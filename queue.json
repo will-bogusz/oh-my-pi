@@ -69043,7 +69043,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-05T00:17:10.304587Z",
+  "at": "2026-11-05T00:23:56.122940Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -69536,6 +69536,23 @@
     "created": "2026-11-03T09:05:24Z"
    },
    {
+    "id": "download-wait-busy",
+    "label": "download-wait-busy",
+    "number": null,
+    "state": "queued",
+    "area": "browser",
+    "priority": "P1",
+    "title": "fix(coding-agent): show browser agents how to wait for a download they start",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-05T00:23:37Z"
+   },
+   {
     "id": "iphone-mirror-scroll-distance",
     "label": "iphone-mirror-scroll-distance",
     "number": null,
@@ -69721,6 +69738,23 @@
     "created": "2026-10-30T21:36:10Z"
    },
    {
+    "id": "open-viewport-attach",
+    "label": "open-viewport-attach",
+    "number": null,
+    "state": "queued",
+    "area": "browser",
+    "priority": "P2",
+    "title": "fix(coding-agent): apply the open viewport on attached and visible browsers",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-05T00:23:48Z"
+   },
+   {
     "id": "r2/relay-own-only",
     "label": "r2/relay-own-only",
     "number": null,
@@ -69736,6 +69770,8 @@
      "conflicts with #17895 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #17940 in docs/tools/browser.md",
      "conflicts with #16908 in packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
+     "conflicts with download-wait-busy in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-supervisor.ts",
+     "conflicts with open-viewport-attach in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts",
      "its need r2/native-window-report conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, docs/tools/browser.md, packages/coding-agent/src/tools/browser/print-hold.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
     ],
@@ -69747,7 +69783,9 @@
      "#17894",
      "#17895",
      "#17940",
-     "#16908"
+     "#16908",
+     "download-wait-busy",
+     "open-viewport-attach"
     ],
     "needs": [
      "#15508",
@@ -69772,6 +69810,8 @@
      "conflicts with #17895 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #17940 in docs/tools/browser.md",
      "conflicts with #16908 in packages/browser-relay/README.md, packages/browser-relay/extension/background.ts, packages/browser-relay/extension/chrome.d.ts, packages/browser-relay/extension/manifest.json, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/extension-assets/manifest.json.txt, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
+     "conflicts with download-wait-busy in docs/tools/browser.md",
+     "conflicts with open-viewport-attach in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need r2/relay-own-only conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-interactions.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
     ],
     "note": "",
@@ -69782,7 +69822,9 @@
      "#17894",
      "#17895",
      "#17940",
-     "#16908"
+     "#16908",
+     "download-wait-busy",
+     "open-viewport-attach"
     ],
     "needs": [
      "r2/relay-own-only"
@@ -69805,6 +69847,8 @@
      "conflicts with #17895 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #17940 in docs/tools/browser.md",
      "conflicts with #16908 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
+     "conflicts with download-wait-busy in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts",
+     "conflicts with open-viewport-attach in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need r2/relay-popup-owned conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-interactions.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "its need r2/page-waiting conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/print-hold.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-interactions.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser.ts, packages/coding-agent/test/tools/browser-relay-detach.test.ts"
@@ -69817,7 +69861,9 @@
      "#17894",
      "#17895",
      "#17940",
-     "#16908"
+     "#16908",
+     "download-wait-busy",
+     "open-viewport-attach"
     ],
     "needs": [
      "r2/relay-popup-owned",
@@ -69990,6 +70036,7 @@
      "conflicts with #17894 in crates/pi-natives/src/desktop/macos/mod.rs",
      "conflicts with #17895 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #16908 in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with open-viewport-attach in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
@@ -70000,7 +70047,8 @@
      "#17893",
      "#17894",
      "#17895",
-     "#16908"
+     "#16908",
+     "open-viewport-attach"
     ],
     "needs": [
      "#15508"
@@ -70023,6 +70071,8 @@
      "conflicts with #17895 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #17940 in docs/tools/browser.md",
      "conflicts with #16908 in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with download-wait-busy in docs/tools/browser.md",
+     "conflicts with open-viewport-attach in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need r2/relay-own-only conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-interactions.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
     ],
     "note": "",
@@ -70033,7 +70083,9 @@
      "#17894",
      "#17895",
      "#17940",
-     "#16908"
+     "#16908",
+     "download-wait-busy",
+     "open-viewport-attach"
     ],
     "needs": [
      "r2/relay-own-only"
@@ -70114,7 +70166,7 @@
     "area": "other",
     "priority": null,
     "title": "fix(find): return the hits verified before find's deadline",
-    "action": "open",
+    "action": "next-hour",
     "reasons": [],
     "note": "",
     "over": [],
@@ -70152,7 +70204,7 @@
     "area": "other",
     "priority": null,
     "title": "fix(coding-agent): fetch Read the Docs raw source only from the page's own Edit link",
-    "action": "open",
+    "action": "next-hour",
     "reasons": [],
     "note": "",
     "over": [],
@@ -70160,6 +70212,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-05T00:03:20Z"
+   },
+   {
+    "id": "shell-url-text-args",
+    "label": "shell-url-text-args",
+    "number": null,
+    "state": "queued",
+    "area": "other",
+    "priority": null,
+    "title": "fix(shell): pass a scheme followed by words to external commands as written",
+    "action": "next-hour",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-05T00:18:49Z"
    },
    {
     "id": "text-reader-usage-shift",
