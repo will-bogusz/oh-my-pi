@@ -1,12 +1,12 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05 01:30Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05 01:33Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-05 00:47Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 7, conflict-held 13, stacked 12, held 8, open PRs 29; merged 232, closed 28
+**Counts:** openable now 6, conflict-held 13, stacked 12, held 8, open PRs 30; merged 232, closed 28
 
-## Openable now (7)
+## Openable now (6)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
@@ -15,7 +15,6 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05
 | tui-file-bun-be-bun | fix(tui-debug): run file entries with bun under the compiled omp binary | other | P1 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/tui-file-bun-be-bun) |
 | find-partial-deadline | fix(find): return the hits verified before find's deadline | other |  | 1h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/find-partial-deadline) |
 | shell-url-text-args | fix(shell): pass a scheme followed by words to external commands as written | other |  | 1h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/shell-url-text-args) |
-| download-wait-busy | fix(coding-agent): show browser agents how to wait for a download they start | browser | P1 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/download-wait-busy) |
 | open-viewport-attach | fix(coding-agent): apply the open viewport on attached and visible browsers | browser | P2 | 1h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/open-viewport-attach) |
 
 ## Conflict-held (13)
@@ -66,7 +65,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05
 | async-job-notice | fix(coding-agent,tui): name the command in background job notices | coding-agent | P1 | 1h | Will, 2026-11-04: Will to confirm competing with/taking over a contributor PR (#12633 / #15253) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/async-job-notice) |
 | skill-url-new-skill | fix(skills): find a skill created after the session started by skill:// name | other |  | 0h | Will, 2026-11-04: Will to confirm competing with/taking over a contributor PR (#12633 / #15253) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/skill-url-new-skill) |
 
-## Open PRs (29)
+## Open PRs (30)
 
 | PR | id | title | area | rank | open | plan | branch |
 |---|---|---|---|---|---|---|---|
@@ -96,6 +95,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05
 | [#18150](https://github.com/can1357/oh-my-pi/pull/18150) | sec-edgar-document-urls | fix(coding-agent): read SEC EDGAR filing documents instead of the company profile | web-scrapers | P0 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/sec-edgar-document-urls) |
 | [#18154](https://github.com/can1357/oh-my-pi/pull/18154) | ssh-write-new-projection | fix(coding-agent): create new ssh:// files from bounded read output | ssh | P1 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ssh-write-new-projection) |
 | [#18153](https://github.com/can1357/oh-my-pi/pull/18153) | lsp-references-stale-open | fix(lsp): sync open documents edited outside OMP before cross-file queries | other | P1 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/lsp-references-stale-open) |
+| [#18155](https://github.com/can1357/oh-my-pi/pull/18155) | download-wait-busy | fix(coding-agent): show browser agents how to wait for a download they start | browser | P1 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/download-wait-busy) |
 | [#18147](https://github.com/can1357/oh-my-pi/pull/18147) | rustfmt-check-files | fix(pi-shell): count files, not diff locations, in minimized rustfmt --check output | other | P0 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/rustfmt-check-files) |
 | [#18148](https://github.com/can1357/oh-my-pi/pull/18148) | diff-binary-files | fix(pi-shell): list binary and line-less files in minimized diff summaries | other | P0 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/diff-binary-files) |
 | [#18151](https://github.com/can1357/oh-my-pi/pull/18151) | markdown-parse-status | fix(edit): stopped warning that valid Markdown edits broke the file | edit | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/markdown-parse-status) |
