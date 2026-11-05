@@ -68191,13 +68191,13 @@
    "needs": [],
    "base": "96e4d8eb5ba1212d2d6018f242de266284cffab9",
    "body": "bodies/eval-late-rejection.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18223,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/eval-late-rejection",
    "host": "MacBook-Pro",
    "added": "2026-11-05T19:43:56Z",
-   "updated": "2026-11-05T20:05:38Z",
+   "updated": "2026-11-05T20:07:12Z",
    "note": "",
    "built": [
     {
@@ -68359,7 +68359,8 @@
      "at": "2026-11-05T20:05:34Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-05T20:07:12Z"
   }
  ],
  "watch": {
