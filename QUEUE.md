@@ -4,7 +4,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-05 03:51Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 0, conflict-held 13, stacked 12, held 7, open PRs 36, queued since the last plan 1; merged 232, closed 28
+**Counts:** openable now 0, conflict-held 13, stacked 12, held 6, open PRs 36, queued since the last plan 2; merged 232, closed 28
 
 ## Openable now (0)
 
@@ -45,7 +45,7 @@ none
 | atspi-walk-reads | fix(natives): read each AT-SPI element in two concurrent rounds | computer | P1 | 1d | atspi-unanswered-app, gtk4-atspi-bounds | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-walk-reads) |
 | role-selectors-cdp | fix(coding-agent): resolve Chromium role selectors through Chrome's accessibility tree | browser | P2 | 1d | role-implicit-landmarks ([#17895](https://github.com/can1357/oh-my-pi/pull/17895)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/role-selectors-cdp) |
 
-## Held (7)
+## Held (6)
 
 | id | title | area | priority | age | hold | branch |
 |---|---|---|---|---|---|---|
@@ -55,7 +55,6 @@ none
 | fallback-revert-when-healthy | feat(coding-agent): add retry.fallbackRevertPolicy when-healthy to return from usage fallbacks | broker | P2 | 22d | Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/fallback-revert-when-healthy) |
 | broker-reset-sweep | feat(coding-agent): spend saved resets from the auth broker before they expire | broker |  | 22d | Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-reset-sweep) |
 | broker-sweep-clients-defer | feat(ai,coding-agent): stop sessions sweeping saved resets the auth broker already spends | broker |  | 22d | Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-sweep-clients-defer) |
-| skill-url-new-skill | fix(skills): find a skill created after the session started by skill:// name | other |  | 3h | Will, 2026-11-04: Will to confirm competing with/taking over a contributor PR (#12633 / #15253) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/skill-url-new-skill) |
 
 ## Open PRs (36)
 
@@ -98,8 +97,9 @@ none
 | [#18148](https://github.com/can1357/oh-my-pi/pull/18148) | diff-binary-files | fix(pi-shell): list binary and line-less files in minimized diff summaries | other | P0 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/diff-binary-files) |
 | [#18151](https://github.com/can1357/oh-my-pi/pull/18151) | markdown-parse-status | fix(edit): stopped warning that valid Markdown edits broke the file | edit | P0 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/markdown-parse-status) |
 
-## Queued since the last plan (1)
+## Queued since the last plan (2)
 
 | id | title | area | priority | age | branch |
 |---|---|---|---|---|---|
 | async-job-notice | fix(coding-agent,tui): name the command in background job notices | coding-agent | P1 | 3h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/async-job-notice) |
+| skill-url-new-skill | fix(skills): find a skill created after the session started by skill:// name | other |  | 3h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/skill-url-new-skill) |
