@@ -66000,7 +66000,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/async-job-notice",
    "host": "MacBook-Pro",
    "added": "2026-11-05T00:15:27Z",
-   "updated": "2026-11-05T04:21:25Z",
+   "updated": "2026-11-05T04:22:03Z",
    "note": "",
    "built": [
     {
@@ -66274,7 +66274,8 @@
      "tree": "4e779a7fdf7a50c5bf753bf869671bed799c7492"
     }
    ],
-   "opened": "2026-11-05T04:21:25Z"
+   "opened": "2026-11-05T04:21:25Z",
+   "readied": "2026-11-05T04:22:03Z"
   },
   {
    "id": "find-partial-deadline",
