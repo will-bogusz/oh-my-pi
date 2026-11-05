@@ -68365,7 +68365,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-05T22:07:57Z",
+  "checked": "2026-11-05T22:38:45Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -68720,12 +68720,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-29T22:27:06Z",
-    "kind": "openable",
-    "id": "snapcompact-reduction-baseline",
-    "title": "fix(coding-agent): let snapcompact replace an archive it shrinks, and report its refusal once"
-   },
    {
     "at": "2026-10-30T11:44:30Z",
     "kind": "merged",
@@ -72713,7 +72707,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-05T21:37:18.856426Z",
+  "at": "2026-11-05T22:38:46.330148Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
