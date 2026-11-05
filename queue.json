@@ -55332,13 +55332,13 @@
    "needs": [],
    "base": "96e4d8eb5ba1212d2d6018f242de266284cffab9",
    "body": "bodies/computer-menu-subtree.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18222,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-menu-subtree",
    "host": "MacBook-Pro",
    "added": "2026-10-24T05:06:00Z",
-   "updated": "2026-11-05T19:34:56Z",
+   "updated": "2026-11-05T19:41:06Z",
    "note": "2026-10-29 (ComputerDocs): rebased onto main b0756921ed and pushed (e2b2d3a213); check + computer.test.ts (137 pass) on goliath; precheck has no timing FIX. Waits: its menu.items line in prompts/tools/computer.md sits next to lines #16925 (apps.open line) and #15282 (ax() line) change, so it conflicts with both until they merge; then rebase (pr-queue advance) and open.",
    "advanced": "2026-11-05T18:59:39Z",
    "built": [
@@ -55491,7 +55491,8 @@
      "at": "2026-11-05T19:34:52Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-05T19:41:06Z"
   },
   {
    "id": "computer-window-wait",
