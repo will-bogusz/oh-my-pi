@@ -65134,7 +65134,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/readthedocs-page-source",
    "host": "MacBook-Pro",
    "added": "2026-11-05T00:03:20Z",
-   "updated": "2026-11-05T02:35:10Z",
+   "updated": "2026-11-05T02:35:35Z",
    "note": "",
    "built": [
     {
@@ -65418,7 +65418,8 @@
      "tree": "3b429f5135b2e05c32bc65f6b7aa907652b7b3c0"
     }
    ],
-   "opened": "2026-11-05T02:35:10Z"
+   "opened": "2026-11-05T02:35:10Z",
+   "readied": "2026-11-05T02:35:35Z"
   },
   {
    "id": "tui-file-bun-be-bun",
