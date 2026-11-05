@@ -1,9 +1,9 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05 14:32Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05 14:33Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-05 14:01Z on goliath; groups below are from it, states from the manifest)
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-05 14:32Z on goliath; groups below are from it, states from the manifest)
 **Counts:** openable now 0, conflict-held 13, stacked 12, held 6, open PRs 23; merged 246, closed 29
 
 ## Openable now (0)
@@ -14,7 +14,7 @@ none
 
 | id | title | area | priority | age | blocked by | branch |
 |---|---|---|---|---|---|---|
-| factory-droid-web-search | feat(coding-agent): search the web through a Factory Droid login (web/factory) | web | P2 | 17d | [#18124](https://github.com/can1357/oh-my-pi/pull/18124), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-web-search) |
+| factory-droid-web-search | feat(coding-agent): search the web through a Factory Droid login (web/factory) | web | P2 | 17d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-web-search) |
 | computer-ui-quiet | fix(computer): wait for the app to finish reacting before the next read or input | computer | P2 | 17d | [#15282](https://github.com/can1357/oh-my-pi/pull/15282), [#16223](https://github.com/can1357/oh-my-pi/pull/16223), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-ui-quiet) |
 | compaction-trigger | feat(coding-agent): record what triggered each compaction | other |  | 15d | [#17747](https://github.com/can1357/oh-my-pi/pull/17747), [#18167](https://github.com/can1357/oh-my-pi/pull/18167), [#17610](https://github.com/can1357/oh-my-pi/pull/17610), [#15128](https://github.com/can1357/oh-my-pi/pull/15128), [#15130](https://github.com/can1357/oh-my-pi/pull/15130), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/compaction-trigger) |
 | computer-menu-subtree | feat(coding-agent): find nested menu commands in one read | computer | P2 | 12d | [#15282](https://github.com/can1357/oh-my-pi/pull/15282) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-menu-subtree) |
@@ -69,7 +69,7 @@ none
 | [#16274](https://github.com/can1357/oh-my-pi/pull/16274) | read-after-bash-revalidate | fix(agent,coding-agent): re-read a file an earlier bash call changed in the same message | other | P1 | 17d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-after-bash-revalidate) |
 | [#17894](https://github.com/can1357/oh-my-pi/pull/17894) | relay-popup-lossless | fix(browser): send the user's keys back to their app while Chrome activates for a popup omp's relay tab opens on macOS | browser | P1 | 2d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-popup-lossless) |
 | [#16553](https://github.com/can1357/oh-my-pi/pull/16553) | click-place-release | fix(natives): keep a macOS drag from the user's app onto the target the user's pick | natives-macos | P1 | 15d | rebase | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/click-place-release) |
-| [#16611](https://github.com/can1357/oh-my-pi/pull/16611) | read-audio-transcripts | feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio | catalog | P2 | 15d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-audio-transcripts) |
+| [#16611](https://github.com/can1357/oh-my-pi/pull/16611) | read-audio-transcripts | feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio | catalog | P2 | 15d | rebase | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-audio-transcripts) |
 | [#16908](https://github.com/can1357/oh-my-pi/pull/16908) | relay-extension-frame | fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it | browser | P2 | 12d | keep; rebases after #17893 merges | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-extension-frame) |
 | [#17897](https://github.com/can1357/oh-my-pi/pull/17897) | iphone-mirror-key-gap | perf(natives): type on iPhone Mirroring twice as fast | computer | P2 | 2d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-key-gap) |
 | [#17757](https://github.com/can1357/oh-my-pi/pull/17757) | macos-capture-geometry | fix(natives): match macOS window screenshots to the window on screen | computer | P0 | 3d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-capture-geometry) |
