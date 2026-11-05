@@ -68197,7 +68197,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/eval-late-rejection",
    "host": "MacBook-Pro",
    "added": "2026-11-05T19:43:56Z",
-   "updated": "2026-11-05T20:07:12Z",
+   "updated": "2026-11-05T20:07:35Z",
    "note": "",
    "built": [
     {
@@ -68360,7 +68360,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-11-05T20:07:12Z"
+   "opened": "2026-11-05T20:07:12Z",
+   "readied": "2026-11-05T20:07:35Z"
   }
  ],
  "watch": {
