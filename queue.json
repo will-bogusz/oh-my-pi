@@ -67845,7 +67845,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-05T06:23:24Z",
+  "checked": "2026-11-05T06:53:45Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -68153,19 +68153,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-29T06:38:43Z",
-    "kind": "openable",
-    "id": "computer-window-wait",
-    "title": "feat(computer): wait for windows opened by actions"
-   },
-   {
-    "at": "2026-10-29T06:38:43Z",
-    "kind": "unopenable",
-    "id": "computer-ui-quiet",
-    "title": "fix(computer): wait for the app to finish reacting before the next read or input",
-    "why": "plan: wait (conflicts with #15282 in packages/coding-agent/src/tools/computer/worker.ts)"
-   },
    {
     "at": "2026-10-29T11:14:13Z",
     "kind": "conflict",
@@ -72280,7 +72267,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-05T05:52:44.720106Z",
+  "at": "2026-11-05T06:53:46.607767Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
