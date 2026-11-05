@@ -4,7 +4,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-05 18:55Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 2, conflict-held 10, stacked 12, held 6, open PRs 24; merged 246, closed 29
+**Counts:** openable now 2, conflict-held 10, stacked 12, held 6, open PRs 24, queued since the last plan 1; merged 246, closed 29
 
 ## Openable now (2)
 
@@ -84,3 +84,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05
 | [#17940](https://github.com/can1357/oh-my-pi/pull/17940) | relay-linux-click-front | fix(coding-agent): keep browser agents from pulling Chrome in front of your app on Linux X11 | browser | P1 | 2d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-linux-click-front) |
 | [#18125](https://github.com/can1357/oh-my-pi/pull/18125) | anthropic-web-search | fix(ai,coding-agent): keep Anthropic web search queries intact, always search, and report refusals | other | P2 | 23h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/anthropic-web-search) |
 | [#18167](https://github.com/can1357/oh-my-pi/pull/18167) | skill-url-new-skill | fix(skills): find a skill created after the session started by skill:// name | other | P1 | 15h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/skill-url-new-skill) |
+
+## Queued since the last plan (1)
+
+| id | title | area | priority | age | branch |
+|---|---|---|---|---|---|
+| browser-open-recovered-tab | fix(browser): keep the tab an open successfully reattaches | browser | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-open-recovered-tab) |
