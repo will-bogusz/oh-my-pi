@@ -64562,6 +64562,24 @@
    "added": "2026-11-04T23:59:50Z",
    "updated": "2026-11-04T23:59:50Z",
    "note": ""
+  },
+  {
+   "id": "computer-screenshot-saved-frame",
+   "branch": "will/computer-screenshot-saved-frame",
+   "title": "fix(coding-agent): say the computer screenshot path holds the scaled frame",
+   "area": "computer",
+   "priority": null,
+   "needs": [],
+   "base": "88a69582c755bd000e8dc0290981fc787a4f400c",
+   "body": "bodies/computer-screenshot-saved-frame.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-screenshot-saved-frame",
+   "host": "MacBook-Pro",
+   "added": "2026-11-05T00:01:13Z",
+   "updated": "2026-11-05T00:01:13Z",
+   "note": ""
   }
  ],
  "watch": {
