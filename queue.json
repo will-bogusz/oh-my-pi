@@ -65362,7 +65362,7 @@
    "branch": "will/tui-file-bun-be-bun",
    "title": "fix(tui-debug): run file entries with bun under the compiled omp binary",
    "area": "other",
-   "priority": "P1",
+   "priority": "P0",
    "needs": [],
    "base": "88a69582c755bd000e8dc0290981fc787a4f400c",
    "body": "bodies/tui-file-bun-be-bun.md",
@@ -65372,7 +65372,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/tui-file-bun-be-bun",
    "host": "MacBook-Pro",
    "added": "2026-11-05T00:05:45Z",
-   "updated": "2026-11-05T01:36:22Z",
+   "updated": "2026-11-05T01:49:08Z",
    "note": "",
    "opened": "2026-11-05T01:36:01Z",
    "readied": "2026-11-05T01:36:22Z"
@@ -65382,7 +65382,7 @@
    "branch": "will/ssh-write-new-projection",
    "title": "fix(coding-agent): create new ssh:// files from bounded read output",
    "area": "ssh",
-   "priority": "P1",
+   "priority": "P0",
    "needs": [],
    "base": "88a69582c755bd000e8dc0290981fc787a4f400c",
    "body": "bodies/ssh-write-new-projection.md",
@@ -65392,7 +65392,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ssh-write-new-projection",
    "host": "MacBook-Pro",
    "added": "2026-11-05T00:10:26Z",
-   "updated": "2026-11-05T01:30:34Z",
+   "updated": "2026-11-05T01:49:08Z",
    "note": "",
    "built": [
     {
@@ -66255,7 +66255,7 @@
    "branch": "will/download-wait-busy",
    "title": "fix(coding-agent): show browser agents how to wait for a download they start",
    "area": "browser",
-   "priority": "P1",
+   "priority": "P0",
    "needs": [],
    "base": "88a69582c755bd000e8dc0290981fc787a4f400c",
    "body": "bodies/download-wait-busy.md",
@@ -66265,7 +66265,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/download-wait-busy",
    "host": "MacBook-Pro",
    "added": "2026-11-05T00:23:37Z",
-   "updated": "2026-11-05T01:33:35Z",
+   "updated": "2026-11-05T01:49:08Z",
    "note": "",
    "built": [
     {
@@ -66881,7 +66881,7 @@
    "branch": "will/markdown-parse-status",
    "title": "fix(edit): stopped warning that valid Markdown edits broke the file",
    "area": "edit",
-   "priority": "P1",
+   "priority": "P0",
    "needs": [],
    "base": "88a69582c755bd000e8dc0290981fc787a4f400c",
    "body": "bodies/markdown-parse-status.md",
@@ -66891,7 +66891,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/markdown-parse-status",
    "host": "MacBook-Pro",
    "added": "2026-11-05T00:41:16Z",
-   "updated": "2026-11-05T01:24:53Z",
+   "updated": "2026-11-05T01:49:08Z",
    "note": "",
    "built": [
     {
