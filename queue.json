@@ -65366,14 +65366,15 @@
    "needs": [],
    "base": "88a69582c755bd000e8dc0290981fc787a4f400c",
    "body": "bodies/tui-file-bun-be-bun.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18156,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/tui-file-bun-be-bun",
    "host": "MacBook-Pro",
    "added": "2026-11-05T00:05:45Z",
-   "updated": "2026-11-05T00:05:45Z",
-   "note": ""
+   "updated": "2026-11-05T01:36:01Z",
+   "note": "",
+   "opened": "2026-11-05T01:36:01Z"
   },
   {
    "id": "ssh-write-new-projection",
