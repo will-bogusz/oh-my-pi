@@ -65660,7 +65660,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/lsp-references-stale-open",
    "host": "MacBook-Pro",
    "added": "2026-11-05T00:10:55Z",
-   "updated": "2026-11-05T01:27:21Z",
+   "updated": "2026-11-05T01:27:43Z",
    "note": "",
    "built": [
     {
@@ -65914,7 +65914,8 @@
      "tree": "4e0b26da9204135254059d64db46ae75a8ccf9ad"
     }
    ],
-   "opened": "2026-11-05T01:27:21Z"
+   "opened": "2026-11-05T01:27:21Z",
+   "readied": "2026-11-05T01:27:43Z"
   },
   {
    "id": "async-job-notice",
