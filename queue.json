@@ -64598,6 +64598,24 @@
    "added": "2026-11-05T00:03:20Z",
    "updated": "2026-11-05T00:03:20Z",
    "note": ""
+  },
+  {
+   "id": "tui-file-bun-be-bun",
+   "branch": "will/tui-file-bun-be-bun",
+   "title": "fix(tui-debug): run file entries with bun under the compiled omp binary",
+   "area": "other",
+   "priority": "P1",
+   "needs": [],
+   "base": "88a69582c755bd000e8dc0290981fc787a4f400c",
+   "body": "bodies/tui-file-bun-be-bun.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/tui-file-bun-be-bun",
+   "host": "MacBook-Pro",
+   "added": "2026-11-05T00:05:45Z",
+   "updated": "2026-11-05T00:05:45Z",
+   "note": ""
   }
  ],
  "watch": {
