@@ -64031,13 +64031,13 @@
    "needs": [],
    "base": "96e4d8eb5ba1212d2d6018f242de266284cffab9",
    "body": "bodies/ax-find-depth.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18221,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ax-find-depth",
    "host": "MacBook-Pro",
    "added": "2026-11-03T08:48:18Z",
-   "updated": "2026-11-05T19:34:48Z",
+   "updated": "2026-11-05T19:38:58Z",
    "note": "",
    "advanced": "2026-11-05T18:59:39Z",
    "built": [
@@ -64110,7 +64110,8 @@
      "at": "2026-11-05T19:34:45Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-05T19:38:58Z"
   },
   {
    "id": "atspi-walk-reads",
