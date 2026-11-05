@@ -68365,7 +68365,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-05T21:37:17Z",
+  "checked": "2026-11-05T22:07:57Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -68720,12 +68720,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-29T21:56:43Z",
-    "kind": "openable",
-    "id": "bash-tool-call-env",
-    "title": "feat(coding-agent): expose PI_TOOL_CALL_ID to bash commands"
-   },
    {
     "at": "2026-10-29T22:27:06Z",
     "kind": "openable",
