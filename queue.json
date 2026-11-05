@@ -67859,7 +67859,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-05T14:32:39Z",
+  "checked": "2026-11-05T15:33:21Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -68313,24 +68313,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-29T15:18:59Z",
-    "kind": "conflict",
-    "label": "#15130",
-    "title": "feat(coding-agent): opt in to spending a blocked account's saved reset before a reserve-only backup",
-    "files": [
-     "packages/coding-agent/src/sdk.ts"
-    ]
-   },
-   {
-    "at": "2026-10-29T15:18:59Z",
-    "kind": "conflict",
-    "label": "#16309",
-    "title": "feat(catalog,tui): show Factory Droid credit promotions in the model browser",
-    "files": [
-     "packages/catalog/src/models.ts"
-    ]
-   },
    {
     "at": "2026-10-29T15:49:38Z",
     "kind": "openable",
@@ -72350,7 +72332,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-05T14:32:40.420174Z",
+  "at": "2026-11-05T15:33:22.388998Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
