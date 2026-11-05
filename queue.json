@@ -64706,6 +64706,24 @@
    "added": "2026-11-05T00:18:49Z",
    "updated": "2026-11-05T00:18:49Z",
    "note": ""
+  },
+  {
+   "id": "download-wait-busy",
+   "branch": "will/download-wait-busy",
+   "title": "fix(coding-agent): show browser agents how to wait for a download they start",
+   "area": "browser",
+   "priority": "P1",
+   "needs": [],
+   "base": "88a69582c755bd000e8dc0290981fc787a4f400c",
+   "body": "bodies/download-wait-busy.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/download-wait-busy",
+   "host": "MacBook-Pro",
+   "added": "2026-11-05T00:23:37Z",
+   "updated": "2026-11-05T00:23:37Z",
+   "note": ""
   }
  ],
  "watch": {
