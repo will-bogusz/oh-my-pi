@@ -67566,7 +67566,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/skill-url-new-skill",
    "host": "MacBook-Pro",
    "added": "2026-11-05T00:44:09Z",
-   "updated": "2026-11-05T04:25:12Z",
+   "updated": "2026-11-05T04:25:43Z",
    "note": "",
    "built": [
     {
@@ -67840,7 +67840,8 @@
      "tree": "4e779a7fdf7a50c5bf753bf869671bed799c7492"
     }
    ],
-   "opened": "2026-11-05T04:25:12Z"
+   "opened": "2026-11-05T04:25:12Z",
+   "readied": "2026-11-05T04:25:42Z"
   }
  ],
  "watch": {
