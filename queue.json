@@ -64742,6 +64742,24 @@
    "added": "2026-11-05T00:23:48Z",
    "updated": "2026-11-05T00:23:48Z",
    "note": ""
+  },
+  {
+   "id": "rustfmt-check-files",
+   "branch": "will/rustfmt-check-files",
+   "title": "fix(pi-shell): count files, not diff locations, in minimized rustfmt --check output",
+   "area": "other",
+   "priority": "P0",
+   "needs": [],
+   "base": "88a69582c755bd000e8dc0290981fc787a4f400c",
+   "body": "bodies/rustfmt-check-files.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/rustfmt-check-files",
+   "host": "MacBook-Pro",
+   "added": "2026-11-05T00:28:38Z",
+   "updated": "2026-11-05T00:28:38Z",
+   "note": ""
   }
  ],
  "watch": {
