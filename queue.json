@@ -64634,6 +64634,24 @@
    "added": "2026-11-05T00:10:26Z",
    "updated": "2026-11-05T00:10:26Z",
    "note": ""
+  },
+  {
+   "id": "lsp-references-stale-open",
+   "branch": "will/lsp-references-stale-open",
+   "title": "fix(lsp): sync open documents edited outside OMP before cross-file queries",
+   "area": "other",
+   "priority": "P1",
+   "needs": [],
+   "base": "88a69582c755bd000e8dc0290981fc787a4f400c",
+   "body": "bodies/lsp-references-stale-open.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/lsp-references-stale-open",
+   "host": "MacBook-Pro",
+   "added": "2026-11-05T00:10:55Z",
+   "updated": "2026-11-05T00:10:55Z",
+   "note": ""
   }
  ],
  "watch": {
