@@ -1,32 +1,33 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05 18:55Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05 18:57Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-05 18:35Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 0, conflict-held 13, stacked 12, held 6, open PRs 23; merged 246, closed 29
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-05 18:55Z on MacBook-Pro; groups below are from it, states from the manifest)
+**Counts:** openable now 3, conflict-held 10, stacked 12, held 6, open PRs 23; merged 246, closed 29
 
-## Openable now (0)
+## Openable now (3)
 
-none
+| id | title | area | priority | age | plan | branch |
+|---|---|---|---|---|---|---|
+| computer-menu-subtree | feat(coding-agent): find nested menu commands in one read | computer | P2 | 12d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-menu-subtree) |
+| ax-find-depth | fix(natives): search 64 levels deep in find() | computer | P2 | 2d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-find-depth) |
+| atspi-setvalue-readback | fix(natives): read back AT-SPI text writes before reporting success | computer | P2 | 2d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-setvalue-readback) |
 
-## Conflict-held (13)
+## Conflict-held (10)
 
 | id | title | area | priority | age | blocked by | branch |
 |---|---|---|---|---|---|---|
 | factory-droid-web-search | feat(coding-agent): search the web through a Factory Droid login (web/factory) | web | P2 | 17d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-web-search) |
-| computer-ui-quiet | fix(computer): wait for the app to finish reacting before the next read or input | computer | P2 | 17d | [#15282](https://github.com/can1357/oh-my-pi/pull/15282), [#16223](https://github.com/can1357/oh-my-pi/pull/16223), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-ui-quiet) |
+| computer-ui-quiet | fix(computer): wait for the app to finish reacting before the next read or input | computer | P2 | 17d | [#16223](https://github.com/can1357/oh-my-pi/pull/16223), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-ui-quiet) |
 | compaction-trigger | feat(coding-agent): record what triggered each compaction | other |  | 15d | [#17747](https://github.com/can1357/oh-my-pi/pull/17747), [#18167](https://github.com/can1357/oh-my-pi/pull/18167), [#17610](https://github.com/can1357/oh-my-pi/pull/17610), [#15128](https://github.com/can1357/oh-my-pi/pull/15128), [#15130](https://github.com/can1357/oh-my-pi/pull/15130), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/compaction-trigger) |
-| computer-menu-subtree | feat(coding-agent): find nested menu commands in one read | computer | P2 | 12d | [#15282](https://github.com/can1357/oh-my-pi/pull/15282) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-menu-subtree) |
 | iphone-mirror-scroll-distance | fix(natives): scroll iPhone Mirroring the whole distance asked for in the background | computer | P1 | 5d | [#17756](https://github.com/can1357/oh-my-pi/pull/17756), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-scroll-distance) |
 | text-reader-usage-shift | fix(coding-agent): price a text-only fallback's archive text, not the failed request's frames, in the fit check | coding-agent |  | 4d | [#17747](https://github.com/can1357/oh-my-pi/pull/17747) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/text-reader-usage-shift) |
 | token-count-policy | feat(catalog,coding-agent): token-count framing policy in KDL | catalog |  | 2d | [#17747](https://github.com/can1357/oh-my-pi/pull/17747) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/token-count-policy) |
 | wire-delta-count | refactor(agent,ai): count the anchored delta from the reader's transformed wire messages | other |  | 2d | [#17610](https://github.com/can1357/oh-my-pi/pull/17610), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wire-delta-count) |
 | wayland-pipewire-dlopen | fix(natives): load libpipewire at runtime so released addons capture on Wayland | computer | P1 | 2d | [#18013](https://github.com/can1357/oh-my-pi/pull/18013) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-pipewire-dlopen) |
-| gtk4-atspi-bounds | fix(natives): find GTK4 app elements on X11 and stop marking them disabled | computer |  | 2d | [#15282](https://github.com/can1357/oh-my-pi/pull/15282) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/gtk4-atspi-bounds) |
-| atspi-unanswered-app | fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool | computer | P1 | 2d | [#15282](https://github.com/can1357/oh-my-pi/pull/15282), [#18013](https://github.com/can1357/oh-my-pi/pull/18013) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-unanswered-app) |
-| ax-find-depth | fix(natives): search 64 levels deep in find() | computer | P2 | 2d | [#15282](https://github.com/can1357/oh-my-pi/pull/15282) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-find-depth) |
-| atspi-setvalue-readback | fix(natives): read back AT-SPI text writes before reporting success | computer | P2 | 2d | [#15282](https://github.com/can1357/oh-my-pi/pull/15282) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-setvalue-readback) |
+| gtk4-atspi-bounds | fix(natives): find GTK4 app elements on X11 and stop marking them disabled | computer |  | 2d | atspi-setvalue-readback | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/gtk4-atspi-bounds) |
+| atspi-unanswered-app | fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool | computer | P1 | 2d | [#18013](https://github.com/can1357/oh-my-pi/pull/18013) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-unanswered-app) |
 
 ## Stacked (12)
 
@@ -62,7 +63,7 @@ none
 |---|---|---|---|---|---|---|---|
 | [#15128](https://github.com/can1357/oh-my-pi/pull/15128) | reset-restore-longest-wait | feat(coding-agent): restore the blocked account whose reset buys the most time | broker | P2 | 26d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-restore-longest-wait) |
 | [#15130](https://github.com/can1357/oh-my-pi/pull/15130) | reset-before-reserve | feat(coding-agent): opt in to spending a blocked account's saved reset before a reserve-only backup | broker | P2 | 26d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-before-reserve) |
-| [#15282](https://github.com/can1357/oh-my-pi/pull/15282) | computer-ax-lines | feat(natives): show what macOS ax() elements can do | computer | P2 | 25d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-ax-lines) |
+| [#15282](https://github.com/can1357/oh-my-pi/pull/15282) | computer-ax-lines | feat(natives): show what macOS ax() elements can do | computer | P2 | 25d | draft | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-ax-lines) |
 | [#15508](https://github.com/can1357/oh-my-pi/pull/15508) | print-hold | fix(coding-agent): keep browser calls going when a page calls window.print() | browser | P2 | 24d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/print-hold) |
 | [#17831](https://github.com/can1357/oh-my-pi/pull/17831) | r2/relay-bg-input-main | fix(coding-agent): let background relay and app.cdp_url tabs take omp's clicks and keys | browser | P1 | 3d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/r2/relay-bg-input-main) |
 | [#16223](https://github.com/can1357/oh-my-pi/pull/16223) | computer-text-drag-select | feat(natives): make a macOS background drag across native text an accessibility selection | computer | P2 | 18d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-text-drag-select) |

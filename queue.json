@@ -72220,8 +72220,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-05T18:35:52.736929Z",
-  "host": "goliath",
+  "at": "2026-11-05T18:55:38.950084Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -72560,23 +72560,6 @@
     "created": "2026-10-10T00:42:10Z"
    },
    {
-    "id": "computer-ax-lines",
-    "label": "#15282",
-    "number": 15282,
-    "state": "open",
-    "area": "computer",
-    "priority": "P2",
-    "title": "feat(natives): show what macOS ax() elements can do",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-10T21:48:41Z"
-   },
-   {
     "id": "computer-text-drag-select",
     "label": "#16223",
     "number": 16223,
@@ -72639,14 +72622,12 @@
     "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool",
     "action": "wait",
     "reasons": [
-     "conflicts with #15282 in crates/pi-natives/src/desktop/ax.rs",
      "conflicts with #18013 in MODULE.bazel.lock"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#15282",
      "#18013"
     ],
     "needs": [],
@@ -72663,7 +72644,6 @@
     "action": "wait",
     "reasons": [
      "needs atspi-unanswered-app (queued), gtk4-atspi-bounds (queued)",
-     "conflicts with #15282 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18013 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/libei.rs",
      "its need gtk4-atspi-bounds conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
@@ -72671,7 +72651,6 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#15282",
      "#18013"
     ],
     "needs": [
@@ -72731,16 +72710,12 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): read back AT-SPI text writes before reporting success",
-    "action": "wait",
-    "reasons": [
-     "conflicts with #15282 in crates/pi-natives/src/desktop/macos/ax.rs"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#15282"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-03T09:07:02Z"
    },
@@ -72752,16 +72727,12 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): search 64 levels deep in find()",
-    "action": "wait",
-    "reasons": [
-     "conflicts with #15282 in crates/pi-natives/src/desktop/ax.rs"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#15282"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-03T08:48:18Z"
    },
@@ -72775,7 +72746,6 @@
     "title": "fix(computer): wait for the app to finish reacting before the next read or input",
     "action": "wait",
     "reasons": [
-     "conflicts with #15282 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #16223 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/computer/worker.ts"
     ],
@@ -72783,7 +72753,6 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#15282",
      "#16223"
     ],
     "needs": [],
@@ -72951,7 +72920,6 @@
     "action": "wait",
     "reasons": [
      "needs computer-ui-quiet (queued)",
-     "conflicts with #15282 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #16223 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "its need computer-ui-quiet conflicts with main in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/tools/computer/supervisor.ts"
@@ -72960,7 +72928,6 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#15282",
      "#16223"
     ],
     "needs": [
@@ -72976,16 +72943,12 @@
     "area": "computer",
     "priority": "P2",
     "title": "feat(coding-agent): find nested menu commands in one read",
-    "action": "wait",
-    "reasons": [
-     "conflicts with #15282 in packages/coding-agent/src/prompts/tools/computer.md"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#15282"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-10-24T05:06:00Z"
    },
@@ -73001,6 +72964,8 @@
     "reasons": [
      "needs computer-ui-quiet (queued), #15282 (open)",
      "conflicts with #16223 in crates/pi-natives/src/desktop/macos/ax.rs",
+     "conflicts with atspi-setvalue-readback in crates/pi-natives/src/desktop/macos/ax.rs",
+     "conflicts with computer-menu-subtree in packages/coding-agent/src/prompts/tools/computer.md",
      "its need computer-ui-quiet conflicts with main in packages/coding-agent/src/tools/computer/worker.ts",
      "its need #15282 conflicts with main in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs"
@@ -73009,7 +72974,9 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#16223"
+     "#16223",
+     "atspi-setvalue-readback",
+     "computer-menu-subtree"
     ],
     "needs": [
      "computer-ui-quiet",
@@ -73192,13 +73159,13 @@
     "title": "fix(natives): find GTK4 app elements on X11 and stop marking them disabled",
     "action": "wait",
     "reasons": [
-     "conflicts with #15282 in crates/pi-natives/src/desktop/linux/ax.rs"
+     "conflicts with atspi-setvalue-readback in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#15282"
+     "atspi-setvalue-readback"
     ],
     "needs": [],
     "created": "2026-11-03T05:52:19Z"
@@ -73428,6 +73395,11 @@
     "created": "2026-11-03T01:24:37Z"
    }
   ],
-  "drafts": []
+  "drafts": [
+   {
+    "label": "#15282",
+    "created": "2026-10-10T21:48:41Z"
+   }
+  ]
  }
 }
