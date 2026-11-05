@@ -1,9 +1,9 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05 02:19Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05 02:20Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 8 of 8 ready events used in the hour before the last plan, 0 left (plan of 2026-11-05 01:49Z on goliath; groups below are from it, states from the manifest)
+**Ready budget:** 7 of 8 ready events used in the hour before the last plan, 1 left (plan of 2026-11-05 02:19Z on goliath; groups below are from it, states from the manifest)
 **Counts:** openable now 5, conflict-held 13, stacked 12, held 8, open PRs 31; merged 232, closed 28
 
 ## Openable now (5)
@@ -14,7 +14,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05
 | readthedocs-page-source | fix(coding-agent): fetch Read the Docs raw source only from the page's own Edit link | other |  | 2h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/readthedocs-page-source) |
 | find-partial-deadline | fix(find): return the hits verified before find's deadline | other |  | 2h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/find-partial-deadline) |
 | shell-url-text-args | fix(shell): pass a scheme followed by words to external commands as written | other |  | 2h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/shell-url-text-args) |
-| open-viewport-attach | fix(coding-agent): apply the open viewport on attached and visible browsers | browser | P2 | 1h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/open-viewport-attach) |
+| open-viewport-attach | fix(coding-agent): apply the open viewport on attached and visible browsers | browser | P2 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/open-viewport-attach) |
 
 ## Conflict-held (13)
 
@@ -79,7 +79,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05
 | [#16553](https://github.com/can1357/oh-my-pi/pull/16553) | click-place-release | fix(natives): keep a macOS drag from the user's app onto the target the user's pick | natives-macos | P1 | 15d | rebase | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/click-place-release) |
 | [#16611](https://github.com/can1357/oh-my-pi/pull/16611) | read-audio-transcripts | feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio | catalog | P2 | 14d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-audio-transcripts) |
 | [#16908](https://github.com/can1357/oh-my-pi/pull/16908) | relay-extension-frame | fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it | browser | P2 | 12d | keep; rebases after #17893 merges | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-extension-frame) |
-| [#17897](https://github.com/can1357/oh-my-pi/pull/17897) | iphone-mirror-key-gap | perf(natives): type on iPhone Mirroring twice as fast | computer | P2 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-key-gap) |
+| [#17897](https://github.com/can1357/oh-my-pi/pull/17897) | iphone-mirror-key-gap | perf(natives): type on iPhone Mirroring twice as fast | computer | P2 | 2d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-key-gap) |
 | [#17757](https://github.com/can1357/oh-my-pi/pull/17757) | macos-capture-geometry | fix(natives): match macOS window screenshots to the window on screen | computer | P0 | 2d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-capture-geometry) |
 | [#17756](https://github.com/can1357/oh-my-pi/pull/17756) | iphone-mirror-pointer | fix(natives): keep background iPhone Mirroring taps reaching the phone after a takeover tap | computer | P1 | 2d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-pointer) |
 | [#17747](https://github.com/can1357/oh-my-pi/pull/17747) | switch-remote-reexpand | fix(agent,coding-agent): read the history behind an OpenAI remote compaction after a model switch | other | P1 | 2d | rebase | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/switch-remote-reexpand) |
@@ -90,7 +90,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05
 | [#18013](https://github.com/can1357/oh-my-pi/pull/18013) | wayland-ei-text | feat(natives): type text the wayland layout lacks through libei text | natives | P2 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-ei-text) |
 | [#17940](https://github.com/can1357/oh-my-pi/pull/17940) | relay-linux-click-front | fix(coding-agent): keep browser agents from pulling Chrome in front of your app on Linux X11 | browser | P1 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-linux-click-front) |
 | [#18124](https://github.com/can1357/oh-my-pi/pull/18124) | search-failure-details | feat(coding-agent): record failed web search providers in tool details | web-search | P2 | 6h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/search-failure-details) |
-| [#18125](https://github.com/can1357/oh-my-pi/pull/18125) | anthropic-web-search | fix(ai,coding-agent): keep Anthropic web search queries intact, always search, and report refusals | other | P2 | 5h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/anthropic-web-search) |
+| [#18125](https://github.com/can1357/oh-my-pi/pull/18125) | anthropic-web-search | fix(ai,coding-agent): keep Anthropic web search queries intact, always search, and report refusals | other | P2 | 6h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/anthropic-web-search) |
 | [#18150](https://github.com/can1357/oh-my-pi/pull/18150) | sec-edgar-document-urls | fix(coding-agent): read SEC EDGAR filing documents instead of the company profile | web-scrapers | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/sec-edgar-document-urls) |
 | [#18156](https://github.com/can1357/oh-my-pi/pull/18156) | tui-file-bun-be-bun | fix(tui-debug): run file entries with bun under the compiled omp binary | other | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/tui-file-bun-be-bun) |
 | [#18154](https://github.com/can1357/oh-my-pi/pull/18154) | ssh-write-new-projection | fix(coding-agent): create new ssh:// files from bounded read output | ssh | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ssh-write-new-projection) |

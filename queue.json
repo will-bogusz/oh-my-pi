@@ -71730,12 +71730,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-05T01:49:11.939048Z",
+  "at": "2026-11-05T02:19:09.261794Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 8,
-   "left": 0
+   "used": 7,
+   "left": 1
   },
   "rows": [
    {
@@ -72485,7 +72485,7 @@
     "area": "browser",
     "priority": "P2",
     "title": "fix(coding-agent): apply the open viewport on attached and visible browsers",
-    "action": "next-hour",
+    "action": "open",
     "reasons": [],
     "note": "",
     "over": [],
