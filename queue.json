@@ -64826,13 +64826,13 @@
    "needs": [],
    "base": "88a69582c755bd000e8dc0290981fc787a4f400c",
    "body": "bodies/computer-screenshot-saved-frame.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18158,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-screenshot-saved-frame",
    "host": "MacBook-Pro",
    "added": "2026-11-05T00:01:13Z",
-   "updated": "2026-11-05T02:14:11Z",
+   "updated": "2026-11-05T02:26:37Z",
    "note": "",
    "built": [
     {
@@ -65115,7 +65115,8 @@
      "host": "goliath",
      "tree": "3b429f5135b2e05c32bc65f6b7aa907652b7b3c0"
     }
-   ]
+   ],
+   "opened": "2026-11-05T02:26:37Z"
   },
   {
    "id": "readthedocs-page-source",
