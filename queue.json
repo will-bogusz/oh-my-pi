@@ -65390,7 +65390,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ssh-write-new-projection",
    "host": "MacBook-Pro",
    "added": "2026-11-05T00:10:26Z",
-   "updated": "2026-11-05T01:30:11Z",
+   "updated": "2026-11-05T01:30:34Z",
    "note": "",
    "built": [
     {
@@ -65644,7 +65644,8 @@
      "tree": "4e0b26da9204135254059d64db46ae75a8ccf9ad"
     }
    ],
-   "opened": "2026-11-05T01:30:11Z"
+   "opened": "2026-11-05T01:30:11Z",
+   "readied": "2026-11-05T01:30:34Z"
   },
   {
    "id": "lsp-references-stale-open",
