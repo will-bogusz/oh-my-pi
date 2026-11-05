@@ -64670,6 +64670,24 @@
    "added": "2026-11-05T00:15:27Z",
    "updated": "2026-11-05T00:15:27Z",
    "note": ""
+  },
+  {
+   "id": "find-partial-deadline",
+   "branch": "will/find-partial-deadline",
+   "title": "fix(find): return the hits verified before find's deadline",
+   "area": "other",
+   "priority": null,
+   "needs": [],
+   "base": "88a69582c755bd000e8dc0290981fc787a4f400c",
+   "body": "bodies/find-partial-deadline.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/find-partial-deadline",
+   "host": "MacBook-Pro",
+   "added": "2026-11-05T00:16:45Z",
+   "updated": "2026-11-05T00:16:45Z",
+   "note": ""
   }
  ],
  "watch": {
