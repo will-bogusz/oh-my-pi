@@ -65384,13 +65384,13 @@
    "needs": [],
    "base": "88a69582c755bd000e8dc0290981fc787a4f400c",
    "body": "bodies/ssh-write-new-projection.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18154,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ssh-write-new-projection",
    "host": "MacBook-Pro",
    "added": "2026-11-05T00:10:26Z",
-   "updated": "2026-11-05T01:13:04Z",
+   "updated": "2026-11-05T01:30:11Z",
    "note": "",
    "built": [
     {
@@ -65643,7 +65643,8 @@
      "host": "goliath",
      "tree": "4e0b26da9204135254059d64db46ae75a8ccf9ad"
     }
-   ]
+   ],
+   "opened": "2026-11-05T01:30:11Z"
   },
   {
    "id": "lsp-references-stale-open",
