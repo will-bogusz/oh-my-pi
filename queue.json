@@ -68178,8 +68178,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-open-recovered-tab",
    "host": "MacBook-Pro",
    "added": "2026-11-05T19:37:08Z",
-   "updated": "2026-11-05T19:37:08Z",
-   "note": ""
+   "updated": "2026-11-05T19:49:55Z",
+   "note": "",
+   "hold": "Main, 2026-11-05: waits for #15508 to merge; do not open over it"
   },
   {
    "id": "eval-late-rejection",

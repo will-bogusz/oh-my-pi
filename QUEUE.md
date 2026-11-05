@@ -4,13 +4,12 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05
 
 **Opening:** not paused
 **Ready budget:** 3 of 8 ready events used in the hour before the last plan, 5 left (plan of 2026-11-05 19:46Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 2, conflict-held 10, stacked 12, held 6, open PRs 26; merged 246, closed 29
+**Counts:** openable now 1, conflict-held 10, stacked 12, held 7, open PRs 26; merged 246, closed 29
 
-## Openable now (2)
+## Openable now (1)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
-| browser-open-recovered-tab | fix(browser): keep the tab an open successfully reattaches | browser | P1 | 0h | open (over P2 #15508) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-open-recovered-tab) |
 | eval-late-rejection | fix(coding-agent): preserve eval state after late tool rejections | coding-agent eval | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/eval-late-rejection) |
 
 ## Conflict-held (10)
@@ -45,7 +44,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05
 | atspi-walk-reads | fix(natives): read each AT-SPI element in two concurrent rounds | computer | P1 | 2d | atspi-unanswered-app, gtk4-atspi-bounds | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-walk-reads) |
 | role-selectors-cdp | fix(coding-agent): resolve Chromium role selectors through Chrome's accessibility tree | browser | P2 | 1d | role-implicit-landmarks ([#17895](https://github.com/can1357/oh-my-pi/pull/17895)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/role-selectors-cdp) |
 
-## Held (6)
+## Held (7)
 
 | id | title | area | priority | age | hold | branch |
 |---|---|---|---|---|---|---|
@@ -55,6 +54,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05
 | fallback-revert-when-healthy | feat(coding-agent): add retry.fallbackRevertPolicy when-healthy to return from usage fallbacks | broker | P2 | 22d | Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/fallback-revert-when-healthy) |
 | broker-reset-sweep | feat(coding-agent): spend saved resets from the auth broker before they expire | broker |  | 22d | Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-reset-sweep) |
 | broker-sweep-clients-defer | feat(ai,coding-agent): stop sessions sweeping saved resets the auth broker already spends | broker |  | 22d | Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-sweep-clients-defer) |
+| browser-open-recovered-tab | fix(browser): keep the tab an open successfully reattaches | browser | P1 | 0h | Main, 2026-11-05: waits for #15508 to merge; do not open over it | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-open-recovered-tab) |
 
 ## Open PRs (26)
 
