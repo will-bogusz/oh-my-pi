@@ -64560,8 +64560,20 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/sec-edgar-document-urls",
    "host": "MacBook-Pro",
    "added": "2026-11-04T23:59:50Z",
-   "updated": "2026-11-04T23:59:50Z",
-   "note": ""
+   "updated": "2026-11-05T01:04:05Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#16908",
+     "code": "39cf41cf8ed8a5b3ed198c4d6a27933bacbeb5a9",
+     "with_code": "5ad397b131bf102cddd732a19155b3e28332c5e7",
+     "tip": "451a7cb181ae48e131ade318f2214056c79b203c",
+     "with_tip": "8f019ef3585a6982b274050296d453c926a297e3",
+     "at": "2026-11-05T01:04:04Z",
+     "host": "goliath",
+     "tree": "0c795a4cc85d3fa2d3ea0a9d83d75d952538b59a"
+    }
+   ]
   },
   {
    "id": "computer-screenshot-saved-frame",
@@ -64578,8 +64590,20 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-screenshot-saved-frame",
    "host": "MacBook-Pro",
    "added": "2026-11-05T00:01:13Z",
-   "updated": "2026-11-05T00:01:13Z",
-   "note": ""
+   "updated": "2026-11-05T01:04:05Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#16908",
+     "code": "3667b9d209e1cd74ae7d3600ba63e47c279875ed",
+     "with_code": "5ad397b131bf102cddd732a19155b3e28332c5e7",
+     "tip": "59856f60c7021a7fa28a2a49d0874b93a7e9ac04",
+     "with_tip": "8f019ef3585a6982b274050296d453c926a297e3",
+     "at": "2026-11-05T01:04:04Z",
+     "host": "goliath",
+     "tree": "0c795a4cc85d3fa2d3ea0a9d83d75d952538b59a"
+    }
+   ]
   },
   {
    "id": "readthedocs-page-source",
@@ -64596,8 +64620,20 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/readthedocs-page-source",
    "host": "MacBook-Pro",
    "added": "2026-11-05T00:03:20Z",
-   "updated": "2026-11-05T00:03:20Z",
-   "note": ""
+   "updated": "2026-11-05T01:04:05Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#16908",
+     "code": "ed78246891fbc2d26113476ce538e68afa13ddbd",
+     "with_code": "5ad397b131bf102cddd732a19155b3e28332c5e7",
+     "tip": "13b0abd83035dcbd30368ad90e1b865934f643af",
+     "with_tip": "8f019ef3585a6982b274050296d453c926a297e3",
+     "at": "2026-11-05T01:04:04Z",
+     "host": "goliath",
+     "tree": "0c795a4cc85d3fa2d3ea0a9d83d75d952538b59a"
+    }
+   ]
   },
   {
    "id": "tui-file-bun-be-bun",
@@ -64632,8 +64668,20 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ssh-write-new-projection",
    "host": "MacBook-Pro",
    "added": "2026-11-05T00:10:26Z",
-   "updated": "2026-11-05T00:10:26Z",
-   "note": ""
+   "updated": "2026-11-05T01:04:05Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#16908",
+     "code": "49144a7a82b9b448169522caa05a9cbd91d1addf",
+     "with_code": "5ad397b131bf102cddd732a19155b3e28332c5e7",
+     "tip": "0716df9c599f80d902effa9c16b98a01d323e80c",
+     "with_tip": "8f019ef3585a6982b274050296d453c926a297e3",
+     "at": "2026-11-05T01:04:04Z",
+     "host": "goliath",
+     "tree": "0c795a4cc85d3fa2d3ea0a9d83d75d952538b59a"
+    }
+   ]
   },
   {
    "id": "lsp-references-stale-open",
@@ -64650,8 +64698,20 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/lsp-references-stale-open",
    "host": "MacBook-Pro",
    "added": "2026-11-05T00:10:55Z",
-   "updated": "2026-11-05T00:10:55Z",
-   "note": ""
+   "updated": "2026-11-05T01:04:05Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#16908",
+     "code": "c96df82a5ba6fcb6036a4beee42f95026cc92854",
+     "with_code": "5ad397b131bf102cddd732a19155b3e28332c5e7",
+     "tip": "452b2e0db815e5820193017dec350175ff2a2d48",
+     "with_tip": "8f019ef3585a6982b274050296d453c926a297e3",
+     "at": "2026-11-05T01:04:04Z",
+     "host": "goliath",
+     "tree": "0c795a4cc85d3fa2d3ea0a9d83d75d952538b59a"
+    }
+   ]
   },
   {
    "id": "async-job-notice",
@@ -64687,8 +64747,20 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/find-partial-deadline",
    "host": "MacBook-Pro",
    "added": "2026-11-05T00:16:45Z",
-   "updated": "2026-11-05T00:16:45Z",
-   "note": ""
+   "updated": "2026-11-05T01:04:05Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#16908",
+     "code": "e9f75ecceeacab9994c009224b4306fdda12ac08",
+     "with_code": "5ad397b131bf102cddd732a19155b3e28332c5e7",
+     "tip": "296c0c233f6c5382947f6b98303e8594d9a17098",
+     "with_tip": "8f019ef3585a6982b274050296d453c926a297e3",
+     "at": "2026-11-05T01:04:04Z",
+     "host": "goliath",
+     "tree": "0c795a4cc85d3fa2d3ea0a9d83d75d952538b59a"
+    }
+   ]
   },
   {
    "id": "shell-url-text-args",
@@ -64723,8 +64795,20 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/download-wait-busy",
    "host": "MacBook-Pro",
    "added": "2026-11-05T00:23:37Z",
-   "updated": "2026-11-05T00:23:37Z",
-   "note": ""
+   "updated": "2026-11-05T01:04:05Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#16908",
+     "code": "86abffc8cdd152a8e5bc99cdf6c7e84a28976f4f",
+     "with_code": "5ad397b131bf102cddd732a19155b3e28332c5e7",
+     "tip": "28da41f612a61c31acdf64bfeb1758fe698ea61d",
+     "with_tip": "8f019ef3585a6982b274050296d453c926a297e3",
+     "at": "2026-11-05T01:04:04Z",
+     "host": "goliath",
+     "tree": "0c795a4cc85d3fa2d3ea0a9d83d75d952538b59a"
+    }
+   ]
   },
   {
    "id": "open-viewport-attach",
@@ -64741,8 +64825,20 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/open-viewport-attach",
    "host": "MacBook-Pro",
    "added": "2026-11-05T00:23:48Z",
-   "updated": "2026-11-05T00:23:48Z",
-   "note": ""
+   "updated": "2026-11-05T01:04:05Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#16908",
+     "code": "26299245ddef15054a372f2b262af9d7829b02dd",
+     "with_code": "5ad397b131bf102cddd732a19155b3e28332c5e7",
+     "tip": "a16ad83c00e0c8462bb8e55cb9ff8ea6427b9156",
+     "with_tip": "8f019ef3585a6982b274050296d453c926a297e3",
+     "at": "2026-11-05T01:04:04Z",
+     "host": "goliath",
+     "tree": "0c795a4cc85d3fa2d3ea0a9d83d75d952538b59a"
+    }
+   ]
   },
   {
    "id": "rustfmt-check-files",
@@ -64795,8 +64891,20 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/markdown-parse-status",
    "host": "MacBook-Pro",
    "added": "2026-11-05T00:41:16Z",
-   "updated": "2026-11-05T00:41:16Z",
-   "note": ""
+   "updated": "2026-11-05T01:04:05Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#16908",
+     "code": "09194d08a7e6836d1ebdf10283819eab57d33019",
+     "with_code": "5ad397b131bf102cddd732a19155b3e28332c5e7",
+     "tip": "31bead9bb64427142abd650349c536f7d5a153cf",
+     "with_tip": "8f019ef3585a6982b274050296d453c926a297e3",
+     "at": "2026-11-05T01:04:04Z",
+     "host": "goliath",
+     "tree": "0c795a4cc85d3fa2d3ea0a9d83d75d952538b59a"
+    }
+   ]
   },
   {
    "id": "skill-url-new-skill",
