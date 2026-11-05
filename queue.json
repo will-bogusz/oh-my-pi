@@ -66833,13 +66833,13 @@
    "needs": [],
    "base": "88a69582c755bd000e8dc0290981fc787a4f400c",
    "body": "bodies/diff-binary-files.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18148,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/diff-binary-files",
    "host": "MacBook-Pro",
    "added": "2026-11-05T00:28:45Z",
-   "updated": "2026-11-05T01:13:04Z",
+   "updated": "2026-11-05T01:18:51Z",
    "note": "",
    "built": [
     {
@@ -66862,7 +66862,8 @@
      "host": "goliath",
      "tree": "4e0b26da9204135254059d64db46ae75a8ccf9ad"
     }
-   ]
+   ],
+   "opened": "2026-11-05T01:18:51Z"
   },
   {
    "id": "markdown-parse-status",
