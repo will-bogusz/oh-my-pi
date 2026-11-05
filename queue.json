@@ -66883,7 +66883,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/markdown-parse-status",
    "host": "MacBook-Pro",
    "added": "2026-11-05T00:41:16Z",
-   "updated": "2026-11-05T01:24:31Z",
+   "updated": "2026-11-05T01:24:53Z",
    "note": "",
    "built": [
     {
@@ -67137,7 +67137,8 @@
      "tree": "4e0b26da9204135254059d64db46ae75a8ccf9ad"
     }
    ],
-   "opened": "2026-11-05T01:24:31Z"
+   "opened": "2026-11-05T01:24:31Z",
+   "readied": "2026-11-05T01:24:52Z"
   },
   {
    "id": "skill-url-new-skill",
