@@ -68980,6 +68980,11 @@
     "sha": "cd479296beb96a7c0cbcb64a442e30c1fa6a55cd",
     "at": "2026-11-05T00:17:09Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "cd479296beb96a7c0cbcb64a442e30c1fa6a55cd",
+    "at": "2026-11-05T00:18:37Z",
+    "host": "goliath"
    }
   }
  },
