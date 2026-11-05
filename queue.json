@@ -69141,7 +69141,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-05T00:28:57.423929Z",
+  "at": "2026-11-05T00:42:34.717233Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -69724,6 +69724,23 @@
     "created": "2026-11-05T00:10:55Z"
    },
    {
+    "id": "markdown-parse-status",
+    "label": "markdown-parse-status",
+    "number": null,
+    "state": "queued",
+    "area": "edit",
+    "priority": "P1",
+    "title": "fix(edit): stopped warning that valid Markdown edits broke the file",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-05T00:41:16Z"
+   },
+   {
     "id": "ssh-write-new-projection",
     "label": "ssh-write-new-projection",
     "number": null,
@@ -69748,7 +69765,7 @@
     "area": "other",
     "priority": "P1",
     "title": "fix(tui-debug): run file entries with bun under the compiled omp binary",
-    "action": "open",
+    "action": "next-hour",
     "reasons": [],
     "note": "",
     "over": [],
