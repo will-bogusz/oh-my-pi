@@ -66839,7 +66839,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/diff-binary-files",
    "host": "MacBook-Pro",
    "added": "2026-11-05T00:28:45Z",
-   "updated": "2026-11-05T01:18:51Z",
+   "updated": "2026-11-05T01:19:12Z",
    "note": "",
    "built": [
     {
@@ -66863,7 +66863,8 @@
      "tree": "4e0b26da9204135254059d64db46ae75a8ccf9ad"
     }
    ],
-   "opened": "2026-11-05T01:18:51Z"
+   "opened": "2026-11-05T01:18:51Z",
+   "readied": "2026-11-05T01:19:12Z"
   },
   {
    "id": "markdown-parse-status",
