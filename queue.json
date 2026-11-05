@@ -67845,7 +67845,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-05T05:22:15Z",
+  "checked": "2026-11-05T06:23:24Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -68153,27 +68153,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-29T06:08:10Z",
-    "kind": "unopenable",
-    "id": "factory-droid-image-role-default",
-    "title": "feat(catalog): fall back to Factory Droid image models in the image role",
-    "why": "opened as #17351"
-   },
-   {
-    "at": "2026-10-29T06:08:10Z",
-    "kind": "unopenable",
-    "id": "git-guard-scope",
-    "title": "feat(pi-shell): keep the git guard's refusals to checkouts other sessions share",
-    "why": "opened as #17349"
-   },
-   {
-    "at": "2026-10-29T06:08:10Z",
-    "kind": "unopenable",
-    "id": "read-url-markup-tokens",
-    "title": "feat(coding-agent): drop social-card meta tags and same-page anchor targets from native web reads",
-    "why": "opened as #17350"
-   },
    {
     "at": "2026-10-29T06:38:43Z",
     "kind": "openable",
