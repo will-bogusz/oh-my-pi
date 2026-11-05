@@ -67866,10 +67866,23 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-05T18:35:51Z",
+  "checked": "2026-11-05T19:06:08Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {},
+  "openable": {
+   "atspi-setvalue-readback": {
+    "since": "2026-11-05T19:06:08Z",
+    "title": "fix(natives): read back AT-SPI text writes before reporting success"
+   },
+   "ax-find-depth": {
+    "since": "2026-11-05T19:06:08Z",
+    "title": "fix(natives): search 64 levels deep in find()"
+   },
+   "computer-menu-subtree": {
+    "since": "2026-11-05T19:06:08Z",
+    "title": "feat(coding-agent): find nested menu commands in one read"
+   }
+  },
   "conflicts": {
    "#16553": {
     "since": "2026-11-04T07:29:23Z",
@@ -68079,7 +68092,6 @@
   "ready": [
    15128,
    15130,
-   15282,
    15508,
    16223,
    16274,
@@ -68102,12 +68114,6 @@
    18167
   ],
   "post_merge": {
-   "17496": {
-    "title": "feat(coding-agent): show whether the next message reads the prompt cache",
-    "merge_commit": "1bceb753ae60ee13900f1893ce58ccbf7658bff2",
-    "merged_at": "2026-11-03T18:41:34Z",
-    "findings": []
-   },
    "17861": {
     "title": "feat(ai,catalog,coding-agent): add Factory Droid Gemini 4 Argon with its request dialect",
     "merge_commit": "d919cd1a2939b20dd1375431f8d2503ce7062a7d",
@@ -70000,6 +70006,24 @@
     "files": [
      "packages/ai/src/providers/openai-shared.ts"
     ]
+   },
+   {
+    "at": "2026-11-05T19:06:08Z",
+    "kind": "openable",
+    "id": "atspi-setvalue-readback",
+    "title": "fix(natives): read back AT-SPI text writes before reporting success"
+   },
+   {
+    "at": "2026-11-05T19:06:08Z",
+    "kind": "openable",
+    "id": "ax-find-depth",
+    "title": "fix(natives): search 64 levels deep in find()"
+   },
+   {
+    "at": "2026-11-05T19:06:08Z",
+    "kind": "openable",
+    "id": "computer-menu-subtree",
+    "title": "feat(coding-agent): find nested menu commands in one read"
    }
   ]
  },
