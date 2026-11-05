@@ -1,20 +1,20 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05 02:21Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05 02:24Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 7 of 8 ready events used in the hour before the last plan, 1 left (plan of 2026-11-05 02:19Z on goliath; groups below are from it, states from the manifest)
+**Ready budget:** 6 of 8 ready events used in the hour before the last plan, 2 left (plan of 2026-11-05 02:21Z on MacBook-Pro; groups below are from it, states from the manifest)
 **Counts:** openable now 5, conflict-held 13, stacked 12, held 8, open PRs 31; merged 232, closed 28
 
 ## Openable now (5)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
-| computer-screenshot-saved-frame | fix(coding-agent): say the computer screenshot path holds the scaled frame | computer |  | 2h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-screenshot-saved-frame) |
+| computer-screenshot-saved-frame | fix(coding-agent): say the computer screenshot path holds the scaled frame | computer |  | 2h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-screenshot-saved-frame) |
 | readthedocs-page-source | fix(coding-agent): fetch Read the Docs raw source only from the page's own Edit link | other |  | 2h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/readthedocs-page-source) |
 | find-partial-deadline | fix(find): return the hits verified before find's deadline | other |  | 2h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/find-partial-deadline) |
 | shell-url-text-args | fix(shell): pass a scheme followed by words to external commands as written | other |  | 2h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/shell-url-text-args) |
-| open-viewport-attach | fix(coding-agent): apply the open viewport on attached and visible browsers | browser | P2 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/open-viewport-attach) |
+| open-viewport-attach | fix(coding-agent): apply the open viewport on attached and visible browsers | browser | P2 | 2h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/open-viewport-attach) |
 
 ## Conflict-held (13)
 
@@ -91,7 +91,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05
 | [#17940](https://github.com/can1357/oh-my-pi/pull/17940) | relay-linux-click-front | fix(coding-agent): keep browser agents from pulling Chrome in front of your app on Linux X11 | browser | P1 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-linux-click-front) |
 | [#18124](https://github.com/can1357/oh-my-pi/pull/18124) | search-failure-details | feat(coding-agent): record failed web search providers in tool details | web-search | P2 | 6h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/search-failure-details) |
 | [#18125](https://github.com/can1357/oh-my-pi/pull/18125) | anthropic-web-search | fix(ai,coding-agent): keep Anthropic web search queries intact, always search, and report refusals | other | P2 | 6h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/anthropic-web-search) |
-| [#18150](https://github.com/can1357/oh-my-pi/pull/18150) | sec-edgar-document-urls | fix(coding-agent): read SEC EDGAR filing documents instead of the company profile | web-scrapers | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/sec-edgar-document-urls) |
+| [#18150](https://github.com/can1357/oh-my-pi/pull/18150) | sec-edgar-document-urls | fix(coding-agent): read SEC EDGAR filing documents instead of the company profile | web-scrapers | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/sec-edgar-document-urls) |
 | [#18156](https://github.com/can1357/oh-my-pi/pull/18156) | tui-file-bun-be-bun | fix(tui-debug): run file entries with bun under the compiled omp binary | other | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/tui-file-bun-be-bun) |
 | [#18154](https://github.com/can1357/oh-my-pi/pull/18154) | ssh-write-new-projection | fix(coding-agent): create new ssh:// files from bounded read output | ssh | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ssh-write-new-projection) |
 | [#18153](https://github.com/can1357/oh-my-pi/pull/18153) | lsp-references-stale-open | fix(lsp): sync open documents edited outside OMP before cross-file queries | other | P1 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/lsp-references-stale-open) |
