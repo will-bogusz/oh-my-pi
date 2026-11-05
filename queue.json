@@ -64037,7 +64037,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ax-find-depth",
    "host": "MacBook-Pro",
    "added": "2026-11-03T08:48:18Z",
-   "updated": "2026-11-05T19:38:58Z",
+   "updated": "2026-11-05T19:39:22Z",
    "note": "",
    "advanced": "2026-11-05T18:59:39Z",
    "built": [
@@ -64111,7 +64111,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-11-05T19:38:58Z"
+   "opened": "2026-11-05T19:38:58Z",
+   "readied": "2026-11-05T19:39:22Z"
   },
   {
    "id": "atspi-walk-reads",
