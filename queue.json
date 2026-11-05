@@ -71730,12 +71730,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-05T02:19:09.261794Z",
-  "host": "goliath",
+  "at": "2026-11-05T02:21:37.821521Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 7,
-   "left": 1
+   "used": 6,
+   "left": 2
   },
   "rows": [
    {
@@ -72865,7 +72865,7 @@
     "area": "computer",
     "priority": null,
     "title": "fix(coding-agent): say the computer screenshot path holds the scaled frame",
-    "action": "next-hour",
+    "action": "open",
     "reasons": [],
     "note": "",
     "over": [],
