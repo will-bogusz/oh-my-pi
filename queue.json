@@ -66263,7 +66263,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/download-wait-busy",
    "host": "MacBook-Pro",
    "added": "2026-11-05T00:23:37Z",
-   "updated": "2026-11-05T01:33:07Z",
+   "updated": "2026-11-05T01:33:35Z",
    "note": "",
    "built": [
     {
@@ -66517,7 +66517,8 @@
      "tree": "4e0b26da9204135254059d64db46ae75a8ccf9ad"
     }
    ],
-   "opened": "2026-11-05T01:33:07Z"
+   "opened": "2026-11-05T01:33:07Z",
+   "readied": "2026-11-05T01:33:35Z"
   },
   {
    "id": "open-viewport-attach",
