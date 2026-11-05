@@ -71757,8 +71757,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-05T03:51:15.734652Z",
-  "host": "goliath",
+  "at": "2026-11-05T04:02:59.006777Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -72393,10 +72393,8 @@
     "area": "coding-agent",
     "priority": "P1",
     "title": "fix(coding-agent,tui): name the command in background job notices",
-    "action": "held",
-    "reasons": [
-     "held: Will, 2026-11-04: Will to confirm competing with/taking over a contributor PR (#12633 / #15253)"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -73005,10 +73003,8 @@
     "area": "other",
     "priority": null,
     "title": "fix(skills): find a skill created after the session started by skill:// name",
-    "action": "held",
-    "reasons": [
-     "held: Will, 2026-11-04: Will to confirm competing with/taking over a contributor PR (#12633 / #15253)"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -73101,6 +73097,7 @@
      "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15128 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/claude-auto-reset-integration.test.ts",
      "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/claude-auto-reset-integration.test.ts",
+     "conflicts with skill-url-new-skill in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in docs/settings.md, packages/coding-agent/src/session/agent-session.ts"
     ],
     "note": "",
@@ -73110,7 +73107,8 @@
      "#17747",
      "#17610",
      "#15128",
-     "#15130"
+     "#15130",
+     "skill-url-new-skill"
     ],
     "needs": [
      "#15133"
@@ -73160,6 +73158,7 @@
      "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15128 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15130 in packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with skill-url-new-skill in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/tui/src/chat/compaction-summary-message.ts"
     ],
     "note": "",
@@ -73169,7 +73168,8 @@
      "#17747",
      "#17610",
      "#15128",
-     "#15130"
+     "#15130",
+     "skill-url-new-skill"
     ],
     "needs": [],
     "created": "2026-10-20T23:41:41Z"

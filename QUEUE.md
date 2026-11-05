@@ -1,14 +1,17 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05 04:02Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05 04:07Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-05 03:51Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 0, conflict-held 13, stacked 12, held 6, open PRs 36, queued since the last plan 2; merged 232, closed 28
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-05 04:02Z on MacBook-Pro; groups below are from it, states from the manifest)
+**Counts:** openable now 2, conflict-held 13, stacked 12, held 6, open PRs 36; merged 232, closed 28
 
-## Openable now (0)
+## Openable now (2)
 
-none
+| id | title | area | priority | age | plan | branch |
+|---|---|---|---|---|---|---|
+| async-job-notice | fix(coding-agent,tui): name the command in background job notices | coding-agent | P1 | 3h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/async-job-notice) |
+| skill-url-new-skill | fix(skills): find a skill created after the session started by skill:// name | other |  | 3h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/skill-url-new-skill) |
 
 ## Conflict-held (13)
 
@@ -16,7 +19,7 @@ none
 |---|---|---|---|---|---|---|
 | factory-droid-web-search | feat(coding-agent): search the web through a Factory Droid login (web/factory) | web | P2 | 17d | [#18124](https://github.com/can1357/oh-my-pi/pull/18124), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-web-search) |
 | computer-ui-quiet | fix(computer): wait for the app to finish reacting before the next read or input | computer | P2 | 16d | [#15282](https://github.com/can1357/oh-my-pi/pull/15282), [#16223](https://github.com/can1357/oh-my-pi/pull/16223), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-ui-quiet) |
-| compaction-trigger | feat(coding-agent): record what triggered each compaction | other |  | 15d | [#17747](https://github.com/can1357/oh-my-pi/pull/17747), [#17610](https://github.com/can1357/oh-my-pi/pull/17610), [#15128](https://github.com/can1357/oh-my-pi/pull/15128), [#15130](https://github.com/can1357/oh-my-pi/pull/15130), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/compaction-trigger) |
+| compaction-trigger | feat(coding-agent): record what triggered each compaction | other |  | 15d | [#17747](https://github.com/can1357/oh-my-pi/pull/17747), [#17610](https://github.com/can1357/oh-my-pi/pull/17610), [#15128](https://github.com/can1357/oh-my-pi/pull/15128), [#15130](https://github.com/can1357/oh-my-pi/pull/15130), skill-url-new-skill, main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/compaction-trigger) |
 | computer-menu-subtree | feat(coding-agent): find nested menu commands in one read | computer | P2 | 11d | [#15282](https://github.com/can1357/oh-my-pi/pull/15282) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-menu-subtree) |
 | iphone-mirror-scroll-distance | fix(natives): scroll iPhone Mirroring the whole distance asked for in the background | computer | P1 | 5d | [#17756](https://github.com/can1357/oh-my-pi/pull/17756), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-scroll-distance) |
 | text-reader-usage-shift | fix(coding-agent): price a text-only fallback's archive text, not the failed request's frames, in the fit check | coding-agent |  | 4d | [#17747](https://github.com/can1357/oh-my-pi/pull/17747) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/text-reader-usage-shift) |
@@ -96,10 +99,3 @@ none
 | [#18147](https://github.com/can1357/oh-my-pi/pull/18147) | rustfmt-check-files | fix(pi-shell): count files, not diff locations, in minimized rustfmt --check output | other | P0 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/rustfmt-check-files) |
 | [#18148](https://github.com/can1357/oh-my-pi/pull/18148) | diff-binary-files | fix(pi-shell): list binary and line-less files in minimized diff summaries | other | P0 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/diff-binary-files) |
 | [#18151](https://github.com/can1357/oh-my-pi/pull/18151) | markdown-parse-status | fix(edit): stopped warning that valid Markdown edits broke the file | edit | P0 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/markdown-parse-status) |
-
-## Queued since the last plan (2)
-
-| id | title | area | priority | age | branch |
-|---|---|---|---|---|---|
-| async-job-notice | fix(coding-agent,tui): name the command in background job notices | coding-agent | P1 | 3h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/async-job-notice) |
-| skill-url-new-skill | fix(skills): find a skill created after the session started by skill:// name | other |  | 3h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/skill-url-new-skill) |
