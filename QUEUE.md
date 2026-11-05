@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05 04:07Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05 04:17Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-05 04:02Z on MacBook-Pro; groups below are from it, states from the manifest)
@@ -10,7 +10,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
-| async-job-notice | fix(coding-agent,tui): name the command in background job notices | coding-agent | P1 | 3h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/async-job-notice) |
+| async-job-notice | fix(coding-agent,tui): name the command in background job notices | coding-agent | P1 | 4h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/async-job-notice) |
 | skill-url-new-skill | fix(skills): find a skill created after the session started by skill:// name | other |  | 3h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/skill-url-new-skill) |
 
 ## Conflict-held (13)
@@ -84,7 +84,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05
 | [#17904](https://github.com/can1357/oh-my-pi/pull/17904) | read-block-pages | fix(coding-agent): stop URL reads returning bot block pages as content | other | P1 | 2d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-block-pages) |
 | [#18013](https://github.com/can1357/oh-my-pi/pull/18013) | wayland-ei-text | feat(natives): type text the wayland layout lacks through libei text | natives | P2 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-ei-text) |
 | [#17940](https://github.com/can1357/oh-my-pi/pull/17940) | relay-linux-click-front | fix(coding-agent): keep browser agents from pulling Chrome in front of your app on Linux X11 | browser | P1 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-linux-click-front) |
-| [#18124](https://github.com/can1357/oh-my-pi/pull/18124) | search-failure-details | feat(coding-agent): record failed web search providers in tool details | web-search | P2 | 7h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/search-failure-details) |
+| [#18124](https://github.com/can1357/oh-my-pi/pull/18124) | search-failure-details | feat(coding-agent): record failed web search providers in tool details | web-search | P2 | 8h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/search-failure-details) |
 | [#18125](https://github.com/can1357/oh-my-pi/pull/18125) | anthropic-web-search | fix(ai,coding-agent): keep Anthropic web search queries intact, always search, and report refusals | other | P2 | 7h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/anthropic-web-search) |
 | [#18150](https://github.com/can1357/oh-my-pi/pull/18150) | sec-edgar-document-urls | fix(coding-agent): read SEC EDGAR filing documents instead of the company profile | web-scrapers | P0 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/sec-edgar-document-urls) |
 | [#18158](https://github.com/can1357/oh-my-pi/pull/18158) | computer-screenshot-saved-frame | fix(coding-agent): say the computer screenshot path holds the scaled frame | computer | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-screenshot-saved-frame) |
@@ -96,6 +96,6 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05
 | [#18163](https://github.com/can1357/oh-my-pi/pull/18163) | shell-url-text-args | fix(shell): pass a scheme followed by words to external commands as written | other | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/shell-url-text-args) |
 | [#18155](https://github.com/can1357/oh-my-pi/pull/18155) | download-wait-busy | fix(coding-agent): show browser agents how to wait for a download they start | browser | P0 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/download-wait-busy) |
 | [#18160](https://github.com/can1357/oh-my-pi/pull/18160) | open-viewport-attach | fix(coding-agent): apply the open viewport on attached and visible browsers | browser | P1 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/open-viewport-attach) |
-| [#18147](https://github.com/can1357/oh-my-pi/pull/18147) | rustfmt-check-files | fix(pi-shell): count files, not diff locations, in minimized rustfmt --check output | other | P0 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/rustfmt-check-files) |
+| [#18147](https://github.com/can1357/oh-my-pi/pull/18147) | rustfmt-check-files | fix(pi-shell): count files, not diff locations, in minimized rustfmt --check output | other | P0 | 3h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/rustfmt-check-files) |
 | [#18148](https://github.com/can1357/oh-my-pi/pull/18148) | diff-binary-files | fix(pi-shell): list binary and line-less files in minimized diff summaries | other | P0 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/diff-binary-files) |
 | [#18151](https://github.com/can1357/oh-my-pi/pull/18151) | markdown-parse-status | fix(edit): stopped warning that valid Markdown edits broke the file | edit | P0 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/markdown-parse-status) |
