@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05 02:16Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05 02:18Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 8 of 8 ready events used in the hour before the last plan, 0 left (plan of 2026-11-05 01:49Z on goliath; groups below are from it, states from the manifest)
@@ -12,7 +12,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05
 |---|---|---|---|---|---|---|
 | computer-screenshot-saved-frame | fix(coding-agent): say the computer screenshot path holds the scaled frame | computer |  | 2h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-screenshot-saved-frame) |
 | readthedocs-page-source | fix(coding-agent): fetch Read the Docs raw source only from the page's own Edit link | other |  | 2h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/readthedocs-page-source) |
-| find-partial-deadline | fix(find): return the hits verified before find's deadline | other |  | 1h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/find-partial-deadline) |
+| find-partial-deadline | fix(find): return the hits verified before find's deadline | other |  | 2h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/find-partial-deadline) |
 | shell-url-text-args | fix(shell): pass a scheme followed by words to external commands as written | other |  | 1h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/shell-url-text-args) |
 | open-viewport-attach | fix(coding-agent): apply the open viewport on attached and visible browsers | browser | P2 | 1h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/open-viewport-attach) |
 
