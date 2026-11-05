@@ -72677,6 +72677,13 @@
     "at": "2026-11-05T20:43:23Z",
     "host": "goliath"
    }
+  },
+  "ba0b3c3c7e7438ff401dc909db73c11f094f59e8": {
+   "windows": {
+    "sha": "89c8a22b4d7c964dd6b30f54a48c772ed648589a",
+    "at": "2026-11-05T20:44:53Z",
+    "host": "goliath"
+   }
   }
  },
  "plan": {
