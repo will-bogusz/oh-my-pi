@@ -66011,13 +66011,13 @@
    "needs": [],
    "base": "88a69582c755bd000e8dc0290981fc787a4f400c",
    "body": "bodies/find-partial-deadline.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18161,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/find-partial-deadline",
    "host": "MacBook-Pro",
    "added": "2026-11-05T00:16:45Z",
-   "updated": "2026-11-05T02:14:11Z",
+   "updated": "2026-11-05T02:32:21Z",
    "note": "",
    "built": [
     {
@@ -66300,7 +66300,8 @@
      "host": "goliath",
      "tree": "3b429f5135b2e05c32bc65f6b7aa907652b7b3c0"
     }
-   ]
+   ],
+   "opened": "2026-11-05T02:32:21Z"
   },
   {
    "id": "shell-url-text-args",
