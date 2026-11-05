@@ -67560,13 +67560,13 @@
    "needs": [],
    "base": "88a69582c755bd000e8dc0290981fc787a4f400c",
    "body": "bodies/skill-url-new-skill.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18167,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/skill-url-new-skill",
    "host": "MacBook-Pro",
    "added": "2026-11-05T00:44:09Z",
-   "updated": "2026-11-05T04:18:02Z",
+   "updated": "2026-11-05T04:25:12Z",
    "note": "",
    "built": [
     {
@@ -67839,7 +67839,8 @@
      "host": "goliath",
      "tree": "4e779a7fdf7a50c5bf753bf869671bed799c7492"
     }
-   ]
+   ],
+   "opened": "2026-11-05T04:25:12Z"
   }
  ],
  "watch": {
