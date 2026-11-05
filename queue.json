@@ -64580,6 +64580,24 @@
    "added": "2026-11-05T00:01:13Z",
    "updated": "2026-11-05T00:01:13Z",
    "note": ""
+  },
+  {
+   "id": "readthedocs-page-source",
+   "branch": "will/readthedocs-page-source",
+   "title": "fix(coding-agent): fetch Read the Docs raw source only from the page's own Edit link",
+   "area": "other",
+   "priority": null,
+   "needs": [],
+   "base": "88a69582c755bd000e8dc0290981fc787a4f400c",
+   "body": "bodies/readthedocs-page-source.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/readthedocs-page-source",
+   "host": "MacBook-Pro",
+   "added": "2026-11-05T00:03:20Z",
+   "updated": "2026-11-05T00:03:20Z",
+   "note": ""
   }
  ],
  "watch": {

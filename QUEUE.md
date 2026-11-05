@@ -4,7 +4,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-05 00:01Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 2, conflict-held 13, stacked 12, held 6, open PRs 23; merged 232, closed 28
+**Counts:** openable now 2, conflict-held 13, stacked 12, held 6, open PRs 23, queued since the last plan 1; merged 232, closed 28
 
 ## Openable now (2)
 
@@ -86,3 +86,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05
 | [#17940](https://github.com/can1357/oh-my-pi/pull/17940) | relay-linux-click-front | fix(coding-agent): keep browser agents from pulling Chrome in front of your app on Linux X11 | browser | P1 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-linux-click-front) |
 | [#18124](https://github.com/can1357/oh-my-pi/pull/18124) | search-failure-details | feat(coding-agent): record failed web search providers in tool details | web-search | P2 | 3h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/search-failure-details) |
 | [#18125](https://github.com/can1357/oh-my-pi/pull/18125) | anthropic-web-search | fix(ai,coding-agent): keep Anthropic web search queries intact, always search, and report refusals | other | P2 | 3h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/anthropic-web-search) |
+
+## Queued since the last plan (1)
+
+| id | title | area | priority | age | branch |
+|---|---|---|---|---|---|
+| readthedocs-page-source | fix(coding-agent): fetch Read the Docs raw source only from the page's own Edit link | other |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/readthedocs-page-source) |
