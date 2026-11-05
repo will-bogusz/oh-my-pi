@@ -67845,7 +67845,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-05T03:51:15Z",
+  "checked": "2026-11-05T04:51:27Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -68014,7 +68014,9 @@
    18160,
    18161,
    18162,
-   18163
+   18163,
+   18166,
+   18167
   ],
   "post_merge": {
    "17496": {
@@ -72305,12 +72307,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-05T04:02:59.006777Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-05T04:51:27.954605Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 2,
+   "left": 6
   },
   "rows": [
    {
@@ -72728,6 +72730,40 @@
     "created": "2026-11-05T02:35:09Z"
    },
    {
+    "id": "async-job-notice",
+    "label": "#18166",
+    "number": 18166,
+    "state": "open",
+    "area": "coding-agent",
+    "priority": "P1",
+    "title": "fix(coding-agent,tui): name the command in background job notices",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-05T04:21:24Z"
+   },
+   {
+    "id": "skill-url-new-skill",
+    "label": "#18167",
+    "number": 18167,
+    "state": "open",
+    "area": "other",
+    "priority": "P1",
+    "title": "fix(skills): find a skill created after the session started by skill:// name",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-05T04:25:11Z"
+   },
+   {
     "id": "print-hold",
     "label": "#15508",
     "number": 15508,
@@ -72932,23 +72968,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-04T20:14:36Z"
-   },
-   {
-    "id": "async-job-notice",
-    "label": "async-job-notice",
-    "number": null,
-    "state": "queued",
-    "area": "coding-agent",
-    "priority": "P1",
-    "title": "fix(coding-agent,tui): name the command in background job notices",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-05T00:15:27Z"
    },
    {
     "id": "atspi-unanswered-app",
@@ -73384,6 +73403,7 @@
     "reasons": [
      "held: Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance",
      "conflicts with #17747 in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-maintenance.ts",
+     "conflicts with #18167 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/turn-recovery.ts, packages/coding-agent/test/agent-session-retry-fallback.test.ts",
      "conflicts with #15128 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/turn-recovery.ts",
@@ -73394,6 +73414,7 @@
     "paired": [],
     "blocked_by": [
      "#17747",
+     "#18167",
      "#17610",
      "#15128",
      "#15130"
@@ -73544,23 +73565,6 @@
     "created": "2026-11-03T05:52:19Z"
    },
    {
-    "id": "skill-url-new-skill",
-    "label": "skill-url-new-skill",
-    "number": null,
-    "state": "queued",
-    "area": "other",
-    "priority": null,
-    "title": "fix(skills): find a skill created after the session started by skill:// name",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-05T00:44:09Z"
-   },
-   {
     "id": "text-reader-usage-shift",
     "label": "text-reader-usage-shift",
     "number": null,
@@ -73642,10 +73646,10 @@
      "held: Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance",
      "needs reset-account-optout (queued)",
      "conflicts with #17747 in packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with #18167 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15128 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/claude-auto-reset-integration.test.ts",
      "conflicts with #15130 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/test/claude-auto-reset-integration.test.ts",
-     "conflicts with skill-url-new-skill in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in docs/settings.md, packages/coding-agent/src/session/agent-session.ts"
     ],
     "note": "",
@@ -73653,10 +73657,10 @@
     "paired": [],
     "blocked_by": [
      "#17747",
+     "#18167",
      "#17610",
      "#15128",
-     "#15130",
-     "skill-url-new-skill"
+     "#15130"
     ],
     "needs": [
      "#15133"
@@ -73703,10 +73707,10 @@
     "action": "wait",
     "reasons": [
      "conflicts with #17747 in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-maintenance.ts",
+     "conflicts with #18167 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15128 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #15130 in packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with skill-url-new-skill in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/tui/src/chat/compaction-summary-message.ts"
     ],
     "note": "",
@@ -73714,10 +73718,10 @@
     "paired": [],
     "blocked_by": [
      "#17747",
+     "#18167",
      "#17610",
      "#15128",
-     "#15130",
-     "skill-url-new-skill"
+     "#15130"
     ],
     "needs": [],
     "created": "2026-10-20T23:41:41Z"
