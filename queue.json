@@ -64822,7 +64822,7 @@
    "branch": "will/computer-screenshot-saved-frame",
    "title": "fix(coding-agent): say the computer screenshot path holds the scaled frame",
    "area": "computer",
-   "priority": null,
+   "priority": "P0",
    "needs": [],
    "base": "88a69582c755bd000e8dc0290981fc787a4f400c",
    "body": "bodies/computer-screenshot-saved-frame.md",
@@ -64832,7 +64832,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-screenshot-saved-frame",
    "host": "MacBook-Pro",
    "added": "2026-11-05T00:01:13Z",
-   "updated": "2026-11-05T02:26:59Z",
+   "updated": "2026-11-05T02:49:24Z",
    "note": "",
    "built": [
     {
@@ -65124,7 +65124,7 @@
    "branch": "will/readthedocs-page-source",
    "title": "fix(coding-agent): fetch Read the Docs raw source only from the page's own Edit link",
    "area": "other",
-   "priority": null,
+   "priority": "P1",
    "needs": [],
    "base": "88a69582c755bd000e8dc0290981fc787a4f400c",
    "body": "bodies/readthedocs-page-source.md",
@@ -65134,7 +65134,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/readthedocs-page-source",
    "host": "MacBook-Pro",
    "added": "2026-11-05T00:03:20Z",
-   "updated": "2026-11-05T02:35:35Z",
+   "updated": "2026-11-05T02:49:24Z",
    "note": "",
    "built": [
     {
@@ -66009,7 +66009,7 @@
    "branch": "will/find-partial-deadline",
    "title": "fix(find): return the hits verified before find's deadline",
    "area": "other",
-   "priority": null,
+   "priority": "P0",
    "needs": [],
    "base": "88a69582c755bd000e8dc0290981fc787a4f400c",
    "body": "bodies/find-partial-deadline.md",
@@ -66019,7 +66019,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/find-partial-deadline",
    "host": "MacBook-Pro",
    "added": "2026-11-05T00:16:45Z",
-   "updated": "2026-11-05T02:32:48Z",
+   "updated": "2026-11-05T02:49:24Z",
    "note": "",
    "built": [
     {
@@ -66311,7 +66311,7 @@
    "branch": "will/shell-url-text-args",
    "title": "fix(shell): pass a scheme followed by words to external commands as written",
    "area": "other",
-   "priority": null,
+   "priority": "P0",
    "needs": [],
    "base": "88a69582c755bd000e8dc0290981fc787a4f400c",
    "body": "bodies/shell-url-text-args.md",
@@ -66321,7 +66321,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/shell-url-text-args",
    "host": "MacBook-Pro",
    "added": "2026-11-05T00:18:49Z",
-   "updated": "2026-11-05T02:38:22Z",
+   "updated": "2026-11-05T02:49:24Z",
    "note": "",
    "built": [
     {
@@ -66625,7 +66625,7 @@
    "branch": "will/open-viewport-attach",
    "title": "fix(coding-agent): apply the open viewport on attached and visible browsers",
    "area": "browser",
-   "priority": "P2",
+   "priority": "P1",
    "needs": [],
    "base": "88a69582c755bd000e8dc0290981fc787a4f400c",
    "body": "bodies/open-viewport-attach.md",
@@ -66635,7 +66635,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/open-viewport-attach",
    "host": "MacBook-Pro",
    "added": "2026-11-05T00:23:48Z",
-   "updated": "2026-11-05T02:29:48Z",
+   "updated": "2026-11-05T02:49:24Z",
    "note": "",
    "built": [
     {
