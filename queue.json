@@ -68365,23 +68365,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-05T19:06:08Z",
+  "checked": "2026-11-05T20:36:30Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {
-   "atspi-setvalue-readback": {
-    "since": "2026-11-05T19:06:08Z",
-    "title": "fix(natives): read back AT-SPI text writes before reporting success"
-   },
-   "ax-find-depth": {
-    "since": "2026-11-05T19:06:08Z",
-    "title": "fix(natives): search 64 levels deep in find()"
-   },
-   "computer-menu-subtree": {
-    "since": "2026-11-05T19:06:08Z",
-    "title": "feat(coding-agent): find nested menu commands in one read"
-   }
-  },
+  "openable": {},
   "conflicts": {
    "#16553": {
     "since": "2026-11-04T07:29:23Z",
@@ -68610,7 +68597,11 @@
    17940,
    18013,
    18125,
-   18167
+   18167,
+   18220,
+   18221,
+   18222,
+   18223
   ],
   "post_merge": {
    "17861": {
@@ -68625,106 +68616,10 @@
     "merged_at": "2026-11-04T18:15:52Z",
     "findings": []
    },
-   "17881": {
-    "title": "docs(coding-agent): restore the --models row in the CLI reference",
-    "merge_commit": "db7a26ad3490d730f25eaeade64c4ff9bb9ed4f9",
-    "merged_at": "2026-11-03T20:02:51Z",
-    "findings": []
-   },
-   "17883": {
-    "title": "fix(snapcompact,coding-agent): count a legacy archive's frames as dropped, not replaced",
-    "merge_commit": "1542c6952def90df2618994e5dc07d8417a041a3",
-    "merged_at": "2026-11-03T20:02:51Z",
-    "findings": []
-   },
    "17885": {
     "title": "feat(ai,catalog): identify Factory Droid requests as droid 1.1.0",
     "merge_commit": "0eb64c8dbce5a0bd9eced6ba734bc090858bf465",
     "merged_at": "2026-11-04T18:15:01Z",
-    "findings": []
-   },
-   "17896": {
-    "title": "fix(coding-agent): find app windows by application id or path",
-    "merge_commit": "6e78cea88642ff754d4bf328833c469af7359929",
-    "merged_at": "2026-11-03T20:02:51Z",
-    "findings": []
-   },
-   "17903": {
-    "title": "fix(natives): pace Wayland multi-clicks so KDE Qt apps see double clicks",
-    "merge_commit": "639583fc0decff903923666fd3f664a092392ba0",
-    "merged_at": "2026-11-03T20:02:51Z",
-    "findings": []
-   },
-   "17908": {
-    "title": "fix(browser): exit a process-local headless Chrome when the process that launched it is killed",
-    "merge_commit": "5808388747b68a6e30bf9b6b02d3393028dfe0f5",
-    "merged_at": "2026-11-03T20:02:51Z",
-    "findings": []
-   },
-   "17909": {
-    "title": "fix(natives): stop takeover keys into iPhone Mirroring and Screen Sharing from leaving Fn held",
-    "merge_commit": "3f4e7799fc471f129000530789fbd3f3f30a772f",
-    "merged_at": "2026-11-03T20:02:51Z",
-    "findings": []
-   },
-   "17910": {
-    "title": "fix(natives): release the X11 virtual keyboard's focus before takeover activates its window",
-    "merge_commit": "75a323fc4658e5f08251525d9261847209a893c4",
-    "merged_at": "2026-11-03T20:02:51Z",
-    "findings": []
-   },
-   "17911": {
-    "title": "fix(natives): refuse X11 background keys to Qt apps instead of reporting them sent",
-    "merge_commit": "0df0156efa2dcc8228e1420c8a693064777ce53e",
-    "merged_at": "2026-11-03T20:02:51Z",
-    "findings": []
-   },
-   "17912": {
-    "title": "fix(natives): keep X11 takeover keys running when the core keyboard switches source",
-    "merge_commit": "c5787d8d29013938e7f944aed18f8d910a91de7c",
-    "merged_at": "2026-11-03T20:02:51Z",
-    "findings": []
-   },
-   "17913": {
-    "title": "fix(natives): refuse background drags on Windows Tk windows",
-    "merge_commit": "afed71e7b7e888f7932263626d44452908f82502",
-    "merged_at": "2026-11-03T20:02:51Z",
-    "findings": []
-   },
-   "17915": {
-    "title": "fix(natives): refuse Wayland element input before focusing the element",
-    "merge_commit": "0db7fb9aecba2054dae5b31dba5b1c94384a942c",
-    "merged_at": "2026-11-03T20:02:51Z",
-    "findings": []
-   },
-   "17921": {
-    "title": "fix(natives): keep X11 background element typing from raising the element's window",
-    "merge_commit": "8600336d1fb54c841811f6c1e93c7f2923dee18a",
-    "merged_at": "2026-11-03T20:02:51Z",
-    "findings": []
-   },
-   "17922": {
-    "title": "fix(natives): name the focused application window on Wayland, not an always-active shell frame",
-    "merge_commit": "fdf17cd5eb9aae38ef23e2cc36d8263e2f6d58c9",
-    "merged_at": "2026-11-03T20:02:51Z",
-    "findings": []
-   },
-   "17931": {
-    "title": "fix(coding-agent): open ~ paths from the home folder in computer apps.open",
-    "merge_commit": "84def6cee1a8d925f5d24a1e0ec14690cae7bc37",
-    "merged_at": "2026-11-03T20:02:51Z",
-    "findings": []
-   },
-   "17932": {
-    "title": "fix(natives): give up an unanswered Wayland RemoteDesktop dialog before the run ends",
-    "merge_commit": "eda639e3da576b8a342d433c07d6ca3582a50b86",
-    "merged_at": "2026-11-03T20:02:51Z",
-    "findings": []
-   },
-   "17936": {
-    "title": "fix(natives): match AT-SPI actions by their machine names",
-    "merge_commit": "ad0668e0c0e7ab9049da2d169b5abfd4987cc714",
-    "merged_at": "2026-11-03T20:02:51Z",
     "findings": []
    },
    "18011": {
@@ -70523,6 +70418,27 @@
     "kind": "openable",
     "id": "computer-menu-subtree",
     "title": "feat(coding-agent): find nested menu commands in one read"
+   },
+   {
+    "at": "2026-11-05T20:36:30Z",
+    "kind": "unopenable",
+    "id": "atspi-setvalue-readback",
+    "title": "fix(natives): read back AT-SPI text writes before reporting success",
+    "why": "opened as #18220"
+   },
+   {
+    "at": "2026-11-05T20:36:30Z",
+    "kind": "unopenable",
+    "id": "ax-find-depth",
+    "title": "fix(natives): search 64 levels deep in find()",
+    "why": "opened as #18221"
+   },
+   {
+    "at": "2026-11-05T20:36:30Z",
+    "kind": "unopenable",
+    "id": "computer-menu-subtree",
+    "title": "feat(coding-agent): find nested menu commands in one read",
+    "why": "opened as #18222"
    }
   ]
  },
