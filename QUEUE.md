@@ -4,9 +4,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-05 00:42Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 14, conflict-held 13, stacked 12, held 6, open PRs 23, queued since the last plan 1; merged 232, closed 28
+**Counts:** openable now 13, conflict-held 13, stacked 12, held 7, open PRs 23, queued since the last plan 1; merged 232, closed 28
 
-## Openable now (14)
+## Openable now (13)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
@@ -16,7 +16,6 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05
 | tui-file-bun-be-bun | fix(tui-debug): run file entries with bun under the compiled omp binary | other | P1 | 0h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/tui-file-bun-be-bun) |
 | ssh-write-new-projection | fix(coding-agent): create new ssh:// files from bounded read output | ssh | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ssh-write-new-projection) |
 | lsp-references-stale-open | fix(lsp): sync open documents edited outside OMP before cross-file queries | other | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/lsp-references-stale-open) |
-| async-job-notice | fix(coding-agent,tui): name the command in background job notices | coding-agent | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/async-job-notice) |
 | find-partial-deadline | fix(find): return the hits verified before find's deadline | other |  | 0h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/find-partial-deadline) |
 | shell-url-text-args | fix(shell): pass a scheme followed by words to external commands as written | other |  | 0h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/shell-url-text-args) |
 | download-wait-busy | fix(coding-agent): show browser agents how to wait for a download they start | browser | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/download-wait-busy) |
@@ -60,7 +59,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05
 | atspi-walk-reads | fix(natives): read each AT-SPI element in two concurrent rounds | computer | P1 | 1d | atspi-unanswered-app, gtk4-atspi-bounds | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-walk-reads) |
 | role-selectors-cdp | fix(coding-agent): resolve Chromium role selectors through Chrome's accessibility tree | browser | P2 | 20h | role-implicit-landmarks ([#17895](https://github.com/can1357/oh-my-pi/pull/17895)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/role-selectors-cdp) |
 
-## Held (6)
+## Held (7)
 
 | id | title | area | priority | age | hold | branch |
 |---|---|---|---|---|---|---|
@@ -70,6 +69,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05
 | fallback-revert-when-healthy | feat(coding-agent): add retry.fallbackRevertPolicy when-healthy to return from usage fallbacks | broker | P2 | 22d | Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/fallback-revert-when-healthy) |
 | broker-reset-sweep | feat(coding-agent): spend saved resets from the auth broker before they expire | broker |  | 22d | Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-reset-sweep) |
 | broker-sweep-clients-defer | feat(ai,coding-agent): stop sessions sweeping saved resets the auth broker already spends | broker |  | 22d | Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-sweep-clients-defer) |
+| async-job-notice | fix(coding-agent,tui): name the command in background job notices | coding-agent | P1 | 0h | Will, 2026-11-04: Will to confirm competing with/taking over a contributor PR (#12633 / #15253) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/async-job-notice) |
 
 ## Open PRs (23)
 
