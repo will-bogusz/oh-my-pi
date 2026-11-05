@@ -55338,7 +55338,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-menu-subtree",
    "host": "MacBook-Pro",
    "added": "2026-10-24T05:06:00Z",
-   "updated": "2026-11-05T19:27:47Z",
+   "updated": "2026-11-05T19:29:19Z",
    "note": "2026-10-29 (ComputerDocs): rebased onto main b0756921ed and pushed (e2b2d3a213); check + computer.test.ts (137 pass) on goliath; precheck has no timing FIX. Waits: its menu.items line in prompts/tools/computer.md sits next to lines #16925 (apps.open line) and #15282 (ax() line) change, so it conflicts with both until they merge; then rebase (pr-queue advance) and open.",
    "advanced": "2026-11-05T18:59:39Z",
    "built": [
@@ -55471,6 +55471,16 @@
      "at": "2026-11-05T19:27:47Z",
      "host": "MacBook-Pro",
      "tree": "d1b90feb17b2ca20a9e60008bc4a99540f43491d"
+    },
+    {
+     "with": "#16908",
+     "code": "ede907b3fc8fa430baa0c69183050fc7f420c84e",
+     "with_code": "5ad397b131bf102cddd732a19155b3e28332c5e7",
+     "tip": "5512594d6608327b45cf36a54788c0c32d8d8ff9",
+     "with_tip": "8f019ef3585a6982b274050296d453c926a297e3",
+     "at": "2026-11-05T19:29:18Z",
+     "host": "MacBook-Pro",
+     "tree": "5bbdf7d3dce34d813685ea2766fc4fb05a083c2a"
     }
    ]
   },
