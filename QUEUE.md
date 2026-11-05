@@ -4,7 +4,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-05 00:17Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 8, conflict-held 13, stacked 12, held 6, open PRs 23, queued since the last plan 2; merged 232, closed 28
+**Counts:** openable now 8, conflict-held 13, stacked 12, held 6, open PRs 23, queued since the last plan 3; merged 232, closed 28
 
 ## Openable now (8)
 
@@ -93,9 +93,10 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05
 | [#18124](https://github.com/can1357/oh-my-pi/pull/18124) | search-failure-details | feat(coding-agent): record failed web search providers in tool details | web-search | P2 | 4h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/search-failure-details) |
 | [#18125](https://github.com/can1357/oh-my-pi/pull/18125) | anthropic-web-search | fix(ai,coding-agent): keep Anthropic web search queries intact, always search, and report refusals | other | P2 | 4h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/anthropic-web-search) |
 
-## Queued since the last plan (2)
+## Queued since the last plan (3)
 
 | id | title | area | priority | age | branch |
 |---|---|---|---|---|---|
 | shell-url-text-args | fix(shell): pass a scheme followed by words to external commands as written | other |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/shell-url-text-args) |
 | download-wait-busy | fix(coding-agent): show browser agents how to wait for a download they start | browser | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/download-wait-busy) |
+| open-viewport-attach | fix(coding-agent): apply the open viewport on attached and visible browsers | browser | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/open-viewport-attach) |
