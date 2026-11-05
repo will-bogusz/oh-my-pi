@@ -1,17 +1,17 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05 00:28Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05 00:31Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-05 00:23Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 11, conflict-held 13, stacked 12, held 6, open PRs 23, queued since the last plan 2; merged 232, closed 28
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-05 00:28Z on MacBook-Pro; groups below are from it, states from the manifest)
+**Counts:** openable now 13, conflict-held 13, stacked 12, held 6, open PRs 23; merged 232, closed 28
 
-## Openable now (11)
+## Openable now (13)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
 | sec-edgar-document-urls | fix(coding-agent): read SEC EDGAR filing documents instead of the company profile | web-scrapers | P0 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/sec-edgar-document-urls) |
-| computer-screenshot-saved-frame | fix(coding-agent): say the computer screenshot path holds the scaled frame | computer |  | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-screenshot-saved-frame) |
+| computer-screenshot-saved-frame | fix(coding-agent): say the computer screenshot path holds the scaled frame | computer |  | 0h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-screenshot-saved-frame) |
 | readthedocs-page-source | fix(coding-agent): fetch Read the Docs raw source only from the page's own Edit link | other |  | 0h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/readthedocs-page-source) |
 | tui-file-bun-be-bun | fix(tui-debug): run file entries with bun under the compiled omp binary | other | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/tui-file-bun-be-bun) |
 | ssh-write-new-projection | fix(coding-agent): create new ssh:// files from bounded read output | ssh | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ssh-write-new-projection) |
@@ -20,7 +20,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05
 | find-partial-deadline | fix(find): return the hits verified before find's deadline | other |  | 0h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/find-partial-deadline) |
 | shell-url-text-args | fix(shell): pass a scheme followed by words to external commands as written | other |  | 0h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/shell-url-text-args) |
 | download-wait-busy | fix(coding-agent): show browser agents how to wait for a download they start | browser | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/download-wait-busy) |
-| open-viewport-attach | fix(coding-agent): apply the open viewport on attached and visible browsers | browser | P2 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/open-viewport-attach) |
+| open-viewport-attach | fix(coding-agent): apply the open viewport on attached and visible browsers | browser | P2 | 0h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/open-viewport-attach) |
+| rustfmt-check-files | fix(pi-shell): count files, not diff locations, in minimized rustfmt --check output | other | P0 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/rustfmt-check-files) |
+| diff-binary-files | fix(pi-shell): list binary and line-less files in minimized diff summaries | other | P0 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/diff-binary-files) |
 
 ## Conflict-held (13)
 
@@ -95,10 +97,3 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05
 | [#17940](https://github.com/can1357/oh-my-pi/pull/17940) | relay-linux-click-front | fix(coding-agent): keep browser agents from pulling Chrome in front of your app on Linux X11 | browser | P1 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-linux-click-front) |
 | [#18124](https://github.com/can1357/oh-my-pi/pull/18124) | search-failure-details | feat(coding-agent): record failed web search providers in tool details | web-search | P2 | 4h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/search-failure-details) |
 | [#18125](https://github.com/can1357/oh-my-pi/pull/18125) | anthropic-web-search | fix(ai,coding-agent): keep Anthropic web search queries intact, always search, and report refusals | other | P2 | 4h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/anthropic-web-search) |
-
-## Queued since the last plan (2)
-
-| id | title | area | priority | age | branch |
-|---|---|---|---|---|---|
-| rustfmt-check-files | fix(pi-shell): count files, not diff locations, in minimized rustfmt --check output | other | P0 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/rustfmt-check-files) |
-| diff-binary-files | fix(pi-shell): list binary and line-less files in minimized diff summaries | other | P0 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/diff-binary-files) |

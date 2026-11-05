@@ -69093,7 +69093,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-05T00:23:56.122940Z",
+  "at": "2026-11-05T00:28:57.423929Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -69501,6 +69501,40 @@
     "created": "2026-11-04T20:14:36Z"
    },
    {
+    "id": "diff-binary-files",
+    "label": "diff-binary-files",
+    "number": null,
+    "state": "queued",
+    "area": "other",
+    "priority": "P0",
+    "title": "fix(pi-shell): list binary and line-less files in minimized diff summaries",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-05T00:28:45Z"
+   },
+   {
+    "id": "rustfmt-check-files",
+    "label": "rustfmt-check-files",
+    "number": null,
+    "state": "queued",
+    "area": "other",
+    "priority": "P0",
+    "title": "fix(pi-shell): count files, not diff locations, in minimized rustfmt --check output",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-05T00:28:38Z"
+   },
+   {
     "id": "sec-edgar-document-urls",
     "label": "sec-edgar-document-urls",
     "number": null,
@@ -69795,7 +69829,7 @@
     "area": "browser",
     "priority": "P2",
     "title": "fix(coding-agent): apply the open viewport on attached and visible browsers",
-    "action": "open",
+    "action": "next-hour",
     "reasons": [],
     "note": "",
     "over": [],
@@ -70175,7 +70209,7 @@
     "area": "computer",
     "priority": null,
     "title": "fix(coding-agent): say the computer screenshot path holds the scaled frame",
-    "action": "open",
+    "action": "next-hour",
     "reasons": [],
     "note": "",
     "over": [],
