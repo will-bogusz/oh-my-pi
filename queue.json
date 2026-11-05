@@ -67845,7 +67845,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-05T10:58:16Z",
+  "checked": "2026-11-05T11:28:44Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -68153,108 +68153,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-29T11:14:13Z",
-    "kind": "conflict",
-    "label": "#15433",
-    "title": "feat(task): add omp agents show for what an agent's spawns run with",
-    "files": [
-     "docs/cli-reference.md"
-    ]
-   },
-   {
-    "at": "2026-10-29T11:14:13Z",
-    "kind": "conflict",
-    "label": "#15508",
-    "title": "fix(coding-agent): keep browser calls going when a page calls window.print()",
-    "files": [
-     "packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts"
-    ]
-   },
-   {
-    "at": "2026-10-29T11:14:13Z",
-    "kind": "conflict",
-    "label": "#16756",
-    "title": "fix(browser): use Chrome's native WebMCP on demand instead of injecting a page hook",
-    "files": [
-     "packages/coding-agent/test/tools/browser-webmcp.test.ts"
-    ]
-   },
-   {
-    "at": "2026-10-29T11:14:13Z",
-    "kind": "conflict",
-    "label": "#16297",
-    "title": "fix(coding-agent): fail provider-qualified model selectors that name no exact id instead of running a sibling",
-    "files": [
-     "docs/cli-reference.md"
-    ]
-   },
-   {
-    "at": "2026-10-29T11:14:13Z",
-    "kind": "conflict",
-    "label": "#16271",
-    "title": "fix(lsp): add another checkout to the language server workspace before opening its files",
-    "files": [
-     "docs/tools/lsp.md",
-     "packages/coding-agent/test/lsp-mux.test.ts"
-    ]
-   },
-   {
-    "at": "2026-10-29T11:14:13Z",
-    "kind": "conflict",
-    "label": "#16576",
-    "title": "feat(coding-agent): tagged the file lines bash prints with their numbers so edit can anchor them",
-    "files": [
-     "packages/coding-agent/src/tools/bash.ts"
-    ]
-   },
-   {
-    "at": "2026-10-29T11:14:13Z",
-    "kind": "conflict",
-    "label": "#16586",
-    "title": "feat(coding-agent,tui): show which bash minimizer filter ran and how much it cut",
-    "files": [
-     "docs/tools/bash.md"
-    ]
-   },
-   {
-    "at": "2026-10-29T11:14:13Z",
-    "kind": "conflict",
-    "label": "#16587",
-    "title": "feat(coding-agent): tag each log record with the session that wrote it",
-    "files": [
-     "docs/tools/debug.md"
-    ]
-   },
-   {
-    "at": "2026-10-29T11:14:13Z",
-    "kind": "conflict",
-    "label": "#16801",
-    "title": "feat(coding-agent): deliver messages into a session from outside with omp poke",
-    "files": [
-     "docs/cli-reference.md",
-     "packages/coding-agent/src/session/agent-session.ts"
-    ]
-   },
-   {
-    "at": "2026-10-29T11:14:13Z",
-    "kind": "conflict",
-    "label": "#16908",
-    "title": "fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it",
-    "files": [
-     "packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
-    ]
-   },
-   {
-    "at": "2026-10-29T11:14:13Z",
-    "kind": "conflict",
-    "label": "#17349",
-    "title": "feat(pi-shell): keep the git guard's refusals to checkouts other sessions share",
-    "files": [
-     "docs/natives-shell-pty-process.md",
-     "docs/settings.md"
-    ]
-   },
    {
     "at": "2026-10-29T13:16:52Z",
     "kind": "merged",
