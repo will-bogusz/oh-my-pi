@@ -64796,6 +64796,24 @@
    "added": "2026-11-05T00:41:16Z",
    "updated": "2026-11-05T00:41:16Z",
    "note": ""
+  },
+  {
+   "id": "skill-url-new-skill",
+   "branch": "will/skill-url-new-skill",
+   "title": "fix(skills): find a skill created after the session started by skill:// name",
+   "area": "other",
+   "priority": null,
+   "needs": [],
+   "base": "88a69582c755bd000e8dc0290981fc787a4f400c",
+   "body": "bodies/skill-url-new-skill.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/skill-url-new-skill",
+   "host": "MacBook-Pro",
+   "added": "2026-11-05T00:44:09Z",
+   "updated": "2026-11-05T00:44:09Z",
+   "note": ""
   }
  ],
  "watch": {
