@@ -72688,6 +72688,11 @@
     "sha": "89c8a22b4d7c964dd6b30f54a48c772ed648589a",
     "at": "2026-11-05T20:44:53Z",
     "host": "goliath"
+   },
+   "macos": {
+    "sha": "89c8a22b4d7c964dd6b30f54a48c772ed648589a",
+    "at": "2026-11-05T20:42:32Z",
+    "host": "Wills-MacBook-Pro"
    }
   }
  },
