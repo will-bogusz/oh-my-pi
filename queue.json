@@ -64143,13 +64143,13 @@
    "needs": [],
    "base": "96e4d8eb5ba1212d2d6018f242de266284cffab9",
    "body": "bodies/atspi-setvalue-readback.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18220,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-setvalue-readback",
    "host": "MacBook-Pro",
    "added": "2026-11-03T09:07:02Z",
-   "updated": "2026-11-05T19:34:41Z",
+   "updated": "2026-11-05T19:36:45Z",
    "note": "",
    "advanced": "2026-11-05T18:59:39Z",
    "built": [
@@ -64222,7 +64222,8 @@
      "at": "2026-11-05T19:34:38Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-05T19:36:45Z"
   },
   {
    "id": "relay-linux-click-front",
