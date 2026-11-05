@@ -67859,7 +67859,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-05T15:33:21Z",
+  "checked": "2026-11-05T16:04:05Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -68313,12 +68313,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-29T15:49:38Z",
-    "kind": "openable",
-    "id": "archive-cache-racy",
-    "title": "fix(coding-agent): re-read an archive rewritten inside one timestamp granule"
-   },
    {
     "at": "2026-10-29T16:20:00Z",
     "kind": "unopenable",
