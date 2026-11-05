@@ -4871,9 +4871,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/text-drag-select",
    "host": "MacBook-Pro",
    "added": "2026-10-18T11:18:03Z",
-   "updated": "2026-11-05T18:49:53Z",
+   "updated": "2026-11-05T19:14:50Z",
    "note": "",
-   "advanced": "2026-11-05T18:49:53Z",
+   "advanced": "2026-11-05T19:14:50Z",
    "built": [
     {
      "with": "#16202",
@@ -21198,9 +21198,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-popup-lossless",
    "host": "MacBook-Pro",
    "added": "2026-10-19T00:03:17Z",
-   "updated": "2026-11-05T18:49:53Z",
+   "updated": "2026-11-05T19:14:50Z",
    "note": "HOLD (Will, 2026-10-18): waits for Will's OK on the Accessibility dependency 2026-11-02 (QueueRestructure): after Brit's merge round, a rebase must keep main's 1c45a9113ce (relay timeout typed by class; detach-report wait only in user-driven browsers), a47a579ff17 (acquireBrowser startRelay:false for a kept tab's close), 49a19f8ec19 (PI_BROWSER_RELAY_KEEP_FRONT=0 opt-out of the front-app hold: any new SkyLight/front-app call must honor it), 89833d37f43 (cancelled press releases on a sentinel off-page point; tab-worker click guard).",
-   "advanced": "2026-11-05T18:49:53Z",
+   "advanced": "2026-11-05T19:14:50Z",
    "built": [
     {
      "with": "#16908",
@@ -57469,7 +57469,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/iphone-mirror-key-gap",
    "host": "MacBook-Pro",
    "added": "2026-10-30T21:15:44Z",
-   "updated": "2026-11-05T18:49:53Z",
+   "updated": "2026-11-05T19:14:50Z",
    "note": "",
    "built": [
     {
@@ -57570,7 +57570,7 @@
      "tree": "91b54a3c61655e10eb8e95bc1a11f335eff2bb2f"
     }
    ],
-   "advanced": "2026-11-05T18:49:53Z",
+   "advanced": "2026-11-05T19:14:50Z",
    "opened": "2026-11-03T02:19:44Z",
    "readied": "2026-11-03T02:20:04Z"
   },
@@ -57589,7 +57589,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-capture-geometry",
    "host": "MacBook-Pro",
    "added": "2026-10-30T21:16:44Z",
-   "updated": "2026-11-05T18:49:53Z",
+   "updated": "2026-11-05T19:14:50Z",
    "note": "",
    "built": [
     {
@@ -57660,7 +57660,7 @@
      "tree": "1c2e904f816765145387f519b84705329a98de9a"
     }
    ],
-   "advanced": "2026-11-05T18:49:53Z",
+   "advanced": "2026-11-05T19:14:50Z",
    "opened": "2026-11-02T03:30:17Z",
    "readied": "2026-11-02T03:30:38Z"
   },
@@ -60575,7 +60575,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/role-implicit-landmarks",
    "host": "MacBook-Pro",
    "added": "2026-11-03T01:12:51Z",
-   "updated": "2026-11-05T18:49:53Z",
+   "updated": "2026-11-05T19:14:50Z",
    "note": "",
    "built": [
     {
@@ -60751,7 +60751,7 @@
    ],
    "opened": "2026-11-03T02:16:08Z",
    "readied": "2026-11-03T02:16:29Z",
-   "advanced": "2026-11-05T18:49:53Z"
+   "advanced": "2026-11-05T19:14:50Z"
   },
   {
    "id": "token-count-policy",
@@ -61027,7 +61027,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-block-pages",
    "host": "MacBook-Pro",
    "added": "2026-11-03T02:52:49Z",
-   "updated": "2026-11-05T18:49:53Z",
+   "updated": "2026-11-05T19:14:50Z",
    "note": "",
    "built": [
     {
@@ -61195,7 +61195,7 @@
    ],
    "opened": "2026-11-03T03:48:08Z",
    "readied": "2026-11-03T03:48:29Z",
-   "advanced": "2026-11-05T18:49:53Z"
+   "advanced": "2026-11-05T19:14:50Z"
   },
   {
    "id": "wayland-click-pacing",
