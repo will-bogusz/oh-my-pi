@@ -73994,5 +73994,11 @@
     "created": "2026-10-10T21:48:41Z"
    }
   ]
+ },
+ "opening": {
+  "id": "eval-late-rejection",
+  "token": "fe3790d35d974fa3ae9f0d8f96854602",
+  "host": "MacBook-Pro",
+  "at": "2026-11-05T20:05:41Z"
  }
 }
