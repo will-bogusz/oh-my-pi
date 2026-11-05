@@ -1,10 +1,10 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-04 23:59Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-05 00:01Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-04 23:46Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 0, conflict-held 13, stacked 12, held 6, open PRs 23, queued since the last plan 1; merged 232, closed 28
+**Counts:** openable now 0, conflict-held 13, stacked 12, held 6, open PRs 23, queued since the last plan 2; merged 232, closed 28
 
 ## Openable now (0)
 
@@ -84,8 +84,9 @@ none
 | [#18124](https://github.com/can1357/oh-my-pi/pull/18124) | search-failure-details | feat(coding-agent): record failed web search providers in tool details | web-search | P2 | 3h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/search-failure-details) |
 | [#18125](https://github.com/can1357/oh-my-pi/pull/18125) | anthropic-web-search | fix(ai,coding-agent): keep Anthropic web search queries intact, always search, and report refusals | other | P2 | 3h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/anthropic-web-search) |
 
-## Queued since the last plan (1)
+## Queued since the last plan (2)
 
 | id | title | area | priority | age | branch |
 |---|---|---|---|---|---|
 | sec-edgar-document-urls | fix(coding-agent): read SEC EDGAR filing documents instead of the company profile | web-scrapers | P0 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/sec-edgar-document-urls) |
+| computer-screenshot-saved-frame | fix(coding-agent): say the computer screenshot path holds the scaled frame | computer |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-screenshot-saved-frame) |
