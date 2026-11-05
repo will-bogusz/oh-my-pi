@@ -37,11 +37,12 @@ Konsole and xterm calls both returned success. A process inside each terminal re
 
 libei's `eis-demo-server` exercised version 3 through `LIBEI_SOCKET`: `type("ab")` failed discovery without `ready`, then logged `text utf8 'ab'` with it.
 
-Linux: `cargo test -p pi-natives --features wayland-pipewire --lib desktop::linux::wayland` passed 35 tests on the current head. The text-run regression covers combining marks, a ZWJ emoji and a flag crossing byte 254, and an oversized grapheme. Linux, macOS and Windows `rust-check` passed. `bun scripts/gen-bazel-lock.ts --check` passed. GNOME was not run; the no-text-device refusal has unit coverage.
+Linux: `cargo test -p pi-natives` passed 606 tests at 48a32de1de. The text-run regression covers combining marks, a ZWJ emoji and a flag crossing byte 254, and an oversized grapheme. Linux, macOS and Windows `rust-check` passed. `bun scripts/gen-bazel-lock.ts --check` passed. GNOME was not run; the no-text-device refusal has unit coverage.
 
 ---
 
 - [ ] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with attribution
+
 
