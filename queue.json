@@ -55330,7 +55330,7 @@
    "area": "computer",
    "priority": "P2",
    "needs": [],
-   "base": "256b3211bca7458391866a8bcc9369902664be55",
+   "base": "96e4d8eb5ba1212d2d6018f242de266284cffab9",
    "body": "bodies/computer-menu-subtree.md",
    "state": "queued",
    "pr": null,
@@ -55338,9 +55338,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-menu-subtree",
    "host": "MacBook-Pro",
    "added": "2026-10-24T05:06:00Z",
-   "updated": "2026-11-02T02:39:08Z",
+   "updated": "2026-11-05T18:58:16Z",
    "note": "2026-10-29 (ComputerDocs): rebased onto main b0756921ed and pushed (e2b2d3a213); check + computer.test.ts (137 pass) on goliath; precheck has no timing FIX. Waits: its menu.items line in prompts/tools/computer.md sits next to lines #16925 (apps.open line) and #15282 (ax() line) change, so it conflicts with both until they merge; then rebase (pr-queue advance) and open.",
-   "advanced": "2026-11-02T02:39:08Z"
+   "advanced": "2026-11-05T18:58:16Z"
   },
   {
    "id": "computer-window-wait",
@@ -63878,7 +63878,7 @@
    "area": "computer",
    "priority": "P2",
    "needs": [],
-   "base": "83de60ad992d12e572ec3ed6fe2dd9e160cdc4a2",
+   "base": "96e4d8eb5ba1212d2d6018f242de266284cffab9",
    "body": "bodies/ax-find-depth.md",
    "state": "queued",
    "pr": null,
@@ -63886,8 +63886,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ax-find-depth",
    "host": "MacBook-Pro",
    "added": "2026-11-03T08:48:18Z",
-   "updated": "2026-11-03T08:48:18Z",
-   "note": ""
+   "updated": "2026-11-05T18:58:16Z",
+   "note": "",
+   "advanced": "2026-11-05T18:58:16Z"
   },
   {
    "id": "atspi-walk-reads",
@@ -63918,7 +63919,7 @@
    "area": "computer",
    "priority": "P2",
    "needs": [],
-   "base": "83de60ad992d12e572ec3ed6fe2dd9e160cdc4a2",
+   "base": "96e4d8eb5ba1212d2d6018f242de266284cffab9",
    "body": "bodies/atspi-setvalue-readback.md",
    "state": "queued",
    "pr": null,
@@ -63926,8 +63927,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-setvalue-readback",
    "host": "MacBook-Pro",
    "added": "2026-11-03T09:07:02Z",
-   "updated": "2026-11-03T09:07:29Z",
-   "note": ""
+   "updated": "2026-11-05T18:58:16Z",
+   "note": "",
+   "advanced": "2026-11-05T18:58:16Z"
   },
   {
    "id": "relay-linux-click-front",
