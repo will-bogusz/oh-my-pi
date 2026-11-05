@@ -66629,7 +66629,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/open-viewport-attach",
    "host": "MacBook-Pro",
    "added": "2026-11-05T00:23:48Z",
-   "updated": "2026-11-05T02:29:22Z",
+   "updated": "2026-11-05T02:29:48Z",
    "note": "",
    "built": [
     {
@@ -66913,7 +66913,8 @@
      "tree": "3b429f5135b2e05c32bc65f6b7aa907652b7b3c0"
     }
    ],
-   "opened": "2026-11-05T02:29:22Z"
+   "opened": "2026-11-05T02:29:22Z",
+   "readied": "2026-11-05T02:29:48Z"
   },
   {
    "id": "rustfmt-check-files",
