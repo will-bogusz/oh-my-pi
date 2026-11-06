@@ -68171,7 +68171,7 @@
    "area": "browser",
    "priority": "P1",
    "needs": [],
-   "base": "96e4d8eb5ba1212d2d6018f242de266284cffab9",
+   "base": "75e7801e247d4e3263439d4cc08ccad60dc64bdd",
    "body": "bodies/browser-open-recovered-tab.md",
    "state": "queued",
    "pr": null,
@@ -68179,8 +68179,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-open-recovered-tab",
    "host": "MacBook-Pro",
    "added": "2026-11-05T19:37:08Z",
-   "updated": "2026-11-06T04:29:38Z",
-   "note": ""
+   "updated": "2026-11-06T04:33:57Z",
+   "note": "",
+   "advanced": "2026-11-06T04:33:57Z"
   },
   {
    "id": "eval-late-rejection",
