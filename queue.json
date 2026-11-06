@@ -68530,7 +68530,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-06T13:54:07Z",
+  "checked": "2026-11-06T14:25:08Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -68712,15 +68712,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-30T14:16:43Z",
-    "kind": "conflict",
-    "label": "#16801",
-    "title": "feat(coding-agent): deliver messages into a session from outside with omp poke",
-    "files": [
-     "packages/coding-agent/src/session/session-storage.ts"
-    ]
-   },
    {
     "at": "2026-10-30T17:52:05Z",
     "kind": "openable",
