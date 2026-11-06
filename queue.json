@@ -68532,7 +68532,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-06T19:31:54Z",
+  "checked": "2026-11-06T20:02:16Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -68710,13 +68710,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-30T19:53:51Z",
-    "kind": "unopenable",
-    "id": "cache-marker",
-    "title": "feat(coding-agent): show whether the next message reads the prompt cache",
-    "why": "opened as #17496"
-   },
    {
     "at": "2026-10-30T20:24:05Z",
     "kind": "openable",
@@ -72902,7 +72895,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-06T19:01:05.697388Z",
+  "at": "2026-11-06T20:02:16.767015Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
