@@ -62679,7 +62679,7 @@
    "branch": "will/wayland-pipewire-dlopen",
    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
    "area": "computer",
-   "priority": "P1",
+   "priority": "P2",
    "needs": [],
    "base": "79fa222e8390aed3494f4bc6746814e6c74c21cf",
    "body": "bodies/wayland-pipewire-dlopen.md",
@@ -62689,7 +62689,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-pipewire-dlopen",
    "host": "MacBook-Pro",
    "added": "2026-11-03T05:43:31Z",
-   "updated": "2026-11-06T23:14:52Z",
+   "updated": "2026-11-06T23:35:08Z",
    "note": "",
    "advanced": "2026-11-06T22:52:51Z",
    "built": [
