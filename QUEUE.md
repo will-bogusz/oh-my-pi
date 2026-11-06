@@ -1,16 +1,14 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-06 05:30Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-06 05:32Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-06 04:29Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 1, conflict-held 10, stacked 12, held 6, open PRs 27; merged 246, closed 29
+**Counts:** openable now 0, conflict-held 10, stacked 12, held 6, open PRs 28; merged 246, closed 29
 
-## Openable now (1)
+## Openable now (0)
 
-| id | title | area | priority | age | plan | branch |
-|---|---|---|---|---|---|---|
-| browser-open-recovered-tab | fix(browser): keep the tab an open successfully reattaches | browser | P1 | 9h | open (over P2 #15508) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-open-recovered-tab) |
+none
 
 ## Conflict-held (10)
 
@@ -55,7 +53,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-06
 | broker-reset-sweep | feat(coding-agent): spend saved resets from the auth broker before they expire | broker |  | 23d | Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-reset-sweep) |
 | broker-sweep-clients-defer | feat(ai,coding-agent): stop sessions sweeping saved resets the auth broker already spends | broker |  | 23d | Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-sweep-clients-defer) |
 
-## Open PRs (27)
+## Open PRs (28)
 
 | PR | id | title | area | rank | open | plan | branch |
 |---|---|---|---|---|---|---|---|
@@ -85,4 +83,5 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-06
 | [#17940](https://github.com/can1357/oh-my-pi/pull/17940) | relay-linux-click-front | fix(coding-agent): keep browser agents from pulling Chrome in front of your app on Linux X11 | browser | P1 | 2d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-linux-click-front) |
 | [#18125](https://github.com/can1357/oh-my-pi/pull/18125) | anthropic-web-search | fix(ai,coding-agent): keep Anthropic web search queries intact, always search, and report refusals | other | P2 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/anthropic-web-search) |
 | [#18167](https://github.com/can1357/oh-my-pi/pull/18167) | skill-url-new-skill | fix(skills): find a skill created after the session started by skill:// name | other | P1 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/skill-url-new-skill) |
+| [#18252](https://github.com/can1357/oh-my-pi/pull/18252) | browser-open-recovered-tab | fix(browser): keep the tab an open successfully reattaches | browser | P1 | 9h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-open-recovered-tab) |
 | [#18223](https://github.com/can1357/oh-my-pi/pull/18223) | eval-late-rejection | fix(coding-agent): preserve eval state after late tool rejections | coding-agent eval | P1 | 9h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/eval-late-rejection) |
