@@ -2768,11 +2768,12 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/print-hold",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-11-03T02:36:13Z",
+   "updated": "2026-11-06T05:32:23Z",
    "note": "",
    "advanced": "2026-11-03T02:36:13Z",
    "rebases_after": [
-    16907
+    16907,
+    18252
    ]
   },
   {
@@ -68173,13 +68174,13 @@
    "needs": [],
    "base": "75e7801e247d4e3263439d4cc08ccad60dc64bdd",
    "body": "bodies/browser-open-recovered-tab.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18252,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-open-recovered-tab",
    "host": "MacBook-Pro",
    "added": "2026-11-05T19:37:08Z",
-   "updated": "2026-11-06T05:30:32Z",
+   "updated": "2026-11-06T05:32:23Z",
    "note": "",
    "advanced": "2026-11-06T04:34:54Z",
    "built": [
@@ -68342,7 +68343,8 @@
      "at": "2026-11-06T05:30:28Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-06T05:32:23Z"
   },
   {
    "id": "eval-late-rejection",
