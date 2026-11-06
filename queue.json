@@ -68530,7 +68530,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-06T10:49:20Z",
+  "checked": "2026-11-06T11:50:47Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -68712,38 +68712,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-30T11:44:30Z",
-    "kind": "merged",
-    "number": 17417,
-    "title": "fix(browser): replace a rich-text editor's text when filling it",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-30T11:44:30Z",
-    "kind": "merged",
-    "number": 17391,
-    "title": "feat(computer): wait for windows opened by actions",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-30T11:44:30Z",
-    "kind": "merged",
-    "number": 17389,
-    "title": "fix(coding-agent): re-read an archive rewritten inside one timestamp granule",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-30T11:44:30Z",
-    "kind": "merged",
-    "number": 17393,
-    "title": "feat(coding-agent): list unused meta tags by name in native web reads",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
    {
     "at": "2026-10-30T14:16:43Z",
     "kind": "conflict",
@@ -72973,7 +72941,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-06T10:49:20.955735Z",
+  "at": "2026-11-06T11:50:48.114005Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
