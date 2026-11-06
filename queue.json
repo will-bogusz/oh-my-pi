@@ -72971,8 +72971,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-06T17:29:53.142884Z",
-  "host": "goliath",
+  "at": "2026-11-06T17:37:04.267199Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -73392,10 +73392,8 @@
     "area": "natives",
     "priority": "P2",
     "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in MODULE.bazel.lock"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
