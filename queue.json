@@ -68532,7 +68532,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-06T21:03:03Z",
+  "checked": "2026-11-06T21:33:07Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -68698,18 +68698,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-30T21:25:06Z",
-    "kind": "openable",
-    "id": "macos-capture-geometry",
-    "title": "fix(natives): match macOS window screenshots to the window on screen"
-   },
-   {
-    "at": "2026-10-30T21:25:06Z",
-    "kind": "openable",
-    "id": "iphone-mirror-key-gap",
-    "title": "perf(natives): type on iPhone Mirroring twice as fast"
-   },
    {
     "at": "2026-10-30T21:55:44Z",
     "kind": "openable",
