@@ -68179,9 +68179,21 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-open-recovered-tab",
    "host": "MacBook-Pro",
    "added": "2026-11-05T19:37:08Z",
-   "updated": "2026-11-06T04:34:54Z",
+   "updated": "2026-11-06T04:48:29Z",
    "note": "",
-   "advanced": "2026-11-06T04:34:54Z"
+   "advanced": "2026-11-06T04:34:54Z",
+   "built": [
+    {
+     "with": "#16908",
+     "code": "aa09222d98d5f0b7250e43c15e89d071cb06c2f5",
+     "with_code": "174eb097f0b019ba28c5f4f37ef6d7722d6c4fe0",
+     "tip": "728e5ea2981d0aba30319024f8a4b2d817418f56",
+     "with_tip": "11f186dd6542512c2155bc205b588bf015ed78b4",
+     "at": "2026-11-06T04:48:28Z",
+     "host": "MacBook-Pro",
+     "tree": "6a5ec18dfa6c92a47d0919dae28dd99c93cf32b6"
+    }
+   ]
   },
   {
    "id": "eval-late-rejection",
