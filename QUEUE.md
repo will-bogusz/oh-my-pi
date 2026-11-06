@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-06 05:00Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-06 05:12Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-06 04:29Z on MacBook-Pro; groups below are from it, states from the manifest)
@@ -85,4 +85,4 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-06
 | [#17940](https://github.com/can1357/oh-my-pi/pull/17940) | relay-linux-click-front | fix(coding-agent): keep browser agents from pulling Chrome in front of your app on Linux X11 | browser | P1 | 2d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-linux-click-front) |
 | [#18125](https://github.com/can1357/oh-my-pi/pull/18125) | anthropic-web-search | fix(ai,coding-agent): keep Anthropic web search queries intact, always search, and report refusals | other | P2 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/anthropic-web-search) |
 | [#18167](https://github.com/can1357/oh-my-pi/pull/18167) | skill-url-new-skill | fix(skills): find a skill created after the session started by skill:// name | other | P1 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/skill-url-new-skill) |
-| [#18223](https://github.com/can1357/oh-my-pi/pull/18223) | eval-late-rejection | fix(coding-agent): preserve eval state after late tool rejections | coding-agent eval | P1 | 8h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/eval-late-rejection) |
+| [#18223](https://github.com/can1357/oh-my-pi/pull/18223) | eval-late-rejection | fix(coding-agent): preserve eval state after late tool rejections | coding-agent eval | P1 | 9h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/eval-late-rejection) |
