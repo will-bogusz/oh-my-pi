@@ -68532,7 +68532,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-06T17:29:52Z",
+  "checked": "2026-11-06T18:00:23Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -68556,13 +68556,6 @@
     "title": "fix(agent,coding-agent): read the history behind an OpenAI remote compaction after a model switch",
     "files": [
      "packages/coding-agent/src/sdk.ts"
-    ]
-   },
-   "#18013": {
-    "since": "2026-11-06T02:41:53Z",
-    "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "files": [
-     "MODULE.bazel.lock"
     ]
    }
   },
@@ -68735,26 +68728,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-30T17:52:05Z",
-    "kind": "openable",
-    "id": "anthropic-128mb-requests",
-    "title": "fix(catalog,coding-agent,snapcompact): size Anthropic image budgets from the 128 MB request limit"
-   },
-   {
-    "at": "2026-10-30T17:52:05Z",
-    "kind": "unopenable",
-    "id": "snapcompact-reduction-baseline",
-    "title": "fix(coding-agent): let snapcompact replace an archive it shrinks, and report its refusal once",
-    "why": "opened as #17490"
-   },
-   {
-    "at": "2026-10-30T17:52:05Z",
-    "kind": "unopenable",
-    "id": "bash-tool-call-env",
-    "title": "feat(coding-agent): expose PI_TOOL_CALL_ID to bash commands",
-    "why": "opened as #17489"
-   },
    {
     "at": "2026-10-30T18:22:10Z",
     "kind": "unopenable",
