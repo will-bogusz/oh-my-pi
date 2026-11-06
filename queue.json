@@ -68532,7 +68532,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-06T20:02:16Z",
+  "checked": "2026-11-06T20:32:18Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -68710,12 +68710,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-30T20:24:05Z",
-    "kind": "openable",
-    "id": "remove-stray-dbs",
-    "title": "chore(coding-agent): remove SQLite files committed with the RPC test fixture"
-   },
    {
     "at": "2026-10-30T20:54:31Z",
     "kind": "unopenable",
