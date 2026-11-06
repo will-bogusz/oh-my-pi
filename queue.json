@@ -2760,7 +2760,7 @@
    "area": "browser",
    "priority": "P2",
    "needs": [],
-   "base": "83de60ad992d12e572ec3ed6fe2dd9e160cdc4a2",
+   "base": "1fa31aa466f171e9f9ed74b9480298873ec022e4",
    "body": null,
    "state": "open",
    "pr": 15508,
@@ -2768,9 +2768,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/print-hold",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-11-06T05:32:23Z",
+   "updated": "2026-11-06T17:21:40Z",
    "note": "",
-   "advanced": "2026-11-03T02:36:13Z",
+   "advanced": "2026-11-06T17:21:40Z",
    "rebases_after": [
     16907,
     18252
