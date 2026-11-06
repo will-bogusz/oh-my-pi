@@ -62683,13 +62683,13 @@
    "needs": [],
    "base": "79fa222e8390aed3494f4bc6746814e6c74c21cf",
    "body": "bodies/wayland-pipewire-dlopen.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18353,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-pipewire-dlopen",
    "host": "MacBook-Pro",
    "added": "2026-11-03T05:43:31Z",
-   "updated": "2026-11-06T23:13:02Z",
+   "updated": "2026-11-06T23:14:31Z",
    "note": "",
    "advanced": "2026-11-06T22:52:51Z",
    "built": [
@@ -62752,7 +62752,8 @@
      "at": "2026-11-06T23:12:59Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-06T23:14:31Z"
   },
   {
    "id": "gtk4-atspi-bounds",
@@ -63189,7 +63190,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-ei-text",
    "host": "MacBook-Pro",
    "added": "2026-11-03T06:23:33Z",
-   "updated": "2026-11-06T17:35:42Z",
+   "updated": "2026-11-06T23:14:31Z",
    "note": "",
    "advanced": "2026-11-06T17:35:42Z",
    "built": [
@@ -63285,7 +63286,10 @@
     }
    ],
    "opened": "2026-11-03T22:44:08Z",
-   "readied": "2026-11-03T22:44:32Z"
+   "readied": "2026-11-03T22:44:32Z",
+   "rebases_after": [
+    18353
+   ]
   },
   {
    "id": "apps-open-tilde",
