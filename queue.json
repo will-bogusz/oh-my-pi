@@ -68598,15 +68598,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-06T23:05:05Z",
+  "checked": "2026-11-06T23:35:10Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {
-   "wayland-pipewire-dlopen": {
-    "since": "2026-11-06T23:05:05Z",
-    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland"
-   }
-  },
+  "openable": {},
   "conflicts": {
    "#16553": {
     "since": "2026-11-04T07:29:23Z",
@@ -68668,7 +68663,8 @@
    18167,
    18220,
    18222,
-   18223
+   18223,
+   18353
   ],
   "post_merge": {
    "18124": {
@@ -68769,21 +68765,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-30T23:27:09Z",
-    "kind": "merged",
-    "number": 17492,
-    "title": "fix(catalog,coding-agent): keep Anthropic inline images within the 128 MB request body",
-    "merged_by": "H4vC",
-    "maintainer_commits": 1
-   },
-   {
-    "at": "2026-10-30T23:27:09Z",
-    "kind": "unopenable",
-    "id": "snapcompact-text-reader",
-    "title": "fix(snapcompact,coding-agent): give models without image input a snapcompact archive's text instead of its frames",
-    "why": "opened as #17510"
-   },
    {
     "at": "2026-10-31T00:59:56Z",
     "kind": "released",
@@ -70637,6 +70618,13 @@
     "kind": "openable",
     "id": "wayland-pipewire-dlopen",
     "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland"
+   },
+   {
+    "at": "2026-11-06T23:35:10Z",
+    "kind": "unopenable",
+    "id": "wayland-pipewire-dlopen",
+    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
+    "why": "opened as #18353"
    }
   ]
  },
@@ -72917,12 +72905,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-06T22:53:27.439791Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-06T23:35:11.385843Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 1,
+   "left": 7
   },
   "rows": [
    {
@@ -73244,6 +73232,25 @@
     "created": "2026-11-04T20:19:46Z"
    },
    {
+    "id": "wayland-pipewire-dlopen",
+    "label": "#18353",
+    "number": 18353,
+    "state": "open",
+    "area": "computer",
+    "priority": "P2",
+    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
+    "action": "keep",
+    "reasons": [],
+    "note": "opened over P2 #18013",
+    "over": [],
+    "paired": [
+     "#18013"
+    ],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-06T23:14:30Z"
+   },
+   {
     "id": "iphone-mirror-key-gap",
     "label": "#17897",
     "number": 17897,
@@ -73340,9 +73347,11 @@
     "title": "feat(natives): type text the wayland layout lacks through libei text",
     "action": "keep",
     "reasons": [],
-    "note": "",
+    "note": "rebases after #18353 merges",
     "over": [],
-    "paired": [],
+    "paired": [
+     "#18353"
+    ],
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-03T22:44:07Z"
@@ -73375,6 +73384,7 @@
     "action": "wait",
     "reasons": [
      "conflicts with #18220 in crates/pi-natives/src/desktop/linux/ax.rs",
+     "conflicts with #18353 in MODULE.bazel.lock, crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #18013 in MODULE.bazel.lock"
     ],
     "note": "",
@@ -73382,6 +73392,7 @@
     "paired": [],
     "blocked_by": [
      "#18220",
+     "#18353",
      "#18013"
     ],
     "needs": [],
@@ -73399,6 +73410,7 @@
     "reasons": [
      "needs atspi-unanswered-app (queued), gtk4-atspi-bounds (queued)",
      "conflicts with #18220 in crates/pi-natives/src/desktop/linux/ax.rs",
+     "conflicts with #18353 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #16223 in crates/pi-natives/Cargo.toml",
      "conflicts with #18013 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/libei.rs",
      "its need gtk4-atspi-bounds conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
@@ -73408,6 +73420,7 @@
     "paired": [],
     "blocked_by": [
      "#18220",
+     "#18353",
      "#16223",
      "#18013"
     ],
@@ -73442,25 +73455,6 @@
     ],
     "needs": [],
     "created": "2026-10-30T21:35:55Z"
-   },
-   {
-    "id": "wayland-pipewire-dlopen",
-    "label": "wayland-pipewire-dlopen",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [
-     "#18013"
-    ],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-03T05:43:31Z"
    },
    {
     "id": "computer-ui-quiet",
@@ -73646,9 +73640,9 @@
     "action": "wait",
     "reasons": [
      "needs computer-ui-quiet (queued)",
+     "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #16223 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with wayland-pipewire-dlopen in docs/tools/computer.md",
      "its need computer-ui-quiet conflicts with main in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/tools/computer/supervisor.ts"
     ],
@@ -73656,9 +73650,9 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#18353",
      "#16223",
-     "#18222",
-     "wayland-pipewire-dlopen"
+     "#18222"
     ],
     "needs": [
      "computer-ui-quiet"
