@@ -68532,7 +68532,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-06T16:28:07Z",
+  "checked": "2026-11-06T17:29:52Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -68566,8 +68566,19 @@
     ]
    }
   },
-  "merged_through": "2026-11-05T14:17:02Z",
-  "unreleased": {},
+  "merged_through": "2026-11-06T17:18:31Z",
+  "unreleased": {
+   "18252": {
+    "title": "fix(browser): keep the tab an open successfully reattaches",
+    "merge_commit": "a4b069a7ec17e791adcd1ad6e02275f4df4ea5eb",
+    "merged_at": "2026-11-06T17:18:30Z"
+   },
+   "18221": {
+    "title": "fix(natives): search 64 levels deep in find()",
+    "merge_commit": "b8e3eb0d0e752f7792e2337b763ffaab7f7b66c4",
+    "merged_at": "2026-11-06T17:18:31Z"
+   }
+  },
   "ready": [
    15128,
    15130,
@@ -68592,10 +68603,8 @@
    18125,
    18167,
    18220,
-   18221,
    18222,
-   18223,
-   18252
+   18223
   ],
   "post_merge": {
    "17861": {
@@ -68710,6 +68719,18 @@
     "title": "fix(coding-agent,tui): name the command in background job notices",
     "merge_commit": "5f1ce42312b78173725931deeb67d6f7bedafff0",
     "merged_at": "2026-11-05T14:17:02Z",
+    "findings": []
+   },
+   "18221": {
+    "title": "fix(natives): search 64 levels deep in find()",
+    "merge_commit": "b8e3eb0d0e752f7792e2337b763ffaab7f7b66c4",
+    "merged_at": "2026-11-06T17:18:31Z",
+    "findings": []
+   },
+   "18252": {
+    "title": "fix(browser): keep the tab an open successfully reattaches",
+    "merge_commit": "a4b069a7ec17e791adcd1ad6e02275f4df4ea5eb",
+    "merged_at": "2026-11-06T17:18:30Z",
     "findings": []
    }
   },
@@ -70654,6 +70675,22 @@
     "id": "browser-open-recovered-tab",
     "title": "fix(browser): keep the tab an open successfully reattaches",
     "why": "opened as #18252"
+   },
+   {
+    "at": "2026-11-06T17:29:52Z",
+    "kind": "merged",
+    "number": 18252,
+    "title": "fix(browser): keep the tab an open successfully reattaches",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-06T17:29:52Z",
+    "kind": "merged",
+    "number": 18221,
+    "title": "fix(natives): search 64 levels deep in find()",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
    }
   ]
  },
@@ -72934,8 +72971,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-06T17:20:07.174159Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-06T17:29:53.142884Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -73198,10 +73235,8 @@
     "area": "browser",
     "priority": "P2",
     "title": "fix(coding-agent): keep browser calls going when a page calls window.print()",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in packages/coding-agent/src/tools/browser/tab-supervisor.ts"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -73554,7 +73589,6 @@
      "conflicts with #17895 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #17940 in docs/tools/browser.md",
      "conflicts with #16908 in packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
-     "its need #15508 conflicts with main in packages/coding-agent/src/tools/browser/tab-supervisor.ts",
      "its need r2/native-window-report conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, docs/tools/browser.md, packages/coding-agent/src/tools/browser/print-hold.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
     ],
@@ -73785,7 +73819,6 @@
      "conflicts with #17893 in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #17895 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #16908 in packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "its need #15508 conflicts with main in packages/coding-agent/src/tools/browser/tab-supervisor.ts",
      "conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
