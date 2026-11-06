@@ -68532,7 +68532,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-06T21:33:07Z",
+  "checked": "2026-11-06T22:03:46Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -68698,18 +68698,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-30T21:55:44Z",
-    "kind": "openable",
-    "id": "iphone-mirror-not-showing",
-    "title": "fix(natives): refuse iPhone Mirroring input while the mirror is not showing the phone"
-   },
-   {
-    "at": "2026-10-30T21:55:44Z",
-    "kind": "openable",
-    "id": "iphone-mirror-pointer",
-    "title": "fix(natives): keep background iPhone Mirroring taps reaching the phone after a takeover tap"
-   },
    {
     "at": "2026-10-30T22:56:30Z",
     "kind": "openable",
@@ -72858,7 +72846,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-06T21:03:03.890313Z",
+  "at": "2026-11-06T22:03:47.592560Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
