@@ -68532,7 +68532,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-06T18:30:51Z",
+  "checked": "2026-11-06T19:31:54Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -68710,23 +68710,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-30T19:23:22Z",
-    "kind": "openable",
-    "id": "cache-marker",
-    "title": "feat(coding-agent): show whether the next message reads the prompt cache"
-   },
-   {
-    "at": "2026-10-30T19:23:22Z",
-    "kind": "conflict",
-    "label": "#17492",
-    "title": "fix(catalog,coding-agent,snapcompact): size Anthropic image budgets from the 128 MB request limit",
-    "files": [
-     "packages/catalog/src/compat/rules/providers/anthropic.kdl",
-     "packages/coding-agent/test/session/provider-image-budget.test.ts",
-     "packages/snapcompact/test/snapcompact.test.ts"
-    ]
-   },
    {
     "at": "2026-10-30T19:53:51Z",
     "kind": "unopenable",
