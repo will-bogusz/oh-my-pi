@@ -68366,7 +68366,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-06T01:40:48Z",
+  "checked": "2026-11-06T02:41:53Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -68391,191 +68391,17 @@
     "files": [
      "packages/coding-agent/src/sdk.ts"
     ]
+   },
+   "#18013": {
+    "since": "2026-11-06T02:41:53Z",
+    "title": "feat(natives): type text the wayland layout lacks through libei text",
+    "files": [
+     "MODULE.bazel.lock"
+    ]
    }
   },
   "merged_through": "2026-11-05T14:17:02Z",
-  "unreleased": {
-   "17496": {
-    "title": "feat(coding-agent): show whether the next message reads the prompt cache",
-    "merge_commit": "1bceb753ae60ee13900f1893ce58ccbf7658bff2",
-    "merged_at": "2026-11-03T18:41:34Z"
-   },
-   "17936": {
-    "title": "fix(natives): match AT-SPI actions by their machine names",
-    "merge_commit": "ad0668e0c0e7ab9049da2d169b5abfd4987cc714",
-    "merged_at": "2026-11-03T20:02:51Z"
-   },
-   "17932": {
-    "title": "fix(natives): give up an unanswered Wayland RemoteDesktop dialog before the run ends",
-    "merge_commit": "eda639e3da576b8a342d433c07d6ca3582a50b86",
-    "merged_at": "2026-11-03T20:02:51Z"
-   },
-   "17931": {
-    "title": "fix(coding-agent): open ~ paths from the home folder in computer apps.open",
-    "merge_commit": "84def6cee1a8d925f5d24a1e0ec14690cae7bc37",
-    "merged_at": "2026-11-03T20:02:51Z"
-   },
-   "17922": {
-    "title": "fix(natives): name the focused application window on Wayland, not an always-active shell frame",
-    "merge_commit": "fdf17cd5eb9aae38ef23e2cc36d8263e2f6d58c9",
-    "merged_at": "2026-11-03T20:02:51Z"
-   },
-   "17921": {
-    "title": "fix(natives): keep X11 background element typing from raising the element's window",
-    "merge_commit": "8600336d1fb54c841811f6c1e93c7f2923dee18a",
-    "merged_at": "2026-11-03T20:02:51Z"
-   },
-   "17915": {
-    "title": "fix(natives): refuse Wayland element input before focusing the element",
-    "merge_commit": "0db7fb9aecba2054dae5b31dba5b1c94384a942c",
-    "merged_at": "2026-11-03T20:02:51Z"
-   },
-   "17913": {
-    "title": "fix(natives): refuse background drags on Windows Tk windows",
-    "merge_commit": "afed71e7b7e888f7932263626d44452908f82502",
-    "merged_at": "2026-11-03T20:02:51Z"
-   },
-   "17912": {
-    "title": "fix(natives): keep X11 takeover keys running when the core keyboard switches source",
-    "merge_commit": "c5787d8d29013938e7f944aed18f8d910a91de7c",
-    "merged_at": "2026-11-03T20:02:51Z"
-   },
-   "17911": {
-    "title": "fix(natives): refuse X11 background keys to Qt apps instead of reporting them sent",
-    "merge_commit": "0df0156efa2dcc8228e1420c8a693064777ce53e",
-    "merged_at": "2026-11-03T20:02:51Z"
-   },
-   "17910": {
-    "title": "fix(natives): release the X11 virtual keyboard's focus before takeover activates its window",
-    "merge_commit": "75a323fc4658e5f08251525d9261847209a893c4",
-    "merged_at": "2026-11-03T20:02:51Z"
-   },
-   "17909": {
-    "title": "fix(natives): stop takeover keys into iPhone Mirroring and Screen Sharing from leaving Fn held",
-    "merge_commit": "3f4e7799fc471f129000530789fbd3f3f30a772f",
-    "merged_at": "2026-11-03T20:02:51Z"
-   },
-   "17908": {
-    "title": "fix(browser): exit a process-local headless Chrome when the process that launched it is killed",
-    "merge_commit": "5808388747b68a6e30bf9b6b02d3393028dfe0f5",
-    "merged_at": "2026-11-03T20:02:51Z"
-   },
-   "17903": {
-    "title": "fix(natives): pace Wayland multi-clicks so KDE Qt apps see double clicks",
-    "merge_commit": "639583fc0decff903923666fd3f664a092392ba0",
-    "merged_at": "2026-11-03T20:02:51Z"
-   },
-   "17896": {
-    "title": "fix(coding-agent): find app windows by application id or path",
-    "merge_commit": "6e78cea88642ff754d4bf328833c469af7359929",
-    "merged_at": "2026-11-03T20:02:51Z"
-   },
-   "17883": {
-    "title": "fix(snapcompact,coding-agent): count a legacy archive's frames as dropped, not replaced",
-    "merge_commit": "1542c6952def90df2618994e5dc07d8417a041a3",
-    "merged_at": "2026-11-03T20:02:51Z"
-   },
-   "17881": {
-    "title": "docs(coding-agent): restore the --models row in the CLI reference",
-    "merge_commit": "db7a26ad3490d730f25eaeade64c4ff9bb9ed4f9",
-    "merged_at": "2026-11-03T20:02:51Z"
-   },
-   "17885": {
-    "title": "feat(ai,catalog): identify Factory Droid requests as droid 1.1.0",
-    "merge_commit": "0eb64c8dbce5a0bd9eced6ba734bc090858bf465",
-    "merged_at": "2026-11-04T18:15:01Z"
-   },
-   "17862": {
-    "title": "feat(catalog): add Muse Spark 1.3 to Factory Droid",
-    "merge_commit": "7ae6555c0943fb61a7cfeb3b144a265367e9ca5e",
-    "merged_at": "2026-11-04T18:15:52Z"
-   },
-   "17861": {
-    "title": "feat(ai,catalog,coding-agent): add Factory Droid Gemini 4 Argon with its request dialect",
-    "merge_commit": "d919cd1a2939b20dd1375431f8d2503ce7062a7d",
-    "merged_at": "2026-11-04T18:17:28Z"
-   },
-   "18012": {
-    "title": "fix(natives): report Wayland input unavailable when no RemoteDesktop portal exists",
-    "merge_commit": "55a0303ec121d9fb72bcfba048e334760798bc57",
-    "merged_at": "2026-11-04T20:46:40Z"
-   },
-   "18011": {
-    "title": "fix(natives): read GTK3 file dialogs as AT-SPI windows",
-    "merge_commit": "664df37279ec76ce5418a2cbbdfcba698067ca82",
-    "merged_at": "2026-11-04T20:46:40Z"
-   },
-   "18166": {
-    "title": "fix(coding-agent,tui): name the command in background job notices",
-    "merge_commit": "5f1ce42312b78173725931deeb67d6f7bedafff0",
-    "merged_at": "2026-11-05T14:17:02Z"
-   },
-   "18163": {
-    "title": "fix(shell): pass a scheme followed by words to external commands as written",
-    "merge_commit": "711209ee1347d22d5caf6c6a94fd27b6a4edccb1",
-    "merged_at": "2026-11-05T14:17:02Z"
-   },
-   "18162": {
-    "title": "fix(coding-agent): fetch Read the Docs raw source only from the page's own Edit link",
-    "merge_commit": "870828285f48529c8025ad4085aff77e34283b39",
-    "merged_at": "2026-11-05T14:17:02Z"
-   },
-   "18161": {
-    "title": "fix(find): return the hits verified before find's deadline",
-    "merge_commit": "ee0f437d1430404ebca3b84242f76d08e051c914",
-    "merged_at": "2026-11-05T14:17:02Z"
-   },
-   "18160": {
-    "title": "fix(coding-agent): apply the open viewport on attached and visible browsers",
-    "merge_commit": "3897a8e9e9f06a5de4160c692935f2e8cc269a2f",
-    "merged_at": "2026-11-05T14:17:02Z"
-   },
-   "18158": {
-    "title": "fix(coding-agent): say the computer screenshot path holds the scaled frame",
-    "merge_commit": "f1d0b5392fd3a83c02e26bdcf38d71a10efc07d7",
-    "merged_at": "2026-11-05T14:17:02Z"
-   },
-   "18156": {
-    "title": "fix(tui-debug): run file entries with bun under the compiled omp binary",
-    "merge_commit": "a4b0e91d77bcdb412bc5c46eec1e3c895c46e26b",
-    "merged_at": "2026-11-05T14:17:02Z"
-   },
-   "18155": {
-    "title": "fix(coding-agent): show browser agents how to wait for a download they start",
-    "merge_commit": "5a9e2b47c064b5f5652d81f534c621d596c120e5",
-    "merged_at": "2026-11-05T14:17:02Z"
-   },
-   "18154": {
-    "title": "fix(coding-agent): create new ssh:// files from bounded read output",
-    "merge_commit": "7e19b03956e0d9d8656fc2585d9b25fdde58023b",
-    "merged_at": "2026-11-05T14:17:02Z"
-   },
-   "18153": {
-    "title": "fix(lsp): sync open documents edited outside OMP before cross-file queries",
-    "merge_commit": "5a7a00413dd4caa1db289f207241e6f9aa0a1407",
-    "merged_at": "2026-11-05T14:17:02Z"
-   },
-   "18150": {
-    "title": "fix(coding-agent): read SEC EDGAR filing documents instead of the company profile",
-    "merge_commit": "fc05b54d6c760125d740eced9a616957fe9cf4d0",
-    "merged_at": "2026-11-05T14:17:02Z"
-   },
-   "18148": {
-    "title": "fix(pi-shell): list binary and line-less files in minimized diff summaries",
-    "merge_commit": "e9da5ddafc8f8d7e6dc84643fe8d4638ee251f49",
-    "merged_at": "2026-11-05T14:17:02Z"
-   },
-   "18147": {
-    "title": "fix(pi-shell): count files, not diff locations, in minimized rustfmt --check output",
-    "merge_commit": "1c8d6aee89890b5fc3f48a95a977266d3129c72e",
-    "merged_at": "2026-11-05T14:17:02Z"
-   },
-   "18124": {
-    "title": "feat(coding-agent): record failed web search providers in tool details",
-    "merge_commit": "a2fe1cc4795794d2745ea11ea4ca88477d1e4e3d",
-    "merged_at": "2026-11-05T14:17:02Z"
-   }
-  },
+  "unreleased": {},
   "ready": [
    15128,
    15130,
@@ -70428,6 +70254,267 @@
     "id": "computer-menu-subtree",
     "title": "feat(coding-agent): find nested menu commands in one read",
     "why": "opened as #18222"
+   },
+   {
+    "at": "2026-11-06T02:41:53Z",
+    "kind": "released",
+    "number": 17496,
+    "title": "feat(coding-agent): show whether the next message reads the prompt cache",
+    "tag": "v18.17.0"
+   },
+   {
+    "at": "2026-11-06T02:41:53Z",
+    "kind": "released",
+    "number": 17936,
+    "title": "fix(natives): match AT-SPI actions by their machine names",
+    "tag": "v18.17.0"
+   },
+   {
+    "at": "2026-11-06T02:41:53Z",
+    "kind": "released",
+    "number": 17932,
+    "title": "fix(natives): give up an unanswered Wayland RemoteDesktop dialog before the run ends",
+    "tag": "v18.17.0"
+   },
+   {
+    "at": "2026-11-06T02:41:53Z",
+    "kind": "released",
+    "number": 17931,
+    "title": "fix(coding-agent): open ~ paths from the home folder in computer apps.open",
+    "tag": "v18.17.0"
+   },
+   {
+    "at": "2026-11-06T02:41:53Z",
+    "kind": "released",
+    "number": 17922,
+    "title": "fix(natives): name the focused application window on Wayland, not an always-active shell frame",
+    "tag": "v18.17.0"
+   },
+   {
+    "at": "2026-11-06T02:41:53Z",
+    "kind": "released",
+    "number": 17921,
+    "title": "fix(natives): keep X11 background element typing from raising the element's window",
+    "tag": "v18.17.0"
+   },
+   {
+    "at": "2026-11-06T02:41:53Z",
+    "kind": "released",
+    "number": 17915,
+    "title": "fix(natives): refuse Wayland element input before focusing the element",
+    "tag": "v18.17.0"
+   },
+   {
+    "at": "2026-11-06T02:41:53Z",
+    "kind": "released",
+    "number": 17913,
+    "title": "fix(natives): refuse background drags on Windows Tk windows",
+    "tag": "v18.17.0"
+   },
+   {
+    "at": "2026-11-06T02:41:53Z",
+    "kind": "released",
+    "number": 17912,
+    "title": "fix(natives): keep X11 takeover keys running when the core keyboard switches source",
+    "tag": "v18.17.0"
+   },
+   {
+    "at": "2026-11-06T02:41:53Z",
+    "kind": "released",
+    "number": 17911,
+    "title": "fix(natives): refuse X11 background keys to Qt apps instead of reporting them sent",
+    "tag": "v18.17.0"
+   },
+   {
+    "at": "2026-11-06T02:41:53Z",
+    "kind": "released",
+    "number": 17910,
+    "title": "fix(natives): release the X11 virtual keyboard's focus before takeover activates its window",
+    "tag": "v18.17.0"
+   },
+   {
+    "at": "2026-11-06T02:41:53Z",
+    "kind": "released",
+    "number": 17909,
+    "title": "fix(natives): stop takeover keys into iPhone Mirroring and Screen Sharing from leaving Fn held",
+    "tag": "v18.17.0"
+   },
+   {
+    "at": "2026-11-06T02:41:53Z",
+    "kind": "released",
+    "number": 17908,
+    "title": "fix(browser): exit a process-local headless Chrome when the process that launched it is killed",
+    "tag": "v18.17.0"
+   },
+   {
+    "at": "2026-11-06T02:41:53Z",
+    "kind": "released",
+    "number": 17903,
+    "title": "fix(natives): pace Wayland multi-clicks so KDE Qt apps see double clicks",
+    "tag": "v18.17.0"
+   },
+   {
+    "at": "2026-11-06T02:41:53Z",
+    "kind": "released",
+    "number": 17896,
+    "title": "fix(coding-agent): find app windows by application id or path",
+    "tag": "v18.17.0"
+   },
+   {
+    "at": "2026-11-06T02:41:53Z",
+    "kind": "released",
+    "number": 17883,
+    "title": "fix(snapcompact,coding-agent): count a legacy archive's frames as dropped, not replaced",
+    "tag": "v18.17.0"
+   },
+   {
+    "at": "2026-11-06T02:41:53Z",
+    "kind": "released",
+    "number": 17881,
+    "title": "docs(coding-agent): restore the --models row in the CLI reference",
+    "tag": "v18.17.0"
+   },
+   {
+    "at": "2026-11-06T02:41:53Z",
+    "kind": "released",
+    "number": 17885,
+    "title": "feat(ai,catalog): identify Factory Droid requests as droid 1.1.0",
+    "tag": "v18.17.0"
+   },
+   {
+    "at": "2026-11-06T02:41:53Z",
+    "kind": "released",
+    "number": 17862,
+    "title": "feat(catalog): add Muse Spark 1.3 to Factory Droid",
+    "tag": "v18.17.0"
+   },
+   {
+    "at": "2026-11-06T02:41:53Z",
+    "kind": "released",
+    "number": 17861,
+    "title": "feat(ai,catalog,coding-agent): add Factory Droid Gemini 4 Argon with its request dialect",
+    "tag": "v18.17.0"
+   },
+   {
+    "at": "2026-11-06T02:41:53Z",
+    "kind": "released",
+    "number": 18012,
+    "title": "fix(natives): report Wayland input unavailable when no RemoteDesktop portal exists",
+    "tag": "v18.17.0"
+   },
+   {
+    "at": "2026-11-06T02:41:53Z",
+    "kind": "released",
+    "number": 18011,
+    "title": "fix(natives): read GTK3 file dialogs as AT-SPI windows",
+    "tag": "v18.17.0"
+   },
+   {
+    "at": "2026-11-06T02:41:53Z",
+    "kind": "released",
+    "number": 18166,
+    "title": "fix(coding-agent,tui): name the command in background job notices",
+    "tag": "v18.17.0"
+   },
+   {
+    "at": "2026-11-06T02:41:53Z",
+    "kind": "released",
+    "number": 18163,
+    "title": "fix(shell): pass a scheme followed by words to external commands as written",
+    "tag": "v18.17.0"
+   },
+   {
+    "at": "2026-11-06T02:41:53Z",
+    "kind": "released",
+    "number": 18162,
+    "title": "fix(coding-agent): fetch Read the Docs raw source only from the page's own Edit link",
+    "tag": "v18.17.0"
+   },
+   {
+    "at": "2026-11-06T02:41:53Z",
+    "kind": "released",
+    "number": 18161,
+    "title": "fix(find): return the hits verified before find's deadline",
+    "tag": "v18.17.0"
+   },
+   {
+    "at": "2026-11-06T02:41:53Z",
+    "kind": "released",
+    "number": 18160,
+    "title": "fix(coding-agent): apply the open viewport on attached and visible browsers",
+    "tag": "v18.17.0"
+   },
+   {
+    "at": "2026-11-06T02:41:53Z",
+    "kind": "released",
+    "number": 18158,
+    "title": "fix(coding-agent): say the computer screenshot path holds the scaled frame",
+    "tag": "v18.17.0"
+   },
+   {
+    "at": "2026-11-06T02:41:53Z",
+    "kind": "released",
+    "number": 18156,
+    "title": "fix(tui-debug): run file entries with bun under the compiled omp binary",
+    "tag": "v18.17.0"
+   },
+   {
+    "at": "2026-11-06T02:41:53Z",
+    "kind": "released",
+    "number": 18155,
+    "title": "fix(coding-agent): show browser agents how to wait for a download they start",
+    "tag": "v18.17.0"
+   },
+   {
+    "at": "2026-11-06T02:41:53Z",
+    "kind": "released",
+    "number": 18154,
+    "title": "fix(coding-agent): create new ssh:// files from bounded read output",
+    "tag": "v18.17.0"
+   },
+   {
+    "at": "2026-11-06T02:41:53Z",
+    "kind": "released",
+    "number": 18153,
+    "title": "fix(lsp): sync open documents edited outside OMP before cross-file queries",
+    "tag": "v18.17.0"
+   },
+   {
+    "at": "2026-11-06T02:41:53Z",
+    "kind": "released",
+    "number": 18150,
+    "title": "fix(coding-agent): read SEC EDGAR filing documents instead of the company profile",
+    "tag": "v18.17.0"
+   },
+   {
+    "at": "2026-11-06T02:41:53Z",
+    "kind": "released",
+    "number": 18148,
+    "title": "fix(pi-shell): list binary and line-less files in minimized diff summaries",
+    "tag": "v18.17.0"
+   },
+   {
+    "at": "2026-11-06T02:41:53Z",
+    "kind": "released",
+    "number": 18147,
+    "title": "fix(pi-shell): count files, not diff locations, in minimized rustfmt --check output",
+    "tag": "v18.17.0"
+   },
+   {
+    "at": "2026-11-06T02:41:53Z",
+    "kind": "released",
+    "number": 18124,
+    "title": "feat(coding-agent): record failed web search providers in tool details",
+    "tag": "v18.17.0"
+   },
+   {
+    "at": "2026-11-06T02:41:53Z",
+    "kind": "conflict",
+    "label": "#18013",
+    "title": "feat(natives): type text the wayland layout lacks through libei text",
+    "files": [
+     "MODULE.bazel.lock"
+    ]
    }
   ]
  },
@@ -72708,8 +72795,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-06T02:27:40.424839Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-06T02:41:54.713306Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -73146,8 +73233,10 @@
     "area": "natives",
     "priority": "P2",
     "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in MODULE.bazel.lock"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -73283,7 +73372,8 @@
     "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
     "action": "wait",
     "reasons": [
-     "conflicts with #18013 in MODULE.bazel.lock, crates/pi-natives/Cargo.toml"
+     "conflicts with #18013 in MODULE.bazel.lock, crates/pi-natives/Cargo.toml",
+     "conflicts with main in MODULE.bazel.lock"
     ],
     "note": "",
     "over": [],
