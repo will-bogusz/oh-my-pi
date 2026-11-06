@@ -74097,5 +74097,11 @@
     "created": "2026-10-10T21:48:41Z"
    }
   ]
+ },
+ "opening": {
+  "id": "wayland-pipewire-dlopen",
+  "token": "45b06e45a8604a5c95bd0282a1e4f1c8",
+  "host": "MacBook-Pro",
+  "at": "2026-11-06T23:07:49Z"
  }
 }
