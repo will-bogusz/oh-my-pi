@@ -68366,10 +68366,15 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-06T03:43:10Z",
+  "checked": "2026-11-06T04:43:49Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {},
+  "openable": {
+   "browser-open-recovered-tab": {
+    "since": "2026-11-06T04:43:49Z",
+    "title": "fix(browser): keep the tab an open successfully reattaches"
+   }
+  },
   "conflicts": {
    "#16553": {
     "since": "2026-11-04T07:29:23Z",
@@ -70515,6 +70520,12 @@
     "files": [
      "MODULE.bazel.lock"
     ]
+   },
+   {
+    "at": "2026-11-06T04:43:49Z",
+    "kind": "openable",
+    "id": "browser-open-recovered-tab",
+    "title": "fix(browser): keep the tab an open successfully reattaches"
    }
   ]
  },
