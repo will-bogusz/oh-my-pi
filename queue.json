@@ -68600,7 +68600,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-07T20:59:55Z",
+  "checked": "2026-11-07T21:30:51Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -68693,12 +68693,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-31T21:24:11Z",
-    "kind": "openable",
-    "id": "unknown-tokenizer-o200k",
-    "title": "fix(agent): count models without a known tokenizer in o200k, and skip thinking signatures the request strips"
-   },
    {
     "at": "2026-10-31T21:54:54Z",
     "kind": "openable",
