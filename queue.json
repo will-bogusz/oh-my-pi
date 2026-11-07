@@ -68600,7 +68600,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-07T15:21:54Z",
+  "checked": "2026-11-07T16:22:50Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -68672,16 +68672,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-31T16:17:38Z",
-    "kind": "conflict",
-    "label": "#15433",
-    "title": "feat(task): add omp agents show for what an agent's spawns run with",
-    "files": [
-     "packages/coding-agent/src/config/model-resolver.ts",
-     "packages/coding-agent/src/task/executor.ts"
-    ]
-   },
    {
     "at": "2026-10-31T17:49:07Z",
     "kind": "released",
