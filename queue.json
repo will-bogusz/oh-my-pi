@@ -68604,18 +68604,11 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-07T22:32:00Z",
+  "checked": "2026-11-07T23:02:57Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
   "conflicts": {
-   "#16223": {
-    "since": "2026-11-07T19:57:55Z",
-    "title": "feat(natives): make a macOS background drag across native text an accessibility selection",
-    "files": [
-     "MODULE.bazel.lock"
-    ]
-   },
    "#16553": {
     "since": "2026-11-04T07:29:23Z",
     "title": "fix(natives): keep a macOS drag from the user's app onto the target the user's pick",
@@ -68652,17 +68645,31 @@
     ]
    }
   },
-  "merged_through": "2026-11-06T17:18:31Z",
-  "unreleased": {},
+  "merged_through": "2026-11-07T22:44:18Z",
+  "unreleased": {
+   "16908": {
+    "title": "fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it",
+    "merge_commit": "56144a656271279f0af4bfefa1491f7058fee161",
+    "merged_at": "2026-11-07T22:44:18Z"
+   },
+   "16223": {
+    "title": "feat(natives): make a macOS background drag across native text an accessibility selection",
+    "merge_commit": "03b4916ab3a78d95d4bf06405efda6d490df7be9",
+    "merged_at": "2026-11-07T22:44:18Z"
+   },
+   "15282": {
+    "title": "feat(natives): show what macOS ax() elements can do",
+    "merge_commit": "6e3bb2aa9266c6e290bb9873a38893aa5694e3b2",
+    "merged_at": "2026-11-07T22:44:18Z"
+   }
+  },
   "ready": [
    15128,
    15130,
    15508,
-   16223,
    16274,
    16553,
    16611,
-   16908,
    17610,
    17747,
    17756,
@@ -68683,6 +68690,24 @@
    18353
   ],
   "post_merge": {
+   "15282": {
+    "title": "feat(natives): show what macOS ax() elements can do",
+    "merge_commit": "6e3bb2aa9266c6e290bb9873a38893aa5694e3b2",
+    "merged_at": "2026-11-07T22:44:18Z",
+    "findings": []
+   },
+   "16223": {
+    "title": "feat(natives): make a macOS background drag across native text an accessibility selection",
+    "merge_commit": "03b4916ab3a78d95d4bf06405efda6d490df7be9",
+    "merged_at": "2026-11-07T22:44:18Z",
+    "findings": []
+   },
+   "16908": {
+    "title": "fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it",
+    "merge_commit": "56144a656271279f0af4bfefa1491f7058fee161",
+    "merged_at": "2026-11-07T22:44:18Z",
+    "findings": []
+   },
    "18221": {
     "title": "fix(natives): search 64 levels deep in find()",
     "merge_commit": "b8e3eb0d0e752f7792e2337b763ffaab7f7b66c4",
@@ -70500,6 +70525,30 @@
     "files": [
      "MODULE.bazel.lock"
     ]
+   },
+   {
+    "at": "2026-11-07T23:02:57Z",
+    "kind": "merged",
+    "number": 16908,
+    "title": "fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-07T23:02:57Z",
+    "kind": "merged",
+    "number": 16223,
+    "title": "feat(natives): make a macOS background drag across native text an accessibility selection",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-07T23:02:57Z",
+    "kind": "merged",
+    "number": 15282,
+    "title": "feat(natives): show what macOS ax() elements can do",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
    }
   ]
  },
@@ -72780,8 +72829,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-07T22:48:12.407971Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-07T23:02:58.530480Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -72902,10 +72951,8 @@
     "area": "browser",
     "priority": "P1",
     "title": "fix(browser): report a relay tab's downloads where Chrome saved them",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in packages/browser-relay/extension/background.ts, packages/browser-relay/extension/chrome.d.ts, packages/browser-relay/extension/manifest.json, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/extension-assets/manifest.json.txt, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -73010,10 +73057,8 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): read back AT-SPI text writes before reporting success",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in crates/pi-natives/src/desktop/macos/ax.rs"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -73209,10 +73254,8 @@
     "area": "computer",
     "priority": "P2",
     "title": "feat(coding-agent): find nested menu commands in one read",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in packages/coding-agent/src/prompts/tools/computer.md"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -73230,7 +73273,7 @@
     "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool",
     "action": "wait",
     "reasons": [
-     "conflicts with #18220 in crates/pi-natives/src/desktop/linux/ax.rs",
+     "conflicts with #18220 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18353 in MODULE.bazel.lock, crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #18013 in MODULE.bazel.lock",
      "conflicts with main in MODULE.bazel.lock, crates/pi-natives/src/desktop/ax.rs"
@@ -73257,7 +73300,7 @@
     "action": "wait",
     "reasons": [
      "needs atspi-unanswered-app (queued), gtk4-atspi-bounds (queued)",
-     "conflicts with #18220 in crates/pi-natives/src/desktop/linux/ax.rs",
+     "conflicts with #18220 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18353 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #18013 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/libei.rs",
      "its need atspi-unanswered-app conflicts with main in MODULE.bazel.lock, crates/pi-natives/src/desktop/ax.rs",
@@ -73287,16 +73330,13 @@
     "title": "fix(natives): scroll iPhone Mirroring the whole distance asked for in the background",
     "action": "wait",
     "reasons": [
-     "conflicts with #17756 in crates/pi-natives/src/desktop/macos/input.rs",
-     "conflicts with #17897 in crates/pi-natives/src/desktop/macos/input.rs",
-     "conflicts with main in crates/pi-natives/src/desktop/macos/input.rs"
+     "conflicts with #17756 in crates/pi-natives/src/desktop/macos/input.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#17756",
-     "#17897"
+     "#17756"
     ],
     "needs": [],
     "created": "2026-10-30T21:35:55Z"
@@ -73311,8 +73351,7 @@
     "title": "fix(computer): wait for the app to finish reacting before the next read or input",
     "action": "wait",
     "reasons": [
-     "conflicts with #18222 in packages/coding-agent/src/tools/computer/worker.ts",
-     "conflicts with main in packages/coding-agent/src/tools/computer/worker.ts"
+     "conflicts with #18222 in packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
     "over": [],
@@ -73335,8 +73374,7 @@
     "reasons": [
      "needs iphone-mirror-scroll-distance (queued)",
      "conflicts with #17756 in crates/pi-natives/src/desktop/macos/input.rs",
-     "conflicts with #17897 in crates/pi-natives/src/desktop/macos/input.rs",
-     "its need iphone-mirror-scroll-distance conflicts with main in crates/pi-natives/src/desktop/macos/input.rs"
+     "conflicts with #17897 in crates/pi-natives/src/desktop/macos/input.rs"
     ],
     "note": "",
     "over": [],
@@ -73393,7 +73431,7 @@
     "action": "wait",
     "reasons": [
      "needs r2/relay-own-only (queued)",
-     "conflicts with #17893 in docs/tools/browser.md, packages/browser-relay/extension/background.ts, packages/browser-relay/extension/manifest.json, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/extension-assets/manifest.json.txt, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
+     "conflicts with #17893 in docs/tools/browser.md, packages/browser-relay/extension/background.ts, packages/browser-relay/extension/chrome.d.ts, packages/browser-relay/extension/manifest.json, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/extension-assets/manifest.json.txt, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "conflicts with #17895 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #17940 in docs/tools/browser.md",
      "its need r2/relay-own-only conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/extension/chrome.d.ts, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/relay/server.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-interactions.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
@@ -73478,8 +73516,7 @@
      "needs computer-ui-quiet (queued)",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
-     "its need computer-ui-quiet conflicts with main in packages/coding-agent/src/tools/computer/worker.ts",
-     "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/tools/computer/supervisor.ts"
+     "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
     "over": [],
@@ -73505,9 +73542,8 @@
     "reasons": [
      "needs computer-ui-quiet (queued)",
      "conflicts with #18220 in crates/pi-natives/src/desktop/macos/ax.rs",
-     "conflicts with #18222 in packages/coding-agent/src/prompts/tools/computer.md",
-     "its need computer-ui-quiet conflicts with main in packages/coding-agent/src/tools/computer/worker.ts",
-     "conflicts with main in crates/pi-natives/src/desktop/mod.rs"
+     "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with main in crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
     "over": [],
