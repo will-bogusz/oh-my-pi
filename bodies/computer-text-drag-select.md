@@ -2,7 +2,7 @@
 
 Dragging across a sentence in TextEdit never needed the mouse, so instead of refusing it or taking over the app I'm typing in, the agent now sets that selection through accessibility.
 
-A background drag across a TextEdit document's text had no background route, so the tool reran it in takeover, which pulled the user out of their app and typed 3 of their 15–16 keys over the agent's new selection (5/5). It now makes the same selection in 0.34–0.44 s, every user key landing in their app, which stays in front (13/13).
+A background drag across a TextEdit document's text had no background route, so the tool reran it in takeover, which pulled the user out of their app and typed 3 of their 15–16 keys over the agent's new selection (5/5). It now makes the same selection in 0.34–0.44 s; every user key lands in their app, kept in front (13/13).
 
 <picture>
   <source media="(min-width: 1244px) and (prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/1e787d78-3951-4f5a-a234-7987e4f47216">
