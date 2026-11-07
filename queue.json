@@ -1184,13 +1184,13 @@
    ],
    "base": "96e4d8eb5ba1212d2d6018f242de266284cffab9",
    "body": null,
-   "state": "open",
+   "state": "merged",
    "pr": 15282,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-ax-lines",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-11-05T18:55:35Z",
+   "updated": "2026-11-07T22:46:52Z",
    "note": "series 2. 2026-10-29 (Ax15282): rebased onto main 3b1408f629 (after 2407a34d11 changelog rewrite) and pushed e43b606ef5 then d71890830b (was f96486b3e0): ComputerDocs b22c71f (Codex P1 4409368429, macOS-only normalized action key) + Codex P2 4414313929 fix (actions= deduped, max 16 + cut note); docs table conflicts resolved toward main padding; rust-check linux/windows/macos at d71890830b; cargo desktop:: 211 pass, computer.test.ts 132 pass; Codex pass on d71890830b failed (no result). Goliath worktree ~/.omp/main-wt/oh-my-pi/computer-ax-lines is current; Mac worktree is behind fork. #15282 -> #15566, #15584 (children queued).",
    "advanced": "2026-11-05T18:49:53Z",
    "built": [
@@ -1572,7 +1572,8 @@
      "at": "2026-10-22T08:24:15Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "merged_by": "pr"
   },
   {
    "id": "setvalue-insertion",
@@ -4866,13 +4867,13 @@
    ],
    "base": "f2b795ba747b23d42052184d822b41e3d01357cc",
    "body": "bodies/computer-text-drag-select.md",
-   "state": "open",
+   "state": "merged",
    "pr": 16223,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/text-drag-select",
    "host": "MacBook-Pro",
    "added": "2026-10-18T11:18:03Z",
-   "updated": "2026-11-07T02:29:19Z",
+   "updated": "2026-11-07T22:46:52Z",
    "note": "",
    "advanced": "2026-11-07T02:29:19Z",
    "built": [
@@ -4971,7 +4972,8 @@
    "readied": "2026-10-18T17:39:23Z",
    "rebases_after": [
     17931
-   ]
+   ],
+   "merged_by": "pr"
   },
   {
    "id": "computer-target-sent-back-late",
@@ -52507,13 +52509,13 @@
    "needs": [],
    "base": "b5a6b2f7e5b6606b6562e678ead83f21738f34a0",
    "body": "bodies/relay-extension-frame.md",
-   "state": "open",
+   "state": "merged",
    "pr": 16908,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-extension-frame",
    "host": "MacBook-Pro",
    "added": "2026-10-23T19:03:59Z",
-   "updated": "2026-11-07T01:23:30Z",
+   "updated": "2026-11-07T22:46:52Z",
    "note": "",
    "built": [
     {
@@ -52964,7 +52966,8 @@
     17751,
     17778,
     17893
-   ]
+   ],
+   "merged_by": "pr"
   },
   {
    "id": "relay-frame-detach-report",
