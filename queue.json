@@ -68600,7 +68600,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-07T17:24:24Z",
+  "checked": "2026-11-07T17:55:24Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -68672,27 +68672,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-31T17:49:07Z",
-    "kind": "released",
-    "number": 17501,
-    "title": "chore(coding-agent): remove SQLite files committed with the RPC test fixture",
-    "tag": "v18.14.2"
-   },
-   {
-    "at": "2026-10-31T17:49:07Z",
-    "kind": "released",
-    "number": 17500,
-    "title": "fix(coding-agent): show the head of an over-budget first line on whole-URL reads",
-    "tag": "v18.14.2"
-   },
-   {
-    "at": "2026-10-31T17:49:07Z",
-    "kind": "released",
-    "number": 17489,
-    "title": "feat(coding-agent): expose PI_TOOL_CALL_ID to bash commands",
-    "tag": "v18.14.2"
-   },
    {
     "at": "2026-10-31T21:24:11Z",
     "kind": "openable",
@@ -72775,7 +72754,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-07T16:53:55.582426Z",
+  "at": "2026-11-07T17:55:25.304927Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
