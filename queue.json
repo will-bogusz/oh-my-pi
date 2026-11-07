@@ -68600,11 +68600,18 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-07T18:56:24Z",
+  "checked": "2026-11-07T19:57:55Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
   "conflicts": {
+   "#16223": {
+    "since": "2026-11-07T19:57:55Z",
+    "title": "feat(natives): make a macOS background drag across native text an accessibility selection",
+    "files": [
+     "MODULE.bazel.lock"
+    ]
+   },
    "#16553": {
     "since": "2026-11-04T07:29:23Z",
     "title": "fix(natives): keep a macOS drag from the user's app onto the target the user's pick",
@@ -68624,6 +68631,20 @@
     "title": "fix(agent,coding-agent): read the history behind an OpenAI remote compaction after a model switch",
     "files": [
      "packages/coding-agent/src/sdk.ts"
+    ]
+   },
+   "#18353": {
+    "since": "2026-11-07T19:57:55Z",
+    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
+    "files": [
+     "MODULE.bazel.lock"
+    ]
+   },
+   "#18013": {
+    "since": "2026-11-07T19:57:55Z",
+    "title": "feat(natives): type text the wayland layout lacks through libei text",
+    "files": [
+     "MODULE.bazel.lock"
     ]
    }
   },
@@ -70468,6 +70489,33 @@
    },
    {
     "at": "2026-11-07T01:37:29Z",
+    "kind": "conflict",
+    "label": "#18013",
+    "title": "feat(natives): type text the wayland layout lacks through libei text",
+    "files": [
+     "MODULE.bazel.lock"
+    ]
+   },
+   {
+    "at": "2026-11-07T19:57:55Z",
+    "kind": "conflict",
+    "label": "#16223",
+    "title": "feat(natives): make a macOS background drag across native text an accessibility selection",
+    "files": [
+     "MODULE.bazel.lock"
+    ]
+   },
+   {
+    "at": "2026-11-07T19:57:55Z",
+    "kind": "conflict",
+    "label": "#18353",
+    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
+    "files": [
+     "MODULE.bazel.lock"
+    ]
+   },
+   {
+    "at": "2026-11-07T19:57:55Z",
     "kind": "conflict",
     "label": "#18013",
     "title": "feat(natives): type text the wayland layout lacks through libei text",
@@ -72754,7 +72802,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-07T18:56:25.613197Z",
+  "at": "2026-11-07T19:57:55.994624Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -73088,8 +73136,10 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in MODULE.bazel.lock"
+    ],
     "note": "opened over P2 #18013",
     "over": [],
     "paired": [
@@ -73160,7 +73210,8 @@
     "title": "feat(natives): make a macOS background drag across native text an accessibility selection",
     "action": "requeue",
     "reasons": [
-     "conflicts with #18353 in MODULE.bazel.lock"
+     "conflicts with #18353 in MODULE.bazel.lock",
+     "conflicts with main in MODULE.bazel.lock"
     ],
     "note": "",
     "over": [],
@@ -73198,8 +73249,10 @@
     "area": "natives",
     "priority": "P2",
     "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in MODULE.bazel.lock"
+    ],
     "note": "rebases after #18353 merges",
     "over": [],
     "paired": [
