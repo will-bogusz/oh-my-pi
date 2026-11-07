@@ -68600,7 +68600,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-07T01:37:29Z",
+  "checked": "2026-11-07T02:07:31Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -68624,20 +68624,6 @@
     "title": "fix(agent,coding-agent): read the history behind an OpenAI remote compaction after a model switch",
     "files": [
      "packages/coding-agent/src/sdk.ts"
-    ]
-   },
-   "#18353": {
-    "since": "2026-11-07T01:37:29Z",
-    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
-    "files": [
-     "MODULE.bazel.lock"
-    ]
-   },
-   "#18013": {
-    "since": "2026-11-07T01:37:29Z",
-    "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "files": [
-     "MODULE.bazel.lock"
     ]
    }
   },
@@ -72907,7 +72893,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-07T01:37:30.033520Z",
+  "at": "2026-11-07T02:07:32.569191Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -73241,10 +73227,8 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in MODULE.bazel.lock"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "opened over P2 #18013",
     "over": [],
     "paired": [
@@ -73349,10 +73333,8 @@
     "area": "natives",
     "priority": "P2",
     "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in MODULE.bazel.lock"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "rebases after #18353 merges",
     "over": [],
     "paired": [
