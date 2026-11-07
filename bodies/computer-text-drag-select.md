@@ -1,6 +1,6 @@
 ## What
 
-Dragging across a sentence in TextEdit never needed the mouse, so instead of refusing it or taking over the app I'm typing in, the agent now just sets that selection through accessibility.
+Dragging across a sentence in TextEdit never needed the mouse, so instead of refusing it or taking over the app I'm typing in, the agent now sets that selection through accessibility.
 
 A background drag across a TextEdit document's text had no background route, so the tool reran it in takeover, which pulled the user out of their app and typed 3 of their 15–16 keys over the agent's new selection (5/5). It now makes the same selection in 0.34–0.44 s, every user key landing in their app, which stays in front (13/13).
 
@@ -35,7 +35,7 @@ Decisions:
 - **`takeover: true` still posts a real drag**, for dragging text to move it.
 - **`DesktopSession.drag` resolves to `{ selection, focusReturn }`**: one call can end as a selection or as a takeover.
 
-Maintenance: a text view that answers those two queries wrongly (Chrome's answer `(0, 0)` with empty bounds) fails the bounds check and keeps the refusal.
+Maintenance: a text view answering those two queries wrongly (Chrome: `(0, 0)`, empty bounds) fails the bounds check and keeps the refusal.
 
 ## Testing
 
@@ -77,13 +77,14 @@ Live, in a macOS VM with `main`'s tool:
 
 </details>
 
-At b22d16f4d8, merged with our other open native PRs on `main` 96e4d8eb5b: `cargo test -p pi-natives` passes on macOS (926) and Linux (620); the computer tool's TS tests (133 pass) ran at c67722be, and no TypeScript changed. Each new test fails with its change removed: the session posting the drag, the selected-text and right-to-left checks, a front read after the target's probes, the old `Win.drag`, and the notice's width cap.
+At b22d16f4d8 with our other open native PRs: `cargo test -p pi-natives` passes on macOS (926) and Linux (620); TS tests (133) ran at c67722be, no TypeScript changed since. Each new test fails with its change removed: the session posting the drag, the selected-text and right-to-left checks, a front read after the target's probes, the old `Win.drag`, and the notice's width cap.
 
 ---
 
 - [x] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
 
 
 
