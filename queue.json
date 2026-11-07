@@ -68600,7 +68600,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-07T13:19:31Z",
+  "checked": "2026-11-07T14:20:49Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -68658,90 +68658,6 @@
    18353
   ],
   "post_merge": {
-   "18124": {
-    "title": "feat(coding-agent): record failed web search providers in tool details",
-    "merge_commit": "a2fe1cc4795794d2745ea11ea4ca88477d1e4e3d",
-    "merged_at": "2026-11-05T14:17:02Z",
-    "findings": []
-   },
-   "18147": {
-    "title": "fix(pi-shell): count files, not diff locations, in minimized rustfmt --check output",
-    "merge_commit": "1c8d6aee89890b5fc3f48a95a977266d3129c72e",
-    "merged_at": "2026-11-05T14:17:02Z",
-    "findings": []
-   },
-   "18148": {
-    "title": "fix(pi-shell): list binary and line-less files in minimized diff summaries",
-    "merge_commit": "e9da5ddafc8f8d7e6dc84643fe8d4638ee251f49",
-    "merged_at": "2026-11-05T14:17:02Z",
-    "findings": []
-   },
-   "18150": {
-    "title": "fix(coding-agent): read SEC EDGAR filing documents instead of the company profile",
-    "merge_commit": "fc05b54d6c760125d740eced9a616957fe9cf4d0",
-    "merged_at": "2026-11-05T14:17:02Z",
-    "findings": []
-   },
-   "18153": {
-    "title": "fix(lsp): sync open documents edited outside OMP before cross-file queries",
-    "merge_commit": "5a7a00413dd4caa1db289f207241e6f9aa0a1407",
-    "merged_at": "2026-11-05T14:17:02Z",
-    "findings": []
-   },
-   "18154": {
-    "title": "fix(coding-agent): create new ssh:// files from bounded read output",
-    "merge_commit": "7e19b03956e0d9d8656fc2585d9b25fdde58023b",
-    "merged_at": "2026-11-05T14:17:02Z",
-    "findings": []
-   },
-   "18155": {
-    "title": "fix(coding-agent): show browser agents how to wait for a download they start",
-    "merge_commit": "5a9e2b47c064b5f5652d81f534c621d596c120e5",
-    "merged_at": "2026-11-05T14:17:02Z",
-    "findings": []
-   },
-   "18156": {
-    "title": "fix(tui-debug): run file entries with bun under the compiled omp binary",
-    "merge_commit": "a4b0e91d77bcdb412bc5c46eec1e3c895c46e26b",
-    "merged_at": "2026-11-05T14:17:02Z",
-    "findings": []
-   },
-   "18158": {
-    "title": "fix(coding-agent): say the computer screenshot path holds the scaled frame",
-    "merge_commit": "f1d0b5392fd3a83c02e26bdcf38d71a10efc07d7",
-    "merged_at": "2026-11-05T14:17:02Z",
-    "findings": []
-   },
-   "18160": {
-    "title": "fix(coding-agent): apply the open viewport on attached and visible browsers",
-    "merge_commit": "3897a8e9e9f06a5de4160c692935f2e8cc269a2f",
-    "merged_at": "2026-11-05T14:17:02Z",
-    "findings": []
-   },
-   "18161": {
-    "title": "fix(find): return the hits verified before find's deadline",
-    "merge_commit": "ee0f437d1430404ebca3b84242f76d08e051c914",
-    "merged_at": "2026-11-05T14:17:02Z",
-    "findings": []
-   },
-   "18162": {
-    "title": "fix(coding-agent): fetch Read the Docs raw source only from the page's own Edit link",
-    "merge_commit": "870828285f48529c8025ad4085aff77e34283b39",
-    "merged_at": "2026-11-05T14:17:02Z",
-    "findings": []
-   },
-   "18163": {
-    "title": "fix(shell): pass a scheme followed by words to external commands as written",
-    "merge_commit": "711209ee1347d22d5caf6c6a94fd27b6a4edccb1",
-    "merged_at": "2026-11-05T14:17:02Z",
-    "findings": []
-   },
-   "18166": {
-    "title": "fix(coding-agent,tui): name the command in background job notices",
-    "merge_commit": "5f1ce42312b78173725931deeb67d6f7bedafff0",
-    "merged_at": "2026-11-05T14:17:02Z",
-    "findings": []
-   },
    "18221": {
     "title": "fix(natives): search 64 levels deep in find()",
     "merge_commit": "b8e3eb0d0e752f7792e2337b763ffaab7f7b66c4",
@@ -68756,14 +68672,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-31T14:14:53Z",
-    "kind": "merged",
-    "number": 17501,
-    "title": "chore(coding-agent): remove SQLite files committed with the RPC test fixture",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
    {
     "at": "2026-10-31T15:16:16Z",
     "kind": "merged",
