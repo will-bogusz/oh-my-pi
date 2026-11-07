@@ -68604,7 +68604,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-07T23:02:57Z",
+  "checked": "2026-11-07T23:33:28Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -68628,20 +68628,6 @@
     "title": "fix(agent,coding-agent): read the history behind an OpenAI remote compaction after a model switch",
     "files": [
      "packages/coding-agent/src/sdk.ts"
-    ]
-   },
-   "#18353": {
-    "since": "2026-11-07T19:57:55Z",
-    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
-    "files": [
-     "MODULE.bazel.lock"
-    ]
-   },
-   "#18013": {
-    "since": "2026-11-07T19:57:55Z",
-    "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "files": [
-     "MODULE.bazel.lock"
     ]
    }
   },
@@ -72829,7 +72815,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-07T23:02:58.530480Z",
+  "at": "2026-11-07T23:33:29.064230Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -73142,10 +73128,8 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in MODULE.bazel.lock"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "opened over P2 #18013",
     "over": [],
     "paired": [
@@ -73233,10 +73217,8 @@
     "area": "natives",
     "priority": "P2",
     "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in MODULE.bazel.lock"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "rebases after #18353 merges",
     "over": [],
     "paired": [
@@ -73542,6 +73524,7 @@
     "reasons": [
      "needs computer-ui-quiet (queued)",
      "conflicts with #18220 in crates/pi-natives/src/desktop/macos/ax.rs",
+     "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/tools/computer/worker.ts"
     ],
@@ -73550,6 +73533,7 @@
     "paired": [],
     "blocked_by": [
      "#18220",
+     "#18353",
      "#18222"
     ],
     "needs": [
