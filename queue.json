@@ -68600,7 +68600,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-07T14:20:49Z",
+  "checked": "2026-11-07T15:21:54Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -68672,22 +68672,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-31T15:16:16Z",
-    "kind": "merged",
-    "number": 17500,
-    "title": "fix(coding-agent): show the head of an over-budget first line on whole-URL reads",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-10-31T15:16:16Z",
-    "kind": "merged",
-    "number": 17489,
-    "title": "feat(coding-agent): expose PI_TOOL_CALL_ID to bash commands",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
    {
     "at": "2026-10-31T16:17:38Z",
     "kind": "conflict",
