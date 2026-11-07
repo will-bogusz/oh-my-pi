@@ -57918,7 +57918,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "5d30c790b883ad0ae05dac2a4d2ccc8ecd103611",
+   "base": "03b4916ab3a78d95d4bf06405efda6d490df7be9",
    "body": "bodies/iphone-mirror-scroll-distance.md",
    "state": "queued",
    "pr": null,
@@ -57926,8 +57926,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/iphone-mirror-scroll-distance",
    "host": "MacBook-Pro",
    "added": "2026-10-30T21:35:55Z",
-   "updated": "2026-10-30T21:35:55Z",
-   "note": ""
+   "updated": "2026-11-07T22:51:44Z",
+   "note": "",
+   "advanced": "2026-11-07T22:51:44Z"
   },
   {
    "id": "iphone-mirror-not-showing",
