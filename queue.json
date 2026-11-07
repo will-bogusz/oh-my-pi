@@ -68600,7 +68600,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-07T01:06:43Z",
+  "checked": "2026-11-07T01:37:29Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -68625,21 +68625,24 @@
     "files": [
      "packages/coding-agent/src/sdk.ts"
     ]
+   },
+   "#18353": {
+    "since": "2026-11-07T01:37:29Z",
+    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
+    "files": [
+     "MODULE.bazel.lock"
+    ]
+   },
+   "#18013": {
+    "since": "2026-11-07T01:37:29Z",
+    "title": "feat(natives): type text the wayland layout lacks through libei text",
+    "files": [
+     "MODULE.bazel.lock"
+    ]
    }
   },
   "merged_through": "2026-11-06T17:18:31Z",
-  "unreleased": {
-   "18252": {
-    "title": "fix(browser): keep the tab an open successfully reattaches",
-    "merge_commit": "a4b069a7ec17e791adcd1ad6e02275f4df4ea5eb",
-    "merged_at": "2026-11-06T17:18:30Z"
-   },
-   "18221": {
-    "title": "fix(natives): search 64 levels deep in find()",
-    "merge_commit": "b8e3eb0d0e752f7792e2337b763ffaab7f7b66c4",
-    "merged_at": "2026-11-06T17:18:31Z"
-   }
-  },
+  "unreleased": {},
   "ready": [
    15128,
    15130,
@@ -70592,6 +70595,38 @@
     "id": "wayland-pipewire-dlopen",
     "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
     "why": "opened as #18353"
+   },
+   {
+    "at": "2026-11-07T01:37:29Z",
+    "kind": "released",
+    "number": 18252,
+    "title": "fix(browser): keep the tab an open successfully reattaches",
+    "tag": "v18.18.0"
+   },
+   {
+    "at": "2026-11-07T01:37:29Z",
+    "kind": "released",
+    "number": 18221,
+    "title": "fix(natives): search 64 levels deep in find()",
+    "tag": "v18.18.0"
+   },
+   {
+    "at": "2026-11-07T01:37:29Z",
+    "kind": "conflict",
+    "label": "#18353",
+    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
+    "files": [
+     "MODULE.bazel.lock"
+    ]
+   },
+   {
+    "at": "2026-11-07T01:37:29Z",
+    "kind": "conflict",
+    "label": "#18013",
+    "title": "feat(natives): type text the wayland layout lacks through libei text",
+    "files": [
+     "MODULE.bazel.lock"
+    ]
    }
   ]
  },
@@ -72872,7 +72907,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-07T00:35:58.100644Z",
+  "at": "2026-11-07T01:37:30.033520Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -73206,8 +73241,10 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in MODULE.bazel.lock"
+    ],
     "note": "opened over P2 #18013",
     "over": [],
     "paired": [
@@ -73312,8 +73349,10 @@
     "area": "natives",
     "priority": "P2",
     "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in MODULE.bazel.lock"
+    ],
     "note": "rebases after #18353 merges",
     "over": [],
     "paired": [
@@ -73352,7 +73391,8 @@
     "reasons": [
      "conflicts with #18220 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18353 in MODULE.bazel.lock, crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
-     "conflicts with #18013 in MODULE.bazel.lock"
+     "conflicts with #18013 in MODULE.bazel.lock",
+     "conflicts with main in MODULE.bazel.lock"
     ],
     "note": "",
     "over": [],
@@ -73380,6 +73420,7 @@
      "conflicts with #18353 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #16223 in crates/pi-natives/Cargo.toml",
      "conflicts with #18013 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/libei.rs",
+     "its need atspi-unanswered-app conflicts with main in MODULE.bazel.lock",
      "its need gtk4-atspi-bounds conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
@@ -73722,7 +73763,7 @@
      "conflicts with #17831 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #17893 in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #17895 in packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with #16908 in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #16908 in packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
