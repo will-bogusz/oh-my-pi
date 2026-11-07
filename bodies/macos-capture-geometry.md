@@ -36,8 +36,8 @@ Not changed: desktop and display captures, Linux and Windows.
 
 ## Testing
 
-- Live on 077868b466 (the same code as this head, before its rebase onto `main`), on macOS 26.1 (one Retina display) and macOS 26.6 (Retina plus a 1920 × 1080 display to its right): every case in the table, compared pixel by pixel with a display crop of its visible part: aligned at offset (0, 0), mean difference under 1 of 255.
-- Capture time per call is unchanged: median 177–242 ms against 180–243 ms on `main` (26.1), 131–153 ms against 125–141 ms (26.6).
+- Live on 077868b466 (this head's code before its rebase), on macOS 26.1 (one Retina display) and macOS 26.6 (Retina plus a 1920 × 1080 display to its right): every case in the table, compared pixel by pixel with a crop of its visible part: aligned at offset (0, 0), mean difference under 1 of 255.
+- Capture time is unchanged: median 177–242 ms against 180–243 ms on `main` (26.1), 131–153 ms against 125–141 ms (26.6).
 - Twelve background taps on iPhone Mirroring aimed from its capture touched the aimed spots within 2.5 points (earlier build, same route).
 - `bun test packages/natives/test/macos-capture-geometry.test.ts` checks which windows `geometry.h` crops from a display, stacked displays included. `cargo test -p pi-natives --lib desktop` (macOS, 490 passed). Clippy and rustfmt on macOS, Linux and Windows.
 
@@ -52,4 +52,5 @@ Capture a window with `new DesktopSession().capture(id)` from `packages/natives`
 - [x] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
 
