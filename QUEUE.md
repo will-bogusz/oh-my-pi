@@ -1,9 +1,9 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-08 19:28Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-08 19:59Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-08 18:56Z on goliath; groups below are from it, states from the manifest)
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-08 19:58Z on goliath; groups below are from it, states from the manifest)
 **Counts:** openable now 1, conflict-held 9, stacked 11, held 6, open PRs 16; merged 259, closed 29
 
 ## Openable now (1)
@@ -65,7 +65,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-08
 | [#17894](https://github.com/can1357/oh-my-pi/pull/17894) | relay-popup-lossless | fix(browser): send the user's keys back to their app while Chrome activates for a popup omp's relay tab opens on macOS | browser | P1 | 5d | requeue | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-popup-lossless) |
 | [#16553](https://github.com/can1357/oh-my-pi/pull/16553) | click-place-release | fix(natives): keep a macOS drag from the user's app onto the target the user's pick | natives-macos | P1 | 18d | rebase | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/click-place-release) |
 | [#16611](https://github.com/can1357/oh-my-pi/pull/16611) | read-audio-transcripts | feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio | catalog | P2 | 18d | rebase | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-audio-transcripts) |
-| [#18222](https://github.com/can1357/oh-my-pi/pull/18222) | computer-menu-subtree | feat(coding-agent): find nested menu commands in one read | computer | P2 | 2d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-menu-subtree) |
+| [#18222](https://github.com/can1357/oh-my-pi/pull/18222) | computer-menu-subtree | feat(coding-agent): find nested menu commands in one read | computer | P2 | 3d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-menu-subtree) |
 | [#17897](https://github.com/can1357/oh-my-pi/pull/17897) | iphone-mirror-key-gap | perf(natives): type on iPhone Mirroring twice as fast | computer | P2 | 5d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-key-gap) |
 | [#17757](https://github.com/can1357/oh-my-pi/pull/17757) | macos-capture-geometry | fix(natives): match macOS window screenshots to the window on screen | computer | P0 | 6d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-capture-geometry) |
 | [#17756](https://github.com/can1357/oh-my-pi/pull/17756) | iphone-mirror-pointer | fix(natives): keep background iPhone Mirroring taps reaching the phone after a takeover tap | computer | P1 | 6d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-pointer) |
