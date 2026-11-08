@@ -68604,7 +68604,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-07T23:33:28Z",
+  "checked": "2026-11-08T00:04:22Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -68708,12 +68708,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-10-31T23:58:29Z",
-    "kind": "openable",
-    "id": "date-reminder-journal",
-    "title": "fix(coding-agent): keep each message's date across resume and subagent revival"
-   },
    {
     "at": "2026-11-01T00:29:05Z",
     "kind": "unopenable",
@@ -72822,7 +72816,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-07T23:33:29.064230Z",
+  "at": "2026-11-08T00:04:23.284860Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -73388,6 +73382,7 @@
     "action": "wait",
     "reasons": [
      "needs #15508 (open), #17831 (open), r2/native-window-report (queued)",
+     "conflicts with #17831 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-background-input.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "conflicts with #17893 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "conflicts with #17895 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #17940 in docs/tools/browser.md",
@@ -73398,6 +73393,7 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#17831",
      "#17893",
      "#17895",
      "#17940"
@@ -73420,6 +73416,7 @@
     "action": "wait",
     "reasons": [
      "needs r2/relay-own-only (queued)",
+     "conflicts with #17831 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "conflicts with #17893 in docs/tools/browser.md, packages/browser-relay/extension/background.ts, packages/browser-relay/extension/chrome.d.ts, packages/browser-relay/extension/manifest.json, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/extension-assets/manifest.json.txt, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "conflicts with #17895 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #17940 in docs/tools/browser.md",
@@ -73430,6 +73427,7 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#17831",
      "#17893",
      "#17895",
      "#17940"
@@ -73450,6 +73448,7 @@
     "action": "wait",
     "reasons": [
      "needs r2/relay-popup-owned (queued), r2/page-waiting (queued)",
+     "conflicts with #17831 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-detach.test.ts",
      "conflicts with #17893 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "conflicts with #17895 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #17940 in docs/tools/browser.md",
@@ -73461,6 +73460,7 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#17831",
      "#17893",
      "#17895",
      "#17940"
@@ -73638,6 +73638,7 @@
     "action": "wait",
     "reasons": [
      "needs r2/relay-own-only (queued)",
+     "conflicts with #17831 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #17893 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #17895 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #17940 in docs/tools/browser.md",
@@ -73648,6 +73649,7 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#17831",
      "#17893",
      "#17895",
      "#17940"
@@ -73716,8 +73718,7 @@
     "title": "fix(natives): find GTK4 app elements on X11 and stop marking them disabled",
     "action": "wait",
     "reasons": [
-     "conflicts with #18220 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
+     "conflicts with #18220 in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
     "over": [],
