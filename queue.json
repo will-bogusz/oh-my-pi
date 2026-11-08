@@ -68605,7 +68605,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-08T16:53:59Z",
+  "checked": "2026-11-08T17:24:56Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -68645,48 +68645,7 @@
    }
   },
   "merged_through": "2026-11-08T08:40:06Z",
-  "unreleased": {
-   "18223": {
-    "title": "fix(coding-agent): preserve eval state after late tool rejections",
-    "merge_commit": "dc949c3e0714bbfe3cbde272db38d7e41f8ca0e6",
-    "merged_at": "2026-11-08T08:40:06Z"
-   },
-   "18220": {
-    "title": "fix(natives): read back AT-SPI text writes before reporting success",
-    "merge_commit": "c1e7ea4267082e39f0f27248c6923c352b9e4da1",
-    "merged_at": "2026-11-08T08:40:06Z"
-   },
-   "18167": {
-    "title": "fix(skills): find a skill created after the session started by skill:// name",
-    "merge_commit": "461f5e8e55395582d60d5f310bcbd19c84fabcb3",
-    "merged_at": "2026-11-08T08:40:06Z"
-   },
-   "17940": {
-    "title": "fix(coding-agent): keep browser agents from pulling Chrome in front of your app on Linux X11",
-    "merge_commit": "5e0d5f179da1401890538b7a85046d138b163a0e",
-    "merged_at": "2026-11-08T08:40:06Z"
-   },
-   "17904": {
-    "title": "fix(coding-agent): stop URL reads returning bot block pages as content",
-    "merge_commit": "6ce6f8a07457a95f500b6f8936a5b176ee147faf",
-    "merged_at": "2026-11-08T08:40:06Z"
-   },
-   "17895": {
-    "title": "fix(coding-agent): find named sections and other implicit roles with role/ selectors",
-    "merge_commit": "c9933df79d9aa44eb41db52a6914652361046827",
-    "merged_at": "2026-11-08T08:40:06Z"
-   },
-   "17893": {
-    "title": "fix(browser): report a relay tab's downloads where Chrome saved them",
-    "merge_commit": "bd7c61fc510e5608b24ab02b8c3eeccda627ee50",
-    "merged_at": "2026-11-08T08:40:06Z"
-   },
-   "17747": {
-    "title": "fix(agent,coding-agent): read the history behind an OpenAI remote compaction after a model switch",
-    "merge_commit": "4e083b6058b99699f2c347210761b9ba69f518fc",
-    "merged_at": "2026-11-08T08:40:06Z"
-   }
-  },
+  "unreleased": {},
   "ready": [
    15128,
    15130,
@@ -68766,22 +68725,10 @@
     "merged_at": "2026-11-08T08:40:06Z",
     "findings": []
    },
-   "18221": {
-    "title": "fix(natives): search 64 levels deep in find()",
-    "merge_commit": "b8e3eb0d0e752f7792e2337b763ffaab7f7b66c4",
-    "merged_at": "2026-11-06T17:18:31Z",
-    "findings": []
-   },
    "18223": {
     "title": "fix(coding-agent): preserve eval state after late tool rejections",
     "merge_commit": "dc949c3e0714bbfe3cbde272db38d7e41f8ca0e6",
     "merged_at": "2026-11-08T08:40:06Z",
-    "findings": []
-   },
-   "18252": {
-    "title": "fix(browser): keep the tab an open successfully reattaches",
-    "merge_commit": "a4b069a7ec17e791adcd1ad6e02275f4df4ea5eb",
-    "merged_at": "2026-11-06T17:18:30Z",
     "findings": []
    }
   },
@@ -70672,6 +70619,62 @@
     "files": [
      "MODULE.bazel.lock"
     ]
+   },
+   {
+    "at": "2026-11-08T17:24:56Z",
+    "kind": "released",
+    "number": 18223,
+    "title": "fix(coding-agent): preserve eval state after late tool rejections",
+    "tag": "v18.18.2"
+   },
+   {
+    "at": "2026-11-08T17:24:56Z",
+    "kind": "released",
+    "number": 18220,
+    "title": "fix(natives): read back AT-SPI text writes before reporting success",
+    "tag": "v18.18.2"
+   },
+   {
+    "at": "2026-11-08T17:24:56Z",
+    "kind": "released",
+    "number": 18167,
+    "title": "fix(skills): find a skill created after the session started by skill:// name",
+    "tag": "v18.18.2"
+   },
+   {
+    "at": "2026-11-08T17:24:56Z",
+    "kind": "released",
+    "number": 17940,
+    "title": "fix(coding-agent): keep browser agents from pulling Chrome in front of your app on Linux X11",
+    "tag": "v18.18.2"
+   },
+   {
+    "at": "2026-11-08T17:24:56Z",
+    "kind": "released",
+    "number": 17904,
+    "title": "fix(coding-agent): stop URL reads returning bot block pages as content",
+    "tag": "v18.18.2"
+   },
+   {
+    "at": "2026-11-08T17:24:56Z",
+    "kind": "released",
+    "number": 17895,
+    "title": "fix(coding-agent): find named sections and other implicit roles with role/ selectors",
+    "tag": "v18.18.2"
+   },
+   {
+    "at": "2026-11-08T17:24:56Z",
+    "kind": "released",
+    "number": 17893,
+    "title": "fix(browser): report a relay tab's downloads where Chrome saved them",
+    "tag": "v18.18.2"
+   },
+   {
+    "at": "2026-11-08T17:24:56Z",
+    "kind": "released",
+    "number": 17747,
+    "title": "fix(agent,coding-agent): read the history behind an OpenAI remote compaction after a model switch",
+    "tag": "v18.18.2"
    }
   ]
  },
