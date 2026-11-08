@@ -58287,13 +58287,13 @@
    "needs": [],
    "base": "ff0a986b88c223a0a746ed95cda8ddada236140c",
    "body": "bodies/switch-remote-reexpand.md",
-   "state": "open",
+   "state": "merged",
    "pr": 17747,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/switch-remote-reexpand",
    "host": "MacBook-Pro",
    "added": "2026-10-30T22:45:47Z",
-   "updated": "2026-11-04T02:37:31Z",
+   "updated": "2026-11-08T08:44:04Z",
    "note": "Waits for #17490 to merge (code conflict in session-maintenance.ts). After it merges: pr-queue advance switch-remote-reexpand; resolve by keeping #17490's #contextBuildOptions getter and adding model: this.#model to it.",
    "advanced": "2026-11-04T02:37:31Z",
    "built": [
@@ -58529,7 +58529,8 @@
     }
    ],
    "opened": "2026-11-02T02:26:18Z",
-   "readied": "2026-11-02T02:27:13Z"
+   "readied": "2026-11-02T02:27:13Z",
+   "merged_by": "pr"
   },
   {
    "id": "snapcompact-frame-budget",
@@ -60720,13 +60721,13 @@
    "needs": [],
    "base": "24439066040e006eb08da7b204f0ac41c79d2de9",
    "body": "bodies/role-implicit-landmarks.md",
-   "state": "open",
+   "state": "merged",
    "pr": 17895,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/role-implicit-landmarks",
    "host": "MacBook-Pro",
    "added": "2026-11-03T01:12:51Z",
-   "updated": "2026-11-08T00:20:15Z",
+   "updated": "2026-11-08T08:44:04Z",
    "note": "",
    "built": [
     {
@@ -60902,7 +60903,8 @@
    ],
    "opened": "2026-11-03T02:16:08Z",
    "readied": "2026-11-03T02:16:29Z",
-   "advanced": "2026-11-08T00:20:15Z"
+   "advanced": "2026-11-08T00:20:15Z",
+   "merged_by": "pr"
   },
   {
    "id": "token-count-policy",
@@ -60969,13 +60971,13 @@
    "needs": [],
    "base": "24439066040e006eb08da7b204f0ac41c79d2de9",
    "body": "bodies/relay-downloads.md",
-   "state": "open",
+   "state": "merged",
    "pr": 17893,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-downloads",
    "host": "MacBook-Pro",
    "added": "2026-11-03T01:33:55Z",
-   "updated": "2026-11-08T00:20:15Z",
+   "updated": "2026-11-08T08:44:04Z",
    "note": "",
    "built": [
     {
@@ -61141,7 +61143,8 @@
    ],
    "opened": "2026-11-03T02:12:23Z",
    "readied": "2026-11-03T02:12:50Z",
-   "advanced": "2026-11-08T00:20:15Z"
+   "advanced": "2026-11-08T00:20:15Z",
+   "merged_by": "pr"
   },
   {
    "id": "encoded-prefix-count",
@@ -61173,13 +61176,13 @@
    "needs": [],
    "base": "24439066040e006eb08da7b204f0ac41c79d2de9",
    "body": "bodies/read-block-pages.md",
-   "state": "open",
+   "state": "merged",
    "pr": 17904,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-block-pages",
    "host": "MacBook-Pro",
    "added": "2026-11-03T02:52:49Z",
-   "updated": "2026-11-08T00:20:15Z",
+   "updated": "2026-11-08T08:44:04Z",
    "note": "",
    "built": [
     {
@@ -61347,7 +61350,8 @@
    ],
    "opened": "2026-11-03T03:48:08Z",
    "readied": "2026-11-03T03:48:29Z",
-   "advanced": "2026-11-08T00:20:15Z"
+   "advanced": "2026-11-08T00:20:15Z",
+   "merged_by": "pr"
   },
   {
    "id": "wayland-click-pacing",
@@ -64213,13 +64217,13 @@
    "needs": [],
    "base": "03b4916ab3a78d95d4bf06405efda6d490df7be9",
    "body": "bodies/atspi-setvalue-readback.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18220,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-setvalue-readback",
    "host": "MacBook-Pro",
    "added": "2026-11-03T09:07:02Z",
-   "updated": "2026-11-07T22:56:16Z",
+   "updated": "2026-11-08T08:44:04Z",
    "note": "",
    "advanced": "2026-11-07T22:56:16Z",
    "built": [
@@ -64294,7 +64298,8 @@
     }
    ],
    "opened": "2026-11-05T19:36:45Z",
-   "readied": "2026-11-05T19:37:07Z"
+   "readied": "2026-11-05T19:37:07Z",
+   "merged_by": "pr"
   },
   {
    "id": "relay-linux-click-front",
@@ -64305,13 +64310,13 @@
    "needs": [],
    "base": "24439066040e006eb08da7b204f0ac41c79d2de9",
    "body": "bodies/relay-linux-click-front.md",
-   "state": "open",
+   "state": "merged",
    "pr": 17940,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-linux-click-front",
    "host": "MacBook-Pro",
    "added": "2026-11-03T10:42:50Z",
-   "updated": "2026-11-08T00:20:15Z",
+   "updated": "2026-11-08T08:44:04Z",
    "note": "",
    "built": [
     {
@@ -64537,7 +64542,8 @@
    ],
    "opened": "2026-11-03T11:09:08Z",
    "readied": "2026-11-03T11:09:32Z",
-   "advanced": "2026-11-08T00:20:15Z"
+   "advanced": "2026-11-08T00:20:15Z",
+   "merged_by": "pr"
   },
   {
    "id": "role-selectors-cdp",
@@ -67947,13 +67953,13 @@
    "needs": [],
    "base": "88a69582c755bd000e8dc0290981fc787a4f400c",
    "body": "bodies/skill-url-new-skill.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18167,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/skill-url-new-skill",
    "host": "MacBook-Pro",
    "added": "2026-11-05T00:44:09Z",
-   "updated": "2026-11-05T04:51:24Z",
+   "updated": "2026-11-08T08:44:04Z",
    "note": "",
    "built": [
     {
@@ -68228,7 +68234,8 @@
     }
    ],
    "opened": "2026-11-05T04:25:12Z",
-   "readied": "2026-11-05T04:25:42Z"
+   "readied": "2026-11-05T04:25:42Z",
+   "merged_by": "pr"
   },
   {
    "id": "browser-open-recovered-tab",
@@ -68422,13 +68429,13 @@
    "needs": [],
    "base": "24439066040e006eb08da7b204f0ac41c79d2de9",
    "body": "bodies/eval-late-rejection.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18223,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/eval-late-rejection",
    "host": "MacBook-Pro",
    "added": "2026-11-05T19:43:56Z",
-   "updated": "2026-11-08T00:22:00Z",
+   "updated": "2026-11-08T08:44:04Z",
    "note": "",
    "built": [
     {
@@ -68593,7 +68600,8 @@
    ],
    "opened": "2026-11-05T20:07:12Z",
    "readied": "2026-11-05T20:07:35Z",
-   "advanced": "2026-11-08T00:22:00Z"
+   "advanced": "2026-11-08T00:22:00Z",
+   "merged_by": "pr"
   }
  ],
  "watch": {
