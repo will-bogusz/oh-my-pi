@@ -62767,7 +62767,7 @@
    "area": "computer",
    "priority": null,
    "needs": [],
-   "base": "035e4f95c314f9aff2f5a779fa335422680f8e36",
+   "base": "a76fe4848554192d73fecb9d285390aafe2346b8",
    "body": "bodies/gtk4-atspi-bounds.md",
    "state": "queued",
    "pr": null,
@@ -62775,9 +62775,9 @@
    "worktree": "/home/will/.omp/main-wt/oh-my-pi/gtk4-atspi-bounds",
    "host": "goliath",
    "added": "2026-11-03T05:52:19Z",
-   "updated": "2026-11-04T21:04:14Z",
+   "updated": "2026-11-08T00:01:00Z",
    "note": "",
-   "advanced": "2026-11-04T21:04:14Z"
+   "advanced": "2026-11-08T00:01:00Z"
   },
   {
    "id": "atspi-file-chooser",
