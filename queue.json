@@ -55327,7 +55327,7 @@
    "area": "computer",
    "priority": "P2",
    "needs": [],
-   "base": "03b4916ab3a78d95d4bf06405efda6d490df7be9",
+   "base": "24439066040e006eb08da7b204f0ac41c79d2de9",
    "body": "bodies/computer-menu-subtree.md",
    "state": "open",
    "pr": 18222,
@@ -55335,9 +55335,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-menu-subtree",
    "host": "MacBook-Pro",
    "added": "2026-10-24T05:06:00Z",
-   "updated": "2026-11-07T22:52:12Z",
+   "updated": "2026-11-08T00:22:00Z",
    "note": "2026-10-29 (ComputerDocs): rebased onto main b0756921ed and pushed (e2b2d3a213); check + computer.test.ts (137 pass) on goliath; precheck has no timing FIX. Waits: its menu.items line in prompts/tools/computer.md sits next to lines #16925 (apps.open line) and #15282 (ax() line) change, so it conflicts with both until they merge; then rebase (pr-queue advance) and open.",
-   "advanced": "2026-11-07T22:52:12Z",
+   "advanced": "2026-11-08T00:22:00Z",
    "built": [
     {
      "with": "#16274",
@@ -68420,7 +68420,7 @@
    "area": "coding-agent eval",
    "priority": "P1",
    "needs": [],
-   "base": "595ff2f359a31142f18f71417449798d66bd4a6c",
+   "base": "24439066040e006eb08da7b204f0ac41c79d2de9",
    "body": "bodies/eval-late-rejection.md",
    "state": "open",
    "pr": 18223,
@@ -68428,7 +68428,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/eval-late-rejection",
    "host": "MacBook-Pro",
    "added": "2026-11-05T19:43:56Z",
-   "updated": "2026-11-07T23:35:49Z",
+   "updated": "2026-11-08T00:22:00Z",
    "note": "",
    "built": [
     {
@@ -68593,7 +68593,7 @@
    ],
    "opened": "2026-11-05T20:07:12Z",
    "readied": "2026-11-05T20:07:35Z",
-   "advanced": "2026-11-07T23:35:49Z"
+   "advanced": "2026-11-08T00:22:00Z"
   }
  ],
  "watch": {
