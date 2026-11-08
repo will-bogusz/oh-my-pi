@@ -68605,7 +68605,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-08T14:50:55Z",
+  "checked": "2026-11-08T15:52:28Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -68786,16 +68786,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-01T15:47:34Z",
-    "kind": "conflict",
-    "label": "#16611",
-    "title": "feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio",
-    "files": [
-     "packages/catalog/src/model-cache.ts",
-     "packages/catalog/src/model-manager.ts"
-    ]
-   },
    {
     "at": "2026-11-02T01:30:17Z",
     "kind": "openable",
@@ -72969,7 +72959,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-08T14:50:56.555847Z",
+  "at": "2026-11-08T15:52:29.647521Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
