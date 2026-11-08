@@ -68605,7 +68605,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-08T12:47:58Z",
+  "checked": "2026-11-08T13:49:09Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -68786,20 +68786,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-01T13:46:43Z",
-    "kind": "released",
-    "number": 17510,
-    "title": "fix(snapcompact,coding-agent): give models without image input a snapcompact archive's text instead of its frames",
-    "tag": "v18.15.0"
-   },
-   {
-    "at": "2026-11-01T13:46:43Z",
-    "kind": "released",
-    "number": 17490,
-    "title": "fix(coding-agent): let snapcompact replace an archive it shrinks, and report its refusal once",
-    "tag": "v18.15.0"
-   },
    {
     "at": "2026-11-01T15:47:34Z",
     "kind": "conflict",
@@ -72983,7 +72969,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-08T12:47:59.398087Z",
+  "at": "2026-11-08T13:49:10.167535Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
