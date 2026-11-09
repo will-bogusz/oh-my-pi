@@ -68605,7 +68605,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-09T02:04:28Z",
+  "checked": "2026-11-09T02:35:04Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -68733,34 +68733,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-02T02:31:41Z",
-    "kind": "unopenable",
-    "id": "cold-revive-xdev-mounts",
-    "title": "fix(task): keep a cold-revived subagent's xd:// devices mounted",
-    "why": "opened as #17746"
-   },
-   {
-    "at": "2026-11-02T02:31:41Z",
-    "kind": "unopenable",
-    "id": "rich-editor-fill-followup",
-    "title": "fix(browser): stop rich-text fill landing before the old text or outside the editor",
-    "why": "opened as #17742"
-   },
-   {
-    "at": "2026-11-02T02:31:41Z",
-    "kind": "unopenable",
-    "id": "snapcompact-think-legend",
-    "title": "fix(snapcompact,coding-agent): drop an archive's reasoning when its summary declares none",
-    "why": "opened as #17745"
-   },
-   {
-    "at": "2026-11-02T02:31:41Z",
-    "kind": "unopenable",
-    "id": "switch-remote-reexpand",
-    "title": "fix(agent,coding-agent): read the history behind an OpenAI remote compaction after a model switch",
-    "why": "opened as #17747"
-   },
    {
     "at": "2026-11-02T03:02:27Z",
     "kind": "openable",
