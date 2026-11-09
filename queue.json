@@ -62767,13 +62767,13 @@
    "needs": [],
    "base": "090a8057a9457c85ed7fb0971bf4cdf3646243c0",
    "body": "bodies/gtk4-atspi-bounds.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18643,
    "closed_prs": [],
    "worktree": "/home/will/.omp/main-wt/oh-my-pi/gtk4-atspi-bounds",
    "host": "goliath",
    "added": "2026-11-03T05:52:19Z",
-   "updated": "2026-11-09T19:48:20Z",
+   "updated": "2026-11-09T22:34:34Z",
    "note": "",
    "advanced": "2026-11-09T18:26:49Z",
    "built": [
@@ -62828,7 +62828,8 @@
     }
    ],
    "opened": "2026-11-09T19:46:59Z",
-   "readied": "2026-11-09T19:47:20Z"
+   "readied": "2026-11-09T19:47:20Z",
+   "merged_by": "pr"
   },
   {
    "id": "atspi-file-chooser",
