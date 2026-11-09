@@ -68763,6 +68763,26 @@
    "added": "2026-11-09T18:05:09Z",
    "updated": "2026-11-09T18:05:09Z",
    "note": ""
+  },
+  {
+   "id": "upload-stall-error-all-providers",
+   "branch": "will/upload-stall-error-all-providers",
+   "title": "fix(ai,agent): say how far a request body uploaded when any provider's connection drops",
+   "area": "other",
+   "priority": "P1",
+   "needs": [
+    "#18624"
+   ],
+   "base": "94e431fde263071d11de8fd12876d691b641ac77",
+   "body": "bodies/upload-stall-error-all-providers.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/upload-stall-error-all-providers",
+   "host": "MacBook-Pro",
+   "added": "2026-11-09T18:20:14Z",
+   "updated": "2026-11-09T18:20:14Z",
+   "note": ""
   }
  ],
  "watch": {
