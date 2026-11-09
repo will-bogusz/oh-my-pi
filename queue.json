@@ -69027,13 +69027,13 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-09T22:25:21Z",
+  "checked": "2026-11-09T22:56:08Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "relay-autoattach-shared": {
-    "since": "2026-11-09T22:25:21Z",
-    "title": "fix(browser-relay): keep a shared child frame attached when one connection turns auto-attach off"
+   "role-selectors-followup": {
+    "since": "2026-11-09T22:56:08Z",
+    "title": "fix(coding-agent): preserve role selectors across locales and document waits"
    }
   },
   "conflicts": {
@@ -69050,33 +69050,10 @@
     "files": [
      "packages/ai/src/providers/openai-shared.ts"
     ]
-   },
-   "#18013": {
-    "since": "2026-11-09T19:51:24Z",
-    "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "files": [
-     "MODULE.bazel.lock"
-    ]
    }
   },
-  "merged_through": "2026-11-09T22:18:38Z",
-  "unreleased": {
-   "18649": {
-    "title": "test(natives): unset LIBEI_SOCKET under the env lock in the Wayland no-portal test",
-    "merge_commit": "2e1c411e317f19222478a593e86e8c874b83e38b",
-    "merged_at": "2026-11-09T22:16:09Z"
-   },
-   "18632": {
-    "title": "fix(coding-agent): resolve Chromium role selectors through Chrome's accessibility tree",
-    "merge_commit": "0c740e39652b83516103538b63225385a945bf6c",
-    "merged_at": "2026-11-09T22:17:05Z"
-   },
-   "17831": {
-    "title": "fix(coding-agent): let background relay and app.cdp_url tabs take omp's clicks and keys",
-    "merge_commit": "03fcac6f9900cab2b31ec9924e8cbe31d2bf5def",
-    "merged_at": "2026-11-09T22:18:38Z"
-   }
-  },
+  "merged_through": "2026-11-09T22:30:45Z",
+  "unreleased": {},
   "ready": [
    15128,
    15130,
@@ -69094,27 +69071,9 @@
    18222,
    18353,
    18624,
-   18643
+   18657
   ],
   "post_merge": {
-   "15282": {
-    "title": "feat(natives): show what macOS ax() elements can do",
-    "merge_commit": "6e3bb2aa9266c6e290bb9873a38893aa5694e3b2",
-    "merged_at": "2026-11-07T22:44:18Z",
-    "findings": []
-   },
-   "16223": {
-    "title": "feat(natives): make a macOS background drag across native text an accessibility selection",
-    "merge_commit": "03b4916ab3a78d95d4bf06405efda6d490df7be9",
-    "merged_at": "2026-11-07T22:44:18Z",
-    "findings": []
-   },
-   "16908": {
-    "title": "fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it",
-    "merge_commit": "56144a656271279f0af4bfefa1491f7058fee161",
-    "merged_at": "2026-11-07T22:44:18Z",
-    "findings": []
-   },
    "17747": {
     "title": "fix(agent,coding-agent): read the history behind an OpenAI remote compaction after a model switch",
     "merge_commit": "4e083b6058b99699f2c347210761b9ba69f518fc",
@@ -69199,6 +69158,12 @@
       "addressed_by": null
      }
     ]
+   },
+   "18643": {
+    "title": "fix(natives): find GTK4 app elements on X11 and stop marking them disabled",
+    "merge_commit": "4f36ff1285d28accedb7cad1277acd2e2149b195",
+    "merged_at": "2026-11-09T22:30:45Z",
+    "findings": []
    },
    "18649": {
     "title": "test(natives): unset LIBEI_SOCKET under the env lock in the Wayland no-portal test",
@@ -70795,6 +70760,55 @@
     "end": 709,
     "url": "https://github.com/can1357/oh-my-pi/pull/18632#pullrequestreview-5833713075",
     "addressed_by": null
+   },
+   {
+    "at": "2026-11-09T22:56:08Z",
+    "kind": "released",
+    "number": 18649,
+    "title": "test(natives): unset LIBEI_SOCKET under the env lock in the Wayland no-portal test",
+    "tag": "v18.18.6"
+   },
+   {
+    "at": "2026-11-09T22:56:08Z",
+    "kind": "released",
+    "number": 18632,
+    "title": "fix(coding-agent): resolve Chromium role selectors through Chrome's accessibility tree",
+    "tag": "v18.18.6"
+   },
+   {
+    "at": "2026-11-09T22:56:08Z",
+    "kind": "released",
+    "number": 17831,
+    "title": "fix(coding-agent): let background relay and app.cdp_url tabs take omp's clicks and keys",
+    "tag": "v18.18.6"
+   },
+   {
+    "at": "2026-11-09T22:56:08Z",
+    "kind": "merged",
+    "number": 18643,
+    "title": "fix(natives): find GTK4 app elements on X11 and stop marking them disabled",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-09T22:56:08Z",
+    "kind": "released",
+    "number": 18643,
+    "title": "fix(natives): find GTK4 app elements on X11 and stop marking them disabled",
+    "tag": "v18.18.6"
+   },
+   {
+    "at": "2026-11-09T22:56:08Z",
+    "kind": "openable",
+    "id": "role-selectors-followup",
+    "title": "fix(coding-agent): preserve role selectors across locales and document waits"
+   },
+   {
+    "at": "2026-11-09T22:56:08Z",
+    "kind": "unopenable",
+    "id": "relay-autoattach-shared",
+    "title": "fix(browser-relay): keep a shared child frame attached when one connection turns auto-attach off",
+    "why": "opened as #18657"
    }
   ]
  },
@@ -73124,8 +73138,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-09T22:55:09.899274Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-09T22:56:09.508678Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 1,
