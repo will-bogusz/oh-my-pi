@@ -1,9 +1,9 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-09 22:19Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-09 22:20Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-09 21:54Z on goliath; groups below are from it, states from the manifest)
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-09 22:19Z on MacBook-Pro; groups below are from it, states from the manifest)
 **Counts:** openable now 0, conflict-held 9, stacked 12, held 6, open PRs 17; merged 262, closed 29
 
 ## Openable now (0)
@@ -21,15 +21,15 @@ none
 | text-reader-usage-shift | fix(coding-agent): price a text-only fallback's archive text, not the failed request's frames, in the fit check | coding-agent |  | 9d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/text-reader-usage-shift) |
 | token-count-policy | feat(catalog,coding-agent): token-count framing policy in KDL | catalog |  | 6d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/token-count-policy) |
 | wire-delta-count | refactor(agent,ai): count the anchored delta from the reader's transformed wire messages | other |  | 6d | [#17610](https://github.com/can1357/oh-my-pi/pull/17610), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wire-delta-count) |
-| atspi-unanswered-app | fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool | computer | P1 | 6d | [#18649](https://github.com/can1357/oh-my-pi/pull/18649), [#18643](https://github.com/can1357/oh-my-pi/pull/18643), [#18353](https://github.com/can1357/oh-my-pi/pull/18353), [#18013](https://github.com/can1357/oh-my-pi/pull/18013), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-unanswered-app) |
-| relay-autoattach-shared | fix(browser-relay): keep a shared child frame attached when one connection turns auto-attach off | browser | P1 | 4h | [#17831](https://github.com/can1357/oh-my-pi/pull/17831) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-autoattach-shared) |
+| atspi-unanswered-app | fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool | computer | P1 | 6d | [#18643](https://github.com/can1357/oh-my-pi/pull/18643), [#18353](https://github.com/can1357/oh-my-pi/pull/18353), [#18013](https://github.com/can1357/oh-my-pi/pull/18013), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-unanswered-app) |
+| relay-autoattach-shared | fix(browser-relay): keep a shared child frame attached when one connection turns auto-attach off | browser | P1 | 4h | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-autoattach-shared) |
 
 ## Stacked (12)
 
 | id | title | area | priority | age | needs | branch |
 |---|---|---|---|---|---|---|
 | computer-input-diff-report | feat(computer): report what input changed as a diff once the app goes quiet | computer | P2 | 27d | computer-ui-quiet | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-input-diff-report) |
-| r2/relay-own-only | fix(browser): attach only the relay tabs omp opened or borrowed | browser | P2 | 27d | [#15508](https://github.com/can1357/oh-my-pi/pull/15508), r2/relay-bg-input-main ([#17831](https://github.com/can1357/oh-my-pi/pull/17831)), r2/native-window-report | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/r2/relay-own-only) |
+| r2/relay-own-only | fix(browser): attach only the relay tabs omp opened or borrowed | browser | P2 | 27d | [#15508](https://github.com/can1357/oh-my-pi/pull/15508), r2/native-window-report | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/r2/relay-own-only) |
 | r2/page-waiting | feat(coding-agent): make a browser dialog or held file chooser one pending state that page calls fail fast on | browser | P2 | 27d | r2/relay-own-only | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/r2/page-waiting) |
 | r2/relay-turn-end-detach | fix(browser): release relay tabs from Chrome's debugger between turns | browser | P2 | 27d | r2/relay-popup-owned, r2/page-waiting | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/r2/relay-turn-end-detach) |
 | r2/native-window-report | feat(coding-agent): name the native windows a browser call raised on macOS | browser | P2 | 27d | [#15508](https://github.com/can1357/oh-my-pi/pull/15508) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/r2/native-window-report) |
@@ -39,7 +39,7 @@ none
 | gemma-tokenizer | feat(natives,catalog): count Gemini in the Gemma vocabulary | catalog |  | 6d | token-count-policy | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/gemma-tokenizer) |
 | encoded-prefix-count | fix(ai,agent,tui,coding-agent): count the system prompt and tools as the provider request encodes them | other |  | 6d | token-count-policy, wire-delta-count | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/encoded-prefix-count) |
 | atspi-walk-reads | fix(natives): read each AT-SPI element in two concurrent rounds | computer | P1 | 6d | atspi-unanswered-app, gtk4-atspi-bounds ([#18643](https://github.com/can1357/oh-my-pi/pull/18643)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-walk-reads) |
-| upload-stall-error-all-providers | fix(ai,agent): say how far a request body uploaded when any provider's connection drops | other | P1 | 3h | [#18624](https://github.com/can1357/oh-my-pi/pull/18624) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/upload-stall-error-all-providers) |
+| upload-stall-error-all-providers | fix(ai,agent): say how far a request body uploaded when any provider's connection drops | other | P1 | 4h | [#18624](https://github.com/can1357/oh-my-pi/pull/18624) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/upload-stall-error-all-providers) |
 
 ## Held (6)
 
