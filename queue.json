@@ -72826,8 +72826,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-09T18:19:01.062214Z",
-  "host": "goliath",
+  "at": "2026-11-09T18:20:25.707117Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 1,
@@ -73248,6 +73248,27 @@
     ],
     "needs": [],
     "created": "2026-11-09T18:05:09Z"
+   },
+   {
+    "id": "upload-stall-error-all-providers",
+    "label": "upload-stall-error-all-providers",
+    "number": null,
+    "state": "queued",
+    "area": "other",
+    "priority": "P1",
+    "title": "fix(ai,agent): say how far a request body uploaded when any provider's connection drops",
+    "action": "wait",
+    "reasons": [
+     "needs #18624 (open)"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [
+     "#18624"
+    ],
+    "created": "2026-11-09T18:20:14Z"
    },
    {
     "id": "computer-ui-quiet",
