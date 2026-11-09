@@ -68920,7 +68920,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-09T20:22:43Z",
+  "checked": "2026-11-09T20:53:00Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -68968,7 +68968,8 @@
    18353,
    18624,
    18632,
-   18643
+   18643,
+   18649
   ],
   "post_merge": {
    "15282": {
@@ -72875,8 +72876,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-09T20:40:18.837888Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-09T20:53:01.131342Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 1,
@@ -72899,6 +72900,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-02T03:30:16Z"
+   },
+   {
+    "id": "wayland-libei-env-race",
+    "label": "#18649",
+    "number": 18649,
+    "state": "open",
+    "area": "natives",
+    "priority": "P0",
+    "title": "test(natives): unset LIBEI_SOCKET under the env lock in the Wayland no-portal test",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-09T20:49:53Z"
    },
    {
     "id": "read-after-bash-revalidate",
@@ -73257,6 +73275,7 @@
     "action": "wait",
     "reasons": [
      "needs atspi-unanswered-app (queued), #18643 (open)",
+     "conflicts with #18649 in crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #18643 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18353 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #18013 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/libei.rs",
@@ -73267,6 +73286,7 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#18649",
      "#18643",
      "#18353",
      "#18013"
@@ -73339,23 +73359,6 @@
      "#18624"
     ],
     "created": "2026-11-09T18:20:14Z"
-   },
-   {
-    "id": "wayland-libei-env-race",
-    "label": "wayland-libei-env-race",
-    "number": null,
-    "state": "queued",
-    "area": "natives",
-    "priority": "P1",
-    "title": "test(natives): unset LIBEI_SOCKET under the env lock in the Wayland no-portal test",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-09T20:39:55Z"
    },
    {
     "id": "computer-ui-quiet",
