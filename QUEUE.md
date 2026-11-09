@@ -1,16 +1,18 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-09 18:26Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-09 18:28Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-09 18:20Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 0, conflict-held 10, stacked 12, held 6, open PRs 18; merged 259, closed 29
+**Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-09 18:27Z on MacBook-Pro; groups below are from it, states from the manifest)
+**Counts:** openable now 1, conflict-held 9, stacked 12, held 6, open PRs 18; merged 259, closed 29
 
-## Openable now (0)
+## Openable now (1)
 
-none
+| id | title | area | priority | age | plan | branch |
+|---|---|---|---|---|---|---|
+| gtk4-atspi-bounds | fix(natives): find GTK4 app elements on X11 and stop marking them disabled | computer |  | 6d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/gtk4-atspi-bounds) |
 
-## Conflict-held (10)
+## Conflict-held (9)
 
 | id | title | area | priority | age | blocked by | branch |
 |---|---|---|---|---|---|---|
@@ -21,7 +23,6 @@ none
 | text-reader-usage-shift | fix(coding-agent): price a text-only fallback's archive text, not the failed request's frames, in the fit check | coding-agent |  | 8d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/text-reader-usage-shift) |
 | token-count-policy | feat(catalog,coding-agent): token-count framing policy in KDL | catalog |  | 6d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/token-count-policy) |
 | wire-delta-count | refactor(agent,ai): count the anchored delta from the reader's transformed wire messages | other |  | 6d | [#17610](https://github.com/can1357/oh-my-pi/pull/17610), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wire-delta-count) |
-| gtk4-atspi-bounds | fix(natives): find GTK4 app elements on X11 and stop marking them disabled | computer |  | 6d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/gtk4-atspi-bounds) |
 | atspi-unanswered-app | fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool | computer | P1 | 6d | [#18353](https://github.com/can1357/oh-my-pi/pull/18353), [#18013](https://github.com/can1357/oh-my-pi/pull/18013), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-unanswered-app) |
 | relay-autoattach-shared | fix(browser-relay): keep a shared child frame attached when one connection turns auto-attach off | browser | P1 | 0h | [#17831](https://github.com/can1357/oh-my-pi/pull/17831) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-autoattach-shared) |
 
