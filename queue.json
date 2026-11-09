@@ -64554,7 +64554,7 @@
    "needs": [
     "role-implicit-landmarks"
    ],
-   "base": "090a8057a9457c85ed7fb0971bf4cdf3646243c0",
+   "base": "0920fabe8e9946781d1e967592e55eab75d66045",
    "body": "bodies/role-selectors-cdp.md",
    "state": "open",
    "pr": 18632,
@@ -64562,9 +64562,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/role-selectors-cdp",
    "host": "MacBook-Pro",
    "added": "2026-11-04T04:02:50Z",
-   "updated": "2026-11-09T18:37:09Z",
+   "updated": "2026-11-09T18:52:05Z",
    "note": "",
-   "advanced": "2026-11-09T18:37:09Z",
+   "advanced": "2026-11-09T18:52:05Z",
    "built": [
     {
      "with": "#16274",
