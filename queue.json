@@ -68921,7 +68921,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-09T20:53:00Z",
+  "checked": "2026-11-09T21:54:42Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -72891,12 +72891,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-09T20:53:01.131342Z",
+  "at": "2026-11-09T21:54:43.487181Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 1,
-   "left": 7
+   "used": 0,
+   "left": 8
   },
   "rows": [
    {
@@ -73263,6 +73263,7 @@
     "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool",
     "action": "wait",
     "reasons": [
+     "conflicts with #18649 in crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #18643 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18353 in MODULE.bazel.lock, crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #18013 in MODULE.bazel.lock",
@@ -73272,6 +73273,7 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#18649",
      "#18643",
      "#18353",
      "#18013"
