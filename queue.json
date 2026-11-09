@@ -64556,13 +64556,13 @@
    ],
    "base": "e0eba274da5e1091908b3c435de8a1e31ee187d4",
    "body": "bodies/role-selectors-cdp.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18632,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/role-selectors-cdp",
    "host": "MacBook-Pro",
    "added": "2026-11-04T04:02:50Z",
-   "updated": "2026-11-09T18:01:35Z",
+   "updated": "2026-11-09T18:02:37Z",
    "note": "",
    "advanced": "2026-11-09T17:54:18Z",
    "built": [
@@ -64655,7 +64655,8 @@
      "at": "2026-11-09T18:01:32Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-09T18:02:37Z"
   },
   {
    "id": "search-failure-details",
