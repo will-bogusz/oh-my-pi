@@ -1,9 +1,9 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-09 05:08Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-09 06:09Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-09 05:07Z on goliath; groups below are from it, states from the manifest)
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-09 06:08Z on goliath; groups below are from it, states from the manifest)
 **Counts:** openable now 1, conflict-held 9, stacked 11, held 6, open PRs 16; merged 259, closed 29
 
 ## Openable now (1)
@@ -23,7 +23,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-09
 | text-reader-usage-shift | fix(coding-agent): price a text-only fallback's archive text, not the failed request's frames, in the fit check | coding-agent |  | 8d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/text-reader-usage-shift) |
 | token-count-policy | feat(catalog,coding-agent): token-count framing policy in KDL | catalog |  | 6d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/token-count-policy) |
 | wire-delta-count | refactor(agent,ai): count the anchored delta from the reader's transformed wire messages | other |  | 6d | [#17610](https://github.com/can1357/oh-my-pi/pull/17610), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wire-delta-count) |
-| gtk4-atspi-bounds | fix(natives): find GTK4 app elements on X11 and stop marking them disabled | computer |  | 5d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/gtk4-atspi-bounds) |
+| gtk4-atspi-bounds | fix(natives): find GTK4 app elements on X11 and stop marking them disabled | computer |  | 6d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/gtk4-atspi-bounds) |
 | atspi-unanswered-app | fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool | computer | P1 | 5d | [#18353](https://github.com/can1357/oh-my-pi/pull/18353), [#18013](https://github.com/can1357/oh-my-pi/pull/18013), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-unanswered-app) |
 
 ## Stacked (11)
@@ -64,7 +64,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-09
 | [#16274](https://github.com/can1357/oh-my-pi/pull/16274) | read-after-bash-revalidate | fix(agent,coding-agent): re-read a file an earlier bash call changed in the same message | other | P1 | 21d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-after-bash-revalidate) |
 | [#17894](https://github.com/can1357/oh-my-pi/pull/17894) | relay-popup-lossless | fix(browser): send the user's keys back to their app while Chrome activates for a popup omp's relay tab opens on macOS | browser | P1 | 6d | requeue | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-popup-lossless) |
 | [#16553](https://github.com/can1357/oh-my-pi/pull/16553) | click-place-release | fix(natives): keep a macOS drag from the user's app onto the target the user's pick | natives-macos | P1 | 19d | rebase | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/click-place-release) |
-| [#16611](https://github.com/can1357/oh-my-pi/pull/16611) | read-audio-transcripts | feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio | catalog | P2 | 18d | rebase | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-audio-transcripts) |
+| [#16611](https://github.com/can1357/oh-my-pi/pull/16611) | read-audio-transcripts | feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio | catalog | P2 | 19d | rebase | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-audio-transcripts) |
 | [#18222](https://github.com/can1357/oh-my-pi/pull/18222) | computer-menu-subtree | feat(coding-agent): find nested menu commands in one read | computer | P2 | 3d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-menu-subtree) |
 | [#17897](https://github.com/can1357/oh-my-pi/pull/17897) | iphone-mirror-key-gap | perf(natives): type on iPhone Mirroring twice as fast | computer | P2 | 6d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-key-gap) |
 | [#17757](https://github.com/can1357/oh-my-pi/pull/17757) | macos-capture-geometry | fix(natives): match macOS window screenshots to the window on screen | computer | P0 | 7d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-capture-geometry) |
