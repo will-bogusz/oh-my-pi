@@ -68786,10 +68786,15 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-09T18:19:00Z",
+  "checked": "2026-11-09T18:49:39Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {},
+  "openable": {
+   "gtk4-atspi-bounds": {
+    "since": "2026-11-09T18:49:39Z",
+    "title": "fix(natives): find GTK4 app elements on X11 and stop marking them disabled"
+   }
+  },
   "conflicts": {
    "#16553": {
     "since": "2026-11-04T07:29:23Z",
@@ -68808,6 +68813,13 @@
    "#18353": {
     "since": "2026-11-08T09:45:12Z",
     "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
+    "files": [
+     "MODULE.bazel.lock"
+    ]
+   },
+   "#18013": {
+    "since": "2026-11-09T18:49:39Z",
+    "title": "feat(natives): type text the wayland layout lacks through libei text",
     "files": [
      "MODULE.bazel.lock"
     ]
@@ -70539,6 +70551,21 @@
     "id": "role-selectors-cdp",
     "title": "fix(coding-agent): resolve Chromium role selectors through Chrome's accessibility tree",
     "why": "opened as #18632"
+   },
+   {
+    "at": "2026-11-09T18:49:39Z",
+    "kind": "openable",
+    "id": "gtk4-atspi-bounds",
+    "title": "fix(natives): find GTK4 app elements on X11 and stop marking them disabled"
+   },
+   {
+    "at": "2026-11-09T18:49:39Z",
+    "kind": "conflict",
+    "label": "#18013",
+    "title": "feat(natives): type text the wayland layout lacks through libei text",
+    "files": [
+     "MODULE.bazel.lock"
+    ]
    }
   ]
  },
@@ -72833,8 +72860,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-09T18:27:47.911430Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-09T18:49:41.548943Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 1,
@@ -73133,8 +73160,10 @@
     "area": "natives",
     "priority": "P2",
     "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in MODULE.bazel.lock"
+    ],
     "note": "rebases after #18353 merges",
     "over": [],
     "paired": [
