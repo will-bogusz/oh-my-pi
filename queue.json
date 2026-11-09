@@ -64550,7 +64550,7 @@
    "branch": "will/role-selectors-cdp",
    "title": "fix(coding-agent): resolve Chromium role selectors through Chrome's accessibility tree",
    "area": "browser",
-   "priority": "P2",
+   "priority": "P1",
    "needs": [
     "role-implicit-landmarks"
    ],
@@ -64562,7 +64562,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/role-selectors-cdp",
    "host": "MacBook-Pro",
    "added": "2026-11-04T04:02:50Z",
-   "updated": "2026-11-09T18:11:51Z",
+   "updated": "2026-11-09T18:18:56Z",
    "note": "",
    "advanced": "2026-11-09T18:11:51Z",
    "built": [
