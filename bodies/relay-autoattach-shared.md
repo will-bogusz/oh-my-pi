@@ -8,24 +8,22 @@ Reproduced on `main` (`21f1188cf88`) with two puppeteer connections to the relay
 
 Every client of a relay tab shares one Chrome debugger attachment, so auto-attach is a tab-wide switch in Chrome. The bridge forwarded each client's `Target.setAutoAttach` to Chrome as it came, so the last client to send one decided for every client.
 
-- **Per-holder intent.** Each session records whether it wants auto-attach. An `autoAttach: false` while another connection still has it on is answered locally. Only the requesting connection forgets its children: it gets `Target.detachedFromTarget` for them, and Chrome keeps them for the others.
-- **Last holder turns it off.** When the last armed session is released or its connection closes, the bridge sends `autoAttach: false` to Chrome, so a registry-held tab doesn't keep auto-attaching for nobody.
-- **One transition at a time per tab.** Auto-attach changes go through the per-tab queue the tab-wide switches already use (`#serializeSwitches`), but stay out of the `{ enabled }` switch table, since auto-attach takes other parameters and owns child sessions. Overlapping requests then can't settle out of order, and a failed enable's rollback can't undo another holder's state. A queued request whose session was released meanwhile gets an `Unknown session id` error instead of no reply.
+- **Per-holder intent.** A session switching auto-attach off gets local child detaches while Chrome keeps the children attached for other holders.
+- **Last holder turns it off.** Releasing the final armed session sends one disable per tab, including when a pending disable fails after its holder departs.
+- **Serialized transitions.** Auto-attach reuses `#serializeSwitches` but stays outside the `{ enabled }` table because its parameters and child-session ownership differ.
 
-Child-session-scoped `Target.setAutoAttach` is unchanged: it is out of this page-scoped fix.
+Child-session-scoped auto-attach is unchanged. Cleanup is best-effort: retrying a failed last-holder disarm after an extension reconnect would require new retry state and reconciliation, outside this page-scoped isolation fix.
 
 ## Testing
 
-- `browser-relay-tab-isolation.test.ts` (headless Chromium with the real extension): two connections on one framed page. A disables auto-attach; B's frame still answers `Runtime.evaluate` and B sees no detach. Fails on `main` with `Target closed`.
-- `browser-relay-bridge.test.ts`:
-  - Another holder stays armed when one connection closes.
-  - An explicit detach of the last armed session sends `autoAttach: false` to Chrome.
-  - A failed in-flight enable from one holder leaves Chrome disarmed.
-  - A queued request on a released session gets an error reply.
-- Five relay test files: 166 pass, 0 fail.
+- Real headless Chromium with the extension: after A disables auto-attach, B's cross-site frame still answers and sees no detach; this fails on `main` with `Target closed`.
+- Focused suite: 127 pass, 0 fail. New failed-disable/departure cases fail without the rollback cleanup; the multi-session disconnect case fails without per-tab disarm deduplication.
+- Coding-agent typecheck passes. Changed TypeScript files pass `oxfmt --check`; CHANGELOG formatting reports the same missing blank line on `origin/main`.
+- Full `bun check` was not run: it includes Rust checks; this PR changes no Rust.
 
 ```sh
-cd packages/coding-agent && bun test test/tools/browser-relay-bridge.test.ts test/tools/browser-relay-tab-isolation.test.ts
+cd packages/coding-agent
+bun test test/tools/browser-relay-bridge.test.ts test/tools/browser-relay-tab-isolation.test.ts test/eval/process-entry-import.test.ts test/cli-computer-lazy.test.ts
 ```
 
 ---
