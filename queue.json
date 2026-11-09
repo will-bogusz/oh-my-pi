@@ -68605,7 +68605,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-09T03:05:40Z",
+  "checked": "2026-11-09T04:06:14Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -68733,52 +68733,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-02T04:03:14Z",
-    "kind": "openable",
-    "id": "computer-ui-quiet",
-    "title": "fix(computer): wait for the app to finish reacting before the next read or input"
-   },
-   {
-    "at": "2026-11-02T04:03:14Z",
-    "kind": "openable",
-    "id": "factory-droid-110-models",
-    "title": "feat(ai,catalog): add the Factory Droid models droid 1.1.0 serves"
-   },
-   {
-    "at": "2026-11-02T04:03:14Z",
-    "kind": "openable",
-    "id": "factory-droid-opus-refusal-fallback",
-    "title": "feat(ai,catalog): give Factory Droid Opus 5.5 the Opus 5 refusal fallback"
-   },
-   {
-    "at": "2026-11-02T04:03:14Z",
-    "kind": "unopenable",
-    "id": "iphone-mirror-not-showing",
-    "title": "fix(natives): refuse iPhone Mirroring input while the mirror is not showing the phone",
-    "why": "opened as #17755"
-   },
-   {
-    "at": "2026-11-02T04:03:14Z",
-    "kind": "unopenable",
-    "id": "iphone-mirror-pointer",
-    "title": "fix(natives): keep background iPhone Mirroring taps reaching the phone after a takeover tap",
-    "why": "opened as #17756"
-   },
-   {
-    "at": "2026-11-02T04:03:14Z",
-    "kind": "unopenable",
-    "id": "macos-capture-geometry",
-    "title": "fix(natives): match macOS window screenshots to the window on screen",
-    "why": "opened as #17757"
-   },
-   {
-    "at": "2026-11-02T04:03:14Z",
-    "kind": "unopenable",
-    "id": "persist-tabs-exit",
-    "title": "fix(browser): keep persist relay tabs open when the session ends",
-    "why": "opened as #17751"
-   },
    {
     "at": "2026-11-02T05:04:59Z",
     "kind": "unopenable",
@@ -72879,7 +72833,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-09T03:05:41.043772Z",
+  "at": "2026-11-09T04:06:15.150854Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
