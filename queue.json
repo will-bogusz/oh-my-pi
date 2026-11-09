@@ -69012,7 +69012,7 @@
    "branch": "will/role-selectors-followup",
    "title": "fix(coding-agent): preserve role selectors across locales and document waits",
    "area": "browser",
-   "priority": "P1",
+   "priority": "P0",
    "needs": [],
    "base": "98eacbbc8d1b98eb6582302f407c647c0fb38f6e",
    "body": "bodies/role-selectors-followup.md",
@@ -69022,7 +69022,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/role-selectors-followup",
    "host": "MacBook-Pro",
    "added": "2026-11-09T22:54:23Z",
-   "updated": "2026-11-09T23:02:30Z",
+   "updated": "2026-11-09T23:15:55Z",
    "note": "",
    "built": [
     {
