@@ -68852,7 +68852,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-libei-env-race",
    "host": "MacBook-Pro",
    "added": "2026-11-09T20:39:55Z",
-   "updated": "2026-11-09T20:49:54Z",
+   "updated": "2026-11-09T20:50:13Z",
    "note": "",
    "built": [
     {
@@ -68915,7 +68915,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-11-09T20:49:54Z"
+   "opened": "2026-11-09T20:49:54Z",
+   "readied": "2026-11-09T20:50:13Z"
   }
  ],
  "watch": {
