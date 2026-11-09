@@ -68605,7 +68605,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-09T01:33:53Z",
+  "checked": "2026-11-09T02:04:28Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -68733,31 +68733,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-02T02:00:55Z",
-    "kind": "openable",
-    "id": "rich-editor-fill-followup",
-    "title": "fix(browser): stop rich-text fill landing before the old text or outside the editor"
-   },
-   {
-    "at": "2026-11-02T02:00:55Z",
-    "kind": "openable",
-    "id": "snapcompact-think-legend",
-    "title": "fix(snapcompact,coding-agent): drop an archive's reasoning when its summary declares none"
-   },
-   {
-    "at": "2026-11-02T02:00:55Z",
-    "kind": "openable",
-    "id": "switch-remote-reexpand",
-    "title": "fix(agent,coding-agent): read the history behind an OpenAI remote compaction after a model switch"
-   },
-   {
-    "at": "2026-11-02T02:00:55Z",
-    "kind": "unopenable",
-    "id": "text-reader-usage-shift",
-    "title": "fix(coding-agent): price a text-only fallback's archive text, not the failed request's frames, in the fit check",
-    "why": "plan: wait (conflicts with switch-remote-reexpand in packages/coding-agent/src/session/session-maintenance.ts)"
-   },
    {
     "at": "2026-11-02T02:31:41Z",
     "kind": "unopenable",
@@ -72956,7 +72931,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-09T01:03:08.499484Z",
+  "at": "2026-11-09T02:04:29.407904Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
