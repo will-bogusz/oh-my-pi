@@ -68654,17 +68654,13 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-09T16:17:31Z",
+  "checked": "2026-11-09T16:48:00Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
    "role-selectors-cdp": {
     "since": "2026-11-08T08:44:06Z",
     "title": "fix(coding-agent): resolve Chromium role selectors through Chrome's accessibility tree"
-   },
-   "upload-stall-error": {
-    "since": "2026-11-09T16:17:31Z",
-    "title": "fix(ai): say whether an Anthropic request body finished uploading when its connection drops"
    }
   },
   "conflicts": {
@@ -68715,7 +68711,8 @@
    18013,
    18125,
    18222,
-   18353
+   18353,
+   18624
   ],
   "post_merge": {
    "15282": {
@@ -70414,6 +70411,13 @@
     "kind": "openable",
     "id": "upload-stall-error",
     "title": "fix(ai): say whether an Anthropic request body finished uploading when its connection drops"
+   },
+   {
+    "at": "2026-11-09T16:48:00Z",
+    "kind": "unopenable",
+    "id": "upload-stall-error",
+    "title": "fix(ai): say whether an Anthropic request body finished uploading when its connection drops",
+    "why": "opened as #18624"
    }
   ]
  },
@@ -72701,12 +72705,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-09T16:17:32.806731Z",
+  "at": "2026-11-09T16:48:00.906362Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 1,
+   "left": 7
   },
   "rows": [
    {
@@ -72816,6 +72820,23 @@
     ],
     "needs": [],
     "created": "2026-11-03T02:14:16Z"
+   },
+   {
+    "id": "upload-stall-error",
+    "label": "#18624",
+    "number": 18624,
+    "state": "open",
+    "area": "other",
+    "priority": "P1",
+    "title": "fix(ai): say whether an Anthropic request body finished uploading when its connection drops",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-09T16:23:43Z"
    },
    {
     "id": "print-hold",
@@ -73459,23 +73480,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-31T21:07:28Z"
-   },
-   {
-    "id": "upload-stall-error",
-    "label": "upload-stall-error",
-    "number": null,
-    "state": "queued",
-    "area": "other",
-    "priority": null,
-    "title": "fix(ai): say whether an Anthropic request body finished uploading when its connection drops",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-09T16:12:04Z"
    },
    {
     "id": "wire-delta-count",

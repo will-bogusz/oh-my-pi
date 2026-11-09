@@ -1,9 +1,9 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-09 16:47Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-09 16:49Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-09 16:17Z on goliath; groups below are from it, states from the manifest)
+**Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-09 16:48Z on goliath; groups below are from it, states from the manifest)
 **Counts:** openable now 1, conflict-held 9, stacked 11, held 6, open PRs 17; merged 259, closed 29
 
 ## Openable now (1)
@@ -73,4 +73,4 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-09
 | [#18353](https://github.com/can1357/oh-my-pi/pull/18353) | wayland-pipewire-dlopen | fix(natives): load libpipewire at runtime so released addons capture on Wayland | computer | P2 | 2d | rebase; opened over P2 #18013 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-pipewire-dlopen) |
 | [#18013](https://github.com/can1357/oh-my-pi/pull/18013) | wayland-ei-text | feat(natives): type text the wayland layout lacks through libei text | natives | P2 | 5d | rebase; rebases after #18353 merges | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-ei-text) |
 | [#18125](https://github.com/can1357/oh-my-pi/pull/18125) | anthropic-web-search | fix(ai,coding-agent): keep Anthropic web search queries intact, always search, and report refusals | other | P2 | 4d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/anthropic-web-search) |
-| [#18624](https://github.com/can1357/oh-my-pi/pull/18624) | upload-stall-error | fix(ai): say whether an Anthropic request body finished uploading when its connection drops | other | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/upload-stall-error) |
+| [#18624](https://github.com/can1357/oh-my-pi/pull/18624) | upload-stall-error | fix(ai): say whether an Anthropic request body finished uploading when its connection drops | other | P1 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/upload-stall-error) |
