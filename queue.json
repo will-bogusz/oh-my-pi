@@ -72661,8 +72661,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-09T15:15:56.034618Z",
-  "host": "goliath",
+  "at": "2026-11-09T16:12:18.048788Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -73419,6 +73419,25 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-31T21:07:28Z"
+   },
+   {
+    "id": "upload-stall-error",
+    "label": "upload-stall-error",
+    "number": null,
+    "state": "queued",
+    "area": "other",
+    "priority": null,
+    "title": "fix(ai): say whether an Anthropic request body finished uploading when its connection drops",
+    "action": "held",
+    "reasons": [
+     "held: Main, 2026-11-09: waiting on Will's own-words sentence for ## What (body has an OWN-WORDS placeholder)"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-09T16:12:04Z"
    },
    {
     "id": "wire-delta-count",
