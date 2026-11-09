@@ -68809,7 +68809,7 @@
    "area": "browser",
    "priority": "P1",
    "needs": [],
-   "base": "c01750ac324bc165e845fbe4aad32ee56486b802",
+   "base": "98eacbbc8d1b98eb6582302f407c647c0fb38f6e",
    "body": "bodies/relay-autoattach-shared.md",
    "state": "open",
    "pr": 18657,
@@ -68817,9 +68817,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-autoattach-shared",
    "host": "MacBook-Pro",
    "added": "2026-11-09T18:05:09Z",
-   "updated": "2026-11-09T22:45:30Z",
+   "updated": "2026-11-09T22:45:40Z",
    "note": "",
-   "advanced": "2026-11-09T22:24:17Z",
+   "advanced": "2026-11-09T22:45:40Z",
    "built": [
     {
      "with": "#16274",
