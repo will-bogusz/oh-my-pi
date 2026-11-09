@@ -1,10 +1,10 @@
 ## What
 
-<!-- OWN-WORDS: Will's sentence goes here, first. -->
+I had a long session where a ~6 MB request kept stalling mid-upload and omp retried for over half an hour saying only "Connection error.", so now the error says whether the body was still uploading or already sent, and how big it was.
 
 An Anthropic turn whose connection drops before any response now says how far the request got, instead of a bare `Connection error.`:
 
-| Where the connection dropped | `main` | This PR |
+| Where the connection dropped | `main` | This PR (example values) |
 |---|---|---|
 | While the request body is still uploading | `Connection error.` | `Connection error: connection lost after 15.3s while uploading the 6.2MB request body; no response received (ECONNRESET).` |
 | After the whole body was sent, before a response | `Connection error.` | `Connection error: connection lost after 20.1s, after the 6.2MB request body was sent and before any response (ECONNRESET).` |
@@ -14,7 +14,7 @@ The error is still an `AnthropicConnectionError`, so retries treat it exactly as
 
 ## Why
 
-A long session sent a 6.2 MB (gzip) request over a link that resets connections about 15 s into a saturated upload. Every attempt died mid-upload, omp retried for about 37 minutes, and the session ended with `Retry budget exhausted after 10 retries: Connection error.` Nothing said the body never finished uploading; finding that took `netstat` (Send-Q stuck at 3-4 MB) and a request dump. With the size and upload state in the message, the first failure points at the request size and the uplink.
+A long session's ~6 MB request stalled mid-upload, the server reset the connection after about 15 s, and omp retried for about 37 minutes, ending with `Retry budget exhausted after 10 retries: Connection error.` Nothing said the body never finished uploading; finding that took `netstat` (Send-Q stuck) and a request dump. With the size and upload state in the message, the first failure points at the upload.
 
 How it works: `coworkFetch`, the `node:https` transport first-party Anthropic requests use, notes when TLS is up and when the request emits `finish` (the whole body handed to the socket). A request error after connect and before response headers becomes a `ConnectionLostBeforeResponseError` with the original error as `cause`, so code- and text-based classification still see it, and `AnthropicConnectionError` uses its sentence. Errors before the connection is up, and aborts and timeouts, keep their own errors.
 
