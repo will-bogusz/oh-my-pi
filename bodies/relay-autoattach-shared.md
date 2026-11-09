@@ -8,7 +8,7 @@ Reproduced on `main` (`21f1188cf88`) with two puppeteer connections to the relay
 
 Every client of a relay tab shares one Chrome debugger attachment, so auto-attach is a tab-wide switch in Chrome. The bridge forwarded each client's `Target.setAutoAttach` to Chrome as it came, so the last client to send one decided for every client.
 
-- **Per-holder intent.** A session switching auto-attach off gets local child detaches while Chrome keeps the children attached for other holders.
+- **Per-holder intent.** A session switching auto-attach off gets local child detaches and cannot keep sending commands to those children, while Chrome keeps them attached for other holders.
 - **Last holder turns it off.** Releasing the final armed session sends one disable per tab, including when a pending disable fails after its holder departs.
 - **Serialized transitions.** Auto-attach reuses `#serializeSwitches` but stays outside the `{ enabled }` table because its parameters and child-session ownership differ.
 
@@ -17,7 +17,7 @@ Child-session-scoped auto-attach is unchanged. Cleanup is best-effort: retrying 
 ## Testing
 
 - Real headless Chromium with the extension: after A disables auto-attach, B's cross-site frame still answers and sees no detach; this fails on `main` with `Target closed`.
-- Focused suite: 127 pass, 0 fail. New failed-disable/departure cases fail without the rollback cleanup; the multi-session disconnect case fails without per-tab disarm deduplication.
+- Focused suite: 127 pass, 0 fail. Negative controls fail without departed-holder rollback cleanup, per-tab disarm deduplication, or rejection of commands to locally detached children.
 - Coding-agent typecheck and `oxfmt --check` on all four changed files pass.
 - Full `bun check` was not run: it includes Rust checks; this PR changes no Rust.
 
