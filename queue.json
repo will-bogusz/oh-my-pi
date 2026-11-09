@@ -68925,10 +68925,15 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-09T21:54:42Z",
+  "checked": "2026-11-09T22:25:21Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {},
+  "openable": {
+   "relay-autoattach-shared": {
+    "since": "2026-11-09T22:25:21Z",
+    "title": "fix(browser-relay): keep a shared child frame attached when one connection turns auto-attach off"
+   }
+  },
   "conflicts": {
    "#16553": {
     "since": "2026-11-04T07:29:23Z",
@@ -68952,8 +68957,24 @@
     ]
    }
   },
-  "merged_through": "2026-11-08T08:40:06Z",
-  "unreleased": {},
+  "merged_through": "2026-11-09T22:18:38Z",
+  "unreleased": {
+   "18649": {
+    "title": "test(natives): unset LIBEI_SOCKET under the env lock in the Wayland no-portal test",
+    "merge_commit": "2e1c411e317f19222478a593e86e8c874b83e38b",
+    "merged_at": "2026-11-09T22:16:09Z"
+   },
+   "18632": {
+    "title": "fix(coding-agent): resolve Chromium role selectors through Chrome's accessibility tree",
+    "merge_commit": "0c740e39652b83516103538b63225385a945bf6c",
+    "merged_at": "2026-11-09T22:17:05Z"
+   },
+   "17831": {
+    "title": "fix(coding-agent): let background relay and app.cdp_url tabs take omp's clicks and keys",
+    "merge_commit": "03fcac6f9900cab2b31ec9924e8cbe31d2bf5def",
+    "merged_at": "2026-11-09T22:18:38Z"
+   }
+  },
   "ready": [
    15128,
    15130,
@@ -68964,7 +68985,6 @@
    17610,
    17756,
    17757,
-   17831,
    17894,
    17897,
    18013,
@@ -68972,9 +68992,7 @@
    18222,
    18353,
    18624,
-   18632,
-   18643,
-   18649
+   18643
   ],
   "post_merge": {
    "15282": {
@@ -68999,6 +69017,12 @@
     "title": "fix(agent,coding-agent): read the history behind an OpenAI remote compaction after a model switch",
     "merge_commit": "4e083b6058b99699f2c347210761b9ba69f518fc",
     "merged_at": "2026-11-08T08:40:06Z",
+    "findings": []
+   },
+   "17831": {
+    "title": "fix(coding-agent): let background relay and app.cdp_url tabs take omp's clicks and keys",
+    "merge_commit": "03fcac6f9900cab2b31ec9924e8cbe31d2bf5def",
+    "merged_at": "2026-11-09T22:18:38Z",
     "findings": []
    },
    "17893": {
@@ -69041,6 +69065,43 @@
     "title": "fix(coding-agent): preserve eval state after late tool rejections",
     "merge_commit": "dc949c3e0714bbfe3cbde272db38d7e41f8ca0e6",
     "merged_at": "2026-11-08T08:40:06Z",
+    "findings": []
+   },
+   "18632": {
+    "title": "fix(coding-agent): resolve Chromium role selectors through Chrome's accessibility tree",
+    "merge_commit": "0c740e39652b83516103538b63225385a945bf6c",
+    "merged_at": "2026-11-09T22:17:05Z",
+    "findings": [
+     {
+      "bot": "chatgpt-codex-connector",
+      "severity": "P1",
+      "path": "packages/coding-agent/src/tools/browser/tern/page-kit.ts",
+      "end": 587,
+      "url": "https://github.com/can1357/oh-my-pi/pull/18632#pullrequestreview-5833713075",
+      "addressed_by": null
+     },
+     {
+      "bot": "chatgpt-codex-connector",
+      "severity": "P2",
+      "path": "packages/coding-agent/src/tools/browser/query-handlers.ts",
+      "end": 850,
+      "url": "https://github.com/can1357/oh-my-pi/pull/18632#pullrequestreview-5833713075",
+      "addressed_by": null
+     },
+     {
+      "bot": "chatgpt-codex-connector",
+      "severity": "P2",
+      "path": "packages/coding-agent/src/tools/browser/query-handlers.ts",
+      "end": 709,
+      "url": "https://github.com/can1357/oh-my-pi/pull/18632#pullrequestreview-5833713075",
+      "addressed_by": null
+     }
+    ]
+   },
+   "18649": {
+    "title": "test(natives): unset LIBEI_SOCKET under the env lock in the Wayland no-portal test",
+    "merge_commit": "2e1c411e317f19222478a593e86e8c874b83e38b",
+    "merged_at": "2026-11-09T22:16:09Z",
     "findings": []
    }
   },
@@ -70566,6 +70627,72 @@
     "files": [
      "MODULE.bazel.lock"
     ]
+   },
+   {
+    "at": "2026-11-09T22:25:21Z",
+    "kind": "merged",
+    "number": 18649,
+    "title": "test(natives): unset LIBEI_SOCKET under the env lock in the Wayland no-portal test",
+    "merged_by": "H4vC",
+    "maintainer_commits": 1
+   },
+   {
+    "at": "2026-11-09T22:25:21Z",
+    "kind": "merged",
+    "number": 18632,
+    "title": "fix(coding-agent): resolve Chromium role selectors through Chrome's accessibility tree",
+    "merged_by": "H4vC",
+    "maintainer_commits": 1
+   },
+   {
+    "at": "2026-11-09T22:25:21Z",
+    "kind": "merged",
+    "number": 17831,
+    "title": "fix(coding-agent): let background relay and app.cdp_url tabs take omp's clicks and keys",
+    "merged_by": "H4vC",
+    "maintainer_commits": 1
+   },
+   {
+    "at": "2026-11-09T22:25:21Z",
+    "kind": "openable",
+    "id": "relay-autoattach-shared",
+    "title": "fix(browser-relay): keep a shared child frame attached when one connection turns auto-attach off"
+   },
+   {
+    "at": "2026-11-09T22:25:21Z",
+    "kind": "post-merge",
+    "number": 18632,
+    "title": "fix(coding-agent): resolve Chromium role selectors through Chrome's accessibility tree",
+    "bot": "chatgpt-codex-connector",
+    "severity": "P1",
+    "path": "packages/coding-agent/src/tools/browser/tern/page-kit.ts",
+    "end": 587,
+    "url": "https://github.com/can1357/oh-my-pi/pull/18632#pullrequestreview-5833713075",
+    "addressed_by": null
+   },
+   {
+    "at": "2026-11-09T22:25:21Z",
+    "kind": "post-merge",
+    "number": 18632,
+    "title": "fix(coding-agent): resolve Chromium role selectors through Chrome's accessibility tree",
+    "bot": "chatgpt-codex-connector",
+    "severity": "P2",
+    "path": "packages/coding-agent/src/tools/browser/query-handlers.ts",
+    "end": 850,
+    "url": "https://github.com/can1357/oh-my-pi/pull/18632#pullrequestreview-5833713075",
+    "addressed_by": null
+   },
+   {
+    "at": "2026-11-09T22:25:21Z",
+    "kind": "post-merge",
+    "number": 18632,
+    "title": "fix(coding-agent): resolve Chromium role selectors through Chrome's accessibility tree",
+    "bot": "chatgpt-codex-connector",
+    "severity": "P2",
+    "path": "packages/coding-agent/src/tools/browser/query-handlers.ts",
+    "end": 709,
+    "url": "https://github.com/can1357/oh-my-pi/pull/18632#pullrequestreview-5833713075",
+    "addressed_by": null
    }
   ]
  },
