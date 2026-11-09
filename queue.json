@@ -72906,12 +72906,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-09T19:20:38.880292Z",
-  "host": "goliath",
+  "at": "2026-11-09T19:48:27.828868Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 1,
+   "left": 7
   },
   "rows": [
    {
@@ -73057,6 +73057,23 @@
     "created": "2026-11-09T18:02:36Z"
    },
    {
+    "id": "gtk4-atspi-bounds",
+    "label": "#18643",
+    "number": 18643,
+    "state": "open",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): find GTK4 app elements on X11 and stop marking them disabled",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-09T19:46:58Z"
+   },
+   {
     "id": "print-hold",
     "label": "#15508",
     "number": 15508,
@@ -73115,10 +73132,8 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in MODULE.bazel.lock"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "opened over P2 #18013",
     "over": [],
     "paired": [
@@ -73206,8 +73221,10 @@
     "area": "natives",
     "priority": "P2",
     "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in MODULE.bazel.lock"
+    ],
     "note": "rebases after #18353 merges",
     "over": [],
     "paired": [
@@ -73244,6 +73261,7 @@
     "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool",
     "action": "wait",
     "reasons": [
+     "conflicts with #18643 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18353 in MODULE.bazel.lock, crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #18013 in MODULE.bazel.lock",
      "conflicts with main in MODULE.bazel.lock, crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs"
@@ -73252,6 +73270,7 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#18643",
      "#18353",
      "#18013"
     ],
@@ -73268,16 +73287,18 @@
     "title": "fix(natives): read each AT-SPI element in two concurrent rounds",
     "action": "wait",
     "reasons": [
-     "needs atspi-unanswered-app (queued), gtk4-atspi-bounds (queued)",
+     "needs atspi-unanswered-app (queued), #18643 (open)",
+     "conflicts with #18643 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18353 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #18013 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/libei.rs",
      "its need atspi-unanswered-app conflicts with main in MODULE.bazel.lock, crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs",
-     "its need gtk4-atspi-bounds conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
+     "its need #18643 conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#18643",
      "#18353",
      "#18013"
     ],
@@ -73689,23 +73710,6 @@
      "wire-delta-count"
     ],
     "created": "2026-11-03T01:54:17Z"
-   },
-   {
-    "id": "gtk4-atspi-bounds",
-    "label": "gtk4-atspi-bounds",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": null,
-    "title": "fix(natives): find GTK4 app elements on X11 and stop marking them disabled",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-03T05:52:19Z"
    },
    {
     "id": "text-reader-usage-shift",
