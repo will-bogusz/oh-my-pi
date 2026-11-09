@@ -68810,13 +68810,13 @@
    "needs": [],
    "base": "c01750ac324bc165e845fbe4aad32ee56486b802",
    "body": "bodies/relay-autoattach-shared.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18657,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-autoattach-shared",
    "host": "MacBook-Pro",
    "added": "2026-11-09T18:05:09Z",
-   "updated": "2026-11-09T22:32:51Z",
+   "updated": "2026-11-09T22:33:47Z",
    "note": "",
    "advanced": "2026-11-09T22:24:17Z",
    "built": [
@@ -68899,7 +68899,8 @@
      "at": "2026-11-09T22:32:48Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-09T22:33:47Z"
   },
   {
    "id": "upload-stall-error-all-providers",
