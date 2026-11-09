@@ -69120,15 +69120,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-09T22:56:08Z",
+  "checked": "2026-11-09T23:26:44Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {
-   "role-selectors-followup": {
-    "since": "2026-11-09T22:56:08Z",
-    "title": "fix(coding-agent): preserve role selectors across locales and document waits"
-   }
-  },
+  "openable": {},
   "conflicts": {
    "#16553": {
     "since": "2026-11-04T07:29:23Z",
@@ -69164,7 +69159,8 @@
    18222,
    18353,
    18624,
-   18657
+   18657,
+   18658
   ],
   "post_merge": {
    "17747": {
@@ -69232,7 +69228,7 @@
       "path": "packages/coding-agent/src/tools/browser/tern/page-kit.ts",
       "end": 587,
       "url": "https://github.com/can1357/oh-my-pi/pull/18632#pullrequestreview-5833713075",
-      "addressed_by": null
+      "addressed_by": 18658
      },
      {
       "bot": "chatgpt-codex-connector",
@@ -69240,7 +69236,7 @@
       "path": "packages/coding-agent/src/tools/browser/query-handlers.ts",
       "end": 850,
       "url": "https://github.com/can1357/oh-my-pi/pull/18632#pullrequestreview-5833713075",
-      "addressed_by": null
+      "addressed_by": 18658
      },
      {
       "bot": "chatgpt-codex-connector",
@@ -69248,7 +69244,7 @@
       "path": "packages/coding-agent/src/tools/browser/query-handlers.ts",
       "end": 709,
       "url": "https://github.com/can1357/oh-my-pi/pull/18632#pullrequestreview-5833713075",
-      "addressed_by": null
+      "addressed_by": 18658
      }
     ]
    },
@@ -70902,6 +70898,13 @@
     "id": "relay-autoattach-shared",
     "title": "fix(browser-relay): keep a shared child frame attached when one connection turns auto-attach off",
     "why": "opened as #18657"
+   },
+   {
+    "at": "2026-11-09T23:26:44Z",
+    "kind": "unopenable",
+    "id": "role-selectors-followup",
+    "title": "fix(coding-agent): preserve role selectors across locales and document waits",
+    "why": "opened as #18658"
    }
   ]
  },
