@@ -68618,8 +68618,37 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/upload-stall-error",
    "host": "MacBook-Pro",
    "added": "2026-11-09T16:12:04Z",
-   "updated": "2026-11-09T16:16:24Z",
-   "note": ""
+   "updated": "2026-11-09T16:22:38Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#17610",
+     "code": "f36ad179532a4c5245c21037e08d80e0ea055314",
+     "with_code": "714b4c7140abbaab7d5113091311d768144710a6",
+     "tip": "e121beebf6bcd60b45db2f5000e88ccf9bf6286b",
+     "with_tip": "25d71ca1e95fcc475f8fc13c5c2409ce98295d68",
+     "at": "2026-11-09T16:22:35Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#18125",
+     "code": "f36ad179532a4c5245c21037e08d80e0ea055314",
+     "with_code": "5402656ebc173c662e80a512b0822fe7187eb1f0",
+     "tip": "e121beebf6bcd60b45db2f5000e88ccf9bf6286b",
+     "with_tip": "c8f8f192d176e637d1848a05d4958b820fe86f0b",
+     "at": "2026-11-09T16:22:38Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#15130",
+     "code": "f36ad179532a4c5245c21037e08d80e0ea055314",
+     "with_code": "0060b29986d9f3944914810d980c3877111db246",
+     "tip": "e121beebf6bcd60b45db2f5000e88ccf9bf6286b",
+     "with_tip": "63d2562c068c206434d5c611dcb02b871a352574",
+     "at": "2026-11-09T16:22:38Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   }
  ],
  "watch": {
