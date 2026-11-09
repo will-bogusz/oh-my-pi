@@ -68623,13 +68623,17 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-09T15:46:29Z",
+  "checked": "2026-11-09T16:17:31Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
    "role-selectors-cdp": {
     "since": "2026-11-08T08:44:06Z",
     "title": "fix(coding-agent): resolve Chromium role selectors through Chrome's accessibility tree"
+   },
+   "upload-stall-error": {
+    "since": "2026-11-09T16:17:31Z",
+    "title": "fix(ai): say whether an Anthropic request body finished uploading when its connection drops"
    }
   },
   "conflicts": {
@@ -70373,6 +70377,12 @@
     "number": 17747,
     "title": "fix(agent,coding-agent): read the history behind an OpenAI remote compaction after a model switch",
     "tag": "v18.18.2"
+   },
+   {
+    "at": "2026-11-09T16:17:31Z",
+    "kind": "openable",
+    "id": "upload-stall-error",
+    "title": "fix(ai): say whether an Anthropic request body finished uploading when its connection drops"
    }
   ]
  },
@@ -72660,8 +72670,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-09T16:16:28.159918Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-09T16:17:32.806731Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 0,
