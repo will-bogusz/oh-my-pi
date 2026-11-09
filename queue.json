@@ -68842,7 +68842,7 @@
    "branch": "will/wayland-libei-env-race",
    "title": "test(natives): unset LIBEI_SOCKET under the env lock in the Wayland no-portal test",
    "area": "natives",
-   "priority": "P1",
+   "priority": "P0",
    "needs": [],
    "base": "7027a619a41c1eccdae6a5f07de91c43e2a487e3",
    "body": "bodies/wayland-libei-env-race.md",
@@ -68852,7 +68852,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-libei-env-race",
    "host": "MacBook-Pro",
    "added": "2026-11-09T20:39:55Z",
-   "updated": "2026-11-09T20:50:13Z",
+   "updated": "2026-11-09T20:52:56Z",
    "note": "",
    "built": [
     {
