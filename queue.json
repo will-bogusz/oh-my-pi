@@ -68654,7 +68654,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-09T16:48:00Z",
+  "checked": "2026-11-09T17:17:58Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -68783,13 +68783,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-02T17:16:36Z",
-    "kind": "unopenable",
-    "id": "factory-droid-gemini-4-argon-110",
-    "title": "feat(ai,catalog,coding-agent): add Factory Droid Gemini 4 Argon with its request dialect",
-    "why": "plan: wait (conflicts with main in packages/coding-agent/test/session/provider-image-budget.test.ts)"
-   },
    {
     "at": "2026-11-02T19:49:08Z",
     "kind": "released",
