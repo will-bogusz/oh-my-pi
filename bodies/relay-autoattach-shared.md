@@ -10,7 +10,7 @@ Every client of a relay tab shares one Chrome debugger attachment, so auto-attac
 
 - **Per-holder intent.** Each session records whether it wants auto-attach. An `autoAttach: false` while another connection still has it on is answered locally. Only the requesting connection forgets its children: it gets `Target.detachedFromTarget` for them, and Chrome keeps them for the others.
 - **Last holder turns it off.** When the last armed session is released or its connection closes, the bridge sends `autoAttach: false` to Chrome, so a registry-held tab doesn't keep auto-attaching for nobody.
-- **One transition at a time per tab.** Auto-attach changes go through the same per-tab queue file-chooser interception already uses (`serializeTabTransition`, generalized from `serializeInterception`). Overlapping requests then can't settle out of order, and a failed enable's rollback can't undo another holder's state. A queued request whose session was released meanwhile gets an `Unknown session id` error instead of no reply.
+- **One transition at a time per tab.** Auto-attach changes go through the per-tab queue the tab-wide switches already use (`#serializeSwitches`), but stay out of the `{ enabled }` switch table, since auto-attach takes other parameters and owns child sessions. Overlapping requests then can't settle out of order, and a failed enable's rollback can't undo another holder's state. A queued request whose session was released meanwhile gets an `Unknown session id` error instead of no reply.
 
 Child-session-scoped `Target.setAutoAttach` is unchanged: it is out of this page-scoped fix.
 
