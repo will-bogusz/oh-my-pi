@@ -68839,15 +68839,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-09T19:20:37Z",
+  "checked": "2026-11-09T19:51:24Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {
-   "gtk4-atspi-bounds": {
-    "since": "2026-11-09T18:49:39Z",
-    "title": "fix(natives): find GTK4 app elements on X11 and stop marking them disabled"
-   }
-  },
+  "openable": {},
   "conflicts": {
    "#16553": {
     "since": "2026-11-04T07:29:23Z",
@@ -68863,9 +68858,9 @@
      "packages/ai/src/providers/openai-shared.ts"
     ]
    },
-   "#18353": {
-    "since": "2026-11-08T09:45:12Z",
-    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
+   "#18013": {
+    "since": "2026-11-09T19:51:24Z",
+    "title": "feat(natives): type text the wayland layout lacks through libei text",
     "files": [
      "MODULE.bazel.lock"
     ]
@@ -68891,7 +68886,8 @@
    18222,
    18353,
    18624,
-   18632
+   18632,
+   18643
   ],
   "post_merge": {
    "15282": {
@@ -68962,137 +68958,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-02T19:49:08Z",
-    "kind": "released",
-    "number": 17778,
-    "title": "fix(browser): stop later input steps after timeout and let relay page waits use the call deadline",
-    "tag": "v18.16.0"
-   },
-   {
-    "at": "2026-11-02T19:49:08Z",
-    "kind": "released",
-    "number": 17772,
-    "title": "feat(ai,catalog): give Factory Droid Opus 5.5 the Opus 5 refusal fallback",
-    "tag": "v18.16.0"
-   },
-   {
-    "at": "2026-11-02T19:49:08Z",
-    "kind": "released",
-    "number": 17768,
-    "title": "fix(browser): report Chrome's relay detach to a call running in a cross-site frame",
-    "tag": "v18.16.0"
-   },
-   {
-    "at": "2026-11-02T19:49:08Z",
-    "kind": "released",
-    "number": 17767,
-    "title": "fix(browser): press the button and count tab.click and frame.click are asked for",
-    "tag": "v18.16.0"
-   },
-   {
-    "at": "2026-11-02T19:49:08Z",
-    "kind": "released",
-    "number": 17766,
-    "title": "feat(ai,catalog): add the Factory Droid models droid 1.1.0 serves",
-    "tag": "v18.16.0"
-   },
-   {
-    "at": "2026-11-02T19:49:08Z",
-    "kind": "released",
-    "number": 17755,
-    "title": "fix(natives): refuse iPhone Mirroring input while the mirror is not showing the phone",
-    "tag": "v18.16.0"
-   },
-   {
-    "at": "2026-11-02T19:49:08Z",
-    "kind": "released",
-    "number": 17751,
-    "title": "fix(browser): keep persist relay tabs open when the session ends",
-    "tag": "v18.16.0"
-   },
-   {
-    "at": "2026-11-02T19:49:08Z",
-    "kind": "released",
-    "number": 17746,
-    "title": "fix(task): keep a cold-revived subagent's xd:// devices mounted",
-    "tag": "v18.16.0"
-   },
-   {
-    "at": "2026-11-02T19:49:08Z",
-    "kind": "released",
-    "number": 17745,
-    "title": "fix(snapcompact,coding-agent): drop an archive's reasoning when its summary declares none",
-    "tag": "v18.16.0"
-   },
-   {
-    "at": "2026-11-02T19:49:08Z",
-    "kind": "released",
-    "number": 17742,
-    "title": "fix(browser): stop rich-text fill landing before the old text or outside the editor",
-    "tag": "v18.16.0"
-   },
-   {
-    "at": "2026-11-02T19:49:08Z",
-    "kind": "released",
-    "number": 17622,
-    "title": "fix(coding-agent): keep each message's date across resume and subagent revival",
-    "tag": "v18.16.0"
-   },
-   {
-    "at": "2026-11-02T19:49:08Z",
-    "kind": "released",
-    "number": 17607,
-    "title": "fix(agent): count models without a known tokenizer in o200k, and skip thinking signatures the request strips",
-    "tag": "v18.16.0"
-   },
-   {
-    "at": "2026-11-02T19:49:08Z",
-    "kind": "released",
-    "number": 16586,
-    "title": "feat(coding-agent,tui): show which bash minimizer filter ran and how much it cut",
-    "tag": "v18.16.0"
-   },
-   {
-    "at": "2026-11-02T19:49:08Z",
-    "kind": "released",
-    "number": 16552,
-    "title": "fix(coding-agent): stop the %pip installer on cancel when /proc cannot be listed",
-    "tag": "v18.16.0"
-   },
-   {
-    "at": "2026-11-02T19:49:08Z",
-    "kind": "released",
-    "number": 16595,
-    "title": "fix(coding-agent): charge column-cut lines their shown width against the read page budget",
-    "tag": "v18.16.0"
-   },
-   {
-    "at": "2026-11-02T19:49:08Z",
-    "kind": "released",
-    "number": 16309,
-    "title": "feat(catalog,tui): show Factory Droid credit promotions in the model browser",
-    "tag": "v18.16.0"
-   },
-   {
-    "at": "2026-11-02T19:49:08Z",
-    "kind": "released",
-    "number": 16284,
-    "title": "fix(browser): keep the user's app in front when omp's relay tab opens a popup on macOS",
-    "tag": "v18.16.0"
-   },
-   {
-    "at": "2026-11-02T19:49:08Z",
-    "kind": "openable",
-    "id": "factory-droid-gemini-4-argon-110",
-    "title": "feat(ai,catalog,coding-agent): add Factory Droid Gemini 4 Argon with its request dialect"
-   },
-   {
-    "at": "2026-11-02T19:49:08Z",
-    "kind": "openable",
-    "id": "factory-droid-muse-spark-1-3",
-    "title": "feat(catalog): add Muse Spark 1.3 to Factory Droid"
-   },
    {
     "at": "2026-11-02T20:19:38Z",
     "kind": "unopenable",
@@ -70606,6 +70471,22 @@
    },
    {
     "at": "2026-11-09T18:49:39Z",
+    "kind": "conflict",
+    "label": "#18013",
+    "title": "feat(natives): type text the wayland layout lacks through libei text",
+    "files": [
+     "MODULE.bazel.lock"
+    ]
+   },
+   {
+    "at": "2026-11-09T19:51:24Z",
+    "kind": "unopenable",
+    "id": "gtk4-atspi-bounds",
+    "title": "fix(natives): find GTK4 app elements on X11 and stop marking them disabled",
+    "why": "opened as #18643"
+   },
+   {
+    "at": "2026-11-09T19:51:24Z",
     "kind": "conflict",
     "label": "#18013",
     "title": "feat(natives): type text the wayland layout lacks through libei text",
