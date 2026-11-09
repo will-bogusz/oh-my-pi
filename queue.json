@@ -68786,7 +68786,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-09T18:49:39Z",
+  "checked": "2026-11-09T19:20:37Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -68813,13 +68813,6 @@
    "#18353": {
     "since": "2026-11-08T09:45:12Z",
     "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
-    "files": [
-     "MODULE.bazel.lock"
-    ]
-   },
-   "#18013": {
-    "since": "2026-11-09T18:49:39Z",
-    "title": "feat(natives): type text the wayland layout lacks through libei text",
     "files": [
      "MODULE.bazel.lock"
     ]
@@ -72860,12 +72853,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-09T18:49:41.548943Z",
+  "at": "2026-11-09T19:20:38.880292Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 1,
-   "left": 7
+   "used": 0,
+   "left": 8
   },
   "rows": [
    {
@@ -73160,10 +73153,8 @@
     "area": "natives",
     "priority": "P2",
     "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in MODULE.bazel.lock"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "rebases after #18353 merges",
     "over": [],
     "paired": [
