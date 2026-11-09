@@ -69006,6 +69006,24 @@
    "readied": "2026-11-09T20:50:13Z",
    "advanced": "2026-11-09T21:48:44Z",
    "merged_by": "pr"
+  },
+  {
+   "id": "role-selectors-followup",
+   "branch": "will/role-selectors-followup",
+   "title": "fix(coding-agent): preserve role selectors across locales and document waits",
+   "area": "browser",
+   "priority": "P1",
+   "needs": [],
+   "base": "98eacbbc8d1b98eb6582302f407c647c0fb38f6e",
+   "body": "bodies/role-selectors-followup.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/role-selectors-followup",
+   "host": "MacBook-Pro",
+   "added": "2026-11-09T22:54:23Z",
+   "updated": "2026-11-09T22:54:23Z",
+   "note": ""
   }
  ],
  "watch": {
