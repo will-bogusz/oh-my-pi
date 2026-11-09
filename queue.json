@@ -68608,7 +68608,7 @@
    "branch": "will/upload-stall-error",
    "title": "fix(ai): say whether an Anthropic request body finished uploading when its connection drops",
    "area": "other",
-   "priority": null,
+   "priority": "P1",
    "needs": [],
    "base": "e176b37fc7d66ce83cbb8ad6c1e15ea66d8ab5d0",
    "body": "bodies/upload-stall-error.md",
@@ -68618,7 +68618,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/upload-stall-error",
    "host": "MacBook-Pro",
    "added": "2026-11-09T16:12:04Z",
-   "updated": "2026-11-09T16:24:05Z",
+   "updated": "2026-11-09T16:47:56Z",
    "note": "",
    "built": [
     {
