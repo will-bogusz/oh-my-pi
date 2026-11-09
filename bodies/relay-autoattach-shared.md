@@ -18,7 +18,7 @@ Child-session-scoped auto-attach is unchanged. Cleanup is best-effort: retrying 
 
 - Real headless Chromium with the extension: after A disables auto-attach, B's cross-site frame still answers and sees no detach; this fails on `main` with `Target closed`.
 - Focused suite: 127 pass, 0 fail. New failed-disable/departure cases fail without the rollback cleanup; the multi-session disconnect case fails without per-tab disarm deduplication.
-- Coding-agent typecheck passes. Changed TypeScript files pass `oxfmt --check`; CHANGELOG formatting reports the same missing blank line on `origin/main`.
+- Coding-agent typecheck and `oxfmt --check` on all four changed files pass.
 - Full `bun check` was not run: it includes Rust checks; this PR changes no Rust.
 
 ```sh
