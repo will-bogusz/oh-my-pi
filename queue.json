@@ -68745,6 +68745,24 @@
    ],
    "opened": "2026-11-09T16:23:45Z",
    "readied": "2026-11-09T16:24:05Z"
+  },
+  {
+   "id": "relay-autoattach-shared",
+   "branch": "will/relay-autoattach-shared",
+   "title": "fix(browser-relay): keep a shared child frame attached when one connection turns auto-attach off",
+   "area": "browser",
+   "priority": "P1",
+   "needs": [],
+   "base": "090a8057a9457c85ed7fb0971bf4cdf3646243c0",
+   "body": "bodies/relay-autoattach-shared.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-autoattach-shared",
+   "host": "MacBook-Pro",
+   "added": "2026-11-09T18:05:09Z",
+   "updated": "2026-11-09T18:05:09Z",
+   "note": ""
   }
  ],
  "watch": {
