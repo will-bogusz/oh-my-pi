@@ -68846,13 +68846,13 @@
    "needs": [],
    "base": "7027a619a41c1eccdae6a5f07de91c43e2a487e3",
    "body": "bodies/wayland-libei-env-race.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18649,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-libei-env-race",
    "host": "MacBook-Pro",
    "added": "2026-11-09T20:39:55Z",
-   "updated": "2026-11-09T20:48:37Z",
+   "updated": "2026-11-09T20:49:54Z",
    "note": "",
    "built": [
     {
@@ -68914,7 +68914,8 @@
      "at": "2026-11-09T20:48:34Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-09T20:49:54Z"
   }
  ],
  "watch": {
