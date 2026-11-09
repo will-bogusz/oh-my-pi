@@ -72812,7 +72812,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-09T19:48:27.828868Z",
+  "at": "2026-11-09T20:40:18.837888Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -73276,6 +73276,23 @@
      "#18624"
     ],
     "created": "2026-11-09T18:20:14Z"
+   },
+   {
+    "id": "wayland-libei-env-race",
+    "label": "wayland-libei-env-race",
+    "number": null,
+    "state": "queued",
+    "area": "natives",
+    "priority": "P1",
+    "title": "test(natives): unset LIBEI_SOCKET under the env lock in the Wayland no-portal test",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-09T20:39:55Z"
    },
    {
     "id": "computer-ui-quiet",
