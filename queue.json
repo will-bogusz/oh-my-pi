@@ -72660,7 +72660,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-09T16:12:18.048788Z",
+  "at": "2026-11-09T16:16:28.159918Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -73427,10 +73427,8 @@
     "area": "other",
     "priority": null,
     "title": "fix(ai): say whether an Anthropic request body finished uploading when its connection drops",
-    "action": "held",
-    "reasons": [
-     "held: Main, 2026-11-09: waiting on Will's own-words sentence for ## What (body has an OWN-WORDS placeholder)"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
