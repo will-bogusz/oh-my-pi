@@ -68786,15 +68786,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-09T17:17:58Z",
+  "checked": "2026-11-09T18:19:00Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {
-   "role-selectors-cdp": {
-    "since": "2026-11-08T08:44:06Z",
-    "title": "fix(coding-agent): resolve Chromium role selectors through Chrome's accessibility tree"
-   }
-  },
+  "openable": {},
   "conflicts": {
    "#16553": {
     "since": "2026-11-04T07:29:23Z",
@@ -68813,13 +68808,6 @@
    "#18353": {
     "since": "2026-11-08T09:45:12Z",
     "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
-    "files": [
-     "MODULE.bazel.lock"
-    ]
-   },
-   "#18013": {
-    "since": "2026-11-08T09:45:12Z",
-    "title": "feat(natives): type text the wayland layout lacks through libei text",
     "files": [
      "MODULE.bazel.lock"
     ]
@@ -68844,7 +68832,8 @@
    18125,
    18222,
    18353,
-   18624
+   18624,
+   18632
   ],
   "post_merge": {
    "15282": {
@@ -70543,6 +70532,13 @@
     "id": "upload-stall-error",
     "title": "fix(ai): say whether an Anthropic request body finished uploading when its connection drops",
     "why": "opened as #18624"
+   },
+   {
+    "at": "2026-11-09T18:19:00Z",
+    "kind": "unopenable",
+    "id": "role-selectors-cdp",
+    "title": "fix(coding-agent): resolve Chromium role selectors through Chrome's accessibility tree",
+    "why": "opened as #18632"
    }
   ]
  },
@@ -72830,8 +72826,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-09T18:05:21.924965Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-09T18:19:01.062214Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 1,
@@ -73130,10 +73126,8 @@
     "area": "natives",
     "priority": "P2",
     "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in MODULE.bazel.lock"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "rebases after #18353 merges",
     "over": [],
     "paired": [
