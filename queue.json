@@ -68605,7 +68605,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-09T04:06:14Z",
+  "checked": "2026-11-09T05:07:13Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -68733,48 +68733,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-02T05:04:59Z",
-    "kind": "unopenable",
-    "id": "tab-click-options",
-    "title": "fix(browser): press the button and count tab.click and frame.click are asked for",
-    "why": "opened as #17767"
-   },
-   {
-    "at": "2026-11-02T05:04:59Z",
-    "kind": "unopenable",
-    "id": "computer-ui-quiet",
-    "title": "fix(computer): wait for the app to finish reacting before the next read or input",
-    "why": "plan: wait (conflicts with #15282 in packages/coding-agent/src/tools/computer/worker.ts)"
-   },
-   {
-    "at": "2026-11-02T05:04:59Z",
-    "kind": "unopenable",
-    "id": "relay-frame-detach-report",
-    "title": "fix(browser): report Chrome's relay detach to a call running in a cross-site frame",
-    "why": "opened as #17768"
-   },
-   {
-    "at": "2026-11-02T05:04:59Z",
-    "kind": "unopenable",
-    "id": "iphone-mirror-key-gap",
-    "title": "perf(natives): type on iPhone Mirroring twice as fast",
-    "why": "plan: held (held: Will, 2026-11-02: robustness of the 60 ms gap on a weak wireless link unmeasured)"
-   },
-   {
-    "at": "2026-11-02T05:04:59Z",
-    "kind": "unopenable",
-    "id": "factory-droid-110-models",
-    "title": "feat(ai,catalog): add the Factory Droid models droid 1.1.0 serves",
-    "why": "opened as #17766"
-   },
-   {
-    "at": "2026-11-02T05:04:59Z",
-    "kind": "unopenable",
-    "id": "factory-droid-opus-refusal-fallback",
-    "title": "feat(ai,catalog): give Factory Droid Opus 5.5 the Opus 5 refusal fallback",
-    "why": "opened as #17772"
-   },
    {
     "at": "2026-11-02T06:05:29Z",
     "kind": "unopenable",
@@ -72833,7 +72791,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-09T04:06:15.150854Z",
+  "at": "2026-11-09T05:07:14.176716Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
