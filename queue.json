@@ -62762,7 +62762,7 @@
    "branch": "will/gtk4-atspi-bounds",
    "title": "fix(natives): find GTK4 app elements on X11 and stop marking them disabled",
    "area": "computer",
-   "priority": null,
+   "priority": "P1",
    "needs": [],
    "base": "090a8057a9457c85ed7fb0971bf4cdf3646243c0",
    "body": "bodies/gtk4-atspi-bounds.md",
@@ -62772,7 +62772,7 @@
    "worktree": "/home/will/.omp/main-wt/oh-my-pi/gtk4-atspi-bounds",
    "host": "goliath",
    "added": "2026-11-03T05:52:19Z",
-   "updated": "2026-11-09T19:47:21Z",
+   "updated": "2026-11-09T19:48:20Z",
    "note": "",
    "advanced": "2026-11-09T18:26:49Z",
    "built": [
