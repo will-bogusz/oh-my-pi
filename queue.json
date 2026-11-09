@@ -68605,7 +68605,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-09T02:35:04Z",
+  "checked": "2026-11-09T03:05:40Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -68733,30 +68733,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-02T03:02:27Z",
-    "kind": "openable",
-    "id": "persist-tabs-exit",
-    "title": "fix(browser): keep persist relay tabs open when the session ends"
-   },
-   {
-    "at": "2026-11-02T03:02:27Z",
-    "kind": "openable",
-    "id": "r2/relay-call-deadline",
-    "title": "fix(browser): stop timed-out input landing late or staying held, and let relay page waits run past 20 s"
-   },
-   {
-    "at": "2026-11-02T03:02:27Z",
-    "kind": "openable",
-    "id": "tab-click-options",
-    "title": "fix(browser): press the button and count tab.click and frame.click are asked for"
-   },
-   {
-    "at": "2026-11-02T03:02:27Z",
-    "kind": "openable",
-    "id": "relay-frame-detach-report",
-    "title": "fix(browser): report Chrome's relay detach to a call running in a cross-site frame"
-   },
    {
     "at": "2026-11-02T04:03:14Z",
     "kind": "openable",
@@ -72903,7 +72879,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-09T02:04:29.407904Z",
+  "at": "2026-11-09T03:05:41.043772Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
