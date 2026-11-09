@@ -73106,12 +73106,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-09T22:25:46.041311Z",
+  "at": "2026-11-09T22:34:38.875722Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 1,
+   "left": 7
   },
   "rows": [
    {
@@ -73223,13 +73223,13 @@
     "created": "2026-11-09T16:23:43Z"
    },
    {
-    "id": "gtk4-atspi-bounds",
-    "label": "#18643",
-    "number": 18643,
+    "id": "relay-autoattach-shared",
+    "label": "#18657",
+    "number": 18657,
     "state": "open",
-    "area": "computer",
+    "area": "browser",
     "priority": "P1",
-    "title": "fix(natives): find GTK4 app elements on X11 and stop marking them disabled",
+    "title": "fix(browser-relay): keep a shared child frame attached when one connection turns auto-attach off",
     "action": "keep",
     "reasons": [],
     "note": "",
@@ -73237,7 +73237,7 @@
     "paired": [],
     "blocked_by": [],
     "needs": [],
-    "created": "2026-11-09T19:46:58Z"
+    "created": "2026-11-09T22:33:46Z"
    },
    {
     "id": "print-hold",
@@ -73427,7 +73427,6 @@
     "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool",
     "action": "wait",
     "reasons": [
-     "conflicts with #18643 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18353 in MODULE.bazel.lock, crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #18013 in MODULE.bazel.lock",
      "conflicts with main in MODULE.bazel.lock, crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/wayland/mod.rs"
@@ -73436,7 +73435,6 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18643",
      "#18353",
      "#18013"
     ],
@@ -73453,24 +73451,20 @@
     "title": "fix(natives): read each AT-SPI element in two concurrent rounds",
     "action": "wait",
     "reasons": [
-     "needs atspi-unanswered-app (queued), #18643 (open)",
-     "conflicts with #18643 in crates/pi-natives/src/desktop/linux/ax.rs",
+     "needs atspi-unanswered-app (queued)",
      "conflicts with #18353 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #18013 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/libei.rs",
-     "its need atspi-unanswered-app conflicts with main in MODULE.bazel.lock, crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
-     "its need #18643 conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
+     "its need atspi-unanswered-app conflicts with main in MODULE.bazel.lock, crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/wayland/mod.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18643",
      "#18353",
      "#18013"
     ],
     "needs": [
-     "atspi-unanswered-app",
-     "gtk4-atspi-bounds"
+     "atspi-unanswered-app"
     ],
     "created": "2026-11-03T09:05:24Z"
    },
@@ -73494,23 +73488,6 @@
     ],
     "needs": [],
     "created": "2026-10-30T21:35:55Z"
-   },
-   {
-    "id": "relay-autoattach-shared",
-    "label": "relay-autoattach-shared",
-    "number": null,
-    "state": "queued",
-    "area": "browser",
-    "priority": "P1",
-    "title": "fix(browser-relay): keep a shared child frame attached when one connection turns auto-attach off",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-09T18:05:09Z"
    },
    {
     "id": "upload-stall-error-all-providers",
@@ -73591,7 +73568,7 @@
     "action": "wait",
     "reasons": [
      "needs #15508 (open), r2/native-window-report (queued)",
-     "conflicts with relay-autoattach-shared in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
+     "conflicts with #18657 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "its need r2/native-window-report conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, docs/tools/browser.md, packages/coding-agent/src/tools/browser/print-hold.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
     ],
@@ -73599,7 +73576,7 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "relay-autoattach-shared"
+     "#18657"
     ],
     "needs": [
      "#15508",
@@ -73618,7 +73595,7 @@
     "action": "wait",
     "reasons": [
      "needs r2/relay-own-only (queued)",
-     "conflicts with relay-autoattach-shared in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
+     "conflicts with #18657 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "its need r2/relay-own-only conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/extension/background.ts, packages/browser-relay/extension/chrome.d.ts, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/relay/server.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/cli/browser-relay-cli.test.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-background-input.test.ts, packages/coding-agent/test/tools/browser-interactions.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "conflicts with main in packages/browser-relay/extension/manifest.json, packages/coding-agent/src/tools/browser/relay/extension-assets/manifest.json.txt"
     ],
@@ -73626,7 +73603,7 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "relay-autoattach-shared"
+     "#18657"
     ],
     "needs": [
      "r2/relay-own-only"
@@ -73644,7 +73621,7 @@
     "action": "wait",
     "reasons": [
      "needs r2/relay-popup-owned (queued), r2/page-waiting (queued)",
-     "conflicts with relay-autoattach-shared in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
+     "conflicts with #18657 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "its need r2/relay-popup-owned conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/extension/background.ts, packages/browser-relay/extension/chrome.d.ts, packages/browser-relay/extension/manifest.json, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/extension-assets/manifest.json.txt, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/relay/server.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/cli/browser-relay-cli.test.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-background-input.test.ts, packages/coding-agent/test/tools/browser-interactions.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "its need r2/page-waiting conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/extension/background.ts, packages/browser-relay/extension/chrome.d.ts, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/print-hold.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/relay/server.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/cli/browser-relay-cli.test.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-background-input.test.ts, packages/coding-agent/test/tools/browser-interactions.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts, packages/coding-agent/test/tools/browser-upload-contents.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser.ts, packages/coding-agent/test/tools/browser-relay-detach.test.ts"
@@ -73653,7 +73630,7 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "relay-autoattach-shared"
+     "#18657"
     ],
     "needs": [
      "r2/relay-popup-owned",
