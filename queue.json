@@ -72679,8 +72679,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-guide-first-use",
    "host": "MacBook-Pro",
    "added": "2026-11-10T19:53:35Z",
-   "updated": "2026-11-10T21:27:36Z",
-   "note": ""
+   "updated": "2026-11-10T21:39:42Z",
+   "note": "",
+   "hold": "Main, 2026-11-10: Haiku shows 1.19x steps on native tasks; waits for the Sol native legs and Will's call"
   },
   {
    "id": "x11-covered-capture",
