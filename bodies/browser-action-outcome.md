@@ -2,7 +2,7 @@
 
 Models kept spending a whole cell just looking at the page to find out whether a click or fill had done anything, so I made each browser action print one line saying what it did.
 
-With an earlier build of this change, GPT-6.1 Sol went from 35 look-only cells to 24 on four browser tasks and took 0.91x `main`'s steps; on Claude Haiku the saving stays within noise. In Chromium, `goto`, `click`, `fill`, `type`, `press` and `select` (tab, frame and element forms) now print into the cell output. Recorded on a bench signup wizard:
+With an earlier build of this change, GPT-6.1 Sol went from 35 look-only cells to 24 on four browser tasks and took 0.91x `main`'s steps; on Claude Haiku this head took 1.07x and 1.17x the steps in two blind legs, so the saving does not carry over to Haiku. In Chromium, `goto`, `click`, `fill`, `type`, `press` and `select` (tab, frame and element forms) now print into the cell output. Recorded on a bench signup wizard:
 
 ```js
 await tab.fill('#email', 'outcome@example.test');
@@ -44,17 +44,18 @@ The probe runs in the frame's isolated world, so page scripts can neither see no
 
 The 102 actions are navigations, in-place changes and deliberate no-ops on six bench task pages, each line compared with an independent look 1 s later, `main` and this head interleaved.
 
-Model runs on headless Chrome for Testing; ratios are geometric means of per-task ratios with 95% bootstrap intervals, and the samples are small. None of these runs was blind: the model could read the arm's name in its working directory or in error stack paths (`outcome-print`, `browser-action-outcome`).
+Model runs on headless Chrome for Testing; ratios are geometric means of per-task ratios with 95% bootstrap intervals, and the samples are small. The earlier-build runs were not blind: the model could read the arm's name in its working directory (`outcome-print`). The two Haiku legs on this head ran in a neutral directory from a neutrally named copy of each tree; a scan of everything the model was sent found no arm name.
 
 | model, tasks x runs per arm | build | steps | tokens | look-only cells | pass `main` / PR |
 |---|---|---|---|---|---|
 | GPT-6.1 Sol medium, 4 x 3 | earlier | **0.91** [0.86, 0.97] | **0.89** [0.81, 0.98] | 35 -> 24 | 12/12 / 12/12 |
 | Claude Haiku 5.5 medium, 4 x 4 | earlier | 0.86 [0.75, 1.01] | 0.85 [0.73, 1.01] | 75 -> 67 | 15/16 / 16/16 |
-| Claude Haiku 5.5 medium, 4 x 4 | this head | 1.02 [0.84, 1.25] | 1.04 [0.86, 1.27] | 77 -> 85 | 14/16 / 16/16 |
+| Claude Haiku 5.5 medium, 4 x 4, blind | this head | 1.17 [0.99, 1.37] | **1.19** [1.02, 1.39] | 62 -> 73 | 15/16 / 16/16 |
+| Claude Haiku 5.5 medium, 4 x 4, blind | this head | 1.07 [0.91, 1.25] | 1.04 [0.88, 1.22] | 66 -> 67 | 16/16 / 14/16 |
 
 <details><summary>The earlier build, and Haiku on this head</summary>
 
-The earlier build printed the same lines without `yet`, ignored every style and class change and read back the focused field. On this head three Haiku tasks took 0.86x to 1.06x the steps and a product configurator 1.63x: in three of its four runs Haiku clicked a colour's caption, which does nothing, was told `no change yet`, and spent cells finding the swatch; two `main` runs made the same click and got no output. Wall time showed no change on either model (Sol 1.03x [0.90, 1.17], Haiku 0.91x [0.71, 1.21]).
+The earlier build printed the same lines without `yet`, ignored every style and class change and read back the focused field. On this head the product configurator cost Haiku most (1.26x and 1.21x the median steps). Part of that is a correct line: Haiku often clicks a colour's caption, which does nothing, then reads `no change yet` and spends cells finding the swatch, but some long runs never saw that line. The PR's two FAILs in the second leg fetched Chrome's `/json/list` themselves, which the bench grader counts as a browser bypass. In the same leg the code with no prompt line took 1.00x [0.88, 1.15] the steps and the earlier prompt wording 1.11x [0.96, 1.30], so no wording made a measurable difference. Wall time: Sol 1.03x [0.90, 1.17]; Haiku 1.11x [0.92, 1.32] and 1.13x [0.98, 1.31], on a shared host.
 
 </details>
 
