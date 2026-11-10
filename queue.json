@@ -70762,6 +70762,26 @@
    "added": "2026-11-10T16:48:01Z",
    "updated": "2026-11-10T16:48:01Z",
    "note": ""
+  },
+  {
+   "id": "browser-wait-text-rendered",
+   "branch": "will/browser-wait-text-rendered",
+   "title": "fix(browser): let a scoped waitForText match only text the page renders",
+   "area": "browser",
+   "priority": "P2",
+   "needs": [
+    "browser-wait-text-regexp"
+   ],
+   "base": "672d912f93159823d7bdb7aa906d4e0f709dc4ec",
+   "body": "bodies/browser-wait-text-rendered.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-wait-text-rendered",
+   "host": "MacBook-Pro",
+   "added": "2026-11-10T16:51:21Z",
+   "updated": "2026-11-10T16:51:21Z",
+   "note": ""
   }
  ],
  "watch": {
