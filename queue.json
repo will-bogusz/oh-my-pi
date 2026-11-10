@@ -77840,6 +77840,13 @@
     "at": "2026-11-10T23:10:08Z",
     "host": "Wills-MacBook-Pro"
    }
+  },
+  "779dccca14efaa99916ca519113eabf995d1f569": {
+   "macos": {
+    "sha": "b25fdb030103af306855e8f0935c4345b2c29944",
+    "at": "2026-11-10T23:31:45Z",
+    "host": "Wills-MacBook-Pro"
+   }
   }
  },
  "plan": {
