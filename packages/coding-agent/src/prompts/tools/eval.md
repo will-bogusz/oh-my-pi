@@ -63,13 +63,6 @@ No `read` needed before first use; the first call's output carries the guide (fu
 {{/each}}
 {{/if}}
 </namespaces>
-{{#each inlinePreludes}}
-
-<{{name}}>
-Global `{{name}}`, documented here in full (no `read` needed):
-{{{documentation}}}
-</{{name}}>
-{{/each}}
 {{/if}}
 
 <critical>

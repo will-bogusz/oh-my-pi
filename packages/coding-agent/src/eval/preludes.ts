@@ -35,11 +35,6 @@ export interface EvalPreludeDefinition {
 	/** Static Markdown documentation shown only while this prelude is enabled. */
 	documentation: string;
 	/**
-	 * Render `documentation` in the eval tool description instead of linking it
-	 * as an `xd://eval/<name>` topic, so the first call needs no `read`.
-	 */
-	inlineDocumentation?: boolean;
-	/**
 	 * Short guide appended to the printed output of this prelude's first call
 	 * in a conversation that returns one (a thrown call or a bare-string result
 	 * leaves it for the next), so the model can start without reading the

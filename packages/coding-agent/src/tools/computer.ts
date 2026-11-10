@@ -152,7 +152,7 @@ export function createComputerPrelude(
 	return {
 		name: "computer",
 		documentation: computerPreludeAssets.documentation,
-		inlineDocumentation: true,
+		firstCallDocumentation: computerPreludeAssets.documentation,
 		javascript: computerPreludeAssets.javascript,
 		python: computerPreludeAssets.python,
 		exports: ["computer"],

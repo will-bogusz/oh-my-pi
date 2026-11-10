@@ -1,4 +1,4 @@
-Control the host desktop from JavaScript or Python Eval with the global `computer` object: windows, screenshots, native input, OS accessibility (AX) trees, clipboard. It is not a standalone tool.
+Control the host desktop from JavaScript or Python Eval with the global `computer` object: windows, screenshots, native input, OS accessibility (AX) trees, clipboard. It is not a standalone tool. On macOS start with `const { window: win } = await computer.apps.open("com.apple.reminders")` (`apps.open` returns the app; its `window` is null when none appeared), then `await win.ax()`.
 
 <instruction>
 - Direct helpers each run one approved call in the persistent desktop session and return real structured values; screenshots auto-display as Eval images.

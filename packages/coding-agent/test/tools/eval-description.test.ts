@@ -8,6 +8,7 @@ import { JsRuntime, type RuntimeHooks } from "@oh-my-pi/pi-coding-agent/eval/js/
 import type { EvalPreludeDefinition } from "@oh-my-pi/pi-coding-agent/eval/preludes";
 import { disposeAllKernelSessions, executePython } from "@oh-my-pi/pi-coding-agent/eval/py/executor";
 import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools";
+import { createComputerPrelude } from "@oh-my-pi/pi-coding-agent/tools/computer";
 import { EvalTool, getEvalDocTopics, getEvalToolDescription } from "@oh-my-pi/pi-coding-agent/tools/eval";
 import { ReadTool } from "@oh-my-pi/pi-coding-agent/tools/read";
 import { TempDir } from "@oh-my-pi/pi-utils";
@@ -207,27 +208,36 @@ describe("eval tool description", () => {
 		expect(tool.docTopics().fixture).toBeUndefined();
 	});
 
-	it("inlines a prelude's documentation when it asks to, without the link", () => {
-		const prelude: EvalPreludeDefinition = {
-			name: "fixture",
-			documentation: "Fixture summary line.\n\nINLINE PRELUDE DOCUMENTATION",
-			inlineDocumentation: true,
-			javascript: "",
-			python: "",
-			exports: [],
-			async invoke() {
-				return { content: [] };
+	it("links the computer guide and prints it with the first computer call's output", async () => {
+		const preludes: EvalPreludeDefinition[] = [];
+		const session = makeSession({ settings: { "computer.enabled": true }, preludes: () => preludes });
+		const computer = createComputerPrelude(session, () => ({
+			async run() {
+				return { displays: [{ type: "text", text: "ran" }], returnValue: 1, screenshots: [] };
 			},
-		};
-		const tool = new EvalTool(makeSession({ preludes: () => [prelude] }));
-		expect(tool.description).toContain("<fixture>");
-		expect(tool.description).toContain("INLINE PRELUDE DOCUMENTATION");
-		expect(tool.description).not.toContain("xd://eval/fixture");
-		expect(tool.docTopics().fixture).toContain("INLINE PRELUDE DOCUMENTATION");
-		const withoutRead = new EvalTool(makeSession({ preludes: () => [prelude], readActive: false }));
-		expect(withoutRead.description.split("INLINE PRELUDE DOCUMENTATION")).toHaveLength(2);
-		expect(withoutRead.description).not.toContain("<fixture>");
-		expect(withoutRead.description).not.toContain("xd://eval/fixture");
+			async capabilities() {
+				return undefined;
+			},
+			async close() {},
+		}));
+		preludes.push(computer);
+		const [summary] = computer.documentation.split("\n", 1);
+		const tool = new EvalTool(session);
+		expect(tool.description).toContain(`\`computer\`: ${summary} → \`xd://eval/computer\``);
+		expect(tool.description).not.toContain("<instruction>");
+		expect(computer.firstCallDocumentation?.trim()).toBe(tool.docTopics().computer);
+
+		const result = await executePython('await computer.run("1")\nawait computer.run("2")', {
+			cwd: process.cwd(),
+			sessionId: `computer-guide-${crypto.randomUUID()}`,
+			toolSession: session,
+			kernelMode: "per-call",
+		});
+		expect(result.exitCode).toBe(0);
+		const [first, ...rest] = result.output.split("<instruction>");
+		expect(first).toStartWith("ran\n");
+		expect(rest).toHaveLength(1);
+		expect(result.output.trimEnd()).toEndWith("</critical>\n\nran\n1");
 	});
 
 	it("lists a prelude with a first-call guide apart from the read-first docs, without the guide", () => {

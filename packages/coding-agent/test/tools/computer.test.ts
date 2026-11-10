@@ -442,11 +442,15 @@ function toolSession(): ToolSession {
 	};
 }
 
-/** Exercise the shipped host approval/call rendering and worker, with only native OS work substituted. */
+/**
+ * Exercise the shipped host approval/call rendering and worker, with only native OS work substituted. The
+ * first-call guide is left out so cell output holds only what the facade prints (eval-description.test.ts
+ * covers its delivery).
+ */
 function workerPrelude(session: ToolSession, native: NativeDesktopSession): EvalPreludeDefinition {
 	const transport = new MemoryTransport();
 	new ComputerWorkerCore(transport, () => native);
-	return createComputerPrelude(session, () => ({
+	const { firstCallDocumentation: _guide, ...prelude } = createComputerPrelude(session, () => ({
 		async run(code, timeoutMs, runSnapshot) {
 			const id = crypto.randomUUID();
 			transport.inbound({ type: "run", id, code, timeoutMs, session: runSnapshot, escape: escapeScope() });
@@ -463,6 +467,7 @@ function workerPrelude(session: ToolSession, native: NativeDesktopSession): Eval
 			await transport.waitFor(message => message.type === "closed");
 		},
 	}));
+	return prelude;
 }
 
 afterAll(async () => {
@@ -925,6 +930,7 @@ describe("computer prelude", () => {
 		};
 		const definition: EvalPreludeDefinition = {
 			...shipped,
+			firstCallDocumentation: undefined,
 			async invoke(parameters) {
 				calls.push(parameters);
 				if (parameters !== null && typeof parameters === "object" && "chain" in parameters) {
