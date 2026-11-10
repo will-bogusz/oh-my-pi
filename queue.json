@@ -71757,13 +71757,13 @@
    "needs": [],
    "base": "e325ffc73ab86e03bdd20a91b77d8e2b3964c906",
    "body": "bodies/eval-error-frames.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18775,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/eval-error-frames",
    "host": "MacBook-Pro",
    "added": "2026-11-10T19:06:45Z",
-   "updated": "2026-11-10T20:28:42Z",
+   "updated": "2026-11-10T20:33:08Z",
    "note": "",
    "advanced": "2026-11-10T20:13:50Z",
    "built": [
@@ -71973,7 +71973,8 @@
      "at": "2026-11-10T20:28:41Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-10T20:33:08Z"
   },
   {
    "id": "factory-droid-argon-promo",
