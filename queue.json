@@ -69329,13 +69329,13 @@
    "needs": [],
    "base": "f0200abf28e8d314125854600cf726dece495246",
    "body": "bodies/finder-desktop-key.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18680,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/finder-desktop-key",
    "host": "MacBook-Pro",
    "added": "2026-11-10T04:31:00Z",
-   "updated": "2026-11-10T05:40:53Z",
+   "updated": "2026-11-10T05:42:51Z",
    "note": "",
    "built": [
     {
@@ -69410,7 +69410,8 @@
      "at": "2026-11-10T05:40:48Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-10T05:42:51Z"
   },
   {
    "id": "computer-window-exact-app",
