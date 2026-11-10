@@ -75915,7 +75915,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-10T19:36:10.128607Z",
+  "at": "2026-11-10T19:42:33.114028Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -76591,8 +76591,10 @@
     "area": "eval",
     "priority": "P1",
     "title": "fix(coding-agent): print nothing for a JavaScript eval cell that ends in an assignment",
-    "action": "open",
-    "reasons": [],
+    "action": "held",
+    "reasons": [
+     "held: Main, 2026-11-10: awaiting model sample (changes every JS cell's return); bots ScreenshotOutput"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -76906,7 +76908,6 @@
      "conflicts with #18738 in docs/tools/browser.md",
      "conflicts with #18750 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18751 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with eval-assign-echo in docs/tools/browser.md",
      "conflicts with observe-print in docs/tools/browser.md",
      "conflicts with subagent-browser in docs/tools/browser.md",
      "its need r2/native-window-report conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, docs/tools/browser.md, packages/coding-agent/src/tools/browser/print-hold.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts",
@@ -76924,7 +76925,6 @@
      "#18738",
      "#18750",
      "#18751",
-     "eval-assign-echo",
      "observe-print",
      "subagent-browser"
     ],
@@ -76952,7 +76952,6 @@
      "conflicts with #18738 in docs/tools/browser.md",
      "conflicts with #18750 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18751 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with eval-assign-echo in docs/tools/browser.md",
      "conflicts with observe-print in docs/tools/browser.md",
      "conflicts with subagent-browser in docs/tools/browser.md",
      "its need r2/relay-own-only conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/extension/background.ts, packages/browser-relay/extension/chrome.d.ts, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/relay/server.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/cli/browser-relay-cli.test.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-background-input.test.ts, packages/coding-agent/test/tools/browser-interactions.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
@@ -76969,7 +76968,6 @@
      "#18738",
      "#18750",
      "#18751",
-     "eval-assign-echo",
      "observe-print",
      "subagent-browser"
     ],
@@ -76997,7 +76995,6 @@
      "conflicts with #18738 in docs/tools/browser.md",
      "conflicts with #18750 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18751 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with eval-assign-echo in docs/tools/browser.md",
      "conflicts with observe-print in docs/tools/browser.md",
      "conflicts with subagent-browser in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts",
      "its need r2/relay-popup-owned conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/extension/background.ts, packages/browser-relay/extension/chrome.d.ts, packages/browser-relay/extension/manifest.json, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/extension-assets/manifest.json.txt, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/relay/server.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/cli/browser-relay-cli.test.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-background-input.test.ts, packages/coding-agent/test/tools/browser-interactions.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
@@ -77016,7 +77013,6 @@
      "#18738",
      "#18750",
      "#18751",
-     "eval-assign-echo",
      "observe-print",
      "subagent-browser"
     ],
@@ -77110,7 +77106,6 @@
      "conflicts with #18753 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with eval-assign-echo in docs/tools/computer.md",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
@@ -77124,8 +77119,7 @@
      "#18746",
      "#18753",
      "#18353",
-     "#18222",
-     "eval-assign-echo"
+     "#18222"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -77152,7 +77146,6 @@
      "conflicts with #18753 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with eval-assign-echo in docs/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
@@ -77167,8 +77160,7 @@
      "#18746",
      "#18753",
      "#18353",
-     "#18222",
-     "eval-assign-echo"
+     "#18222"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -77308,7 +77300,6 @@
      "conflicts with #18738 in docs/tools/browser.md",
      "conflicts with #18750 in packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18751 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with eval-assign-echo in docs/tools/browser.md",
      "conflicts with observe-print in docs/tools/browser.md",
      "conflicts with subagent-browser in docs/tools/browser.md",
      "its need r2/relay-own-only conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/extension/background.ts, packages/browser-relay/extension/chrome.d.ts, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/relay/server.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/cli/browser-relay-cli.test.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-background-input.test.ts, packages/coding-agent/test/tools/browser-interactions.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
@@ -77324,7 +77315,6 @@
      "#18738",
      "#18750",
      "#18751",
-     "eval-assign-echo",
      "observe-print",
      "subagent-browser"
     ],
@@ -77575,6 +77565,44 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
+   },
+   {
+    "id": "factory-droid-171-models",
+    "label": "factory-droid-171-models",
+    "number": null,
+    "state": "queued",
+    "area": "factory-droid",
+    "priority": null,
+    "title": "feat(catalog): add the Factory Droid models droid 1.7.1 serves",
+    "action": "wait",
+    "reasons": [
+     "needs factory-droid-171-pin (queued)"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [
+     "factory-droid-171-pin"
+    ],
+    "created": "2026-11-10T19:41:03Z"
+   },
+   {
+    "id": "factory-droid-171-pin",
+    "label": "factory-droid-171-pin",
+    "number": null,
+    "state": "queued",
+    "area": "factory-droid",
+    "priority": null,
+    "title": "feat(ai,catalog): identify Factory Droid requests as droid 1.7.1",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-10T19:38:06Z"
    },
    {
     "id": "gemma-tokenizer",
