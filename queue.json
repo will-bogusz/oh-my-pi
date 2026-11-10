@@ -70724,6 +70724,24 @@
    "added": "2026-11-10T16:35:28Z",
    "updated": "2026-11-10T16:35:28Z",
    "note": ""
+  },
+  {
+   "id": "browser-run-main-world",
+   "branch": "will/browser-run-main-world",
+   "title": "fix(browser): run tab.run page evaluations in the page's main world",
+   "area": "browser",
+   "priority": "P1",
+   "needs": [],
+   "base": "eda28eff97cf7a352fd3057a03581be1686dbc7a",
+   "body": "bodies/browser-run-main-world.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-run-main-world",
+   "host": "MacBook-Pro",
+   "added": "2026-11-10T16:47:04Z",
+   "updated": "2026-11-10T16:47:04Z",
+   "note": ""
   }
  ],
  "watch": {
