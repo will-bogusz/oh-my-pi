@@ -73196,17 +73196,13 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-10T21:17:59Z",
+  "checked": "2026-11-10T22:19:02Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "x11-covered-capture": {
-    "since": "2026-11-10T20:48:01Z",
-    "title": "fix(natives): capture a covered X11 window from its own pixels, or say it is covered"
-   },
-   "x11-takeover-user": {
-    "since": "2026-11-10T21:17:59Z",
-    "title": "fix(natives): keep X11 takeover from taking a typing user's keys"
+   "subagent-browser-relay": {
+    "since": "2026-11-10T22:19:02Z",
+    "title": "feat(coding-agent): keep subagents' browser tabs out of the user's Chrome and Tern pane unless asked"
    }
   },
   "conflicts": {
@@ -73236,8 +73232,69 @@
     ]
    }
   },
-  "merged_through": "2026-11-09T22:30:45Z",
-  "unreleased": {},
+  "merged_through": "2026-11-10T22:02:28Z",
+  "unreleased": {
+   "18773": {
+    "title": "fix(coding-agent): keep a child omp's browser tabs out of its parent's Tern pane and cmux workspace",
+    "merge_commit": "827d50cac3718d9e2b82326f024b1d28e68d219e",
+    "merged_at": "2026-11-10T22:02:27Z"
+   },
+   "18768": {
+    "title": "fix(catalog): show list prices for Factory Droid Fable 5.1, GLM 5.2 Fast and Muse Spark Open",
+    "merge_commit": "1e60ff458b5a3b9fe50981d30bb79be276121385",
+    "merged_at": "2026-11-10T22:02:27Z"
+   },
+   "18767": {
+    "title": "fix(catalog): show Factory Droid's Gemini 4 Argon credit promotion",
+    "merge_commit": "c8bc4c707a95c4dd4cd76a701dcc8efd940744f3",
+    "merged_at": "2026-11-10T22:02:27Z"
+   },
+   "18761": {
+    "title": "fix(browser): have agents report a step the page cannot do instead of faking it",
+    "merge_commit": "67669e6d06d45ddb3ea9189d3f1371b60e369ead",
+    "merged_at": "2026-11-10T22:02:27Z"
+   },
+   "18746": {
+    "title": "fix(natives): wait for another session's input lock before failing InputBusy",
+    "merge_commit": "0198fc0ac2ffde96712fa23d5e5b64ab24dbcccd",
+    "merged_at": "2026-11-10T22:02:27Z"
+   },
+   "18745": {
+    "title": "fix(natives): accept aliases in computer role searches",
+    "merge_commit": "2683884786f2a81e4fbf00696c6722a8739df165",
+    "merged_at": "2026-11-10T22:02:27Z"
+   },
+   "18744": {
+    "title": "fix(coding-agent): prefer exact app names when selecting windows",
+    "merge_commit": "c28aafca99731e80c6258e7437d5af12433abf9e",
+    "merged_at": "2026-11-10T22:02:27Z"
+   },
+   "18739": {
+    "title": "fix(browser): point calls on a tab that is not open at browser.open()",
+    "merge_commit": "1fe8469b25abbbec5a17733b5d144669186af0f8",
+    "merged_at": "2026-11-10T22:02:27Z"
+   },
+   "18675": {
+    "title": "fix(natives): send macOS keys for a window to the sheet focused on it",
+    "merge_commit": "0bd53d7fbb6224cc1482ce289ab1234459269e80",
+    "merged_at": "2026-11-10T22:02:27Z"
+   },
+   "18680": {
+    "title": "fix(natives): restore Finder with its desktop focus after macOS background input",
+    "merge_commit": "2ff8afcd5ff31c41845b344f6d63577e1dfaa862",
+    "merged_at": "2026-11-10T22:02:28Z"
+   },
+   "18658": {
+    "title": "fix(coding-agent): preserve role selectors across locales and document waits",
+    "merge_commit": "03614503e84b381ebddc40ca537685f59c3f4cc6",
+    "merged_at": "2026-11-10T22:02:28Z"
+   },
+   "18657": {
+    "title": "fix(browser-relay): keep a shared child frame attached when one connection turns auto-attach off",
+    "merge_commit": "990816641c5c34989dd6fe909bc09adc46c14a2e",
+    "merged_at": "2026-11-10T22:02:28Z"
+   }
+  },
   "ready": [
    15128,
    15130,
@@ -73255,30 +73312,21 @@
    18222,
    18353,
    18624,
-   18657,
-   18658,
-   18675,
    18676,
-   18680,
    18737,
    18738,
-   18739,
    18743,
-   18744,
-   18745,
-   18746,
    18750,
    18751,
    18753,
-   18761,
    18766,
-   18767,
-   18768,
    18771,
    18772,
-   18773,
    18775,
-   18776
+   18776,
+   18783,
+   18784,
+   18786
   ],
   "post_merge": {
    "17831": {
@@ -73304,14 +73352,6 @@
       "bot": "chatgpt-codex-connector",
       "severity": "P2",
       "path": "packages/coding-agent/src/tools/browser/query-handlers.ts",
-      "end": 850,
-      "url": "https://github.com/can1357/oh-my-pi/pull/18632#pullrequestreview-5833713075",
-      "addressed_by": 18658
-     },
-     {
-      "bot": "chatgpt-codex-connector",
-      "severity": "P2",
-      "path": "packages/coding-agent/src/tools/browser/query-handlers.ts",
       "end": 709,
       "url": "https://github.com/can1357/oh-my-pi/pull/18632#pullrequestreview-5833713075",
       "addressed_by": 18658
@@ -73329,27 +73369,81 @@
     "merge_commit": "2e1c411e317f19222478a593e86e8c874b83e38b",
     "merged_at": "2026-11-09T22:16:09Z",
     "findings": []
+   },
+   "18657": {
+    "title": "fix(browser-relay): keep a shared child frame attached when one connection turns auto-attach off",
+    "merge_commit": "990816641c5c34989dd6fe909bc09adc46c14a2e",
+    "merged_at": "2026-11-10T22:02:28Z",
+    "findings": []
+   },
+   "18658": {
+    "title": "fix(coding-agent): preserve role selectors across locales and document waits",
+    "merge_commit": "03614503e84b381ebddc40ca537685f59c3f4cc6",
+    "merged_at": "2026-11-10T22:02:28Z",
+    "findings": []
+   },
+   "18675": {
+    "title": "fix(natives): send macOS keys for a window to the sheet focused on it",
+    "merge_commit": "0bd53d7fbb6224cc1482ce289ab1234459269e80",
+    "merged_at": "2026-11-10T22:02:27Z",
+    "findings": []
+   },
+   "18680": {
+    "title": "fix(natives): restore Finder with its desktop focus after macOS background input",
+    "merge_commit": "2ff8afcd5ff31c41845b344f6d63577e1dfaa862",
+    "merged_at": "2026-11-10T22:02:28Z",
+    "findings": []
+   },
+   "18739": {
+    "title": "fix(browser): point calls on a tab that is not open at browser.open()",
+    "merge_commit": "1fe8469b25abbbec5a17733b5d144669186af0f8",
+    "merged_at": "2026-11-10T22:02:27Z",
+    "findings": []
+   },
+   "18744": {
+    "title": "fix(coding-agent): prefer exact app names when selecting windows",
+    "merge_commit": "c28aafca99731e80c6258e7437d5af12433abf9e",
+    "merged_at": "2026-11-10T22:02:27Z",
+    "findings": []
+   },
+   "18745": {
+    "title": "fix(natives): accept aliases in computer role searches",
+    "merge_commit": "2683884786f2a81e4fbf00696c6722a8739df165",
+    "merged_at": "2026-11-10T22:02:27Z",
+    "findings": []
+   },
+   "18746": {
+    "title": "fix(natives): wait for another session's input lock before failing InputBusy",
+    "merge_commit": "0198fc0ac2ffde96712fa23d5e5b64ab24dbcccd",
+    "merged_at": "2026-11-10T22:02:27Z",
+    "findings": []
+   },
+   "18761": {
+    "title": "fix(browser): have agents report a step the page cannot do instead of faking it",
+    "merge_commit": "67669e6d06d45ddb3ea9189d3f1371b60e369ead",
+    "merged_at": "2026-11-10T22:02:27Z",
+    "findings": []
+   },
+   "18767": {
+    "title": "fix(catalog): show Factory Droid's Gemini 4 Argon credit promotion",
+    "merge_commit": "c8bc4c707a95c4dd4cd76a701dcc8efd940744f3",
+    "merged_at": "2026-11-10T22:02:27Z",
+    "findings": []
+   },
+   "18768": {
+    "title": "fix(catalog): show list prices for Factory Droid Fable 5.1, GLM 5.2 Fast and Muse Spark Open",
+    "merge_commit": "1e60ff458b5a3b9fe50981d30bb79be276121385",
+    "merged_at": "2026-11-10T22:02:27Z",
+    "findings": []
+   },
+   "18773": {
+    "title": "fix(coding-agent): keep a child omp's browser tabs out of its parent's Tern pane and cmux workspace",
+    "merge_commit": "827d50cac3718d9e2b82326f024b1d28e68d219e",
+    "merged_at": "2026-11-10T22:02:27Z",
+    "findings": []
    }
   },
   "events": [
-   {
-    "at": "2026-11-03T21:48:23Z",
-    "kind": "openable",
-    "id": "wayland-input-capability",
-    "title": "fix(natives): report Wayland input unavailable when no RemoteDesktop portal exists"
-   },
-   {
-    "at": "2026-11-03T21:48:23Z",
-    "kind": "openable",
-    "id": "wayland-ei-text",
-    "title": "feat(natives): type text the wayland layout lacks through libei text"
-   },
-   {
-    "at": "2026-11-03T21:48:23Z",
-    "kind": "openable",
-    "id": "atspi-file-chooser",
-    "title": "fix(natives): read GTK3 file dialogs as AT-SPI windows"
-   },
    {
     "at": "2026-11-03T22:48:56Z",
     "kind": "unopenable",
@@ -74807,6 +74901,122 @@
     "kind": "openable",
     "id": "x11-takeover-user",
     "title": "fix(natives): keep X11 takeover from taking a typing user's keys"
+   },
+   {
+    "at": "2026-11-10T22:19:02Z",
+    "kind": "merged",
+    "number": 18773,
+    "title": "fix(coding-agent): keep a child omp's browser tabs out of its parent's Tern pane and cmux workspace",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-10T22:19:02Z",
+    "kind": "merged",
+    "number": 18768,
+    "title": "fix(catalog): show list prices for Factory Droid Fable 5.1, GLM 5.2 Fast and Muse Spark Open",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-10T22:19:02Z",
+    "kind": "merged",
+    "number": 18767,
+    "title": "fix(catalog): show Factory Droid's Gemini 4 Argon credit promotion",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-10T22:19:02Z",
+    "kind": "merged",
+    "number": 18761,
+    "title": "fix(browser): have agents report a step the page cannot do instead of faking it",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-10T22:19:02Z",
+    "kind": "merged",
+    "number": 18746,
+    "title": "fix(natives): wait for another session's input lock before failing InputBusy",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-10T22:19:02Z",
+    "kind": "merged",
+    "number": 18745,
+    "title": "fix(natives): accept aliases in computer role searches",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-10T22:19:02Z",
+    "kind": "merged",
+    "number": 18744,
+    "title": "fix(coding-agent): prefer exact app names when selecting windows",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-10T22:19:02Z",
+    "kind": "merged",
+    "number": 18739,
+    "title": "fix(browser): point calls on a tab that is not open at browser.open()",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-10T22:19:02Z",
+    "kind": "merged",
+    "number": 18675,
+    "title": "fix(natives): send macOS keys for a window to the sheet focused on it",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-10T22:19:02Z",
+    "kind": "merged",
+    "number": 18680,
+    "title": "fix(natives): restore Finder with its desktop focus after macOS background input",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-10T22:19:02Z",
+    "kind": "merged",
+    "number": 18658,
+    "title": "fix(coding-agent): preserve role selectors across locales and document waits",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-10T22:19:02Z",
+    "kind": "merged",
+    "number": 18657,
+    "title": "fix(browser-relay): keep a shared child frame attached when one connection turns auto-attach off",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-10T22:19:02Z",
+    "kind": "openable",
+    "id": "subagent-browser-relay",
+    "title": "feat(coding-agent): keep subagents' browser tabs out of the user's Chrome and Tern pane unless asked"
+   },
+   {
+    "at": "2026-11-10T22:19:02Z",
+    "kind": "unopenable",
+    "id": "x11-covered-capture",
+    "title": "fix(natives): capture a covered X11 window from its own pixels, or say it is covered",
+    "why": "opened as #18783"
+   },
+   {
+    "at": "2026-11-10T22:19:02Z",
+    "kind": "unopenable",
+    "id": "x11-takeover-user",
+    "title": "fix(natives): keep X11 takeover from taking a typing user's keys",
+    "why": "opened as #18784"
    }
   ]
  },
