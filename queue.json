@@ -69120,7 +69120,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-10T01:28:49Z",
+  "checked": "2026-11-10T01:59:11Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -69262,18 +69262,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-03T01:56:47Z",
-    "kind": "openable",
-    "id": "relay-downloads",
-    "title": "fix(browser): report a relay tab's downloads where Chrome saved them"
-   },
-   {
-    "at": "2026-11-03T01:56:47Z",
-    "kind": "openable",
-    "id": "relay-popup-lossless",
-    "title": "fix(browser): send the user's keys back to their app while Chrome activates for a popup omp's relay tab opens on macOS"
-   },
    {
     "at": "2026-11-03T02:27:08Z",
     "kind": "unopenable",
