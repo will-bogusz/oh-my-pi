@@ -8,6 +8,7 @@ import { parseTernSelector } from "@oh-my-pi/pi-coding-agent/tools/browser/tern/
 import { TernSocketClient } from "@oh-my-pi/pi-coding-agent/tools/browser/tern/wire";
 import { encodeRawPng } from "@oh-my-pi/pi-coding-agent/utils/png-encode";
 import { type FakeAnswer, type FakeDaemon, startFakeDaemon } from "./tern-fake-daemon";
+import { rejectionOf } from "../helpers/rejection";
 
 interface FakePage {
 	/** Event batches the `events` op hands out, one per poll. */
@@ -433,12 +434,16 @@ describe("TernTab", () => {
 		const tab = await openTab(fake);
 		const frame = await tab.frame("#pay");
 		const before = fake.requests.length;
-		await expect(frame.waitForFunction("window.paid", { timeout: 50, polling: 10 })).rejects.toThrow(
+		expect(String(await rejectionOf(frame.waitForFunction("window.paid", { timeout: 50, polling: 10 })))).toContain(
 			"frame.waitForFunction() timed out after 50ms",
 		);
 		const polls = fake.requests.slice(before).map(request => request.op);
 		expect(polls.length).toBeGreaterThan(0);
 		for (const op of polls) expect(op).toMatchObject({ op: "eval", world: "page", frame: "0.1" });
+		// A string holding a function is sent as the function, called with the extra arguments.
+		const sent = fake.requests.length;
+		await rejectionOf(frame.waitForFunction("(n) => window.paid === n", { timeout: 50, polling: 10 }, 7));
+		expect(fake.requests[sent]?.op).toMatchObject({ function: "(n) => window.paid === n", args: [7] });
 	});
 
 	it("names the Tern backend and the reason for helpers it cannot provide", async () => {

@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Browser tabs and frames can wait for a condition in the page with `waitForFunction(fnOrExpression, { timeout?, polling? }, ...args)`, which resolves with the condition's first truthy value, instead of a loop of `evaluate` calls and sleeps; `waitFor` and `waitForSelector` given a function or a number of milliseconds now name the call and the helper to use instead
+
 ### Fixed
 
 - A browser call on a tab that is not open now says to open it with `await browser.open({ name })` (Python: `await browser.open(name=…)`) and the url and app it was opened with, instead of pointing at the removed `action:"open"` ([#18739](https://github.com/can1357/oh-my-pi/pull/18739) by [@will-bogusz](https://github.com/will-bogusz))
@@ -18,7 +22,6 @@
 
 - `/usage` and `omp usage` show LiteLLM key and user budgets for the built-in `litellm` provider and every models.yml provider with `discovery.type: litellm`, unless listed in `disabledProviders` ([#17873](https://github.com/can1357/oh-my-pi/pull/17873) by [@maykonmichel](https://github.com/maykonmichel))
 - Extensions can ask the operator before an interactive quit, or cancel it, with `session_before_shutdown`; a further `/exit` or Ctrl+D skips the pending prompts and closes ([#18424](https://github.com/can1357/oh-my-pi/pull/18424) by [@aw1cks](https://github.com/aw1cks))
-- Browser tabs and frames can wait for a condition in the page with `waitForFunction(fnOrExpression, { timeout?, polling? })`, which resolves with the condition's first truthy value, instead of a loop of `evaluate` calls and sleeps; passing a function to `waitFor` now points at it
 
 ### Changed
 
