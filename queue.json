@@ -71426,6 +71426,24 @@
    "added": "2026-11-10T18:54:12Z",
    "updated": "2026-11-10T18:54:12Z",
    "note": ""
+  },
+  {
+   "id": "observe-settle",
+   "branch": "will/browser-observe-settle",
+   "title": "feat(browser): let observe() settle the effects of the preceding action",
+   "area": "browser",
+   "priority": "P1",
+   "needs": [],
+   "base": "e1d8f29d54957da5cb38b11d10a6778d13476980",
+   "body": "bodies/observe-settle.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-observe-settle",
+   "host": "MacBook-Pro",
+   "added": "2026-11-10T18:56:46Z",
+   "updated": "2026-11-10T18:56:46Z",
+   "note": ""
   }
  ],
  "watch": {
