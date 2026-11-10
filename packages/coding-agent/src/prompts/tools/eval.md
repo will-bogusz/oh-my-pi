@@ -60,7 +60,11 @@ More globals; `read` the linked docs before first use:
 {{#each inlinePreludes}}
 
 <{{name}}>
+{{#if core}}
+Global `{{name}}`, core usage below (no `read` needed for it); full reference at `xd://eval/{{name}}`:
+{{else}}
 Global `{{name}}`, documented here in full (no `read` needed):
+{{/if}}
 {{{documentation}}}
 </{{name}}>
 {{/each}}

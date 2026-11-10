@@ -229,6 +229,32 @@ describe("eval tool description", () => {
 		expect(withoutRead.description).not.toContain("<fixture>");
 		expect(withoutRead.description).not.toContain("xd://eval/fixture");
 	});
+
+	it("inlines a prelude's core documentation and keeps the full documentation as its topic", () => {
+		const prelude: EvalPreludeDefinition = {
+			name: "fixture",
+			documentation: "Fixture summary line.\n\nFULL PRELUDE DOCUMENTATION",
+			coreDocumentation: "CORE PRELUDE DOCUMENTATION",
+			javascript: "",
+			python: "",
+			exports: [],
+			async invoke() {
+				return { content: [] };
+			},
+		};
+		const tool = new EvalTool(makeSession({ preludes: () => [prelude] }));
+		expect(tool.description).toContain("<fixture>");
+		expect(tool.description).toContain("CORE PRELUDE DOCUMENTATION");
+		expect(tool.description).toContain("xd://eval/fixture");
+		expect(tool.description).not.toContain("FULL PRELUDE DOCUMENTATION");
+		expect(tool.docTopics().fixture).toContain("FULL PRELUDE DOCUMENTATION");
+		const withoutRead = new EvalTool(makeSession({ preludes: () => [prelude], readActive: false }));
+		expect(withoutRead.description).toContain("FULL PRELUDE DOCUMENTATION");
+		expect(withoutRead.description).not.toContain("CORE PRELUDE DOCUMENTATION");
+		const whole = new EvalTool(makeSession({ preludes: () => [{ ...prelude, inlineDocumentation: true }] }));
+		expect(whole.description).toContain("FULL PRELUDE DOCUMENTATION");
+		expect(whole.description).not.toContain("CORE PRELUDE DOCUMENTATION");
+	});
 });
 
 describe("eval tool dynamic schema", () => {

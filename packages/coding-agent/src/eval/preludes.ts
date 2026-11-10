@@ -39,6 +39,12 @@ export interface EvalPreludeDefinition {
 	 * as an `xd://eval/<name>` topic, so the first call needs no `read`.
 	 */
 	inlineDocumentation?: boolean;
+	/**
+	 * Short usage rendered in the eval tool description while `documentation`
+	 * stays the `xd://eval/<name>` topic, so common calls need no `read`
+	 * without paying for the whole reference. Ignored with `inlineDocumentation`.
+	 */
+	coreDocumentation?: string;
 	/** JavaScript source installed into an ordinary JavaScript eval realm. */
 	javascript: string;
 	/** Python source installed into a Python eval kernel. */
