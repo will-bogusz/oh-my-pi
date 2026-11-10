@@ -69897,13 +69897,13 @@
    "needs": [],
    "base": "eda28eff97cf7a352fd3057a03581be1686dbc7a",
    "body": "bodies/browser-dead-tab-hint.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18739,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-dead-tab-hint",
    "host": "MacBook-Pro",
    "added": "2026-11-10T05:35:21Z",
-   "updated": "2026-11-10T16:30:15Z",
+   "updated": "2026-11-10T16:40:16Z",
    "note": "",
    "advanced": "2026-11-10T16:02:51Z",
    "built": [
@@ -70057,7 +70057,8 @@
      "host": "MacBook-Pro",
      "tree": "8ed067a17a0d7305303e1e1bc7461ef5510c3f69"
     }
-   ]
+   ],
+   "opened": "2026-11-10T16:40:16Z"
   },
   {
    "id": "computer-strict-options",
