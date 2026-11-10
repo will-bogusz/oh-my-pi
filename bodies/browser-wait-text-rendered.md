@@ -8,7 +8,7 @@ I made a scoped `waitForText` ignore an element the page does not render, becaus
 
 A wait that resolves on markup the page has not shown reports a success that did not happen. The unscoped wait reads `document.body.innerText`, which leaves unrendered text out. The scoped one read the element's `innerText`, and for an element that is not rendered, `innerText` returns `textContent`, hidden text and all. A zero-model probe found this; no recorded run used the scoped form.
 
-Shape of the fix: `renderedText` in `queries.ts` is one self-contained page-side function. It returns `""` when the element or a flat-tree ancestor (through slots and shadow hosts) is `display: none`, and the element's `innerText` otherwise. Chromium, cmux and the Tern page kit all run it. Text inside a rendered element is unchanged, `opacity: 0` included. Semantic delta: a scoped wait on `title`, a `<script>` data blob or a closed `<dialog>` matched on `main` and now never does (use `tab.title()` or `evaluate`). Known limit: content slotted into a closed shadow root has no `assignedSlot`, so a hidden slot there is not seen.
+Shape of the fix: `renderedText` in `queries.ts` is one self-contained page-side function. It returns `""` when the element or a flat-tree ancestor (through slots and shadow hosts) is `display: none`, and the element's `innerText` otherwise. Chromium, cmux and the Tern page kit all run it. Text inside a rendered element is unchanged, `opacity: 0` included. Semantic delta: a scoped wait on `title`, a `<script>` data blob or a closed `<dialog>` matched on `main` and now never does. Known limit: content slotted into a closed shadow root has no `assignedSlot`, so a hidden slot there is not seen.
 
 ## Testing
 
