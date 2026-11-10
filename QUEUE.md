@@ -1,19 +1,20 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10 21:56Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10 22:00Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-10 21:48Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 2, conflict-held 11, stacked 16, held 13, open PRs 40; merged 263, closed 29
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-10 21:56Z on MacBook-Pro; groups below are from it, states from the manifest)
+**Counts:** openable now 3, conflict-held 10, stacked 16, held 13, open PRs 40; merged 263, closed 29
 
-## Openable now (2)
+## Openable now (3)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
+| browser-core-first-use | feat(agent,coding-agent): send a short browser guide with the first browser call | browser | P2 | 3h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-core-first-use) |
 | x11-covered-capture | fix(natives): capture a covered X11 window from its own pixels, or say it is covered | computer | P1 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-covered-capture) |
 | x11-takeover-user | fix(natives): keep X11 takeover from taking a typing user's keys | computer | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-takeover-user) |
 
-## Conflict-held (11)
+## Conflict-held (10)
 
 | id | title | area | priority | age | blocked by | branch |
 |---|---|---|---|---|---|---|
@@ -27,7 +28,6 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10
 | atspi-unanswered-app | fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool | computer | P1 | 7d | [#18745](https://github.com/can1357/oh-my-pi/pull/18745), [#18353](https://github.com/can1357/oh-my-pi/pull/18353), [#18013](https://github.com/can1357/oh-my-pi/pull/18013), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-unanswered-app) |
 | browser-wait-predicate | feat(browser): add waitForFunction to tabs and frames | browser | P1 | 6h | [#18676](https://github.com/can1357/oh-my-pi/pull/18676), [#15508](https://github.com/can1357/oh-my-pi/pull/15508) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-wait-predicate) |
 | browser-run-node-hint | fix(browser): say where tab.run code runs when it reaches for a page global | browser | P2 | 5h | [#15508](https://github.com/can1357/oh-my-pi/pull/15508) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-run-node-hint) |
-| browser-core-first-use | feat(agent,coding-agent): send a short browser guide with the first browser call | browser | P2 | 3h | [#18738](https://github.com/can1357/oh-my-pi/pull/18738) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-core-first-use) |
 
 ## Stacked (16)
 
@@ -60,10 +60,10 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10
 | fallback-revert-when-healthy | feat(coding-agent): add retry.fallbackRevertPolicy when-healthy to return from usage fallbacks | broker | P2 | 28d | Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/fallback-revert-when-healthy) |
 | broker-reset-sweep | feat(coding-agent): spend saved resets from the auth broker before they expire | broker |  | 28d | Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-reset-sweep) |
 | broker-sweep-clients-defer | feat(ai,coding-agent): stop sessions sweeping saved resets the auth broker already spends | broker |  | 28d | Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-sweep-clients-defer) |
-| observe-settle | feat(browser): let observe() settle the effects of the preceding action | browser | P1 | 2h | observe-core series: opens when Brit agrees the series (Will) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-observe-settle) |
-| settle-reads | feat(browser): settle the preceding action before reads too | browser | P1 | 2h | observe-core series: opens when Brit agrees the series (Will) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-settle-reads) |
-| act-look-prompt | docs(browser): teach acting and looking in one Eval cell without sleeps | browser | P2 | 2h | observe-core series: opens when Brit agrees the series (Will) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-act-look-prompt) |
-| observe-stable-ids | feat(browser): keep observe() ids stable across observations | browser | P2 | 2h | observe-core series: opens when Brit agrees the series (Will) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-observe-stable-ids) |
+| observe-settle | feat(browser): let observe() settle the effects of the preceding action | browser | P1 | 3h | observe-core series: opens when Brit agrees the series (Will) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-observe-settle) |
+| settle-reads | feat(browser): settle the preceding action before reads too | browser | P1 | 3h | observe-core series: opens when Brit agrees the series (Will) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-settle-reads) |
+| act-look-prompt | docs(browser): teach acting and looking in one Eval cell without sleeps | browser | P2 | 3h | observe-core series: opens when Brit agrees the series (Will) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-act-look-prompt) |
+| observe-stable-ids | feat(browser): keep observe() ids stable across observations | browser | P2 | 3h | observe-core series: opens when Brit agrees the series (Will) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-observe-stable-ids) |
 | browser-action-outcome | feat(browser): print what each browser action did to the page | browser | P2 | 2h | ActionOutcomePR, 2026-11-10: Haiku leg on this head did not reproduce the step saving (1.02x [0.84,1.25] vs earlier 0.86x); Sol leg on this head (guard-team, from 21:15Z) decides | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-action-outcome) |
 | eval-assign-echo | fix(coding-agent): print nothing for a JavaScript eval cell that ends in an assignment | eval | P1 | 2h | Main, 2026-11-10: awaiting model sample (changes every JS cell's return); bots ScreenshotOutput | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/eval-assign-echo) |
 | computer-guide-first-use | feat(coding-agent): send the computer guide with the first computer call | computer | P2 | 2h | Main, 2026-11-10: Haiku shows 1.19x steps on native tasks; waits for the Sol native legs and Will's call | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-guide-first-use) |
@@ -83,7 +83,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10
 | [#17897](https://github.com/can1357/oh-my-pi/pull/17897) | iphone-mirror-key-gap | perf(natives): type on iPhone Mirroring twice as fast | computer | P2 | 7d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-key-gap) |
 | [#17757](https://github.com/can1357/oh-my-pi/pull/17757) | macos-capture-geometry | fix(natives): match macOS window screenshots to the window on screen | computer | P0 | 8d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-capture-geometry) |
 | [#17756](https://github.com/can1357/oh-my-pi/pull/17756) | iphone-mirror-pointer | fix(natives): keep background iPhone Mirroring taps reaching the phone after a takeover tap | computer | P1 | 8d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-pointer) |
-| [#17610](https://github.com/can1357/oh-my-pi/pull/17610) | claude-refusal-strip-retry | fix(ai,coding-agent): carry other models' reasoning to Claude and retry its refusal without it | other | P2 | 9d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/claude-refusal-strip-retry) |
+| [#17610](https://github.com/can1357/oh-my-pi/pull/17610) | claude-refusal-strip-retry | fix(ai,coding-agent): carry other models' reasoning to Claude and retry its refusal without it | other | P2 | 10d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/claude-refusal-strip-retry) |
 | [#18353](https://github.com/can1357/oh-my-pi/pull/18353) | wayland-pipewire-dlopen | fix(natives): load libpipewire at runtime so released addons capture on Wayland | computer | P2 | 3d | keep; opened over P2 #18013 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-pipewire-dlopen) |
 | [#18013](https://github.com/can1357/oh-my-pi/pull/18013) | wayland-ei-text | feat(natives): type text the wayland layout lacks through libei text | natives | P2 | 6d | keep; rebases after #18353 merges | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-ei-text) |
 | [#18125](https://github.com/can1357/oh-my-pi/pull/18125) | anthropic-web-search | fix(ai,coding-agent): keep Anthropic web search queries intact, always search, and report refusals | other | P2 | 6d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/anthropic-web-search) |
