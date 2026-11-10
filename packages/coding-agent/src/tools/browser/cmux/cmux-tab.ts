@@ -1,7 +1,7 @@
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { Snowflake, untilAborted } from "@oh-my-pi/pi-utils";
+import { Snowflake, untilAborted, withTimeout } from "@oh-my-pi/pi-utils";
 import { JsRuntime } from "../../../eval/js/shared/runtime";
 import { readImageHeaderDimensions, resizeImage } from "../../../utils/image-resize";
 import { resolveToCwd } from "../../path-utils";
@@ -46,9 +46,12 @@ import {
 } from "../navigation";
 import {
 	DEFAULT_STYLE_PROPERTIES,
-	PREDICATE_ANSWER_SOURCE,
 	PREDICATE_CALL_SOURCE,
+	PREDICATE_ANSWER_SOURCE,
 	type PredicateAnswer,
+	pageTextMatches,
+	waitForTextLabel,
+	waitTextTarget,
 } from "../queries";
 import type {
 	HarContentPolicy,
@@ -1558,21 +1561,26 @@ export class CmuxTab implements InProcessRunTab {
 		);
 	}
 
-	async waitForText(text: string, opts: { timeout?: number; selector?: string; exact?: boolean } = {}): Promise<void> {
+	async waitForText(
+		text: string | RegExp,
+		opts: { timeout?: number; selector?: string; exact?: boolean } = {},
+	): Promise<void> {
 		const timeoutMs = opts.timeout ?? this.#runContext?.timeoutMs ?? 30_000;
 		const signal = this.#runContext?.signal;
 		const deadline = Date.now() + timeoutMs;
+		const target = waitTextTarget(text);
+		const exact = opts.exact === true;
+		const timedOut = new ToolError(`${waitForTextLabel(text)} timed out after ${timeoutMs}ms`);
 		while (Date.now() <= deadline) {
-			const content = opts.selector
-				? await this.text(opts.selector)
-				: await this.#evalScript<string>("document.body?.innerText || ''");
-			if (content !== null) {
-				const candidate = content.trim();
-				if (opts.exact ? candidate === text : candidate.includes(text)) return;
-			}
+			const evaluation = opts.selector
+				? this.queryElement<boolean>(opts.selector, pageTextMatches.toString(), [target, exact])
+				: this.#evalScript<boolean>(`(${pageTextMatches.toString()})(null, ${JSON.stringify(target)}, ${exact})`);
+			// A slow match keeps the page (and the daemon's queue) busy, but the wait still ends at its deadline.
+			const matched = await withTimeout(evaluation, Math.max(1, deadline - Date.now()), timedOut, signal);
+			if (matched) return;
 			await untilAborted(signal, () => Bun.sleep(100));
 		}
-		throw new ToolError(`tab.waitForText(${JSON.stringify(text)}) timed out after ${timeoutMs}ms`);
+		throw timedOut;
 	}
 
 	async waitForNavigation(opts?: { waitUntil?: WaitUntil; timeout?: number }): Promise<null> {

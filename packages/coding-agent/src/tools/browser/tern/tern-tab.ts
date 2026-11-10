@@ -18,7 +18,7 @@ import { AsyncLocalStorage } from "node:async_hooks";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { isRecord, logger, Snowflake, untilAborted } from "@oh-my-pi/pi-utils";
+import { isRecord, logger, Snowflake, untilAborted, withTimeout } from "@oh-my-pi/pi-utils";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import { JsRuntime } from "../../../eval/js/shared/runtime";
 import { resizeImage } from "../../../utils/image-resize";
@@ -67,9 +67,11 @@ import { normalizeAllowedDomains, urlMatcher } from "../network";
 import { resolveOpTimeouts, resolveWaitTimeout, ZERO_MATCH_FAIL_FAST_MS } from "../op-timeouts";
 import {
 	DEFAULT_STYLE_PROPERTIES,
-	PREDICATE_ANSWER_SOURCE,
 	PREDICATE_CALL_SOURCE,
+	PREDICATE_ANSWER_SOURCE,
 	type PredicateAnswer,
+	waitForTextLabel,
+	waitTextTarget,
 } from "../queries";
 import { extractReadableFromHtml, type ReadableExtractOptions, type ReadableFormat } from "../readable";
 import {
@@ -2699,15 +2701,17 @@ export class TernTab implements InProcessRunTab {
 	}
 
 	/**
-	 * Wait until `text` appears in the body (or a matching element). On native
-	 * reads: until an element's rendered text contains it (ignoring case), or
-	 * with `exact` equals it.
+	 * Wait until `text` (a string or `RegExp`) appears in the body (or a matching element).
+	 * Native string waits match rendered text, ignoring case unless `exact` is set.
 	 */
-	async waitForText(text: string, opts: { timeout?: number; selector?: string; exact?: boolean } = {}): Promise<void> {
-		const label = `tab.waitForText(${JSON.stringify(text)})`;
+	async waitForText(
+		text: string | RegExp,
+		opts: { timeout?: number; selector?: string; exact?: boolean } = {},
+	): Promise<void> {
+		const label = waitForTextLabel(text);
 		const timeoutMs = resolveWaitTimeout(this.#cellMs, opts.timeout);
 		const root = opts.selector ? this.#spec(opts.selector) : null;
-		if (this.#native) {
+		if (this.#native && typeof text === "string") {
 			let left = timeoutMs;
 			let within: DomRef | undefined;
 			if (root) {
@@ -2732,9 +2736,16 @@ export class TernTab implements InProcessRunTab {
 			if (!waited.matched) throw new ToolError(`${label} timed out after ${timeoutMs}ms`);
 			return;
 		}
-		await this.#poll(label, timeoutMs, async () =>
-			(await this.#kit<boolean>("hasText", [text, root, opts.exact === true])) ? true : undefined,
-		);
+		const target = waitTextTarget(text);
+		const deadline = Date.now() + timeoutMs;
+		const timedOut = new ToolError(`${label} timed out after ${timeoutMs}ms`);
+		await this.#poll(label, timeoutMs, async () => {
+			// A slow match (or kit install) keeps the page busy, but the wait still ends at its deadline.
+			const check = this.#kit<boolean>("hasText", [target, root, opts.exact === true]);
+			return (await withTimeout(check, Math.max(1, deadline - Date.now()), timedOut, this.#signal))
+				? true
+				: undefined;
+		});
 	}
 
 	/** Wait for a visible matching element and return its handle. */

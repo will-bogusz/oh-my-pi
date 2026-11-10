@@ -300,30 +300,70 @@ async function pollPage<T>(
 	throw new ToolError(timeoutMessage);
 }
 
+/** Whether a `waitForText` target is a `RegExp`, from this realm or the run's; anything else is matched as text. */
+export function isWaitTextPattern(text: unknown): text is RegExp {
+	return Object.prototype.toString.call(text) === "[object RegExp]";
+}
+
+/** The label `tab.waitForText` reports itself by, naming a `RegExp` by its source as written. */
+export function waitForTextLabel(text: string | RegExp): string {
+	return `tab.waitForText(${isWaitTextPattern(text) ? String(text) : JSON.stringify(text)})`;
+}
+
+/** A `waitForText` target as page script receives it: the text, or a `RegExp` as its source and flags. */
+export type WaitTextTarget = string | { source: string; flags: string };
+
+/** The {@link WaitTextTarget} page script receives for `text`. */
+export function waitTextTarget(text: string | RegExp): WaitTextTarget {
+	return isWaitTextPattern(text) ? { source: text.source, flags: text.flags } : text;
+}
+
+/**
+ * Page-side: whether the trimmed text of `element` (the body's when null) satisfies a `waitForText` target: a string
+ * is found in it (equals it with `exact`), a pattern matches it. The pattern runs where the text is, so one that
+ * backtracks for long stalls the page rather than omp, and the wait still ends at its timeout. Self-contained, so
+ * backends that run page script embed its source.
+ */
+export function pageTextMatches(element: unknown, target: WaitTextTarget, exact: boolean): boolean {
+	type TextNode = { innerText?: string; textContent: string | null };
+	const pageGlobal = globalThis as unknown as { document: { body: TextNode | null } };
+	const node = element as TextNode | null;
+	const content = node
+		? (node.innerText ?? node.textContent ?? "")
+		: pageGlobal.document.body
+			? (pageGlobal.document.body.innerText ?? "")
+			: "";
+	const candidate = String(content).trim();
+	if (typeof target === "string") return exact ? candidate === target : candidate.includes(target);
+	return new RegExp(target.source, target.flags).test(candidate);
+}
+
 /** Wait until text appears in the document body or a scoped element. */
 export async function waitForPageText(
 	page: Page,
-	text: string,
+	text: string | RegExp,
 	opts: { timeout: number; selector?: string; exact?: boolean; signal: AbortSignal },
 ): Promise<void> {
+	const target = waitTextTarget(text);
+	const exact = opts.exact === true;
 	await pollPage(
 		async () => {
-			const content = opts.selector
-				? await queryText(page, opts.selector, opts.signal)
-				: ((await untilAborted(opts.signal, () =>
-						page.evaluate(() => {
-							const pageGlobal = globalThis as unknown as {
-								document: { body?: { innerText?: string } };
-							};
-							return pageGlobal.document.body?.innerText ?? "";
-						}),
-					)) as string);
-			if (content === null) return undefined;
-			const candidate = content.trim();
-			return (opts.exact ? candidate === text : candidate.includes(text)) ? true : undefined;
+			if (!opts.selector) {
+				const matched = await untilAborted(opts.signal, () => page.evaluate(pageTextMatches, null, target, exact));
+				return matched ? true : undefined;
+			}
+			const handle = await firstHandle(page, opts.selector, opts.signal);
+			if (!handle) return undefined;
+			try {
+				const matched = await untilAborted(opts.signal, () => handle.evaluate(pageTextMatches, target, exact));
+				return matched ? true : undefined;
+			} finally {
+				// Not awaited: a page still busy with the match would hold the timed-out wait until it finished.
+				void handle.dispose().catch(() => undefined);
+			}
 		},
 		{ timeout: opts.timeout, interval: 100, signal: opts.signal },
-		`tab.waitForText(${JSON.stringify(text)}) timed out after ${opts.timeout}ms`,
+		`${waitForTextLabel(text)} timed out after ${opts.timeout}ms`,
 	);
 }
 
