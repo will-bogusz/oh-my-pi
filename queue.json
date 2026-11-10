@@ -75251,12 +75251,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-10T17:25:25.330640Z",
+  "at": "2026-11-10T17:35:13.384933Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 7,
-   "left": 1
+   "used": 8,
+   "left": 0
   },
   "rows": [
    {
@@ -75513,6 +75513,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-10T16:42:22Z"
+   },
+   {
+    "id": "computer-window-exact-app",
+    "label": "#18744",
+    "number": 18744,
+    "state": "open",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(coding-agent): prefer exact app names when selecting windows",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-10T16:44:37Z"
    },
    {
     "id": "computer-find-role-alias",
@@ -75938,7 +75955,7 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(computer): reject unknown helper option keys",
-    "action": "open",
+    "action": "next-hour",
     "reasons": [],
     "note": "",
     "over": [],
@@ -76124,6 +76141,7 @@
      "needs computer-ui-quiet (queued)",
      "conflicts with #18675 in docs/tools/computer.md",
      "conflicts with #18737 in packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts",
+     "conflicts with #18744 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18745 in docs/tools/computer.md",
      "conflicts with #18746 in docs/tools/computer.md",
      "conflicts with #18353 in docs/tools/computer.md",
@@ -76137,6 +76155,7 @@
     "blocked_by": [
      "#18675",
      "#18737",
+     "#18744",
      "#18745",
      "#18746",
      "#18353",
@@ -76162,6 +76181,7 @@
      "conflicts with #18680 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with #18675 in crates/pi-natives/src/desktop/macos/ax.rs, docs/tools/computer.md",
      "conflicts with #18743 in crates/pi-natives/src/desktop/macos/ax.rs",
+     "conflicts with #18744 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18745 in docs/tools/computer.md",
      "conflicts with #18746 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
      "conflicts with #18353 in docs/tools/computer.md",
@@ -76176,6 +76196,7 @@
      "#18680",
      "#18675",
      "#18743",
+     "#18744",
      "#18745",
      "#18746",
      "#18353",
@@ -76567,10 +76588,6 @@
    }
   ],
   "drafts": [
-   {
-    "label": "#18744",
-    "created": "2026-11-10T16:44:37Z"
-   },
    {
     "label": "#18751",
     "created": "2026-11-10T17:23:38Z"
