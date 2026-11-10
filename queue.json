@@ -71464,6 +71464,26 @@
    "added": "2026-11-10T18:56:55Z",
    "updated": "2026-11-10T18:56:55Z",
    "note": ""
+  },
+  {
+   "id": "act-look-prompt",
+   "branch": "will/browser-act-look-prompt",
+   "title": "docs(browser): teach acting and looking in one Eval cell without sleeps",
+   "area": "browser",
+   "priority": "P2",
+   "needs": [
+    "settle-reads"
+   ],
+   "base": "eeef065bc9bc1efb3f99a3d25448bcb8f7010dca",
+   "body": "bodies/act-look-prompt.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-act-look-prompt",
+   "host": "MacBook-Pro",
+   "added": "2026-11-10T18:57:06Z",
+   "updated": "2026-11-10T18:57:06Z",
+   "note": ""
   }
  ],
  "watch": {
