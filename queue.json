@@ -69524,21 +69524,33 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-10T05:32:52Z",
+  "checked": "2026-11-10T06:03:36Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
+   "browser-call-timeout": {
+    "since": "2026-11-10T06:03:36Z",
+    "title": "fix(browser): give browser calls without a timeout the Eval cell's timeout"
+   },
+   "browser-console-shape": {
+    "since": "2026-11-10T06:03:36Z",
+    "title": "fix(browser): tell agents that treat console() or errors() as an array to read .entries"
+   },
    "computer-window-exact-app": {
     "since": "2026-11-10T05:32:52Z",
     "title": "fix(coding-agent): prefer exact app names when selecting windows"
    },
-   "finder-desktop-key": {
-    "since": "2026-11-10T05:32:52Z",
-    "title": "fix(natives): restore Finder with its desktop focus after macOS background input"
+   "browser-dead-tab-hint": {
+    "since": "2026-11-10T06:03:36Z",
+    "title": "fix(browser): point calls on a tab that is not open at browser.open()"
    },
    "computer-find-role-alias": {
     "since": "2026-11-10T05:32:52Z",
     "title": "fix(natives): accept aliases in computer role searches"
+   },
+   "computer-strict-options": {
+    "since": "2026-11-10T06:03:36Z",
+    "title": "fix(computer): reject unknown helper option keys"
    }
   },
   "conflicts": {
@@ -69572,7 +69584,8 @@
    18657,
    18658,
    18675,
-   18676
+   18676,
+   18680
   ],
   "post_merge": {
    "17747": {
@@ -69674,24 +69687,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-03T06:01:17Z",
-    "kind": "openable",
-    "id": "wayland-pipewire-dlopen",
-    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland"
-   },
-   {
-    "at": "2026-11-03T06:01:17Z",
-    "kind": "openable",
-    "id": "x11-element-focus-steal",
-    "title": "fix(natives): keep X11 background element typing from raising the element's window"
-   },
-   {
-    "at": "2026-11-03T06:01:17Z",
-    "kind": "openable",
-    "id": "atspi-file-chooser",
-    "title": "fix(natives): read GTK3 file dialogs as AT-SPI windows"
-   },
    {
     "at": "2026-11-03T07:02:12Z",
     "kind": "openable",
@@ -71179,6 +71174,37 @@
     "kind": "openable",
     "id": "computer-find-role-alias",
     "title": "fix(natives): accept aliases in computer role searches"
+   },
+   {
+    "at": "2026-11-10T06:03:36Z",
+    "kind": "openable",
+    "id": "browser-call-timeout",
+    "title": "fix(browser): give browser calls without a timeout the Eval cell's timeout"
+   },
+   {
+    "at": "2026-11-10T06:03:36Z",
+    "kind": "openable",
+    "id": "browser-console-shape",
+    "title": "fix(browser): tell agents that treat console() or errors() as an array to read .entries"
+   },
+   {
+    "at": "2026-11-10T06:03:36Z",
+    "kind": "openable",
+    "id": "browser-dead-tab-hint",
+    "title": "fix(browser): point calls on a tab that is not open at browser.open()"
+   },
+   {
+    "at": "2026-11-10T06:03:36Z",
+    "kind": "openable",
+    "id": "computer-strict-options",
+    "title": "fix(computer): reject unknown helper option keys"
+   },
+   {
+    "at": "2026-11-10T06:03:36Z",
+    "kind": "unopenable",
+    "id": "finder-desktop-key",
+    "title": "fix(natives): restore Finder with its desktop focus after macOS background input",
+    "why": "opened as #18680"
    }
   ]
  },
@@ -73570,12 +73596,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-10T05:50:21.163322Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-10T06:03:37.492265Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 3,
-   "left": 5
+   "used": 1,
+   "left": 7
   },
   "rows": [
    {
@@ -74127,7 +74153,7 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(computer): reject unknown helper option keys",
-    "action": "next-hour",
+    "action": "open",
     "reasons": [],
     "note": "",
     "over": [],
