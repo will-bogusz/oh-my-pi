@@ -72681,6 +72681,24 @@
    "added": "2026-11-10T19:53:35Z",
    "updated": "2026-11-10T19:53:35Z",
    "note": ""
+  },
+  {
+   "id": "x11-covered-capture",
+   "branch": "will/x11-covered-capture",
+   "title": "fix(natives): capture a covered X11 window from its own pixels, or say it is covered",
+   "area": "computer",
+   "priority": "P1",
+   "needs": [],
+   "base": "e325ffc73ab86e03bdd20a91b77d8e2b3964c906",
+   "body": "bodies/x11-covered-capture.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-covered-capture",
+   "host": "MacBook-Pro",
+   "added": "2026-11-10T20:41:59Z",
+   "updated": "2026-11-10T20:41:59Z",
+   "note": ""
   }
  ],
  "watch": {
