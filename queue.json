@@ -75317,12 +75317,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-10T17:46:04.509079Z",
-  "host": "goliath",
+  "at": "2026-11-10T17:50:01.594686Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 6,
-   "left": 2
+   "used": 4,
+   "left": 4
   },
   "rows": [
    {
