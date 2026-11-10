@@ -71729,8 +71729,64 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-171-pin",
    "host": "MacBook-Pro",
    "added": "2026-11-10T19:38:06Z",
-   "updated": "2026-11-10T19:42:27Z",
-   "note": ""
+   "updated": "2026-11-10T19:49:42Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#18767",
+     "code": "882b5c09d0e138a3336052c7fd2c373b0a398476",
+     "with_code": "f790d5582e283778a50beece4e7afcd311ad97a1",
+     "tip": "0093ffa81560e89211ad4d7bb215b7a2908453f4",
+     "with_tip": "a8f2e7baa456e3b16fd43130ec15b449d05a8fd6",
+     "at": "2026-11-10T19:49:35Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#18768",
+     "code": "882b5c09d0e138a3336052c7fd2c373b0a398476",
+     "with_code": "6904b3057c4bad0edf4ba79f0c024c843b25a834",
+     "tip": "0093ffa81560e89211ad4d7bb215b7a2908453f4",
+     "with_tip": "0a2864cbd6b3e69a1a33082bc0732a3302c53351",
+     "at": "2026-11-10T19:49:41Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#18624",
+     "code": "882b5c09d0e138a3336052c7fd2c373b0a398476",
+     "with_code": "a6c3686b678ac8e1348dd9b3262238ddf925504d",
+     "tip": "0093ffa81560e89211ad4d7bb215b7a2908453f4",
+     "with_tip": "94e431fde263071d11de8fd12876d691b641ac77",
+     "at": "2026-11-10T19:49:41Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#17610",
+     "code": "882b5c09d0e138a3336052c7fd2c373b0a398476",
+     "with_code": "714b4c7140abbaab7d5113091311d768144710a6",
+     "tip": "0093ffa81560e89211ad4d7bb215b7a2908453f4",
+     "with_tip": "25d71ca1e95fcc475f8fc13c5c2409ce98295d68",
+     "at": "2026-11-10T19:49:41Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#18125",
+     "code": "882b5c09d0e138a3336052c7fd2c373b0a398476",
+     "with_code": "5402656ebc173c662e80a512b0822fe7187eb1f0",
+     "tip": "0093ffa81560e89211ad4d7bb215b7a2908453f4",
+     "with_tip": "c8f8f192d176e637d1848a05d4958b820fe86f0b",
+     "at": "2026-11-10T19:49:41Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#18766",
+     "code": "882b5c09d0e138a3336052c7fd2c373b0a398476",
+     "with_code": "217118c54c604c03d049e395293367329897c0b8",
+     "tip": "0093ffa81560e89211ad4d7bb215b7a2908453f4",
+     "with_tip": "365ac2057a01992604bf0b676dea9acbf7bd435e",
+     "at": "2026-11-10T19:49:41Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "factory-droid-171-models",
