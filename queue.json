@@ -69335,7 +69335,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/finder-desktop-key",
    "host": "MacBook-Pro",
    "added": "2026-11-10T04:31:00Z",
-   "updated": "2026-11-10T05:42:51Z",
+   "updated": "2026-11-10T05:43:12Z",
    "note": "",
    "built": [
     {
@@ -69411,7 +69411,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-11-10T05:42:51Z"
+   "opened": "2026-11-10T05:42:51Z",
+   "readied": "2026-11-10T05:43:11Z"
   },
   {
    "id": "computer-window-exact-app",
