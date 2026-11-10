@@ -71763,7 +71763,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/eval-error-frames",
    "host": "MacBook-Pro",
    "added": "2026-11-10T19:06:45Z",
-   "updated": "2026-11-10T20:33:08Z",
+   "updated": "2026-11-10T20:33:34Z",
    "note": "",
    "advanced": "2026-11-10T20:13:50Z",
    "built": [
@@ -71974,7 +71974,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-11-10T20:33:08Z"
+   "opened": "2026-11-10T20:33:08Z",
+   "readied": "2026-11-10T20:33:33Z"
   },
   {
    "id": "factory-droid-argon-promo",
