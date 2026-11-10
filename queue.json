@@ -73387,13 +73387,13 @@
    "needs": [],
    "base": "a2df1c9ef8d61301ab7222332aeb53acd5d38ab7",
    "body": "bodies/devin-retire-swe-1-6-fast.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18795,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-retire-swe-1-6-fast",
    "host": "MacBook-Pro",
    "added": "2026-11-10T23:05:26Z",
-   "updated": "2026-11-10T23:10:37Z",
+   "updated": "2026-11-10T23:14:14Z",
    "note": "",
    "built": [
     {
@@ -73423,7 +73423,8 @@
      "at": "2026-11-10T23:10:36Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-10T23:14:14Z"
   }
  ],
  "watch": {
