@@ -70567,7 +70567,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-open-window",
    "host": "MacBook-Pro",
    "added": "2026-11-10T15:55:51Z",
-   "updated": "2026-11-10T16:42:23Z",
+   "updated": "2026-11-10T16:42:46Z",
    "note": "",
    "built": [
     {
@@ -70681,7 +70681,8 @@
      "tree": "cc4e34929e58e80b79a5fad96294c5f28983deb6"
     }
    ],
-   "opened": "2026-11-10T16:42:23Z"
+   "opened": "2026-11-10T16:42:23Z",
+   "readied": "2026-11-10T16:42:46Z"
   },
   {
    "id": "browser-hover-actionable",
