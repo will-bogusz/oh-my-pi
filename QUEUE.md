@@ -109,4 +109,4 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10
 
 | id | title | area | priority | age | branch |
 |---|---|---|---|---|---|
-| eval-assign-echo | fix(coding-agent): print nothing for a JavaScript eval cell that ends in an assignment | browser | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/eval-assign-echo) |
+| eval-assign-echo | fix(coding-agent): print nothing for a JavaScript eval cell that ends in an assignment | eval | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/eval-assign-echo) |
