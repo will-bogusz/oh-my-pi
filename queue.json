@@ -69126,7 +69126,7 @@
    "area": "browser",
    "priority": "P0",
    "needs": [],
-   "base": "7a03d7af15263b7d77ee628d617b43f7b1dcb8a8",
+   "base": "3af67e0bfbcda7add66798fb40dc08fb66b772c0",
    "body": "bodies/click-reresolve-detached.md",
    "state": "open",
    "pr": 18676,
@@ -69134,7 +69134,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/click-reresolve-detached",
    "host": "MacBook-Pro",
    "added": "2026-11-10T04:15:06Z",
-   "updated": "2026-11-10T19:19:12Z",
+   "updated": "2026-11-10T19:32:12Z",
    "note": "",
    "built": [
     {
@@ -69239,7 +69239,7 @@
    ],
    "opened": "2026-11-10T04:53:51Z",
    "readied": "2026-11-10T04:54:11Z",
-   "advanced": "2026-11-10T19:19:12Z"
+   "advanced": "2026-11-10T19:32:12Z"
   },
   {
    "id": "sheet-key-target",
