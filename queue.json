@@ -70433,7 +70433,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "f0200abf28e8d314125854600cf726dece495246",
+   "base": "eda28eff97cf7a352fd3057a03581be1686dbc7a",
    "body": "bodies/computer-input-lease-wait.md",
    "state": "open",
    "pr": 18746,
@@ -70441,7 +70441,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-input-lease-wait",
    "host": "MacBook-Pro",
    "added": "2026-11-10T15:55:32Z",
-   "updated": "2026-11-10T17:00:21Z",
+   "updated": "2026-11-10T17:09:34Z",
    "note": "",
    "built": [
     {
@@ -70556,7 +70556,8 @@
     }
    ],
    "opened": "2026-11-10T16:48:58Z",
-   "readied": "2026-11-10T16:49:24Z"
+   "readied": "2026-11-10T16:49:24Z",
+   "advanced": "2026-11-10T17:09:34Z"
   },
   {
    "id": "computer-open-window",
