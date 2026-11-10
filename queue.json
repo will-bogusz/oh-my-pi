@@ -70084,13 +70084,13 @@
    "needs": [],
    "base": "f0200abf28e8d314125854600cf726dece495246",
    "body": "bodies/computer-strict-options.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18753,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-strict-options",
    "host": "MacBook-Pro",
    "added": "2026-11-10T05:41:26Z",
-   "updated": "2026-11-10T17:41:01Z",
+   "updated": "2026-11-10T17:43:16Z",
    "note": "",
    "built": [
     {
@@ -70303,7 +70303,8 @@
      "host": "MacBook-Pro",
      "tree": "71d4c5f330c642bdd8635d34f66928420f42a0ba"
     }
-   ]
+   ],
+   "opened": "2026-11-10T17:43:16Z"
   },
   {
    "id": "browser-console-shape",
