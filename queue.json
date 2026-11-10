@@ -71753,7 +71753,7 @@
    "branch": "will/eval-error-frames",
    "title": "fix(coding-agent): print a failed JavaScript cell's own frames, not omp's host stack",
    "area": "eval",
-   "priority": "P2",
+   "priority": "P1",
    "needs": [],
    "base": "e325ffc73ab86e03bdd20a91b77d8e2b3964c906",
    "body": "bodies/eval-error-frames.md",
@@ -71763,7 +71763,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/eval-error-frames",
    "host": "MacBook-Pro",
    "added": "2026-11-10T19:06:45Z",
-   "updated": "2026-11-10T20:41:05Z",
+   "updated": "2026-11-10T20:47:58Z",
    "note": "",
    "advanced": "2026-11-10T20:41:05Z",
    "built": [
