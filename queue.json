@@ -69743,7 +69743,7 @@
    "area": "browser",
    "priority": "P1",
    "needs": [],
-   "base": "e325ffc73ab86e03bdd20a91b77d8e2b3964c906",
+   "base": "6dd7ddf5feab54da3c82b460ee390a7d09aeabaa",
    "body": "bodies/browser-call-timeout.md",
    "state": "open",
    "pr": 18737,
@@ -69751,9 +69751,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-call-timeout",
    "host": "MacBook-Pro",
    "added": "2026-11-10T05:34:29Z",
-   "updated": "2026-11-10T20:19:56Z",
+   "updated": "2026-11-10T23:54:44Z",
    "note": "",
-   "advanced": "2026-11-10T20:19:56Z",
+   "advanced": "2026-11-10T23:54:44Z",
    "built": [
     {
      "with": "#18658",
