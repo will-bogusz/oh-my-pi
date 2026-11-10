@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10 16:27Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10 16:30Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-10 16:17Z on MacBook-Pro; groups below are from it, states from the manifest)
@@ -11,7 +11,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
 | computer-window-exact-app | fix(coding-agent): prefer exact app names when selecting windows | computer | P1 | 11h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-window-exact-app) |
-| computer-find-role-alias | fix(natives): accept aliases in computer role searches | computer | P2 | 10h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-find-role-alias) |
+| computer-find-role-alias | fix(natives): accept aliases in computer role searches | computer | P2 | 11h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-find-role-alias) |
 | browser-call-timeout | fix(browser): give browser calls without a timeout the Eval cell's timeout | browser | P1 | 10h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-call-timeout) |
 | browser-dead-tab-hint | fix(browser): point calls on a tab that is not open at browser.open() | browser | P2 | 10h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-dead-tab-hint) |
 | computer-strict-options | fix(computer): reject unknown helper option keys | computer | P2 | 10h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-strict-options) |
