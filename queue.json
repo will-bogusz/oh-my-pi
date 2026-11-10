@@ -71197,13 +71197,13 @@
    "needs": [],
    "base": "e325ffc73ab86e03bdd20a91b77d8e2b3964c906",
    "body": "bodies/browser-core-first-use.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18786,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-core-first-use",
    "host": "MacBook-Pro",
    "added": "2026-11-10T18:04:09Z",
-   "updated": "2026-11-10T22:02:13Z",
+   "updated": "2026-11-10T22:11:21Z",
    "note": "",
    "advanced": "2026-11-10T21:53:22Z",
    "built": [
@@ -71417,7 +71417,8 @@
      "host": "MacBook-Pro",
      "tree": "9b17ab6bc57e66734bf4f6ddfe646427ee805a72"
     }
-   ]
+   ],
+   "opened": "2026-11-10T22:11:21Z"
   },
   {
    "id": "browser-honest-completion",
