@@ -69327,7 +69327,7 @@
    "area": "computer",
    "priority": "P0",
    "needs": [],
-   "base": "f0200abf28e8d314125854600cf726dece495246",
+   "base": "eda28eff97cf7a352fd3057a03581be1686dbc7a",
    "body": "bodies/finder-desktop-key.md",
    "state": "open",
    "pr": 18680,
@@ -69335,7 +69335,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/finder-desktop-key",
    "host": "MacBook-Pro",
    "added": "2026-11-10T04:31:00Z",
-   "updated": "2026-11-10T06:03:32Z",
+   "updated": "2026-11-10T15:41:25Z",
    "note": "",
    "built": [
     {
@@ -69412,7 +69412,8 @@
     }
    ],
    "opened": "2026-11-10T05:42:51Z",
-   "readied": "2026-11-10T05:43:11Z"
+   "readied": "2026-11-10T05:43:11Z",
+   "advanced": "2026-11-10T15:41:25Z"
   },
   {
    "id": "computer-window-exact-app",
