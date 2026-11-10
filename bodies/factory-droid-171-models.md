@@ -19,7 +19,7 @@ Reading order: the seed rows, then the per-model `models` blocks in `factory-dro
 droid 1.7.0/1.7.1 add these models and retire Muse Spark 1.3's gate (its flag is deprecated, served only for older clients). Each new model reuses an existing rule axis; Fable 5.2 is prefix-bound, so it gets `drop_block` on the direct Anthropic upstream like Opus 5.5.
 
 Decisions:
-- Carbon gets no list price: Google has published none (droid carries a placeholder quote), and borrowing Argon's row would show Argon's introductory price.
+- Carbon gets no list price: Google has published none, and borrowing Argon's row would show Argon's introductory price.
 - Muse Spark 1.3 gains image input only: droid also enables PDF, but omp's model `input` has no PDF modality to set.
 - GPT Image 2.6's new `complexity` and GIF controls are left out; its default request matches 2.5's.
 
@@ -36,6 +36,7 @@ Maintenance: the Carbon card ends by itself on 2026-12-01; the next sync round d
 
 ---
 
-- [ ] `bun check` passes
+- [x] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
