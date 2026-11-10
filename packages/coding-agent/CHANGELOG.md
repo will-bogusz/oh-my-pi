@@ -14,6 +14,7 @@
 ### Changed
 
 - Ask forms can attach notes to selected options; those notes accompany the answers separately from submitted form values ([#18779](https://github.com/can1357/oh-my-pi/pull/18779) by [@Shadorain](https://github.com/Shadorain))
+- When another agent's computer call holds the desktop, your agent's `InputBusy` says which one: its label and omp process id
 
 ## [18.18.7] - 2026-11-10
 
