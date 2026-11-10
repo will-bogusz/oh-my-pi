@@ -72448,7 +72448,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/screenshot-result-line",
    "host": "MacBook-Pro",
    "added": "2026-11-10T19:42:48Z",
-   "updated": "2026-11-10T20:37:05Z",
+   "updated": "2026-11-10T20:37:33Z",
    "note": "",
    "built": [
     {
@@ -72659,7 +72659,8 @@
     }
    ],
    "advanced": "2026-11-10T20:17:46Z",
-   "opened": "2026-11-10T20:37:05Z"
+   "opened": "2026-11-10T20:37:05Z",
+   "readied": "2026-11-10T20:37:32Z"
   },
   {
    "id": "computer-guide-first-use",
