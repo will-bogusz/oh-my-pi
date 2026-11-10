@@ -69335,8 +69335,73 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/finder-desktop-key",
    "host": "MacBook-Pro",
    "added": "2026-11-10T04:31:00Z",
-   "updated": "2026-11-10T04:31:00Z",
-   "note": ""
+   "updated": "2026-11-10T05:40:45Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#17894",
+     "code": "0f819f6cf35132f05835d1b19d4462c56e424160",
+     "with_code": "8c518d39e8ae4759e6546b0727302ce1cd78cd50",
+     "tip": "a87d27371d7a8f66aff70ad452580a1c793d1c90",
+     "with_tip": "3181a9f0bdcc1fa4b210d66d9a09f1d0c29ffe09",
+     "at": "2026-11-10T05:40:40Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16553",
+     "code": "0f819f6cf35132f05835d1b19d4462c56e424160",
+     "with_code": "432ad760bb724ebf42ba3b5f60661a3f8d20b1b0",
+     "tip": "a87d27371d7a8f66aff70ad452580a1c793d1c90",
+     "with_tip": "bce3313da96a3074e73393570fe2ab20be849a15",
+     "at": "2026-11-10T05:40:44Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#17897",
+     "code": "0f819f6cf35132f05835d1b19d4462c56e424160",
+     "with_code": "2bbb547591ae156ccac7af195b43202e415d1bd2",
+     "tip": "a87d27371d7a8f66aff70ad452580a1c793d1c90",
+     "with_tip": "c627202ac6932a14b0c2e4f61da160c1b71a8cd9",
+     "at": "2026-11-10T05:40:44Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#17757",
+     "code": "0f819f6cf35132f05835d1b19d4462c56e424160",
+     "with_code": "57c8b56de66790faec97d3d41e37b747521b4588",
+     "tip": "a87d27371d7a8f66aff70ad452580a1c793d1c90",
+     "with_tip": "8fe4506e2f5c4c65313c5271d99dee3fbd1f0ae0",
+     "at": "2026-11-10T05:40:44Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#17756",
+     "code": "0f819f6cf35132f05835d1b19d4462c56e424160",
+     "with_code": "a6e6573a4b74d0002eefa7c7dfd2b5b4255dfc18",
+     "tip": "a87d27371d7a8f66aff70ad452580a1c793d1c90",
+     "with_tip": "958ce40314cc468833fe07051a96a77ff086d6a5",
+     "at": "2026-11-10T05:40:44Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#18353",
+     "code": "0f819f6cf35132f05835d1b19d4462c56e424160",
+     "with_code": "4f9298170e07ac62f3231d709708abf3d4557a3d",
+     "tip": "a87d27371d7a8f66aff70ad452580a1c793d1c90",
+     "with_tip": "1dfb2748ef1ea83ca2221f32cb2962f9663ad9af",
+     "at": "2026-11-10T05:40:44Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#18675",
+     "code": "0f819f6cf35132f05835d1b19d4462c56e424160",
+     "with_code": "9f3a46eff8e92604e373ddd79524106dab790d80",
+     "tip": "a87d27371d7a8f66aff70ad452580a1c793d1c90",
+     "with_tip": "b90203d5f458c582b3c36a4ad0666e8d6e075ff6",
+     "at": "2026-11-10T05:40:44Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "computer-window-exact-app",
