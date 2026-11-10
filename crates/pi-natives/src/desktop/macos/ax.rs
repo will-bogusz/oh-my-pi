@@ -1301,6 +1301,7 @@ fn element_props(
 		partial: identity.is_none(),
 		identity,
 		selected,
+		expanded: None,
 		role_name: role_name.map(str::to_owned),
 	})
 }

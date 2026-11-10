@@ -10,6 +10,7 @@
 - Computer input no longer fails with `InputBusy` the moment another omp session's call holds the desktop, such as an `apps.open` waiting for its window: it waits up to 5 seconds for that call to finish, on macOS, Linux and Windows ([#18746](https://github.com/can1357/oh-my-pi/pull/18746) by [@will-bogusz](https://github.com/will-bogusz))
 
 ### Fixed
+- Windows accessibility trees now show checkbox, selection and expansion state, and can identify recreated controls when resolving stale references.
 
 - Fixed a crash when parsing Markdown with very deeply nested lists or block quotes, such as a line of several hundred `- ` markers, which made editing such files kill the process ([#18707](https://github.com/can1357/oh-my-pi/issues/18707))
 - Fixed the shell's `git` builtin on Windows with `bash.gitGuard` (or smart git) on failing every allowed command with exit 127 (`…\Git\cmd\git: No such file or directory`); it now runs `git.exe` ([#18722](https://github.com/can1357/oh-my-pi/issues/18722))

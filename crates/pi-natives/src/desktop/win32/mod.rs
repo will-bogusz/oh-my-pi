@@ -1,5 +1,7 @@
 #[cfg(target_os = "windows")]
 mod ax;
+#[cfg(any(target_os = "windows", test))]
+mod ax_states;
 #[cfg(target_os = "windows")]
 mod capture;
 pub mod delivery;

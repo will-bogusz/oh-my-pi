@@ -112,6 +112,8 @@ pub struct AxProps {
 	pub partial:     bool,
 	/// Whether a row, cell, button or file icon reports itself selected.
 	pub selected:    bool,
+	/// Whether an expandable control is expanded; `None` for leaves or unknown state.
+	pub expanded:    Option<bool>,
 	/// A name the platform derives when the element has neither title nor
 	/// description, such as a window's close button.
 	pub role_name:   Option<String>,
@@ -864,6 +866,11 @@ fn write_line(
 	if props.selected {
 		text.push_str(" (selected)");
 	}
+	match props.expanded {
+		Some(true) => text.push_str(" (expanded)"),
+		Some(false) => text.push_str(" (collapsed)"),
+		None => {},
+	}
 	if focused {
 		text.push_str(" (focused)");
 	}
@@ -1567,6 +1574,7 @@ mod tests {
 			identity:    Some(test_identity((role, title))),
 			partial:     false,
 			selected:    false,
+			expanded:    None,
 			role_name:   None,
 		}
 	}
@@ -2421,6 +2429,22 @@ mod tests {
 		}
 		// Only the two dates outside the page are asked.
 		assert_eq!(m.settable_reads, 2);
+	}
+	#[test]
+	fn expanded_controls_render_their_state_without_marking_leaves() {
+		let mut props = p("treeitem", Some("Folder"));
+		let render = |props: &AxProps| {
+			let mut text = String::new();
+			write_line(&mut text, props, "e1", None, false, Writable::Unmarked);
+			text
+		};
+		props.expanded = Some(false);
+		assert!(render(&props).ends_with(" (collapsed)"));
+		props.expanded = Some(true);
+		assert!(render(&props).ends_with(" (expanded)"));
+		props.expanded = None;
+		assert!(!render(&props).contains("(expanded)"));
+		assert!(!render(&props).contains("(collapsed)"));
 	}
 	#[test]
 	fn only_page_text_fields_answering_unsettable_are_marked_readonly() {

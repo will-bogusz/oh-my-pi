@@ -2924,6 +2924,7 @@ mod capture_tests {
 				actions: Vec::new(),
 				child_count: 0,
 				selected: false,
+				expanded: None,
 				role_name: None,
 			})
 		}

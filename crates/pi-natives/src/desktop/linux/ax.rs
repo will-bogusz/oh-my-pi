@@ -583,6 +583,7 @@ impl AtSpiAx {
 				identity: None,
 				partial: false,
 				selected: false,
+				expanded: None,
 				role_name: None,
 			})
 		})

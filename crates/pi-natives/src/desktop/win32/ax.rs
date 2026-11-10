@@ -6,7 +6,7 @@ use uiautomation::{
 		UIExpandCollapsePattern, UIInvokePattern, UILegacyIAccessiblePattern, UIScrollItemPattern,
 		UISelectionItemPattern, UITogglePattern, UIValuePattern,
 	},
-	types::{ControlType, ExpandCollapseState, Handle, Point, UIProperty},
+	types::{ControlType, ExpandCollapseState, Handle, Point, TreeScope, UIProperty},
 	variants::Value,
 };
 use windows_sys::Win32::{
@@ -23,6 +23,7 @@ use super::{
 	},
 	window,
 };
+use super::ax_states;
 
 /// Ancestors of a hit-tested element searched for the control that owns it.
 const MAX_PRESS_ANCESTORS: usize = 8;
@@ -322,6 +323,26 @@ fn value(element: &UIElement) -> Option<String> {
 		})
 }
 
+fn cached_string(element: &UIElement, property: UIProperty) -> Result<Option<String>, ()> {
+	match element.get_cached_property_value(property).and_then(|value| value.get_value()) {
+		Ok(Value::STRING(value)) => Ok((!value.is_empty()).then_some(value)),
+		Ok(Value::EMPTY) => Ok(None),
+		_ => Err(()),
+	}
+}
+
+fn cached_bool(element: &UIElement, property: UIProperty) -> bool {
+	matches!(element.get_cached_property_value(property).and_then(|value| value.get_value()), Ok(Value::BOOL(true)))
+}
+
+fn cached_state(element: &UIElement, available: UIProperty, state: UIProperty) -> Option<i32> {
+	if !cached_bool(element, available) { return None; }
+	match element.get_cached_property_value(state).and_then(|value| value.get_value()) {
+		Ok(Value::I4(value) | Value::INT(value)) => Some(value),
+		_ => None,
+	}
+}
+
 fn truncate(value: impl ToString) -> String {
 	let value = value.to_string();
 	if value.chars().count() <= 200 {
@@ -372,10 +393,36 @@ impl AxBackend for Win32Ax {
 		let element = Self::element(handle)?;
 		let control_type = element.get_control_type().map_err(ax_error)?;
 		let native_role = control_type.to_string();
+		let cache = self.automation()?.create_cache_request().map_err(ax_error)?;
+		cache.set_tree_scope(TreeScope::Element).map_err(ax_error)?;
+		for property in [
+			UIProperty::Name, UIProperty::AutomationId, UIProperty::ClassName,
+			UIProperty::HelpText, UIProperty::ValueValue, UIProperty::LegacyIAccessibleValue,
+			UIProperty::IsTogglePatternAvailable, UIProperty::ToggleToggleState,
+			UIProperty::SelectionItemIsSelected, UIProperty::IsExpandCollapsePatternAvailable,
+			UIProperty::ExpandCollapseExpandCollapseState,
+		] { cache.add_property(property).map_err(ax_error)?; }
+		let cached = element.build_updated_cache(&cache).map_err(ax_error)?;
+		let fields = [
+			cached_string(&cached, UIProperty::Name), cached_string(&cached, UIProperty::AutomationId),
+			cached_string(&cached, UIProperty::ClassName), cached_string(&cached, UIProperty::HelpText),
+			cached_string(&cached, UIProperty::ValueValue), cached_string(&cached, UIProperty::LegacyIAccessibleValue),
+		];
+		let identity = ax_states::identity(&native_role,
+			&fields.each_ref().map(|field| field.as_ref().map(|value| value.as_deref()).map_err(|_| ())));
+		let [title, _, _, description, value, legacy_value] = fields;
+		let title = title.ok().flatten();
+		let description = description.ok().flatten();
+		let value = value.ok().flatten().or_else(|| legacy_value.ok().flatten());
+		let value = ax_states::toggle_value(value, cached_state(
+			&cached, UIProperty::IsTogglePatternAvailable, UIProperty::ToggleToggleState));
+		let selected = ax_states::selected(&native_role, cached_bool(&cached, UIProperty::SelectionItemIsSelected));
+		let expanded = ax_states::expanded(cached_state(&cached,
+			UIProperty::IsExpandCollapsePatternAvailable, UIProperty::ExpandCollapseExpandCollapseState));
 		let walker = self.walker()?;
-		let child_count = walker
-			.get_children(element)
-			.map_or(0, |children| children.len().min(u32::MAX as usize) as u32);
+		let children = walker.get_children(element);
+		let partial = identity.is_none() || children.is_err();
+		let child_count = children.map_or(0, |children| children.len().min(u32::MAX as usize) as u32);
 		// UIA rectangles already use physical desktop pixels, the same
 		// native coordinate space as window metadata and capture geometry.
 		let bounds = element.get_bounding_rectangle().ok().map(|rect| AxBounds {
@@ -387,17 +434,18 @@ impl AxBackend for Win32Ax {
 		Ok(AxProps {
 			role: normalize_role_uia(&native_role),
 			native_role,
-			title: optional(element.get_name()),
-			value: value(element),
-			description: optional(element.get_help_text()),
+			title,
+			value,
+			description,
 			enabled: element.is_enabled().unwrap_or(false),
 			focused: element.has_keyboard_focus().unwrap_or(false),
 			bounds,
 			actions: actions(element),
 			child_count,
-			identity: None,
-			partial: false,
-			selected: false,
+			identity,
+			partial,
+			selected,
+			expanded,
 			role_name: None,
 		})
 	}
