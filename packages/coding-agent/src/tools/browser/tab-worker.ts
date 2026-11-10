@@ -811,6 +811,8 @@ function waitInPage(
 		resolve = fulfill;
 		reject = fail;
 	});
+	// The host attaches to this promise in its next protocol call, after the page's rejection checkpoint.
+	void promise.catch(() => {});
 	let settled = false;
 	let observer: Observer | undefined;
 	let frame: number | undefined;
@@ -969,7 +971,11 @@ function createRunPage(page: Page, signal: AbortSignal): Page {
 								return value;
 							}
 						} finally {
-							if (!returned) await value.dispose();
+							if (!returned) {
+								const cleanup = value.dispose();
+								if (evalSignal.aborted) void cleanup.catch(() => {});
+								else await cleanup;
+							}
 						}
 					} catch (error) {
 						if (!waitSignal.aborted && evalSignal.aborted) throw timedOut();
