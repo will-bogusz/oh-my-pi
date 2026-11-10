@@ -69120,7 +69120,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-10T02:30:09Z",
+  "checked": "2026-11-10T03:00:33Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -69262,12 +69262,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-03T02:57:27Z",
-    "kind": "openable",
-    "id": "read-block-pages",
-    "title": "fix(coding-agent): stop URL reads returning bot block pages as content"
-   },
    {
     "at": "2026-11-03T03:28:25Z",
     "kind": "openable",
