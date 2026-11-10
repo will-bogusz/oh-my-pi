@@ -69424,13 +69424,13 @@
    "needs": [],
    "base": "f0200abf28e8d314125854600cf726dece495246",
    "body": "bodies/computer-window-exact-app.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18744,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-window-exact-app",
    "host": "MacBook-Pro",
    "added": "2026-11-10T05:24:11Z",
-   "updated": "2026-11-10T16:30:15Z",
+   "updated": "2026-11-10T16:44:38Z",
    "note": "",
    "built": [
     {
@@ -69583,7 +69583,8 @@
      "host": "MacBook-Pro",
      "tree": "8ed067a17a0d7305303e1e1bc7461ef5510c3f69"
     }
-   ]
+   ],
+   "opened": "2026-11-10T16:44:38Z"
   },
   {
    "id": "computer-find-role-alias",
