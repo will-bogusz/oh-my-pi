@@ -42,12 +42,12 @@ This is a default change: anything parsing `Dimensions:` or `URL:` from the text
 ## Testing
 
 - `test/tools/browser-open-options.test.ts` opens a page, then reopens through a redirect: one line each, the URL only on the redirected one. With the source reverted, it, the `formatScreenshot` cases and `browser-screenshot-plus` fail (10 tests). The six browser and image test files: 90 pass with Chrome for Testing.
-- Agent check, Haiku 5.5 through `omp -p`, headless Chrome for Testing, 6 runs per task and arm (not blind: the worktree names `so-main` and `so-head` showed in error stack frames; a neutral rerun replaces these numbers). The few extra calls were choices made before any changed text appeared (a `silent` screenshot then read from disk, a tab closed after the model's own `tab.run` error).
+- Agent check, Haiku 5.5 through `omp -p`, headless Chrome for Testing, 6 runs per task and arm, arms run from neutrally named worktrees in shuffled order. Both tasks pass 6/6 on both arms with every first click a hit. The two longer click runs on this PR were the model's own slips after the first screenshot (a `display()` call that does not exist, `clickAt({ x, y })` instead of `clickAt(x, y)`).
 
 | Task | `main` | this PR |
 |---|---|---|
-| click a canvas-only button with `tab.clickAt` from a scale-2 screenshot | 6/6 hit first click, 3.2 calls | 6/6, 3.5 calls |
-| report where a redirecting open landed | 6/6, 2.0 calls | 6/6, 2.2 calls |
+| click a canvas-only button with `tab.clickAt` from a scale-2 screenshot | 6/6 hit first click, 3.0 calls | 6/6 hit first click, 3.7 calls (3, 3, 3, 3, 4, 6) |
+| report where a redirecting open landed | 6/6, 2.0 calls | 6/6, 2.0 calls |
 
 - Token counts: the 307 screenshot and 727 open blocks in that user's recorded browser results, counted with o200k before and after rewriting them in this PR's format.
 
