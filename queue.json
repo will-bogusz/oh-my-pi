@@ -71214,13 +71214,13 @@
    "needs": [],
    "base": "e1d8f29d54957da5cb38b11d10a6778d13476980",
    "body": "bodies/browser-honest-completion.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18761,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-honest-completion",
    "host": "MacBook-Pro",
    "added": "2026-11-10T18:17:46Z",
-   "updated": "2026-11-10T18:41:23Z",
+   "updated": "2026-11-10T18:43:34Z",
    "note": "",
    "built": [
     {
@@ -71367,7 +71367,8 @@
      "at": "2026-11-10T18:41:22Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-10T18:43:34Z"
   },
   {
    "id": "subagent-browser",
