@@ -70561,13 +70561,13 @@
    "needs": [],
    "base": "f0200abf28e8d314125854600cf726dece495246",
    "body": "bodies/computer-open-window.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18743,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-open-window",
    "host": "MacBook-Pro",
    "added": "2026-11-10T15:55:51Z",
-   "updated": "2026-11-10T16:31:50Z",
+   "updated": "2026-11-10T16:42:23Z",
    "note": "",
    "built": [
     {
@@ -70680,7 +70680,8 @@
      "host": "MacBook-Pro",
      "tree": "cc4e34929e58e80b79a5fad96294c5f28983deb6"
     }
-   ]
+   ],
+   "opened": "2026-11-10T16:42:23Z"
   },
   {
    "id": "browser-hover-actionable",
