@@ -4,7 +4,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10
 
 **Opening:** not paused
 **Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-10 18:44Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 1, conflict-held 10, stacked 15, held 7, open PRs 32, queued since the last plan 4; merged 263, closed 29
+**Counts:** openable now 1, conflict-held 10, stacked 15, held 7, open PRs 32, queued since the last plan 5; merged 263, closed 29
 
 ## Openable now (1)
 
@@ -96,7 +96,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10
 | [#18751](https://github.com/can1357/oh-my-pi/pull/18751) | browser-run-main-world | fix(browser): run tab.run page evaluations in the page's main world | browser | P1 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-run-main-world) |
 | [#18761](https://github.com/can1357/oh-my-pi/pull/18761) | browser-honest-completion | fix(browser): have agents report a step the page cannot do instead of faking it | browser | P1 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-honest-completion) |
 
-## Queued since the last plan (4)
+## Queued since the last plan (5)
 
 | id | title | area | priority | age | branch |
 |---|---|---|---|---|---|
@@ -104,3 +104,4 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10
 | observe-settle | feat(browser): let observe() settle the effects of the preceding action | browser | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-observe-settle) |
 | settle-reads | feat(browser): settle the preceding action before reads too | browser | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-settle-reads) |
 | act-look-prompt | docs(browser): teach acting and looking in one Eval cell without sleeps | browser | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-act-look-prompt) |
+| observe-stable-ids | feat(browser): keep observe() ids stable across observations | browser | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-observe-stable-ids) |
