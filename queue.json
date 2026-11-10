@@ -70238,13 +70238,13 @@
    "needs": [],
    "base": "eda28eff97cf7a352fd3057a03581be1686dbc7a",
    "body": "bodies/browser-console-shape.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18738,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-console-shape",
    "host": "MacBook-Pro",
    "added": "2026-11-10T05:49:27Z",
-   "updated": "2026-11-10T16:30:15Z",
+   "updated": "2026-11-10T16:38:10Z",
    "note": "",
    "advanced": "2026-11-10T16:02:51Z",
    "built": [
@@ -70398,7 +70398,8 @@
      "host": "MacBook-Pro",
      "tree": "8ed067a17a0d7305303e1e1bc7461ef5510c3f69"
     }
-   ]
+   ],
+   "opened": "2026-11-10T16:38:10Z"
   },
   {
    "id": "browser-wait-predicate",
