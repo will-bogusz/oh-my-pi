@@ -71377,7 +71377,7 @@
    "branch": "will/subagent-browser",
    "title": "fix(coding-agent): keep a child omp's browser tabs out of its parent's Tern pane and cmux workspace",
    "area": "browser",
-   "priority": "P1",
+   "priority": "P0",
    "needs": [],
    "base": "e1d8f29d54957da5cb38b11d10a6778d13476980",
    "body": "bodies/subagent-browser.md",
@@ -71387,7 +71387,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/subagent-browser",
    "host": "MacBook-Pro",
    "added": "2026-11-10T18:40:24Z",
-   "updated": "2026-11-10T20:09:56Z",
+   "updated": "2026-11-10T20:17:29Z",
    "note": "",
    "built": [
     {
@@ -72330,7 +72330,7 @@
    "branch": "will/factory-droid-171-pin",
    "title": "feat(ai,catalog): identify Factory Droid requests as droid 1.7.1",
    "area": "factory-droid",
-   "priority": null,
+   "priority": "P1",
    "needs": [],
    "base": "bb8d763482c351264b3093e9bb81d27edd3ed1e9",
    "body": "bodies/factory-droid-171-pin.md",
@@ -72340,7 +72340,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-171-pin",
    "host": "MacBook-Pro",
    "added": "2026-11-10T19:38:06Z",
-   "updated": "2026-11-10T20:01:49Z",
+   "updated": "2026-11-10T20:17:29Z",
    "note": "",
    "built": [
     {
