@@ -1,16 +1,19 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10 04:31Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10 04:33Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-10 03:30Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 0, conflict-held 8, stacked 12, held 6, open PRs 18, queued since the last plan 3; merged 263, closed 29
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-10 04:31Z on goliath; groups below are from it, states from the manifest)
+**Counts:** openable now 2, conflict-held 9, stacked 12, held 6, open PRs 18; merged 263, closed 29
 
-## Openable now (0)
+## Openable now (2)
 
-none
+| id | title | area | priority | age | plan | branch |
+|---|---|---|---|---|---|---|
+| click-reresolve-detached | fix(coding-agent): look a click's selector up again when the page replaces its element | browser | P2 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/click-reresolve-detached) |
+| sheet-key-target | fix(natives): send macOS keys for a window to the sheet focused on it | computer | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/sheet-key-target) |
 
-## Conflict-held (8)
+## Conflict-held (9)
 
 | id | title | area | priority | age | blocked by | branch |
 |---|---|---|---|---|---|---|
@@ -22,6 +25,7 @@ none
 | token-count-policy | feat(catalog,coding-agent): token-count framing policy in KDL | catalog |  | 7d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/token-count-policy) |
 | wire-delta-count | refactor(agent,ai): count the anchored delta from the reader's transformed wire messages | other |  | 7d | [#17610](https://github.com/can1357/oh-my-pi/pull/17610), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wire-delta-count) |
 | atspi-unanswered-app | fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool | computer | P1 | 6d | [#18353](https://github.com/can1357/oh-my-pi/pull/18353), [#18013](https://github.com/can1357/oh-my-pi/pull/18013), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-unanswered-app) |
+| finder-desktop-key | fix(natives): restore Finder with its desktop focus after macOS background input | computer | P1 | 0h | [#16553](https://github.com/can1357/oh-my-pi/pull/16553) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/finder-desktop-key) |
 
 ## Stacked (12)
 
@@ -73,11 +77,3 @@ none
 | [#18624](https://github.com/can1357/oh-my-pi/pull/18624) | upload-stall-error | fix(ai): say whether an Anthropic request body finished uploading when its connection drops | other | P1 | 12h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/upload-stall-error) |
 | [#18657](https://github.com/can1357/oh-my-pi/pull/18657) | relay-autoattach-shared | fix(browser-relay): keep a shared child frame attached when one connection turns auto-attach off | browser | P1 | 5h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-autoattach-shared) |
 | [#18658](https://github.com/can1357/oh-my-pi/pull/18658) | role-selectors-followup | fix(coding-agent): preserve role selectors across locales and document waits | browser | P0 | 5h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/role-selectors-followup) |
-
-## Queued since the last plan (3)
-
-| id | title | area | priority | age | branch |
-|---|---|---|---|---|---|
-| click-reresolve-detached | fix(coding-agent): look a click's selector up again when the page replaces its element | browser | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/click-reresolve-detached) |
-| sheet-key-target | fix(natives): send macOS keys for a window to the sheet focused on it | computer | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/sheet-key-target) |
-| finder-desktop-key | fix(natives): restore Finder with its desktop focus after macOS background input | computer | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/finder-desktop-key) |
