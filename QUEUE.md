@@ -1,17 +1,19 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10 19:38Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10 19:40Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-11-10 19:21Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 2, conflict-held 10, stacked 15, held 12, open PRs 35, queued since the last plan 3; merged 263, closed 29
+**Ready budget:** 4 of 8 ready events used in the hour before the last plan, 4 left (plan of 2026-11-10 19:36Z on MacBook-Pro; groups below are from it, states from the manifest)
+**Counts:** openable now 4, conflict-held 10, stacked 15, held 12, open PRs 35, queued since the last plan 1; merged 263, closed 29
 
-## Openable now (2)
+## Openable now (4)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
 | subagent-browser | fix(coding-agent): keep a child omp's browser tabs out of its parent's Tern pane and cmux workspace | browser | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/subagent-browser) |
 | eval-error-frames | fix(coding-agent): print a failed JavaScript cell's own frames, not omp's host stack | eval | P2 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/eval-error-frames) |
+| eval-assign-echo | fix(coding-agent): print nothing for a JavaScript eval cell that ends in an assignment | eval | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/eval-assign-echo) |
+| observe-print | fix(browser): print every observed element, one line each, instead of cutting at 100 | browser | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/observe-print) |
 
 ## Conflict-held (10)
 
@@ -102,13 +104,11 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10
 | [#18751](https://github.com/can1357/oh-my-pi/pull/18751) | browser-run-main-world | fix(browser): run tab.run page evaluations in the page's main world | browser | P1 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-run-main-world) |
 | [#18761](https://github.com/can1357/oh-my-pi/pull/18761) | browser-honest-completion | fix(browser): have agents report a step the page cannot do instead of faking it | browser | P1 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-honest-completion) |
 | [#18766](https://github.com/can1357/oh-my-pi/pull/18766) | devin-pin-31243 | fix(catalog): identify Devin requests as CLI 3000.12.43 | catalog | P2 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-pin-31243) |
-| [#18767](https://github.com/can1357/oh-my-pi/pull/18767) | factory-droid-argon-promo | fix(catalog): show Factory Droid's Gemini 4 Argon credit promotion | catalog | P0 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-argon-promo) |
-| [#18768](https://github.com/can1357/oh-my-pi/pull/18768) | factory-droid-list-prices | fix(catalog): show list prices for Factory Droid Fable 5.1, GLM 5.2 Fast and Muse Spark Open | catalog | P0 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-list-prices) |
+| [#18767](https://github.com/can1357/oh-my-pi/pull/18767) | factory-droid-argon-promo | fix(catalog): show Factory Droid's Gemini 4 Argon credit promotion | catalog | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-argon-promo) |
+| [#18768](https://github.com/can1357/oh-my-pi/pull/18768) | factory-droid-list-prices | fix(catalog): show list prices for Factory Droid Fable 5.1, GLM 5.2 Fast and Muse Spark Open | catalog | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-list-prices) |
 
-## Queued since the last plan (3)
+## Queued since the last plan (1)
 
 | id | title | area | priority | age | branch |
 |---|---|---|---|---|---|
-| eval-assign-echo | fix(coding-agent): print nothing for a JavaScript eval cell that ends in an assignment | eval | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/eval-assign-echo) |
-| observe-print | fix(browser): print every observed element, one line each, instead of cutting at 100 | browser | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/observe-print) |
 | factory-droid-171-pin | feat(ai,catalog): identify Factory Droid requests as droid 1.7.1 | factory-droid |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-171-pin) |
