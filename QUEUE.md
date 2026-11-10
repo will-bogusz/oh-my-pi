@@ -1,21 +1,21 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10 06:22Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10 07:06Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-10 06:03Z on goliath; groups below are from it, states from the manifest)
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-10 07:04Z on goliath; groups below are from it, states from the manifest)
 **Counts:** openable now 6, conflict-held 8, stacked 12, held 6, open PRs 21; merged 263, closed 29
 
 ## Openable now (6)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
-| computer-window-exact-app | fix(coding-agent): prefer exact app names when selecting windows | computer | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-window-exact-app) |
-| computer-find-role-alias | fix(natives): accept aliases in computer role searches | computer | P2 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-find-role-alias) |
-| browser-call-timeout | fix(browser): give browser calls without a timeout the Eval cell's timeout | browser | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-call-timeout) |
-| browser-dead-tab-hint | fix(browser): point calls on a tab that is not open at browser.open() | browser | P2 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-dead-tab-hint) |
-| computer-strict-options | fix(computer): reject unknown helper option keys | computer | P2 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-strict-options) |
-| browser-console-shape | fix(browser): tell agents that treat console() or errors() as an array to read .entries | browser | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-console-shape) |
+| computer-window-exact-app | fix(coding-agent): prefer exact app names when selecting windows | computer | P1 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-window-exact-app) |
+| computer-find-role-alias | fix(natives): accept aliases in computer role searches | computer | P2 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-find-role-alias) |
+| browser-call-timeout | fix(browser): give browser calls without a timeout the Eval cell's timeout | browser | P1 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-call-timeout) |
+| browser-dead-tab-hint | fix(browser): point calls on a tab that is not open at browser.open() | browser | P2 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-dead-tab-hint) |
+| computer-strict-options | fix(computer): reject unknown helper option keys | computer | P2 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-strict-options) |
+| browser-console-shape | fix(browser): tell agents that treat console() or errors() as an array to read .entries | browser | P1 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-console-shape) |
 
 ## Conflict-held (8)
 
@@ -77,9 +77,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10
 | [#18353](https://github.com/can1357/oh-my-pi/pull/18353) | wayland-pipewire-dlopen | fix(natives): load libpipewire at runtime so released addons capture on Wayland | computer | P2 | 3d | keep; opened over P2 #18013 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-pipewire-dlopen) |
 | [#18013](https://github.com/can1357/oh-my-pi/pull/18013) | wayland-ei-text | feat(natives): type text the wayland layout lacks through libei text | natives | P2 | 6d | keep; rebases after #18353 merges | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-ei-text) |
 | [#18125](https://github.com/can1357/oh-my-pi/pull/18125) | anthropic-web-search | fix(ai,coding-agent): keep Anthropic web search queries intact, always search, and report refusals | other | P2 | 5d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/anthropic-web-search) |
-| [#18624](https://github.com/can1357/oh-my-pi/pull/18624) | upload-stall-error | fix(ai): say whether an Anthropic request body finished uploading when its connection drops | other | P1 | 13h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/upload-stall-error) |
-| [#18657](https://github.com/can1357/oh-my-pi/pull/18657) | relay-autoattach-shared | fix(browser-relay): keep a shared child frame attached when one connection turns auto-attach off | browser | P1 | 7h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-autoattach-shared) |
-| [#18658](https://github.com/can1357/oh-my-pi/pull/18658) | role-selectors-followup | fix(coding-agent): preserve role selectors across locales and document waits | browser | P0 | 7h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/role-selectors-followup) |
-| [#18676](https://github.com/can1357/oh-my-pi/pull/18676) | click-reresolve-detached | fix(coding-agent): look a click's selector up again when the page replaces its element | browser | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/click-reresolve-detached) |
-| [#18675](https://github.com/can1357/oh-my-pi/pull/18675) | sheet-key-target | fix(natives): send macOS keys for a window to the sheet focused on it | computer | P1 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/sheet-key-target) |
-| [#18680](https://github.com/can1357/oh-my-pi/pull/18680) | finder-desktop-key | fix(natives): restore Finder with its desktop focus after macOS background input | computer | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/finder-desktop-key) |
+| [#18624](https://github.com/can1357/oh-my-pi/pull/18624) | upload-stall-error | fix(ai): say whether an Anthropic request body finished uploading when its connection drops | other | P1 | 14h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/upload-stall-error) |
+| [#18657](https://github.com/can1357/oh-my-pi/pull/18657) | relay-autoattach-shared | fix(browser-relay): keep a shared child frame attached when one connection turns auto-attach off | browser | P1 | 8h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-autoattach-shared) |
+| [#18658](https://github.com/can1357/oh-my-pi/pull/18658) | role-selectors-followup | fix(coding-agent): preserve role selectors across locales and document waits | browser | P0 | 8h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/role-selectors-followup) |
+| [#18676](https://github.com/can1357/oh-my-pi/pull/18676) | click-reresolve-detached | fix(coding-agent): look a click's selector up again when the page replaces its element | browser | P0 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/click-reresolve-detached) |
+| [#18675](https://github.com/can1357/oh-my-pi/pull/18675) | sheet-key-target | fix(natives): send macOS keys for a window to the sheet focused on it | computer | P1 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/sheet-key-target) |
+| [#18680](https://github.com/can1357/oh-my-pi/pull/18680) | finder-desktop-key | fix(natives): restore Finder with its desktop focus after macOS background input | computer | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/finder-desktop-key) |
