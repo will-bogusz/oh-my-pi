@@ -71204,6 +71204,24 @@
    "updated": "2026-11-10T18:04:23Z",
    "note": "",
    "hold": "CoreDocPR, 2026-11-10: until the Sol confirming run on this head (after 21:15Z) and the body's numbers are filled"
+  },
+  {
+   "id": "browser-honest-completion",
+   "branch": "will/browser-honest-completion",
+   "title": "fix(browser): have agents report a step the page cannot do instead of faking it",
+   "area": "browser",
+   "priority": "P1",
+   "needs": [],
+   "base": "e1d8f29d54957da5cb38b11d10a6778d13476980",
+   "body": "bodies/browser-honest-completion.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-honest-completion",
+   "host": "MacBook-Pro",
+   "added": "2026-11-10T18:17:46Z",
+   "updated": "2026-11-10T18:17:46Z",
+   "note": ""
   }
  ],
  "watch": {
