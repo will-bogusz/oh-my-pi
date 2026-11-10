@@ -72442,13 +72442,13 @@
    "needs": [],
    "base": "e325ffc73ab86e03bdd20a91b77d8e2b3964c906",
    "body": "bodies/screenshot-result-line.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18776,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/screenshot-result-line",
    "host": "MacBook-Pro",
    "added": "2026-11-10T19:42:48Z",
-   "updated": "2026-11-10T20:28:51Z",
+   "updated": "2026-11-10T20:37:05Z",
    "note": "",
    "built": [
     {
@@ -72658,7 +72658,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "advanced": "2026-11-10T20:17:46Z"
+   "advanced": "2026-11-10T20:17:46Z",
+   "opened": "2026-11-10T20:37:05Z"
   },
   {
    "id": "computer-guide-first-use",
