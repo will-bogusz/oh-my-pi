@@ -73043,13 +73043,13 @@
    "needs": [],
    "base": "e325ffc73ab86e03bdd20a91b77d8e2b3964c906",
    "body": "bodies/x11-takeover-user.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18784,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-takeover-user",
    "host": "MacBook-Pro",
    "added": "2026-11-10T21:06:23Z",
-   "updated": "2026-11-10T21:56:13Z",
+   "updated": "2026-11-10T22:08:26Z",
    "note": "",
    "built": [
     {
@@ -73169,7 +73169,8 @@
      "at": "2026-11-10T21:56:13Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-10T22:08:26Z"
   }
  ],
  "watch": {
