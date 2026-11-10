@@ -69412,18 +69412,24 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-10T05:02:18Z",
+  "checked": "2026-11-10T05:32:52Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {},
-  "conflicts": {
-   "#16553": {
-    "since": "2026-11-04T07:29:23Z",
-    "title": "fix(natives): keep a macOS drag from the user's app onto the target the user's pick",
-    "files": [
-     "crates/pi-natives/src/desktop/macos/skylight.rs"
-    ]
+  "openable": {
+   "computer-window-exact-app": {
+    "since": "2026-11-10T05:32:52Z",
+    "title": "fix(coding-agent): prefer exact app names when selecting windows"
    },
+   "finder-desktop-key": {
+    "since": "2026-11-10T05:32:52Z",
+    "title": "fix(natives): restore Finder with its desktop focus after macOS background input"
+   },
+   "computer-find-role-alias": {
+    "since": "2026-11-10T05:32:52Z",
+    "title": "fix(natives): accept aliases in computer role searches"
+   }
+  },
+  "conflicts": {
    "#16611": {
     "since": "2026-11-05T14:32:39Z",
     "title": "feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio",
@@ -69556,41 +69562,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-03T05:30:29Z",
-    "kind": "unopenable",
-    "id": "mirror-takeover-keys",
-    "title": "fix(natives): stop takeover keys into iPhone Mirroring and Screen Sharing from leaving Fn held",
-    "why": "opened as #17909"
-   },
-   {
-    "at": "2026-11-03T05:30:29Z",
-    "kind": "unopenable",
-    "id": "x11-mpx-focus-release",
-    "title": "fix(natives): release the X11 virtual keyboard's focus before takeover activates its window",
-    "why": "opened as #17910"
-   },
-   {
-    "at": "2026-11-03T05:30:29Z",
-    "kind": "unopenable",
-    "id": "x11-qt-background-keys",
-    "title": "fix(natives): refuse X11 background keys to Qt apps instead of reporting them sent",
-    "why": "opened as #17911"
-   },
-   {
-    "at": "2026-11-03T05:30:29Z",
-    "kind": "unopenable",
-    "id": "x11-takeover-keymap-switch",
-    "title": "fix(natives): keep X11 takeover keys running when the core keyboard switches source",
-    "why": "opened as #17912"
-   },
-   {
-    "at": "2026-11-03T05:30:29Z",
-    "kind": "unopenable",
-    "id": "win-silent-drag",
-    "title": "fix(natives): refuse background drags on Windows Tk windows",
-    "why": "opened as #17913"
-   },
    {
     "at": "2026-11-03T06:01:17Z",
     "kind": "openable",
@@ -71078,6 +71049,24 @@
     "id": "click-reresolve-detached",
     "title": "fix(coding-agent): look a click's selector up again when the page replaces its element",
     "why": "opened as #18676"
+   },
+   {
+    "at": "2026-11-10T05:32:52Z",
+    "kind": "openable",
+    "id": "computer-window-exact-app",
+    "title": "fix(coding-agent): prefer exact app names when selecting windows"
+   },
+   {
+    "at": "2026-11-10T05:32:52Z",
+    "kind": "openable",
+    "id": "finder-desktop-key",
+    "title": "fix(natives): restore Finder with its desktop focus after macOS background input"
+   },
+   {
+    "at": "2026-11-10T05:32:52Z",
+    "kind": "openable",
+    "id": "computer-find-role-alias",
+    "title": "fix(natives): accept aliases in computer role searches"
    }
   ]
  },
