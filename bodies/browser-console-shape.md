@@ -11,7 +11,7 @@ The helpers' result was documented nowhere an agent reads it: the prompt listed 
 Shape of the fix:
 - The return type stays. `requests()` and the other log helpers return objects too, and `nextSeq`/`dropped` are needed for paging.
 - The prompt line is the fix for every language; it names the field as `r.entries` (JavaScript) and `r["entries"]` (Python).
-- The JavaScript prelude adds non-enumerable members to the result, so the hint shows only when the result is misused. The value prints, serialises (`JSON.stringify`, `structuredClone`, the tool bridge) and destructures as on `main`. This follows the computer prelude, whose `find()` array explains how to pick one element when used as an element.
+- The JavaScript prelude adds non-enumerable members, so the hint shows only on misuse. Printing, serialisation (`JSON.stringify`, `structuredClone`, the tool bridge) and destructuring stay unchanged. This follows the computer prelude, whose `find()` array explains how to pick one element when used as an element.
 - Python is unchanged in code: there the result is a plain `dict`, and only the prompt line applies.
 
 Known edge: a result kept in a global is not copied into Eval's speculation snapshot, so a later cell that builds tool arguments from it just runs without speculation.
