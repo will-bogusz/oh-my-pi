@@ -73393,8 +73393,37 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-retire-swe-1-6-fast",
    "host": "MacBook-Pro",
    "added": "2026-11-10T23:05:26Z",
-   "updated": "2026-11-10T23:05:26Z",
-   "note": ""
+   "updated": "2026-11-10T23:10:37Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#18771",
+     "code": "d51b4eed83ad6a828fdacbdced787f18c009283d",
+     "with_code": "bfa2b8ef033742b716e394d4413b320c3fec269b",
+     "tip": "040f26cb80a2b65f2eeeba57cb762f506efb0df6",
+     "with_tip": "0b4dc556082eea5e6305211aed01f4c7d823cacf",
+     "at": "2026-11-10T23:10:31Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#17610",
+     "code": "d51b4eed83ad6a828fdacbdced787f18c009283d",
+     "with_code": "714b4c7140abbaab7d5113091311d768144710a6",
+     "tip": "040f26cb80a2b65f2eeeba57cb762f506efb0df6",
+     "with_tip": "25d71ca1e95fcc475f8fc13c5c2409ce98295d68",
+     "at": "2026-11-10T23:10:36Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#18766",
+     "code": "d51b4eed83ad6a828fdacbdced787f18c009283d",
+     "with_code": "217118c54c604c03d049e395293367329897c0b8",
+     "tip": "040f26cb80a2b65f2eeeba57cb762f506efb0df6",
+     "with_tip": "365ac2057a01992604bf0b676dea9acbf7bd435e",
+     "at": "2026-11-10T23:10:36Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   }
  ],
  "watch": {
