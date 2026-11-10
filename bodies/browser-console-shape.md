@@ -6,7 +6,7 @@ I kept seeing agents call `.slice()` or `.filter()` on what `tab.console()` retu
 
 ## Why
 
-The helpers' result was documented nowhere an agent reads it: the prompt listed `console` and `errors` by name only, so agents guessed a list. In Will's sessions from 2026-10-15 to 2026-11-10, 31 of the 46 agents that called `tab.console()` or `tab.errors()` used the result as an array at least once, then spent a cell finding out the shape.
+The prompt listed `console` and `errors` by name only, so agents guessed a list. In the archived Oct 15–Nov 9 calls, 32 of 47 non-harness agents hit a console/errors array-method error, counting each agent separately per root session; the cohort contains 311 calls.
 
 Shape of the fix:
 - The return type stays. `requests()` and the other log helpers return objects too, and `nextSeq`/`dropped` are needed for paging.
