@@ -69593,7 +69593,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "f0200abf28e8d314125854600cf726dece495246",
+   "base": "eda28eff97cf7a352fd3057a03581be1686dbc7a",
    "body": "bodies/computer-find-role-alias.md",
    "state": "open",
    "pr": 18745,
@@ -69601,7 +69601,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-find-role-alias",
    "host": "MacBook-Pro",
    "added": "2026-11-10T05:28:38Z",
-   "updated": "2026-11-10T17:00:21Z",
+   "updated": "2026-11-10T17:03:02Z",
    "note": "",
    "built": [
     {
@@ -69716,7 +69716,8 @@
     }
    ],
    "opened": "2026-11-10T16:46:38Z",
-   "readied": "2026-11-10T16:47:06Z"
+   "readied": "2026-11-10T16:47:06Z",
+   "advanced": "2026-11-10T17:03:02Z"
   },
   {
    "id": "browser-call-timeout",
