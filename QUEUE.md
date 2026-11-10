@@ -4,7 +4,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10
 
 **Opening:** not paused
 **Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-11-10 23:19Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 1, conflict-held 10, stacked 15, held 13, open PRs 33, queued since the last plan 1; merged 275, closed 29
+**Counts:** openable now 1, conflict-held 10, stacked 15, held 13, open PRs 33, queued since the last plan 2; merged 275, closed 29
 
 ## Openable now (1)
 
@@ -103,8 +103,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10
 | [#18784](https://github.com/can1357/oh-my-pi/pull/18784) | x11-takeover-user | fix(natives): keep X11 takeover from taking a typing user's keys | computer | P1 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-takeover-user) |
 | [#18795](https://github.com/can1357/oh-my-pi/pull/18795) | devin-retire-swe-1-6-fast | fix(catalog): drop Devin's retired SWE-1.6 Fast seed row | catalog | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-retire-swe-1-6-fast) |
 
-## Queued since the last plan (1)
+## Queued since the last plan (2)
 
 | id | title | area | priority | age | branch |
 |---|---|---|---|---|---|
 | agent-identity | feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy | tui | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/agent-identity) |
+| browser-cursor | feat(browser): draw the acting agent's cursor in OMP-driven tabs | browser | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-cursor) |
