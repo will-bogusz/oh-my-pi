@@ -5,7 +5,7 @@
 
 ### Added
 
-- Agent names in Task tool rows and the agent hub take a colour of their own in the terminal UI (Tern's native view keeps its styling): Main is blue and every subagent keeps the same one of six other colours wherever it appears
+- Agent names in Task tool rows and agent hub rows take a colour of their own in the terminal UI: Main is blue, and each subagent keeps the same one of six other colours in both places, live or finished
 
 ### Changed
 
