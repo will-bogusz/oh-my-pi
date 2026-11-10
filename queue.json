@@ -69127,13 +69127,13 @@
    "needs": [],
    "base": "f0200abf28e8d314125854600cf726dece495246",
    "body": "bodies/click-reresolve-detached.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18676,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/click-reresolve-detached",
    "host": "MacBook-Pro",
    "added": "2026-11-10T04:15:06Z",
-   "updated": "2026-11-10T04:52:52Z",
+   "updated": "2026-11-10T04:53:51Z",
    "note": "",
    "built": [
     {
@@ -69235,7 +69235,8 @@
      "at": "2026-11-10T04:52:49Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-10T04:53:51Z"
   },
   {
    "id": "sheet-key-target",
