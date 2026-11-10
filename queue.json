@@ -73555,7 +73555,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-10T15:48:24.406730Z",
+  "at": "2026-11-10T16:17:17.100543Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -74012,6 +74012,23 @@
     "created": "2026-11-10T05:49:27Z"
    },
    {
+    "id": "computer-open-window",
+    "label": "computer-open-window",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): return the window showing a page from macOS apps.open in a browser",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-10T15:55:51Z"
+   },
+   {
     "id": "computer-window-exact-app",
     "label": "computer-window-exact-app",
     "number": null,
@@ -74126,6 +74143,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-10T05:28:38Z"
+   },
+   {
+    "id": "computer-input-lease-wait",
+    "label": "computer-input-lease-wait",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P2",
+    "title": "fix(natives): wait for another session's input lock before failing InputBusy",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-10T15:55:32Z"
    },
    {
     "id": "computer-strict-options",
@@ -74319,6 +74353,7 @@
      "conflicts with browser-call-timeout in packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts",
      "conflicts with computer-window-exact-app in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with computer-find-role-alias in docs/tools/computer.md",
+     "conflicts with computer-input-lease-wait in docs/tools/computer.md",
      "conflicts with computer-strict-options in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/computer/worker.ts"
     ],
@@ -74332,6 +74367,7 @@
      "browser-call-timeout",
      "computer-window-exact-app",
      "computer-find-role-alias",
+     "computer-input-lease-wait",
      "computer-strict-options"
     ],
     "needs": [
@@ -74356,6 +74392,7 @@
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with computer-window-exact-app in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with computer-find-role-alias in docs/tools/computer.md",
+     "conflicts with computer-input-lease-wait in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
      "conflicts with computer-strict-options in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/tools/computer/worker.ts"
     ],
@@ -74369,6 +74406,7 @@
      "#18222",
      "computer-window-exact-app",
      "computer-find-role-alias",
+     "computer-input-lease-wait",
      "computer-strict-options"
     ],
     "needs": [
@@ -74436,6 +74474,7 @@
      "conflicts with #18676 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #17894 in crates/pi-natives/src/desktop/macos/mod.rs",
      "conflicts with browser-call-timeout in packages/coding-agent/src/tools/browser/tab-supervisor.ts",
+     "conflicts with computer-open-window in crates/pi-natives/src/desktop/macos/capture.rs",
      "conflicts with browser-dead-tab-hint in packages/coding-agent/src/tools/browser/tab-supervisor.ts",
      "conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
@@ -74446,6 +74485,7 @@
      "#18676",
      "#17894",
      "browser-call-timeout",
+     "computer-open-window",
      "browser-dead-tab-hint"
     ],
     "needs": [
