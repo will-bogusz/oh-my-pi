@@ -14,8 +14,7 @@ Changing the printed vocabulary would also widen existing substring searches. Fo
 
 - `cargo +nightly-2026-11-08 test -p pi-natives query_accepts_role_aliases_without_widening_printed_substrings`: failed on main plus the regression test (`radiobutton`: 0 matches instead of 1), passed with the fix.
 - `cargo +nightly-2026-11-08 test -p pi-natives desktop::ax::tests`: 42 passed on macOS.
-- `rust-check`: macOS clippy and rustfmt passed on the final head.
-- Not run on the final head: Linux and Windows Rust gates, because the build host lacked disk headroom.
+- `rust-check`: macOS, Linux and Windows clippy and rustfmt passed on the final head.
 
 ---
 
