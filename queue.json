@@ -71201,8 +71201,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-core-doc",
    "host": "MacBook-Pro",
    "added": "2026-11-10T18:04:09Z",
-   "updated": "2026-11-10T18:04:09Z",
-   "note": ""
+   "updated": "2026-11-10T18:04:23Z",
+   "note": "",
+   "hold": "CoreDocPR, 2026-11-10: until the Sol confirming run on this head (after 21:15Z) and the body's numbers are filled"
   }
  ],
  "watch": {
