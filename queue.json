@@ -71484,6 +71484,26 @@
    "added": "2026-11-10T18:57:06Z",
    "updated": "2026-11-10T18:57:06Z",
    "note": ""
+  },
+  {
+   "id": "observe-stable-ids",
+   "branch": "will/browser-observe-stable-ids",
+   "title": "feat(browser): keep observe() ids stable across observations",
+   "area": "browser",
+   "priority": "P2",
+   "needs": [
+    "act-look-prompt"
+   ],
+   "base": "8fd921ad4865da2d0bae434f46afef0e57d16a44",
+   "body": "bodies/observe-stable-ids.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-observe-stable-ids",
+   "host": "MacBook-Pro",
+   "added": "2026-11-10T18:57:15Z",
+   "updated": "2026-11-10T18:57:15Z",
+   "note": ""
   }
  ],
  "watch": {
