@@ -1,10 +1,10 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10 15:43Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10 15:45Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-10 15:13Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 6, conflict-held 8, stacked 12, held 6, open PRs 21; merged 263, closed 29
+**Counts:** openable now 6, conflict-held 8, stacked 12, held 6, open PRs 21, queued since the last plan 1; merged 263, closed 29
 
 ## Openable now (6)
 
@@ -83,3 +83,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10
 | [#18676](https://github.com/can1357/oh-my-pi/pull/18676) | click-reresolve-detached | fix(coding-agent): look a click's selector up again when the page replaces its element | browser | P0 | 10h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/click-reresolve-detached) |
 | [#18675](https://github.com/can1357/oh-my-pi/pull/18675) | sheet-key-target | fix(natives): send macOS keys for a window to the sheet focused on it | computer | P1 | 10h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/sheet-key-target) |
 | [#18680](https://github.com/can1357/oh-my-pi/pull/18680) | finder-desktop-key | fix(natives): restore Finder with its desktop focus after macOS background input | computer | P0 | 10h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/finder-desktop-key) |
+
+## Queued since the last plan (1)
+
+| id | title | area | priority | age | branch |
+|---|---|---|---|---|---|
+| browser-wait-predicate | feat(browser): add waitForFunction to tabs and frames | browser | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-wait-predicate) |
