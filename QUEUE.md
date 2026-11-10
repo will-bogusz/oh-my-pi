@@ -1,12 +1,12 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10 19:46Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10 19:48Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 4 of 8 ready events used in the hour before the last plan, 4 left (plan of 2026-11-10 19:42Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 4, conflict-held 10, stacked 16, held 13, open PRs 35, queued since the last plan 1; merged 263, closed 29
+**Ready budget:** 3 of 8 ready events used in the hour before the last plan, 5 left (plan of 2026-11-10 19:47Z on goliath; groups below are from it, states from the manifest)
+**Counts:** openable now 5, conflict-held 10, stacked 16, held 13, open PRs 35; merged 263, closed 29
 
-## Openable now (4)
+## Openable now (5)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
@@ -14,6 +14,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10
 | eval-error-frames | fix(coding-agent): print a failed JavaScript cell's own frames, not omp's host stack | eval | P2 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/eval-error-frames) |
 | observe-print | fix(browser): print every observed element, one line each, instead of cutting at 100 | browser | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/observe-print) |
 | factory-droid-171-pin | feat(ai,catalog): identify Factory Droid requests as droid 1.7.1 | factory-droid |  | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-171-pin) |
+| screenshot-result-line | feat(coding-agent): report browser screenshots and opens on one line | browser | P2 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/screenshot-result-line) |
 
 ## Conflict-held (10)
 
@@ -28,7 +29,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10
 | wire-delta-count | refactor(agent,ai): count the anchored delta from the reader's transformed wire messages | other |  | 7d | [#17610](https://github.com/can1357/oh-my-pi/pull/17610), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wire-delta-count) |
 | atspi-unanswered-app | fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool | computer | P1 | 7d | [#18745](https://github.com/can1357/oh-my-pi/pull/18745), [#18353](https://github.com/can1357/oh-my-pi/pull/18353), [#18013](https://github.com/can1357/oh-my-pi/pull/18013), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-unanswered-app) |
 | browser-wait-predicate | feat(browser): add waitForFunction to tabs and frames | browser | P1 | 4h | [#18676](https://github.com/can1357/oh-my-pi/pull/18676), [#15508](https://github.com/can1357/oh-my-pi/pull/15508) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-wait-predicate) |
-| browser-run-node-hint | fix(browser): say where tab.run code runs when it reaches for a page global | browser | P2 | 2h | [#15508](https://github.com/can1357/oh-my-pi/pull/15508) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-run-node-hint) |
+| browser-run-node-hint | fix(browser): say where tab.run code runs when it reaches for a page global | browser | P2 | 3h | [#15508](https://github.com/can1357/oh-my-pi/pull/15508) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-run-node-hint) |
 
 ## Stacked (16)
 
@@ -108,9 +109,3 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10
 | [#18766](https://github.com/can1357/oh-my-pi/pull/18766) | devin-pin-31243 | fix(catalog): identify Devin requests as CLI 3000.12.43 | catalog | P2 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-pin-31243) |
 | [#18767](https://github.com/can1357/oh-my-pi/pull/18767) | factory-droid-argon-promo | fix(catalog): show Factory Droid's Gemini 4 Argon credit promotion | catalog | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-argon-promo) |
 | [#18768](https://github.com/can1357/oh-my-pi/pull/18768) | factory-droid-list-prices | fix(catalog): show list prices for Factory Droid Fable 5.1, GLM 5.2 Fast and Muse Spark Open | catalog | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-list-prices) |
-
-## Queued since the last plan (1)
-
-| id | title | area | priority | age | branch |
-|---|---|---|---|---|---|
-| screenshot-result-line | feat(coding-agent): report browser screenshots and opens on one line | browser | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/screenshot-result-line) |

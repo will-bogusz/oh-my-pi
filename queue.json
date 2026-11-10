@@ -71772,10 +71772,14 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-10T19:17:32Z",
+  "checked": "2026-11-10T19:47:07Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
+   "observe-print": {
+    "since": "2026-11-10T19:47:07Z",
+    "title": "fix(browser): print every observed element, one line each, instead of cutting at 100"
+   },
    "subagent-browser": {
     "since": "2026-11-10T18:44:26Z",
     "title": "fix(coding-agent): keep a child omp's browser tabs out of its parent's Tern pane and cmux workspace"
@@ -71783,6 +71787,14 @@
    "eval-error-frames": {
     "since": "2026-11-10T19:17:32Z",
     "title": "fix(coding-agent): print a failed JavaScript cell's own frames, not omp's host stack"
+   },
+   "screenshot-result-line": {
+    "since": "2026-11-10T19:47:07Z",
+    "title": "feat(coding-agent): report browser screenshots and opens on one line"
+   },
+   "factory-droid-171-pin": {
+    "since": "2026-11-10T19:47:07Z",
+    "title": "feat(ai,catalog): identify Factory Droid requests as droid 1.7.1"
    }
   },
   "conflicts": {
@@ -71847,7 +71859,9 @@
    18751,
    18753,
    18761,
-   18766
+   18766,
+   18767,
+   18768
   ],
   "post_merge": {
    "17831": {
@@ -73430,6 +73444,24 @@
     "kind": "openable",
     "id": "eval-error-frames",
     "title": "fix(coding-agent): print a failed JavaScript cell's own frames, not omp's host stack"
+   },
+   {
+    "at": "2026-11-10T19:47:07Z",
+    "kind": "openable",
+    "id": "observe-print",
+    "title": "fix(browser): print every observed element, one line each, instead of cutting at 100"
+   },
+   {
+    "at": "2026-11-10T19:47:07Z",
+    "kind": "openable",
+    "id": "screenshot-result-line",
+    "title": "feat(coding-agent): report browser screenshots and opens on one line"
+   },
+   {
+    "at": "2026-11-10T19:47:07Z",
+    "kind": "openable",
+    "id": "factory-droid-171-pin",
+    "title": "feat(ai,catalog): identify Factory Droid requests as droid 1.7.1"
    }
   ]
  },
@@ -75916,12 +75948,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-10T19:42:33.114028Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-10T19:47:07.854448Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 4,
-   "left": 4
+   "used": 3,
+   "left": 5
   },
   "rows": [
    {
@@ -77348,6 +77380,23 @@
     ],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
+   },
+   {
+    "id": "screenshot-result-line",
+    "label": "screenshot-result-line",
+    "number": null,
+    "state": "queued",
+    "area": "browser",
+    "priority": "P2",
+    "title": "feat(coding-agent): report browser screenshots and opens on one line",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-10T19:42:48Z"
    },
    {
     "id": "subagent-browser-relay",
