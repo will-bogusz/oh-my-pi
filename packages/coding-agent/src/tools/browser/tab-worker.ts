@@ -41,6 +41,7 @@ import {
 } from "../run-scope";
 import { ToolAbortError, throwIfAborted } from "../tool-errors";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
+import { type ActionOutcomeOptions, runWithActionOutcome } from "./action-outcome";
 import {
 	type AriaSnapshotOptions,
 	assertSelectorString,
@@ -377,6 +378,8 @@ const MATCH_COUNT_PROBE_TIMEOUT_MS = 1_000;
 const DETACH_REPORT_TIMEOUT_MS = 500;
 /** Longest a page call waits for a main-frame navigation the page requested to replace the document. */
 const REQUESTED_NAVIGATION_WAIT_MS = 5_000;
+/** Longest an action's outcome waits for a navigation the action requested to commit before reporting. */
+const OUTCOME_NAVIGATION_WAIT_MS = 400;
 
 /** Options for one tab helper run through `WorkerCore.#runOp`. */
 interface OpOptions {
@@ -391,6 +394,8 @@ interface OpOptions {
 	dialog?: "blocks" | "answers";
 	/** What the call saw when its deadline fired (e.g. the current URL), appended to the timeout error. */
 	timeoutNote?: () => string;
+	/** Print what the action did to the page into the cell output. */
+	outcome?: ActionOutcomeOptions;
 }
 /** Longest a look waits for the effects of the actions before it to land. */
 const SETTLE_TIMEOUT_MS = 3_000;
@@ -620,11 +625,13 @@ export type ActionableHandle = InteractionHandle & ElementQueryHelpers & { fill(
  * hanging on puppeteer's protocol timeout. `dialog` says how the action meets a
  * confirm or prompt (`OpOptions.dialog`): a click or key press that opens one is
  * done (`"answers"`); any other action fails (`"blocks"`, the default).
+ * With `outcome`, what the action did to the page is printed into the cell output.
  */
 export type HandleOpGuard = <T>(
 	label: string,
 	fn: (signal: AbortSignal) => Promise<T>,
 	dialog?: "blocks" | "answers",
+	outcome?: ActionOutcomeOptions,
 ) => Promise<T>;
 
 /**
@@ -1138,29 +1145,38 @@ export function toActionableHandle(
 						invalidate,
 					),
 				method === "press" || method === "tap" ? "answers" : "blocks",
+				method === "press" ? {} : undefined,
 			);
 	}
 	enriched.type = (text, options) =>
-		guard<void>("handle.type()", signal =>
-			runGuardedHandleAction(
-				enriched,
-				originals,
-				"handle.type()",
-				signal,
-				() => typeIntoElement(enriched, text, signal, options),
-				invalidate,
-			),
+		guard<void>(
+			"handle.type()",
+			signal =>
+				runGuardedHandleAction(
+					enriched,
+					originals,
+					"handle.type()",
+					signal,
+					() => typeIntoElement(enriched, text, signal, options),
+					invalidate,
+				),
+			"blocks",
+			{ input: { text, replaces: false } },
 		);
 	enriched.fill = value =>
-		guard<void>("handle.fill()", signal =>
-			runGuardedHandleAction(
-				enriched,
-				originals,
-				"handle.fill()",
-				signal,
-				() => fillViaHandle(enriched, value, signal),
-				invalidate,
-			),
+		guard<void>(
+			"handle.fill()",
+			signal =>
+				runGuardedHandleAction(
+					enriched,
+					originals,
+					"handle.fill()",
+					signal,
+					() => fillViaHandle(enriched, value, signal),
+					invalidate,
+				),
+			"blocks",
+			{ input: { text: value, replaces: true } },
 		);
 	enriched.click = options =>
 		guard<void>(
@@ -1179,6 +1195,7 @@ export function toActionableHandle(
 					invalidate,
 				),
 			"answers",
+			{},
 		);
 	enriched.dblclick = () =>
 		guard<void>(
@@ -1228,15 +1245,19 @@ export function toActionableHandle(
 			),
 		);
 	enriched.select = (...values) =>
-		guard<string[]>("handle.select()", signal =>
-			runGuardedHandleAction(
-				enriched,
-				originals,
-				"handle.select()",
-				signal,
-				() => selectElementOptions(enriched, values, "handle.select()", signal),
-				invalidate,
-			),
+		guard<string[]>(
+			"handle.select()",
+			signal =>
+				runGuardedHandleAction(
+					enriched,
+					originals,
+					"handle.select()",
+					signal,
+					() => selectElementOptions(enriched, values, "handle.select()", signal),
+					invalidate,
+				),
+			"blocks",
+			{},
 		);
 	enriched.highlight = (options?: HighlightOptions) =>
 		guard<void>("handle.highlight()", signal =>
@@ -2788,21 +2809,30 @@ export class WorkerCore {
 					arming.catch(() => undefined),
 				);
 			if (opts?.awaitNavigation) await this.#awaitRequestedNavigation(opSignal, perOpTimeoutMs);
-			if (!watchdog && !dialogs) return await fn(opSignal);
-			const racedSignal = AbortSignal.any([opSignal, earlyAc.signal]);
-			const racers = [fn(racedSignal)];
-			if (watchdog) racers.push(this.#zeroMatchWatchdog(watchdog.selector, label, watchdog.afterMs, racedSignal));
-			if (dialogs) {
-				racers.push(
-					// The finally tears the call down once this settles the race.
-					dialogs.whenPending(racedSignal).then(state => {
-						if (opts?.dialog === "blocks") throw dialogBlocksPageError(label, state, "opened");
-						// An "answers" op is an input that resolves to nothing; the dialog is what it did.
-						return undefined as T;
-					}),
-				);
-			}
-			return await Promise.race(racers);
+			const action = async (): Promise<T> => {
+				if (!watchdog && !dialogs) return await fn(opSignal);
+				const racedSignal = AbortSignal.any([opSignal, earlyAc.signal]);
+				try {
+					const racers = [fn(racedSignal)];
+					if (watchdog)
+						racers.push(this.#zeroMatchWatchdog(watchdog.selector, label, watchdog.afterMs, racedSignal));
+					if (dialogs) {
+						racers.push(
+							dialogs.whenPending(racedSignal).then(state => {
+								if (opts?.dialog === "blocks") throw dialogBlocksPageError(label, state, "opened");
+								// An "answers" op is an input that resolves to nothing; the dialog is what it did.
+								return undefined as T;
+							}),
+						);
+					}
+					return await Promise.race(racers);
+				} finally {
+					// The watchdog guards finding the element, not the outcome probe that follows the action.
+					earlyAc.abort();
+				}
+			};
+			if (!opts?.outcome) return await action();
+			return await this.#reportActionOutcome(active.output, opts.outcome, opSignal, action);
 		} catch (err) {
 			// Fail fast with a named, attributable error instead of the opaque whole-cell timeout:
 			// our per-op deadline fired, or puppeteer's own (equal) timeout fired first — having
@@ -2913,6 +2943,39 @@ export class WorkerCore {
 		if (!settled) this.#mainFrameNavigationRequested = false;
 	}
 
+	/** Run an action and print what it did to the page into the cell output (see {@link runWithActionOutcome}). */
+	async #reportActionOutcome<T>(
+		output: RunOutput,
+		outcome: ActionOutcomeOptions,
+		signal: AbortSignal,
+		action: () => Promise<T>,
+	): Promise<T> {
+		const page = this.#requirePage();
+		const frame = outcome.frame ?? page.mainFrame();
+		const { result, line } = await runWithActionOutcome(
+			frame,
+			action,
+			{
+				dialog: () => this.#dialogs?.state(),
+				// Waits without clearing the request flag, so the next call still waits out a slower commit.
+				navigation:
+					frame === page.mainFrame()
+						? () =>
+								waitForMainFrameDocument(
+									page,
+									() => this.#mainFrameNavigationRequested,
+									OUTCOME_NAVIGATION_WAIT_MS,
+									signal,
+								)
+						: undefined,
+			},
+			signal,
+			outcome.input,
+		);
+		if (line) output.pushText(`${line}\n`);
+		return result;
+	}
+
 	/** Run one of our own page reads once more on the new document when a navigation took its execution context. */
 	async #rereadAfterNavigation<T>(signal: AbortSignal, perOpMs: number, read: () => Promise<T>): Promise<T> {
 		try {
@@ -2993,7 +3056,11 @@ export class WorkerCore {
 		const enrich = (handle: ElementHandle): ActionableHandle =>
 			toActionableHandle(
 				handle,
-				(label, fn, dialog = "blocks") => input(label, actionOpMs, fn, { dialog }),
+				(label, fn, dialog = "blocks", outcome) =>
+					input(label, actionOpMs, fn, {
+						dialog,
+						outcome: outcome && { ...outcome, frame: handle.frame },
+					}),
 				async () => {
 					// Raw Puppeteer actions have no AbortSignal. Poison + dispose every
 					// cached handle and stop navigation before reporting a recoverable timeout.
@@ -3023,27 +3090,32 @@ export class WorkerCore {
 			url: () => page.url(),
 			title: () => read("tab.title()", INF, sig => untilAborted(sig, () => page.title())),
 			goto: (url, opts) =>
-				input(`tab.goto(${JSON.stringify(url)})`, INF, async sig => {
-					this.#clearElementCache();
-					try {
-						// Default to "load" because dev servers with HMR/WS never reach networkidle.
-						// budgetBound (not the full cell) so a hung navigation fails named and
-						// catchable inside the run instead of dying with the whole cell.
-						await navigateMainFrame(page, opts?.waitUntil ?? "load", budgetBound, sig, options =>
-							page.goto(url, options),
-						);
-					} catch (err) {
-						if (isPuppeteerTimeout(err)) {
-							// Abandon the hung navigation NOW — a still-pending load stalls every
-							// later op on this page and cascades into more opaque timeouts.
-							await this.#stopLoading();
-							throw new NavigationTimeoutError(
-								`tab.goto(${JSON.stringify(url)}) timed out after ${budgetBound}ms; pending navigation stopped — retry with a longer tool timeout or waitUntil:"domcontentloaded"`,
+				input(
+					`tab.goto(${JSON.stringify(url)})`,
+					INF,
+					async sig => {
+						this.#clearElementCache();
+						try {
+							// Default to "load" because dev servers with HMR/WS never reach networkidle.
+							// budgetBound (not the full cell) so a hung navigation fails named and
+							// catchable inside the run instead of dying with the whole cell.
+							await navigateMainFrame(page, opts?.waitUntil ?? "load", budgetBound, sig, options =>
+								page.goto(url, options),
 							);
+						} catch (err) {
+							if (isPuppeteerTimeout(err)) {
+								// Abandon the hung navigation NOW — a still-pending load stalls every
+								// later op on this page and cascades into more opaque timeouts.
+								await this.#stopLoading();
+								throw new NavigationTimeoutError(
+									`tab.goto(${JSON.stringify(url)}) timed out after ${budgetBound}ms; pending navigation stopped — retry with a longer tool timeout or waitUntil:"domcontentloaded"`,
+								);
+							}
+							throw err;
 						}
-						throw err;
-					}
-				}),
+					},
+					{ outcome: {} },
+				),
 			observe: opts =>
 				read("tab.observe()", quickOpMs, async sig => {
 					await this.#settleAfterAction(sig, quickOpMs);
@@ -3110,7 +3182,7 @@ export class WorkerCore {
 							clickElement(handle, label, sig, click),
 						);
 					},
-					{ selector, zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS, dialog: "answers" },
+					{ selector, zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS, dialog: "answers", outcome: {} },
 				),
 			type: (selector, text) =>
 				act(
@@ -3124,7 +3196,7 @@ export class WorkerCore {
 							await handle.dispose().catch(() => undefined);
 						}
 					},
-					{ selector, zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS },
+					{ selector, zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS, outcome: { input: { text, replaces: false } } },
 				),
 			fill: (selector, value) =>
 				act(
@@ -3138,7 +3210,11 @@ export class WorkerCore {
 							await handle.dispose().catch(() => undefined);
 						}
 					},
-					{ selector, zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS },
+					{
+						selector,
+						zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS,
+						outcome: { input: { text: value, replaces: true } },
+					},
 				),
 			press: (key, opts) =>
 				act(
@@ -3159,7 +3235,7 @@ export class WorkerCore {
 						}
 						await pressKey(page, key, undefined, sig);
 					},
-					{ dialog: "answers" },
+					{ dialog: "answers", outcome: {} },
 				),
 			scroll: (deltaX, deltaY, opts) =>
 				act("tab.scroll()", actionOpMs, async sig => {
@@ -3273,7 +3349,7 @@ export class WorkerCore {
 					`tab.select(${JSON.stringify(selector)})`,
 					actionOpMs,
 					sig => this.#select(selector, values, actionOpMs, sig),
-					{ selector, zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS },
+					{ selector, zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS, outcome: {} },
 				),
 			uploadFile: (selector, ...filePaths) => {
 				const label = `tab.uploadFile(${JSON.stringify(selector)})`;
