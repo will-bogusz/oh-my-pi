@@ -72115,7 +72115,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/observe-print",
    "host": "MacBook-Pro",
    "added": "2026-11-10T19:33:45Z",
-   "updated": "2026-11-10T20:05:45Z",
+   "updated": "2026-11-10T20:06:10Z",
    "note": "",
    "built": [
     {
@@ -72319,7 +72319,8 @@
      "tree": "2426c89aba4dff16a38fa46e9e3a8390f42b4585"
     }
    ],
-   "opened": "2026-11-10T20:05:45Z"
+   "opened": "2026-11-10T20:05:45Z",
+   "readied": "2026-11-10T20:06:10Z"
   },
   {
    "id": "factory-droid-171-pin",
