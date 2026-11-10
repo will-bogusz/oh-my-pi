@@ -73363,7 +73363,7 @@
    "area": "computer",
    "priority": "P0",
    "needs": [],
-   "base": "e325ffc73ab86e03bdd20a91b77d8e2b3964c906",
+   "base": "433a9101959de11e34cd0047996cb1e87446a383",
    "body": "bodies/x11-mpx-qt.md",
    "state": "queued",
    "pr": null,
@@ -73371,8 +73371,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-mpx-qt",
    "host": "MacBook-Pro",
    "added": "2026-11-10T22:23:32Z",
-   "updated": "2026-11-10T22:23:32Z",
-   "note": ""
+   "updated": "2026-11-10T22:25:53Z",
+   "note": "",
+   "advanced": "2026-11-10T22:25:53Z"
   }
  ],
  "watch": {
