@@ -73578,6 +73578,11 @@
     "sha": "6574704491f615ed6411a8b31a117fd9e0d322ae",
     "at": "2026-11-10T06:17:53Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "6574704491f615ed6411a8b31a117fd9e0d322ae",
+    "at": "2026-11-10T06:21:19Z",
+    "host": "goliath"
    }
   },
   "c5d58ead5157d85bf60af10abf998c15cc66c694": {
