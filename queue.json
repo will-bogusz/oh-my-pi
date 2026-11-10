@@ -69391,6 +69391,24 @@
    "added": "2026-11-10T05:34:29Z",
    "updated": "2026-11-10T05:34:29Z",
    "note": ""
+  },
+  {
+   "id": "browser-dead-tab-hint",
+   "branch": "will/browser-dead-tab-hint",
+   "title": "fix(browser): point calls on a tab that is not open at browser.open()",
+   "area": "browser",
+   "priority": "P2",
+   "needs": [],
+   "base": "f0200abf28e8d314125854600cf726dece495246",
+   "body": "bodies/browser-dead-tab-hint.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-dead-tab-hint",
+   "host": "MacBook-Pro",
+   "added": "2026-11-10T05:35:21Z",
+   "updated": "2026-11-10T05:35:21Z",
+   "note": ""
   }
  ],
  "watch": {
