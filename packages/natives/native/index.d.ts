@@ -1686,6 +1686,11 @@ export interface DesktopSessionOptions {
    * count, which `desktopEscapeStops` reads after they close.
    */
   escapeStopKey?: string
+  /**
+   * The agent this session acts for, named to other sessions that wait
+   * for its input/focus control.
+   */
+  agentLabel?: string
 }
 
 /** One capturable top-level window in global logical desktop coordinates. */
