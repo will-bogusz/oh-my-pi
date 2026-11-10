@@ -73540,12 +73540,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-10T05:41:34.468308Z",
+  "at": "2026-11-10T05:43:59.910009Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 2,
-   "left": 6
+   "used": 3,
+   "left": 5
   },
   "rows": [
    {
@@ -73717,6 +73717,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-10T04:52:18Z"
+   },
+   {
+    "id": "finder-desktop-key",
+    "label": "#18680",
+    "number": 18680,
+    "state": "open",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): restore Finder with its desktop focus after macOS background input",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-10T05:42:50Z"
    },
    {
     "id": "print-hold",
@@ -73978,23 +73995,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-10T05:24:11Z"
-   },
-   {
-    "id": "finder-desktop-key",
-    "label": "finder-desktop-key",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives): restore Finder with its desktop focus after macOS background input",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-10T04:31:00Z"
    },
    {
     "id": "iphone-mirror-scroll-distance",
@@ -74290,10 +74290,10 @@
     "reasons": [
      "needs computer-ui-quiet (queued)",
      "conflicts with #18675 in crates/pi-natives/src/desktop/macos/ax.rs, docs/tools/computer.md",
+     "conflicts with #18680 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with computer-window-exact-app in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with finder-desktop-key in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with computer-find-role-alias in docs/tools/computer.md",
      "conflicts with computer-strict-options in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/tools/computer/worker.ts"
@@ -74303,10 +74303,10 @@
     "paired": [],
     "blocked_by": [
      "#18675",
+     "#18680",
      "#18353",
      "#18222",
      "computer-window-exact-app",
-     "finder-desktop-key",
      "computer-find-role-alias",
      "computer-strict-options"
     ],
