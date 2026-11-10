@@ -69422,7 +69422,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "f0200abf28e8d314125854600cf726dece495246",
+   "base": "eda28eff97cf7a352fd3057a03581be1686dbc7a",
    "body": "bodies/computer-window-exact-app.md",
    "state": "open",
    "pr": 18744,
@@ -69430,7 +69430,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-window-exact-app",
    "host": "MacBook-Pro",
    "added": "2026-11-10T05:24:11Z",
-   "updated": "2026-11-10T17:25:12Z",
+   "updated": "2026-11-10T17:33:00Z",
    "note": "",
    "built": [
     {
@@ -69593,7 +69593,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-11-10T16:44:38Z"
+   "opened": "2026-11-10T16:44:38Z",
+   "advanced": "2026-11-10T17:33:00Z"
   },
   {
    "id": "computer-find-role-alias",
