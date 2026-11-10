@@ -153,6 +153,7 @@ export function createComputerPrelude(
 		name: "computer",
 		documentation: computerPreludeAssets.documentation,
 		firstCallDocumentation: computerPreludeAssets.documentation,
+		alwaysOnDocumentation: computerPreludeAssets.alwaysOn,
 		javascript: computerPreludeAssets.javascript,
 		python: computerPreludeAssets.python,
 		exports: ["computer"],

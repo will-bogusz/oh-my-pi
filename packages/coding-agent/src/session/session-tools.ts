@@ -2028,11 +2028,17 @@ export class SessionTools {
 		// Topic docs are served through `read`; sessions without it get them inline,
 		// matching the eval description's `inlineTopics` fallback.
 		const canRead = this.getActiveToolNames().includes("read");
-		const entries = added.map(definition => ({
-			name: definition.name,
-			summary: evalPreludeSummary(definition),
-			firstCall: canRead && Boolean(definition.firstCallDocumentation?.trim()),
-		}));
+		const entries = added.map(definition => {
+			const firstCall = canRead && Boolean(definition.firstCallDocumentation?.trim());
+			// As in the eval description, the always-on rules nest under the entry.
+			const alwaysOn = firstCall ? definition.alwaysOnDocumentation?.trim().replace(/^/gm, "  ") : undefined;
+			return {
+				name: definition.name,
+				summary: evalPreludeSummary(definition),
+				firstCall,
+				alwaysOn: alwaysOn || undefined,
+			};
+		});
 		return {
 			role: "custom",
 			customType: EVAL_PRELUDE_NOTICE_MESSAGE_TYPE,

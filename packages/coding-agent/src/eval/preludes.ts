@@ -43,6 +43,12 @@ export interface EvalPreludeDefinition {
 	 * tool description keeps one line. Delivered once per conversation.
 	 */
 	firstCallDocumentation?: string;
+	/**
+	 * Markdown rules the always-on tool description keeps under the one-line
+	 * summary of a prelude with a first-call guide: what the model needs before
+	 * that guide arrives and keeps in the cached prefix after it.
+	 */
+	alwaysOnDocumentation?: string;
 	/** JavaScript source installed into an ordinary JavaScript eval realm. */
 	javascript: string;
 	/** Python source installed into a Python eval kernel. */

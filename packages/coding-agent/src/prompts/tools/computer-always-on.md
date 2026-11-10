@@ -1,0 +1,7 @@
+- Act through the AX tree, not pixels: `await win.ax()` returns one text string, a node per line with `[ref=eN]`. Element actions need no screenshot.
+- `await win.ref("eN").click()` clicks any element by ref (rows, cells, text, links, sidebar items) without a screenshot; `{count: 2}` double-clicks, `{button: "right", menu: ["Item"]}` picks from its context menu.
+- `el.press()` works only on elements that offer a press action (buttons, checkboxes, menu items); when it fails because the element has no press action, call `.click()` on that same element.
+- Text: `await win.ref("eN").setValue("…")` sets a settable field; `el.type("…")` types into it; `win.press("enter")` sends a key.
+- `await win.menu.select(["File", "New"])` runs a menu command; `const [el] = await win.find({ role: "button", title: "Done" })` finds one element.
+- After a change, re-read `win.ax()` to verify it and to get fresh refs.
+- Pixels only for canvases and custom-drawn surfaces with no AX nodes: `win.click(x, y)` takes pixels of that window's most recent full `win.screenshot()`; `bounds()` are global desktop coordinates, never `win.click` input.

@@ -4,6 +4,9 @@
 Now available in JS/Python `eval`{{#if canRead}}; `read` the linked docs before first use{{#if anyFirstCall}} unless marked{{/if}}{{/if}}:
 {{#each added}}
 - `{{name}}`{{#if summary}}: {{summary}}{{/if}}{{#if firstCall}} (no `read` needed first: its first call's output carries the guide){{/if}}{{#if ../canRead}} → `xd://eval/{{name}}`{{/if}}
+{{#if alwaysOn}}
+{{{alwaysOn}}}
+{{/if}}
 {{/each}}
 {{/if}}
 {{#if removed.length}}

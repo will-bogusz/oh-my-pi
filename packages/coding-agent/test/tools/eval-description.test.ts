@@ -227,7 +227,8 @@ describe("eval tool description", () => {
 		preludes.push(computer);
 		const [summary] = computer.documentation.split("\n", 1);
 		const tool = new EvalTool(session);
-		expect(tool.description).toContain(`\`computer\`: ${summary} → \`xd://eval/computer\``);
+		const [alwaysOn] = (computer.alwaysOnDocumentation ?? "").trim().split("\n", 1);
+		expect(tool.description).toContain(`\`computer\`: ${summary} → \`xd://eval/computer\`\n  ${alwaysOn}\n`);
 		expect(tool.description).not.toContain("<instruction>");
 		expect(computer.firstCallDocumentation?.trim()).toBe(tool.docTopics().computer);
 
@@ -255,6 +256,7 @@ describe("eval tool description", () => {
 			name: "fixture",
 			documentation: "Fixture summary line.\n\nFULL PRELUDE DOCUMENTATION",
 			firstCallDocumentation: "FIRST CALL GUIDE",
+			alwaysOnDocumentation: "- ALWAYS-ON RULE",
 			javascript: "",
 			python: "",
 			exports: [],
@@ -267,6 +269,7 @@ describe("eval tool description", () => {
 		expect(readFirst).not.toContain("xd://eval/fixture");
 		expect(firstCall).toContain("xd://eval/fixture");
 		expect(description).not.toContain("FIRST CALL GUIDE");
+		expect(firstCall).toContain("→ `xd://eval/fixture`\n  - ALWAYS-ON RULE\n");
 	});
 });
 

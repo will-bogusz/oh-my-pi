@@ -192,7 +192,10 @@ export interface EvalToolDescriptionOptions {
 	/** Point blocked callers at the `wait` tool; false when the session lacks it (subagents). Default: true. */
 	waitTool?: boolean;
 	/** Enabled preludes; each becomes an `xd://eval/<name>` doc topic. */
-	preludes?: readonly Pick<EvalPreludeDefinition, "name" | "documentation" | "firstCallDocumentation">[];
+	preludes?: readonly Pick<
+		EvalPreludeDefinition,
+		"name" | "documentation" | "firstCallDocumentation" | "alwaysOnDocumentation"
+	>[];
 	/**
 	 * Inline every doc topic instead of linking `xd://eval/<topic>`. Required
 	 * when the session cannot `read` (the only transport for topic docs).
@@ -254,13 +257,15 @@ export function getEvalDocTopics(options: EvalToolDescriptionOptions = {}): Reco
 /** Model-facing eval description: core kernel surface plus one pointer per doc topic. */
 export function getEvalToolDescription(options: EvalToolDescriptionOptions = {}): string {
 	const preludes: { name: string; summary: string }[] = [];
-	const firstCallPreludes: { name: string; summary: string }[] = [];
+	const firstCallPreludes: { name: string; summary: string; alwaysOn?: string }[] = [];
 	for (const prelude of options.preludes ?? []) {
 		const summary = evalPreludeSummary(prelude);
 		if (!summary) continue;
 		// Without `read` every topic is inlined in full, so a first-call guide changes nothing there.
 		if (prelude.firstCallDocumentation?.trim() && !options.inlineTopics) {
-			firstCallPreludes.push({ name: prelude.name, summary });
+			// The always-on rules nest under the prelude's entry.
+			const alwaysOn = prelude.alwaysOnDocumentation?.trim().replace(/^/gm, "  ");
+			firstCallPreludes.push({ name: prelude.name, summary, alwaysOn: alwaysOn || undefined });
 		} else {
 			preludes.push({ name: prelude.name, summary });
 		}

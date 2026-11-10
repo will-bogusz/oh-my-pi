@@ -60,6 +60,9 @@ More globals; `read` the linked docs before first use:
 No `read` needed before first use; the first call's output carries the guide (full reference linked):
 {{#each firstCallPreludes}}
 - `{{name}}`: {{summary}} → `xd://eval/{{name}}`
+{{#if alwaysOn}}
+{{{alwaysOn}}}
+{{/if}}
 {{/each}}
 {{/if}}
 </namespaces>
