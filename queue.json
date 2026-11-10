@@ -76863,12 +76863,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-10T21:17:59.906596Z",
+  "at": "2026-11-10T21:48:12.011733Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 2,
-   "left": 6
+   "used": 0,
+   "left": 8
   },
   "rows": [
    {
@@ -78098,14 +78098,16 @@
     "area": "browser",
     "priority": "P2",
     "title": "feat(agent,coding-agent): send a short browser guide with the first browser call",
-    "action": "held",
+    "action": "wait",
     "reasons": [
-     "held: CoreDocPR, 2026-11-10: until the Sol confirming run on this head (after 21:15Z) and the body's numbers are filled"
+     "conflicts with #18738 in packages/coding-agent/test/eval/browser-prelude-facade.test.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#18738"
+    ],
     "needs": [],
     "created": "2026-11-10T18:04:09Z"
    },
@@ -78117,8 +78119,9 @@
     "area": "computer",
     "priority": "P2",
     "title": "feat(coding-agent): send the computer guide with the first computer call",
-    "action": "wait",
+    "action": "held",
     "reasons": [
+     "held: Main, 2026-11-10: Haiku shows 1.19x steps on native tasks; waits for the Sol native legs and Will's call",
      "needs browser-core-first-use (queued)"
     ],
     "note": "",
