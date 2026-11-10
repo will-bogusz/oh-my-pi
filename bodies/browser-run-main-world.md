@@ -12,11 +12,13 @@ The prompt calls this a raw Puppeteer `page`. In 15 Browser Use tasks 6 hit this
 
 Shape of the fix (`createRunPage` in `tab-worker.ts`, wrapping the run's `page`):
 - The five methods evaluate in `page.mainFrame().mainRealm()`, adopting element-handle arguments as `tab.evaluate` does (`evaluateInRealm`, now shared). `$eval`/`$$eval` selectors still resolve in the isolated world.
-- `waitForFunction` polls by evaluating instead of calling Puppeteer's wait, which would install its bindings as main-world globals. It retries across navigations, throws Puppeteer's `TimeoutError` message, and stops with the run.
+- `waitForFunction` polls by evaluating instead of calling Puppeteer's wait, which would install its bindings as main-world globals. It times out at the deadline even mid-predicate; `"raf"`/`"mutation"` polling checks in the page, anything else on a 100 ms timer (hidden tabs run no frames).
 - Every other member is the tab's own page; one returning the page (`page.on(…)`) returns the wrapper.
 - Unchanged: `frame.evaluate`, `elementHandle.evaluate` and other `Page` objects (`tab.page`, `browser.pages()`); the docs now say so.
 
 ## Testing
+
+The deterministic Chromium regression below is the primary evidence; all model samples exposed the arm name in the working directory or Eval stack traces, so they were not blind.
 
 - `bun test test/tools/browser-tab-worker-startup.test.ts`, "runs code handed to the run's page evaluation methods in the main world", on real headless Chromium: a page global, a custom-element member, an adopted element argument, `$eval`/`$$eval`, `waitForFunction` resolving on a later global and timing out, a chained `page.on(…).evaluate`, and no Puppeteer binding on the page's globals. With the change reverted the page-global reads come back `null`/`undefined`.
 - Sample set: call the shadow-DOM form's `collectFormData()` through the run's `page`, 2 runs each:
@@ -26,13 +28,14 @@ Shape of the fix (`createRunPage` in `tab-worker.ts`, wrapping the run's `page`)
 | Haiku 5.5 | 0 / 2: both reported the method missing ("custom element registry is `null`") | 2 / 2, first call |
 | GPT-6.1 Sol | 2 / 2, each after a failed call and a switch to `page.mainFrame().mainRealm()` | 2 / 2, first call |
 
-- The three Browser Use local tasks that failed this way (shadow-DOM form, autocomplete, flight booking) each finished once on this branch with GPT-6 Luna; the form's success banner showed after a real submit.
+- GPT-6 Luna finished each of three local Browser Use tasks once on this branch (shadow-DOM form, autocomplete, flight booking), with no paired before runs; these arm-labelled runs are not comparative evidence. The form's success banner showed after a real submit.
 - `bun run check:types` and `oxfmt --check` pass.
 
-Review first: the `Proxy` in `createRunPage`, which binds every other member to the real page so Puppeteer's private fields still work.
+Review first: the `Proxy` in `createRunPage`.
 
 ---
 
 - [x] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
