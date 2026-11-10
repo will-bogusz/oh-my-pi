@@ -69582,7 +69582,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-10T15:43:31Z",
+  "checked": "2026-11-10T16:14:59Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -69593,6 +69593,10 @@
    "browser-console-shape": {
     "since": "2026-11-10T06:03:36Z",
     "title": "fix(browser): tell agents that treat console() or errors() as an array to read .entries"
+   },
+   "computer-open-window": {
+    "since": "2026-11-10T16:14:59Z",
+    "title": "fix(natives): return the window showing a page from macOS apps.open in a browser"
    },
    "computer-window-exact-app": {
     "since": "2026-11-10T05:32:52Z",
@@ -69605,6 +69609,10 @@
    "computer-find-role-alias": {
     "since": "2026-11-10T05:32:52Z",
     "title": "fix(natives): accept aliases in computer role searches"
+   },
+   "computer-input-lease-wait": {
+    "since": "2026-11-10T16:14:59Z",
+    "title": "fix(natives): wait for another session's input lock before failing InputBusy"
    },
    "computer-strict-options": {
     "since": "2026-11-10T06:03:36Z",
@@ -69697,15 +69705,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-03T16:12:59Z",
-    "kind": "conflict",
-    "label": "#17747",
-    "title": "fix(agent,coding-agent): read the history behind an OpenAI remote compaction after a model switch",
-    "files": [
-     "packages/coding-agent/src/session/session-provider-boundary.ts"
-    ]
-   },
    {
     "at": "2026-11-03T18:46:10Z",
     "kind": "merged",
@@ -71115,6 +71114,18 @@
     "id": "finder-desktop-key",
     "title": "fix(natives): restore Finder with its desktop focus after macOS background input",
     "why": "opened as #18680"
+   },
+   {
+    "at": "2026-11-10T16:14:59Z",
+    "kind": "openable",
+    "id": "computer-open-window",
+    "title": "fix(natives): return the window showing a page from macOS apps.open in a browser"
+   },
+   {
+    "at": "2026-11-10T16:14:59Z",
+    "kind": "openable",
+    "id": "computer-input-lease-wait",
+    "title": "fix(natives): wait for another session's input lock before failing InputBusy"
    }
   ]
  },
