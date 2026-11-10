@@ -71162,37 +71162,17 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-10T16:14:59Z",
+  "checked": "2026-11-10T17:15:05Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "browser-call-timeout": {
-    "since": "2026-11-10T06:03:36Z",
-    "title": "fix(browser): give browser calls without a timeout the Eval cell's timeout"
+   "browser-hover-actionable": {
+    "since": "2026-11-10T17:15:05Z",
+    "title": "fix(browser): check a hover target the way a click target is checked"
    },
-   "browser-console-shape": {
-    "since": "2026-11-10T06:03:36Z",
-    "title": "fix(browser): tell agents that treat console() or errors() as an array to read .entries"
-   },
-   "computer-open-window": {
-    "since": "2026-11-10T16:14:59Z",
-    "title": "fix(natives): return the window showing a page from macOS apps.open in a browser"
-   },
-   "computer-window-exact-app": {
-    "since": "2026-11-10T05:32:52Z",
-    "title": "fix(coding-agent): prefer exact app names when selecting windows"
-   },
-   "browser-dead-tab-hint": {
-    "since": "2026-11-10T06:03:36Z",
-    "title": "fix(browser): point calls on a tab that is not open at browser.open()"
-   },
-   "computer-find-role-alias": {
-    "since": "2026-11-10T05:32:52Z",
-    "title": "fix(natives): accept aliases in computer role searches"
-   },
-   "computer-input-lease-wait": {
-    "since": "2026-11-10T16:14:59Z",
-    "title": "fix(natives): wait for another session's input lock before failing InputBusy"
+   "browser-run-main-world": {
+    "since": "2026-11-10T17:15:05Z",
+    "title": "fix(browser): run tab.run page evaluations in the page's main world"
    },
    "computer-strict-options": {
     "since": "2026-11-10T06:03:36Z",
@@ -71231,7 +71211,13 @@
    18658,
    18675,
    18676,
-   18680
+   18680,
+   18737,
+   18738,
+   18739,
+   18743,
+   18745,
+   18746
   ],
   "post_merge": {
    "17831": {
@@ -72706,6 +72692,67 @@
     "kind": "openable",
     "id": "computer-input-lease-wait",
     "title": "fix(natives): wait for another session's input lock before failing InputBusy"
+   },
+   {
+    "at": "2026-11-10T17:15:05Z",
+    "kind": "openable",
+    "id": "browser-hover-actionable",
+    "title": "fix(browser): check a hover target the way a click target is checked"
+   },
+   {
+    "at": "2026-11-10T17:15:05Z",
+    "kind": "openable",
+    "id": "browser-run-main-world",
+    "title": "fix(browser): run tab.run page evaluations in the page's main world"
+   },
+   {
+    "at": "2026-11-10T17:15:05Z",
+    "kind": "unopenable",
+    "id": "browser-call-timeout",
+    "title": "fix(browser): give browser calls without a timeout the Eval cell's timeout",
+    "why": "opened as #18737"
+   },
+   {
+    "at": "2026-11-10T17:15:05Z",
+    "kind": "unopenable",
+    "id": "browser-console-shape",
+    "title": "fix(browser): tell agents that treat console() or errors() as an array to read .entries",
+    "why": "opened as #18738"
+   },
+   {
+    "at": "2026-11-10T17:15:05Z",
+    "kind": "unopenable",
+    "id": "computer-open-window",
+    "title": "fix(natives): return the window showing a page from macOS apps.open in a browser",
+    "why": "opened as #18743"
+   },
+   {
+    "at": "2026-11-10T17:15:05Z",
+    "kind": "unopenable",
+    "id": "computer-window-exact-app",
+    "title": "fix(coding-agent): prefer exact app names when selecting windows",
+    "why": "opened as #18744"
+   },
+   {
+    "at": "2026-11-10T17:15:05Z",
+    "kind": "unopenable",
+    "id": "browser-dead-tab-hint",
+    "title": "fix(browser): point calls on a tab that is not open at browser.open()",
+    "why": "opened as #18739"
+   },
+   {
+    "at": "2026-11-10T17:15:05Z",
+    "kind": "unopenable",
+    "id": "computer-find-role-alias",
+    "title": "fix(natives): accept aliases in computer role searches",
+    "why": "opened as #18745"
+   },
+   {
+    "at": "2026-11-10T17:15:05Z",
+    "kind": "unopenable",
+    "id": "computer-input-lease-wait",
+    "title": "fix(natives): wait for another session's input lock before failing InputBusy",
+    "why": "opened as #18746"
    }
   ]
  },
