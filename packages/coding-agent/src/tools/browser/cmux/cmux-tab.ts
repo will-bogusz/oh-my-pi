@@ -38,7 +38,7 @@ import {
 	pushStateInPage,
 	reloadInPage,
 } from "../navigation";
-import { DEFAULT_STYLE_PROPERTIES, isFunctionSource } from "../queries";
+import { DEFAULT_STYLE_PROPERTIES, isFunctionSource, waitForTextLabel, waitForTextMatches } from "../queries";
 import type {
 	HarContentPolicy,
 	NetworkPattern,
@@ -1528,7 +1528,10 @@ export class CmuxTab implements InProcessRunTab {
 		);
 	}
 
-	async waitForText(text: string, opts: { timeout?: number; selector?: string; exact?: boolean } = {}): Promise<void> {
+	async waitForText(
+		text: string | RegExp,
+		opts: { timeout?: number; selector?: string; exact?: boolean } = {},
+	): Promise<void> {
 		const timeoutMs = opts.timeout ?? this.#runContext?.timeoutMs ?? 30_000;
 		const signal = this.#runContext?.signal;
 		const deadline = Date.now() + timeoutMs;
@@ -1536,13 +1539,10 @@ export class CmuxTab implements InProcessRunTab {
 			const content = opts.selector
 				? await this.text(opts.selector)
 				: await this.#evalScript<string>("document.body?.innerText || ''");
-			if (content !== null) {
-				const candidate = content.trim();
-				if (opts.exact ? candidate === text : candidate.includes(text)) return;
-			}
+			if (content !== null && waitForTextMatches(content.trim(), text, opts.exact)) return;
 			await untilAborted(signal, () => Bun.sleep(100));
 		}
-		throw new ToolError(`tab.waitForText(${JSON.stringify(text)}) timed out after ${timeoutMs}ms`);
+		throw new ToolError(`${waitForTextLabel(text)} timed out after ${timeoutMs}ms`);
 	}
 
 	async waitForNavigation(opts?: { waitUntil?: WaitUntil; timeout?: number }): Promise<null> {

@@ -50,7 +50,7 @@ import type {
 } from "../network";
 import { normalizeAllowedDomains } from "../network";
 import { resolveOpTimeouts, resolveWaitTimeout, ZERO_MATCH_FAIL_FAST_MS } from "../op-timeouts";
-import { DEFAULT_STYLE_PROPERTIES, isFunctionSource } from "../queries";
+import { DEFAULT_STYLE_PROPERTIES, isFunctionSource, isWaitTextPattern, waitForTextLabel } from "../queries";
 import { extractReadableFromHtml, type ReadableExtractOptions, type ReadableFormat } from "../readable";
 import {
 	enableReact,
@@ -1605,13 +1605,15 @@ export class TernTab implements InProcessRunTab {
 		return (await this.#read<boolean>(selector, "checked")) === true;
 	}
 
-	/** Wait until `text` appears in the body (or a matching element). */
-	async waitForText(text: string, opts: { timeout?: number; selector?: string; exact?: boolean } = {}): Promise<void> {
+	/** Wait until `text` (a string or `RegExp`) appears in the body (or a matching element). */
+	async waitForText(
+		text: string | RegExp,
+		opts: { timeout?: number; selector?: string; exact?: boolean } = {},
+	): Promise<void> {
 		const root = opts.selector ? this.#spec(opts.selector) : null;
-		await this.#poll(
-			`tab.waitForText(${JSON.stringify(text)})`,
-			resolveWaitTimeout(this.#cellMs, opts.timeout),
-			async () => ((await this.#kit<boolean>("hasText", [text, root, opts.exact === true])) ? true : undefined),
+		const target = isWaitTextPattern(text) ? { source: text.source, flags: text.flags } : text;
+		await this.#poll(waitForTextLabel(text), resolveWaitTimeout(this.#cellMs, opts.timeout), async () =>
+			(await this.#kit<boolean>("hasText", [target, root, opts.exact === true])) ? true : undefined,
 		);
 	}
 

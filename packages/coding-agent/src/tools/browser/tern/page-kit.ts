@@ -169,8 +169,11 @@ export interface TernKitApi {
 	 * the frame element or an ancestor is scaled, rotated or skewed (points inside cannot be mapped).
 	 */
 	frameOrigin(index: number): { x: number; y: number } | null;
-	/** Whether body text (or `root`'s text) contains — or with `exact`, equals — `text` after trimming. */
-	hasText(text: string, root: TernSelector | null, exact: boolean): boolean;
+	/**
+	 * Whether body text (or `root`'s text) contains — or with `exact`, equals — `text` after trimming; a `RegExp`, sent
+	 * as its `source` and `flags`, matches it instead.
+	 */
+	hasText(text: string | { source: string; flags: string }, root: TernSelector | null, exact: boolean): boolean;
 	/** Viewport and scroll metrics. */
 	geometry(): TernGeometry;
 	/** Whether the deep active element is editable. */
@@ -1085,6 +1088,7 @@ const kit = {
 			content = document.body ? document.body.innerText || "" : "";
 		}
 		const candidate = String(content).trim();
+		if (text !== null && typeof text === "object") return new RegExp(text.source, text.flags).test(candidate);
 		return exact ? candidate === text : candidate.includes(text);
 	},
 	geometry: () => ({

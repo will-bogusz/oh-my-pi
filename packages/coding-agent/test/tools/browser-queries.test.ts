@@ -343,8 +343,12 @@ describe.skipIf(!CHROMIUM_AVAILABLE)("browser semantic selectors and queries", (
 		});
 	});
 
-	it("waits for delayed body and scoped exact text and reports a named timeout", async () => {
+	it("waits for delayed body and scoped exact text or a pattern and reports a named timeout", async () => {
 		expect(await call("waitForText", ["Hello world", { timeout: 10_000 }])).toBeUndefined();
+		// A cell's RegExp crosses the bridge in the prelude's encoding.
+		expect(
+			await call("waitForText", [{ __omp_re: { source: "hello\\s+WORLD", flags: "i" } }, { timeout: 10_000 }]),
+		).toBeUndefined();
 		// Chromium and the worker share the CI host with other test processes; allow for scheduling delays
 		// while still exercising the page's real timer and the text polling path.
 		expect(
@@ -387,6 +391,34 @@ describe.skipIf(!CHROMIUM_AVAILABLE)("browser semantic selectors and queries", (
 		}`)) as { name: string; message: string } | null;
 		expect(timeout?.name).toBe("ToolError");
 		expect(timeout?.message).toContain("tab.waitForText");
+		const patternTimeout = (await run(`try {
+			await tab.waitForText(/never appears/g, { timeout: 150 });
+			return null;
+		} catch (error) {
+			return error.message;
+		}`)) as string | null;
+		expect(patternTimeout).toContain("tab.waitForText(/never appears/g)");
+		// A pattern a run reuses is tested from the start of the text each time, whatever its last match left.
+		expect(
+			await run(`const pattern = /hello/gi;
+			await tab.waitForText(pattern, { timeout: 2_000 });
+			await tab.waitForText(pattern, { timeout: 2_000 });
+			return true`),
+		).toBe(true);
+		// Tern's page kit gets a pattern as its source and flags; it is plain page script, so it runs here too.
+		expect(
+			await run(`await tab.evaluate(${JSON.stringify(`(function () {\n${TERN_KIT_SOURCE}\n})()`)});
+			return await tab.evaluate(() => {
+				const kit = globalThis.__ompTernKit;
+				const pattern = { source: "hello\\\\s+WORLD", flags: "gi" };
+				return [
+					kit.hasText(pattern, null, false),
+					kit.hasText(pattern, null, false),
+					kit.hasText({ source: "world", flags: "y" }, null, false),
+					kit.hasText({ source: "^nope", flags: "" }, null, false),
+				];
+			});`),
+		).toEqual([true, true, false, false]);
 	}, 60_000);
 
 	it("waits for a page predicate, resolves with its value, and reports a named timeout", async () => {

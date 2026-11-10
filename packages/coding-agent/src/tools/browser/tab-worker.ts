@@ -117,6 +117,7 @@ import {
 	queryVisible,
 	waitForPageText,
 	waitForPagePredicate,
+	waitForTextLabel,
 } from "./queries";
 import { DownloadManager, type BrowserDownload } from "./downloads";
 import { InitScriptManager, type InitScriptInfo } from "./init-scripts";
@@ -474,7 +475,7 @@ interface TabApi {
 	isVisible(selector: string): Promise<boolean>;
 	isEnabled(selector: string): Promise<boolean>;
 	isChecked(selector: string): Promise<boolean>;
-	waitForText(text: string, opts?: { timeout?: number; selector?: string; exact?: boolean }): Promise<void>;
+	waitForText(text: string | RegExp, opts?: { timeout?: number; selector?: string; exact?: boolean }): Promise<void>;
 	addInitScript(source: string): Promise<{ id: string }>;
 	removeInitScript(id: string): Promise<void>;
 	initScripts(): Promise<InitScriptInfo[]>;
@@ -3037,7 +3038,7 @@ export class WorkerCore {
 				),
 			waitForText: (text, opts) => {
 				const w = waitMs(opts?.timeout);
-				return act(`tab.waitForText(${JSON.stringify(text)})`, w, sig =>
+				return act(waitForTextLabel(text), w, sig =>
 					waitForPageText(page, text, {
 						timeout: w,
 						selector: opts?.selector ? normalizeSelector(opts.selector) : undefined,

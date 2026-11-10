@@ -300,10 +300,31 @@ async function pollPage<T>(
 	throw new ToolError(timeoutMessage);
 }
 
+/** Whether a `waitForText` target is a `RegExp`, from this realm or the run's; anything else is matched as text. */
+export function isWaitTextPattern(text: unknown): text is RegExp {
+	return Object.prototype.toString.call(text) === "[object RegExp]";
+}
+
+/** The label `tab.waitForText` reports itself by, naming a `RegExp` by its source as written. */
+export function waitForTextLabel(text: string | RegExp): string {
+	return `tab.waitForText(${isWaitTextPattern(text) ? String(text) : JSON.stringify(text)})`;
+}
+
+/**
+ * Whether trimmed page text satisfies a `waitForText` target: a string is found in it (equals it with `exact`), a
+ * `RegExp` matches it.
+ */
+export function waitForTextMatches(candidate: string, text: string | RegExp, exact: boolean | undefined): boolean {
+	if (!isWaitTextPattern(text)) return exact ? candidate === text : candidate.includes(text);
+	// A global or sticky pattern resumes from its last match; every poll tests the whole text.
+	text.lastIndex = 0;
+	return text.test(candidate);
+}
+
 /** Wait until text appears in the document body or a scoped element. */
 export async function waitForPageText(
 	page: Page,
-	text: string,
+	text: string | RegExp,
 	opts: { timeout: number; selector?: string; exact?: boolean; signal: AbortSignal },
 ): Promise<void> {
 	await pollPage(
@@ -319,11 +340,10 @@ export async function waitForPageText(
 						}),
 					)) as string);
 			if (content === null) return undefined;
-			const candidate = content.trim();
-			return (opts.exact ? candidate === text : candidate.includes(text)) ? true : undefined;
+			return waitForTextMatches(content.trim(), text, opts.exact) ? true : undefined;
 		},
 		{ timeout: opts.timeout, interval: 100, signal: opts.signal },
-		`tab.waitForText(${JSON.stringify(text)}) timed out after ${opts.timeout}ms`,
+		`${waitForTextLabel(text)} timed out after ${opts.timeout}ms`,
 	);
 }
 

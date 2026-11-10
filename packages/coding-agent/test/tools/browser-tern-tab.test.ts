@@ -369,6 +369,26 @@ describe("TernTab", () => {
 		]);
 	});
 
+	it("sends a waitForText pattern to the page as its source and flags", async () => {
+		const checks: unknown[][] = [];
+		const fake = await startPage({
+			eventBatches: [],
+			kit: {
+				hasText: args => {
+					checks.push(args);
+					return true;
+				},
+			},
+		});
+		const tab = await openTab(fake);
+		await tab.waitForText(/total:\s+\d+/i);
+		await tab.waitForText(42 as unknown as string);
+		expect(checks).toEqual([
+			[{ source: "total:\\s+\\d+", flags: "i" }, null, false],
+			[42, null, false],
+		]);
+	});
+
 	it("closes the PiP of an open that was abandoned before Tern answered", async () => {
 		const opened = Promise.withResolvers<number>();
 		const closed = Promise.withResolvers<unknown>();
