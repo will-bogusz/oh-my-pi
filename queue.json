@@ -71213,7 +71213,7 @@
    "area": "browser",
    "priority": "P1",
    "needs": [],
-   "base": "e1d8f29d54957da5cb38b11d10a6778d13476980",
+   "base": "e325ffc73ab86e03bdd20a91b77d8e2b3964c906",
    "body": "bodies/browser-honest-completion.md",
    "state": "open",
    "pr": 18761,
@@ -71221,7 +71221,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-honest-completion",
    "host": "MacBook-Pro",
    "added": "2026-11-10T18:17:46Z",
-   "updated": "2026-11-10T18:43:56Z",
+   "updated": "2026-11-10T20:17:44Z",
    "note": "",
    "built": [
     {
@@ -71370,7 +71370,8 @@
     }
    ],
    "opened": "2026-11-10T18:43:34Z",
-   "readied": "2026-11-10T18:43:56Z"
+   "readied": "2026-11-10T18:43:56Z",
+   "advanced": "2026-11-10T20:17:44Z"
   },
   {
    "id": "subagent-browser",
