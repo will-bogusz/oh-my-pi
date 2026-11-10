@@ -2754,7 +2754,7 @@
    "area": "browser",
    "priority": "P2",
    "needs": [],
-   "base": "090a8057a9457c85ed7fb0971bf4cdf3646243c0",
+   "base": "e325ffc73ab86e03bdd20a91b77d8e2b3964c906",
    "body": "bodies/print-hold.md",
    "state": "open",
    "pr": 15508,
@@ -2762,9 +2762,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/print-hold",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-11-09T18:45:04Z",
+   "updated": "2026-11-10T20:21:50Z",
    "note": "",
-   "advanced": "2026-11-09T18:45:04Z",
+   "advanced": "2026-11-10T20:21:50Z",
    "rebases_after": [
     16907,
     18252
@@ -55328,7 +55328,7 @@
    "area": "computer",
    "priority": "P2",
    "needs": [],
-   "base": "e0eba274da5e1091908b3c435de8a1e31ee187d4",
+   "base": "e325ffc73ab86e03bdd20a91b77d8e2b3964c906",
    "body": "bodies/computer-menu-subtree.md",
    "state": "open",
    "pr": 18222,
@@ -55336,9 +55336,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-menu-subtree",
    "host": "MacBook-Pro",
    "added": "2026-10-24T05:06:00Z",
-   "updated": "2026-11-09T17:52:29Z",
+   "updated": "2026-11-10T20:21:50Z",
    "note": "2026-10-29 (ComputerDocs): rebased onto main b0756921ed and pushed (e2b2d3a213); check + computer.test.ts (137 pass) on goliath; precheck has no timing FIX. Waits: its menu.items line in prompts/tools/computer.md sits next to lines #16925 (apps.open line) and #15282 (ax() line) change, so it conflicts with both until they merge; then rebase (pr-queue advance) and open.",
-   "advanced": "2026-11-09T17:52:29Z",
+   "advanced": "2026-11-10T20:21:50Z",
    "built": [
     {
      "with": "#16274",
@@ -57732,7 +57732,7 @@
    "area": "computer",
    "priority": "P0",
    "needs": [],
-   "base": "595ff2f359a31142f18f71417449798d66bd4a6c",
+   "base": "e325ffc73ab86e03bdd20a91b77d8e2b3964c906",
    "body": "bodies/macos-capture-geometry.md",
    "state": "open",
    "pr": 17757,
@@ -57740,7 +57740,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-capture-geometry",
    "host": "MacBook-Pro",
    "added": "2026-10-30T21:16:44Z",
-   "updated": "2026-11-07T23:35:49Z",
+   "updated": "2026-11-10T20:21:50Z",
    "note": "",
    "built": [
     {
@@ -57811,7 +57811,7 @@
      "tree": "1c2e904f816765145387f519b84705329a98de9a"
     }
    ],
-   "advanced": "2026-11-07T23:35:49Z",
+   "advanced": "2026-11-10T20:21:50Z",
    "opened": "2026-11-02T03:30:17Z",
    "readied": "2026-11-02T03:30:38Z"
   },
@@ -57822,7 +57822,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "595ff2f359a31142f18f71417449798d66bd4a6c",
+   "base": "e325ffc73ab86e03bdd20a91b77d8e2b3964c906",
    "body": "bodies/iphone-mirror-pointer.md",
    "state": "open",
    "pr": 17756,
@@ -57830,7 +57830,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/iphone-mirror-pointer",
    "host": "MacBook-Pro",
    "added": "2026-10-30T21:35:47Z",
-   "updated": "2026-11-07T23:35:49Z",
+   "updated": "2026-11-10T20:21:50Z",
    "note": "",
    "built": [
     {
@@ -57901,7 +57901,7 @@
      "tree": "1c2e904f816765145387f519b84705329a98de9a"
     }
    ],
-   "advanced": "2026-11-07T23:35:49Z",
+   "advanced": "2026-11-10T20:21:50Z",
    "opened": "2026-11-02T03:27:34Z",
    "readied": "2026-11-02T03:27:55Z"
   },
