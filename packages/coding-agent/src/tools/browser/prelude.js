@@ -81,6 +81,7 @@
 		"select",
 		"uploadFile",
 		"waitForUrl",
+		"waitForFunction",
 		"text",
 		"html",
 		"value",
@@ -183,6 +184,7 @@
 		"evaluate",
 		"waitFor",
 		"waitForSelector",
+		"waitForFunction",
 		"screenshot",
 	];
 	const makeElement = (name, handleMethod, handleArgs) => {
