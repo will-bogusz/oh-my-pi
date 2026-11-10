@@ -18,20 +18,18 @@ Known edge: a result kept in a global is not copied into Eval's speculation snap
 
 ## Testing
 
-The JavaScript Haiku samples below were not blind: the after arm exposed `browser-console-shape` in Eval stack traces in 3 of 6 runs for each task.
-
 - `bun test test/eval/browser-prelude-facade.test.ts test/tools/browser-console.test.ts test/eval/worker-core.test.ts`: `slice`, `length`, spreading and `map` on `console()`, and `slice` on `errors()`, throw the `.entries` hint; `.entries` and JSON output are unchanged; a real JS runtime prints the result as on `main`. The new case fails with the prelude change reverted.
-- Headless sessions, low thinking, main vs this branch, scored from the transcripts:
+- Headless sessions, low thinking, main vs this branch, scored from the transcripts. The two JavaScript Haiku tasks were rerun blind from neutral working directories and source copies, with zero label hits in all 24 transcripts; the other rows are the earlier samples:
 
   | model, task | sessions per arm | answered: `main` / branch | read `entries` in code: `main` / branch |
   |---|---|---|---|
-  | Haiku 5.5, "which errors and warnings did the page log" | 6 | 2 / 3 | 0 / 4 |
-  | Haiku 5.5, "last three console messages, in order" | 6 | 6 / 6 | 0 / 5 |
+  | Haiku 5.5, "which errors and warnings did the page log" (blind) | 6 | 3 / 4 | 0 / 6 |
+  | Haiku 5.5, "last three console messages, in order" (blind) | 6 | 6 / 6 | 0 / 6 |
   | Haiku 5.5, the same in a Python cell | 4 | 4 / 4 | 4 / 4 |
   | GPT-6.1 Sol, both JavaScript tasks | 4 each | 8 / 8 | printed the whole result on both |
   | GPT-6.1 Sol, the Python task | 4 | 4 / 4 | 4 / 4 |
 
-  On `main`, Haiku read the log through `window` globals or printed the whole result; with the line it read `entries` directly. No session on either arm called an array method on the result, so these runs show what the prompt line does, while the unit test shows what the hint does.
+  In the blind Haiku runs, `main` had one array-method shape error on the last-three task and the branch had none; both arms still answered all six. The errors/warnings task had no shape errors on either arm. The unit test separately checks the misuse hint.
 - `bun run check:ts` passes.
 
 ---
