@@ -69524,7 +69524,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-10T11:09:37Z",
+  "checked": "2026-11-10T11:40:13Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -69639,13 +69639,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-03T11:36:54Z",
-    "kind": "unopenable",
-    "id": "relay-linux-click-front",
-    "title": "fix(coding-agent): keep browser agents from pulling Chrome in front of your app on Linux X11",
-    "why": "opened as #17940"
-   },
    {
     "at": "2026-11-03T12:38:09Z",
     "kind": "conflict",
