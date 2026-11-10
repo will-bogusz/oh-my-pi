@@ -72720,13 +72720,17 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-10T20:48:01Z",
+  "checked": "2026-11-10T21:17:59Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
    "x11-covered-capture": {
     "since": "2026-11-10T20:48:01Z",
     "title": "fix(natives): capture a covered X11 window from its own pixels, or say it is covered"
+   },
+   "x11-takeover-user": {
+    "since": "2026-11-10T21:17:59Z",
+    "title": "fix(natives): keep X11 takeover from taking a typing user's keys"
    }
   },
   "conflicts": {
@@ -74321,6 +74325,12 @@
     "id": "screenshot-result-line",
     "title": "feat(coding-agent): report browser screenshots and opens on one line",
     "why": "opened as #18776"
+   },
+   {
+    "at": "2026-11-10T21:17:59Z",
+    "kind": "openable",
+    "id": "x11-takeover-user",
+    "title": "fix(natives): keep X11 takeover from taking a typing user's keys"
    }
   ]
  },
@@ -76852,12 +76862,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-10T20:48:02.160325Z",
+  "at": "2026-11-10T21:17:59.906596Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 5,
-   "left": 3
+   "used": 2,
+   "left": 6
   },
   "rows": [
    {
@@ -77682,6 +77692,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-10T20:41:59Z"
+   },
+   {
+    "id": "x11-takeover-user",
+    "label": "x11-takeover-user",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): keep X11 takeover from taking a typing user's keys",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-10T21:06:23Z"
    },
    {
     "id": "browser-wait-predicate",
