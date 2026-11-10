@@ -103,7 +103,9 @@ export interface FrameApiHooks {
 	waitMs(timeout?: number): number;
 	/** Run a named, abort-aware operation. */
 	op: FrameOperation;
-	/** Run an input action like {@link op}, so the tab's next look waits for its effects. */
+	/** Read after settling preceding actions, without creating an action mark. */
+	read: FrameOperation;
+	/** Run an input action like {@link op}, so the tab's next look or read waits for its effects. */
 	act: FrameOperation;
 	/** Persist and report a frame element screenshot. */
 	captureScreenshot(frame: Frame, selector: string, signal: AbortSignal): Promise<string>;
@@ -286,7 +288,7 @@ export function createFrameApi(frame: Frame, hooks: FrameApiHooks): BrowserFrame
 			}),
 		// Without a selector, the frame's `<body>`; any value passed, `null` included, is still checked as a selector.
 		text: (selector = "body") =>
-			hooks.op(
+			hooks.read(
 				`frame.text(${JSON.stringify(selector)})`,
 				hooks.quickOpMs,
 				signal =>
@@ -299,7 +301,7 @@ export function createFrameApi(frame: Frame, hooks: FrameApiHooks): BrowserFrame
 				selectorOptions(selector),
 			),
 		html: (selector = "body") =>
-			hooks.op(
+			hooks.read(
 				`frame.html(${JSON.stringify(selector)})`,
 				hooks.quickOpMs,
 				signal =>
@@ -307,7 +309,7 @@ export function createFrameApi(frame: Frame, hooks: FrameApiHooks): BrowserFrame
 				selectorOptions(selector),
 			),
 		value: selector =>
-			hooks.op(
+			hooks.read(
 				`frame.value(${JSON.stringify(selector)})`,
 				hooks.quickOpMs,
 				signal =>
@@ -320,7 +322,7 @@ export function createFrameApi(frame: Frame, hooks: FrameApiHooks): BrowserFrame
 				selectorOptions(selector),
 			),
 		attr: (selector, name) =>
-			hooks.op(
+			hooks.read(
 				`frame.attr(${JSON.stringify(selector)}, ${JSON.stringify(name)})`,
 				hooks.quickOpMs,
 				signal =>
@@ -334,11 +336,11 @@ export function createFrameApi(frame: Frame, hooks: FrameApiHooks): BrowserFrame
 				selectorOptions(selector),
 			),
 		count: selector =>
-			hooks.op(`frame.count(${JSON.stringify(selector)})`, hooks.quickOpMs, signal =>
+			hooks.read(`frame.count(${JSON.stringify(selector)})`, hooks.quickOpMs, signal =>
 				untilAborted(signal, () => frame.$$eval(hooks.normalizeSelector(selector), elements => elements.length)),
 			),
 		isVisible: selector =>
-			hooks.op(`frame.isVisible(${JSON.stringify(selector)})`, hooks.quickOpMs, async signal => {
+			hooks.read(`frame.isVisible(${JSON.stringify(selector)})`, hooks.quickOpMs, async signal => {
 				const handle = await untilAborted(signal, () => frame.$(hooks.normalizeSelector(selector)));
 				if (!handle) return false;
 				try {
@@ -348,19 +350,19 @@ export function createFrameApi(frame: Frame, hooks: FrameApiHooks): BrowserFrame
 				}
 			}),
 		ariaSnapshot: (selector, options) =>
-			hooks.op("frame.ariaSnapshot()", hooks.quickOpMs, async signal => {
+			hooks.read("frame.ariaSnapshot()", hooks.quickOpMs, async signal => {
 				return (await untilAborted(signal, () =>
 					frame.evaluate(buildAriaSnapshotScript(selector, options)),
 				)) as string;
 			}),
 		evaluate: ((fn: string | ((...args: unknown[]) => unknown), ...args: unknown[]) =>
-			hooks.op("frame.evaluate()", Number.POSITIVE_INFINITY, signal =>
+			hooks.read("frame.evaluate()", Number.POSITIVE_INFINITY, signal =>
 				untilAborted(signal, () => frame.evaluate(fn as never, ...args)),
 			)) as BrowserFrameApi["evaluate"],
 		waitFor: waitForSelector,
 		waitForSelector,
 		screenshot: selector =>
-			hooks.op(
+			hooks.read(
 				`frame.screenshot(${JSON.stringify(selector)})`,
 				hooks.quickOpMs,
 				signal => hooks.captureScreenshot(frame, selector, signal),
