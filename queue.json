@@ -71189,7 +71189,7 @@
   {
    "id": "browser-core-first-use",
    "branch": "will/browser-core-first-use",
-   "title": "feat(coding-agent): put a short browser guide in the eval tool description",
+   "title": "feat(coding-agent): send a short browser guide with the first browser call",
    "area": "browser",
    "priority": "P2",
    "needs": [],
@@ -71201,7 +71201,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-core-first-use",
    "host": "MacBook-Pro",
    "added": "2026-11-10T18:04:09Z",
-   "updated": "2026-11-10T18:56:56Z",
+   "updated": "2026-11-10T18:56:59Z",
    "note": "",
    "hold": "CoreDocPR, 2026-11-10: until the Sol confirming run on this head (after 21:15Z) and the body's numbers are filled"
   },
