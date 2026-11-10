@@ -27,7 +27,7 @@ Shape:
   | GPT-6.1 Sol, `main` / branch | 4 / 4 | 3 / 4 | 6 / 0 | 52 s / 20 s |
   | Haiku 5.5, `main` / branch | 4 / 4 | 0 / 3 | 1 / 4 | 19 s / 17 s |
 
-  On `main`, Sol tried `tab.waitFor("window.__job.status === …")` and `page.waitForFunction` in `tab.run`, which timed out, before reading the value by hand; with the branch each session called `tab.waitForFunction` once. On `main` all four Haiku sessions wrote loops; the branch's failed cells were unrelated (`browser.open(url)` with a string).
+  On `main`, Sol tried `tab.waitFor("window.__job.status === …")` and `page.waitForFunction` in `tab.run`, which timed out; with the branch each called `tab.waitForFunction` once.
 - `bun run check:ts` passes.
 
 ---
