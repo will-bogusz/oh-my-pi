@@ -69730,7 +69730,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-call-timeout",
    "host": "MacBook-Pro",
    "added": "2026-11-10T05:34:29Z",
-   "updated": "2026-11-10T16:35:50Z",
+   "updated": "2026-11-10T16:36:17Z",
    "note": "",
    "advanced": "2026-11-10T16:02:51Z",
    "built": [
@@ -69885,7 +69885,8 @@
      "tree": "8ed067a17a0d7305303e1e1bc7461ef5510c3f69"
     }
    ],
-   "opened": "2026-11-10T16:35:50Z"
+   "opened": "2026-11-10T16:35:50Z",
+   "readied": "2026-11-10T16:36:17Z"
   },
   {
    "id": "browser-dead-tab-hint",
