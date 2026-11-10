@@ -56,6 +56,7 @@ export const TAB_VALUE_METHODS: readonly string[] = [
 	"select",
 	"uploadFile",
 	"waitForUrl",
+	"waitForFunction",
 	"text",
 	"html",
 	"value",
@@ -166,6 +167,7 @@ export const FRAME_METHODS: readonly string[] = [
 	"evaluate",
 	"waitFor",
 	"waitForSelector",
+	"waitForFunction",
 	"screenshot",
 ];
 
