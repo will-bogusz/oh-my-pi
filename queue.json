@@ -72699,6 +72699,24 @@
    "added": "2026-11-10T20:41:59Z",
    "updated": "2026-11-10T20:41:59Z",
    "note": ""
+  },
+  {
+   "id": "x11-takeover-user",
+   "branch": "will/x11-takeover-user",
+   "title": "fix(natives): keep X11 takeover from taking a typing user's keys",
+   "area": "computer",
+   "priority": "P1",
+   "needs": [],
+   "base": "e325ffc73ab86e03bdd20a91b77d8e2b3964c906",
+   "body": "bodies/x11-takeover-user.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-takeover-user",
+   "host": "MacBook-Pro",
+   "added": "2026-11-10T21:06:23Z",
+   "updated": "2026-11-10T21:06:23Z",
+   "note": ""
   }
  ],
  "watch": {
