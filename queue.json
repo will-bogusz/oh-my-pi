@@ -69503,6 +69503,24 @@
    "added": "2026-11-10T05:41:26Z",
    "updated": "2026-11-10T05:41:26Z",
    "note": ""
+  },
+  {
+   "id": "browser-console-shape",
+   "branch": "will/browser-console-shape",
+   "title": "fix(browser): tell agents that treat console() or errors() as an array to read .entries",
+   "area": "browser",
+   "priority": "P1",
+   "needs": [],
+   "base": "f0200abf28e8d314125854600cf726dece495246",
+   "body": "bodies/browser-console-shape.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-console-shape",
+   "host": "MacBook-Pro",
+   "added": "2026-11-10T05:49:27Z",
+   "updated": "2026-11-10T05:49:27Z",
+   "note": ""
   }
  ],
  "watch": {
