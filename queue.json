@@ -70080,7 +70080,7 @@
    "branch": "will/computer-strict-options",
    "title": "fix(computer): reject unknown helper option keys",
    "area": "computer",
-   "priority": "P2",
+   "priority": "P1",
    "needs": [],
    "base": "f0200abf28e8d314125854600cf726dece495246",
    "body": "bodies/computer-strict-options.md",
@@ -70090,7 +70090,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-strict-options",
    "host": "MacBook-Pro",
    "added": "2026-11-10T05:41:26Z",
-   "updated": "2026-11-10T17:43:45Z",
+   "updated": "2026-11-10T17:46:00Z",
    "note": "",
    "built": [
     {
