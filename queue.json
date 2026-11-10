@@ -71576,6 +71576,24 @@
    "added": "2026-11-10T19:19:18Z",
    "updated": "2026-11-10T19:19:18Z",
    "note": ""
+  },
+  {
+   "id": "factory-droid-list-prices",
+   "branch": "will/factory-droid-list-prices",
+   "title": "fix(catalog): show list prices for Factory Droid Fable 5.1, GLM 5.2 Fast and Muse Spark Open",
+   "area": "catalog",
+   "priority": null,
+   "needs": [],
+   "base": "7a03d7af15263b7d77ee628d617b43f7b1dcb8a8",
+   "body": "bodies/factory-droid-list-prices.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-list-prices",
+   "host": "MacBook-Pro",
+   "added": "2026-11-10T19:19:30Z",
+   "updated": "2026-11-10T19:19:30Z",
+   "note": ""
   }
  ],
  "watch": {
