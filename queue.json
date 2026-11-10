@@ -73393,7 +73393,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-retire-swe-1-6-fast",
    "host": "MacBook-Pro",
    "added": "2026-11-10T23:05:26Z",
-   "updated": "2026-11-10T23:14:14Z",
+   "updated": "2026-11-10T23:14:50Z",
    "note": "",
    "built": [
     {
@@ -73424,7 +73424,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-11-10T23:14:14Z"
+   "opened": "2026-11-10T23:14:14Z",
+   "readied": "2026-11-10T23:14:49Z"
   }
  ],
  "watch": {
