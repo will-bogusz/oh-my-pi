@@ -69558,6 +69558,24 @@
    "added": "2026-11-10T15:55:32Z",
    "updated": "2026-11-10T15:55:32Z",
    "note": ""
+  },
+  {
+   "id": "computer-open-window",
+   "branch": "will/computer-open-window",
+   "title": "fix(natives): return the window showing a page from macOS apps.open in a browser",
+   "area": "computer",
+   "priority": "P1",
+   "needs": [],
+   "base": "f0200abf28e8d314125854600cf726dece495246",
+   "body": "bodies/computer-open-window.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-open-window",
+   "host": "MacBook-Pro",
+   "added": "2026-11-10T15:55:51Z",
+   "updated": "2026-11-10T15:55:51Z",
+   "note": ""
   }
  ],
  "watch": {
