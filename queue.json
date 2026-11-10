@@ -68817,7 +68817,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-autoattach-shared",
    "host": "MacBook-Pro",
    "added": "2026-11-09T18:05:09Z",
-   "updated": "2026-11-10T18:47:23Z",
+   "updated": "2026-11-10T18:47:31Z",
    "note": "2026-11-10 (QueueRestructure): semantic clash with the other relay PR, git merges clean: #17894 (relay-popup-lossless, 691146f3d0) adds bridge.ts #sessionOwner reading conn.childParents.get(id) as a string; #18657 (relay-autoattach-shared) turned childParents values into {parent, explicit}. Together: TS2322 at #sessionOwner plus 4 relay test failures (RelayBridge child targets, relay tab ownership). Whichever merges second: rebase and read .parent in #sessionOwner, then rerun browser-relay-bridge and browser-relay-tab-isolation tests.",
    "advanced": "2026-11-10T18:47:23Z",
    "built": [
@@ -68893,11 +68893,11 @@
     },
     {
      "with": "#17894",
-     "code": "27683ca8c1fccec2c0e7d4fdea9a0baf76768331",
-     "with_code": "8c518d39e8ae4759e6546b0727302ce1cd78cd50",
-     "tip": "9ef21919d164e3fac5a0d02425b4cf1c3306e627",
-     "with_tip": "3181a9f0bdcc1fa4b210d66d9a09f1d0c29ffe09",
-     "at": "2026-11-09T22:32:48Z",
+     "code": "e82a1d29540feeb72b33a9bd48bb5c30c668cc4e",
+     "with_code": "fd277d4591e6b2819d4307f92298b1d20ea02eb0",
+     "tip": "fad06a09508cd90187675eaae1ffc508977d4067",
+     "with_tip": "94dcdea75aa45d9a84d2e2a8881503066a073bcf",
+     "at": "2026-11-10T18:47:27Z",
      "host": "MacBook-Pro"
     }
    ],
