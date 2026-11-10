@@ -1,6 +1,6 @@
 import ariaBundle from "../aria/aria-snapshot.bundle.txt" with { type: "text" };
 import type { AriaSnapshotPayload } from "../aria/aria-snapshot";
-import { DEFAULT_STYLE_PROPERTIES, type QueryBox } from "../queries";
+import { DEFAULT_STYLE_PROPERTIES, type QueryBox, renderedText } from "../queries";
 import { roleRules, SEMANTIC_QUERY_HANDLERS } from "../query-handlers";
 import type { Observation } from "../tab-protocol";
 import type { TernSelector } from "./selectors";
@@ -207,7 +207,7 @@ const SEMANTIC_SOURCE = Object.entries(SEMANTIC_QUERY_HANDLERS)
 
 // Page-side kit body. Plain JS (no eval/new Function/string timers: runs under page CSP) in the
 // scope set up by TERN_KIT_SOURCE, where `loadAria` (fresh ARIA bundle instance), `semantic`, `roleRules`,
-// `INTERACTIVE_ROLES` and `DEFAULT_STYLES` are bound. No backticks or `${` in here: this is a String.raw
+// `INTERACTIVE_ROLES`, `DEFAULT_STYLES` and `renderedText` are bound. No backticks or `${` in here: this is a String.raw
 // template.
 const KIT_BODY = String.raw`
 const STATE_ROLES_CHECKED = new Set(["checkbox", "radio", "switch", "menuitemcheckbox", "menuitemradio"]);
@@ -1083,7 +1083,7 @@ const kit = {
 		if (root) {
 			const el = first(root);
 			if (!el) return false;
-			content = el.innerText != null ? el.innerText : el.textContent || "";
+			content = renderedText(el);
 		} else {
 			content = document.body ? document.body.innerText || "" : "";
 		}
@@ -1150,6 +1150,7 @@ export const TERN_KIT_SOURCE = [
 	`const roleRules = ${roleRules.toString()};`,
 	`const INTERACTIVE_ROLES = new Set(${JSON.stringify(INTERACTIVE_ROLES)});`,
 	`const DEFAULT_STYLES = ${JSON.stringify(DEFAULT_STYLE_PROPERTIES)};`,
+	`const renderedText = ${renderedText.toString()};`,
 	KIT_BODY,
 	"})();",
 ].join("\n");

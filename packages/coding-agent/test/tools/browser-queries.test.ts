@@ -421,6 +421,51 @@ describe.skipIf(!CHROMIUM_AVAILABLE)("browser semantic selectors and queries", (
 		).toEqual([true, true, false, false]);
 	}, 60_000);
 
+	it("waits for scoped text only in an element the page renders", async () => {
+		await run(`await tab.evaluate(() => {
+			const add = html => document.body.insertAdjacentHTML("beforeend", html);
+			add('<div id="outer" style="display:none"><span id="nested">Nested text</span></div>');
+			add('<div id="slot-host"><span id="slotted">Slotted text</span></div>');
+			document.querySelector("#slot-host").attachShadow({ mode: "open" }).innerHTML = '<div style="display:none"><slot></slot></div>';
+			add('<div id="hidden-host" style="display:none"></div>');
+			document.querySelector("#hidden-host").attachShadow({ mode: "open" }).innerHTML = '<p id="inside">Inside text</p>';
+			add('<div id="shown">Shown text</div>');
+		}); return null`);
+		const outcome = async (text: string, selector: string, timeout?: number) =>
+			await run(`try {
+				await tab.waitForText(${JSON.stringify(text)}, ${JSON.stringify({ selector, timeout })});
+				return "found";
+			} catch (error) {
+				return error.message;
+			}`);
+		// `#hidden` is the fixture's `display: none` element.
+		for (const [text, selector] of [
+			["Hidden", "#hidden"],
+			["Hidden", 'xpath///div[@id="hidden"]/text()'],
+			["Nested text", "#nested"],
+			["Slotted text", "#slotted"],
+			["Inside text", "pierce/#inside"],
+		] as const) {
+			expect(await outcome(text, selector, 300)).toContain("timed out after 300ms");
+		}
+		expect(await outcome("Shown text", "#shown")).toBe("found");
+		expect(await outcome("Shown text", 'xpath///div[@id="shown"]/text()')).toBe("found");
+		// Tern's page kit embeds the same page-side test.
+		expect(
+			await run(`await tab.evaluate(${JSON.stringify(`(function () {\n${TERN_KIT_SOURCE}\n})()`)});
+			return await tab.evaluate(() => {
+				const kit = globalThis.__ompTernKit;
+				return [
+					kit.hasText("Hidden", { engine: "css", query: "#hidden" }, false),
+					kit.hasText("Nested text", { engine: "css", query: "#nested" }, false),
+					kit.hasText("Slotted text", { engine: "css", query: "#slotted" }, false),
+					kit.hasText("Inside text", { engine: "pierce", query: "#inside" }, false),
+					kit.hasText("Shown text", { engine: "css", query: "#shown" }, false),
+				];
+			});`),
+		).toEqual([false, false, false, false, true]);
+	}, 60_000);
+
 	it("waits for a page predicate, resolves with its value, and reports a named timeout", async () => {
 		await call("evaluate", ["setTimeout(() => { window.__job = { status: 'done', result: 'EXP-1' }; }, 200), 0"]);
 		expect(

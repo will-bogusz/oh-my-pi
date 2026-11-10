@@ -73,6 +73,41 @@ export async function queryText(page: Page, selector: string, signal: AbortSigna
 	}
 }
 
+/**
+ * Page-side: the trimmed text a node shows, or `""` when it is not rendered because it or a flat-tree ancestor
+ * has `display: none` (including `hidden`). `innerText` alone falls back to `textContent` there, hidden text and
+ * all. The walk climbs through open slots and shadow hosts; content slotted into a closed shadow root has no
+ * `assignedSlot` to follow. Self-contained, so backends that run page script embed its source.
+ */
+export function renderedText(element: unknown): string {
+	type PageNode = {
+		nodeType: number;
+		assignedSlot?: PageNode | null;
+		parentElement: PageNode | null;
+		getRootNode(): { host?: PageNode };
+		innerText?: string;
+		textContent: string | null;
+	};
+	const pageGlobal = globalThis as unknown as { getComputedStyle(node: PageNode): { display: string } };
+	const el = element as PageNode;
+	for (let node: PageNode | null = el; node;) {
+		// An xpath `text()` selector resolves to a Text node, which has no computed style of its own.
+		if (node.nodeType === 1 && pageGlobal.getComputedStyle(node).display === "none") return "";
+		node = node.assignedSlot ?? node.parentElement ?? node.getRootNode().host ?? null;
+	}
+	return (el.innerText ?? el.textContent ?? "").trim();
+}
+
+async function queryRenderedText(page: Page, selector: string, signal: AbortSignal): Promise<string | null> {
+	const handle = await firstHandle(page, selector, signal);
+	if (!handle) return null;
+	try {
+		return (await untilAborted(signal, () => handle.evaluate(renderedText))) as string;
+	} finally {
+		await handle.dispose().catch(() => undefined);
+	}
+}
+
 /** Return the first matching element's inner HTML, or `null`. */
 export async function queryHtml(page: Page, selector: string, signal: AbortSignal): Promise<string | null> {
 	const handle = await firstHandle(page, selector, signal);
@@ -330,7 +365,7 @@ export async function waitForPageText(
 	await pollPage(
 		async () => {
 			const content = opts.selector
-				? await queryText(page, opts.selector, opts.signal)
+				? await queryRenderedText(page, opts.selector, opts.signal)
 				: ((await untilAborted(opts.signal, () =>
 						page.evaluate(() => {
 							const pageGlobal = globalThis as unknown as {

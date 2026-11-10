@@ -38,7 +38,13 @@ import {
 	pushStateInPage,
 	reloadInPage,
 } from "../navigation";
-import { DEFAULT_STYLE_PROPERTIES, isFunctionSource, waitForTextLabel, waitForTextMatches } from "../queries";
+import {
+	DEFAULT_STYLE_PROPERTIES,
+	isFunctionSource,
+	renderedText,
+	waitForTextLabel,
+	waitForTextMatches,
+} from "../queries";
 import type {
 	HarContentPolicy,
 	NetworkPattern,
@@ -1537,7 +1543,7 @@ export class CmuxTab implements InProcessRunTab {
 		const deadline = Date.now() + timeoutMs;
 		while (Date.now() <= deadline) {
 			const content = opts.selector
-				? await this.text(opts.selector)
+				? await this.queryElement<string>(opts.selector, renderedText.toString())
 				: await this.#evalScript<string>("document.body?.innerText || ''");
 			if (content !== null && waitForTextMatches(content.trim(), text, opts.exact)) return;
 			await untilAborted(signal, () => Bun.sleep(100));
