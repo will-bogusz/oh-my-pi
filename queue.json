@@ -71442,8 +71442,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-observe-settle",
    "host": "MacBook-Pro",
    "added": "2026-11-10T18:56:46Z",
-   "updated": "2026-11-10T18:56:46Z",
-   "note": ""
+   "updated": "2026-11-10T18:57:24Z",
+   "note": "",
+   "hold": "observe-core series: opens when Brit agrees the series (Will)"
   },
   {
    "id": "settle-reads",
