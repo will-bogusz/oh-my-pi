@@ -71505,8 +71505,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-observe-stable-ids",
    "host": "MacBook-Pro",
    "added": "2026-11-10T18:57:15Z",
-   "updated": "2026-11-10T18:57:15Z",
-   "note": ""
+   "updated": "2026-11-10T18:57:32Z",
+   "note": "",
+   "hold": "observe-core series: opens when Brit agrees the series (Will)"
   }
  ],
  "watch": {
