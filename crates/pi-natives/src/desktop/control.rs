@@ -467,9 +467,9 @@ impl ProcessLease {
 		Ok(Self)
 	}
 
-	/// Names `agent` to this process's other sessions, once the kernel lease
-	/// is held too.
-	fn name(&self, agent: Arc<str>) {
+	/// Names `agent` to this process's other sessions; called once both the
+	/// process and the kernel lease are held, and cleared when the lease drops.
+	fn name_holder(agent: Arc<str>) {
 		*HOLDER.lock() = Some(agent);
 	}
 }
@@ -632,7 +632,7 @@ impl KernelOwner {
 						if let Some(agent) = agent {
 							#[cfg(unix)]
 							kernel.record(&agent);
-							process.name(agent);
+							ProcessLease::name_holder(agent);
 						}
 						// Withdrawn from release helpers before the lock is released.
 						#[cfg(target_os = "macos")]
@@ -1304,8 +1304,10 @@ mod tests {
 	#[test]
 	fn input_refused_by_another_sessions_control_names_its_agent() {
 		let _serial = OWNERSHIP_TEST.lock();
-		let holder =
-			CancellationSource::counting_escapes(Arc::default(), Some(Arc::from("CursorChecks.Scout")));
+		let holder = CancellationSource::counting_escapes(
+			Arc::default(),
+			Some(Arc::from("CursorChecks.Scout")),
+		);
 		let held = InputLease::acquire(&holder.token(), false).expect("the holder takes control");
 		let named = format!("agent \"CursorChecks.Scout\" (omp pid {})", std::process::id());
 		// Another session of this omp.
