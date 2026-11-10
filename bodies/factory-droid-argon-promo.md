@@ -30,6 +30,6 @@ Maintenance: none when the promotion ends, since the `standard` card restores 1.
 
 ---
 
-- [ ] `bun check` passes
+- [x] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
