@@ -71594,6 +71594,24 @@
    "added": "2026-11-10T19:19:30Z",
    "updated": "2026-11-10T19:19:30Z",
    "note": ""
+  },
+  {
+   "id": "browser-action-outcome",
+   "branch": "will/browser-action-outcome",
+   "title": "feat(browser): print what each browser action did to the page",
+   "area": "browser",
+   "priority": "P2",
+   "needs": [],
+   "base": "e1d8f29d54957da5cb38b11d10a6778d13476980",
+   "body": "bodies/browser-action-outcome.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-action-outcome",
+   "host": "MacBook-Pro",
+   "added": "2026-11-10T19:19:48Z",
+   "updated": "2026-11-10T19:19:48Z",
+   "note": ""
   }
  ],
  "watch": {
