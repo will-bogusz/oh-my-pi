@@ -246,6 +246,7 @@
 - RPC hosts now always receive a terminal `agent_end` after an over-quota 429: usage-limit bookkeeping is bounded so a stalled usage report can no longer hold the event ([#19411](https://github.com/can1357/oh-my-pi/issues/19411), [#19417](https://github.com/can1357/oh-my-pi/pull/19417) by [@yuzu-octopus](https://github.com/yuzu-octopus))
 - Rex and other OSC 7501 terminals no longer play a success sound mid-run when a stale agent end arrives after another run has opened ([#17307](https://github.com/can1357/oh-my-pi/issues/17307), [#19418](https://github.com/can1357/oh-my-pi/pull/19418) by [@yuzu-octopus](https://github.com/yuzu-octopus))
 - Browser `tab.waitForText` accepts a `RegExp`, as `waitForUrl` does, instead of failing with "Argument to String.prototype.includes cannot be a RegExp"
+- Browser `tab.waitForText(text, { selector })` no longer resolves on text in a `display: none` or `hidden` element, or inside one, such as a success message the page has not shown yet; it already ignored that text without a `selector`
 
 ## [18.22.0] - 2026-11-16
 

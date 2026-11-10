@@ -320,19 +320,35 @@ export function waitTextTarget(text: string | RegExp): WaitTextTarget {
 
 /**
  * Page-side: whether the trimmed text of `element` (the body's when null) satisfies a `waitForText` target: a string
- * is found in it (equals it with `exact`), a pattern matches it. The pattern runs where the text is, so one that
+ * is found in it (equals it with `exact`), a pattern matches it. Only rendered text counts: an element that is
+ * `display: none` (including `hidden`), or has such a flat-tree ancestor, has none, where `innerText` alone would fall
+ * back to `textContent`, hidden text and all. The walk climbs through open slots and shadow hosts; content slotted
+ * into a closed shadow root has no `assignedSlot` to follow. The pattern runs where the text is, so one that
  * backtracks for long stalls the page rather than omp, and the wait still ends at its timeout. Self-contained, so
  * backends that run page script embed its source.
  */
 export function pageTextMatches(element: unknown, target: WaitTextTarget, exact: boolean): boolean {
-	type TextNode = { innerText?: string; textContent: string | null };
-	const pageGlobal = globalThis as unknown as { document: { body: TextNode | null } };
-	const node = element as TextNode | null;
-	const content = node
-		? (node.innerText ?? node.textContent ?? "")
-		: pageGlobal.document.body
-			? (pageGlobal.document.body.innerText ?? "")
-			: "";
+	type PageNode = {
+		nodeType: number;
+		assignedSlot?: PageNode | null;
+		parentElement: PageNode | null;
+		getRootNode(): { host?: PageNode };
+		innerText?: string;
+		textContent: string | null;
+	};
+	const pageGlobal = globalThis as unknown as {
+		document: { body: PageNode | null };
+		getComputedStyle(node: PageNode): { display: string };
+	};
+	const el = element as PageNode | null;
+	let content = el ? (el.innerText ?? el.textContent ?? "") : (pageGlobal.document.body?.innerText ?? "");
+	for (let node = el; node; node = node.assignedSlot ?? node.parentElement ?? node.getRootNode().host ?? null) {
+		// An xpath `text()` selector resolves to a Text node, which has no computed style of its own.
+		if (node.nodeType === 1 && pageGlobal.getComputedStyle(node).display === "none") {
+			content = "";
+			break;
+		}
+	}
 	const candidate = String(content).trim();
 	if (typeof target === "string") return exact ? candidate === target : candidate.includes(target);
 	return new RegExp(target.source, target.flags).test(candidate);
