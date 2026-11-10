@@ -18,6 +18,8 @@ Known edge: a result kept in a global is not copied into Eval's speculation snap
 
 ## Testing
 
+The JavaScript Haiku samples below were not blind: the after arm exposed `browser-console-shape` in Eval stack traces in 3 of 6 runs for each task.
+
 - `bun test test/eval/browser-prelude-facade.test.ts test/tools/browser-console.test.ts test/eval/worker-core.test.ts`: `slice`, `length`, spreading and `map` on `console()`, and `slice` on `errors()`, throw the `.entries` hint; `.entries` and JSON output are unchanged; a real JS runtime prints the result as on `main`. The new case fails with the prelude change reverted.
 - Headless sessions, low thinking, main vs this branch, scored from the transcripts:
 
