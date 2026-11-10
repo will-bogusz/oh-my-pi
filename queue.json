@@ -73384,7 +73384,7 @@
    "branch": "will/devin-retire-swe-1-6-fast",
    "title": "fix(catalog): drop Devin's retired SWE-1.6 Fast seed row",
    "area": "catalog",
-   "priority": null,
+   "priority": "P0",
    "needs": [],
    "base": "6dd7ddf5feab54da3c82b460ee390a7d09aeabaa",
    "body": "bodies/devin-retire-swe-1-6-fast.md",
@@ -73394,7 +73394,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-retire-swe-1-6-fast",
    "host": "MacBook-Pro",
    "added": "2026-11-10T23:05:26Z",
-   "updated": "2026-11-10T23:18:38Z",
+   "updated": "2026-11-10T23:19:27Z",
    "note": "",
    "built": [
     {
