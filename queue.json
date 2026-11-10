@@ -72430,7 +72430,7 @@
    "area": "browser",
    "priority": "P2",
    "needs": [],
-   "base": "e1d8f29d54957da5cb38b11d10a6778d13476980",
+   "base": "e325ffc73ab86e03bdd20a91b77d8e2b3964c906",
    "body": "bodies/screenshot-result-line.md",
    "state": "queued",
    "pr": null,
@@ -72438,7 +72438,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/screenshot-result-line",
    "host": "MacBook-Pro",
    "added": "2026-11-10T19:42:48Z",
-   "updated": "2026-11-10T20:02:22Z",
+   "updated": "2026-11-10T20:17:46Z",
    "note": "",
    "built": [
     {
@@ -72641,7 +72641,8 @@
      "host": "MacBook-Pro",
      "tree": "2426c89aba4dff16a38fa46e9e3a8390f42b4585"
     }
-   ]
+   ],
+   "advanced": "2026-11-10T20:17:46Z"
   },
   {
    "id": "computer-guide-first-use",
