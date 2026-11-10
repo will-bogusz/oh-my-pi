@@ -70742,6 +70742,24 @@
    "added": "2026-11-10T16:47:04Z",
    "updated": "2026-11-10T16:47:04Z",
    "note": ""
+  },
+  {
+   "id": "browser-run-node-hint",
+   "branch": "will/browser-run-node-hint",
+   "title": "fix(browser): say where tab.run code runs when it reaches for a page global",
+   "area": "browser",
+   "priority": "P2",
+   "needs": [],
+   "base": "eda28eff97cf7a352fd3057a03581be1686dbc7a",
+   "body": "bodies/browser-run-node-hint.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-run-node-hint",
+   "host": "MacBook-Pro",
+   "added": "2026-11-10T16:48:01Z",
+   "updated": "2026-11-10T16:48:01Z",
+   "note": ""
   }
  ],
  "watch": {
