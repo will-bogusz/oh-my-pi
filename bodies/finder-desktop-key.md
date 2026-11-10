@@ -6,7 +6,7 @@ On main, after a click on the desktop with a Finder window open, `win.press('shi
 
 > **macOS context.** After a click on the desktop, Finder reports the desktop (an `AXScrollArea` that `_AXUIElementGetWindow` cannot map) as both its `AXFocusedWindow` and `AXMainWindow`. Main restores the user's app with its key window, or with only its front status when the app provably shows no window. Finder with a window open fitted neither case, so nothing could be put back afterwards and the input was refused.
 
-Reading order: `restorable_key` and `takeover_key` in `crates/pi-natives/src/desktop/macos/skylight.rs`, then `ax::focus_outside_windows`.
+Reading order: `restorable_key` and `takeover_key` in `crates/pi-natives/src/desktop/macos/skylight.rs`, then `ax::restoration_window`.
 
 ## Why
 
