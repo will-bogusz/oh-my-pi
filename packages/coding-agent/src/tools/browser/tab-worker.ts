@@ -42,6 +42,7 @@ import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import {
 	type AriaSnapshotOptions,
 	assertSelectorString,
+	assertWaitSelector,
 	captureAriaSnapshot,
 	PLAYWRIGHT_ONLY_SELECTOR_RE,
 	parseAriaRefSelector,
@@ -410,10 +411,11 @@ interface TabApi {
 	select(selector: string, ...values: string[]): Promise<string[]>;
 	uploadFile(selector: string, ...filePaths: string[]): Promise<void>;
 	waitForUrl(pattern: string | RegExp, opts?: { timeout?: number }): Promise<string>;
-	/** Wait until a page-world function or expression returns a truthy value, and resolve with that value. */
+	/** Wait until a page-world function (called with `args`) or expression is truthy, and resolve with its value. */
 	waitForFunction(
-		predicate: string | (() => unknown),
+		predicate: string | ((...args: unknown[]) => unknown),
 		opts?: { timeout?: number; polling?: number },
+		...args: unknown[]
 	): Promise<unknown>;
 	waitForResponse(
 		pattern: string | RegExp | ((response: HTTPResponse) => boolean | Promise<boolean>),
@@ -2681,6 +2683,7 @@ export class WorkerCore {
 				}),
 			drag: (from, to) => act("tab.drag()", actionOpMs, sig => this.#drag(from, to, sig)),
 			waitFor: (selector, opts) => {
+				assertWaitSelector("tab.waitFor", selector);
 				const w = waitMs(opts?.timeout);
 				return act(
 					`tab.waitFor(${JSON.stringify(selector)})`,
@@ -2690,6 +2693,7 @@ export class WorkerCore {
 				);
 			},
 			waitForSelector: (selector, opts) => {
+				assertWaitSelector("tab.waitForSelector", selector);
 				const w = waitMs(opts?.timeout);
 				return act(
 					`tab.waitForSelector(${JSON.stringify(selector)})`,
@@ -2796,12 +2800,13 @@ export class WorkerCore {
 				const w = waitMs(opts?.timeout);
 				return act("tab.waitForUrl()", w, sig => this.#waitForUrl(pattern, w, sig));
 			},
-			waitForFunction: (predicate, opts) => {
+			waitForFunction: (predicate, opts, ...args) => {
 				const w = waitMs(opts?.timeout);
 				return act("tab.waitForFunction()", w, sig =>
 					waitForPagePredicate(page.mainFrame(), "tab.waitForFunction()", predicate, {
 						timeout: w,
 						polling: opts?.polling,
+						args,
 						signal: sig,
 					}),
 				);

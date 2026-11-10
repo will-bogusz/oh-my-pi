@@ -7,7 +7,7 @@ import type { ElementHandle, ElementScreenshotOptions, Frame, Page } from "puppe
 import { formatScreenshot, resizeImage } from "../../utils/image-resize";
 import { throwIfAborted } from "../tool-errors";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
-import { type AriaSnapshotOptions, buildAriaSnapshotScript } from "./aria/aria-snapshot";
+import { type AriaSnapshotOptions, assertWaitSelector, buildAriaSnapshotScript } from "./aria/aria-snapshot";
 import { clickElement, fillViaHandle, pressKey, typeIntoElement } from "./interactions";
 import { readPageViewport } from "./launch";
 import { RunOutput } from "./run-output";
@@ -78,10 +78,11 @@ export interface BrowserFrameApi {
 	waitFor(selector: string, options?: FrameWaitOptions): Promise<boolean>;
 	/** Wait for a selector and report whether it appeared. */
 	waitForSelector(selector: string, options?: FrameWaitOptions): Promise<boolean>;
-	/** Wait until a function or expression evaluated in this frame returns a truthy value, and resolve with it. */
+	/** Wait until a function (called with `args`) or expression in this frame is truthy, and resolve with its value. */
 	waitForFunction(
-		predicate: string | (() => unknown),
+		predicate: string | ((...args: unknown[]) => unknown),
 		options?: { timeout?: number; polling?: number },
+		...args: unknown[]
 	): Promise<unknown>;
 	/** Capture a matching element inside this frame. */
 	screenshot(selector: string): Promise<string>;
@@ -199,6 +200,7 @@ export function createFrameApi(frame: Frame, hooks: FrameApiHooks): BrowserFrame
 		zeroMatchAfterMs: hooks.zeroMatchAfterMs,
 	});
 	const waitForSelector = (selector: string, options?: FrameWaitOptions): Promise<boolean> => {
+		assertWaitSelector("frame.waitForSelector", selector);
 		const deadline = hooks.waitMs(options?.timeout);
 		return hooks.op(
 			`frame.waitForSelector(${JSON.stringify(selector)})`,
@@ -361,14 +363,18 @@ export function createFrameApi(frame: Frame, hooks: FrameApiHooks): BrowserFrame
 			hooks.op("frame.evaluate()", Number.POSITIVE_INFINITY, signal =>
 				untilAborted(signal, () => frame.evaluate(fn as never, ...args)),
 			)) as BrowserFrameApi["evaluate"],
-		waitFor: waitForSelector,
+		waitFor: (selector, options) => {
+			assertWaitSelector("frame.waitFor", selector);
+			return waitForSelector(selector, options);
+		},
 		waitForSelector,
-		waitForFunction: (predicate, options) => {
+		waitForFunction: (predicate, options, ...args) => {
 			const deadline = hooks.waitMs(options?.timeout);
 			return hooks.op("frame.waitForFunction()", deadline, signal =>
 				waitForPagePredicate(frame, "frame.waitForFunction()", predicate, {
 					timeout: deadline,
 					polling: options?.polling,
+					args,
 					signal,
 				}),
 			);

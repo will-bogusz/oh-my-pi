@@ -112,11 +112,6 @@ const ARIA_REF_PREFIXES = ["aria-ref=", "aria-ref/", "ariaref/"];
  */
 export function assertSelectorString(selector: unknown): asserts selector is string {
 	if (typeof selector === "string") return;
-	if (typeof selector === "function") {
-		throw new ToolError(
-			"Browser selector must be a string; got a function. To wait until a condition holds, use tab.waitForFunction(fn, { timeout }).",
-		);
-	}
 	let kind: string;
 	if (selector !== null && typeof selector === "object") {
 		kind =
@@ -129,6 +124,25 @@ export function assertSelectorString(selector: unknown): asserts selector is str
 			"tab.click/type/fill/waitFor take string selectors only — " +
 			'call the handle method directly (e.g. (await tab.id(n)).click()) or pass a string like "aria-ref=eN".',
 	);
+}
+
+/**
+ * Guard a selector wait (`waitFor`, `waitForSelector`) by the call's name (`tab.waitFor`). A function or a
+ * number there is a condition or a sleep the agent meant: name the helper that waits for that instead.
+ */
+export function assertWaitSelector(call: string, selector: unknown): asserts selector is string {
+	const owner = call.slice(0, call.lastIndexOf("."));
+	if (typeof selector === "function") {
+		throw new ToolError(
+			`${call}(fn) waits for a selector string, not a function. To wait until a condition holds, use ${owner}.waitForFunction(fn, { timeout }).`,
+		);
+	}
+	if (typeof selector === "number") {
+		throw new ToolError(
+			`${call}(${selector}) waits for a selector string, not a number of milliseconds. Wait for what should change instead: ${owner}.waitForSelector(selector) or ${owner}.waitForFunction(fn), with { timeout } in ms.`,
+		);
+	}
+	assertSelectorString(selector);
 }
 
 /**
