@@ -70440,7 +70440,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-input-lease-wait",
    "host": "MacBook-Pro",
    "added": "2026-11-10T15:55:32Z",
-   "updated": "2026-11-10T16:48:58Z",
+   "updated": "2026-11-10T16:49:25Z",
    "note": "",
    "built": [
     {
@@ -70554,7 +70554,8 @@
      "tree": "cc4e34929e58e80b79a5fad96294c5f28983deb6"
     }
    ],
-   "opened": "2026-11-10T16:48:58Z"
+   "opened": "2026-11-10T16:48:58Z",
+   "readied": "2026-11-10T16:49:24Z"
   },
   {
    "id": "computer-open-window",
