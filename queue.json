@@ -77101,8 +77101,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-10T21:48:12.011733Z",
-  "host": "goliath",
+  "at": "2026-11-10T21:56:22.798955Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -78336,16 +78336,12 @@
     "area": "browser",
     "priority": "P2",
     "title": "feat(agent,coding-agent): send a short browser guide with the first browser call",
-    "action": "wait",
-    "reasons": [
-     "conflicts with #18738 in packages/coding-agent/test/eval/browser-prelude-facade.test.ts"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#18738"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-10T18:04:09Z"
    },
@@ -78390,6 +78386,7 @@
      "conflicts with #18753 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with browser-core-first-use in packages/agent/src/agent.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
@@ -78403,7 +78400,8 @@
      "#18746",
      "#18753",
      "#18353",
-     "#18222"
+     "#18222",
+     "browser-core-first-use"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -78589,6 +78587,7 @@
      "conflicts with #18751 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18772 in docs/tools/browser.md",
      "conflicts with #18776 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with browser-core-first-use in docs/tools/browser.md",
      "its need r2/relay-own-only conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/extension/background.ts, packages/browser-relay/extension/chrome.d.ts, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/relay/server.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/cli/browser-relay-cli.test.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-background-input.test.ts, packages/coding-agent/test/tools/browser-interactions.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "conflicts with main in packages/coding-agent/test/tools/browser-upload-contents.test.ts"
     ],
@@ -78604,7 +78603,8 @@
      "#18750",
      "#18751",
      "#18772",
-     "#18776"
+     "#18776",
+     "browser-core-first-use"
     ],
     "needs": [
      "r2/relay-own-only"
