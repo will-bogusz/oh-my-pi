@@ -33,7 +33,9 @@ The deterministic Chromium regression below is the primary evidence.
 | Haiku 5.5 (blind) | 0 / 2 through the requested route on the first call; each recovered via `tab.evaluate` in 3 additional Eval cells | 2 / 2 through the requested route, first call |
 | GPT-6.1 Sol (arm name visible) | 2 / 2, each after a failed call and a switch to `page.mainFrame().mainRealm()` | 2 / 2, first call |
 
-Haiku's final answers were right in 2 of 2 runs on both arms. The earlier Sol and Luna samples exposed `main-world` / `bf2-main-world` in the working directory or Eval stack traces; they are not blind.
+Haiku's final answers were right in 2 of 2 runs on both arms.
+
+The earlier Sol comparison and Luna's shadow-form/autocomplete runs exposed `main-world` / `bf2-main-world` in the working directory or Eval stack traces; Luna's flight run used a `fix1` working directory. None was blind.
 
 - GPT-6 Luna finished each of three local Browser Use tasks once on this branch (shadow-DOM form, autocomplete, flight booking), with no paired before runs; these arm-labelled runs are not comparative evidence. The form's success banner showed after a real submit.
 - `bun run check:types` and `oxfmt --check` pass.
