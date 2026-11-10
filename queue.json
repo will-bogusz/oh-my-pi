@@ -69123,7 +69123,7 @@
    "branch": "will/click-reresolve-detached",
    "title": "fix(coding-agent): look a click's selector up again when the page replaces its element",
    "area": "browser",
-   "priority": "P2",
+   "priority": "P0",
    "needs": [],
    "base": "f0200abf28e8d314125854600cf726dece495246",
    "body": "bodies/click-reresolve-detached.md",
@@ -69133,7 +69133,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/click-reresolve-detached",
    "host": "MacBook-Pro",
    "added": "2026-11-10T04:15:06Z",
-   "updated": "2026-11-10T05:00:06Z",
+   "updated": "2026-11-10T05:02:15Z",
    "note": "",
    "built": [
     {
