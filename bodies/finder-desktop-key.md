@@ -10,9 +10,9 @@ Reading order: `restorable_key` and `takeover_key` in `crates/pi-natives/src/des
 
 ## Why
 
-- An app whose focused window is no window at all now counts as `UserKey::OutsideWindows`. Like the windowless case, only its front status is restored, which leaves its focus where it was.
+- Finder with its focused window on the desktop now counts as `UserKey::OutsideWindows`. Like the windowless case, only its front status is restored, which leaves its focus where it was.
 - Takeover of another window of that same app is still refused, now with a message that says why: it makes that window key, and no window could hand the desktop focus back.
-- Only an unmapped `AXScrollArea`, the desktop's role, counts. A real window that fails to map, or any other element, keeps main's refusal.
+- Only Finder, verified by its bundle identity, with an unmapped `AXScrollArea` counts. Another application's scroll view, a real window that fails to map, or any other element keeps main's refusal. The focused element is read once for both window mapping and classification.
 
 ## Testing
 
@@ -25,7 +25,7 @@ Live, on a macOS 26.5 VM, the same cells on main and on this branch. TextEdit ha
 | `finderWindow.press('shift', {takeover: true})` | `InputFailed` | `InputFailed`, saying the desktop focus could not be put back |
 | `finderWindow.press('shift')` (background) | `UserIntervened` | `UserIntervened` (unchanged) |
 
-Unit tests in `skylight.rs`: `a_front_app_without_a_key_window_is_restored_only_when_nothing_is_lost` covers the new state, and `takeover_in_the_users_own_app_refuses_focus_it_cannot_put_back` covers the same-app refusal, and `only_an_unmapped_scroll_area_is_focus_outside_windows` in `ax.rs` covers which focused element counts.
+`cargo test -p pi-natives --lib` passes all 936 tests on macOS. `only_finders_unmapped_scroll_area_is_focus_outside_windows` covers the Finder-only exception and fails with the identity guard reverted; `a_front_app_without_a_key_window_is_restored_only_when_nothing_is_lost` covers restoration states, and `takeover_in_the_users_own_app_refuses_focus_it_cannot_put_back` covers same-app refusal.
 
 ---
 
