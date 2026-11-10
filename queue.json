@@ -71673,6 +71673,24 @@
    "updated": "2026-11-10T19:21:44Z",
    "note": "",
    "hold": "ActionOutcomePR, 2026-11-10: Haiku leg on this head did not reproduce the step saving (1.02x [0.84,1.25] vs earlier 0.86x); Sol leg on this head (guard-team, from 21:15Z) decides"
+  },
+  {
+   "id": "eval-assign-echo",
+   "branch": "will/eval-assign-echo",
+   "title": "fix(coding-agent): print nothing for a JavaScript eval cell that ends in an assignment",
+   "area": "browser",
+   "priority": "P1",
+   "needs": [],
+   "base": "e1d8f29d54957da5cb38b11d10a6778d13476980",
+   "body": "bodies/eval-assign-echo.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/eval-assign-echo",
+   "host": "MacBook-Pro",
+   "added": "2026-11-10T19:30:30Z",
+   "updated": "2026-11-10T19:30:30Z",
+   "note": ""
   }
  ],
  "watch": {
