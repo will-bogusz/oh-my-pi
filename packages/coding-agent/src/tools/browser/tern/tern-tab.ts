@@ -33,6 +33,7 @@ import type {
 } from "../console-capture";
 import type { DialogPolicy, DialogState } from "../dialogs";
 import type { BrowserDownload } from "../downloads";
+import { AgentCursor, withoutSecondCursor } from "../agent-cursor";
 import type { BrowserEmulateOptions, ClipboardActionResult, ClipboardReadResult } from "../emulation";
 import type { BrowserFrameInfo } from "../frames";
 import type { InProcessRunContext, InProcessRunTab } from "../in-process-run";
@@ -158,6 +159,14 @@ type World = "page" | "isolated";
 
 /** Where an operation runs: the main frame (`null`) or a registered frame path. */
 type FramePath = string | null;
+/** What {@link TernTab.captureBytes} captures and how. */
+interface TernCaptureOptions {
+	selector?: string | TernSelector;
+	fullPage?: boolean;
+	format: "png" | "jpeg";
+	quality?: number;
+	scale?: number;
+}
 
 interface BoundingBox {
 	x: number;
@@ -390,6 +399,11 @@ export class TernTab implements InProcessRunTab {
 	// Input state.
 	#pointer: { x: number; y: number } | undefined;
 	readonly #buttons = new Set<"left" | "right" | "middle">();
+	/** The agent cursor (`browser.cursor`), drawn from the input steps omp sends. */
+	readonly #agentCursor = new AgentCursor(
+		(source, arg) => this.#eval(source, [arg], "isolated", null),
+		(level, text, meta) => logger[level](text, meta),
+	);
 	readonly #mods: TernModifier[] = [];
 	// Screenshots, snapshots, recording.
 	readonly #screenshotHistory = new Map<string, ScreenshotHistory>();
@@ -511,6 +525,8 @@ export class TernTab implements InProcessRunTab {
 	/** Publish the active run. */
 	setRunContext(context: InProcessRunContext): void {
 		this.#runContext = context;
+		// omp's own runs (`undefined`) leave the cursor as the agent's last run chose.
+		if (context.session.cursor !== undefined) this.#agentCursor.use(context.session.cursor);
 	}
 
 	/** Forget the finished run. */
@@ -545,6 +561,8 @@ export class TernTab implements InProcessRunTab {
 	 * A block already gone is no error.
 	 */
 	async close(opts: { timeoutMs: number }): Promise<void> {
+		// The user's page an adopted block leaves keeps no cursor of omp's; sent ahead of the release, not awaited.
+		if (this.adopted) void this.#agentCursor.remove();
 		await this.#recording.close().catch(error => {
 			logger.warn("Failed to finalize a Tern browser recording during close", {
 				error: error instanceof Error ? error.message : String(error),
@@ -637,6 +655,14 @@ export class TernTab implements InProcessRunTab {
 	async #input(steps: TernInputStep[]): Promise<void> {
 		if (steps.length === 0) return;
 		await this.#op("input", { events: steps });
+		const mouse = steps.filter(step => step.type === "mouse");
+		const down = mouse.find(step => step.action === "down");
+		if (down) {
+			this.#agentCursor.moveTo(down.x, down.y);
+			this.#agentCursor.press();
+		}
+		const last = mouse.at(-1);
+		if (last && (last.x !== down?.x || last.y !== down?.y)) this.#agentCursor.moveTo(last.x, last.y);
 	}
 
 	/** Pull new Tern events into the tab's state (single-flight). */
@@ -675,6 +701,7 @@ export class TernTab implements InProcessRunTab {
 				if (event.type === "committed") {
 					this.#pendingDialog = undefined;
 					this.#frameUrls.clear();
+					this.#agentCursor.redraw();
 				}
 				return;
 			case "title":
@@ -1838,17 +1865,16 @@ export class TernTab implements InProcessRunTab {
 
 	// ─── Screenshots, PDF ─────────────────────────────────────────────────
 
-	/** Capture raw image bytes: viewport, full page, or an element (optionally in a frame), at `scale` image pixels per CSS pixel (default: the viewport's). */
-	async captureBytes(
-		opts: {
-			selector?: string | TernSelector;
-			fullPage?: boolean;
-			format: "png" | "jpeg";
-			quality?: number;
-			scale?: number;
-		},
-		frame: FramePath = null,
-	): Promise<Buffer> {
+	/**
+	 * Capture raw image bytes: viewport, full page, or an element (optionally in a frame), at `scale` image pixels per
+	 * CSS pixel (default: the viewport's). The agent cursor is hidden for it: every caller hands the image to the agent.
+	 */
+	async captureBytes(opts: TernCaptureOptions, frame: FramePath = null): Promise<Buffer> {
+		return await this.#agentCursor.hiddenDuring(this.#signal, () => this.#grab(opts, frame));
+	}
+
+	/** {@link captureBytes} as the page shows, agent cursor included. */
+	async #grab(opts: TernCaptureOptions, frame: FramePath): Promise<Buffer> {
 		const scale = opts.scale ?? this.#viewport.deviceScaleFactor ?? 1;
 		const fields: Record<string, unknown> = { scale, format: opts.format };
 		if (opts.format === "jpeg") fields.quality = opts.quality ?? 80;
@@ -2015,7 +2041,9 @@ export class TernTab implements InProcessRunTab {
 			);
 		}
 		const context = this.#requireRunContext("tab.pdf()");
-		const answer = await this.#op("pdf", {}, resolveOpTimeouts(this.#cellMs).budgetBound);
+		const answer = await this.#agentCursor.hiddenDuring(this.#signal, () =>
+			this.#op("pdf", {}, resolveOpTimeouts(this.#cellMs).budgetBound),
+		);
 		if (!isRecord(answer) || typeof answer.data !== "string") throw new ToolError("Tern pdf answered without data");
 		const dest = opts.path
 			? resolveToCwd(opts.path, context.session.cwd)
@@ -2695,7 +2723,7 @@ export class TernTab implements InProcessRunTab {
 		let loop: Promise<void> | undefined;
 		const tab = this;
 		const capture = async (quality: number): Promise<Uint8Array> =>
-			await tab.captureBytes({ format: "jpeg", quality: Math.max(1, Math.min(100, Math.round(quality))) });
+			await tab.#grab({ format: "jpeg", quality: Math.max(1, Math.min(100, Math.round(quality))) }, null);
 		return {
 			viewport: async () => {
 				const geometry = await tab.#kit<TernGeometry>("geometry", []);
@@ -2750,7 +2778,7 @@ export class TernTab implements InProcessRunTab {
 			this.#recordingSource(),
 			rawPath,
 			context.session.cwd,
-			options,
+			withoutSecondCursor(options, context.session.cursor),
 			context.signal,
 		);
 	}
@@ -2768,11 +2796,17 @@ export class TernTab implements InProcessRunTab {
 	/** Finalize and immediately start another recording. */
 	async recordRestart(rawPath: string, options?: RecordingOptions): Promise<RecordingStartResult> {
 		const context = this.#requireRunContext("tab.recordRestart()");
-		return await this.#recording.restart(this.#recordingSource(), rawPath, context.session.cwd, options, {
-			signal: context.signal,
-			output: context.output,
-			excludeWebP: context.session.excludeWebP,
-		});
+		return await this.#recording.restart(
+			this.#recordingSource(),
+			rawPath,
+			context.session.cwd,
+			withoutSecondCursor(options, context.session.cursor),
+			{
+				signal: context.signal,
+				output: context.output,
+				excludeWebP: context.session.excludeWebP,
+			},
+		);
 	}
 
 	/** Recording state. */

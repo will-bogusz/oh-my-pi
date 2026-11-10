@@ -16,6 +16,8 @@ import { expandPath } from "../path-utils";
 import { CELL_BUDGET_SLACK_MS } from "../run-scope";
 import { ToolAbortError, toWorkerErrorPayload } from "../tool-errors";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
+import { MAIN_AGENT_ID } from "../../registry/agent-registry";
+import { type AgentCursorIdentity, agentCursorIdentity } from "./agent-cursor";
 import { gracefulKillTreeOnce, isChromiumBrowserExecutable, pickElectronTarget } from "./attach";
 import type * as Cmux from "./cmux/cmux-tab";
 import { mapWaitUntil } from "./cmux/rpc";
@@ -53,7 +55,7 @@ import {
 	type WorkerOutbound,
 } from "./tab-protocol";
 
-import { cfgBrowserScreenshotDir } from "./settings";
+import { cfgBrowserCursor, cfgBrowserScreenshotDir } from "./settings";
 import { listTernBlocks, noTernBlockError, pickTernBlock } from "./tern/blocks";
 import type * as Tern from "./tern/tern-tab";
 import { newUploadStagingDir, removeUploadStaging, sweepUploadStaging } from "./upload-files";
@@ -147,6 +149,8 @@ export interface WorkerTabSession extends TabSessionBase<PuppeteerBrowserHandle>
 	workerExitNotice?: string;
 	/** The tab was opened with `ignore_https_errors`; a replacement worker re-applies it. */
 	ignoreHttpsErrors?: boolean;
+	/** The agent cursor the last agent run chose; a replacement worker takes it over, element and all. */
+	cursor?: AgentCursorIdentity | null;
 }
 
 export interface CmuxTabSession extends TabSessionBase<CmuxBrowserHandle> {
@@ -920,6 +924,9 @@ export async function runInTab(name: string, opts: RunInTabOptions): Promise<Run
 			cwd: opts.session.cwd,
 			browserScreenshotDir: expandBrowserScreenshotDir(opts.session),
 			excludeWebP: webpExclusionForModel(opts.session.getActiveModel?.()),
+			cursor: cfgBrowserCursor.get(opts.session.settings)
+				? agentCursorIdentity(opts.session.getAgentId?.() ?? MAIN_AGENT_ID)
+				: null,
 		},
 	);
 	// A worker that exited with no run in flight left the reset unreported; this call reports it. Runs an open
@@ -1091,6 +1098,7 @@ async function runInTabWithSnapshot(
 	else opts.signal?.addEventListener("abort", abort, { once: true });
 	try {
 		try {
+			if (snapshot.cursor !== undefined) tab.cursor = snapshot.cursor;
 			tab.worker.send({
 				type: "run",
 				id,
@@ -2160,6 +2168,7 @@ async function recycleTimedOutWorkerTab(
 		recover: opts.recover ?? true,
 		userDriven: tab.kindTag === "connected" || tab.kindTag === "relay",
 		relay: tab.kindTag === "relay",
+		cursor: tab.cursor ?? undefined,
 	};
 	// A release can land while the new worker starts: it tore down the worker it saw, so a
 	// replacement published after it would drive a closed tab.

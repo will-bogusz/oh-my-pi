@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
+import { removeAgentCursorInPage } from "@oh-my-pi/pi-coding-agent/tools/browser/agent-cursor";
 import { RunOutput } from "@oh-my-pi/pi-coding-agent/tools/browser/run-output";
 import type { ScreenshotResult } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-protocol";
 import { TernElementHandle, TernTab, userSourceFunction } from "@oh-my-pi/pi-coding-agent/tools/browser/tern/tern-tab";
@@ -486,4 +487,69 @@ describe("TernTab screenshots", () => {
 		expect(text).toContain("by 1.17 to get viewport CSS pixels for tab.clickAt");
 		for (const saved of screenshots) await fs.rm(saved.dest);
 	});
+
+	it("draws the agent cursor where omp's input goes, hides it for captures and removes it from an adopted page", async () => {
+		expect(await cursorTrace({ color: "#268bd2", label: "Main" })).toEqual([
+			"input",
+			"place 40,20",
+			"place 40,20 press",
+			"hide",
+			"eval",
+			"capture",
+			"show",
+			"hide",
+			"pdf",
+			"show",
+			"input",
+			"place 60,30",
+			"remove",
+			"release",
+		]);
+	});
+
+	it("sends no cursor calls while browser.cursor is off", async () => {
+		expect(await cursorTrace(null)).toEqual(["input", "eval", "capture", "pdf", "input", "release"]);
+	});
 });
+
+/**
+ * In an adopted block with `cursor` as the run's agent cursor: click, take a screenshot, print a PDF, move, and
+ * release the block; list every op Tern received, in order, naming the agent cursor's calls.
+ */
+async function cursorTrace(cursor: { color: string; label: string } | null): Promise<string[]> {
+	const png = encodeRawPng(new Uint8Array(800 * 600 * 3), 800, 600, 3).toBase64();
+	daemon = await startFakeDaemon(op => (op.op === "capture" || op.op === "pdf" ? { ok: { data: png } } : { ok: {} }));
+	client = new TernSocketClient({ socketPath: daemon.socketPath });
+	const tab = new TernTab({
+		client,
+		block: 7,
+		name: "main",
+		viewport: { width: 800, height: 600, deviceScaleFactor: 1 },
+		adopted: { block: 7, url: "https://example.test/", title: "Example", owner: null, shown: true, driven: false },
+	});
+	const screenshots: ScreenshotResult[] = [];
+	tab.setRunContext({
+		timeoutMs: 5_000,
+		signal: new AbortController().signal,
+		session: { cwd: os.tmpdir(), cursor },
+		output: new RunOutput(),
+		screenshots,
+	});
+	await tab.clickAt(40, 20);
+	await tab.screenshot();
+	const pdf = await tab.pdf({ path: `${os.tmpdir()}/omp-tern-cursor-${process.pid}.pdf` });
+	await tab.mouseMove(60, 30);
+	await tab.close({ timeoutMs: 5_000 });
+	for (const saved of screenshots) await fs.rm(saved.dest);
+	await fs.rm(pdf);
+	const remove = removeAgentCursorInPage.toString();
+	return daemon.requests.map(({ op }) => {
+		if (op.op !== "eval") return String(op.op);
+		if (op.function === remove) return "remove";
+		const [arg] = Array.isArray(op.args) ? (op.args as unknown[]) : [];
+		if (typeof arg === "boolean") return arg ? "show" : "hide";
+		if (typeof arg !== "object" || arg === null || !("press" in arg)) return "eval";
+		const at = arg as { x: number; y: number; press: boolean };
+		return `place ${at.x},${at.y}${at.press ? " press" : ""}`;
+	});
+}

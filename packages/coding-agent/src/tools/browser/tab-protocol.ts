@@ -1,4 +1,5 @@
 import type { ImageContent, TextContent } from "@oh-my-pi/pi-ai";
+import type { AgentCursorIdentity } from "./agent-cursor";
 
 export type Transferable = Bun.Transferable;
 
@@ -40,6 +41,11 @@ export interface SessionSnapshot {
 	browserScreenshotDir?: string;
 	/** Force non-WebP screenshot encoding (e.g. for Ollama). Unset honors `OMP_NO_WEBP`. */
 	excludeWebP?: boolean;
+	/**
+	 * The agent cursor (`browser.cursor`) for this agent's run: drawn as this identity, or `null` for none. omp's own
+	 * runs (an open's navigation) leave it unset and keep what the agent's last run chose.
+	 */
+	cursor?: AgentCursorIdentity | null;
 }
 
 /**
@@ -112,6 +118,8 @@ export type WorkerInitPayload =
 			userDriven?: boolean;
 			/** The browser is the omp relay: downloads arrive as page events, and the relay names where Chrome saved them. */
 			relay?: boolean;
+			/** The agent cursor the replaced worker drew on this page: hidden from captures and removed at close. */
+			cursor?: AgentCursorIdentity;
 	  };
 
 /** Result of one host tool requested by browser-run JavaScript. */

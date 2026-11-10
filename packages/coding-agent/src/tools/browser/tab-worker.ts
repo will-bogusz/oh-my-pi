@@ -49,6 +49,7 @@ import {
 } from "./aria/aria-snapshot";
 import { resolveOpTimeouts, resolveWaitTimeout, ZERO_MATCH_FAIL_FAST_MS, ZERO_MATCH_POLL_MS } from "./op-timeouts";
 import { type BrowserA11yOptions, type BrowserA11yResult, formatA11ySummary, runA11yAudit } from "./a11y/audit";
+import { type AgentCursor, type AgentCursorIdentity, pageAgentCursor, withoutSecondCursor } from "./agent-cursor";
 import {
 	applyUserAgentOverride,
 	BrowserEmulationController,
@@ -350,6 +351,8 @@ const MATCH_COUNT_PROBE_TIMEOUT_MS = 1_000;
 const DETACH_REPORT_TIMEOUT_MS = 500;
 /** Longest a page call waits for a main-frame navigation the page requested to replace the document. */
 const REQUESTED_NAVIGATION_WAIT_MS = 5_000;
+/** Bound on removing the agent cursor from a page that outlives its tab, so a page that runs no script can't hold up close. */
+const CURSOR_REMOVE_TIMEOUT_MS = 500;
 
 /** Options for one tab helper run through `WorkerCore.#runOp`. */
 interface OpOptions {
@@ -1556,6 +1559,8 @@ export class WorkerCore {
 	/** Session holding `ignore_https_errors`; Chromium drops the override once it detaches. */
 	#certificateOverride?: CDPSession;
 	readonly #recording = new RecordingController();
+	/** The agent cursor, made by the first run that draws it (`browser.cursor`). */
+	#cursor?: AgentCursor;
 	/** Set once the core stops for good: by {@link terminate}, or by a close. */
 	#stopped = false;
 	/**
@@ -1852,6 +1857,8 @@ export class WorkerCore {
 					deviceScaleFactor: payload.viewport.deviceScaleFactor ?? 0,
 				});
 			}
+			// The worker this one replaces drew a cursor here: take it over so captures hide it and close removes it.
+			if (payload.mode === "attach" && payload.cursor) this.#useCursor(payload.cursor);
 			const info = await this.#currentReadyInfo();
 			this.#started = true;
 			this.#transport.send({ type: "ready", info });
@@ -2057,6 +2064,8 @@ export class WorkerCore {
 		try {
 			throwIfAborted(signal);
 			await untilAborted(signal, () => this.#emulation?.reapply() ?? Promise.resolve());
+			// omp's own runs (`undefined`) leave the cursor as the agent's last run chose.
+			if (msg.session.cursor !== undefined) this.#useCursor(msg.session.cursor);
 			runPage = createRunPageScope(this.#requirePage(), () => this.#requireNetwork().restoreInterception());
 			const browser = this.#requireBrowser();
 			const tabApi = this.#createTabApi(msg.name, msg.timeoutMs, signal, msg.session, output, screenshots, active);
@@ -2815,7 +2824,13 @@ export class WorkerCore {
 				),
 			recordStart: (destination, opts) =>
 				op(`tab.recordStart(${JSON.stringify(destination)})`, quickOpMs, sig =>
-					this.#recording.start(createCdpRecordingSource(page), destination, session.cwd, opts, sig),
+					this.#recording.start(
+						createCdpRecordingSource(page),
+						destination,
+						session.cwd,
+						withoutSecondCursor(opts, session.cursor),
+						sig,
+					),
 				),
 			recordStop: () =>
 				op("tab.recordStop()", budgetBound, sig =>
@@ -2823,11 +2838,17 @@ export class WorkerCore {
 				),
 			recordRestart: (destination, opts) =>
 				op(`tab.recordRestart(${JSON.stringify(destination)})`, budgetBound, sig =>
-					this.#recording.restart(createCdpRecordingSource(page), destination, session.cwd, opts, {
-						signal: sig,
-						output,
-						excludeWebP: session.excludeWebP,
-					}),
+					this.#recording.restart(
+						createCdpRecordingSource(page),
+						destination,
+						session.cwd,
+						withoutSecondCursor(opts, session.cursor),
+						{
+							signal: sig,
+							output,
+							excludeWebP: session.excludeWebP,
+						},
+					),
 				),
 			recording: () => op("tab.recording()", quickOpMs, () => Promise.resolve(this.#recording.status())),
 			webmcpList: opts => op("tab.webmcpList()", quickOpMs, sig => untilAborted(sig, () => webmcp.list(opts, sig))),
@@ -3678,10 +3699,23 @@ export class WorkerCore {
 		await this.#certificateOverride?.detach().catch(() => undefined);
 		this.#certificateOverride = undefined;
 		this.#emulation?.dispose();
+		// A page that stays open (borrowed, or kept) keeps no cursor of a tab that is gone.
+		if (this.#cursor && (!this.#ownsPage || keepPage)) {
+			await withTimeout(this.#cursor.remove(), CURSOR_REMOVE_TIMEOUT_MS, "agent cursor removal").catch(
+				() => undefined,
+			);
+		}
 		if (this.#ownsPage && !keepPage && page && !page.isClosed()) await page.close().catch(() => undefined);
 		if (this.#browser?.connected) this.#browser.disconnect();
 		this.#transport.send({ type: "closed" });
 		this.#transport.close();
+	}
+
+	/** Apply an agent cursor choice; the cursor is made by the first choice that draws one. */
+	#useCursor(identity: AgentCursorIdentity | null): void {
+		if (identity)
+			this.#cursor ??= pageAgentCursor(this.#requirePage(), (level, text, meta) => this.#log(level, text, meta));
+		this.#cursor?.use(identity);
 	}
 
 	#requirePage(): Page {

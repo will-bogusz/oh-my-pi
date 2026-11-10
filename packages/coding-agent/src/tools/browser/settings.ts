@@ -66,6 +66,19 @@ export const cfgBrowserHeadless = register({
 	},
 });
 
+export const cfgBrowserCursor = register({
+	id: "browser.cursor",
+	type: "boolean",
+	default: false,
+	ui: {
+		tab: "tools",
+		group: "Grep & Browser",
+		label: "Agent Cursor",
+		description:
+			"Draw the agent's cursor, in its colour and with its name, where it points and clicks in browser tabs omp drives (Chromium and Tern), so you can follow it in a visible window. The agent's own screenshots and PDFs leave it out; pages can detect the element it adds.",
+	},
+});
+
 export const cfgBrowserCmux = register({
 	id: "browser.cmux",
 	type: "boolean",

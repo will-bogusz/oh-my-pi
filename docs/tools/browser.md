@@ -165,6 +165,8 @@ Images are saved beneath `browser.screenshotDir`, or the OS temporary directory 
 
 Host result details preserve structured `value` separately from displayed content. Printed text is capped by the shared inline-output policy; over-cap text is stored as a session artifact and the capped text is printed.
 
+With `browser.cursor` on (off by default), omp draws the acting agent's cursor, an arrow in its colour with its name, in the top document of each Chromium tab (managed, spawned, connected or relay) and Tern tab it drives. It moves after each pointer move or press omp sends, including input into iframes, while the cursor itself is never drawn inside an iframe and never follows your own pointer; it comes back after the main frame loads a new document. Every screenshot and PDF the agent takes (`tab.screenshot`, `tab.diffScreenshot`, `frame.screenshot`, `tab.pdf`, a direct `page.screenshot()`) hides it for the capture; recordings show it, and a recording's `cursor: true` then adds no second cursor. Pages can find the element it adds (`#__omp_agent_cursor__` in the top document). cmux surfaces draw no cursor.
+
 ## Safety and lifecycle
 
 Relay and attached modes operate on real logged-in sessions; sites attribute actions to the user. Name a target or create a dedicated tab. Never navigate the user's visible tab or take a consequential action without direct authorization.
