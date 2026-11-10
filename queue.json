@@ -71425,8 +71425,37 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-pin-31243",
    "host": "MacBook-Pro",
    "added": "2026-11-10T18:54:12Z",
-   "updated": "2026-11-10T18:54:12Z",
-   "note": ""
+   "updated": "2026-11-10T19:05:28Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#18624",
+     "code": "217118c54c604c03d049e395293367329897c0b8",
+     "with_code": "a6c3686b678ac8e1348dd9b3262238ddf925504d",
+     "tip": "5c23d88bd3a79c30285cd16b654de9ee683bd007",
+     "with_tip": "94e431fde263071d11de8fd12876d691b641ac77",
+     "at": "2026-11-10T19:05:23Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#17610",
+     "code": "217118c54c604c03d049e395293367329897c0b8",
+     "with_code": "714b4c7140abbaab7d5113091311d768144710a6",
+     "tip": "5c23d88bd3a79c30285cd16b654de9ee683bd007",
+     "with_tip": "25d71ca1e95fcc475f8fc13c5c2409ce98295d68",
+     "at": "2026-11-10T19:05:28Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#18125",
+     "code": "217118c54c604c03d049e395293367329897c0b8",
+     "with_code": "5402656ebc173c662e80a512b0822fe7187eb1f0",
+     "tip": "5c23d88bd3a79c30285cd16b654de9ee683bd007",
+     "with_tip": "c8f8f192d176e637d1848a05d4958b820fe86f0b",
+     "at": "2026-11-10T19:05:28Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "observe-settle",
