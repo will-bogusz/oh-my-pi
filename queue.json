@@ -69903,7 +69903,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-dead-tab-hint",
    "host": "MacBook-Pro",
    "added": "2026-11-10T05:35:21Z",
-   "updated": "2026-11-10T16:40:16Z",
+   "updated": "2026-11-10T16:40:37Z",
    "note": "",
    "advanced": "2026-11-10T16:02:51Z",
    "built": [
@@ -70058,7 +70058,8 @@
      "tree": "8ed067a17a0d7305303e1e1bc7461ef5510c3f69"
     }
    ],
-   "opened": "2026-11-10T16:40:16Z"
+   "opened": "2026-11-10T16:40:16Z",
+   "readied": "2026-11-10T16:40:36Z"
   },
   {
    "id": "computer-strict-options",
