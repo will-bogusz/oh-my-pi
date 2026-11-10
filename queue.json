@@ -73396,7 +73396,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-10T05:19:18.679833Z",
+  "at": "2026-11-10T05:24:27.216852Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -73802,6 +73802,23 @@
     "created": "2026-11-03T09:05:24Z"
    },
    {
+    "id": "computer-window-exact-app",
+    "label": "computer-window-exact-app",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(coding-agent): prefer exact app names when selecting windows",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-10T05:24:11Z"
+   },
+   {
     "id": "finder-desktop-key",
     "label": "finder-desktop-key",
     "number": null,
@@ -74016,6 +74033,7 @@
      "conflicts with #18675 in docs/tools/computer.md",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with computer-window-exact-app in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
@@ -74024,7 +74042,8 @@
     "blocked_by": [
      "#18675",
      "#18353",
-     "#18222"
+     "#18222",
+     "computer-window-exact-app"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -74045,6 +74064,7 @@
      "conflicts with #18675 in crates/pi-natives/src/desktop/macos/ax.rs, docs/tools/computer.md",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with computer-window-exact-app in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with finder-desktop-key in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/tools/computer/worker.ts"
     ],
@@ -74055,6 +74075,7 @@
      "#18675",
      "#18353",
      "#18222",
+     "computer-window-exact-app",
      "finder-desktop-key"
     ],
     "needs": [
