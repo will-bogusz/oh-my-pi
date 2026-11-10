@@ -30,9 +30,9 @@ Maintenance: the Carbon card ends by itself on 2026-12-01; the next sync round d
 - Live on a Factory login from this branch, `omp -p` two-read turn (read two files, reply with their sum): 42 on `claude-fable-5.2`, `gemini-4-carbon` and `kimi-k3.1-pro`.
 - One-image turn on `muse-spark-1.3` (a red/blue split PNG): this branch sends the image and the model answers RED/BLUE; the base branch drops it and the model says it got no image.
 - `generate_image` with the `image` role set to `factory-droid/gpt-image-2.6-sunburst` returned a generated image, reported as `gpt-image-2.6-sunburst`.
-- Native parity: droid 1.7.1 captures for `claude-fable-5.2@anthropic`, `gemini-4-carbon@google` and `kimi-k3.1-pro@fireworks` match omp's requests (`factory-droid-native-parity.test.ts` 62 pass). With Carbon removed from Argon's dialect line its parity case fails; with Kimi K3.1 Pro removed from `requires-tool-result-name` the new completions test fails.
+- Native parity: droid 1.7.1 captures for `claude-fable-5.2@anthropic`, `gemini-4-carbon@google` and `kimi-k3.1-pro@fireworks` match omp's requests (`factory-droid-native-parity.test.ts` 64 pass). With Carbon removed from Argon's dialect line its parity case fails; with Kimi K3.1 Pro removed from `requires-tool-result-name` the new completions test fails.
 - Discovery tests now check that the three new flags gate their models and that Muse Spark 1.3 is listed with its flag off and carries image input.
-- `bun test` (`env -i`): `packages/ai` Factory tests 301 pass; `packages/catalog` Factory and compat tests 209 pass, 1 fail (`compat-conformance` "every bundle=\"always\" seed row…", failing on `main` too); `packages/coding-agent` image-gen and image-budget tests 92 pass. `check:types` clean for all three.
+- `bun test` (`env -i`): `packages/ai` Factory tests 303 pass; `packages/catalog` Factory and compat tests 209 pass, 1 fail (`compat-conformance` "every bundle=\"always\" seed row…", failing on `main` too); `packages/coding-agent` image-gen and image-budget tests 92 pass. `check:types` clean for all three.
 
 ---
 
