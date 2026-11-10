@@ -1,19 +1,18 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10 19:51Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10 19:52Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 3 of 8 ready events used in the hour before the last plan, 5 left (plan of 2026-11-10 19:47Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 5, conflict-held 10, stacked 16, held 13, open PRs 35; merged 263, closed 29
+**Counts:** openable now 4, conflict-held 10, stacked 16, held 13, open PRs 36; merged 263, closed 29
 
-## Openable now (5)
+## Openable now (4)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
 | subagent-browser | fix(coding-agent): keep a child omp's browser tabs out of its parent's Tern pane and cmux workspace | browser | P1 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/subagent-browser) |
 | eval-error-frames | fix(coding-agent): print a failed JavaScript cell's own frames, not omp's host stack | eval | P2 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/eval-error-frames) |
 | observe-print | fix(browser): print every observed element, one line each, instead of cutting at 100 | browser | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/observe-print) |
-| factory-droid-171-pin | feat(ai,catalog): identify Factory Droid requests as droid 1.7.1 | factory-droid |  | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-171-pin) |
 | screenshot-result-line | feat(coding-agent): report browser screenshots and opens on one line | browser | P2 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/screenshot-result-line) |
 
 ## Conflict-held (10)
@@ -50,7 +49,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10
 | browser-wait-text-regexp | fix(browser): accept a RegExp in waitForText, as waitForUrl does | browser | P2 | 3h | browser-wait-predicate | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-wait-text-regexp) |
 | browser-wait-text-rendered | fix(browser): let a scoped waitForText match only text the page renders | browser | P2 | 3h | browser-wait-text-regexp | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-wait-text-rendered) |
 | subagent-browser-relay | feat(coding-agent): keep subagents' browser tabs out of the user's Chrome and Tern pane unless asked | browser | P2 | 1h | subagent-browser | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/subagent-browser-relay) |
-| factory-droid-171-models | feat(catalog): add the Factory Droid models droid 1.7.1 serves | factory-droid |  | 0h | factory-droid-171-pin | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-171-models) |
+| factory-droid-171-models | feat(catalog): add the Factory Droid models droid 1.7.1 serves | factory-droid |  | 0h | factory-droid-171-pin ([#18771](https://github.com/can1357/oh-my-pi/pull/18771)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-171-models) |
 
 ## Held (13)
 
@@ -70,7 +69,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10
 | browser-action-outcome | feat(browser): print what each browser action did to the page | browser | P2 | 0h | ActionOutcomePR, 2026-11-10: Haiku leg on this head did not reproduce the step saving (1.02x [0.84,1.25] vs earlier 0.86x); Sol leg on this head (guard-team, from 21:15Z) decides | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-action-outcome) |
 | eval-assign-echo | fix(coding-agent): print nothing for a JavaScript eval cell that ends in an assignment | eval | P1 | 0h | Main, 2026-11-10: awaiting model sample (changes every JS cell's return); bots ScreenshotOutput | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/eval-assign-echo) |
 
-## Open PRs (35)
+## Open PRs (36)
 
 | PR | id | title | area | rank | open | plan | branch |
 |---|---|---|---|---|---|---|---|
@@ -93,7 +92,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10
 | [#18657](https://github.com/can1357/oh-my-pi/pull/18657) | relay-autoattach-shared | fix(browser-relay): keep a shared child frame attached when one connection turns auto-attach off | browser | P1 | 21h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-autoattach-shared) |
 | [#18658](https://github.com/can1357/oh-my-pi/pull/18658) | role-selectors-followup | fix(coding-agent): preserve role selectors across locales and document waits | browser | P0 | 20h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/role-selectors-followup) |
 | [#18676](https://github.com/can1357/oh-my-pi/pull/18676) | click-reresolve-detached | fix(coding-agent): look a click's selector up again when the page replaces its element | browser | P0 | 14h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/click-reresolve-detached) |
-| [#18675](https://github.com/can1357/oh-my-pi/pull/18675) | sheet-key-target | fix(natives): send macOS keys for a window to the sheet focused on it | computer | P1 | 14h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/sheet-key-target) |
+| [#18675](https://github.com/can1357/oh-my-pi/pull/18675) | sheet-key-target | fix(natives): send macOS keys for a window to the sheet focused on it | computer | P1 | 15h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/sheet-key-target) |
 | [#18680](https://github.com/can1357/oh-my-pi/pull/18680) | finder-desktop-key | fix(natives): restore Finder with its desktop focus after macOS background input | computer | P0 | 14h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/finder-desktop-key) |
 | [#18744](https://github.com/can1357/oh-my-pi/pull/18744) | computer-window-exact-app | fix(coding-agent): prefer exact app names when selecting windows | computer | P1 | 3h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-window-exact-app) |
 | [#18745](https://github.com/can1357/oh-my-pi/pull/18745) | computer-find-role-alias | fix(natives): accept aliases in computer role searches | computer | P1 | 3h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-find-role-alias) |
@@ -109,3 +108,4 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10
 | [#18766](https://github.com/can1357/oh-my-pi/pull/18766) | devin-pin-31243 | fix(catalog): identify Devin requests as CLI 3000.12.43 | catalog | P2 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-pin-31243) |
 | [#18767](https://github.com/can1357/oh-my-pi/pull/18767) | factory-droid-argon-promo | fix(catalog): show Factory Droid's Gemini 4 Argon credit promotion | catalog | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-argon-promo) |
 | [#18768](https://github.com/can1357/oh-my-pi/pull/18768) | factory-droid-list-prices | fix(catalog): show list prices for Factory Droid Fable 5.1, GLM 5.2 Fast and Muse Spark Open | catalog | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-list-prices) |
+| [#18771](https://github.com/can1357/oh-my-pi/pull/18771) | factory-droid-171-pin | feat(ai,catalog): identify Factory Droid requests as droid 1.7.1 | factory-droid |  | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-171-pin) |
