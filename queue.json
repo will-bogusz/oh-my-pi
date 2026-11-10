@@ -70090,7 +70090,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-strict-options",
    "host": "MacBook-Pro",
    "added": "2026-11-10T05:41:26Z",
-   "updated": "2026-11-10T17:43:16Z",
+   "updated": "2026-11-10T17:43:45Z",
    "note": "",
    "built": [
     {
@@ -70304,7 +70304,8 @@
      "tree": "71d4c5f330c642bdd8635d34f66928420f42a0ba"
     }
    ],
-   "opened": "2026-11-10T17:43:16Z"
+   "opened": "2026-11-10T17:43:16Z",
+   "readied": "2026-11-10T17:43:44Z"
   },
   {
    "id": "browser-console-shape",
