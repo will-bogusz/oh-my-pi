@@ -349,6 +349,19 @@ describe("OMP-owned browser evaluation", () => {
 							prototype.dispose = originalDispose;
 							await sample.dispose();
 						}
+						const cleanupController = new AbortController();
+						let cleanupAbort;
+						prototype.dispose = function() {
+							queueMicrotask(() => cleanupController.abort());
+							return originalDispose.call(this).then(() => Promise.withResolvers().promise);
+						};
+						try {
+							cleanupAbort = await page.waitForFunction(() => false, {
+								timeout: 0, signal: cleanupController.signal,
+							}).then(() => "resolved", error => error.name);
+						} finally {
+							prototype.dispose = originalDispose;
+						}
 						const truthiness = [];
 						for (const cancellation of ["timeout", "signal"]) {
 							const realm = page.mainFrame().mainRealm();
@@ -436,6 +449,7 @@ describe("OMP-owned browser evaluation", () => {
 							cancelled,
 							late,
 							lateDisposals,
+							cleanupAbort,
 							truthiness,
 							shimmed,
 							thrown,
@@ -452,7 +466,15 @@ describe("OMP-owned browser evaluation", () => {
 							missing = error instanceof Error ? error.message : String(error);
 						}
 						await Promise.all([first.dispose(), marker.dispose(), waited.dispose()]);
-						return { seen, missing };
+						// Drive the protocol's navigation-error branch without relying on navigation event timing.
+						const navigationHandle = await page.waitForFunction(() => {
+							if (globalThis.__ompRetriedContext) return "retried";
+							globalThis.__ompRetriedContext = true;
+							throw new Error("Execution context was destroyed, most likely because of a navigation.");
+						}, { polling: 5_000, timeout: 2_000 });
+						const navigation = await navigationHandle.jsonValue();
+						await navigationHandle.dispose();
+						return { seen, missing, navigation };
 					`,
 					timeoutMs: 15_000,
 					session,
@@ -476,6 +498,7 @@ describe("OMP-owned browser evaluation", () => {
 						],
 						late: "TimeoutError",
 						lateDisposals: 1,
+						cleanupAbort: "AbortError",
 						truthiness: ["TimeoutError", "AbortError"],
 						chained: 47,
 						shimmed: [47, 47, 47],
@@ -485,6 +508,7 @@ describe("OMP-owned browser evaluation", () => {
 						leaked: [],
 					},
 					missing: expect.stringContaining('failed to find element matching selector "#absent"'),
+					navigation: "retried",
 				});
 			} finally {
 				await releaseTab(name, { kill: true });
