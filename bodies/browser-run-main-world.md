@@ -10,11 +10,16 @@ The prompt calls this a raw Puppeteer `page`. In 15 Browser Use tasks 6 hit this
 
 `main` isolates so Puppeteer's own machinery (query handlers, `waitForFunction` bindings) stays invisible to page scripts. `tab.evaluate` already runs user code in the main world (`8c8afaf4779`), and this gives the run's `page` the same, nothing more.
 
+<details>
+<summary>Shape and scope</summary>
+
 Shape of the fix (`createRunPage` in `tab-worker.ts`, wrapping the run's `page`):
 - The five methods evaluate in `page.mainFrame().mainRealm()`, adopting element-handle arguments as `tab.evaluate` does (`evaluateInRealm`, now shared). `$eval`/`$$eval` selectors still resolve in the isolated world.
 - `waitForFunction` polls by evaluating instead of calling Puppeteer's wait, which would install its bindings as main-world globals. It times out at the deadline even mid-predicate; `"raf"`/`"mutation"` polling checks in the page, anything else on a 100 ms timer (hidden tabs run no frames).
 - Every other member is the tab's own page; one returning the page (`page.on(…)`) returns the wrapper.
 - Unchanged: `frame.evaluate`, `elementHandle.evaluate` and other `Page` objects (`tab.page`, `browser.pages()`); the docs now say so.
+
+</details>
 
 ## Testing
 
