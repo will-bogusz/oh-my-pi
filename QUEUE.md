@@ -4,15 +4,14 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10
 
 **Opening:** not paused
 **Ready budget:** 4 of 8 ready events used in the hour before the last plan, 4 left (plan of 2026-11-10 19:36Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 4, conflict-held 10, stacked 15, held 12, open PRs 35, queued since the last plan 2; merged 263, closed 29
+**Counts:** openable now 3, conflict-held 10, stacked 15, held 13, open PRs 35, queued since the last plan 2; merged 263, closed 29
 
-## Openable now (4)
+## Openable now (3)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
 | subagent-browser | fix(coding-agent): keep a child omp's browser tabs out of its parent's Tern pane and cmux workspace | browser | P1 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/subagent-browser) |
 | eval-error-frames | fix(coding-agent): print a failed JavaScript cell's own frames, not omp's host stack | eval | P2 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/eval-error-frames) |
-| eval-assign-echo | fix(coding-agent): print nothing for a JavaScript eval cell that ends in an assignment | eval | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/eval-assign-echo) |
 | observe-print | fix(browser): print every observed element, one line each, instead of cutting at 100 | browser | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/observe-print) |
 
 ## Conflict-held (10)
@@ -50,7 +49,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10
 | browser-wait-text-rendered | fix(browser): let a scoped waitForText match only text the page renders | browser | P2 | 2h | browser-wait-text-regexp | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-wait-text-rendered) |
 | subagent-browser-relay | feat(coding-agent): keep subagents' browser tabs out of the user's Chrome and Tern pane unless asked | browser | P2 | 1h | subagent-browser | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/subagent-browser-relay) |
 
-## Held (12)
+## Held (13)
 
 | id | title | area | priority | age | hold | branch |
 |---|---|---|---|---|---|---|
@@ -66,6 +65,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10
 | act-look-prompt | docs(browser): teach acting and looking in one Eval cell without sleeps | browser | P2 | 0h | observe-core series: opens when Brit agrees the series (Will) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-act-look-prompt) |
 | observe-stable-ids | feat(browser): keep observe() ids stable across observations | browser | P2 | 0h | observe-core series: opens when Brit agrees the series (Will) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-observe-stable-ids) |
 | browser-action-outcome | feat(browser): print what each browser action did to the page | browser | P2 | 0h | ActionOutcomePR, 2026-11-10: Haiku leg on this head did not reproduce the step saving (1.02x [0.84,1.25] vs earlier 0.86x); Sol leg on this head (guard-team, from 21:15Z) decides | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-action-outcome) |
+| eval-assign-echo | fix(coding-agent): print nothing for a JavaScript eval cell that ends in an assignment | eval | P1 | 0h | Main, 2026-11-10: awaiting model sample (changes every JS cell's return); bots ScreenshotOutput | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/eval-assign-echo) |
 
 ## Open PRs (35)
 
