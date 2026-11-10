@@ -7,6 +7,7 @@ import type { ElementHandle, ElementScreenshotOptions, Frame, Page } from "puppe
 import { formatScreenshot, resizeImage } from "../../utils/image-resize";
 import { throwIfAborted } from "../tool-errors";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
+import type { ActionOutcomeOptions } from "./action-outcome";
 import { type AriaSnapshotOptions, buildAriaSnapshotScript } from "./aria/aria-snapshot";
 import { clickElement, fillViaHandle, pressKey, typeIntoElement } from "./interactions";
 import { readPageViewport } from "./launch";
@@ -86,7 +87,7 @@ export type FrameOperation = <T>(
 	label: string,
 	deadlineMs: number,
 	operation: (signal: AbortSignal) => Promise<T>,
-	selectorOptions?: { selector?: string; zeroMatchAfterMs?: number },
+	selectorOptions?: { selector?: string; zeroMatchAfterMs?: number; outcome?: ActionOutcomeOptions },
 ) => Promise<T>;
 
 /** Worker hooks needed to build a frame-scoped helper without coupling it to WorkerCore. */
@@ -245,7 +246,7 @@ export function createFrameApi(frame: Frame, hooks: FrameApiHooks): BrowserFrame
 						await handle.dispose().catch(() => undefined);
 					}
 				},
-				selectorOptions(selector),
+				{ ...selectorOptions(selector), outcome: { frame } },
 			),
 		fill: (selector, value) =>
 			hooks.op(
@@ -259,7 +260,7 @@ export function createFrameApi(frame: Frame, hooks: FrameApiHooks): BrowserFrame
 						await handle.dispose().catch(() => undefined);
 					}
 				},
-				selectorOptions(selector),
+				{ ...selectorOptions(selector), outcome: { frame, input: { text: value, replaces: true } } },
 			),
 		type: (selector, text) =>
 			hooks.op(
@@ -274,14 +275,19 @@ export function createFrameApi(frame: Frame, hooks: FrameApiHooks): BrowserFrame
 						await handle.dispose().catch(() => undefined);
 					}
 				},
-				selectorOptions(selector),
+				{ ...selectorOptions(selector), outcome: { frame, input: { text, replaces: false } } },
 			),
 		press: (key, options) =>
-			hooks.op(`frame.press(${JSON.stringify(key)})`, hooks.actionOpMs, async signal => {
-				if (options?.selector)
-					await untilAborted(signal, () => frame.focus(hooks.normalizeSelector(options.selector!)));
-				await pressKey(frame.page(), key, undefined, signal);
-			}),
+			hooks.op(
+				`frame.press(${JSON.stringify(key)})`,
+				hooks.actionOpMs,
+				async signal => {
+					if (options?.selector)
+						await untilAborted(signal, () => frame.focus(hooks.normalizeSelector(options.selector!)));
+					await pressKey(frame.page(), key, undefined, signal);
+				},
+				{ outcome: { frame } },
+			),
 		// Without a selector, the frame's `<body>`; any value passed, `null` included, is still checked as a selector.
 		text: (selector = "body") =>
 			hooks.op(

@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- In Chromium tabs, browser actions (`goto`, `click`, `fill`, `type`, `press`, `select`) print whether the page navigated, changed, or showed no change yet
+
 ## [18.18.8] - 2026-11-11
 
 ### Changed

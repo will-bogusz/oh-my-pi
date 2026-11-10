@@ -39,6 +39,7 @@ import {
 } from "../run-scope";
 import { ToolAbortError, throwIfAborted } from "../tool-errors";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
+import { type ActionOutcomeOptions, runWithActionOutcome } from "./action-outcome";
 import {
 	type AriaSnapshotOptions,
 	assertSelectorString,
@@ -350,12 +351,16 @@ const MATCH_COUNT_PROBE_TIMEOUT_MS = 1_000;
 const DETACH_REPORT_TIMEOUT_MS = 500;
 /** Longest a page call waits for a main-frame navigation the page requested to replace the document. */
 const REQUESTED_NAVIGATION_WAIT_MS = 5_000;
+/** Longest an action's outcome waits for a navigation the action requested to commit before reporting. */
+const OUTCOME_NAVIGATION_WAIT_MS = 400;
 
 /** Options for one tab helper run through `WorkerCore.#runOp`. */
 interface OpOptions {
 	selector?: string;
 	zeroMatchAfterMs?: number;
 	awaitNavigation?: boolean;
+	/** Print what the action did to the page into the cell output. */
+	outcome?: ActionOutcomeOptions;
 }
 
 /** Queue a wheel event without treating a delayed renderer acknowledgement as dispatch failure. */
@@ -578,9 +583,14 @@ export type ActionableHandle = InteractionHandle & ElementQueryHelpers & { fill(
  * A named per-op guard: runs `fn` inside the active run's fail-fast deadline and
  * in-flight tracking (the same wrapper `tab.click(selector)` uses), so a stalled
  * handle action rejects with a named error before the cell budget instead of
- * hanging on puppeteer's protocol timeout.
+ * hanging on puppeteer's protocol timeout. With `outcome`, what the action did to
+ * the page is printed into the cell output.
  */
-export type HandleOpGuard = <T>(label: string, fn: (signal: AbortSignal) => Promise<T>) => Promise<T>;
+export type HandleOpGuard = <T>(
+	label: string,
+	fn: (signal: AbortSignal) => Promise<T>,
+	outcome?: ActionOutcomeOptions,
+) => Promise<T>;
 
 /**
  * Every `ElementHandle` method that dispatches input, pointer/touch, drag, or navigation
@@ -828,53 +838,65 @@ export function toActionableHandle(
 		const original = originals.interactive[method];
 		if (!original) continue;
 		methods[method] = (...args) =>
-			guard(`handle.${method}()`, signal =>
-				runGuardedHandleAction(
-					enriched,
-					originals,
-					`handle.${method}()`,
-					signal,
-					() => (method === "press" ? original(args[0], args[1], signal) : original(...args)),
-					invalidate,
-				),
+			guard(
+				`handle.${method}()`,
+				signal =>
+					runGuardedHandleAction(
+						enriched,
+						originals,
+						`handle.${method}()`,
+						signal,
+						() => (method === "press" ? original(args[0], args[1], signal) : original(...args)),
+						invalidate,
+					),
+				method === "press" ? {} : undefined,
 			);
 	}
 	enriched.type = (text, options) =>
-		guard<void>("handle.type()", signal =>
-			runGuardedHandleAction(
-				enriched,
-				originals,
-				"handle.type()",
-				signal,
-				() => typeIntoElement(enriched, text, signal, options),
-				invalidate,
-			),
+		guard<void>(
+			"handle.type()",
+			signal =>
+				runGuardedHandleAction(
+					enriched,
+					originals,
+					"handle.type()",
+					signal,
+					() => typeIntoElement(enriched, text, signal, options),
+					invalidate,
+				),
+			{ input: { text, replaces: false } },
 		);
 	enriched.fill = value =>
-		guard<void>("handle.fill()", signal =>
-			runGuardedHandleAction(
-				enriched,
-				originals,
-				"handle.fill()",
-				signal,
-				() => fillViaHandle(enriched, value, signal),
-				invalidate,
-			),
+		guard<void>(
+			"handle.fill()",
+			signal =>
+				runGuardedHandleAction(
+					enriched,
+					originals,
+					"handle.fill()",
+					signal,
+					() => fillViaHandle(enriched, value, signal),
+					invalidate,
+				),
+			{ input: { text: value, replaces: true } },
 		);
 	enriched.click = options =>
-		guard<void>("handle.click()", signal =>
-			runGuardedHandleAction(
-				enriched,
-				originals,
-				"handle.click()",
-				signal,
-				() =>
-					clickElement(enriched, "handle.click()", signal, {
-						button: options?.button,
-						clickCount: options?.count,
-					}),
-				invalidate,
-			),
+		guard<void>(
+			"handle.click()",
+			signal =>
+				runGuardedHandleAction(
+					enriched,
+					originals,
+					"handle.click()",
+					signal,
+					() =>
+						clickElement(enriched, "handle.click()", signal, {
+							button: options?.button,
+							clickCount: options?.count,
+						}),
+					invalidate,
+				),
+			{},
 		);
 	enriched.dblclick = () =>
 		guard<void>("handle.dblclick()", signal =>
@@ -910,15 +932,18 @@ export function toActionableHandle(
 			),
 		);
 	enriched.select = (...values) =>
-		guard<string[]>("handle.select()", signal =>
-			runGuardedHandleAction(
-				enriched,
-				originals,
-				"handle.select()",
-				signal,
-				() => selectElementOptions(enriched, values, "handle.select()", signal),
-				invalidate,
-			),
+		guard<string[]>(
+			"handle.select()",
+			signal =>
+				runGuardedHandleAction(
+					enriched,
+					originals,
+					"handle.select()",
+					signal,
+					() => selectElementOptions(enriched, values, "handle.select()", signal),
+					invalidate,
+				),
+			{},
 		);
 	enriched.highlight = (options?: HighlightOptions) =>
 		guard<void>("handle.highlight()", signal =>
@@ -2323,12 +2348,21 @@ export class WorkerCore {
 					arming.catch(() => undefined),
 				);
 			if (opts?.awaitNavigation) await this.#awaitRequestedNavigation(opSignal, perOpTimeoutMs);
-			if (!watchdog) return await fn(opSignal);
-			const racedSignal = AbortSignal.any([opSignal, earlyAc.signal]);
-			return await Promise.race([
-				fn(racedSignal),
-				this.#zeroMatchWatchdog(watchdog.selector, label, watchdog.afterMs, racedSignal),
-			]);
+			const action = async (): Promise<T> => {
+				if (!watchdog) return await fn(opSignal);
+				const racedSignal = AbortSignal.any([opSignal, earlyAc.signal]);
+				try {
+					return await Promise.race([
+						fn(racedSignal),
+						this.#zeroMatchWatchdog(watchdog.selector, label, watchdog.afterMs, racedSignal),
+					]);
+				} finally {
+					// The watchdog guards finding the element, not the outcome probe that follows the action.
+					earlyAc.abort();
+				}
+			};
+			if (!opts?.outcome) return await action();
+			return await this.#reportActionOutcome(active.output, opts.outcome, opSignal, action);
 		} catch (err) {
 			// Fail fast with a named, attributable error instead of the opaque whole-cell timeout:
 			// our per-op deadline fired, or puppeteer's own (equal) timeout fired first — having
@@ -2438,6 +2472,39 @@ export class WorkerCore {
 		if (!settled) this.#mainFrameNavigationRequested = false;
 	}
 
+	/** Run an action and print what it did to the page into the cell output (see {@link runWithActionOutcome}). */
+	async #reportActionOutcome<T>(
+		output: RunOutput,
+		outcome: ActionOutcomeOptions,
+		signal: AbortSignal,
+		action: () => Promise<T>,
+	): Promise<T> {
+		const page = this.#requirePage();
+		const frame = outcome.frame ?? page.mainFrame();
+		const { result, line } = await runWithActionOutcome(
+			frame,
+			action,
+			{
+				dialog: () => this.#dialogs?.state(),
+				// Waits without clearing the request flag, so the next call still waits out a slower commit.
+				navigation:
+					frame === page.mainFrame()
+						? () =>
+								waitForMainFrameDocument(
+									page,
+									() => this.#mainFrameNavigationRequested,
+									OUTCOME_NAVIGATION_WAIT_MS,
+									signal,
+								)
+						: undefined,
+			},
+			signal,
+			outcome.input,
+		);
+		if (line) output.pushText(`${line}\n`);
+		return result;
+	}
+
 	/** Run one of our own page reads once more on the new document when a navigation took its execution context. */
 	async #rereadAfterNavigation<T>(signal: AbortSignal, perOpMs: number, read: () => Promise<T>): Promise<T> {
 		try {
@@ -2487,7 +2554,8 @@ export class WorkerCore {
 		const enrich = (handle: ElementHandle): ActionableHandle =>
 			toActionableHandle(
 				handle,
-				(label, fn) => op(label, actionOpMs, fn),
+				(label, fn, outcome) =>
+					op(label, actionOpMs, fn, outcome && { outcome: { ...outcome, frame: handle.frame } }),
 				async () => {
 					// Raw Puppeteer actions have no AbortSignal. Poison + dispose every
 					// cached handle and stop navigation before reporting a recoverable timeout.
@@ -2516,27 +2584,32 @@ export class WorkerCore {
 			url: () => page.url(),
 			title: () => read("tab.title()", INF, sig => untilAborted(sig, () => page.title())),
 			goto: (url, opts) =>
-				op(`tab.goto(${JSON.stringify(url)})`, INF, async sig => {
-					this.#clearElementCache();
-					try {
-						// Default to "load" because dev servers with HMR/WS never reach networkidle.
-						// budgetBound (not the full cell) so a hung navigation fails named and
-						// catchable inside the run instead of dying with the whole cell.
-						await navigateMainFrame(page, opts?.waitUntil ?? "load", budgetBound, sig, options =>
-							page.goto(url, options),
-						);
-					} catch (err) {
-						if (isPuppeteerTimeout(err)) {
-							// Abandon the hung navigation NOW — a still-pending load stalls every
-							// later op on this page and cascades into more opaque timeouts.
-							await this.#stopLoading();
-							throw new NavigationTimeoutError(
-								`tab.goto(${JSON.stringify(url)}) timed out after ${budgetBound}ms; pending navigation stopped — retry with a longer tool timeout or waitUntil:"domcontentloaded"`,
+				op(
+					`tab.goto(${JSON.stringify(url)})`,
+					INF,
+					async sig => {
+						this.#clearElementCache();
+						try {
+							// Default to "load" because dev servers with HMR/WS never reach networkidle.
+							// budgetBound (not the full cell) so a hung navigation fails named and
+							// catchable inside the run instead of dying with the whole cell.
+							await navigateMainFrame(page, opts?.waitUntil ?? "load", budgetBound, sig, options =>
+								page.goto(url, options),
 							);
+						} catch (err) {
+							if (isPuppeteerTimeout(err)) {
+								// Abandon the hung navigation NOW — a still-pending load stalls every
+								// later op on this page and cascades into more opaque timeouts.
+								await this.#stopLoading();
+								throw new NavigationTimeoutError(
+									`tab.goto(${JSON.stringify(url)}) timed out after ${budgetBound}ms; pending navigation stopped — retry with a longer tool timeout or waitUntil:"domcontentloaded"`,
+								);
+							}
+							throw err;
 						}
-						throw err;
-					}
-				}),
+					},
+					{ outcome: {} },
+				),
 			observe: opts => read("tab.observe()", quickOpMs, sig => this.#collectObservation({ ...opts, signal: sig })),
 			ariaSnapshot: (selector, opts) =>
 				read(
@@ -2603,7 +2676,7 @@ export class WorkerCore {
 							void handle.dispose().catch(() => undefined);
 						}
 					},
-					{ selector, zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS },
+					{ selector, zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS, outcome: {} },
 				),
 			type: (selector, text) =>
 				act(
@@ -2617,7 +2690,7 @@ export class WorkerCore {
 							await handle.dispose().catch(() => undefined);
 						}
 					},
-					{ selector, zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS },
+					{ selector, zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS, outcome: { input: { text, replaces: false } } },
 				),
 			fill: (selector, value) =>
 				act(
@@ -2631,24 +2704,33 @@ export class WorkerCore {
 							await handle.dispose().catch(() => undefined);
 						}
 					},
-					{ selector, zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS },
+					{
+						selector,
+						zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS,
+						outcome: { input: { text: value, replaces: true } },
+					},
 				),
 			press: (key, opts) =>
-				act(`tab.press(${JSON.stringify(key)})`, actionOpMs, async sig => {
-					assertTabPressArgs(key, opts);
-					const selector = opts?.selector;
-					if (selector) {
-						if (parseAriaRefSelector(selector) !== null) {
-							const handle = await this.#resolveAriaRef(selector);
-							try {
-								await untilAborted(sig, () => handle.focus());
-							} finally {
-								await handle.dispose().catch(() => undefined);
-							}
-						} else await untilAborted(sig, () => page.focus(normalizeSelector(selector)));
-					}
-					await pressKey(page, key, undefined, sig);
-				}),
+				act(
+					`tab.press(${JSON.stringify(key)})`,
+					actionOpMs,
+					async sig => {
+						assertTabPressArgs(key, opts);
+						const selector = opts?.selector;
+						if (selector) {
+							if (parseAriaRefSelector(selector) !== null) {
+								const handle = await this.#resolveAriaRef(selector);
+								try {
+									await untilAborted(sig, () => handle.focus());
+								} finally {
+									await handle.dispose().catch(() => undefined);
+								}
+							} else await untilAborted(sig, () => page.focus(normalizeSelector(selector)));
+						}
+						await pressKey(page, key, undefined, sig);
+					},
+					{ outcome: {} },
+				),
 			scroll: (deltaX, deltaY, opts) =>
 				act("tab.scroll()", actionOpMs, async sig => {
 					if (!opts?.selector) {
@@ -2759,7 +2841,7 @@ export class WorkerCore {
 					`tab.select(${JSON.stringify(selector)})`,
 					actionOpMs,
 					sig => this.#select(selector, values, actionOpMs, sig),
-					{ selector, zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS },
+					{ selector, zeroMatchAfterMs: ZERO_MATCH_FAIL_FAST_MS, outcome: {} },
 				),
 			uploadFile: (selector, ...filePaths) => {
 				const label = `tab.uploadFile(${JSON.stringify(selector)})`;
