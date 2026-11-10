@@ -70675,6 +70675,24 @@
      "tree": "cc4e34929e58e80b79a5fad96294c5f28983deb6"
     }
    ]
+  },
+  {
+   "id": "browser-hover-actionable",
+   "branch": "will/browser-hover-actionable",
+   "title": "fix(browser): check a hover target the way a click target is checked",
+   "area": "browser",
+   "priority": "P1",
+   "needs": [],
+   "base": "eda28eff97cf7a352fd3057a03581be1686dbc7a",
+   "body": "bodies/browser-hover-actionable.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-hover-actionable",
+   "host": "MacBook-Pro",
+   "added": "2026-11-10T16:34:24Z",
+   "updated": "2026-11-10T16:34:24Z",
+   "note": ""
   }
  ],
  "watch": {
