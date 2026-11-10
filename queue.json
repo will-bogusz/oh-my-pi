@@ -69524,7 +69524,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-10T07:04:31Z",
+  "checked": "2026-11-10T08:05:37Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -69687,20 +69687,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-03T08:02:55Z",
-    "kind": "unopenable",
-    "id": "apps-open-tilde",
-    "title": "fix(coding-agent): open ~ paths from the home folder in computer apps.open",
-    "why": "opened as #17931"
-   },
-   {
-    "at": "2026-11-03T08:02:55Z",
-    "kind": "unopenable",
-    "id": "wayland-consent-deadline",
-    "title": "fix(natives): give up an unanswered Wayland RemoteDesktop dialog before the run ends",
-    "why": "opened as #17932"
-   },
    {
     "at": "2026-11-03T09:03:52Z",
     "kind": "openable",
@@ -73578,7 +73564,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-10T07:04:31.853512Z",
+  "at": "2026-11-10T08:05:37.835038Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
