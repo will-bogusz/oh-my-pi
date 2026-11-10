@@ -4,13 +4,12 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10
 
 **Opening:** not paused
 **Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-10 23:50Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 3, conflict-held 9, stacked 16, held 13, open PRs 33; merged 275, closed 29
+**Counts:** openable now 2, conflict-held 9, stacked 16, held 14, open PRs 33; merged 275, closed 29
 
-## Openable now (3)
+## Openable now (2)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
-| atspi-unanswered-app | fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool | computer | P1 | 7d | open (over P2 #18353, #18013) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-unanswered-app) |
 | x11-mpx-qt | fix(natives): stop X11 background input from crashing your running Qt 6.5+ apps | computer | P0 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-mpx-qt) |
 | agent-identity | feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy | tui | P2 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/agent-identity) |
 
@@ -49,7 +48,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10
 | factory-droid-171-models | feat(catalog): add the Factory Droid models droid 1.7.1 serves | factory-droid |  | 4h | factory-droid-171-pin ([#18771](https://github.com/can1357/oh-my-pi/pull/18771)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-171-models) |
 | browser-cursor | feat(browser): draw the acting agent's cursor in OMP-driven tabs | browser | P2 | 0h | agent-identity | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-cursor) |
 
-## Held (13)
+## Held (14)
 
 | id | title | area | priority | age | hold | branch |
 |---|---|---|---|---|---|---|
@@ -59,6 +58,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10
 | fallback-revert-when-healthy | feat(coding-agent): add retry.fallbackRevertPolicy when-healthy to return from usage fallbacks | broker | P2 | 28d | Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/fallback-revert-when-healthy) |
 | broker-reset-sweep | feat(coding-agent): spend saved resets from the auth broker before they expire | broker |  | 28d | Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-reset-sweep) |
 | broker-sweep-clients-defer | feat(ai,coding-agent): stop sessions sweeping saved resets the auth broker already spends | broker |  | 28d | Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-sweep-clients-defer) |
+| atspi-unanswered-app | fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool | computer | P1 | 7d | Main, 2026-11-11: waits for AtspiHarm's description paragraph and Main's P0 call | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-unanswered-app) |
 | observe-settle | feat(browser): let observe() settle the effects of the preceding action | browser | P1 | 4h | observe-core series: opens when Brit agrees the series (Will) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-observe-settle) |
 | settle-reads | feat(browser): settle the preceding action before reads too | browser | P1 | 4h | observe-core series: opens when Brit agrees the series (Will) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-settle-reads) |
 | act-look-prompt | docs(browser): teach acting and looking in one Eval cell without sleeps | browser | P2 | 4h | observe-core series: opens when Brit agrees the series (Will) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-act-look-prompt) |
