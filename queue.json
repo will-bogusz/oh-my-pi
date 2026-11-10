@@ -69120,7 +69120,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-10T00:27:29Z",
+  "checked": "2026-11-10T01:28:49Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -69262,25 +69262,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-03T01:26:08Z",
-    "kind": "openable",
-    "id": "role-implicit-landmarks",
-    "title": "fix(coding-agent): find named sections and other implicit roles with role/ selectors"
-   },
-   {
-    "at": "2026-11-03T01:26:08Z",
-    "kind": "openable",
-    "id": "windows-app-id",
-    "title": "fix(coding-agent): find app windows by application id or path"
-   },
-   {
-    "at": "2026-11-03T01:26:08Z",
-    "kind": "unopenable",
-    "id": "factory-droid-110-pin",
-    "title": "feat(ai,catalog): identify Factory Droid requests as droid 1.1.0",
-    "why": "opened as #17885"
-   },
    {
     "at": "2026-11-03T01:56:47Z",
     "kind": "openable",
@@ -73222,7 +73203,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-10T00:27:30.048894Z",
+  "at": "2026-11-10T01:28:50.439157Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
