@@ -69337,6 +69337,24 @@
    "added": "2026-11-10T04:31:00Z",
    "updated": "2026-11-10T04:31:00Z",
    "note": ""
+  },
+  {
+   "id": "computer-window-exact-app",
+   "branch": "will/computer-window-exact-app",
+   "title": "fix(coding-agent): prefer exact app names when selecting windows",
+   "area": "computer",
+   "priority": "P1",
+   "needs": [],
+   "base": "f0200abf28e8d314125854600cf726dece495246",
+   "body": "bodies/computer-window-exact-app.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-window-exact-app",
+   "host": "MacBook-Pro",
+   "added": "2026-11-10T05:24:11Z",
+   "updated": "2026-11-10T05:24:11Z",
+   "note": ""
   }
  ],
  "watch": {
