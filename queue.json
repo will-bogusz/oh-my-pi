@@ -71617,13 +71617,13 @@
    "needs": [],
    "base": "7a03d7af15263b7d77ee628d617b43f7b1dcb8a8",
    "body": "bodies/factory-droid-list-prices.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18768,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-list-prices",
    "host": "MacBook-Pro",
    "added": "2026-11-10T19:19:30Z",
-   "updated": "2026-11-10T19:26:57Z",
+   "updated": "2026-11-10T19:33:27Z",
    "note": "",
    "built": [
     {
@@ -71653,7 +71653,8 @@
      "at": "2026-11-10T19:26:56Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-10T19:33:27Z"
   },
   {
    "id": "browser-action-outcome",
