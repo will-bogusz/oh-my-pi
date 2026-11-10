@@ -69591,7 +69591,7 @@
    "branch": "will/computer-find-role-alias",
    "title": "fix(natives): accept aliases in computer role searches",
    "area": "computer",
-   "priority": "P2",
+   "priority": "P1",
    "needs": [],
    "base": "f0200abf28e8d314125854600cf726dece495246",
    "body": "bodies/computer-find-role-alias.md",
@@ -69601,7 +69601,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-find-role-alias",
    "host": "MacBook-Pro",
    "added": "2026-11-10T05:28:38Z",
-   "updated": "2026-11-10T16:47:07Z",
+   "updated": "2026-11-10T17:00:21Z",
    "note": "",
    "built": [
     {
@@ -69896,7 +69896,7 @@
    "branch": "will/browser-dead-tab-hint",
    "title": "fix(browser): point calls on a tab that is not open at browser.open()",
    "area": "browser",
-   "priority": "P2",
+   "priority": "P0",
    "needs": [],
    "base": "eda28eff97cf7a352fd3057a03581be1686dbc7a",
    "body": "bodies/browser-dead-tab-hint.md",
@@ -69906,7 +69906,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-dead-tab-hint",
    "host": "MacBook-Pro",
    "added": "2026-11-10T05:35:21Z",
-   "updated": "2026-11-10T16:48:33Z",
+   "updated": "2026-11-10T17:00:21Z",
    "note": "",
    "advanced": "2026-11-10T16:48:33Z",
    "built": [
@@ -70430,7 +70430,7 @@
    "branch": "will/computer-input-lease-wait",
    "title": "fix(natives): wait for another session's input lock before failing InputBusy",
    "area": "computer",
-   "priority": "P2",
+   "priority": "P1",
    "needs": [],
    "base": "f0200abf28e8d314125854600cf726dece495246",
    "body": "bodies/computer-input-lease-wait.md",
@@ -70440,7 +70440,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-input-lease-wait",
    "host": "MacBook-Pro",
    "added": "2026-11-10T15:55:32Z",
-   "updated": "2026-11-10T16:49:25Z",
+   "updated": "2026-11-10T17:00:21Z",
    "note": "",
    "built": [
     {
