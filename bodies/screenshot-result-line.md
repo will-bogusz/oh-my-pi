@@ -42,7 +42,7 @@ This is a default change: anything parsing `Dimensions:` or `URL:` from the text
 ## Testing
 
 - `test/tools/browser-open-options.test.ts` opens a page, then reopens through a redirect: one line each, the URL only on the redirected one. With the source reverted, it, the `formatScreenshot` cases and `browser-screenshot-plus` fail (10 tests). The six browser and image test files: 90 pass with Chrome for Testing.
-- Agent check, Haiku 5.5 through `omp -p`, headless Chrome for Testing, 6 runs per task and arm. The few extra calls were choices made before any changed text appeared (a `silent` screenshot then read from disk, a tab closed after the model's own `tab.run` error).
+- Agent check, Haiku 5.5 through `omp -p`, headless Chrome for Testing, 6 runs per task and arm (not blind: the worktree names `so-main` and `so-head` showed in error stack frames; a neutral rerun replaces these numbers). The few extra calls were choices made before any changed text appeared (a `silent` screenshot then read from disk, a tab closed after the model's own `tab.run` error).
 
 | Task | `main` | this PR |
 |---|---|---|
