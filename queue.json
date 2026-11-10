@@ -71411,10 +71411,15 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-10T17:46:03Z",
+  "checked": "2026-11-10T18:44:26Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {},
+  "openable": {
+   "subagent-browser": {
+    "since": "2026-11-10T18:44:26Z",
+    "title": "fix(coding-agent): keep a child omp's browser tabs out of its parent's Tern pane and cmux workspace"
+   }
+  },
   "conflicts": {
    "#15128": {
     "since": "2026-11-10T17:46:03Z",
@@ -71475,7 +71480,8 @@
    18746,
    18750,
    18751,
-   18753
+   18753,
+   18761
   ],
   "post_merge": {
    "17831": {
@@ -73054,6 +73060,12 @@
     "files": [
      "packages/coding-agent/src/session/agent-session.ts"
     ]
+   },
+   {
+    "at": "2026-11-10T18:44:26Z",
+    "kind": "openable",
+    "id": "subagent-browser",
+    "title": "fix(coding-agent): keep a child omp's browser tabs out of its parent's Tern pane and cmux workspace"
    }
   ]
  },
