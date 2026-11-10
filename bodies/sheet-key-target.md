@@ -2,7 +2,7 @@
 
 I made keys and typing for a macOS window go into the sheet that's open and focused on it, like an Open panel or Go to Folder, instead of refusing and naming the sheet's window id.
 
-On a computer-use benchmark task that picks a folder through Automator's Open sheet, every OMP run hit this refusal twice (⌘⇧G on the document window, then Return in the Go to Folder field) and spent a call each time looking up the sheet's id; with this branch both go through in the background.
+On the Nov 10 Automator Open-sheet benchmark, six OMP runs hit 1–2 sheet-targeting refusals each (median 2), before this fix. In the native checks below, this branch sends both the document window's ⌘⇧G and the Go to Folder field's Return in the background; these are not paired model reruns.
 
 > **macOS context.** A sheet (Open, Save, Go to Folder) is its own window attached to a document window. While it is up the document window cannot become key, and macOS sends every key the app gets to the sheet. A sheet's controls report the document window as their `AXWindow`, so `el.press()` on them is addressed to the document window.
 
