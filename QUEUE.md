@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10 21:07Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10 21:14Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 5 of 8 ready events used in the hour before the last plan, 3 left (plan of 2026-11-10 20:48Z on goliath; groups below are from it, states from the manifest)
@@ -103,8 +103,8 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10
 | [#18750](https://github.com/can1357/oh-my-pi/pull/18750) | browser-hover-actionable | fix(browser): check a hover target the way a click target is checked | browser | P1 | 3h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-hover-actionable) |
 | [#18751](https://github.com/can1357/oh-my-pi/pull/18751) | browser-run-main-world | fix(browser): run tab.run page evaluations in the page's main world | browser | P1 | 3h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-run-main-world) |
 | [#18761](https://github.com/can1357/oh-my-pi/pull/18761) | browser-honest-completion | fix(browser): have agents report a step the page cannot do instead of faking it | browser | P1 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-honest-completion) |
-| [#18773](https://github.com/can1357/oh-my-pi/pull/18773) | subagent-browser | fix(coding-agent): keep a child omp's browser tabs out of its parent's Tern pane and cmux workspace | browser | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/subagent-browser) |
-| [#18766](https://github.com/can1357/oh-my-pi/pull/18766) | devin-pin-31243 | fix(catalog): identify Devin requests as CLI 3000.12.43 | catalog | P2 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-pin-31243) |
+| [#18773](https://github.com/can1357/oh-my-pi/pull/18773) | subagent-browser | fix(coding-agent): keep a child omp's browser tabs out of its parent's Tern pane and cmux workspace | browser | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/subagent-browser) |
+| [#18766](https://github.com/can1357/oh-my-pi/pull/18766) | devin-pin-31243 | fix(catalog): identify Devin requests as CLI 3000.12.43 | catalog | P2 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-pin-31243) |
 | [#18775](https://github.com/can1357/oh-my-pi/pull/18775) | eval-error-frames | fix(coding-agent): print a failed JavaScript cell's own frames, not omp's host stack | eval | P1 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/eval-error-frames) |
 | [#18767](https://github.com/can1357/oh-my-pi/pull/18767) | factory-droid-argon-promo | fix(catalog): show Factory Droid's Gemini 4 Argon credit promotion | catalog | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-argon-promo) |
 | [#18768](https://github.com/can1357/oh-my-pi/pull/18768) | factory-droid-list-prices | fix(catalog): show list prices for Factory Droid Fable 5.1, GLM 5.2 Fast and Muse Spark Open | catalog | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-list-prices) |
