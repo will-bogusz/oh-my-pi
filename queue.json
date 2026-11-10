@@ -71827,6 +71827,26 @@
    "added": "2026-11-10T19:42:48Z",
    "updated": "2026-11-10T19:45:31Z",
    "note": ""
+  },
+  {
+   "id": "computer-guide-first-use",
+   "branch": "will/computer-guide-first-use",
+   "title": "feat(coding-agent): send the computer guide with the first computer call",
+   "area": "computer",
+   "priority": "P2",
+   "needs": [
+    "browser-core-first-use"
+   ],
+   "base": "ff7a0b87c8272750ee8498f60746cdd7e84e1eec",
+   "body": "bodies/computer-guide-first-use.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-guide-first-use",
+   "host": "MacBook-Pro",
+   "added": "2026-11-10T19:53:35Z",
+   "updated": "2026-11-10T19:53:35Z",
+   "note": ""
   }
  ],
  "watch": {
