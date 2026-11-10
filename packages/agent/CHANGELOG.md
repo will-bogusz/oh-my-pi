@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Added `Agent.messagesRevision`, which changes whenever messages are replaced or removed (compaction, prune, rewind, load, clear) and not when one is appended
+
 ## [18.18.2] - 2026-11-08
 
 ### Added

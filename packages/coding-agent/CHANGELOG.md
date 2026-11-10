@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Browser tasks start without reading `xd://eval/browser`: the first browser call of a conversation returns a short browser guide (helpers with their signatures, selector forms, the re-observe rule) with its output, and `xd://eval/browser` still holds the full guide
+
 ## [18.18.7] - 2026-11-10
 
 ### Added
