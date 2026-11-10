@@ -17,7 +17,7 @@ Shape of the fix: `renderedText` in `queries.ts` is one self-contained page-side
 
 ## Questions for the maintainer
 
-Other reads give hidden text too. This PR leaves them alone, since callers may rely on them. Probe on `main`, one element each:
+Other reads give hidden text too. Left alone here; callers may rely on them. Probe on `main`, one element each:
 
 | read | `display: none` / `hidden` / inside one | `visibility: hidden` | inside closed `<details>` | `opacity: 0` |
 |---|---|---|---|---|
@@ -25,7 +25,7 @@ Other reads give hidden text too. This PR leaves them alone, since callers may r
 | `tab.text()`, `extract()` | left out | left out | left out | included |
 | `isVisible`, `waitForSelector({ visible })` | false / waits | false / waits | **true** / resolves | true / resolves |
 
-1. `tab.text(selector)` returns a hidden element's text (`innerText` falling back to `textContent`). In a Browser Use run, an agent submitted the shadow-DOM form, its unscoped wait for "The secret is:" timed out, and `tab.text("#success-message")` returned the hidden banner's full text, which it reported as the confirmation. I'd return `renderedText` here too, matching `tab.text()` on the body, and leave `textContent` to `evaluate`.
+1. `tab.text(selector)` returns a hidden element's text In a Browser Use run, an agent submitted the shadow-DOM form, its unscoped wait for "The secret is:" timed out, and `tab.text("#success-message")` returned the hidden banner's full text as its confirmation. I'd return `renderedText` here too, matching `tab.text()` on the body, and leave `textContent` to `evaluate`.
 2. `isVisible` says true for content of a closed `<details>`. I'd make it false (`checkVisibility()` says so).
 3. `opacity: 0` counts as visible everywhere, as in Playwright. I'd keep that.
 
