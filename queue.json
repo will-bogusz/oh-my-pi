@@ -69540,6 +69540,24 @@
    "added": "2026-11-10T15:45:44Z",
    "updated": "2026-11-10T15:46:36Z",
    "note": ""
+  },
+  {
+   "id": "computer-input-lease-wait",
+   "branch": "will/computer-input-lease-wait",
+   "title": "fix(natives): wait for another session's input lock before failing InputBusy",
+   "area": "computer",
+   "priority": "P2",
+   "needs": [],
+   "base": "f0200abf28e8d314125854600cf726dece495246",
+   "body": "bodies/computer-input-lease-wait.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-input-lease-wait",
+   "host": "MacBook-Pro",
+   "added": "2026-11-10T15:55:32Z",
+   "updated": "2026-11-10T15:55:32Z",
+   "note": ""
   }
  ],
  "watch": {
