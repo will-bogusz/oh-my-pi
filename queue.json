@@ -71233,6 +71233,24 @@
      "host": "MacBook-Pro"
     }
    ]
+  },
+  {
+   "id": "subagent-browser",
+   "branch": "will/subagent-browser",
+   "title": "fix(coding-agent): keep a child omp's browser tabs out of its parent's Tern pane and cmux workspace",
+   "area": "browser",
+   "priority": "P1",
+   "needs": [],
+   "base": "e1d8f29d54957da5cb38b11d10a6778d13476980",
+   "body": "bodies/subagent-browser.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/subagent-browser",
+   "host": "MacBook-Pro",
+   "added": "2026-11-10T18:40:24Z",
+   "updated": "2026-11-10T18:40:24Z",
+   "note": ""
   }
  ],
  "watch": {
