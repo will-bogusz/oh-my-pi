@@ -72671,7 +72671,7 @@
    "needs": [
     "browser-core-first-use"
    ],
-   "base": "ff7a0b87c8272750ee8498f60746cdd7e84e1eec",
+   "base": "587f6a295787619384743711852c8f926ec03cc2",
    "body": "bodies/computer-guide-first-use.md",
    "state": "queued",
    "pr": null,
@@ -72679,7 +72679,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-guide-first-use",
    "host": "MacBook-Pro",
    "added": "2026-11-10T19:53:35Z",
-   "updated": "2026-11-10T19:53:35Z",
+   "updated": "2026-11-10T21:27:36Z",
    "note": ""
   },
   {
