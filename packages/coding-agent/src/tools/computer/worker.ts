@@ -1394,7 +1394,7 @@ export class ComputerWorkerCore {
 				const session = await createSession({
 					display: snapshot.display,
 					escapeStopKey: escape.key,
-					agentLabel: snapshot.agentLabel,
+					agentId: snapshot.agentId,
 				});
 				const guarded = this.#guard(session);
 				this.#session = session;
