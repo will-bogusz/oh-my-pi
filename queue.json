@@ -69120,7 +69120,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-09T23:26:44Z",
+  "checked": "2026-11-10T00:27:29Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -69262,18 +69262,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-03T00:24:02Z",
-    "kind": "openable",
-    "id": "factory-droid-110-pin",
-    "title": "feat(ai,catalog): identify Factory Droid requests as droid 1.1.0"
-   },
-   {
-    "at": "2026-11-03T00:24:02Z",
-    "kind": "openable",
-    "id": "iphone-mirror-key-gap",
-    "title": "perf(natives): type on iPhone Mirroring twice as fast"
-   },
    {
     "at": "2026-11-03T01:26:08Z",
     "kind": "openable",
@@ -73234,12 +73222,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-09T23:57:11.985783Z",
+  "at": "2026-11-10T00:27:30.048894Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 1,
-   "left": 7
+   "used": 0,
+   "left": 8
   },
   "rows": [
    {
