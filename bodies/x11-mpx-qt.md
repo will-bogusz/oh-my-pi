@@ -4,7 +4,7 @@ I found that on X11, every `computer` session that had used background input cra
 
 With two PySide6 6.10.1 windows open on Xorg + mutter, a session that clicks and types into a GTK window and then ends killed both windows in 10 of 10 runs on `main` and in 0 of 10 with this PR.
 
-> **X11 context.** Background input drives a second "master" pointer and keyboard (XInput2 MPX) fed by uinput devices. Removing a master makes running Qt 6.5+ xcb clients free its child devices twice and segfault in `QXcbConnection::xi2SetupDevices()`: [QTBUG-146876](https://bugreports.qt.io/browse/QTBUG-146876), open and still in Qt 6.12.0 ([QTBUG-151420](https://bugreports.qt.io/browse/QTBUG-151420)). Qt 6.4 and 5 are not affected.
+> **X11 context.** Background input drives a second "master" pointer and keyboard (XInput2 MPX) fed by uinput devices. Removing a master makes running Qt 6.5+ xcb clients free its child devices twice and segfault in `QXcbConnection::xi2SetupDevices()`: [QTBUG-146876](https://bugreports.qt.io/browse/QTBUG-146876), open and still in Qt 6.12.0 ([QTBUG-151420](https://bugreports.qt.io/browse/QTBUG-151420)). Qt 6.4 and 5 are not affected. Removing a master also crashes GTK3 apps when one of their popups holds a grab at that moment (Cua fixed the same in [trycua/cua@a08193ac9](https://github.com/trycua/cua/commit/a08193ac9)), so keeping masters covers GTK3 as well.
 
 | When `main` removes a master | Qt 6.5+ apps on `main` | This PR |
 |---|---|---|
