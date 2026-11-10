@@ -1,12 +1,12 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10 16:36Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10 16:38Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-10 16:17Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 7, conflict-held 9, stacked 12, held 6, open PRs 22, queued since the last plan 2; merged 263, closed 29
+**Counts:** openable now 6, conflict-held 9, stacked 12, held 6, open PRs 23, queued since the last plan 2; merged 263, closed 29
 
-## Openable now (7)
+## Openable now (6)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
@@ -14,7 +14,6 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10
 | computer-find-role-alias | fix(natives): accept aliases in computer role searches | computer | P2 | 11h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-find-role-alias) |
 | browser-dead-tab-hint | fix(browser): point calls on a tab that is not open at browser.open() | browser | P2 | 11h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-dead-tab-hint) |
 | computer-strict-options | fix(computer): reject unknown helper option keys | computer | P2 | 10h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-strict-options) |
-| browser-console-shape | fix(browser): tell agents that treat console() or errors() as an array to read .entries | browser | P1 | 10h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-console-shape) |
 | computer-input-lease-wait | fix(natives): wait for another session's input lock before failing InputBusy | computer | P2 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-input-lease-wait) |
 | computer-open-window | fix(natives): return the window showing a page from macOS apps.open in a browser | computer | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-open-window) |
 
@@ -60,7 +59,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10
 | broker-reset-sweep | feat(coding-agent): spend saved resets from the auth broker before they expire | broker |  | 27d | Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-reset-sweep) |
 | broker-sweep-clients-defer | feat(ai,coding-agent): stop sessions sweeping saved resets the auth broker already spends | broker |  | 27d | Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-sweep-clients-defer) |
 
-## Open PRs (22)
+## Open PRs (23)
 
 | PR | id | title | area | rank | open | plan | branch |
 |---|---|---|---|---|---|---|---|
@@ -86,6 +85,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-10
 | [#18675](https://github.com/can1357/oh-my-pi/pull/18675) | sheet-key-target | fix(natives): send macOS keys for a window to the sheet focused on it | computer | P1 | 11h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/sheet-key-target) |
 | [#18680](https://github.com/can1357/oh-my-pi/pull/18680) | finder-desktop-key | fix(natives): restore Finder with its desktop focus after macOS background input | computer | P0 | 10h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/finder-desktop-key) |
 | [#18737](https://github.com/can1357/oh-my-pi/pull/18737) | browser-call-timeout | fix(browser): give browser calls without a timeout the Eval cell's timeout | browser | P1 | 11h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-call-timeout) |
+| [#18738](https://github.com/can1357/oh-my-pi/pull/18738) | browser-console-shape | fix(browser): tell agents that treat console() or errors() as an array to read .entries | browser | P1 | 10h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-console-shape) |
 
 ## Queued since the last plan (2)
 
