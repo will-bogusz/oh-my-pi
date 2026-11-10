@@ -72702,17 +72702,13 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-10T20:17:32Z",
+  "checked": "2026-11-10T20:48:01Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "eval-error-frames": {
-    "since": "2026-11-10T19:17:32Z",
-    "title": "fix(coding-agent): print a failed JavaScript cell's own frames, not omp's host stack"
-   },
-   "screenshot-result-line": {
-    "since": "2026-11-10T19:47:07Z",
-    "title": "feat(coding-agent): report browser screenshots and opens on one line"
+   "x11-covered-capture": {
+    "since": "2026-11-10T20:48:01Z",
+    "title": "fix(natives): capture a covered X11 window from its own pixels, or say it is covered"
    }
   },
   "conflicts": {
@@ -72739,20 +72735,6 @@
     "title": "feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio",
     "files": [
      "packages/ai/src/providers/openai-shared.ts"
-    ]
-   },
-   "#18353": {
-    "since": "2026-11-10T20:17:32Z",
-    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
-    "files": [
-     "MODULE.bazel.lock"
-    ]
-   },
-   "#18013": {
-    "since": "2026-11-10T20:17:32Z",
-    "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "files": [
-     "MODULE.bazel.lock"
     ]
    }
   },
@@ -72796,7 +72778,9 @@
    18768,
    18771,
    18772,
-   18773
+   18773,
+   18775,
+   18776
   ],
   "post_merge": {
    "17831": {
@@ -72850,143 +72834,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-03T20:17:45Z",
-    "kind": "merged",
-    "number": 17936,
-    "title": "fix(natives): match AT-SPI actions by their machine names",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-03T20:17:45Z",
-    "kind": "merged",
-    "number": 17932,
-    "title": "fix(natives): give up an unanswered Wayland RemoteDesktop dialog before the run ends",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-03T20:17:45Z",
-    "kind": "merged",
-    "number": 17931,
-    "title": "fix(coding-agent): open ~ paths from the home folder in computer apps.open",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-03T20:17:45Z",
-    "kind": "merged",
-    "number": 17922,
-    "title": "fix(natives): name the focused application window on Wayland, not an always-active shell frame",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-03T20:17:45Z",
-    "kind": "merged",
-    "number": 17921,
-    "title": "fix(natives): keep X11 background element typing from raising the element's window",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-03T20:17:45Z",
-    "kind": "merged",
-    "number": 17915,
-    "title": "fix(natives): refuse Wayland element input before focusing the element",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-03T20:17:45Z",
-    "kind": "merged",
-    "number": 17913,
-    "title": "fix(natives): refuse background drags on Windows Tk windows",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-03T20:17:45Z",
-    "kind": "merged",
-    "number": 17912,
-    "title": "fix(natives): keep X11 takeover keys running when the core keyboard switches source",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-03T20:17:45Z",
-    "kind": "merged",
-    "number": 17911,
-    "title": "fix(natives): refuse X11 background keys to Qt apps instead of reporting them sent",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-03T20:17:45Z",
-    "kind": "merged",
-    "number": 17910,
-    "title": "fix(natives): release the X11 virtual keyboard's focus before takeover activates its window",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-03T20:17:45Z",
-    "kind": "merged",
-    "number": 17909,
-    "title": "fix(natives): stop takeover keys into iPhone Mirroring and Screen Sharing from leaving Fn held",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-03T20:17:45Z",
-    "kind": "merged",
-    "number": 17908,
-    "title": "fix(browser): exit a process-local headless Chrome when the process that launched it is killed",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-03T20:17:45Z",
-    "kind": "merged",
-    "number": 17903,
-    "title": "fix(natives): pace Wayland multi-clicks so KDE Qt apps see double clicks",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-03T20:17:45Z",
-    "kind": "merged",
-    "number": 17896,
-    "title": "fix(coding-agent): find app windows by application id or path",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-03T20:17:45Z",
-    "kind": "merged",
-    "number": 17883,
-    "title": "fix(snapcompact,coding-agent): count a legacy archive's frames as dropped, not replaced",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-03T20:17:45Z",
-    "kind": "merged",
-    "number": 17881,
-    "title": "docs(coding-agent): restore the --models row in the CLI reference",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-03T20:17:45Z",
-    "kind": "conflict",
-    "label": "#16223",
-    "title": "feat(natives): make a macOS background drag across native text an accessibility selection",
-    "files": [
-     "packages/coding-agent/test/tools/computer.test.ts"
-    ]
-   },
    {
     "at": "2026-11-03T21:48:23Z",
     "kind": "openable",
@@ -74436,6 +74283,26 @@
     "files": [
      "MODULE.bazel.lock"
     ]
+   },
+   {
+    "at": "2026-11-10T20:48:01Z",
+    "kind": "openable",
+    "id": "x11-covered-capture",
+    "title": "fix(natives): capture a covered X11 window from its own pixels, or say it is covered"
+   },
+   {
+    "at": "2026-11-10T20:48:01Z",
+    "kind": "unopenable",
+    "id": "eval-error-frames",
+    "title": "fix(coding-agent): print a failed JavaScript cell's own frames, not omp's host stack",
+    "why": "opened as #18775"
+   },
+   {
+    "at": "2026-11-10T20:48:01Z",
+    "kind": "unopenable",
+    "id": "screenshot-result-line",
+    "title": "feat(coding-agent): report browser screenshots and opens on one line",
+    "why": "opened as #18776"
    }
   ]
  },
@@ -76967,7 +76834,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-10T20:17:32.988409Z",
+  "at": "2026-11-10T20:48:02.160325Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -77418,6 +77285,23 @@
     "created": "2026-11-10T20:05:43Z"
    },
    {
+    "id": "eval-error-frames",
+    "label": "#18775",
+    "number": 18775,
+    "state": "open",
+    "area": "eval",
+    "priority": "P1",
+    "title": "fix(coding-agent): print a failed JavaScript cell's own frames, not omp's host stack",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-10T20:33:07Z"
+   },
+   {
     "id": "factory-droid-171-pin",
     "label": "#18771",
     "number": 18771,
@@ -77493,10 +77377,8 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in MODULE.bazel.lock"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "opened over P2 #18013",
     "over": [],
     "paired": [
@@ -77605,10 +77487,8 @@
     "area": "natives",
     "priority": "P2",
     "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in MODULE.bazel.lock"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "rebases after #18353 merges",
     "over": [],
     "paired": [
@@ -77634,6 +77514,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-05T19:41:05Z"
+   },
+   {
+    "id": "screenshot-result-line",
+    "label": "#18776",
+    "number": 18776,
+    "state": "open",
+    "area": "browser",
+    "priority": "P2",
+    "title": "feat(coding-agent): report browser screenshots and opens on one line",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-10T20:37:04Z"
    },
    {
     "id": "atspi-unanswered-app",
@@ -77750,6 +77647,23 @@
      "#18624"
     ],
     "created": "2026-11-09T18:20:14Z"
+   },
+   {
+    "id": "x11-covered-capture",
+    "label": "x11-covered-capture",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): capture a covered X11 window from its own pixels, or say it is covered",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-10T20:41:59Z"
    },
    {
     "id": "browser-wait-predicate",
@@ -77916,23 +77830,6 @@
     "created": "2026-10-19T07:26:45Z"
    },
    {
-    "id": "eval-error-frames",
-    "label": "eval-error-frames",
-    "number": null,
-    "state": "queued",
-    "area": "eval",
-    "priority": "P2",
-    "title": "fix(coding-agent): print a failed JavaScript cell's own frames, not omp's host stack",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-10T19:06:45Z"
-   },
-   {
     "id": "macos-scroll-direction",
     "label": "macos-scroll-direction",
     "number": null,
@@ -77983,6 +77880,7 @@
      "conflicts with #18750 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18751 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18772 in docs/tools/browser.md",
+     "conflicts with #18776 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need r2/native-window-report conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, docs/tools/browser.md, packages/coding-agent/src/tools/browser/print-hold.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
     ],
@@ -77999,7 +77897,8 @@
      "#18738",
      "#18750",
      "#18751",
-     "#18772"
+     "#18772",
+     "#18776"
     ],
     "needs": [
      "#15508",
@@ -78027,6 +77926,7 @@
      "conflicts with #18750 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18751 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18772 in docs/tools/browser.md",
+     "conflicts with #18776 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need r2/relay-own-only conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/extension/background.ts, packages/browser-relay/extension/chrome.d.ts, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/relay/server.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/cli/browser-relay-cli.test.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-background-input.test.ts, packages/coding-agent/test/tools/browser-interactions.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "conflicts with main in packages/browser-relay/extension/manifest.json, packages/coding-agent/src/tools/browser/relay/extension-assets/manifest.json.txt"
     ],
@@ -78042,7 +77942,8 @@
      "#18738",
      "#18750",
      "#18751",
-     "#18772"
+     "#18772",
+     "#18776"
     ],
     "needs": [
      "r2/relay-own-only"
@@ -78070,6 +77971,7 @@
      "conflicts with #18750 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18751 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18772 in docs/tools/browser.md",
+     "conflicts with #18776 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need r2/relay-popup-owned conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/extension/background.ts, packages/browser-relay/extension/chrome.d.ts, packages/browser-relay/extension/manifest.json, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/extension-assets/manifest.json.txt, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/relay/server.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/cli/browser-relay-cli.test.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-background-input.test.ts, packages/coding-agent/test/tools/browser-interactions.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "its need r2/page-waiting conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/extension/background.ts, packages/browser-relay/extension/chrome.d.ts, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/print-hold.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/relay/server.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/cli/browser-relay-cli.test.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-background-input.test.ts, packages/coding-agent/test/tools/browser-interactions.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts, packages/coding-agent/test/tools/browser-upload-contents.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser.ts, packages/coding-agent/test/tools/browser-relay-detach.test.ts"
@@ -78087,7 +77989,8 @@
      "#18738",
      "#18750",
      "#18751",
-     "#18772"
+     "#18772",
+     "#18776"
     ],
     "needs": [
      "r2/relay-popup-owned",
@@ -78358,6 +78261,7 @@
      "conflicts with #18743 in crates/pi-natives/src/desktop/macos/capture.rs",
      "conflicts with #18750 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18751 in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #18776 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
@@ -78370,7 +78274,8 @@
      "#18737",
      "#18743",
      "#18750",
-     "#18751"
+     "#18751",
+     "#18776"
     ],
     "needs": [
      "#15508"
@@ -78396,6 +78301,7 @@
      "conflicts with #18750 in packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18751 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18772 in docs/tools/browser.md",
+     "conflicts with #18776 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need r2/relay-own-only conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/extension/background.ts, packages/browser-relay/extension/chrome.d.ts, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/relay/server.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/cli/browser-relay-cli.test.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-background-input.test.ts, packages/coding-agent/test/tools/browser-interactions.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "conflicts with main in packages/coding-agent/test/tools/browser-upload-contents.test.ts"
     ],
@@ -78410,7 +78316,8 @@
      "#18738",
      "#18750",
      "#18751",
-     "#18772"
+     "#18772",
+     "#18776"
     ],
     "needs": [
      "r2/relay-own-only"
@@ -78443,23 +78350,6 @@
     "created": "2026-10-13T21:47:19Z"
    },
    {
-    "id": "screenshot-result-line",
-    "label": "screenshot-result-line",
-    "number": null,
-    "state": "queued",
-    "area": "browser",
-    "priority": "P2",
-    "title": "feat(coding-agent): report browser screenshots and opens on one line",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-10T19:42:48Z"
-   },
-   {
     "id": "subagent-browser-relay",
     "label": "subagent-browser-relay",
     "number": null,
@@ -78469,12 +78359,15 @@
     "title": "feat(coding-agent): keep subagents' browser tabs out of the user's Chrome and Tern pane unless asked",
     "action": "wait",
     "reasons": [
-     "needs #18773 (open)"
+     "needs #18773 (open)",
+     "conflicts with #18773 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#18773"
+    ],
     "needs": [
      "subagent-browser"
     ],
