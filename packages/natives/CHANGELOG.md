@@ -12,7 +12,7 @@
 
 - macOS keys, typing and held keys for a window now go to a sheet attached to it that holds keyboard focus, such as an Open sheet or Finder's Go to Folder, as macOS sends them, instead of throwing `InvalidTarget` and naming the sheet; so do keys for a control of that sheet, which reports the window under it as its own ([#18675](https://github.com/can1357/oh-my-pi/pull/18675) by [@will-bogusz](https://github.com/will-bogusz))
 - Computer input no longer fails with `InputBusy` the moment another omp session's call holds the desktop, such as an `apps.open` waiting for its window: it waits up to 5 seconds for that call to finish, on macOS, Linux and Windows ([#18746](https://github.com/can1357/oh-my-pi/pull/18746) by [@will-bogusz](https://github.com/will-bogusz))
-- Computer `InputBusy` names the agent holding input/focus control and its omp process id (`agent "Scout" (omp pid 4242) owns input/focus control`) on macOS and Linux, and on Windows when that agent runs in the same omp
+- Computer `InputBusy` names the agent holding input/focus control and its omp process id (`agent "Main.Scout" (omp pid 4242) owns input/focus control`) when the holder's session set `agentId`, on macOS and Linux, and on Windows when that agent runs in the same omp
 
 ## [18.18.6] - 2026-11-09
 
