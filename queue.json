@@ -69524,7 +69524,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-10T08:05:37Z",
+  "checked": "2026-11-10T09:07:04Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -69588,58 +69588,10 @@
    18680
   ],
   "post_merge": {
-   "17747": {
-    "title": "fix(agent,coding-agent): read the history behind an OpenAI remote compaction after a model switch",
-    "merge_commit": "4e083b6058b99699f2c347210761b9ba69f518fc",
-    "merged_at": "2026-11-08T08:40:06Z",
-    "findings": []
-   },
    "17831": {
     "title": "fix(coding-agent): let background relay and app.cdp_url tabs take omp's clicks and keys",
     "merge_commit": "03fcac6f9900cab2b31ec9924e8cbe31d2bf5def",
     "merged_at": "2026-11-09T22:18:38Z",
-    "findings": []
-   },
-   "17893": {
-    "title": "fix(browser): report a relay tab's downloads where Chrome saved them",
-    "merge_commit": "bd7c61fc510e5608b24ab02b8c3eeccda627ee50",
-    "merged_at": "2026-11-08T08:40:06Z",
-    "findings": []
-   },
-   "17895": {
-    "title": "fix(coding-agent): find named sections and other implicit roles with role/ selectors",
-    "merge_commit": "c9933df79d9aa44eb41db52a6914652361046827",
-    "merged_at": "2026-11-08T08:40:06Z",
-    "findings": []
-   },
-   "17904": {
-    "title": "fix(coding-agent): stop URL reads returning bot block pages as content",
-    "merge_commit": "6ce6f8a07457a95f500b6f8936a5b176ee147faf",
-    "merged_at": "2026-11-08T08:40:06Z",
-    "findings": []
-   },
-   "17940": {
-    "title": "fix(coding-agent): keep browser agents from pulling Chrome in front of your app on Linux X11",
-    "merge_commit": "5e0d5f179da1401890538b7a85046d138b163a0e",
-    "merged_at": "2026-11-08T08:40:06Z",
-    "findings": []
-   },
-   "18167": {
-    "title": "fix(skills): find a skill created after the session started by skill:// name",
-    "merge_commit": "461f5e8e55395582d60d5f310bcbd19c84fabcb3",
-    "merged_at": "2026-11-08T08:40:06Z",
-    "findings": []
-   },
-   "18220": {
-    "title": "fix(natives): read back AT-SPI text writes before reporting success",
-    "merge_commit": "c1e7ea4267082e39f0f27248c6923c352b9e4da1",
-    "merged_at": "2026-11-08T08:40:06Z",
-    "findings": []
-   },
-   "18223": {
-    "title": "fix(coding-agent): preserve eval state after late tool rejections",
-    "merge_commit": "dc949c3e0714bbfe3cbde272db38d7e41f8ca0e6",
-    "merged_at": "2026-11-08T08:40:06Z",
     "findings": []
    },
    "18632": {
@@ -69687,12 +69639,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-03T09:03:52Z",
-    "kind": "openable",
-    "id": "atspi-action-names",
-    "title": "fix(natives): match AT-SPI actions by their machine names"
-   },
    {
     "at": "2026-11-03T09:34:39Z",
     "kind": "unopenable",
@@ -73564,7 +73510,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-10T08:05:37.835038Z",
+  "at": "2026-11-10T09:07:05.386981Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
