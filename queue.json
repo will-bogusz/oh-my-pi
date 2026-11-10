@@ -69325,7 +69325,7 @@
    "branch": "will/finder-desktop-key",
    "title": "fix(natives): restore Finder with its desktop focus after macOS background input",
    "area": "computer",
-   "priority": "P1",
+   "priority": "P0",
    "needs": [],
    "base": "f0200abf28e8d314125854600cf726dece495246",
    "body": "bodies/finder-desktop-key.md",
@@ -69335,7 +69335,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/finder-desktop-key",
    "host": "MacBook-Pro",
    "added": "2026-11-10T04:31:00Z",
-   "updated": "2026-11-10T05:57:32Z",
+   "updated": "2026-11-10T06:03:32Z",
    "note": "",
    "built": [
     {
