@@ -44,7 +44,7 @@ The probe runs in the frame's isolated world, so page scripts can neither see no
 
 The 102 actions are navigations, in-place changes and deliberate no-ops on six bench task pages, each line compared with an independent look 1 s later, `main` and this head interleaved.
 
-Model runs on headless Chrome for Testing; ratios are geometric means of per-task ratios with 95% bootstrap intervals, and the samples are small:
+Model runs on headless Chrome for Testing; ratios are geometric means of per-task ratios with 95% bootstrap intervals, and the samples are small. None of these runs was blind: the model could read the arm's name in its working directory or in error stack paths (`outcome-print`, `browser-action-outcome`).
 
 | model, tasks x runs per arm | build | steps | tokens | look-only cells | pass `main` / PR |
 |---|---|---|---|---|---|
