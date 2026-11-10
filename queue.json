@@ -71558,6 +71558,24 @@
    "added": "2026-11-10T19:06:45Z",
    "updated": "2026-11-10T19:06:45Z",
    "note": ""
+  },
+  {
+   "id": "factory-droid-argon-promo",
+   "branch": "will/factory-droid-argon-promo",
+   "title": "fix(catalog): show Factory Droid's Gemini 4 Argon credit promotion",
+   "area": "catalog",
+   "priority": null,
+   "needs": [],
+   "base": "7a03d7af15263b7d77ee628d617b43f7b1dcb8a8",
+   "body": "bodies/factory-droid-argon-promo.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-argon-promo",
+   "host": "MacBook-Pro",
+   "added": "2026-11-10T19:19:18Z",
+   "updated": "2026-11-10T19:19:18Z",
+   "note": ""
   }
  ],
  "watch": {
