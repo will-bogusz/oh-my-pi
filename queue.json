@@ -21420,7 +21420,7 @@
    "area": "computer",
    "priority": "P2",
    "needs": [],
-   "base": "03b4916ab3a78d95d4bf06405efda6d490df7be9",
+   "base": "433a9101959de11e34cd0047996cb1e87446a383",
    "body": "bodies/computer-ui-quiet.md",
    "state": "queued",
    "pr": null,
@@ -21428,9 +21428,9 @@
    "worktree": null,
    "host": "MacBook-Pro",
    "added": "2026-10-19T07:26:45Z",
-   "updated": "2026-11-07T22:58:27Z",
+   "updated": "2026-11-10T22:13:06Z",
    "note": "On opening: edit discussion #16371's 'What it sees now' table, PR cell 'queued' -> '#N' (the watcher updates only the status block). Real overlap with #16403: both change the apps.open native call in worker.ts (we wrap it in the quiet wait); if #16403 merges first, rebase onto it and wrap its new call (QueueRebase, 2026-10-22). 2026-10-29 (ComputerDocs): 00427ab9a8 replaces the Bun.sleep in 'waits after an unawaited input ends' with gates (precheck timing FIX cleared; fails with 25b3c0c99's worker fix reverted); computer-input-diff-report restacked on it. The Mac worktree's local branch (0725dcaf40) is a stale pre-advance copy; work from fork. 2026-10-29 later: rebased onto main b0756921ed and pushed (049c16bba4), precheck clean then; #15282's Codex fix f96486b3e0 changed the axPerform call ui-quiet wraps in worker.ts, so it now waits for #15282 to merge, then rebases (wrap the call with the native key).$'\\n'2026-11-03 (QueueRestructure): after #17931 merged, Brit's 84b4eb7453 made computer/worker.ts sessionPath resolve ~ paths with path.resolve(expandTilde(..)) (native separators) and dropped settings.ts's private expandTilde copy: a rebase onto main keeps that, and new path handling reuses the shared expandTilde + path.resolve.",
-   "advanced": "2026-11-07T22:58:27Z",
+   "advanced": "2026-11-10T22:13:06Z",
    "built": [
     {
      "with": "#16908",
@@ -57912,7 +57912,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "03b4916ab3a78d95d4bf06405efda6d490df7be9",
+   "base": "433a9101959de11e34cd0047996cb1e87446a383",
    "body": "bodies/iphone-mirror-scroll-distance.md",
    "state": "queued",
    "pr": null,
@@ -57920,9 +57920,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/iphone-mirror-scroll-distance",
    "host": "MacBook-Pro",
    "added": "2026-10-30T21:35:55Z",
-   "updated": "2026-11-07T22:58:36Z",
+   "updated": "2026-11-10T22:13:06Z",
    "note": "",
-   "advanced": "2026-11-07T22:58:36Z"
+   "advanced": "2026-11-10T22:13:06Z"
   },
   {
    "id": "iphone-mirror-not-showing",
@@ -70496,7 +70496,7 @@
    "area": "browser",
    "priority": "P1",
    "needs": [],
-   "base": "f0200abf28e8d314125854600cf726dece495246",
+   "base": "433a9101959de11e34cd0047996cb1e87446a383",
    "body": "bodies/browser-wait-predicate.md",
    "state": "queued",
    "pr": null,
@@ -70504,8 +70504,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-wait-predicate",
    "host": "MacBook-Pro",
    "added": "2026-11-10T15:45:44Z",
-   "updated": "2026-11-10T15:46:36Z",
-   "note": ""
+   "updated": "2026-11-10T22:13:06Z",
+   "note": "",
+   "advanced": "2026-11-10T22:13:06Z"
   },
   {
    "id": "computer-input-lease-wait",
@@ -71165,7 +71166,7 @@
    "area": "browser",
    "priority": "P2",
    "needs": [],
-   "base": "eda28eff97cf7a352fd3057a03581be1686dbc7a",
+   "base": "433a9101959de11e34cd0047996cb1e87446a383",
    "body": "bodies/browser-run-node-hint.md",
    "state": "queued",
    "pr": null,
@@ -71173,8 +71174,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-run-node-hint",
    "host": "MacBook-Pro",
    "added": "2026-11-10T16:48:01Z",
-   "updated": "2026-11-10T16:48:01Z",
-   "note": ""
+   "updated": "2026-11-10T22:13:06Z",
+   "note": "",
+   "advanced": "2026-11-10T22:13:06Z"
   },
   {
    "id": "browser-wait-text-rendered",
@@ -71830,7 +71832,7 @@
    "needs": [
     "subagent-browser"
    ],
-   "base": "5e0cebfc222150f3fad7d3f3be3b10b34be9480c",
+   "base": "433a9101959de11e34cd0047996cb1e87446a383",
    "body": "bodies/subagent-browser-relay.md",
    "state": "queued",
    "pr": null,
@@ -71838,8 +71840,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/subagent-browser-relay",
    "host": "MacBook-Pro",
    "added": "2026-11-10T18:40:43Z",
-   "updated": "2026-11-10T18:40:43Z",
-   "note": ""
+   "updated": "2026-11-10T22:13:06Z",
+   "note": "",
+   "advanced": "2026-11-10T22:13:06Z"
   },
   {
    "id": "devin-pin-31243",
@@ -71897,7 +71900,7 @@
    "area": "browser",
    "priority": "P1",
    "needs": [],
-   "base": "e1d8f29d54957da5cb38b11d10a6778d13476980",
+   "base": "433a9101959de11e34cd0047996cb1e87446a383",
    "body": "bodies/observe-settle.md",
    "state": "queued",
    "pr": null,
@@ -71905,9 +71908,10 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-observe-settle",
    "host": "MacBook-Pro",
    "added": "2026-11-10T18:56:46Z",
-   "updated": "2026-11-10T18:57:24Z",
+   "updated": "2026-11-10T22:13:06Z",
    "note": "",
-   "hold": "observe-core series: opens when Brit agrees the series (Will)"
+   "hold": "observe-core series: opens when Brit agrees the series (Will)",
+   "advanced": "2026-11-10T22:13:06Z"
   },
   {
    "id": "settle-reads",
@@ -72308,7 +72312,7 @@
    "area": "browser",
    "priority": "P2",
    "needs": [],
-   "base": "e1d8f29d54957da5cb38b11d10a6778d13476980",
+   "base": "433a9101959de11e34cd0047996cb1e87446a383",
    "body": "bodies/browser-action-outcome.md",
    "state": "queued",
    "pr": null,
@@ -72316,9 +72320,10 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-action-outcome",
    "host": "MacBook-Pro",
    "added": "2026-11-10T19:19:48Z",
-   "updated": "2026-11-10T22:02:10Z",
+   "updated": "2026-11-10T22:13:06Z",
    "note": "",
-   "hold": "ActionOutcomePR, 2026-11-10: Haiku leg on this head did not reproduce the step saving (1.02x [0.84,1.25] vs earlier 0.86x); Sol leg on this head (guard-team, from 21:15Z) decides"
+   "hold": "ActionOutcomePR, 2026-11-10: Haiku leg on this head did not reproduce the step saving (1.02x [0.84,1.25] vs earlier 0.86x); Sol leg on this head (guard-team, from 21:15Z) decides",
+   "advanced": "2026-11-10T22:13:06Z"
   },
   {
    "id": "eval-assign-echo",
@@ -72327,7 +72332,7 @@
    "area": "eval",
    "priority": "P1",
    "needs": [],
-   "base": "e1d8f29d54957da5cb38b11d10a6778d13476980",
+   "base": "433a9101959de11e34cd0047996cb1e87446a383",
    "body": "bodies/eval-assign-echo.md",
    "state": "queued",
    "pr": null,
@@ -72335,9 +72340,10 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/eval-assign-echo",
    "host": "MacBook-Pro",
    "added": "2026-11-10T19:30:30Z",
-   "updated": "2026-11-10T19:41:11Z",
+   "updated": "2026-11-10T22:13:06Z",
    "note": "",
-   "hold": "Main, 2026-11-10: awaiting model sample (changes every JS cell's return); bots ScreenshotOutput"
+   "hold": "Main, 2026-11-10: awaiting model sample (changes every JS cell's return); bots ScreenshotOutput",
+   "advanced": "2026-11-10T22:13:06Z"
   },
   {
    "id": "observe-print",
