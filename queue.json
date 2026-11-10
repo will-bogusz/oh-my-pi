@@ -75239,7 +75239,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-10T17:00:25.255966Z",
+  "at": "2026-11-10T17:17:41.438247Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -76172,6 +76172,7 @@
      "needs computer-ui-quiet (queued)",
      "conflicts with #18680 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with #18675 in crates/pi-natives/src/desktop/macos/ax.rs, docs/tools/computer.md",
+     "conflicts with #18743 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with #18745 in docs/tools/computer.md",
      "conflicts with #18746 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
      "conflicts with #18353 in docs/tools/computer.md",
@@ -76185,6 +76186,7 @@
     "blocked_by": [
      "#18680",
      "#18675",
+     "#18743",
      "#18745",
      "#18746",
      "#18353",
