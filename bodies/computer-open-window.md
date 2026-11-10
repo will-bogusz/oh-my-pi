@@ -15,16 +15,17 @@ In a macOS 26.5 VM, an HTML file with its own `<title>` opened in Safari or Chro
 
 ## Why
 
-A browser shows an opened URL or file in a tab of a window it already has, and titles that window with the page's `<title>` once the page loads. `main` looked for a window titled with the file's name, which a titled page never has (`null` after the whole 3 s wait), and for a URL returned the frontmost window at once, before the tab had switched. In four of five real sessions, `apps.open` on a page came back like that: two HTML files `null`, a `chrome://extensions` call titled with a Gmail tab.
+Browsers title windows with the page's `<title>`, not its filename. `main` searched for the filename or returned a URL's window before its tab switched. The historical sample had four browser opens across three sessions, all returning a missing or stale-titled window; its fifth call, in a fourth session, correctly returned a PNG's Preview window.
 
-With this PR the name match still comes first. Otherwise `apps.open` takes the first window, front to back, whose title changed since the call (for a URL, also one that opened since), once that title has stayed the same for about 0.7 s: Safari shows a new tab as "Untitled" for 0.1-0.4 s before a local page's title. The wait keeps `main`'s 3 s bound. A file whose window never changed returns `null` as before; an Open panel a document app shows first never counts, since a new window counts only once its title changes. Files also match the name Finder shows, so Pages' `Budget.pages`, titled "Budget", is found at once.
+With this PR the name match still comes first; otherwise `apps.open` takes the first window, front to back, whose title changed since the call, or a newly created standard window, once its title has stayed the same for about 0.7 s. The baseline includes hidden and minimized windows across Spaces, so becoming visible is not mistaken for creation; accessibility distinguishes a new document window from an unchanged Open dialog, and without that evidence a new file window must change title. The wait keeps `main`'s 3 s bound, and files also match Finder's display name, such as `Budget` for `Budget.pages`.
 
 Rejected: reading the page's URL from accessibility (Chrome's window reports `AXDocument`, Safari's does not).
 
 ## Testing
 
-- `shown_window` unit tests in `crates/pi-natives/src/desktop/macos/applications.rs`, on injected window lists: a file titled by its page in an existing or new browser window, Safari's interim "Untitled", the front window first, a URL's new window, the Finder display name, an Open panel at the deadline, unreadable titles. With `main`'s choice of window put back into `shown_window`, 2 of them fail. `cargo test -p pi-natives --lib desktop::applications` on macOS: 25 passed.
-- Live, a lume macOS 26.5 VM with Safari, Chrome and TextEdit, `main` against this branch on the same 18 cases, from a closed browser to a page that takes 1.5 s and a TextEdit document.
+- `cargo test -p pi-natives --lib desktop::applications` on macOS: 25 passed, including page-titled files on the first poll, hidden windows keeping their old title beyond the settle period, Safari's interim title, Finder display names, unchanged Open dialogs and unreadable titles.
+- Before the bot fixes: a lume macOS 26.5 VM with Safari, Chrome and TextEdit, `main` against this branch on the same 18 cases, from a closed browser to a page that takes 1.5 s and a TextEdit document.
+- The bot-round cases use injected window lists and AX-role answers; a fresh live run of the new all-Space snapshot and Open-dialog distinction has not been performed.
 - `rust-check` on macOS and Linux.
 
 ---
