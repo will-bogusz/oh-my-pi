@@ -69120,7 +69120,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-10T03:30:40Z",
+  "checked": "2026-11-10T04:00:49Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -69262,26 +69262,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-03T03:58:48Z",
-    "kind": "openable",
-    "id": "headless-chrome-pipe",
-    "title": "fix(browser): exit a process-local headless Chrome when the process that launched it is killed"
-   },
-   {
-    "at": "2026-11-03T03:58:48Z",
-    "kind": "unopenable",
-    "id": "wayland-click-pacing",
-    "title": "fix(natives): pace Wayland multi-clicks so KDE Qt apps see double clicks",
-    "why": "opened as #17903"
-   },
-   {
-    "at": "2026-11-03T03:58:48Z",
-    "kind": "unopenable",
-    "id": "read-block-pages",
-    "title": "fix(coding-agent): stop URL reads returning bot block pages as content",
-    "why": "opened as #17904"
-   },
    {
     "at": "2026-11-03T04:29:20Z",
     "kind": "openable",
