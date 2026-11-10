@@ -8,6 +8,7 @@ import {
 	resolveApproval,
 	resolveApprovalFromContext,
 } from "../tools/approval";
+import { resolveOutputMaxColumns } from "../tools/output-meta";
 
 /** Host context supplied when an eval prelude calls back out of its language VM. */
 export interface EvalPreludeContext {
@@ -207,7 +208,45 @@ function takeFirstCallGuide(definition: EvalPreludeDefinition, session: ToolSess
 	}
 	if (delivered.preludes.has(definition.name)) return undefined;
 	delivered.preludes.add(definition.name);
-	return `${definition.name}${FIRST_CALL_GUIDE_HEADER}full reference at \`xd://eval/${definition.name}\`):\n${guide}`;
+	const header = `${definition.name}${FIRST_CALL_GUIDE_HEADER}full reference at \`xd://eval/${definition.name}\`):`;
+	// The guide prints through the cell output, whose sink cuts every line past `tools.outputMaxColumns`
+	// bytes, so its long rules are wrapped onto indented continuation lines instead of losing their tails.
+	return `${header}\n${wrapLines(guide, resolveOutputMaxColumns(session.settings))}`;
+}
+
+/**
+ * `text` with each line longer than `maxBytes` UTF-8 bytes broken at spaces onto continuation lines indented under
+ * its text (past its indent and bullet marker). Lines inside a code fence are left whole: the sink may cut one, but
+ * reflowing code would change it.
+ */
+function wrapLines(text: string, maxBytes: number): string {
+	const limit = Math.floor(maxBytes);
+	if (!(limit > 0)) return text;
+	const out: string[] = [];
+	let fenced = false;
+	for (const line of text.split("\n")) {
+		if (/^\s*```/.test(line)) fenced = !fenced;
+		if (fenced || Buffer.byteLength(line) <= limit) {
+			out.push(line);
+			continue;
+		}
+		const [, lead = "", marker = "", rest = ""] = /^(\s*)([-*] )?(.*)$/.exec(line) ?? [];
+		const indent = lead + " ".repeat(marker.length);
+		// The bullet marker stays on the line of its first word.
+		let current = lead + marker;
+		let first = true;
+		for (const word of rest.split(" ")) {
+			if (!first && Buffer.byteLength(`${current} ${word}`) > limit) {
+				out.push(current);
+				current = indent + word;
+			} else {
+				current = first ? current + word : `${current} ${word}`;
+			}
+			first = false;
+		}
+		out.push(current);
+	}
+	return out.join("\n");
 }
 
 /** Names of the preludes whose first-call guide a tool result in the session's context still carries. */

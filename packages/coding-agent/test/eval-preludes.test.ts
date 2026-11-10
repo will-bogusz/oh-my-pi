@@ -214,4 +214,41 @@ describe("eval prelude host invocation", () => {
 			"ran",
 		);
 	});
+
+	it("wraps guide lines past the session's output line cap under their indent and bullet, never fenced code", async () => {
+		const code = `const line = "${"x".repeat(60)}";`;
+		const guide = [
+			"- top rule",
+			"  - nested alpha beta gamma delta epsilon zeta eta theta",
+			"```js",
+			code,
+			"```",
+		].join("\n");
+		const definition: EvalPreludeDefinition = {
+			name: "probe",
+			documentation: "Probe documentation",
+			firstCallDocumentation: guide,
+			javascript: "globalThis.probe = {};",
+			python: "probe = object()",
+			exports: ["probe"],
+			approval: "read",
+			invoke: async () => ({ content: [{ type: "text", text: "ran" }], details: {} }),
+		};
+		const deliver = async (cap: number) => {
+			const session = {
+				...makeSession(() => [definition]),
+				settings: Settings.isolated({ "tools.outputMaxColumns": cap }),
+			};
+			const { content } = await invokeEvalPrelude("probe", {}, { session, toolCallId: "call" });
+			return content.map(part => (part.type === "text" ? part.text : "")).join("");
+		};
+
+		expect(await deliver(40)).toContain(
+			["- top rule", "  - nested alpha beta gamma delta", "    epsilon zeta eta theta", "```js", code, "```"].join(
+				"\n",
+			),
+		);
+		// A cap of 0 turns the sink's cut off, and the guide goes out as written.
+		expect(await deliver(0)).toContain(`):\n${guide}\n`);
+	});
 });

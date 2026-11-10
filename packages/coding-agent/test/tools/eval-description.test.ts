@@ -210,7 +210,11 @@ describe("eval tool description", () => {
 
 	it("links the computer guide and prints it with the first computer call's output", async () => {
 		const preludes: EvalPreludeDefinition[] = [];
-		const session = makeSession({ settings: { "computer.enabled": true }, preludes: () => preludes });
+		// The session's output line cap differs from the process default (768), as an SDK or ACP session's may.
+		const session = makeSession({
+			settings: { "computer.enabled": true, "tools.outputMaxColumns": 1024 },
+			preludes: () => preludes,
+		});
 		const computer = createComputerPrelude(session, () => ({
 			async run() {
 				return { displays: [{ type: "text", text: "ran" }], returnValue: 1, screenshots: [] };
@@ -238,6 +242,12 @@ describe("eval tool description", () => {
 		expect(first).toStartWith("ran\n");
 		expect(rest).toHaveLength(1);
 		expect(result.output.trimEnd()).toEndWith("</critical>\n\nran\n1");
+		// The cell output cuts lines past the session's `tools.outputMaxColumns`; the guide's longer rules arrive whole,
+		// wrapped onto continuation lines.
+		expect(result.output.replace(/\s+/g, " ")).toContain(
+			(computer.firstCallDocumentation ?? "").trim().replace(/\s+/g, " "),
+		);
+		expect(Math.max(...result.output.split("\n").map(line => Buffer.byteLength(line)))).toBeLessThanOrEqual(1024);
 	});
 
 	it("lists a prelude with a first-call guide apart from the read-first docs, without the guide", () => {

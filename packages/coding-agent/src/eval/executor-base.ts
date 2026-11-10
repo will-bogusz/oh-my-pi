@@ -479,7 +479,8 @@ export async function executeWithKernelBase<
 		formatTimeoutAnnotation,
 	} = params;
 
-	const settings = await Settings.init();
+	// The session's own caps, as the JS executor uses: an SDK, ACP or subagent session may differ from the process's.
+	const settings = options?.toolSession?.settings ?? (await Settings.init());
 	const sink = new OutputSink({
 		onChunk: options?.onChunk,
 		artifactPath: options?.artifactPath,
