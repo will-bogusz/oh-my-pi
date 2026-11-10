@@ -73494,8 +73494,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-10T15:13:15.611632Z",
-  "host": "goliath",
+  "at": "2026-11-10T15:48:24.406730Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -74008,6 +74008,29 @@
      "#18624"
     ],
     "created": "2026-11-09T18:20:14Z"
+   },
+   {
+    "id": "browser-wait-predicate",
+    "label": "browser-wait-predicate",
+    "number": null,
+    "state": "queued",
+    "area": "browser",
+    "priority": "P1",
+    "title": "feat(browser): add waitForFunction to tabs and frames",
+    "action": "wait",
+    "reasons": [
+     "conflicts with #18676 in packages/coding-agent/src/tools/browser/frames.ts",
+     "conflicts with #15508 in docs/tools/browser.md"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "#18676",
+     "#15508"
+    ],
+    "needs": [],
+    "created": "2026-11-10T15:45:44Z"
    },
    {
     "id": "browser-dead-tab-hint",
