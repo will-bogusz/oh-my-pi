@@ -72406,7 +72406,7 @@
    "needs": [
     "factory-droid-171-pin"
    ],
-   "base": "0093ffa81560e89211ad4d7bb215b7a2908453f4",
+   "base": "0b4dc556082eea5e6305211aed01f4c7d823cacf",
    "body": "bodies/factory-droid-171-models.md",
    "state": "queued",
    "pr": null,
@@ -72414,7 +72414,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-171-models",
    "host": "MacBook-Pro",
    "added": "2026-11-10T19:41:03Z",
-   "updated": "2026-11-10T19:42:30Z",
+   "updated": "2026-11-10T20:03:41Z",
    "note": ""
   },
   {
