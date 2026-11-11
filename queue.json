@@ -75816,6 +75816,24 @@
    "opened": "2026-11-11T06:06:11Z",
    "readied": "2026-11-11T06:06:53Z",
    "advanced": "2026-11-11T06:53:17Z"
+  },
+  {
+   "id": "relay-print-preview-error",
+   "branch": "will/relay-print-preview-error",
+   "title": "fix(coding-agent,browser-relay): fail a browser call a print preview holds in an attached browser within seconds",
+   "area": "browser",
+   "priority": "P2",
+   "needs": [],
+   "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
+   "body": "bodies/relay-print-preview-error.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-print-preview-error",
+   "host": "MacBook-Pro",
+   "added": "2026-11-11T07:04:56Z",
+   "updated": "2026-11-11T07:04:56Z",
+   "note": ""
   }
  ],
  "watch": {
