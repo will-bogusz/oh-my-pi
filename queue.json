@@ -82800,6 +82800,13 @@
     "at": "2026-11-11T10:07:30Z",
     "host": "Wills-MacBook-Pro"
    }
+  },
+  "2db3363a45d4a1b088dab5d129c68760dd0d71fc": {
+   "windows": {
+    "sha": "f1bfb1e728a8a579e8c215643d7e42314fc70f9f",
+    "at": "2026-11-11T10:10:59Z",
+    "host": "goliath"
+   }
   }
  },
  "plan": {
