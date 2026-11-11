@@ -77141,7 +77141,7 @@
    "area": "browser",
    "priority": "P2",
    "needs": [],
-   "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
+   "base": "6364864c1102930ebd13092ff91fdb02553f3f73",
    "body": "bodies/browser-select-objects.md",
    "state": "queued",
    "pr": null,
@@ -77149,8 +77149,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-select-objects",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:27:26Z",
-   "updated": "2026-11-11T14:03:00Z",
-   "note": ""
+   "updated": "2026-11-11T14:13:07Z",
+   "note": "",
+   "advanced": "2026-11-11T14:13:07Z"
   },
   {
    "id": "win-screen-locked",
