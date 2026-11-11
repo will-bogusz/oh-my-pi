@@ -1428,7 +1428,7 @@ fn perform_choosing(
 		if path.is_some() {
 			return Err(DesktopError::invalid_target("AXRaise opens no menu to choose an item from"));
 		}
-		return element_action_result(&native, send_action(element, &native));
+		return raise_unless_cancelled(&native, |action| send_action(element, action));
 	}
 	let pid = element_pid(element)?;
 	let scroll = scroll_before_press(&native, &actions, || process::is_uikit(pid));
@@ -2083,16 +2083,28 @@ fn scroll_before_press<'a>(
 	uikit().then_some(scroll.as_str())
 }
 
+/// Sends `AXRaise` as `native`, unless the run was cancelled before the send,
+/// including during the action-name read that chose it, which can block for
+/// the app's whole AX timeout. A raise inside [`control::cleanup`], such as
+/// takeover's restoration, still goes out, and so does one after the user
+/// used the app: raising sends no input to it.
+fn raise_unless_cancelled(native: &str, send: impl FnOnce(&str) -> AXError) -> CoreResult<()> {
+	control::check()?;
+	element_action_result(native, send(native))
+}
+
 /// Sends `native`, after `scroll` when given. A failed scroll leaves the
-/// action to report its own outcome; a run cancelled during the scroll sends
-/// nothing more, and nothing is sent once the user has pressed a key or
-/// clicked in the app since the call was admitted
+/// action to report its own outcome. Nothing is sent by a run cancelled
+/// before the send, including during the action-name read that chose
+/// `native`, which can block for the app's whole AX timeout; nor once the
+/// user has pressed a key or clicked in the app since the call was admitted
 /// ([`control::intervention::check_press`]).
 fn press_into_view(
 	native: &str,
 	scroll: Option<&str>,
 	mut send: impl FnMut(&str) -> AXError,
 ) -> CoreResult<()> {
+	control::check()?;
 	control::intervention::check_press()?;
 	if let Some(scroll) = scroll {
 		let _ = send(scroll);
@@ -3239,8 +3251,49 @@ mod tests {
 	}
 
 	#[test]
+	fn a_run_cancelled_before_the_send_sends_no_action() {
+		use super::{SCROLL_TO_VISIBLE, press_into_view, raise_unless_cancelled};
+		use crate::desktop::control;
+
+		// The run is cancelled while the action-name read that chose the
+		// action blocks, as an app answering slowly makes it: neither the
+		// scroll nor the press goes out, nor a raise.
+		let source = control::CancellationSource::default();
+		let token = source.token();
+		source.cancel();
+		let mut sent = Vec::new();
+		let pressed = control::with_token_for_test(&token, || {
+			press_into_view("AXPress", Some(SCROLL_TO_VISIBLE), |action| {
+				sent.push(action.to_owned());
+				AXError::Success
+			})
+		});
+		let raised = control::with_token_for_test(&token, || {
+			raise_unless_cancelled("AXRaise", |action| {
+				sent.push(action.to_owned());
+				AXError::Success
+			})
+		});
+		assert_eq!(pressed.map_err(|error| error.code), Err(ErrorCode::Cancelled));
+		assert_eq!(raised.map_err(|error| error.code), Err(ErrorCode::Cancelled));
+		assert!(sent.is_empty(), "{sent:?}");
+		// Takeover restores the stacking it changed inside cleanup, cancelled
+		// or not.
+		let restored = control::with_token_for_test(&token, || {
+			control::cleanup(|| {
+				raise_unless_cancelled("AXRaise", |action| {
+					sent.push(action.to_owned());
+					AXError::Success
+				})
+			})
+		});
+		assert!(restored.is_ok());
+		assert_eq!(sent, ["AXRaise"]);
+	}
+
+	#[test]
 	fn no_action_is_sent_once_the_user_used_the_app() {
-		use super::{SCROLL_TO_VISIBLE, press_into_view};
+		use super::{SCROLL_TO_VISIBLE, press_into_view, raise_unless_cancelled};
 		use crate::desktop::control::{CancellationSource, intervention::Listener};
 
 		let run = |used_before: bool| {
@@ -3259,10 +3312,19 @@ mod tests {
 				listener.record_for_test(7, std::time::Instant::now());
 				AXError::Success
 			});
+			// A raise sends the app no input, so it still goes out.
+			let raised = raise_unless_cancelled("AXRaise", |action| {
+				sent.push(action.to_owned());
+				AXError::Success
+			});
+			assert!(raised.is_ok());
 			(result.map_err(|error| error.code), sent)
 		};
-		assert_eq!(run(true), (Err(ErrorCode::UserIntervened), vec![]));
-		assert_eq!(run(false), (Err(ErrorCode::UserIntervened), vec![SCROLL_TO_VISIBLE.to_owned()]));
+		assert_eq!(run(true), (Err(ErrorCode::UserIntervened), vec!["AXRaise".to_owned()]));
+		assert_eq!(
+			run(false),
+			(Err(ErrorCode::UserIntervened), vec![SCROLL_TO_VISIBLE.to_owned(), "AXRaise".to_owned()])
+		);
 	}
 
 	#[test]

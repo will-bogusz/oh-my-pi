@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed a cancelled or timed-out macOS `press()` or `raise()` still pressing or raising when the app was slow to list its actions
+
 ## [18.18.8] - 2026-11-11
 
 ### Changed
