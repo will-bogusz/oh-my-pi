@@ -1492,6 +1492,9 @@ describe("RelayBridge attachment release", () => {
 		// A relay restarted after an upgrade: Chrome still has the previous process's attachments.
 		connect(bridge, ext, [tab({ tabId: 1 }), tab({ tabId: 2 })], [1]);
 		await flush();
+		// Reconcile the tab-wide switches the prior relay left behind before releasing the attachment.
+		ack(bridge, ext, "send");
+		await flush();
 		expect(ext.rpcs("detach").map(rpc => rpc.tabId)).toEqual([1]);
 	});
 
