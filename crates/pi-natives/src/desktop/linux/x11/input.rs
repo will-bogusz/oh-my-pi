@@ -12,7 +12,7 @@
 //!   pointer position and previously active window.
 
 use std::{
-	cell::Cell,
+	cell::{Cell, RefCell},
 	sync::Arc,
 	time::{Duration, Instant},
 };
@@ -35,6 +35,7 @@ use x11rb::{
 use super::{
 	keymap::{self, KeyStep, Keymap},
 	mpx::Mpx,
+	release_guard::{Held, ReleaseGuard},
 	toolkit, uinput,
 	wm::{Atoms, FocusSnapshot, Wm},
 };
@@ -78,6 +79,9 @@ pub struct X11Input {
 	/// hot-plug devices is not re-probed (and its hierarchy not churned) on
 	/// every action.
 	mpx_unavailable:  Option<String>,
+	/// The watcher releasing this call's `XTest` presses if omp dies first;
+	/// set for the length of each `XTest` call that can press.
+	release:          RefCell<Option<ReleaseGuard>>,
 }
 
 /// Keyboard input to plan against a keymap.
@@ -133,6 +137,7 @@ impl X11Input {
 			takeover_pointer: Cell::new(None),
 			mpx: None,
 			mpx_unavailable,
+			release: RefCell::new(None),
 		})
 	}
 
@@ -617,6 +622,7 @@ impl X11Input {
 	/// Real `XTest` pointer input, with the gesture's modifiers held on the core
 	/// keyboard and every modifier and button released on all exit paths.
 	fn pointer_xtest(&self, event: &PointerEvent) -> CoreResult<()> {
+		let _watched = (!matches!(event, PointerEvent::Move { .. })).then(|| self.watch_releases());
 		let modifiers = match event {
 			PointerEvent::Click { modifiers, .. } | PointerEvent::Drag { modifiers, .. } => *modifiers,
 			PointerEvent::Move { .. } | PointerEvent::Scroll { .. } | PointerEvent::Hold { .. } => {
@@ -706,6 +712,12 @@ impl X11Input {
 	}
 
 	fn xtest_steps(&self, steps: &[KeyStep], duration: Duration) -> CoreResult<()> {
+		// Started before the checks, so no connect or fork sits between them
+		// and the first press.
+		let _watched = steps
+			.iter()
+			.any(|step| step.press)
+			.then(|| self.watch_releases());
 		self.check_released_keys(
 			steps
 				.iter()
@@ -740,11 +752,30 @@ impl X11Input {
 		self.conn.flush().map_err(input_failed)
 	}
 
+	/// Forks the watcher that releases this call's `XTest` presses if omp dies
+	/// before it does; the returned scope ends it. A watcher that cannot start
+	/// leaves the call to run without one.
+	fn watch_releases(&self) -> WatchedReleases<'_> {
+		*self.release.borrow_mut() = ReleaseGuard::start(self.root);
+		WatchedReleases(&self.release)
+	}
+
+	fn watch(&self, held: Held, press: bool) {
+		if let Some(guard) = self.release.borrow().as_ref() {
+			if press {
+				guard.pressing(held);
+			} else {
+				guard.released(held);
+			}
+		}
+	}
+
 	fn xtest_key(&self, keycode: u8, press: bool) -> CoreResult<()> {
 		// A release always goes out: a cancel stops only the next press.
 		if press {
 			control::check()?;
 			self.check_takeover_focus()?;
+			self.watch(Held::Key(keycode), true);
 		}
 		self
 			.conn
@@ -763,7 +794,11 @@ impl X11Input {
 			)
 			.map_err(input_failed)?
 			.check()
-			.map_err(input_failed)
+			.map_err(input_failed)?;
+		if !press {
+			self.watch(Held::Key(keycode), false);
+		}
+		Ok(())
 	}
 
 	fn send_key(
@@ -983,6 +1018,7 @@ impl X11Input {
 				// The takeover already moved the core pointer, and maybe clicked.
 				self.wm().check_pointer_target(window, x, y, true)?;
 			}
+			self.watch(Held::Button(detail), true);
 		}
 		self
 			.conn
@@ -1001,7 +1037,11 @@ impl X11Input {
 			)
 			.map_err(input_failed)?
 			.check()
-			.map_err(input_failed)
+			.map_err(input_failed)?;
+		if !press {
+			self.watch(Held::Button(detail), false);
+		}
+		Ok(())
 	}
 
 	fn check_released_keys(&self, keycodes: impl IntoIterator<Item = u8>) -> CoreResult<()> {
@@ -1129,6 +1169,15 @@ fn pointer_mpx(wm: Wm<'_>, mpx: &mut Mpx, window: Window, event: &PointerEvent) 
 		mpx.inhibit();
 	}
 	isolated(result, isolation)
+}
+
+/// One `XTest` call's release watch; dropping it ends the watcher.
+struct WatchedReleases<'a>(&'a RefCell<Option<ReleaseGuard>>);
+
+impl Drop for WatchedReleases<'_> {
+	fn drop(&mut self) {
+		self.0.borrow_mut().take();
+	}
 }
 
 /// Joins an MPX call's result with its focus-isolation check. A clean refusal
@@ -1297,5 +1346,118 @@ mod tests {
 		let failed = isolated(Err(DesktopError::input_failed("lost")), disturbed()).unwrap_err();
 		assert_eq!(failed.message, "lost");
 		assert_eq!(isolated(Ok(()), disturbed()).unwrap_err().message, "focus moved");
+	}
+
+	/// Set for the process `a_killed_holder_leaves_no_xtest_key_or_button_down`
+	/// starts and kills.
+	const HOLDER: &str = "PI_TEST_XTEST_HOLDER";
+
+	/// A process killed while it holds an `XTest` key and button leaves
+	/// neither down. Starts its own `Xvfb`: `cargo test -p pi-natives --
+	/// --ignored killed_holder`.
+	#[test]
+	#[ignore = "starts Xvfb"]
+	fn a_killed_holder_leaves_no_xtest_key_or_button_down() {
+		use std::{
+			io::{BufRead, BufReader},
+			process::{Child, Command, Stdio},
+		};
+
+		use x11rb::protocol::{Event, xinput};
+
+		struct Reaped(Child);
+		impl Drop for Reaped {
+			fn drop(&mut self) {
+				let _ = self.0.kill();
+				let _ = self.0.wait();
+			}
+		}
+		let mut server = Reaped(
+			Command::new("Xvfb")
+				.args(["-displayfd", "1", "-screen", "0", "320x240x24", "-nolisten", "tcp"])
+				.stdout(Stdio::piped())
+				.stderr(Stdio::null())
+				.spawn()
+				.expect("Xvfb starts"),
+		);
+		let mut number = String::new();
+		BufReader::new(server.0.stdout.take().expect("Xvfb stdout"))
+			.read_line(&mut number)
+			.expect("Xvfb reports its display");
+		let display = format!(":{}", number.trim());
+		let (conn, screen) = x11rb::connect(Some(&display)).expect("connect to Xvfb");
+		let root = conn.setup().roots[screen].root;
+		let shift = Keymap::core(&conn)
+			.unwrap()
+			.held_keycodes(&[KeyName::Shift])
+			.unwrap()[0];
+		let held = || {
+			let keys = conn.query_keymap().unwrap().reply().unwrap().keys;
+			let buttons = conn.query_pointer(root).unwrap().reply().unwrap().mask;
+			(
+				keys[usize::from(shift / 8)] & (1 << (shift % 8)) != 0,
+				buttons.contains(KeyButMask::BUTTON1),
+			)
+		};
+		conn.xinput_xi_query_version(2, 0).unwrap().reply().unwrap();
+		conn
+			.xinput_xi_select_events(root, &[xinput::EventMask {
+				deviceid: xinput::Device::ALL.into(),
+				mask:     vec![
+					xinput::XIEventMask::RAW_KEY_PRESS | xinput::XIEventMask::RAW_BUTTON_PRESS,
+				],
+			}])
+			.unwrap()
+			.check()
+			.unwrap();
+
+		let mut holder = Reaped(
+			Command::new(std::env::current_exe().unwrap())
+				.args(["--exact", "desktop::linux::x11::input::tests::xtest_holder", "--ignored"])
+				.env("DISPLAY", &display)
+				.env(HOLDER, "1")
+				.stdout(Stdio::piped())
+				.stderr(Stdio::null())
+				.spawn()
+				.expect("holder starts"),
+		);
+		let (mut shift_down, mut button_down) = (false, false);
+		while !(shift_down && button_down) {
+			match conn.wait_for_event().unwrap() {
+				Event::XinputRawKeyPress(raw) if raw.detail == u32::from(shift) => shift_down = true,
+				Event::XinputRawButtonPress(raw) if raw.detail == 1 => button_down = true,
+				_ => {},
+			}
+		}
+		assert_eq!(held(), (true, true), "the holder holds Shift and button 1");
+		let mut output = holder.0.stdout.take().expect("holder stdout");
+		holder.0.kill().expect("SIGKILL the holder");
+		holder.0.wait().expect("reap the holder");
+		// The holder's stdout ends when every process holding it is gone,
+		// which includes a watcher that is still sending its releases.
+		std::io::Read::read_to_end(&mut output, &mut Vec::new()).expect("holder stdout ends");
+		conn.get_input_focus().unwrap().reply().unwrap();
+		assert_eq!(held(), (false, false), "Shift and button 1 after the holder died");
+	}
+
+	/// The holder `a_killed_holder_leaves_no_xtest_key_or_button_down` kills:
+	/// holds Shift and button 1 through `XTest` for 30 s.
+	#[test]
+	#[ignore = "run by a_killed_holder_leaves_no_xtest_key_or_button_down"]
+	fn xtest_holder() {
+		if std::env::var_os(HOLDER).is_none() {
+			return;
+		}
+		let (conn, screen) = x11rb::connect(None).unwrap();
+		let root = conn.setup().roots[screen].root;
+		let mut input = X11Input::new(Arc::new(conn), root).unwrap();
+		let hold = PointerEvent::Hold {
+			x:        10.0,
+			y:        10.0,
+			button:   MouseButton::Left,
+			keys:     vec![KeyName::Shift],
+			duration: Duration::from_secs(30),
+		};
+		let _ = input.pointer(&Target::Desktop, hold, DeliveryMode::Background);
 	}
 }

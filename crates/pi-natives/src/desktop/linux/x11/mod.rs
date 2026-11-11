@@ -2,6 +2,7 @@ mod capture;
 mod input;
 mod keymap;
 mod mpx;
+mod release_guard;
 mod toolkit;
 mod uinput;
 mod wm;
