@@ -71295,13 +71295,13 @@
    "needs": [],
    "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
    "body": "bodies/browser-run-node-hint.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18840,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-run-node-hint",
    "host": "MacBook-Pro",
    "added": "2026-11-10T16:48:01Z",
-   "updated": "2026-11-11T06:19:23Z",
+   "updated": "2026-11-11T06:22:50Z",
    "note": "",
    "advanced": "2026-11-11T06:19:23Z",
    "built": [
@@ -71535,7 +71535,8 @@
      "host": "goliath",
      "tree": "9edbb8e021bfb59339f8b832dd126edbed2672a6"
     }
-   ]
+   ],
+   "opened": "2026-11-11T06:22:50Z"
   },
   {
    "id": "browser-wait-text-rendered",
