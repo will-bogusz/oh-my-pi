@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 13:00Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 13:01Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-11-11 11:54Z on MacBook-Pro; groups below are from it, states from the manifest)
@@ -139,7 +139,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | [#18895](https://github.com/can1357/oh-my-pi/pull/18895) | win-posted-modifiers | fix(natives): refuse Windows background input that holds a modifier | computer | P1 | 3h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-posted-modifiers) |
 | [#18883](https://github.com/can1357/oh-my-pi/pull/18883) | browser-main-wait-globals | fix(browser): keep main-world waits from exposing query bindings | browser | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/main-world-wait) |
 | [#18884](https://github.com/can1357/oh-my-pi/pull/18884) | browser-main-wait-navigation | fix(browser): rearm main-world waits after navigation | browser | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/main-world-wait-navigation) |
-| [#18897](https://github.com/can1357/oh-my-pi/pull/18897) | macos-layout-chords | fix(natives): press macOS key chords on the keys of the current keyboard layout | natives | P1 | 2h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-layout-chords) |
+| [#18897](https://github.com/can1357/oh-my-pi/pull/18897) | macos-layout-chords | fix(natives): press macOS key chords on the keys of the current keyboard layout | natives | P1 | 3h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-layout-chords) |
 | [#18896](https://github.com/can1357/oh-my-pi/pull/18896) | xproc-intervention | fix(natives): stop macOS input refusals between omp processes | computer | P1 | 2h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/xproc-intervention) |
 | [#18892](https://github.com/can1357/oh-my-pi/pull/18892) | ax-ref-read-as | fix(natives): refuse macOS element actions once the ref's element reads as another control | computer | P0 | 2h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-ref-read-as) |
 
