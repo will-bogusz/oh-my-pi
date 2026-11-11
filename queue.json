@@ -72764,7 +72764,7 @@
    "needs": [
     "observe-settle"
    ],
-   "base": "9d771ea038a46e077bf66f9e12f5a1f0ca32b206",
+   "base": "d36461fe168ddcf9c14525d66179ffd10e7cbf60",
    "body": "bodies/settle-reads.md",
    "state": "queued",
    "pr": null,
@@ -72772,7 +72772,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-settle-reads",
    "host": "MacBook-Pro",
    "added": "2026-11-10T18:56:55Z",
-   "updated": "2026-11-11T09:25:46Z",
+   "updated": "2026-11-11T12:07:33Z",
    "note": "",
    "hold": "Main, 2026-11-11: unheld on blind Sol+Opus; opens (proposal track) only after BrowserExperiments' blind Haiku table and quiet wall-time rerun are in the body",
    "kind": "proposal",
