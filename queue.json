@@ -78290,17 +78290,13 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-11T11:01:45Z",
+  "checked": "2026-11-11T12:02:52Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
    "ax-ref-read-as": {
     "since": "2026-11-11T11:01:45Z",
     "title": "fix(natives): refuse macOS element actions once the ref's element reads as another control"
-   },
-   "browser-main-wait-globals": {
-    "since": "2026-11-11T10:00:57Z",
-    "title": "fix(browser): keep main-world waits from exposing query bindings"
    },
    "macos-layout-chords": {
     "since": "2026-11-11T11:01:45Z",
@@ -78314,13 +78310,13 @@
     "since": "2026-11-11T10:00:57Z",
     "title": "fix(natives): refuse Windows background input that holds a modifier"
    },
+   "win-takeover-focus": {
+    "since": "2026-11-11T12:02:52Z",
+    "title": "fix(natives): hand the foreground back after Windows element takeover input"
+   },
    "xproc-intervention": {
     "since": "2026-11-11T10:31:11Z",
     "title": "fix(natives): stop macOS input refusals between omp processes"
-   },
-   "browser-main-wait-navigation": {
-    "since": "2026-11-11T10:00:57Z",
-    "title": "fix(browser): rearm main-world waits after navigation"
    },
    "macos-ax-cancel-before-send": {
     "since": "2026-11-11T10:00:57Z",
@@ -78345,6 +78341,13 @@
     "title": "feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio",
     "files": [
      "packages/ai/src/providers/openai-shared.ts"
+    ]
+   },
+   "#18013": {
+    "since": "2026-11-11T12:02:52Z",
+    "title": "feat(natives): type text the wayland layout lacks through libei text",
+    "files": [
+     "MODULE.bazel.lock"
     ]
    }
   },
@@ -78391,7 +78394,9 @@
    18833,
    18838,
    18840,
-   18865
+   18865,
+   18883,
+   18884
   ],
   "post_merge": {
    "17831": {
@@ -80426,6 +80431,35 @@
     "kind": "openable",
     "id": "macos-layout-chords",
     "title": "fix(natives): press macOS key chords on the keys of the current keyboard layout"
+   },
+   {
+    "at": "2026-11-11T12:02:52Z",
+    "kind": "openable",
+    "id": "win-takeover-focus",
+    "title": "fix(natives): hand the foreground back after Windows element takeover input"
+   },
+   {
+    "at": "2026-11-11T12:02:52Z",
+    "kind": "unopenable",
+    "id": "browser-main-wait-globals",
+    "title": "fix(browser): keep main-world waits from exposing query bindings",
+    "why": "opened as #18883"
+   },
+   {
+    "at": "2026-11-11T12:02:52Z",
+    "kind": "unopenable",
+    "id": "browser-main-wait-navigation",
+    "title": "fix(browser): rearm main-world waits after navigation",
+    "why": "opened as #18884"
+   },
+   {
+    "at": "2026-11-11T12:02:52Z",
+    "kind": "conflict",
+    "label": "#18013",
+    "title": "feat(natives): type text the wayland layout lacks through libei text",
+    "files": [
+     "MODULE.bazel.lock"
+    ]
    }
   ]
  },
