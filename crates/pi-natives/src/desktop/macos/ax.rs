@@ -62,7 +62,7 @@ const MAX_ATTACHED_SEARCH_DEPTH: usize = 24;
 /// that skips bounds drops the last two, and `props` drops `AXChildren`,
 /// whose count `AXUIElementGetAttributeValueCount` reads without copying the
 /// array.
-const NODE_ATTRIBUTES: [&str; 17] = [
+const NODE_ATTRIBUTES: [&str; 18] = [
 	"AXChildren",
 	"AXRole",
 	"AXTitle",
@@ -78,6 +78,7 @@ const NODE_ATTRIBUTES: [&str; 17] = [
 	"AXIdentifier",
 	"AXURL",
 	"AXPlaceholderValue",
+	"AXTitleUIElement",
 	"AXPosition",
 	"AXSize",
 ];
@@ -96,14 +97,16 @@ const HELP: usize = 11;
 const IDENTIFIER: usize = 12;
 const URL: usize = 13;
 const PLACEHOLDER: usize = 14;
-const POSITION: usize = 15;
-const SIZE: usize = 16;
+const TITLE_ELEMENT: usize = 15;
+const POSITION: usize = 16;
+const SIZE: usize = 17;
 
 /// The [`NODE_ATTRIBUTES`] read only to tell an element apart in its window
-/// ([`read_identity`]) or to name a field by its placeholder. A batch that
-/// fails as a whole skips them, so a hung app costs no more lone reads, each
-/// with its own timeout, than the element's role, labels, state and children;
-/// the element then has no identity, and a field without a label no name.
+/// ([`read_identity`]) or to name an element by its placeholder or linked
+/// label. A batch that fails as a whole skips them, so a hung app costs no
+/// more lone reads, each with its own timeout, than the element's role,
+/// labels, state and children; the element then has no identity, and an
+/// element without a label of its own no name.
 const IDENTITY_ONLY: Range<usize> = SUBROLE..POSITION;
 
 /// Which slice of [`NODE_ATTRIBUTES`] one element read requests.
@@ -1260,6 +1263,17 @@ fn element_props(
 	child_count: usize,
 	read_bounds: WalkBounds,
 ) -> CoreResult<AxProps> {
+	labelled_props(element, values, child_count, read_bounds, copy_attribute_result)
+}
+
+/// [`element_props`], reading a linked label with `read_label`.
+fn labelled_props(
+	element: &AXUIElement,
+	values: &NodeValues,
+	child_count: usize,
+	read_bounds: WalkBounds,
+	read_label: impl FnMut(&AXUIElement, &str) -> Result<Option<CFRetained<CFType>>, AXError>,
+) -> CoreResult<AxProps> {
 	let native_role = required_string(values.get(ROLE), "AXRole")?;
 	let actions = copy_strings_from_action_names(element).unwrap_or_default();
 	let read = |index| values.get(index).ok().flatten();
@@ -1273,13 +1287,26 @@ fn element_props(
 			.and_then(|value| value.downcast::<CFBoolean>().ok())
 			.map(|value| value.as_bool())
 	};
-	let title = nonempty(string(TITLE));
 	let value = nonempty(read(VALUE).map(|value| stringify_value(&value)));
+	let own_description = nonempty(string(DESCRIPTION));
+	// A control with neither a title nor a description of its own is named by
+	// the text its `AXTitleUIElement` links to, as a SwiftUI toggle in a
+	// grouped `Form` is by the label beside it. A label read the app did not
+	// answer leaves the element unnamed and without an identity.
+	let (title, label_answered) = match nonempty(string(TITLE)) {
+		Some(title) => (Some(title), true),
+		None if own_description.is_some() => (None, true),
+		None => match linked_label(read(TITLE_ELEMENT).as_deref(), read_label) {
+			Ok(label) => (label, true),
+			Err(_) => (None, false),
+		},
+	};
 	// A field with no label of its own is named by its placeholder ("Add
 	// Date"), as an accessible name falls back to it.
-	let description = nonempty(string(DESCRIPTION))
-		.or_else(|| nonempty(string(PLACEHOLDER)).filter(|_| title.is_none()));
-	let identity = read_identity(values, &native_role, [&title, &value, &description]);
+	let description =
+		own_description.or_else(|| nonempty(string(PLACEHOLDER)).filter(|_| title.is_none()));
+	let identity = read_identity(values, &native_role, [&title, &value, &description])
+		.filter(|_| label_answered);
 	let role_name = window_control_name(&native_role, [&title, &description], string(SUBROLE));
 	let selected = selected(values, &native_role);
 	Ok(AxProps {
@@ -1303,6 +1330,33 @@ fn element_props(
 		selected,
 		role_name: role_name.map(str::to_owned),
 	})
+}
+
+/// The text of the element an `AXTitleUIElement` value links to, read with
+/// `read`: its `AXValue`, as static text carries it, else its `AXTitle`.
+/// `Err` is a read the app did not answer.
+fn linked_label(
+	linked: Option<&CFType>,
+	mut read: impl FnMut(&AXUIElement, &str) -> Result<Option<CFRetained<CFType>>, AXError>,
+) -> Result<Option<String>, AXError> {
+	let Some(label) = linked.and_then(|linked| linked.downcast_ref::<AXUIElement>()) else {
+		return Ok(None);
+	};
+	for attribute in ["AXValue", "AXTitle"] {
+		let text = read(label, attribute);
+		if !answered(&text) {
+			return text.map(|_| None);
+		}
+		let text = text
+			.ok()
+			.flatten()
+			.and_then(|text| text.downcast::<CFString>().ok())
+			.map(|text| text.to_string());
+		if let Some(text) = nonempty(text) {
+			return Ok(Some(text));
+		}
+	}
+	Ok(None)
 }
 
 /// Whether the element reports itself selected. Only list and table rows and
@@ -1344,7 +1398,7 @@ fn window_control_name(
 
 /// The [`NODE_ATTRIBUTES`] that, with `AXRole`, tell an element apart in its
 /// window.
-const IDENTIFYING: [usize; 10] = [
+const IDENTIFYING: [usize; 11] = [
 	SUBROLE,
 	ROLE_DESCRIPTION,
 	TITLE,
@@ -1355,6 +1409,7 @@ const IDENTIFYING: [usize; 10] = [
 	IDENTIFIER,
 	URL,
 	PLACEHOLDER,
+	TITLE_ELEMENT,
 ];
 
 /// The element's [`AxProps::identity`], hashed from its role and
@@ -2503,8 +2558,10 @@ mod tests {
 		ptr::NonNull,
 	};
 
-	use objc2_application_services::{AXError, AXValue, AXValueType};
-	use objc2_core_foundation::{CFArray, CFNumber, CFString, CFType, CFURL, Type, kCFNull};
+	use objc2_application_services::{AXError, AXUIElement, AXValue, AXValueType};
+	use objc2_core_foundation::{
+		CFArray, CFNumber, CFRetained, CFString, CFType, CFURL, Type, kCFNull,
+	};
 
 	use super::{
 		AttachedCandidate, AxWindowRecord, CHILDREN, DESCRIPTION, ENABLED, FocusedWindow,
@@ -2579,6 +2636,41 @@ mod tests {
 	}
 
 	#[test]
+	fn a_control_without_a_label_of_its_own_is_named_by_its_linked_label() {
+		use super::linked_label;
+
+		let link = create_system_wide();
+		let link: &CFType = &link;
+		let text =
+			|text: &'static str| -> CFRetained<CFType> { CFString::from_static_str(text).into() };
+		let mut reads = Vec::new();
+		let mut label = |value: Result<Option<&'static str>, AXError>, title| {
+			reads.clear();
+			linked_label(Some(link), |_, attribute| {
+				reads.push(attribute.to_owned());
+				match attribute {
+					"AXValue" => value.map(|value| value.map(text)),
+					_ => Ok(Some(text(title))),
+				}
+			})
+		};
+		// SwiftUI's toggle label is static text, named by its value.
+		assert_eq!(label(Ok(Some("Launch at login")), "x"), Ok(Some("Launch at login".into())));
+		// An empty or missing value falls back to the label's title.
+		assert_eq!(label(Ok(Some("")), "Mode"), Ok(Some("Mode".into())));
+		assert_eq!(label(Err(AXError::NoValue), "Mode"), Ok(Some("Mode".into())));
+		// A read the app did not answer is no name, and says so.
+		assert_eq!(label(Err(AXError::CannotComplete), "Mode"), Err(AXError::CannotComplete));
+		assert_eq!(reads, ["AXValue"]);
+		// No link, or a link that is not an element, reads nothing.
+		let unread = |_: &AXUIElement, _: &str| -> Result<Option<CFRetained<CFType>>, AXError> {
+			unreachable!("no label to read")
+		};
+		assert_eq!(linked_label(None, unread), Ok(None));
+		assert_eq!(linked_label(Some(&*text("Mode")), unread), Ok(None));
+	}
+
+	#[test]
 	fn only_an_element_whose_app_answered_every_identifying_attribute_has_an_identity() {
 		use super::{HELP, answered, read_identity};
 
@@ -2597,7 +2689,7 @@ mod tests {
 		let null = unsafe { kCFNull }.unwrap();
 		// One walk read, in `NODE_ATTRIBUTES` order, with `help` as its `AXHelp`.
 		let walk = |help: &CFType| {
-			let entries: [&CFType; 15] = [
+			let entries: [&CFType; 16] = [
 				null,
 				&role,
 				&title,
@@ -2610,6 +2702,7 @@ mod tests {
 				null,
 				null,
 				help,
+				null,
 				null,
 				null,
 				null,
@@ -2653,7 +2746,7 @@ mod tests {
 
 	#[test]
 	fn a_field_without_a_label_is_named_by_its_placeholder() {
-		use super::{PLACEHOLDER, WalkBounds, element_props};
+		use super::{PLACEHOLDER, TITLE_ELEMENT, WalkBounds, labelled_props};
 
 		let role = CFString::from_static_str("AXTextField");
 		let role: &CFType = &role;
@@ -2667,20 +2760,39 @@ mod tests {
 			unsafe { AXValue::new(AXValueType::AXError, NonNull::from(&mut busy).cast()) }.unwrap();
 		// SAFETY: kCFNull is a process-lifetime constant.
 		let null: &CFType = unsafe { kCFNull }.unwrap();
+		let link = create_system_wide();
+		let link: &CFType = &link;
 		// One walk read of a Reminders date field, with `title` and
-		// `description` as its own labels.
-		let field = |title: &CFType, description: &CFType, placeholder: &CFType| {
-			let mut entries = [null; 15];
+		// `description` as its own labels and `link` as its `AXTitleUIElement`,
+		// whose text `label` answers.
+		let read = |title: &CFType,
+		            description: &CFType,
+		            placeholder: &CFType,
+		            link: &CFType,
+		            label: Result<Option<&'static str>, AXError>| {
+			let mut entries = [null; NodeRead::Walk.attributes().end];
 			entries[ROLE] = role;
 			entries[TITLE] = title;
 			entries[DESCRIPTION] = description;
 			entries[PLACEHOLDER] = placeholder;
+			entries[TITLE_ELEMENT] = link;
 			let values = NodeValues::from_batch(
 				Ok(CFArray::from_objects(&entries)),
 				NodeRead::Walk.attributes(),
 				|_| unreachable!("an answered batch needs no lone reads"),
 			);
-			element_props(&create_system_wide(), &values, 0, WalkBounds::Skip).unwrap()
+			let text =
+				|text: &'static str| -> CFRetained<CFType> { CFString::from_static_str(text).into() };
+			labelled_props(&create_system_wide(), &values, 0, WalkBounds::Skip, |_, attribute| {
+				match attribute {
+					"AXValue" => label.map(|label| label.map(text)),
+					_ => Ok(None),
+				}
+			})
+			.unwrap()
+		};
+		let field = |title: &CFType, description: &CFType, placeholder: &CFType| {
+			read(title, description, placeholder, null, Ok(None))
 		};
 		let unlabeled = field(null, null, add_date);
 		assert_eq!(unlabeled.description.as_deref(), Some("Add Date"));
@@ -2690,11 +2802,23 @@ mod tests {
 		let titled = field(due, null, add_date);
 		assert_eq!(titled.title.as_deref(), Some("Due"));
 		assert_eq!(titled.description, None);
-		// A placeholder the app was too busy to answer leaves the field
-		// unnamed and without an identity, so no ref is matched by its name.
+		// A linked label names an unlabelled field and outranks its
+		// placeholder, but not a description of its own.
+		let linked = read(null, null, add_date, link, Ok(Some("Mode")));
+		assert_eq!((linked.title.as_deref(), linked.description), (Some("Mode"), None));
+		assert!(!linked.partial);
+		let described = read(null, due, null, link, Ok(Some("Mode")));
+		assert_eq!((described.title, described.description.as_deref()), (None, Some("Due")));
+		// A placeholder or linked label the app was too busy to answer leaves
+		// the field unnamed by it and without an identity, so no ref is
+		// matched by its name.
 		let unanswered = field(null, null, &busy);
 		assert_eq!(unanswered.description, None);
 		assert!(unanswered.partial);
+		let unread = read(null, null, null, link, Err(AXError::CannotComplete));
+		assert_eq!(unread.title, None);
+		assert!(unread.partial);
+		assert!(read(null, null, add_date, &busy, Ok(Some("Mode"))).partial);
 	}
 
 	#[test]
@@ -2779,7 +2903,7 @@ mod tests {
 		let null: &CFType = unsafe { kCFNull }.unwrap();
 		let yes: &CFType = objc2_core_foundation::CFBoolean::new(true);
 		let walk = |slot: &CFType| {
-			let mut entries = [null; 15];
+			let mut entries = [null; NodeRead::Walk.attributes().end];
 			entries[SELECTED] = slot;
 			NodeValues::from_batch(
 				Ok(CFArray::from_objects(&entries)),

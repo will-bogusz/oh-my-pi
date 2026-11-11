@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- macOS `ax()` now shows a toggle in a SwiftUI settings form with the label beside it, and `find({ title })` matches that label, instead of leaving the control unnamed
+
 ## [18.18.8] - 2026-11-11
 
 ### Changed
