@@ -74335,14 +74335,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-11T03:54:34Z",
+  "checked": "2026-11-11T04:25:00Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "atspi-unanswered-app": {
-    "since": "2026-11-11T03:54:34Z",
-    "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool"
-   },
    "browser-select-readback": {
     "since": "2026-11-11T00:21:30Z",
     "title": "fix(coding-agent): return the options a page leaves selected after its change handlers"
@@ -74370,20 +74366,6 @@
     "title": "feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio",
     "files": [
      "packages/ai/src/providers/openai-shared.ts"
-    ]
-   },
-   "#18353": {
-    "since": "2026-11-11T03:23:48Z",
-    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
-    "files": [
-     "MODULE.bazel.lock"
-    ]
-   },
-   "#18013": {
-    "since": "2026-11-11T03:23:48Z",
-    "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "files": [
-     "MODULE.bazel.lock"
     ]
    }
   },
@@ -76342,6 +76324,13 @@
     "id": "atspi-text-first",
     "title": "fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility",
     "why": "plan: wait (conflicts with atspi-unanswered-app in crates/pi-natives/src/desktop/linux/wayland/mod.rs)"
+   },
+   {
+    "at": "2026-11-11T04:25:00Z",
+    "kind": "unopenable",
+    "id": "atspi-unanswered-app",
+    "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool",
+    "why": "plan: wait (conflicts with #18823 in crates/pi-natives/src/desktop/linux/ax.rs; conflicts with #18353 in MODULE.bazel.lock, crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs; conflicts with #18013 in MODULE.bazel.lock)"
    }
   ]
  },
