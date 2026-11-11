@@ -77166,6 +77166,24 @@
    "updated": "2026-11-11T09:50:32Z",
    "note": "",
    "hold": "WindowsMined, 2026-11-11: live Windows trial running; body gets the result"
+  },
+  {
+   "id": "browser-main-wait-globals",
+   "branch": "will/main-world-wait",
+   "title": "fix(browser): keep main-world waits from exposing query bindings",
+   "area": "browser",
+   "priority": "P1",
+   "needs": [],
+   "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
+   "body": "bodies/browser-main-wait-globals.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/main-world-wait",
+   "host": "MacBook-Pro",
+   "added": "2026-11-11T09:58:00Z",
+   "updated": "2026-11-11T09:58:00Z",
+   "note": ""
   }
  ],
  "watch": {
