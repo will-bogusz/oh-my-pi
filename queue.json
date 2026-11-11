@@ -78248,6 +78248,26 @@
    "added": "2026-11-11T10:51:34Z",
    "updated": "2026-11-11T11:16:59Z",
    "note": ""
+  },
+  {
+   "id": "ax-row-action",
+   "branch": "will/ax-row-action",
+   "title": "fix(natives): follow rebuilt macOS table rows without selecting a neighbour",
+   "area": "computer",
+   "priority": "P1",
+   "needs": [
+    "ax-ref-read-as"
+   ],
+   "base": "5adf609d41b643689eebd4a5e0d91187f06df3e1",
+   "body": "bodies/ax-row-action.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ax-row-action",
+   "host": "MacBook-Pro",
+   "added": "2026-11-11T11:44:46Z",
+   "updated": "2026-11-11T11:44:46Z",
+   "note": ""
   }
  ],
  "watch": {
