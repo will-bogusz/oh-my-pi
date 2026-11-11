@@ -28,7 +28,7 @@ With a user typing in another window on X11, GTK and Qt text fields got the exac
 
 ## Why
 
-On X11, `el.type` sends background keys only to the focused element of a GTK 3 window and otherwise reruns in takeover, typing while the user may type too. Wayland cannot focus another app's field, so `main` refuses. An AT-SPI insert needs neither focus nor keys, and the call reads the field back before reporting success.
+On X11, `el.type` sends background keys only to focused GTK 3 elements; otherwise takeover races the user's typing. Wayland cannot focus another app's field, so `main` refuses. AT-SPI inserts need no focus or keys; read-back checks success.
 
 The field ends as focusing it and typing would: the text replaces the selection or goes in at the caret, and an unfocused GTK entry is replaced whole, since focusing one selects it. Only GTK and Qt multi-line edits take the route; other toolkits, and apps whose toolkit cannot be read, keep keys.
 
