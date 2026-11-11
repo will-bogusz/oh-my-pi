@@ -447,7 +447,7 @@ impl AxBackend for Win32Ax {
 		Ok(self
 			.walker()?
 			.get_children(element)
-			.unwrap_or_default()
+			.map_err(ax_error)?
 			.into_iter()
 			.map(uia_handle)
 			.collect())
