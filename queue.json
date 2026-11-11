@@ -77118,9 +77118,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-setvalue-readback",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:34:38Z",
-   "updated": "2026-11-11T09:40:03Z",
+   "updated": "2026-11-11T09:40:16Z",
    "note": "",
-   "hold": "WindowsMined, 2026-11-11: live Windows trial running; body gets the result"
+   "hold": "WindowsMined, 2026-11-11: live Windows trial pending; unhold when its body carries the result"
   },
   {
    "id": "win-posted-modifiers",
