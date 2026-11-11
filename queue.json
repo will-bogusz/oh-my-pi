@@ -74535,7 +74535,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-detach-owned-close",
    "host": "MacBook-Pro",
    "added": "2026-11-11T01:40:34Z",
-   "updated": "2026-11-11T05:14:48Z",
+   "updated": "2026-11-11T05:15:14Z",
    "note": "",
    "advanced": "2026-11-11T04:14:41Z",
    "built": [
@@ -74760,7 +74760,8 @@
      "tree": "e83aec7171f48043871347e032f5e0e8f128a4b7"
     }
    ],
-   "opened": "2026-11-11T05:14:48Z"
+   "opened": "2026-11-11T05:14:48Z",
+   "readied": "2026-11-11T05:15:14Z"
   },
   {
    "id": "macos-click-timestamp",
