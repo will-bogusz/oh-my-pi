@@ -79819,37 +79819,25 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-11T12:02:52Z",
+  "checked": "2026-11-11T13:34:31Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "ax-ref-read-as": {
-    "since": "2026-11-11T11:01:45Z",
-    "title": "fix(natives): refuse macOS element actions once the ref's element reads as another control"
-   },
-   "macos-layout-chords": {
-    "since": "2026-11-11T11:01:45Z",
-    "title": "fix(natives): press macOS key chords on the keys of the current keyboard layout"
-   },
-   "macos-press-disabled": {
-    "since": "2026-11-11T10:00:57Z",
-    "title": "fix(natives): refuse a macOS press on a disabled element"
-   },
-   "win-posted-modifiers": {
-    "since": "2026-11-11T10:00:57Z",
-    "title": "fix(natives): refuse Windows background input that holds a modifier"
+   "win-setvalue-readback": {
+    "since": "2026-11-11T13:34:31Z",
+    "title": "fix(natives): verify Windows value writes and notify combo selections"
    },
    "win-takeover-focus": {
     "since": "2026-11-11T12:02:52Z",
     "title": "fix(natives): hand the foreground back after Windows element takeover input"
    },
-   "xproc-intervention": {
-    "since": "2026-11-11T10:31:11Z",
-    "title": "fix(natives): stop macOS input refusals between omp processes"
+   "atspi-press-actions": {
+    "since": "2026-11-11T13:34:31Z",
+    "title": "fix(natives): press Chromium menu items, options and tabs on Linux"
    },
-   "macos-ax-cancel-before-send": {
-    "since": "2026-11-11T10:00:57Z",
-    "title": "fix(natives): send no macOS AX action once its run is cancelled"
+   "browser-wait-selector-state": {
+    "since": "2026-11-11T13:34:31Z",
+    "title": "fix(browser): honor selector wait states and reject unknown options"
    },
    "macos-menu-miss-items": {
     "since": "2026-11-11T10:00:57Z",
@@ -79925,7 +79913,12 @@
    18840,
    18865,
    18883,
-   18884
+   18884,
+   18892,
+   18895,
+   18896,
+   18897,
+   18898
   ],
   "post_merge": {
    "17831": {
@@ -81989,6 +81982,66 @@
     "files": [
      "MODULE.bazel.lock"
     ]
+   },
+   {
+    "at": "2026-11-11T13:34:31Z",
+    "kind": "openable",
+    "id": "win-setvalue-readback",
+    "title": "fix(natives): verify Windows value writes and notify combo selections"
+   },
+   {
+    "at": "2026-11-11T13:34:31Z",
+    "kind": "openable",
+    "id": "atspi-press-actions",
+    "title": "fix(natives): press Chromium menu items, options and tabs on Linux"
+   },
+   {
+    "at": "2026-11-11T13:34:31Z",
+    "kind": "openable",
+    "id": "browser-wait-selector-state",
+    "title": "fix(browser): honor selector wait states and reject unknown options"
+   },
+   {
+    "at": "2026-11-11T13:34:31Z",
+    "kind": "unopenable",
+    "id": "ax-ref-read-as",
+    "title": "fix(natives): refuse macOS element actions once the ref's element reads as another control",
+    "why": "opened as #18892"
+   },
+   {
+    "at": "2026-11-11T13:34:31Z",
+    "kind": "unopenable",
+    "id": "macos-layout-chords",
+    "title": "fix(natives): press macOS key chords on the keys of the current keyboard layout",
+    "why": "opened as #18897"
+   },
+   {
+    "at": "2026-11-11T13:34:31Z",
+    "kind": "unopenable",
+    "id": "macos-press-disabled",
+    "title": "fix(natives): refuse a macOS press on a disabled element",
+    "why": "opened as #18898"
+   },
+   {
+    "at": "2026-11-11T13:34:31Z",
+    "kind": "unopenable",
+    "id": "win-posted-modifiers",
+    "title": "fix(natives): refuse Windows background input that holds a modifier",
+    "why": "opened as #18895"
+   },
+   {
+    "at": "2026-11-11T13:34:31Z",
+    "kind": "unopenable",
+    "id": "xproc-intervention",
+    "title": "fix(natives): stop macOS input refusals between omp processes",
+    "why": "opened as #18896"
+   },
+   {
+    "at": "2026-11-11T13:34:31Z",
+    "kind": "unopenable",
+    "id": "macos-ax-cancel-before-send",
+    "title": "fix(natives): send no macOS AX action once its run is cancelled",
+    "why": "plan: wait (conflicts with #18898 in crates/pi-natives/src/desktop/macos/ax.rs)"
    }
   ]
  },
@@ -85860,8 +85913,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-11T13:11:58.855731Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-11T13:34:32.047970Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 5,
@@ -86388,12 +86441,16 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): refuse macOS element actions once the ref's element reads as another control",
-    "action": "keep",
-    "reasons": [],
+    "action": "requeue",
+    "reasons": [
+     "conflicts with #18898 in crates/pi-natives/src/desktop/macos/ax.rs"
+    ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#18898"
+    ],
     "needs": [],
     "created": "2026-11-11T12:38:46Z"
    },
@@ -86705,15 +86762,12 @@
     "title": "fix(natives): stop Linux accessibility reads from freezing apps that show long tables",
     "action": "held",
     "reasons": [
-     "held: Main, 2026-11-11: opens after atspi-unanswered-app (P0, first in Main's Linux order) merges; they conflict in linux/ax.rs",
-     "conflicts with #18892 in crates/pi-natives/src/desktop/mod.rs"
+     "held: Main, 2026-11-11: opens after atspi-unanswered-app (P0, first in Main's Linux order) merges; they conflict in linux/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#18892"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T01:54:02Z"
    },
@@ -86742,6 +86796,31 @@
     ],
     "needs": [],
     "created": "2026-11-03T08:39:53Z"
+   },
+   {
+    "id": "atspi-combo-choice",
+    "label": "atspi-combo-choice",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): choose Linux combo box options without opening their keyboard-grabbing list",
+    "action": "wait",
+    "reasons": [
+     "needs atspi-unanswered-app (queued)",
+     "conflicts with #18823 in crates/pi-natives/src/desktop/linux/ax.rs",
+     "its need atspi-unanswered-app conflicts with main in MODULE.bazel.lock"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "#18823"
+    ],
+    "needs": [
+     "atspi-unanswered-app"
+    ],
+    "created": "2026-11-11T13:30:39Z"
    },
    {
     "id": "atspi-text-first",
@@ -86776,7 +86855,6 @@
      "needs atspi-unanswered-app (queued)",
      "conflicts with #18783 in crates/pi-natives/Cargo.toml",
      "conflicts with #18823 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with #18892 in crates/pi-natives/src/desktop/ax.rs",
      "conflicts with #18353 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #18013 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/libei.rs",
      "its need atspi-unanswered-app conflicts with main in MODULE.bazel.lock",
@@ -86788,7 +86866,6 @@
     "blocked_by": [
      "#18783",
      "#18823",
-     "#18892",
      "#18353",
      "#18013"
     ],
@@ -86808,7 +86885,7 @@
     "action": "wait",
     "reasons": [
      "needs #18892 (open)",
-     "conflicts with main in crates/pi-natives/src/desktop/mod.rs"
+     "conflicts with main in crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs"
     ],
     "note": "",
     "over": [],
@@ -87142,6 +87219,48 @@
     "created": "2026-11-10T18:56:55Z"
    },
    {
+    "id": "atspi-press-actions",
+    "label": "atspi-press-actions",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P2",
+    "title": "fix(natives): press Chromium menu items, options and tabs on Linux",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-11T13:13:42Z"
+   },
+   {
+    "id": "atspi-qt-menus",
+    "label": "atspi-qt-menus",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P2",
+    "title": "fix(natives): let Linux menu.select walk into Qt apps' menus",
+    "action": "wait",
+    "reasons": [
+     "needs atspi-unanswered-app (queued)",
+     "conflicts with #18823 in crates/pi-natives/src/desktop/linux/ax.rs",
+     "its need atspi-unanswered-app conflicts with main in MODULE.bazel.lock"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "#18823"
+    ],
+    "needs": [
+     "atspi-unanswered-app"
+    ],
+    "created": "2026-11-11T13:21:21Z"
+   },
+   {
     "id": "atspi-value-readback",
     "label": "atspi-value-readback",
     "number": null,
@@ -87175,7 +87294,7 @@
     "area": "browser",
     "priority": "P2",
     "title": "fix(browser): honor selector wait states and reject unknown options",
-    "action": "open",
+    "action": "next-hour",
     "reasons": [],
     "note": "",
     "over": [],
@@ -87288,12 +87407,16 @@
     "area": "natives",
     "priority": "P2",
     "title": "fix(natives): send no macOS AX action once its run is cancelled",
-    "action": "next-hour",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with #18898 in crates/pi-natives/src/desktop/macos/ax.rs"
+    ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#18898"
+    ],
     "needs": [],
     "created": "2026-11-11T09:59:13Z"
    },
@@ -87515,14 +87638,12 @@
     "title": "fix(natives): expose Windows control state and stale-reference matches",
     "action": "wait",
     "reasons": [
-     "conflicts with #18892 in crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with win-setvalue-readback in crates/pi-natives/src/desktop/win32/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18892",
      "win-setvalue-readback"
     ],
     "needs": [],
@@ -87600,9 +87721,8 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives,coding-agent): report unavailable Windows desktop sessions",
-    "action": "held",
+    "action": "wait",
     "reasons": [
-     "held: WindowsMined, 2026-11-11: live Windows trial pending; unhold when its body carries the result",
      "conflicts with win-setvalue-readback in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/win32/mod.rs"
     ],
     "note": "",
@@ -87771,7 +87891,6 @@
      "conflicts with #18753 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18783 in packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18784 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md",
-     "conflicts with #18892 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18895 in docs/tools/computer.md",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18865 in docs/tools/computer.md",
@@ -87789,7 +87908,6 @@
      "#18753",
      "#18783",
      "#18784",
-     "#18892",
      "#18895",
      "#18353",
      "#18865",
@@ -87818,13 +87936,11 @@
      "conflicts with #18753 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18783 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18784 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md",
-     "conflicts with #18892 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18895 in docs/tools/computer.md",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18865 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with win-setvalue-readback in docs/tools/computer.md",
-     "conflicts with macos-ax-cancel-before-send in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
@@ -87836,13 +87952,11 @@
      "#18753",
      "#18783",
      "#18784",
-     "#18892",
      "#18895",
      "#18353",
      "#18865",
      "#18222",
-     "win-setvalue-readback",
-     "macos-ax-cancel-before-send"
+     "win-setvalue-readback"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -87860,15 +87974,13 @@
     "action": "wait",
     "reasons": [
      "needs agent-identity (queued)",
-     "conflicts with #18784 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
-     "conflicts with #18892 in crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs"
+     "conflicts with #18784 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18784",
-     "#18892"
+     "#18784"
     ],
     "needs": [
      "agent-identity"
