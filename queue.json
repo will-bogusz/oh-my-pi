@@ -36802,7 +36802,7 @@
    "area": "natives-macos",
    "priority": "P1",
    "needs": [],
-   "base": "f680ea91b165e861f26549bc823a3964837da028",
+   "base": "17e8c17e5d3e60acb2239bf504a43865b04b6a31",
    "body": "bodies/click-place-release.md",
    "state": "open",
    "pr": 16553,
@@ -36810,7 +36810,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/click-place-release",
    "host": "MacBook-Pro",
    "added": "2026-10-20T20:11:57Z",
-   "updated": "2026-11-11T14:19:37Z",
+   "updated": "2026-11-11T16:52:56Z",
    "note": "",
    "built": [
     {
@@ -36843,7 +36843,7 @@
    ],
    "opened": "2026-10-20T20:20:44Z",
    "readied": "2026-10-20T20:21:05Z",
-   "advanced": "2026-11-11T06:41:19Z",
+   "advanced": "2026-11-11T16:52:56Z",
    "design_checks": [
     {
      "pr": 16553,
