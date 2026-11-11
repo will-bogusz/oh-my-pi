@@ -73262,7 +73262,7 @@
    "needs": [
     "act-look-prompt"
    ],
-   "base": "c791d1bcd07793385f5d6da26fb2c0c8cc92cc98",
+   "base": "61b81943ce26f378253abc2039e83392ada499af",
    "body": "bodies/observe-stable-ids.md",
    "state": "queued",
    "pr": null,
@@ -73270,7 +73270,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-observe-stable-ids",
    "host": "MacBook-Pro",
    "added": "2026-11-10T18:57:15Z",
-   "updated": "2026-11-11T09:26:11Z",
+   "updated": "2026-11-11T12:07:39Z",
    "note": "",
    "hold": "Main, 2026-11-11: unheld on blind Sol+Opus; opens (proposal track) only after BrowserExperiments' blind Haiku table and quiet wall-time rerun are in the body",
    "kind": "proposal",
