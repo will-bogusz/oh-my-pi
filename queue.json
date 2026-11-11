@@ -80247,7 +80247,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wait-ladder-context",
    "host": "MacBook-Pro",
    "added": "2026-11-11T10:13:40Z",
-   "updated": "2026-11-11T20:02:16Z",
+   "updated": "2026-11-11T20:13:39Z",
    "note": "QueueSkipper, 2026-11-11: accepted tree admission. Native build and 655 Rust tests pass; workspace types and 149 focused tests pass (3 skipped). check:ts format defects reproduce on PR 18924/18925 alone; SDK relay-toggle prefix test fails on PR 18786 f68cdf587a alone (4 pass/1 fail), not tree-specific. Sibling owners handle separately; entry files pass oxfmt.",
    "kind": "proposal",
    "built": [
@@ -80357,16 +80357,6 @@
      "with_code": "6d05be27ed451bff25e5fffd6aa74a268ea1fba3",
      "tip": "8aad08c951d769364be78f983a3d41ebc7c1cdd4",
      "with_tip": "d867971cad51b5534b22b6e5170fb1ff69cf5f25",
-     "at": "2026-11-11T11:28:21Z",
-     "host": "MacBook-Pro",
-     "tree": "7f38b215d2735a663a1299f21814d11c0f8f8349"
-    },
-    {
-     "with": "#18772",
-     "code": "52f0e73d02c9dad46e5d04947fcf528f7b753b9b",
-     "with_code": "41e3fbd56c72550710e3248166f8907ebc04008e",
-     "tip": "8aad08c951d769364be78f983a3d41ebc7c1cdd4",
-     "with_tip": "3860a0ecc9b68e4cc4ca7da82ebe020623d892f1",
      "at": "2026-11-11T11:28:21Z",
      "host": "MacBook-Pro",
      "tree": "7f38b215d2735a663a1299f21814d11c0f8f8349"
@@ -80573,6 +80563,15 @@
      "tip": "0d59274e35e54f6b8ae2aca86ee70b06183e7f12",
      "with_tip": "d93027d2577954e14abe4cc61a40cfa65ad84495",
      "at": "2026-11-11T20:02:13Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#18772",
+     "code": "52f0e73d02c9dad46e5d04947fcf528f7b753b9b",
+     "with_code": "6551b38f2a9d42ca769d9d076412b899035a2069",
+     "tip": "0d59274e35e54f6b8ae2aca86ee70b06183e7f12",
+     "with_tip": "fbeeafa3aa47c60bdb122574a6f10b790365cf1b",
+     "at": "2026-11-11T20:13:32Z",
      "host": "MacBook-Pro"
     }
    ],
