@@ -77763,7 +77763,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-setvalue-readback",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:34:38Z",
-   "updated": "2026-11-11T16:16:49Z",
+   "updated": "2026-11-11T16:17:17Z",
    "note": "",
    "built": [
     {
@@ -77976,7 +77976,8 @@
      "tree": "6388dc54ea63d024bf535e8aba05ffe088172cd6"
     }
    ],
-   "opened": "2026-11-11T16:16:49Z"
+   "opened": "2026-11-11T16:16:49Z",
+   "readied": "2026-11-11T16:17:17Z"
   },
   {
    "id": "win-posted-modifiers",
