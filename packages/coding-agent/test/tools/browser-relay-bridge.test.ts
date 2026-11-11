@@ -1486,11 +1486,12 @@ describe("RelayBridge attachment release", () => {
 		expect(bridge.listTargets()).toEqual([]);
 	});
 
-	it("takes off an attachment no client holds when the extension says hello", () => {
+	it("takes off an attachment no client holds when the extension says hello", async () => {
 		const bridge = new RelayBridge({});
 		const ext = new FakeExtSocket();
 		// A relay restarted after an upgrade: Chrome still has the previous process's attachments.
 		connect(bridge, ext, [tab({ tabId: 1 }), tab({ tabId: 2 })], [1]);
+		await flush();
 		expect(ext.rpcs("detach").map(rpc => rpc.tabId)).toEqual([1]);
 	});
 
@@ -2613,18 +2614,15 @@ describe("RelayBridge auto-attach gating", () => {
 			connId,
 			JSON.stringify({ id: ++msgSeq, method: "Target.setAutoAttach", params: { autoAttach: true } }),
 		);
-		ack(bridge, ext, "attach");
 		await flush();
-		// Unclaimed when Chrome detached it, the tab is refused with the frame left in place, and hidden.
-		bridge.extMessage(ext, JSON.stringify({ t: "detached", tabId: 1, reason: "target_closed" }));
-		await flush();
-		expect(ext.pending("attach").map(r => [r.tabId, r.clearForeignFrames])).toEqual([[1, false]]);
-		nack(bridge, ext, "attach", "Cannot access a chrome-extension:// URL of different extension");
-		await flush();
-		expect(bridge.listTargets().map(t => t.id)).toEqual([`PAGE${ANON}.2`]);
+		// Discovery never attaches an unclaimed tab, so it cannot trigger Chrome's foreign-frame refusal.
+		expect(ext.rpcs("attach")).toEqual([]);
 
 		// The supervisor re-adopts the tab on a new worker, which claims it before anything else.
-		bridge.cdpConnected(new FakeCdpSocket(), pageId(1));
+		bridge.cdpMessage(
+			connId,
+			JSON.stringify({ id: ++msgSeq, method: "OMP.claimTarget", params: { targetId: pageId(1) } }),
+		);
 		await flush();
 		expect(ext.pending("attach").map(r => [r.tabId, r.clearForeignFrames])).toEqual([[1, true]]);
 		expect(ext.rpcs("group").map(r => r.tabIds)).toEqual([[1]]);
@@ -3281,7 +3279,7 @@ describe("RelayBridge focus emulation", () => {
 		expect(ext.rpcs("detach")).toEqual([]);
 
 		const next = new FakeCdpSocket();
-		const nextConn = bridge.cdpConnected(next);
+		const nextConn = bridge.cdpConnected(next, pageId(1));
 		const targetsId = ++msgSeq;
 		bridge.cdpMessage(nextConn, JSON.stringify({ id: targetsId, method: "Target.getTargets" }));
 		expect(next.messages.find(message => message.id === targetsId)).toMatchObject({
@@ -3421,10 +3419,16 @@ describe("RelayBridge foreign extension frames", () => {
 		const cdp = new FakeCdpSocket();
 		const connId = bridge.cdpConnected(cdp, pageId(1));
 		const driven = await attachPage(bridge, ext, cdp, connId, 1);
-		const other = await attachPage(bridge, ext, cdp, connId, 2);
-		for (const sessionId of [driven, other]) {
-			bridge.cdpMessage(connId, JSON.stringify({ id: ++msgSeq, sessionId, method: "Page.getFrameTree" }));
-		}
+		const otherId = ++msgSeq;
+		bridge.cdpMessage(
+			connId,
+			JSON.stringify({
+				id: otherId,
+				method: "Target.attachToTarget",
+				params: { targetId: pageId(2), flatten: true },
+			}),
+		);
+		bridge.cdpMessage(connId, JSON.stringify({ id: ++msgSeq, sessionId: driven, method: "Page.getFrameTree" }));
 		await flush();
 		const flags = (tabId: number) =>
 			new Set(
@@ -3433,7 +3437,8 @@ describe("RelayBridge foreign extension frames", () => {
 					.map(rpc => rpc.clearForeignFrames),
 			);
 		expect(flags(1)).toEqual(new Set([true]));
-		expect(flags(2)).toEqual(new Set([false]));
+		expect(flags(2)).toEqual(new Set());
+		expect(cdp.messages.find(message => message.id === otherId)).toHaveProperty("error");
 	});
 
 	it("takes the claim an older omp worker sends on its page session", async () => {

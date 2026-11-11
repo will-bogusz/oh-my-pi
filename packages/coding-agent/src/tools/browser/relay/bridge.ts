@@ -1194,6 +1194,12 @@ export class RelayBridge {
 			this.#replyError(conn, msg, "relay extension is not connected");
 			return false;
 		}
+		// A page session already belongs to this connection; retain the relay-private claim older workers send.
+		if (msg.method === "OMP.claimTarget") {
+			this.#claimTab(conn, tabKey);
+			this.#reply(conn, msg, {});
+			return true;
+		}
 		// Relay-private: where Chrome saved a download the page reported. A page session's download events carry no
 		// path, and Chrome refuses an extension's `setDownloadBehavior`, so the extension looks the file up.
 		if (msg.method === "OMP.downloadPath") return await this.#replyDownloadPath(conn, msg, inst);

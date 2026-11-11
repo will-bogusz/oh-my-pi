@@ -318,8 +318,18 @@ describe.skipIf(!CHROMIUM_AVAILABLE)("relay tab ownership", () => {
 		try {
 			const source = await fixture.browser.newPage();
 			await source.goto(`${fixture.origin}/framed`);
-			first = await puppeteer.connect({ browserURL: fixture.cdpUrl });
-			second = await puppeteer.connect({ browserURL: fixture.cdpUrl });
+			const { webSocketDebuggerUrl } = (await fetch(`${fixture.cdpUrl}/json/version`).then(response =>
+				response.json(),
+			)) as { webSocketDebuggerUrl: string };
+			const endpoint = new URL(webSocketDebuggerUrl);
+			const pages = (await fetch(`${fixture.cdpUrl}/json`).then(response => response.json())) as Array<{
+				id: string;
+				url: string;
+			}>;
+			const relayTarget = pages.find(page => page.url === source.url())!;
+			endpoint.searchParams.set("claim", relayTarget.id);
+			first = await puppeteer.connect({ browserWSEndpoint: endpoint.toString() });
+			second = await puppeteer.connect({ browserWSEndpoint: endpoint.toString() });
 			const firstPage = (await first.pages()).find(page => page.url() === source.url())!;
 			const secondPage = (await second.pages()).find(page => page.url() === source.url())!;
 			const frame = secondPage.frames().find(frame => frame.parentFrame())!;
@@ -783,7 +793,6 @@ describe.skipIf(!CHROMIUM_AVAILABLE)("relay tab ownership", () => {
 			await fixture.close();
 		}
 	}, 30_000);
-
 });
 describe.skipIf(!CHROMIUM_AVAILABLE)("owned tab recovery", () => {
 	it("keeps an owned target alive after a failed recovery init so a retry can adopt it", async () => {
@@ -852,7 +861,7 @@ describe.skipIf(!CHROMIUM_AVAILABLE)("owned tab recovery", () => {
 			},
 			websocket: {
 				open(client) {
-					const socket = new WebSocket(launched.browser.wsEndpoint());
+					const socket = new WebSocket(launched.wsEndpoint);
 					const queued: string[] = [];
 					socket.onopen = () => {
 						for (const message of queued.splice(0)) socket.send(message);

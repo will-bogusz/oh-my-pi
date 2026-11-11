@@ -947,17 +947,7 @@ describe("pickRelayTarget", () => {
 			},
 			{ id: "PAGE_SECOND", type: "page", title: "Second", url: "about:blank", active: "false", discarded: "false" },
 		];
-		const first = makeTarget("PAGE_FIRST", makePage([() => {}], relayEntries[0]!.url).page);
-		const blank = makePage([() => {}], "about:blank").page;
-		const second = makeTarget("PAGE_SECOND", blank);
-
-		expect(
-			await pickElectronTarget(makeBrowser([first.target, second.target]), {
-				relayJson,
-				matcher: "PAGE_SECOND",
-			}),
-		).toBe(blank);
-		expect(first.pageSpy).not.toHaveBeenCalled();
+		expect(await pickRelayTarget(relayJson, "PAGE_SECOND")).toBe("PAGE_SECOND");
 	});
 
 	it("does not adopt another relay tab when an exact id names a discarded tab", async () => {
@@ -979,14 +969,8 @@ describe("pickRelayTarget", () => {
 				discarded: "true",
 			},
 		];
-		const browser = makeBrowser([
-			makeTarget("PAGE_FIRST", makePage([() => {}]).page).target,
-			makeTarget("PAGE_DISCARDED", makePage([() => {}]).page).target,
-		]);
 
-		await expect(pickElectronTarget(browser, { relayJson, matcher: "PAGE_DISCARDED" })).rejects.toThrow(
-			"was discarded by Chrome",
-		);
+		await expect(pickRelayTarget(relayJson, "PAGE_DISCARDED")).rejects.toThrow("was discarded by Chrome");
 	});
 
 	it("waits for a just-opened tab to reach /json before failing the matcher", async () => {
