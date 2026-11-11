@@ -82404,6 +82404,11 @@
     "sha": "b32adb539afc2f4544144b6c17b14f3c6f426fab",
     "at": "2026-11-11T09:37:00Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "b32adb539afc2f4544144b6c17b14f3c6f426fab",
+    "at": "2026-11-11T09:40:28Z",
+    "host": "goliath"
    }
   },
   "42a3bce7eb5ccbe2a5e77f50792e41a83693d5d8": {
