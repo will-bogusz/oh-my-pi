@@ -77203,7 +77203,7 @@
    "branch": "will/main-world-wait",
    "title": "fix(browser): keep main-world waits from exposing query bindings",
    "area": "browser",
-   "priority": "P1",
+   "priority": "P0",
    "needs": [],
    "base": "7b42b1be6069b791c54e1c4c93d2070978d9e6bf",
    "body": "bodies/browser-main-wait-globals.md",
@@ -77213,7 +77213,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/main-world-wait",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:58:00Z",
-   "updated": "2026-11-11T11:46:00Z",
+   "updated": "2026-11-11T12:02:50Z",
    "note": "",
    "built": [
     {
@@ -77514,7 +77514,7 @@
    "branch": "will/main-world-wait-navigation",
    "title": "fix(browser): rearm main-world waits after navigation",
    "area": "browser",
-   "priority": "P2",
+   "priority": "P0",
    "needs": [],
    "base": "7b42b1be6069b791c54e1c4c93d2070978d9e6bf",
    "body": "bodies/browser-main-wait-navigation.md",
@@ -77524,7 +77524,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/main-world-wait-navigation",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:58:14Z",
-   "updated": "2026-11-11T11:49:31Z",
+   "updated": "2026-11-11T12:02:50Z",
    "note": "",
    "advanced": "2026-11-11T11:49:31Z",
    "built": [
