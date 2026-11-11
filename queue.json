@@ -70776,7 +70776,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "eda28eff97cf7a352fd3057a03581be1686dbc7a",
+   "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
    "body": "bodies/computer-open-window.md",
    "state": "open",
    "pr": 18743,
@@ -70784,7 +70784,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-open-window",
    "host": "MacBook-Pro",
    "added": "2026-11-10T15:55:51Z",
-   "updated": "2026-11-10T20:07:15Z",
+   "updated": "2026-11-11T08:36:35Z",
    "note": "",
    "built": [
     {
@@ -70900,7 +70900,7 @@
    ],
    "opened": "2026-11-10T16:42:23Z",
    "readied": "2026-11-10T16:42:46Z",
-   "advanced": "2026-11-10T17:15:05Z"
+   "advanced": "2026-11-11T08:36:35Z"
   },
   {
    "id": "browser-hover-actionable",
