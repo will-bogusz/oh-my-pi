@@ -71,7 +71,7 @@ fn server() -> (Server, String) {
 	(server, format!(":{}", number.trim()))
 }
 
-/// XLookupString refreshes its cached map on MappingNotify exactly as an Xlib
+/// `XLookupString` refreshes its cached map on `MappingNotify` exactly as an Xlib
 /// client does. The receiving thread translates while the sender is running.
 #[test]
 #[ignore = "starts Xvfb and uses Xlib"]

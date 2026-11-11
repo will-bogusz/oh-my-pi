@@ -452,7 +452,8 @@ impl TextMapping {
 		let restored = self.restore();
 		match (result, restored) {
 			(Err(mut error), Err(restore)) => {
-				error.message.push_str(&format!("; {}", restore.message));
+				error.message.push_str("; ");
+				error.message.push_str(&restore.message);
 				Err(error)
 			},
 			(result, Ok(())) => result,
