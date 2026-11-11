@@ -1,10 +1,10 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 13:27Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 13:28Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 5 of 8 ready events used in the hour before the last plan, 3 left (plan of 2026-11-11 13:11Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 7, conflict-held 22, stacked 22, held 14, parked 2, open PRs 48, queued since the last plan 2; merged 275, closed 30
+**Counts:** openable now 7, conflict-held 22, stacked 22, held 13, parked 2, open PRs 48, queued since the last plan 3; merged 275, closed 30
 
 ## Openable now (7)
 
@@ -72,7 +72,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | ax-row-action | fix(natives): follow rebuilt macOS table rows without selecting a neighbour | computer | P1 | 1h | ax-ref-read-as ([#18892](https://github.com/can1357/oh-my-pi/pull/18892)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-row-action) |
 | win-focus-report | fix(natives): report where focus went after a Windows takeover | computer | P2 | 0h | win-takeover-focus | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-focus-report) |
 
-## Held (14)
+## Held (13)
 
 | id | title | area | priority | age | hold | branch |
 |---|---|---|---|---|---|---|
@@ -88,7 +88,6 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | atspi-text-first | fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility | computer | P1 | 11h | Main, 2026-11-11: opens after atspi-unanswered-app (P0) so it does not block it | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-text-first) |
 | atspi-value-readback | fix(natives): read back AT-SPI numeric setValue before reporting success | computer | P2 | 10h | Main, 2026-11-11: opens after atspi-unanswered-app (P0) so it does not block it | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-value-readback) |
 | win-minimised-windows | fix(natives,coding-agent): show a minimized Windows app's window from apps.open instead of launching it again | computer | P2 | 4h | Main, 2026-11-11: prompt changed; stays queued until Main arranges model samples | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-minimised-windows) |
-| win-screen-locked | fix(natives,coding-agent): report unavailable Windows desktop sessions | computer | P2 | 3h | Main, 2026-11-11: prompt changed; stays queued until Main arranges model samples | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-screen-locked) |
 | win-ax-states | fix(natives): expose Windows control state and stale-reference matches | computer | P2 | 3h | Main, 2026-11-11: prompt changed; stays queued until Main arranges model samples | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-ax-states) |
 
 ## Parked (2)
@@ -151,9 +150,10 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | [#18896](https://github.com/can1357/oh-my-pi/pull/18896) | xproc-intervention | fix(natives): stop macOS input refusals between omp processes | computer | P1 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/xproc-intervention) |
 | [#18892](https://github.com/can1357/oh-my-pi/pull/18892) | ax-ref-read-as | fix(natives): refuse macOS element actions once the ref's element reads as another control | computer | P1 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-ref-read-as) |
 
-## Queued since the last plan (2)
+## Queued since the last plan (3)
 
 | id | title | area | priority | age | branch |
 |---|---|---|---|---|---|
+| win-screen-locked | fix(natives,coding-agent): report unavailable Windows desktop sessions | computer | P2 | 3h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-screen-locked) |
 | atspi-press-actions | fix(natives): press Chromium menu items, options and tabs on Linux | computer | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-press-actions) |
 | atspi-qt-menus | fix(natives): let Linux menu.select walk into Qt apps' menus | computer | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-qt-menus) |
