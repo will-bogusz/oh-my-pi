@@ -10,7 +10,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
-| wait-ladder-context | feat(wait): reduce empty checks in large conversations | coding-agent | P2 | 9h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wait-ladder-context) |
+| wait-ladder-context | feat(wait): reduce empty checks in large conversations | coding-agent | P2 | 10h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wait-ladder-context) |
 
 ## Conflict-held (30)
 
