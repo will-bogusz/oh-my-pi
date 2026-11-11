@@ -77220,6 +77220,24 @@
    "added": "2026-11-11T09:58:14Z",
    "updated": "2026-11-11T09:58:14Z",
    "note": ""
+  },
+  {
+   "id": "macos-menu-miss-items",
+   "branch": "will/macos-menu-miss-items",
+   "title": "fix(natives): name the menu items on offer when a menu bar path misses",
+   "area": "natives",
+   "priority": "P2",
+   "needs": [],
+   "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
+   "body": "bodies/macos-menu-miss-items.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-menu-miss-items",
+   "host": "MacBook-Pro",
+   "added": "2026-11-11T09:58:16Z",
+   "updated": "2026-11-11T09:58:16Z",
+   "note": ""
   }
  ],
  "watch": {
