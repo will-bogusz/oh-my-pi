@@ -75357,17 +75357,13 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-11T04:25:00Z",
+  "checked": "2026-11-11T04:55:02Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
    "browser-select-readback": {
     "since": "2026-11-11T00:21:30Z",
     "title": "fix(coding-agent): return the options a page leaves selected after its change handlers"
-   },
-   "x11-mpx-key-confirm": {
-    "since": "2026-11-11T02:53:00Z",
-    "title": "fix(natives): confirm every X11 virtual-keyboard key release, in order"
    },
    "browser-download-missing-file": {
     "since": "2026-11-11T00:21:30Z",
@@ -77353,6 +77349,13 @@
     "id": "atspi-unanswered-app",
     "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool",
     "why": "plan: wait (conflicts with #18823 in crates/pi-natives/src/desktop/linux/ax.rs; conflicts with #18353 in MODULE.bazel.lock, crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs; conflicts with #18013 in MODULE.bazel.lock)"
+   },
+   {
+    "at": "2026-11-11T04:55:02Z",
+    "kind": "unopenable",
+    "id": "x11-mpx-key-confirm",
+    "title": "fix(natives): confirm every X11 virtual-keyboard key release, in order",
+    "why": "opened as #18828"
    }
   ]
  },
@@ -80224,12 +80227,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-11T04:42:46.633989Z",
+  "at": "2026-11-11T04:55:03.387433Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 2,
-   "left": 6
+   "used": 0,
+   "left": 8
   },
   "rows": [
    {
@@ -81092,23 +81095,6 @@
     ],
     "needs": [],
     "created": "2026-11-11T03:06:32Z"
-   },
-   {
-    "id": "x11-mpx-key-confirm",
-    "label": "x11-mpx-key-confirm",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives): confirm every X11 virtual-keyboard key release, in order",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-11T02:32:46Z"
    },
    {
     "id": "x11-takeover-keyboard-grab",
@@ -82284,7 +82270,12 @@
     "created": "2026-11-03T01:24:37Z"
    }
   ],
-  "drafts": [],
+  "drafts": [
+   {
+    "label": "#18828",
+    "created": "2026-11-11T04:50:22Z"
+   }
+  ],
   "parked": [
    {
     "label": "#15128",
