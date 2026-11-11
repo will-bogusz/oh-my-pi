@@ -71301,7 +71301,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-run-node-hint",
    "host": "MacBook-Pro",
    "added": "2026-11-10T16:48:01Z",
-   "updated": "2026-11-11T06:22:50Z",
+   "updated": "2026-11-11T06:23:17Z",
    "note": "",
    "advanced": "2026-11-11T06:19:23Z",
    "built": [
@@ -71536,7 +71536,8 @@
      "tree": "9edbb8e021bfb59339f8b832dd126edbed2672a6"
     }
    ],
-   "opened": "2026-11-11T06:22:50Z"
+   "opened": "2026-11-11T06:22:50Z",
+   "readied": "2026-11-11T06:23:17Z"
   },
   {
    "id": "browser-wait-text-rendered",
