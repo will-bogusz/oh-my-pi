@@ -79756,6 +79756,24 @@
    "added": "2026-11-11T13:11:20Z",
    "updated": "2026-11-11T13:11:20Z",
    "note": ""
+  },
+  {
+   "id": "atspi-press-actions",
+   "branch": "will/atspi-press-actions",
+   "title": "fix(natives): press Chromium menu items, options and tabs on Linux",
+   "area": "computer",
+   "priority": "P2",
+   "needs": [],
+   "base": "7b42b1be6069b791c54e1c4c93d2070978d9e6bf",
+   "body": "bodies/atspi-press-actions.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-press-actions",
+   "host": "MacBook-Pro",
+   "added": "2026-11-11T13:13:42Z",
+   "updated": "2026-11-11T13:13:42Z",
+   "note": ""
   }
  ],
  "watch": {
