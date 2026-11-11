@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 14:13Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 14:15Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-11 14:04Z on goliath; groups below are from it, states from the manifest)
@@ -14,10 +14,10 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | win-setvalue-readback | fix(natives): verify Windows value writes and notify combo selections | computer | P1 | 4h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-setvalue-readback) |
 | win-menu-modal | fix(natives): confirm Windows menu commands that open modal dialogs | computer | P2 | 4h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-menu-modal) |
 | macos-menu-miss-items | fix(natives): name the menu items on offer when a menu bar path misses | natives | P2 | 4h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-menu-miss-items) |
-| wait-ladder-context | feat(wait): reduce empty checks in large conversations | coding-agent | P2 | 3h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wait-ladder-context) |
+| wait-ladder-context | feat(wait): reduce empty checks in large conversations | coding-agent | P2 | 4h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wait-ladder-context) |
 | win-takeover-focus | fix(natives): hand the foreground back after Windows element takeover input | computer | P1 | 2h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-takeover-focus) |
 | browser-wait-selector-state | fix(browser): honor selector wait states and reject unknown options | browser | P2 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-wait-selector-state) |
-| atspi-press-actions | fix(natives): press Chromium menu items, options and tabs on Linux | computer | P2 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-press-actions) |
+| atspi-press-actions | fix(natives): press Chromium menu items, options and tabs on Linux | computer | P2 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-press-actions) |
 
 ## Conflict-held (27)
 
@@ -36,7 +36,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | browser-action-outcome | feat(browser): print what each browser action did to the page | browser | P2 | 18h | [#18786](https://github.com/can1357/oh-my-pi/pull/18786), browser-wait-selector-state | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-action-outcome) |
 | agent-identity | feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy | tui | P2 | 14h | [#18784](https://github.com/can1357/oh-my-pi/pull/18784) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/agent-identity) |
 | computer-run-failure-output | fix(computer): retain output and screenshots when a run fails | computer | P1 | 14h | [#18753](https://github.com/can1357/oh-my-pi/pull/18753) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-run-failure-output) |
-| browser-click-frame-removed | fix(coding-agent): fail a click whose frame the page removed while the button was down | browser | P1 | 13h | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-click-frame-removed) |
+| browser-click-frame-removed | fix(coding-agent): fail a click whose frame the page removed while the button was down | browser | P1 | 14h | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-click-frame-removed) |
 | computer-filter-types | fix(computer): say window and element filters take text when given a RegExp | computer | P2 | 12h | [#18753](https://github.com/can1357/oh-my-pi/pull/18753) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-filter-types) |
 | covered-fill | fix(coding-agent): refuse browser keys aimed at a field a modal dialog covers | browser | P1 | 12h | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/covered-fill) |
 | x11-xtest-release | fix(natives): release X11 XTest keys and buttons a killed omp held | computer | P1 | 11h | [#18784](https://github.com/can1357/oh-my-pi/pull/18784), [#18222](https://github.com/can1357/oh-my-pi/pull/18222) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-xtest-release) |
@@ -73,7 +73,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | factory-droid-171-models | feat(catalog): add the Factory Droid models droid 1.7.1 serves | factory-droid |  | 18h | factory-droid-171-pin ([#18771](https://github.com/can1357/oh-my-pi/pull/18771)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-171-models) |
 | browser-cursor | feat(browser): draw the acting agent's cursor in OMP-driven tabs | browser | P2 | 14h | agent-identity | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-cursor) |
 | desktop-cursor | feat(coding-agent,natives): show each agent's cursor where its computer input lands on macOS | coding-agent | P2 | 13h | agent-identity | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/desktop-cursor) |
-| win-target-layout | fix(natives): map Windows keys on the receiving keyboard layout | computer | P1 | 4h | win-posted-modifiers ([#18895](https://github.com/can1357/oh-my-pi/pull/18895)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-target-layout) |
+| win-target-layout | fix(natives): map Windows keys on the receiving keyboard layout | computer | P1 | 5h | win-posted-modifiers ([#18895](https://github.com/can1357/oh-my-pi/pull/18895)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-target-layout) |
 | ax-row-action | fix(natives): follow rebuilt macOS table rows without selecting a neighbour | computer | P1 | 2h | ax-ref-read-as ([#18892](https://github.com/can1357/oh-my-pi/pull/18892)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-row-action) |
 | win-focus-report | fix(natives): report where focus went after a Windows takeover | computer | P2 | 1h | win-takeover-focus | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-focus-report) |
 | atspi-qt-menus | fix(natives): let Linux menu.select walk into Qt apps' menus | computer | P2 | 0h | atspi-unanswered-app | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-qt-menus) |
