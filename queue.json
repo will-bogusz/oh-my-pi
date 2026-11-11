@@ -73872,13 +73872,13 @@
    "needs": [],
    "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
    "body": "bodies/macos-click-timestamp.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18824,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-click-timestamp",
    "host": "MacBook-Pro",
    "added": "2026-11-11T01:40:54Z",
-   "updated": "2026-11-11T03:37:15Z",
+   "updated": "2026-11-11T03:44:06Z",
    "note": "",
    "built": [
     {
@@ -73999,7 +73999,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "advanced": "2026-11-11T03:37:15Z"
+   "advanced": "2026-11-11T03:37:15Z",
+   "opened": "2026-11-11T03:44:06Z"
   },
   {
    "id": "atspi-huge-children",
