@@ -1,26 +1,23 @@
 ## What
 
-I made selector waits honor `state` and reject misspelled options instead of silently waiting for the wrong condition.
+I made selector waits on Chromium-backed tabs and frames honor `state` and reject misspelled options instead of waiting for the wrong condition.
 
 Waiting for an already-removed element with `state: "hidden"` or `"detached"` went from a 20-second timeout to 0–5 ms, with five runs of each state.
 
-The four states share option validation across Chromium/relay tabs, scoped frames, Tern and cmux. Existing `visible`/`hidden` forms remain accepted; `detached` requires absence, not just invisibility. Chromium's raw Puppeteer page and ElementHandle methods remain native APIs.
+This covers Chromium-backed tabs and their scoped frames, which is OMP's own Chromium and the Chrome relay, where the wait was measured. Tern and cmux are unchanged: Tern still reads only `visible`/`hidden` and cmux only `timeout`, so on those two a `state` or a misspelled option is still ignored and `state: "hidden"` still waits for the element to appear. Existing `visible`/`hidden` forms remain accepted; `detached` requires absence, not just invisibility, except that a `role/` selector never matches a hidden element, so its `detached` wait also ends when the match is hidden.
 
 ## Why
 
-The helper discarded `state`, so a disappearance wait instead waited for an element to appear. Invalid keys and values now name the accepted forms before any wait starts, following the existing ToolError validation convention rather than silently coercing them.
-
-Review `selector-wait.ts` first, then the backend wait branches. Conflicting state and boolean options are rejected rather than assigned an implicit precedence.
+The Chromium helper discarded `state`, so disappearance waits instead waited for appearance. Shared validation now names accepted forms and rejects conflicting visibility flags; raw Puppeteer APIs are unchanged.
 
 ## Testing
 
-- A scripted real headless Chromium page exercised all four states and both Puppeteer forms, five times each, on main and this branch. Both disappearance states timed out on main; all 30 branch calls resolved.
-- The two real-worker regressions failed on main (hidden-state timeout; unknown options accepted) and passed with the fix. The focused worker, Tern and cmux test files passed, with the desktop-only test skipped.
-- Re-run: `bun test packages/coding-agent/test/tools/browser-tab-worker-startup.test.ts packages/coding-agent/test/tools/browser-tern-tab.test.ts packages/coding-agent/test/tools/browser-cmux-page-text.test.ts`.
-- `bun run check:ts` stopped at an existing formatting error in `packages/coding-agent/test/agent-session-async-delivery.test.ts`; lint reported no errors and the workspace `check:types` phase passed when run separately. No desktop browser or model calls were used.
+- Real headless Chromium: five repetitions of each state and legacy form; removed hidden/detached selectors time out on main and resolve with this fix. Invalid-key/value cells are rejected rather than accepted.
+- Real-worker regressions fail before and pass after, including live refs, scoped frames and document replacement. Focused suite: 41 pass, one desktop-only skip. Coding-agent type check passes.
+- Re-run: `bun test packages/coding-agent/test/tools/browser-tab-worker-startup.test.ts packages/coding-agent/test/tools/browser-tern-tab.test.ts packages/coding-agent/test/tools/browser-cmux-page-text.test.ts`; `bun run --cwd packages/coding-agent check:types`.
 
 ---
 
 - [ ] `bun check` passes
 - [x] Tested locally
-- [ ] CHANGELOG updated with the required attribution
+- [x] CHANGELOG updated with the required attribution
