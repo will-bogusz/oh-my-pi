@@ -83965,6 +83965,11 @@
     "sha": "56c4425f11af26c97544d1409dc7a3fef5cda305",
     "at": "2026-11-11T11:38:06Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "56c4425f11af26c97544d1409dc7a3fef5cda305",
+    "at": "2026-11-11T11:38:50Z",
+    "host": "goliath"
    }
   }
  },
