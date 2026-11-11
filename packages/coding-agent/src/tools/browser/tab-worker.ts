@@ -368,7 +368,6 @@ const REQUESTED_NAVIGATION_WAIT_MS = 5_000;
 /** Grace after a call before file chooser interception is released in the user's browser. */
 const USER_DRIVEN_RELEASE_MS = 1_500;
 
-
 /** Queue a wheel event without treating a delayed renderer acknowledgement as dispatch failure. */
 export async function dispatchScroll(
 	dispatch: () => Promise<void>,
