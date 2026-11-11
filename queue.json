@@ -20719,7 +20719,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-after-bash-revalidate",
    "host": "MacBook-Pro",
    "added": "2026-10-18T21:39:24Z",
-   "updated": "2026-11-11T09:49:49Z",
+   "updated": "2026-11-11T09:50:16Z",
    "note": "",
    "built": [
     {
@@ -21167,6 +21167,14 @@
      "at": "2026-11-11T09:35:26Z",
      "verdict": "change",
      "note": "DesignChecks: fix the writer rule (function-valued approvals make read/grep/glob writers; read after read runs twice). Patch 16274/writer-rule.patch; drop round-12/13 tests, decline those cases as on main; body restates writer list + re-measured cost",
+     "ref": "/Users/viathebrink/tmp/oh-my-pi/DesignChecks/DesignChecks.md"
+    },
+    {
+     "pr": 16274,
+     "rounds": 16,
+     "at": "2026-11-11T09:50:15Z",
+     "verdict": "change",
+     "note": "Writer rule fixed as named: a dynamic approval is asked with the call's args and no context; throw or non-read = writer. At e86516437e read/grep/glob counted as writers, so a read after a read ran twice (probe 2 -> 1). Round-12/13 tests (context-only and transform-only write resolvers) deleted; those cases stay as on main. Re-measured with the PR's replay: 3,957 re-reads / +233 s (head rule 21,996 / +542 s). Pushed b41f24913a.",
      "ref": "/Users/viathebrink/tmp/oh-my-pi/DesignChecks/DesignChecks.md"
     }
    ]
