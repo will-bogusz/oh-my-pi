@@ -75,6 +75,11 @@ impl Win32Ax {
 		self.automation()?.get_raw_view_walker().map_err(ax_error)
 	}
 
+	fn read_children(&mut self, element: &UIElement) -> CoreResult<Vec<UIElement>> {
+		let condition = self.automation()?.create_true_condition().map_err(ax_error)?;
+		element.find_all(TreeScope::Children, &condition).map_err(ax_error)
+	}
+
 	/// Top-level window hosting `element`, found through the nearest ancestor
 	/// that owns a native window; `None` for the desktop itself.
 	pub(super) fn host_root(&mut self, element: &UIElement) -> Option<HWND> {
@@ -411,8 +416,7 @@ impl AxBackend for Win32Ax {
 		let expanded = ax_states::expanded(cached_state(&cached,
 			UIProperty::IsExpandCollapsePatternAvailable, UIProperty::ExpandCollapseExpandCollapseState)
 			.ok().flatten());
-		let walker = self.walker()?;
-		let children = walker.get_children(element);
+		let children = self.read_children(element);
 		let partial = identity.is_none() || children.is_err();
 		let child_count = children.map_or(0, |children| children.len().min(u32::MAX as usize) as u32);
 		// UIA rectangles already use physical desktop pixels, the same
@@ -445,9 +449,7 @@ impl AxBackend for Win32Ax {
 	fn children(&mut self, handle: &AxHandle) -> CoreResult<Vec<AxHandle>> {
 		let element = Self::element(handle)?;
 		Ok(self
-			.walker()?
-			.get_children(element)
-			.map_err(ax_error)?
+			.read_children(element)?
 			.into_iter()
 			.map(uia_handle)
 			.collect())
