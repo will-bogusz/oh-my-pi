@@ -25,7 +25,13 @@ Linux: all 8 targeted tests passed. All 7 regressions failed with their fixes re
 
 Workspace clippy (all targets, vendored forks excluded) and rustfmt passed on Linux, macOS and Windows (via cargo-xwin).
 
-Live check on a Windows 11 desktop: pending.
+Live check on a Windows 11 guest (WinForms probe form, background `press()` on each control, `ax()` before and after):
+
+| Control | `main` | this PR |
+|---|---|---|
+| Checkbox "Check", pressed (app logged `checked: true`) | `- checkbox "Check"`, same line before and after | `: "0"` before, `: "1"` after |
+| Tree folder "Parent", pressed (selects it) | `- treeitem "Parent"`, no state | `(collapsed)` before; `(selected) (collapsed) (focused)` after |
+| OK of a modal MessageBox, pressed once (closes it), then pressed again through the same handle | first press ok; second `AxFailed` ("UI Automation failed: An event was unable to invoke any of the subscribers") | first press ok; second `StaleRef` (UI Automation reports the element unavailable) |
 
 Raw-view parity and the dual-HRESULT destroyed-candidate path have not been live-tested.
 
