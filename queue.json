@@ -79796,6 +79796,26 @@
    "added": "2026-11-11T13:21:21Z",
    "updated": "2026-11-11T13:21:21Z",
    "note": ""
+  },
+  {
+   "id": "atspi-combo-choice",
+   "branch": "will/atspi-combo-choice",
+   "title": "fix(natives): choose Linux combo box options without opening their keyboard-grabbing list",
+   "area": "computer",
+   "priority": "P1",
+   "needs": [
+    "atspi-unanswered-app"
+   ],
+   "base": "c49b777b23e050bd1aadf6fcaa93c6b0e53f484c",
+   "body": "bodies/atspi-combo-choice.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-combo-choice",
+   "host": "MacBook-Pro",
+   "added": "2026-11-11T13:30:39Z",
+   "updated": "2026-11-11T13:30:39Z",
+   "note": ""
   }
  ],
  "watch": {
