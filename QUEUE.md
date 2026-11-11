@@ -134,5 +134,5 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 
 | id | title | area | priority | age | branch |
 |---|---|---|---|---|---|
-| browser-action-outcome | feat(browser): print what each browser action did to the page | browser | P2 | 13h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-action-outcome) |
+| browser-action-outcome | feat(browser): print what each browser action did to the page | browser | P2 | 14h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-action-outcome) |
 | win-target-layout | fix(natives): map Windows keys on the receiving keyboard layout | computer | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-target-layout) |
