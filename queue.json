@@ -90529,5 +90529,11 @@
     "wake": ""
    }
   ]
+ },
+ "opening": {
+  "id": "win-takeover-focus",
+  "token": "ab38e9fb56324ac3abf9c24c8f8728d1",
+  "host": "MacBook-Pro",
+  "at": "2026-11-11T16:17:23Z"
  }
 }
