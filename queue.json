@@ -75819,15 +75819,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-11T05:55:48Z",
+  "checked": "2026-11-11T06:26:06Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {
-   "print-pref": {
-    "since": "2026-11-11T05:55:48Z",
-    "title": "fix(coding-agent,browser-relay): stop a page calling window.print() from hanging browser calls"
-   }
-  },
+  "openable": {},
   "conflicts": {
    "#16611": {
     "since": "2026-11-05T14:32:39Z",
@@ -75840,7 +75835,6 @@
   "merged_through": "2026-11-10T22:02:28Z",
   "unreleased": {},
   "ready": [
-   15508,
    16274,
    16553,
    16611,
@@ -75878,7 +75872,9 @@
    18829,
    18830,
    18832,
-   18833
+   18833,
+   18838,
+   18840
   ],
   "post_merge": {
    "17831": {
@@ -77845,6 +77841,13 @@
     "kind": "openable",
     "id": "print-pref",
     "title": "fix(coding-agent,browser-relay): stop a page calling window.print() from hanging browser calls"
+   },
+   {
+    "at": "2026-11-11T06:26:06Z",
+    "kind": "unopenable",
+    "id": "print-pref",
+    "title": "fix(coding-agent,browser-relay): stop a page calling window.print() from hanging browser calls",
+    "why": "opened as #18838"
    }
   ]
  },
@@ -80824,12 +80827,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-11T06:20:29.199393Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-11T06:26:07.719958Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 1,
-   "left": 7
+   "used": 2,
+   "left": 6
   },
   "rows": [
    {
@@ -80950,6 +80953,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T05:19:29Z"
+   },
+   {
+    "id": "browser-run-node-hint",
+    "label": "#18840",
+    "number": 18840,
+    "state": "open",
+    "area": "browser",
+    "priority": "P0",
+    "title": "fix(browser): say where tab.run code runs when it reaches for a page global",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-11T06:22:49Z"
    },
    {
     "id": "read-after-bash-revalidate",
@@ -81904,23 +81924,6 @@
     "created": "2026-11-11T02:53:57Z"
    },
    {
-    "id": "browser-run-node-hint",
-    "label": "browser-run-node-hint",
-    "number": null,
-    "state": "queued",
-    "area": "browser",
-    "priority": "P2",
-    "title": "fix(browser): say where tab.run code runs when it reaches for a page global",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-10T16:48:01Z"
-   },
-   {
     "id": "browser-wait-text-regexp",
     "label": "browser-wait-text-regexp",
     "number": null,
@@ -82083,6 +82086,7 @@
      "needs r2/relay-own-only (queued)",
      "conflicts with #18676 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18830 in docs/tools/browser.md",
+     "conflicts with #18840 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #17894 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "conflicts with #18737 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "conflicts with #18738 in docs/tools/browser.md",
@@ -82093,7 +82097,6 @@
      "conflicts with #18776 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18786 in docs/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md, packages/browser-relay/README.md",
-     "conflicts with browser-run-node-hint in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in docs/tools/browser.md, packages/browser-relay/extension/background.ts, packages/browser-relay/extension/manifest.json, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/extension-assets/manifest.json.txt, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
     ],
     "note": "",
@@ -82102,6 +82105,7 @@
     "blocked_by": [
      "#18676",
      "#18830",
+     "#18840",
      "#17894",
      "#18737",
      "#18738",
@@ -82111,8 +82115,7 @@
      "#18838",
      "#18776",
      "#18786",
-     "#18789",
-     "browser-run-node-hint"
+     "#18789"
     ],
     "needs": [
      "r2/relay-own-only"
@@ -82132,6 +82135,7 @@
      "needs r2/relay-popup-owned (queued), r2/page-waiting (queued)",
      "conflicts with #18676 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18830 in docs/tools/browser.md",
+     "conflicts with #18840 in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #17894 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "conflicts with #18737 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "conflicts with #18738 in docs/tools/browser.md",
@@ -82143,7 +82147,6 @@
      "conflicts with #18776 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18786 in docs/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts",
-     "conflicts with browser-run-node-hint in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need r2/relay-popup-owned conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/extension/background.ts, packages/browser-relay/extension/chrome.d.ts, packages/browser-relay/extension/manifest.json, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/extension-assets/manifest.json.txt, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/relay/server.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/cli/browser-relay-cli.test.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-background-input.test.ts, packages/coding-agent/test/tools/browser-interactions.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "its need r2/page-waiting conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/extension/background.ts, packages/browser-relay/extension/chrome.d.ts, packages/browser-relay/scripts/build-extension.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/print-hold.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/extension-files.ts, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/relay/server.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/cli/browser-relay-cli.test.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-background-input.test.ts, packages/coding-agent/test/tools/browser-interactions.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-probe.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts, packages/coding-agent/test/tools/browser-upload-contents.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser.ts, packages/coding-agent/test/tools/browser-relay-detach.test.ts"
@@ -82154,6 +82157,7 @@
     "blocked_by": [
      "#18676",
      "#18830",
+     "#18840",
      "#17894",
      "#18737",
      "#18738",
@@ -82164,8 +82168,7 @@
      "#18838",
      "#18776",
      "#18786",
-     "#18789",
-     "browser-run-node-hint"
+     "#18789"
     ],
     "needs": [
      "r2/relay-popup-owned",
@@ -82513,6 +82516,7 @@
      "conflicts with #18676 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18829 in packages/coding-agent/src/tools/browser/interactions.ts",
      "conflicts with #18830 in docs/tools/browser.md",
+     "conflicts with #18840 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #17894 in docs/tools/browser.md",
      "conflicts with #18737 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18738 in docs/tools/browser.md",
@@ -82523,7 +82527,6 @@
      "conflicts with #18776 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18786 in docs/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md",
-     "conflicts with browser-run-node-hint in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/print-hold.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-upload-contents.test.ts"
     ],
     "note": "",
@@ -82533,6 +82536,7 @@
      "#18676",
      "#18829",
      "#18830",
+     "#18840",
      "#17894",
      "#18737",
      "#18738",
@@ -82542,8 +82546,7 @@
      "#18838",
      "#18776",
      "#18786",
-     "#18789",
-     "browser-run-node-hint"
+     "#18789"
     ],
     "needs": [
      "r2/relay-own-only"
