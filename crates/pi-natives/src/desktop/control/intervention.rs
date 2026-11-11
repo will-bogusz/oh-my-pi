@@ -287,11 +287,14 @@ impl Default for Listener {
 impl Listener {
 	/// Whether the tap runs, starting it if it does not yet.
 	pub(crate) fn listening(&mut self) -> bool {
-		if let Tap::Stopped(start) = self.tap
-			&& let Ok(tap) = start(Arc::clone(&self.inputs))
-		{
+		if let Tap::Stopped(start) = self.tap {
+			// The HID counters are read before the tap is enabled: a press after
+			// that is one the tap delivers or the record gives up on, never one
+			// both in the record's start and in what the tap delivers.
 			self.inputs.clicks().start();
-			self.tap = Tap::Running(tap);
+			if let Ok(tap) = start(Arc::clone(&self.inputs)) {
+				self.tap = Tap::Running(tap);
+			}
 		}
 		!matches!(self.tap, Tap::Stopped(_))
 	}
@@ -349,7 +352,10 @@ impl Listener {
 
 #[cfg(test)]
 mod tests {
-	use std::cell::Cell;
+	use std::{
+		cell::Cell,
+		sync::atomic::{AtomicBool, Ordering},
+	};
 
 	use super::*;
 	use crate::desktop::error::ErrorCode;
@@ -562,5 +568,21 @@ mod tests {
 		let error = listener.admit(7, &token).err().unwrap();
 		assert_eq!(error.code, ErrorCode::UserIntervened);
 		assert!(error.message.contains("still using TextEdit"), "{}", error.message);
+	}
+
+	#[test]
+	fn the_click_record_starts_before_the_tap_that_feeds_it() {
+		// A press between the tap's start and the record's would be counted in
+		// the record's start and then delivered by the tap as one more.
+		static STARTED_FIRST: AtomicBool = AtomicBool::new(false);
+		let mut listener = Listener {
+			inputs: Arc::default(),
+			tap:    Tap::Stopped(|inputs| {
+				STARTED_FIRST.store(inputs.clicks().started(), Ordering::SeqCst);
+				Err(DesktopError::permission_denied("no tap in tests"))
+			}),
+		};
+		assert!(!listener.listening());
+		assert!(STARTED_FIRST.load(Ordering::SeqCst));
 	}
 }

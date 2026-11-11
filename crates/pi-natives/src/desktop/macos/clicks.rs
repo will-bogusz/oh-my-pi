@@ -100,9 +100,16 @@ impl Default for ClickJournal {
 }
 
 impl ClickJournal {
-	/// Starts the record as the session's tap starts.
+	/// Starts the record just before the session's tap starts.
 	pub(crate) fn start(&self) {
 		self.0.lock().start(hid_buttons());
+	}
+
+	/// Whether the record has started: until then nothing from before it is
+	/// known, not even as the user's.
+	#[cfg(test)]
+	pub(crate) fn started(&self) -> bool {
+		self.0.lock().before.is_some()
 	}
 
 	/// macOS disabled the session's tap, which then missed every event until
