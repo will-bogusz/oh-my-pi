@@ -88707,8 +88707,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-11T18:08:00.431883Z",
-  "host": "goliath",
+  "at": "2026-11-11T18:14:42.144951Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -89148,8 +89148,10 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in MODULE.bazel.lock"
+    ],
     "note": "accepted pair with #18353; accepted pair with #18013",
     "over": [],
     "paired": [
@@ -89287,8 +89289,10 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in MODULE.bazel.lock"
+    ],
     "note": "accepted pair with #18013; accepted pair with #18914",
     "over": [],
     "paired": [
@@ -89341,8 +89345,10 @@
     "area": "natives",
     "priority": "P2",
     "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in MODULE.bazel.lock"
+    ],
     "note": "accepted pair with #18353; accepted pair with #18914; accepted pair with #18783; accepted pair with #18825",
     "over": [],
     "paired": [
@@ -89497,7 +89503,8 @@
      "needs #18914 (open)",
      "conflicts with #18921 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18892 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs"
+     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs",
+     "its need #18914 conflicts with main in MODULE.bazel.lock"
     ],
     "note": "",
     "over": [],
@@ -89553,6 +89560,7 @@
      "conflicts with #18923 in crates/pi-natives/src/desktop/ax.rs",
      "conflicts with #18353 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #18013 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/libei.rs",
+     "its need #18914 conflicts with main in MODULE.bazel.lock",
      "conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
@@ -89828,7 +89836,7 @@
     "title": "feat(browser): add waitForFunction to tabs and frames",
     "action": "wait",
     "reasons": [
-     "conflicts with #18924 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/cmux/cmux-tab.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts",
+     "conflicts with #18924 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18786 in packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with main in packages/coding-agent/src/tools/browser/frames.ts"
     ],
@@ -89905,7 +89913,8 @@
      "needs #18914 (open)",
      "conflicts with #18921 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18892 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/ax/menus.rs"
+     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/ax/menus.rs",
+     "its need #18914 conflicts with main in MODULE.bazel.lock"
     ],
     "note": "",
     "over": [],
@@ -89933,7 +89942,8 @@
      "needs #18914 (open)",
      "conflicts with #18921 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18892 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs"
+     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs",
+     "its need #18914 conflicts with main in MODULE.bazel.lock"
     ],
     "note": "",
     "over": [],
@@ -89983,7 +89993,7 @@
     "action": "wait",
     "reasons": [
      "needs browser-wait-predicate (queued)",
-     "conflicts with #18924 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/cmux/cmux-tab.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts",
+     "conflicts with #18924 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need browser-wait-predicate conflicts with main in packages/coding-agent/src/tools/browser/frames.ts"
     ],
     "note": "",
@@ -90008,7 +90018,7 @@
     "action": "wait",
     "reasons": [
      "needs browser-wait-text-regexp (queued)",
-     "conflicts with #18924 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/cmux/cmux-tab.ts, packages/coding-agent/test/tools/browser-cmux-page-text.test.ts",
+     "conflicts with #18924 in docs/tools/browser.md",
      "its need browser-wait-text-regexp conflicts with main in packages/coding-agent/src/tools/browser/frames.ts"
     ],
     "note": "",
@@ -90021,6 +90031,27 @@
      "browser-wait-text-regexp"
     ],
     "created": "2026-11-10T16:51:21Z"
+   },
+   {
+    "id": "click-snapshot-first",
+    "label": "click-snapshot-first",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P2",
+    "title": "fix(natives): start the macOS click record before the tap that feeds it",
+    "action": "wait",
+    "reasons": [
+     "needs #16553 (open)"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [
+     "#16553"
+    ],
+    "created": "2026-11-11T18:13:37Z"
    },
    {
     "id": "computer-filter-types",
@@ -90497,7 +90528,7 @@
      "held: Main, 2026-11-11: stays held until #18786 merges with the typed-message guide channel (design check replace); then one property on the computer prelude, drop the wrap variant, re-run its blind legs",
      "needs #18786 (open)",
      "conflicts with #18786 in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/prompts/tools/eval.md, packages/coding-agent/src/tools/eval.ts",
-     "conflicts with main in packages/coding-agent/test/sdk-computer-prelude-toggle.test.ts"
+     "conflicts with main in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/sdk-computer-prelude-toggle.test.ts"
     ],
     "note": "",
     "over": [],
@@ -90531,7 +90562,6 @@
      "conflicts with #18915 in docs/tools/computer.md",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with #18786 in packages/agent/src/agent.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/tools/eval.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
@@ -90547,8 +90577,7 @@
      "#18895",
      "#18915",
      "#18353",
-     "#18222",
-     "#18786"
+     "#18222"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -90661,7 +90690,7 @@
     "reasons": [
      "held: Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance",
      "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/turn-recovery.ts, packages/coding-agent/test/agent-session-retry-fallback.test.ts",
-     "conflicts with #18786 in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-advisors.ts",
+     "conflicts with #18786 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in docs/advisor-watchdog.md, docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-advisors.ts, packages/coding-agent/src/session/turn-recovery.ts, packages/coding-agent/test/agent-session-retry-fallback.test.ts"
     ],
     "note": "",
@@ -90685,6 +90714,8 @@
     "action": "wait",
     "reasons": [
      "needs act-look-prompt (queued)",
+     "conflicts with #18737 in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #18750 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18772 in docs/tools/browser.md",
      "conflicts with #18924 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18925 in packages/coding-agent/src/tools/browser/tab-worker.ts",
@@ -90694,6 +90725,8 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#18737",
+     "#18750",
      "#18772",
      "#18924",
      "#18925"
