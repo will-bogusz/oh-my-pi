@@ -550,7 +550,7 @@ describe.skipIf(!CHROMIUM_AVAILABLE)("relay tab ownership", () => {
 			const blankTabId = await chromeTabIdOf(fixture, "about:blank");
 			// Headless Chrome reports every window focused, so this holds the user's focus fixed; the visible run checks it.
 			const userWindowFocused = () =>
-				fixture.extension.evaluate(
+				fixture.inExtension(
 					`chrome.tabs.get(${humanTabId}).then(tab => chrome.windows.get(tab.windowId)).then(window => window.focused)`,
 				);
 			const focusedBefore = await userWindowFocused();
@@ -583,7 +583,7 @@ return got.url();`,
 				// Wait for the relay's selection change; a popup window stays where Chrome put it, not minimized.
 				const expected =
 					key === "window" ? { window: "popup", state: "normal" } : { active: false, window: "normal" };
-				const placement = await fixture.extension.evaluate(`(async () => {
+				const placement = await fixture.inExtension(`(async () => {
 					const { promise, resolve, reject } = Promise.withResolvers();
 					const expected = ${JSON.stringify(expected)};
 					const inspect = async () => {
@@ -621,7 +621,7 @@ return { visible: await got.evaluate(() => document.visibilityState), shot: shot
 				expect(await chromeTab(fixture, humanTabId)).toEqual({ active: true });
 				expect(await userWindowFocused()).toBe(focusedBefore);
 				expect(
-					await fixture.extension.evaluate(`chrome.tabs.get(${popupTabId}).then(async tab => {
+					await fixture.inExtension(`chrome.tabs.get(${popupTabId}).then(async tab => {
 						const window = await chrome.windows.get(tab.windowId);
 						return { active: tab.active, window: window.type, state: window.state };
 					})`),
