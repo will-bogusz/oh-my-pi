@@ -75577,7 +75577,7 @@
   {
    "id": "print-pref",
    "branch": "will/print-pref",
-   "title": "fix(coding-agent,browser-relay): stop a page calling window.print() from hanging browser calls",
+   "title": "fix(coding-agent): stop a page calling window.print() from hanging the browser omp launches",
    "area": "browser",
    "priority": "P2",
    "needs": [],
@@ -75589,7 +75589,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/print-pref",
    "host": "MacBook-Pro",
    "added": "2026-11-11T03:57:46Z",
-   "updated": "2026-11-11T07:09:24Z",
+   "updated": "2026-11-11T07:10:04Z",
    "note": "",
    "built": [
     {
