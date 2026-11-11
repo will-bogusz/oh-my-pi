@@ -77934,8 +77934,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-10T23:50:45.332725Z",
-  "host": "goliath",
+  "at": "2026-11-10T23:59:15.268487Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 1,
@@ -78544,15 +78544,19 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool",
-    "action": "open",
-    "reasons": [],
+    "action": "held",
+    "reasons": [
+     "held: Main, 2026-11-11: waits for AtspiHarm's description paragraph and Main's P0 call",
+     "conflicts with #18353 in MODULE.bazel.lock, crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
+     "conflicts with #18013 in MODULE.bazel.lock"
+    ],
     "note": "",
-    "over": [
+    "over": [],
+    "paired": [],
+    "blocked_by": [
      "#18353",
      "#18013"
     ],
-    "paired": [],
-    "blocked_by": [],
     "needs": [],
     "created": "2026-11-03T08:39:53Z"
    },
@@ -78569,7 +78573,6 @@
      "needs atspi-unanswered-app (queued)",
      "conflicts with #18353 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #18013 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/libei.rs",
-     "conflicts with atspi-unanswered-app in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/wayland/libei.rs, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
@@ -78577,8 +78580,7 @@
     "paired": [],
     "blocked_by": [
      "#18353",
-     "#18013",
-     "atspi-unanswered-app"
+     "#18013"
     ],
     "needs": [
      "atspi-unanswered-app"
@@ -79129,7 +79131,6 @@
      "conflicts with #18753 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with atspi-unanswered-app in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with agent-identity in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/tools/computer/worker.ts"
     ],
@@ -79141,7 +79142,6 @@
      "#18753",
      "#18353",
      "#18222",
-     "atspi-unanswered-app",
      "agent-identity"
     ],
     "needs": [
