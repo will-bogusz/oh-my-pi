@@ -75838,7 +75838,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-11T06:26:06Z",
+  "checked": "2026-11-11T07:27:45Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -80875,12 +80875,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-11T07:17:37.093458Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-11T07:27:46.240961Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 1,
-   "left": 7
+   "used": 0,
+   "left": 8
   },
   "rows": [
    {
