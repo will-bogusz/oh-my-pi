@@ -6,9 +6,6 @@ mod toolkit;
 mod uinput;
 mod wm;
 
-#[cfg(test)]
-mod remap_tests;
-
 use capture::X11Capture;
 use image::RgbaImage;
 use input::X11Input;

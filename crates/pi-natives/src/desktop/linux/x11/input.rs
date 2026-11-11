@@ -291,14 +291,10 @@ impl X11Input {
 			Keymap::xtest(&self.conn)?
 		};
 		match (target, mode) {
-			(Target::Desktop | Target::Display(_), _) => {
-				self.xtest_keys(keys)
-			},
+			(Target::Desktop | Target::Display(_), _) => self.xtest_keys(keys),
 			(Target::Window(id), DeliveryMode::Foreground | DeliveryMode::ForegroundReturnFocus) => {
 				let window = parse_window(id)?;
-				self.with_foreground(window, FOREGROUND_KEYBOARD_SETTLE, |this| {
-					this.xtest_keys(keys)
-				})
+				self.with_foreground(window, FOREGROUND_KEYBOARD_SETTLE, |this| this.xtest_keys(keys))
 			},
 			(Target::Window(id), DeliveryMode::Background) => {
 				let window = parse_window(id)?;
@@ -711,13 +707,15 @@ impl X11Input {
 			},
 		}
 	}
+
 	fn xtest_keys(&mut self, keys: Keys<'_>) -> CoreResult<()> {
 		let mapping = if let Keys::Text(text) = keys {
 			Some(self.keymap.bind_text(Arc::clone(&self.conn), text)?)
 		} else {
 			None
 		};
-		let result = keys.plan(&self.keymap)
+		let result = keys
+			.plan(&self.keymap)
 			.and_then(|steps| self.xtest_steps(&steps, keys.duration()));
 		match mapping {
 			Some(mapping) => mapping.finish(result),
@@ -731,14 +729,14 @@ impl X11Input {
 		} else {
 			None
 		};
-		let result = keys.plan(&self.keymap)
+		let result = keys
+			.plan(&self.keymap)
 			.and_then(|steps| self.send_key_steps(window, &steps, keys.duration()));
 		match mapping {
 			Some(mapping) => mapping.finish(result),
 			None => result,
 		}
 	}
-
 
 	fn xtest_steps(&self, steps: &[KeyStep], duration: Duration) -> CoreResult<()> {
 		self.check_released_keys(
@@ -1334,3 +1332,7 @@ mod tests {
 		assert_eq!(isolated(Ok(()), disturbed()).unwrap_err().message, "focus moved");
 	}
 }
+
+#[cfg(test)]
+#[path = "remap_tests.rs"]
+mod remap_tests;
