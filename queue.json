@@ -80647,8 +80647,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wait-ladder-context",
    "host": "MacBook-Pro",
    "added": "2026-11-11T10:13:40Z",
-   "updated": "2026-11-11T23:36:06Z",
-   "note": "QueueSkipper, 2026-11-11: accepted tree admission. Native build and 655 Rust tests pass; workspace types and 149 focused tests pass (3 skipped). check:ts format defects reproduce on PR 18924/18925 alone; SDK relay-toggle prefix test fails on PR 18786 f68cdf587a alone (4 pass/1 fail), not tree-specific. Sibling owners handle separately; entry files pass oxfmt.",
+   "updated": "2026-11-11T23:36:09Z",
+   "note": "Closed by Will, 2026-11-11: the wait ladder's values are chosen intentionally; do not reopen or re-propose tuning them. The polling cost it addressed is handled in Will's delegation rule (end the turn after starting a subagent instead of calling wait).",
    "kind": "proposal",
    "built": [
     {
