@@ -2,7 +2,7 @@
 
 I made Linux `el.type` put text straight into GTK fields and Qt text editors through accessibility, because the key path kept landing the agent's text in whatever field the user was typing in.
 
-With a user typing in another window on X11, GTK and Qt text fields got the exact text 0 of 10 times on `main` (GTK 3 reported success after typing into the user's own field 5 times, and the user lost 14 to 26 characters) and 70 of 70 times with this PR, with no user characters lost. On KDE Wayland, where `main` refuses element typing, they take it 10 of 10.
+While a user typed elsewhere, X11 GTK and Qt fields got exact text 0/10 on `main`, versus 70/70 here with no user characters lost. On KDE Wayland, `main` refuses; this PR delivers 10/10.
 
 **X11** (GNOME/mutter), a simulated user typing in another window throughout:
 
@@ -30,17 +30,17 @@ With a user typing in another window on X11, GTK and Qt text fields got the exac
 
 On X11, `el.type` sends background keys only to focused GTK 3 elements; otherwise takeover races the user's typing. Wayland cannot focus another app's field, so `main` refuses. AT-SPI inserts need no focus or keys; read-back checks success.
 
-The field ends as focusing it and typing would: the text replaces the selection or goes in at the caret, and an unfocused GTK entry is replaced whole, since focusing one selects it. Only GTK and Qt multi-line edits take the route; other toolkits, and apps whose toolkit cannot be read, keep keys.
+Text replaces the selection or enters at the caret; unfocused GTK entries are replaced whole, matching focus-and-type. Only GTK and Qt multi-line edits take this route; other or unreadable toolkits keep keys.
 
 **Question for the maintainer: Qt single-line fields.** Qt applies an accessibility insert to a line edit, spin box, date edit or combo box editor as `setText` (`QAccessibleLineEdit::insertText` in qtbase `simplewidgets.cpp`, Qt 5.15 and 6), skipping the validator and input mask, with no `textEdited`, undo or modified flag.
 - A, route everywhere: Qt line edits get the exact text on X11 (9/9, 0 user characters lost), but digits-only line edits, spin boxes and combo editors stored "AB" and reported success (5/5 each).
 - B, decline (shipped): validators hold (30/30 per widget), but Qt line edits keep `main`'s takeover on X11 (0/10 exact, 23 user characters lost) and stay refused on Wayland.
 
-If the maintainer picks decline for `el.type`, `setValue` should decline the same fields.
+`setValue` takes the same write on a Qt single-line field: on `main` it stores the text without `textEdited` and reports success (Qt 5 and Qt 6 `QLineEdit`, unfocused, 20 of 20; Ubuntu 22.04 Xvfb microVM), and a validator is bypassed as for typing (QTBUG-152232). If you pick declining for `el.type`, `setValue` should decline the same fields; that is one condition in `set_value`.
 
 ## Testing
 
-Real OMP runs in Ubuntu 24.04 X11 and KDE Plasma Wayland guests, with QEMU keys typing into a second window for each whole trial and no-agent controls around each cell (0 characters lost). A false success on one arm meant 30 runs before the other was called clean.
+Real OMP runs on Ubuntu 24.04 X11 and KDE Plasma Wayland, with QEMU keys typing elsewhere throughout and no-agent controls (0 characters lost). A false success triggered 30 runs per arm.
 
 - `cargo test -p pi-natives --lib -- desktop::`: 255 passed. The insert test in `linux/ax.rs` fails without the Qt decline (a Qt line edit holding "12" takes "AB"), without the toolkit check, and with unfocused GTK entries left on their caret.
 - Not run: GNOME Wayland, Qt 5 on Wayland.
