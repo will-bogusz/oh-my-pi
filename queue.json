@@ -73836,7 +73836,7 @@
    "branch": "will/eval-assign-echo",
    "title": "fix(coding-agent): print nothing for a JavaScript eval cell that ends in an assignment",
    "area": "eval",
-   "priority": "P1",
+   "priority": "P2",
    "needs": [],
    "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
    "body": "bodies/eval-assign-echo.md",
@@ -73846,7 +73846,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/eval-assign-echo",
    "host": "MacBook-Pro",
    "added": "2026-11-10T19:30:30Z",
-   "updated": "2026-11-11T09:54:05Z",
+   "updated": "2026-11-11T10:00:54Z",
    "note": "",
    "advanced": "2026-11-11T09:54:05Z",
    "built": [
