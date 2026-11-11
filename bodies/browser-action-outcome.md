@@ -2,7 +2,7 @@
 
 Models kept spending a whole cell just looking at the page to find out whether a click or fill had done anything, so I made each browser action print one line saying what it did.
 
-In blind runs on four browser tasks this head took 0.89x `main`'s steps on Claude Opus 5.5 [0.83, 0.96] and 0.94x on GPT-6.1 Sol [0.89, 0.997], with fewer look-only cells on both; on Claude Haiku it took 1.07x and 1.17x the steps, so the saving is not claimed across models. In Chromium, `goto`, `click`, `fill`, `type`, `press` and `select` (tab, frame and element forms) now print into the cell output. Recorded on a bench signup wizard:
+It helps GPT-6.1 Sol and Claude Opus 5.5 and costs Claude Haiku steps: in blind runs on four browser tasks this head took 0.94x `main`'s steps on Sol [0.89, 0.997] and 0.89x on Opus [0.83, 0.96], and 1.17x and 1.07x on Haiku. In Chromium, `goto`, `click`, `fill`, `type`, `press` and `select` (tab, frame and element forms) now print into the cell output. Recorded on a bench signup wizard:
 
 ```js
 await tab.fill('#email', 'outcome@example.test');
@@ -19,6 +19,8 @@ await tab.click('#next');
 | `navigated to <url>` | the frame's URL or document changed | 38 of 38 |
 | `page changed` | nodes, text, attributes or a form value changed | 42 of 44 |
 | `no change yet` | nothing changed while the DOM stayed quiet for 80 ms (300 ms at most) | 16 of 20 |
+
+96 of the 102 lines were right.
 
 A fill or type whose value the page rewrote adds `(field now shows "…")`, never for a password field, and a dialog left open prints `dialog pending: confirm "…"`. Return values are unchanged; when the page cannot be probed, nothing is printed.
 
@@ -54,6 +56,8 @@ Model runs on headless Chrome for Testing; ratios are geometric means of per-tas
 | GPT-6.1 Sol medium, 4 x 3, blind | this head | **0.94** [0.89, 0.997] | **0.90** [0.84, 0.98] | 12 -> 8 | 12/12 / 12/12 |
 | Claude Haiku 5.5 medium, 4 x 4, blind | this head | 1.17 [0.99, 1.37] | **1.19** [1.02, 1.39] | 62 -> 73 | 15/16 / 16/16 |
 | Claude Haiku 5.5 medium, 4 x 4, blind | this head | 1.07 [0.91, 1.25] | 1.04 [0.88, 1.22] | 66 -> 67 | 16/16 / 14/16 |
+
+The product configurator, where Haiku lost most, is reported apart: Sol took 1.04x its mean steps there (same median) and Opus 6 against 7 (median). Opus's one failed run, on `main`, was a harness artefact. All Opus runs were taken on a quiet host.
 
 <details><summary>The earlier build, and Haiku on this head</summary>
 
