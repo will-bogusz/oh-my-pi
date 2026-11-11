@@ -79292,7 +79292,7 @@
    "area": "natives",
    "priority": "P1",
    "needs": [],
-   "base": "73d7521269a1212fc2b2790a2e8c08424496c953",
+   "base": "0ef8a9e7c2fd9870cead2c12839a665ee15fe852",
    "body": "bodies/macos-menu-miss-items.md",
    "state": "open",
    "pr": 18923,
@@ -79300,7 +79300,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-menu-miss-items",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:58:16Z",
-   "updated": "2026-11-11T17:21:31Z",
+   "updated": "2026-11-11T17:31:35Z",
    "note": "",
    "built": [
     {
@@ -79599,7 +79599,7 @@
    ],
    "opened": "2026-11-11T16:39:42Z",
    "readied": "2026-11-11T16:40:10Z",
-   "advanced": "2026-11-11T17:21:23Z"
+   "advanced": "2026-11-11T17:31:35Z"
   },
   {
    "id": "macos-ax-cancel-before-send",
