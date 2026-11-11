@@ -2169,6 +2169,56 @@ describe("computer worker round trips", () => {
 		});
 	});
 
+	it("rejects a RegExp or other non-text window and element filter with the form filters take", async () => {
+		const transport = new MemoryTransport();
+		const native = new FakeNativeSession();
+		const queried: AxQuery[] = [];
+		native.axQuery = async (_target, query) => {
+			queried.push(query);
+			return [];
+		};
+		new ComputerWorkerCore(transport, () => native);
+		// A run passes a real RegExp; a direct JavaScript call delivers a nested one as `{}`, a Python
+		// `re.Pattern` option as its `__omp_re` marker.
+		const result = await runWorker(
+			transport,
+			"regexp-filters",
+			`const attempts = [
+				() => desktop.window({ title: /Remote Desktop/ }),
+				() => desktop.windows({ title: /Remote Desktop/ }),
+				() => desktop.window({ app: /Code/i, wait: 100 }),
+				() => desktop.windows({ title: {} }),
+				() => desktop.window({ title: { __omp_re: { source: "Remote", flags: "" } } }),
+				() => desktop.window(/Editor/),
+				() => desktop.windows(/Editor/),
+				async () => (await desktop.window(42)).find({ title: /Save/ }),
+				async () => (await desktop.window(42)).find({ role: "button", value: 5 }),
+				async () => (await desktop.window(42)).find(/Save/),
+			];
+			const errors = [];
+			for (const attempt of attempts) {
+				try { await attempt(); errors.push("no error"); } catch (error) { errors.push(error.message); }
+			}
+			return errors;`,
+		);
+		expect(result.ok).toBe(true);
+		if (!result.ok) return;
+		const text = "text matched as a case-insensitive substring, not a RegExp";
+		expect(result.payload.returnValue).toEqual([
+			`window({ title }) takes ${text}; got a RegExp`,
+			`windows({ title }) takes ${text}; got a RegExp`,
+			`window({ app }) takes ${text}; got a RegExp`,
+			`windows({ title }) takes ${text}; got object`,
+			`window({ title }) takes ${text}; got a RegExp`,
+			`window() takes a window id or an { app, title } filter of ${text}; got a RegExp`,
+			`windows() takes an { app, title } filter of ${text}; got a RegExp`,
+			`find({ title }) takes ${text}; got a RegExp`,
+			`find({ value }) takes ${text}; got number`,
+			`find() takes a { role, title, value } query of ${text}; got a RegExp`,
+		]);
+		expect(queried).toEqual([]);
+	});
+
 	it("keeps an app-filter miss without scanning applications when windows have no process identity", async () => {
 		const transport = new MemoryTransport();
 		const native = new FakeNativeSession();
