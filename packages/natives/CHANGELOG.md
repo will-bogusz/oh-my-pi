@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- macOS background key presses into a window one call after another no longer end the word they type: every call re-sent the activation and press that make the window key, and TextEdit then capitalized the word, so `press("z")` then `press("1")` typed `Z1`
+
 ## [18.18.8] - 2026-11-11
 
 ### Changed
