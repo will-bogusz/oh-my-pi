@@ -2,7 +2,7 @@
 
 I made a click on a button inside an iframe fail when the page removes that iframe as the button goes down, because Chrome tabs reported those clicks as delivered although the button never got its click.
 
-A Chromium click confirms delivery by reading a record of the target's `pointerdown`, `mousedown` and `click` events after the release. When that read failed, `clickElement` counted the click as delivered, on the theory that the click had navigated away. Now, for an element in a child frame, the record is also read once while the first press is down; if the frame is already gone then, the click fails with `could not confirm the click: the press reached the page, which removed the element's frame before the button came up, so no click followed; check the page before clicking again`.
+For child-frame clicks, delivery is checked while the first press is still down as well as after release. A frame already gone before release produces an unconfirmed-input error that says the press reached the page and asks the caller to inspect before clicking again. A frame that closes on the click still counts as delivered.
 
 | Child frame the page removes | Before | Now |
 |---|---|---|
