@@ -23,7 +23,7 @@ Before, these windows appear while the call reports success. Read `roster.rs`, `
 - Cost: +27 to +35 ms median per call (n=50 per arm per browser); headless skips it.
 - Maintenance: rests on Chrome drawing menus above normal windows and sheets inside the tab's window; else the report goes quiet, not wrong.
 
-Non-goals: answering the windows; Linux and Windows. Untested: a window the user opens in that browser inside the tab's frame mid-call would be named; a page calling `print()` was not measured. Printing is disabled in omp's own Chrome profile by merged #18838; attached browsers retain their print settings.
+Non-goals: answering windows; Linux and Windows. Untested: a user's window opening inside the tab's frame mid-call; `print()`. Merged #18838 disables printing in omp's Chrome profile, not attached browsers.
 
 Known limit: a picker opened in a tab omp holds in the background, such as a relay tab it opened itself (#16119), isn't named.
 
