@@ -78518,7 +78518,7 @@
    "area": "browser",
    "priority": "P0",
    "needs": [],
-   "base": "7b42b1be6069b791c54e1c4c93d2070978d9e6bf",
+   "base": "50da2d357039404a81d7c64622740ce13e4c54b4",
    "body": "bodies/browser-main-wait-globals.md",
    "state": "open",
    "pr": 18883,
@@ -78526,7 +78526,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/main-world-wait",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:58:00Z",
-   "updated": "2026-11-11T12:02:50Z",
+   "updated": "2026-11-11T18:16:49Z",
    "note": "",
    "built": [
     {
@@ -78802,7 +78802,7 @@
    ],
    "opened": "2026-11-11T11:33:31Z",
    "readied": "2026-11-11T11:33:56Z",
-   "advanced": "2026-11-11T11:46:00Z"
+   "advanced": "2026-11-11T18:16:49Z"
   },
   {
    "id": "macos-press-disabled",
