@@ -77256,6 +77256,24 @@
    "added": "2026-11-11T09:59:13Z",
    "updated": "2026-11-11T09:59:13Z",
    "note": ""
+  },
+  {
+   "id": "macos-layout-chords",
+   "branch": "will/macos-layout-chords",
+   "title": "fix(natives): press macOS key chords on the keys of the current keyboard layout",
+   "area": "natives",
+   "priority": "P1",
+   "needs": [],
+   "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
+   "body": "bodies/macos-layout-chords.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-layout-chords",
+   "host": "MacBook-Pro",
+   "added": "2026-11-11T10:01:18Z",
+   "updated": "2026-11-11T10:01:18Z",
+   "note": ""
   }
  ],
  "watch": {
