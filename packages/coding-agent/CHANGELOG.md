@@ -37,6 +37,7 @@
 - A `yield` without `data` no longer uses the subagent's last message as the result; it only finalizes incremental sections that were already submitted.
 - A `computer` key press that opens a macOS popup button's or menu button's menu in the background now fails listing the items and naming the press or click that chooses one, instead of leaving the menu open with your keyboard ([#19179](https://github.com/can1357/oh-my-pi/pull/19179) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed Claude not seeing the reasoning of earlier Codex, Kimi, Grok and other non-Claude turns after a model switch, including turns kept through a compaction; it now gets that reasoning as text. When Claude refuses a turn with `Refusal (reasoning_extraction)` because of that carried reasoning, the turn is retried once without it, and the session stops sending it to Claude ([#7241](https://github.com/can1357/oh-my-pi/issues/7241)) ([#17610](https://github.com/can1357/oh-my-pi/pull/17610) by [@will-bogusz](https://github.com/will-bogusz))
+- In a browser omp attaches to (the relay, `app.cdp_url`, `app.path`), a call that a page's print preview holds now fails within about a second with an error saying a print preview is open and what clears it (the user cancels it, or navigating away), instead of timing out and killing the tab; the tab keeps its page, including with a one-second call timeout. A page replacing `Promise` does not cause an unrelated preview to abort its calls
 
 ## [18.22.0] - 2026-11-16
 

@@ -171,6 +171,11 @@ export type WorkerInitPayload =
 			openedInFront?: boolean;
 			/** Known local browser process, used to reject another app at the same screen frame. */
 			browserPid?: number;
+			/**
+			 * The browser shows its windows, so a page's `window.print()` can open a print preview over it. Each run
+			 * then checks whether a preview holds the page.
+			 */
+			printPreview?: boolean;
 	  };
 
 /** Result of one host tool requested by browser-run JavaScript. */
