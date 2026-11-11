@@ -10,7 +10,7 @@ I made an element keep its `observe()` id while it stays on the page, so an id f
 | Beta's old id | resolves to a neighbour | `Element id 2 is stale` |
 | id after a navigation | `Unknown element id` | `Element id N is stale`, numbering continues |
 
-On Chromium the id is keyed by the document's loader id and the CDP backend node id (`WorkerCore.observeElement`); backend node ids are only unique per renderer, which main already guards by checking the loader id at resolve time. Each `observe()` still disposes the handles it resolved (`#releaseElementHandles`), so held handles do not pin removed nodes; a cached handle that was released or disposed is resolved again instead of being read as a removed element. A worker keeps the ids of the 5,000 most recently observed elements beyond the latest listing (`OBSERVED_ID_LIMIT`), so a long-lived page that keeps rendering new nodes does not grow the maps without bound; an older id then fails as stale. Tern's page kit keeps an element-to-id map per document, gives `includeAll` text entries their own ids, and continues from the tab's next id after a navigation.
+IDs name the original node in its original document, never a replacement with a matching role or label. Releasing a cached handle does not make its still-live element stale. Chromium retains the 5,000 most recently observed elements beyond the latest listing; evicted ids fail stale rather than being recycled. Tern uses per-document identity; cmux keeps its own refs.
 
 Rejected: re-attaching an id to a "same" element by role, name and position after a re-render. On a list that re-renders after a delete, the old row's Remove id would land on the next row's Remove.
 
