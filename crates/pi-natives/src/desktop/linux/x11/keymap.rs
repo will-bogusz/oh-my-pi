@@ -37,6 +37,7 @@ pub(super) struct Keymap {
 	modifier_masks:      Vec<(u8, u16)>,
 	device:             Option<u8>,
 	core_mapping:       bool,
+	master:             Option<u8>,
 }
 
 impl Keymap {
@@ -99,6 +100,14 @@ impl Keymap {
 		Ok(map)
 	}
 
+	pub(super) fn mpx(conn: &RustConnection, slave: u16, master: u16) -> CoreResult<Self> {
+		let mut map = Self::device(conn, slave)?;
+		map.master = Some(u8::try_from(master).map_err(|_| {
+			DesktopError::input_failed(format!("XInput device id {master} exceeds XI1 range"))
+		})?);
+		Ok(map)
+	}
+
 	/// The core keyboard's `XTest` device map, plus the core modifier map.
 	/// Xorg reads an `XTest` key in that device's keymap, while the core map
 	/// follows whichever keyboard typed last, so after the user types on a
@@ -129,7 +138,7 @@ impl Keymap {
 		keysyms: Vec<u32>,
 		modifier_masks: Vec<(u8, u16)>,
 	) -> Self {
-		Self { min_keycode, keysyms_per_keycode, keysyms, modifier_masks, device: None, core_mapping: true }
+		Self { min_keycode, keysyms_per_keycode, keysyms, modifier_masks, device: None, core_mapping: true, master: None }
 	}
 
 	/// Keycode emitting `keysym` and whether Shift must be held for it. The
@@ -212,8 +221,12 @@ impl Keymap {
 
 	pub(super) fn bind_text(&mut self, conn: Arc<RustConnection>, text: &str) -> CoreResult<TextMapping> {
 		let mut bindings = self.text_bindings(text, None)?;
-		let core = if !bindings.is_empty() && self.core_mapping && self.device.is_some() {
+		let core = if bindings.is_empty() {
+			None
+		} else if self.core_mapping && self.device.is_some() {
 			Some(Self::core(&conn)?)
+		} else if let Some(master) = self.master {
+			Some(Self::device(&conn, master.into())?)
 		} else {
 			None
 		};
@@ -225,7 +238,8 @@ impl Keymap {
 		let mut guard = TextMapping {
 			conn,
 			device: if self.core_mapping { None } else { self.device },
-			width: core.as_ref().map_or(self.keysyms_per_keycode, |map| map.keysyms_per_keycode),
+			width: if self.core_mapping { core.as_ref().map_or(self.keysyms_per_keycode, |map| map.keysyms_per_keycode) } else { self.keysyms_per_keycode },
+			master: self.master.zip(core.as_ref().map(|map| map.keysyms_per_keycode)),
 			bound: Vec::new(),
 		};
 		for (code, symbol) in bindings {
@@ -342,18 +356,29 @@ pub(super) struct TextMapping {
 	conn: Arc<RustConnection>,
 	device: Option<u8>,
 	width: u8,
+	master: Option<(u8, u8)>,
 	bound: Vec<u8>,
 }
 
 impl TextMapping {
 	fn write(&self, code: u8, row: &[u32]) -> CoreResult<()> {
-		if let Some(device) = self.device {
+		let result = if let Some(device) = self.device {
 			self.conn.xinput_change_device_key_mapping(device, code, self.width, 1, row)
-				.map_err(keymap_failed)?.check().map_err(keymap_failed)
+				.map_err(keymap_failed).and_then(|cookie| cookie.check().map_err(keymap_failed))
 		} else {
 			self.conn.change_keyboard_mapping(1, code, self.width, row)
-				.map_err(keymap_failed)?.check().map_err(keymap_failed)
-		}
+				.map_err(keymap_failed).and_then(|cookie| cookie.check().map_err(keymap_failed))
+		};
+		// A slave's next key copies its map to its master. Restore that copy
+		// too, even when the slave's restore failed.
+		let master = if let Some((device, width)) = self.master {
+			let row = vec![row[0]; usize::from(width)];
+			self.conn.xinput_change_device_key_mapping(device, code, width, 1, &row)
+				.map_err(keymap_failed).and_then(|cookie| cookie.check().map_err(keymap_failed))
+		} else {
+			Ok(())
+		};
+		result.and(master)
 	}
 
 	fn restore(&mut self) -> CoreResult<()> {

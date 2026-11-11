@@ -643,7 +643,7 @@ impl Mpx {
 	fn keyboard_keymap(&mut self) -> CoreResult<Keymap> {
 		let slave = self.ensure_keyboard()?.slave;
 		// The desktop can reconfigure a hot-plugged device between actions.
-		Keymap::device(&self.conn, slave)
+		Keymap::mpx(&self.conn, slave, self.master_keyboard)
 	}
 
 	fn ensure_keyboard(&mut self) -> CoreResult<&mut VirtualKeyboard> {

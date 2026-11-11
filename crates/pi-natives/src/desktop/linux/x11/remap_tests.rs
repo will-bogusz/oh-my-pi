@@ -64,7 +64,7 @@ fn remapped_xtest_text_is_translated_before_the_empty_rows_are_restored() {
 			XMapWindow(display, window);
 			XSetInputFocus(display, window, 1, 0);
 			XSync(display, 0);
-			ready.send(()).unwrap();
+			ready.send(window as u32).unwrap();
 			let mut text = String::new();
 			while text.chars().count() < "héllo wörld ✓".chars().count() {
 				let mut event = [0 as c_long; 24];
@@ -77,6 +77,7 @@ fn remapped_xtest_text_is_translated_before_the_empty_rows_are_restored() {
 						XLookupString(event.as_mut_ptr(), buffer.as_mut_ptr(), 32, &mut symbol, std::ptr::null_mut());
 						text.push(Keysym::new(symbol as u32).key_char().expect("a text keysym"));
 					},
+					33 => break,
 					_ => {},
 				}
 			}
@@ -84,15 +85,20 @@ fn remapped_xtest_text_is_translated_before_the_empty_rows_are_restored() {
 			(text, std::time::Instant::now())
 		}
 	});
-	started.recv().unwrap();
+	let window = started.recv().unwrap();
 	let (conn, screen) = x11rb::connect(Some(&display)).unwrap();
 	let root = conn.setup().roots[screen].root;
 	let conn = Arc::new(conn);
 	let before = conn.get_keyboard_mapping(conn.setup().min_keycode, conn.setup().max_keycode - conn.setup().min_keycode + 1).unwrap().reply().unwrap();
 	let mut input = X11Input::new(Arc::clone(&conn), root).unwrap();
 	let sent = std::time::Instant::now();
-	input.type_text(&Target::Desktop, "héllo wörld ✓", DeliveryMode::Foreground).unwrap();
+	let result = input.type_text(&Target::Desktop, "héllo wörld ✓", DeliveryMode::Foreground);
+	if result.is_err() {
+		use x11rb::protocol::xproto::{ClientMessageEvent, EventMask};
+		conn.send_event(false, window, EventMask::NO_EVENT, ClientMessageEvent::new(32, window, 0u32, [0u32; 5])).unwrap().check().unwrap();
+	}
 	let (received, translated) = receiver.join().unwrap();
+	result.unwrap();
 	assert_eq!(received, "héllo wörld ✓");
 	eprintln!("Xlib translated the complete text run in {:?}; remap grace is 100ms", translated.duration_since(sent));
 	let after = conn.get_keyboard_mapping(conn.setup().min_keycode, conn.setup().max_keycode - conn.setup().min_keycode + 1).unwrap().reply().unwrap();
@@ -104,10 +110,11 @@ fn remapped_xtest_text_is_translated_before_the_empty_rows_are_restored() {
 
 #[test]
 #[ignore = "starts Xvfb"]
-fn remapped_text_restores_empty_rows_on_error_and_unwind() {
+fn remapped_text_restores_empty_rows_on_cancellation_and_unwind() {
 	let (_server, display) = server();
 	let (conn, _) = x11rb::connect(Some(&display)).unwrap();
 	let conn = Arc::new(conn);
+	let before = conn.get_keyboard_mapping(conn.setup().min_keycode, conn.setup().max_keycode - conn.setup().min_keycode + 1).unwrap().reply().unwrap();
 	let mut map = Keymap::xtest(&conn).unwrap();
 	let source = control::CancellationSource::default();
 	let token = source.token();
@@ -125,6 +132,8 @@ fn remapped_text_restores_empty_rows_on_error_and_unwind() {
 	}).unwrap_err();
 	assert!(error.message.to_lowercase().contains("cancel"), "{}", error.message);
 	assert!(Keymap::xtest(&conn).unwrap().plan_text("✓").is_err());
+	let after = conn.get_keyboard_mapping(conn.setup().min_keycode, conn.setup().max_keycode - conn.setup().min_keycode + 1).unwrap().reply().unwrap();
+	assert_eq!(after.keysyms, before.keysyms, "cancel restores the original empty core rows");
 	let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
 		let mut map = Keymap::xtest(&conn).unwrap();
 		let _mapping = map.bind_text(Arc::clone(&conn), "✓").unwrap();
@@ -132,4 +141,33 @@ fn remapped_text_restores_empty_rows_on_error_and_unwind() {
 	}));
 	assert!(result.is_err());
 	assert!(Keymap::xtest(&conn).unwrap().plan_text("✓").is_err());
+	let after = conn.get_keyboard_mapping(conn.setup().min_keycode, conn.setup().max_keycode - conn.setup().min_keycode + 1).unwrap().reply().unwrap();
+	assert_eq!(after.keysyms, before.keysyms, "unwind restores the original empty core rows");
+}
+
+#[test]
+#[ignore = "starts Xvfb"]
+fn remapped_device_text_restores_both_slave_and_master() {
+	use x11rb::protocol::xinput::{ConnectionExt as _, Device, DeviceType, HierarchyChange, HierarchyChangeData, HierarchyChangeDataAddMaster};
+	let (_server, display) = server();
+	let (conn, _) = x11rb::connect(Some(&display)).unwrap();
+	let conn = Arc::new(conn);
+	conn.xinput_xi_query_version(2, 0).unwrap().reply().unwrap();
+	let name = b"remap fixture";
+	conn.xinput_xi_change_hierarchy(&[HierarchyChange {
+		len: ((8 + name.len()).div_ceil(4)) as u16,
+		data: HierarchyChangeData::AddMaster(HierarchyChangeDataAddMaster {
+			name: name.to_vec(), send_core: false, enable: true,
+		}),
+	}]).unwrap().check().unwrap();
+	let devices = conn.xinput_xi_query_device(Device::ALL).unwrap().reply().unwrap();
+	let master = devices.infos.iter().find(|info| info.name == b"remap fixture keyboard" && info.type_ == DeviceType::MASTER_KEYBOARD).unwrap().deviceid;
+	let slave = devices.infos.iter().find(|info| info.attachment == master && info.type_ == DeviceType::SLAVE_KEYBOARD).unwrap().deviceid;
+	let mut map = Keymap::mpx(&conn, slave, master).unwrap();
+	let mapping = map.bind_text(Arc::clone(&conn), "✓").unwrap();
+	assert!(Keymap::device(&conn, slave).unwrap().plan_text("✓").is_ok());
+	assert!(Keymap::device(&conn, master).unwrap().plan_text("✓").is_ok());
+	mapping.finish(Ok(())).unwrap();
+	assert!(Keymap::device(&conn, slave).unwrap().plan_text("✓").is_err());
+	assert!(Keymap::device(&conn, master).unwrap().plan_text("✓").is_err());
 }
