@@ -340,6 +340,7 @@ impl MacInput {
 					return Err(keyboard_modifiers_refusal(window, "press this shortcut"));
 				}
 				let mut physical = remote_modifier_check(remote, window);
+				let typing = typing_key(keys).filter(|_| remote.is_none() && !process::is_terminal(pid));
 				let delivery = with_background_keyboard(
 					&self.source,
 					pid,
@@ -348,13 +349,31 @@ impl MacInput {
 					entry_front,
 					|to, guard| {
 						element_keys(pid, element, || {
+							// Read once the window is key and the element focused, which
+							// can move the application's focus.
+							let field = typing.and_then(|_| ax::typing_field(to, element));
 							press_chord(&self.source, &chord, gap, |event| {
 								let guard = || {
 									guard()?;
 									physical.as_mut().map_or(Ok(()), |check| check())
 								};
 								post_guarded(event, guard, |event| skylight::post_keyboard(to, event))
-							})
+							})?;
+							let (Some(key), Some(field)) = (typing, field) else {
+								return Ok(());
+							};
+							let deadline = Instant::now() + TYPED_TIMEOUT;
+							confirm_typed(
+								window,
+								key,
+								|| field.changed(),
+								|| {
+									deadline
+										.checked_duration_since(Instant::now())
+										.filter(|left| !left.is_zero())
+								},
+								control::settle,
+							)
 						})
 					},
 				)?;
@@ -1346,6 +1365,52 @@ fn confirm_shortcut_answered(
 	)))
 }
 
+/// The character key of a chord that types text: one letter or digit key,
+/// or Space, with only Shift beside it for a letter. Digits keep no Shift,
+/// which some layouts make a dead key.
+fn typing_key(keys: &[KeyName]) -> Option<char> {
+	let (shift, rest): (Vec<_>, Vec<_>) = keys.iter().partition(|&&key| key == KeyName::Shift);
+	match (shift.len(), rest.as_slice()) {
+		(0 | 1, [KeyName::Char(character)]) if character.is_ascii_alphabetic() => Some(*character),
+		(0, [KeyName::Char(character)]) if character.is_ascii_digit() => Some(*character),
+		(0, [KeyName::Space]) => Some(' '),
+		_ => None,
+	}
+}
+
+/// After a background key that types ([`typing_key`]) went out to a native
+/// text field ([`ax::typing_field`]): fails unless `changed` reports the
+/// field's value changed before `remaining` runs out, read again after each
+/// `wait`. A value that can no longer be read gives no verdict.
+///
+/// An application can take a background key and type nothing: `TextEdit`
+/// with automatic capitalization on dropped both of `z` and `1` pressed in a
+/// new document while every press reported success.
+fn confirm_typed(
+	window: &DesktopWindow,
+	key: char,
+	mut changed: impl FnMut() -> Option<bool>,
+	mut remaining: impl FnMut() -> Option<Duration>,
+	mut wait: impl FnMut(Duration),
+) -> CoreResult<()> {
+	while changed() == Some(false) {
+		let Some(left) = remaining() else {
+			let key = if key == ' ' { "Space".to_owned() } else { key.to_string() };
+			return Err(DesktopError::input_failed(format!(
+				"the key {key} went out to window {} ({}), but its focused text field still reads \
+				 the same {} ms later, so the key typed nothing there. Background keys can be \
+				 dropped by the application's text input; win.type inserts text through \
+				 accessibility instead",
+				window.id,
+				window.app,
+				TYPED_TIMEOUT.as_millis(),
+			)));
+		};
+		wait(TYPED_POLL.min(left));
+	}
+	Ok(())
+}
+
 const fn pointer_kind(event: &PointerEvent) -> &'static str {
 	match event {
 		PointerEvent::Click { .. } => "click",
@@ -1868,6 +1933,11 @@ const KEY_GAP: Duration = Duration::from_millis(8);
 const SHORTCUT_REPLY_DELAY: Duration = Duration::from_millis(100);
 /// How long that application has to reply before it counts as not answering.
 const SHORTCUT_REPLY_TIMEOUT_SECONDS: f32 = 1.5;
+/// How long a native text field has to show what a background key typed
+/// before the key counts as having typed nothing ([`confirm_typed`]).
+const TYPED_TIMEOUT: Duration = Duration::from_millis(1000);
+/// Time between reads of that field's value.
+const TYPED_POLL: Duration = Duration::from_millis(20);
 /// Pacing between the dragged events of a background drag, one 60 Hz frame.
 const DRAG_STEP_GAP: Duration = Duration::from_millis(16);
 /// Wait at the end point before a background drag's release, so the target
@@ -6731,6 +6801,69 @@ mod tests {
 		let unchecked =
 			|| -> CoreResult<bool> { panic!("a chord without a modifier is not checked") };
 		assert!(confirm_shortcut_answered(&window, &[KeyName::Enter], unchecked).is_ok());
+	}
+
+	#[test]
+	fn only_a_letter_digit_or_space_key_counts_as_typing() {
+		assert_eq!(typing_key(&[KeyName::Char('z')]), Some('z'));
+		assert_eq!(typing_key(&[KeyName::Shift, KeyName::Char('z')]), Some('z'));
+		assert_eq!(typing_key(&[KeyName::Char('1')]), Some('1'));
+		assert_eq!(typing_key(&[KeyName::Space]), Some(' '));
+		// Shift-6 is a dead key on US International; punctuation keys are dead
+		// keys on many layouts; modifiers make shortcuts.
+		assert_eq!(typing_key(&[KeyName::Shift, KeyName::Char('6')]), None);
+		assert_eq!(typing_key(&[KeyName::Char('\'')]), None);
+		assert_eq!(typing_key(&[KeyName::Meta, KeyName::Char('z')]), None);
+		assert_eq!(typing_key(&[KeyName::Alt, KeyName::Char('e')]), None);
+		assert_eq!(typing_key(&[KeyName::Enter]), None);
+		assert_eq!(typing_key(&[KeyName::Char('a'), KeyName::Char('b')]), None);
+	}
+
+	#[test]
+	fn a_typing_key_that_leaves_the_field_unchanged_fails() {
+		let window = background_window("TextEdit");
+		let mut reads = 0;
+		let mut waited = Duration::ZERO;
+		let mut left = 3;
+		let error = confirm_typed(
+			&window,
+			'z',
+			|| {
+				reads += 1;
+				Some(false)
+			},
+			|| {
+				left -= 1;
+				(left > 0).then_some(Duration::from_millis(500))
+			},
+			|step| waited += step,
+		)
+		.expect_err("a key that typed nothing must not report success");
+		assert_eq!(error.code, crate::desktop::error::ErrorCode::InputFailed);
+		assert!(error.message.contains("the key z went out to window 42 (TextEdit)"));
+		assert!(error.message.contains("typed nothing"));
+		assert_eq!(reads, 3, "read again after every wait until time ran out");
+		assert_eq!(waited, TYPED_POLL * 2);
+	}
+
+	#[test]
+	fn a_typing_key_passes_once_the_field_changes_or_cannot_be_read() {
+		let window = background_window("TextEdit");
+		let mut reads = [Some(false), Some(false), Some(true)].into_iter();
+		let mut waits = 0;
+		confirm_typed(
+			&window,
+			'z',
+			|| reads.next().unwrap(),
+			|| Some(Duration::from_secs(1)),
+			|_| waits += 1,
+		)
+		.expect("the character arrived on the third read");
+		assert_eq!(waits, 2);
+		let out_of_time = || -> Option<Duration> { panic!("a changed field needs no wait") };
+		assert!(confirm_typed(&window, 'z', || Some(true), out_of_time, |_| {}).is_ok());
+		// A field that can no longer be read gives no verdict.
+		assert!(confirm_typed(&window, 'z', || None, out_of_time, |_| {}).is_ok());
 	}
 
 	#[test]

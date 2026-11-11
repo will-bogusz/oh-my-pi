@@ -1833,6 +1833,41 @@ fn insert_selected_text(
 	Ok(true)
 }
 
+/// A native field that takes typed text ([`takes_inserted_text`]) and is not
+/// secure, with the value it read before a key that types went out.
+pub(super) struct TypingField {
+	element: CFRetained<AXUIElement>,
+	before:  String,
+}
+
+impl TypingField {
+	/// Whether the field's value differs from the one read before the key;
+	/// `None` once it can no longer be read.
+	pub(super) fn changed(&self) -> Option<bool> {
+		copy_string(&self.element, "AXValue").map(|value| value != self.before)
+	}
+}
+
+/// The field keys typed into `pid` land in: `element` when the keys are
+/// addressed to it, else `pid`'s focused element; `None` unless it is a field
+/// [`TypingField`] describes.
+pub(super) fn typing_field(pid: libc::pid_t, element: Option<&AXUIElement>) -> Option<TypingField> {
+	let element = match element {
+		Some(element) => element.retain(),
+		None => copy_element(&*probe_application(pid)?, "AXFocusedUIElement")?,
+	};
+	if !takes_inserted_text(
+		|| text_surface(&element),
+		copy_string(&element, "AXRole").as_deref(),
+		|| attribute_settable(&element, "AXSelectedText"),
+	) || is_secure(&element)
+	{
+		return None;
+	}
+	let before = copy_string(&element, "AXValue")?;
+	Some(TypingField { element, before })
+}
+
 /// Replaces a native text field's whole value through `AXSelectedText`, the
 /// path `typeText` uses, after focusing the field and selecting all of it.
 /// `false` means nothing was written and the caller may write `AXValue`.
