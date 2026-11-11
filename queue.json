@@ -72842,7 +72842,7 @@
    "area": "browser",
    "priority": "P2",
    "needs": [],
-   "base": "433a9101959de11e34cd0047996cb1e87446a383",
+   "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
    "body": "bodies/browser-action-outcome.md",
    "state": "queued",
    "pr": null,
@@ -72850,9 +72850,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-action-outcome",
    "host": "MacBook-Pro",
    "added": "2026-11-10T19:19:48Z",
-   "updated": "2026-11-11T09:19:35Z",
+   "updated": "2026-11-11T09:19:43Z",
    "note": "",
-   "advanced": "2026-11-10T22:13:06Z",
+   "advanced": "2026-11-11T09:19:43Z",
    "kind": "proposal"
   },
   {
