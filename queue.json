@@ -73561,21 +73561,17 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-10T23:50:44Z",
+  "checked": "2026-11-11T00:21:30Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "x11-mpx-qt": {
-    "since": "2026-11-10T22:49:03Z",
-    "title": "fix(natives): stop X11 background input from crashing your running Qt 6.5+ apps"
+   "browser-select-readback": {
+    "since": "2026-11-11T00:21:30Z",
+    "title": "fix(coding-agent): return the options a page leaves selected after its change handlers"
    },
-   "atspi-unanswered-app": {
-    "since": "2026-11-10T23:50:44Z",
-    "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool"
-   },
-   "agent-identity": {
-    "since": "2026-11-10T23:50:44Z",
-    "title": "feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy"
+   "browser-download-missing-file": {
+    "since": "2026-11-11T00:21:30Z",
+    "title": "fix(coding-agent): fail a download wait when the saved file is not on this machine"
    }
   },
   "conflicts": {
@@ -75396,6 +75392,39 @@
     "kind": "openable",
     "id": "agent-identity",
     "title": "feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy"
+   },
+   {
+    "at": "2026-11-11T00:21:30Z",
+    "kind": "openable",
+    "id": "browser-select-readback",
+    "title": "fix(coding-agent): return the options a page leaves selected after its change handlers"
+   },
+   {
+    "at": "2026-11-11T00:21:30Z",
+    "kind": "openable",
+    "id": "browser-download-missing-file",
+    "title": "fix(coding-agent): fail a download wait when the saved file is not on this machine"
+   },
+   {
+    "at": "2026-11-11T00:21:30Z",
+    "kind": "unopenable",
+    "id": "x11-mpx-qt",
+    "title": "fix(natives): stop X11 background input from crashing your running Qt 6.5+ apps",
+    "why": "plan: wait (conflicts with #18784 in crates/pi-natives/src/desktop/linux/x11/mpx.rs)"
+   },
+   {
+    "at": "2026-11-11T00:21:30Z",
+    "kind": "unopenable",
+    "id": "atspi-unanswered-app",
+    "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool",
+    "why": "plan: held (held: Main, 2026-11-11: waits for AtspiHarm's description paragraph and Main's P0 call; conflicts with #18353 in MODULE.bazel.lock, crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs; conflicts with #18013 in MODULE.bazel.lock)"
+   },
+   {
+    "at": "2026-11-11T00:21:30Z",
+    "kind": "unopenable",
+    "id": "agent-identity",
+    "title": "feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy",
+    "why": "plan: wait (conflicts with #18784 in docs/tools/computer.md)"
    }
   ]
  },
@@ -78039,8 +78068,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-11T00:16:07.608759Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-11T00:21:31.309600Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -79350,6 +79379,32 @@
      "computer-ui-quiet"
     ],
     "created": "2026-10-13T21:47:19Z"
+   },
+   {
+    "id": "desktop-cursor",
+    "label": "desktop-cursor",
+    "number": null,
+    "state": "queued",
+    "area": "coding-agent",
+    "priority": "P2",
+    "title": "feat(coding-agent,natives): show each agent's cursor where its computer input lands on macOS",
+    "action": "wait",
+    "reasons": [
+     "needs agent-identity (queued)",
+     "conflicts with #18784 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
+     "conflicts with #15128 in docs/settings.md"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "#18784",
+     "#15128"
+    ],
+    "needs": [
+     "agent-identity"
+    ],
+    "created": "2026-11-11T00:21:12Z"
    },
    {
     "id": "factory-droid-web-search",

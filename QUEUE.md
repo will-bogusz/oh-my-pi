@@ -3,8 +3,8 @@
 Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 00:23Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-11 00:16Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 2, conflict-held 13, stacked 16, held 13, open PRs 33, queued since the last plan 2; merged 275, closed 29
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-11 00:21Z on goliath; groups below are from it, states from the manifest)
+**Counts:** openable now 2, conflict-held 13, stacked 17, held 13, open PRs 33, queued since the last plan 1; merged 275, closed 29
 
 ## Openable now (2)
 
@@ -26,12 +26,12 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | wire-delta-count | refactor(agent,ai): count the anchored delta from the reader's transformed wire messages | other |  | 7d | [#18771](https://github.com/can1357/oh-my-pi/pull/18771), [#17610](https://github.com/can1357/oh-my-pi/pull/17610), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wire-delta-count) |
 | browser-wait-predicate | feat(browser): add waitForFunction to tabs and frames | browser | P1 | 8h | [#18676](https://github.com/can1357/oh-my-pi/pull/18676), [#15508](https://github.com/can1357/oh-my-pi/pull/15508) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-wait-predicate) |
 | browser-run-node-hint | fix(browser): say where tab.run code runs when it reaches for a page global | browser | P2 | 7h | [#15508](https://github.com/can1357/oh-my-pi/pull/15508) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-run-node-hint) |
-| x11-mpx-qt | fix(natives): stop X11 background input from crashing your running Qt 6.5+ apps | computer | P0 | 1h | [#18784](https://github.com/can1357/oh-my-pi/pull/18784) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-mpx-qt) |
+| x11-mpx-qt | fix(natives): stop X11 background input from crashing your running Qt 6.5+ apps | computer | P0 | 2h | [#18784](https://github.com/can1357/oh-my-pi/pull/18784) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-mpx-qt) |
 | agent-identity | feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy | tui | P2 | 0h | [#18784](https://github.com/can1357/oh-my-pi/pull/18784) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/agent-identity) |
 | computer-run-failure-output | fix(computer): retain output and screenshots when a run fails | computer | P1 | 0h | [#18753](https://github.com/can1357/oh-my-pi/pull/18753) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-run-failure-output) |
 | browser-click-frame-removed | fix(coding-agent): fail a click whose frame the page removed while the button was down | browser | P1 | 0h | [#18676](https://github.com/can1357/oh-my-pi/pull/18676) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-click-frame-removed) |
 
-## Stacked (16)
+## Stacked (17)
 
 | id | title | area | priority | age | needs | branch |
 |---|---|---|---|---|---|---|
@@ -51,6 +51,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | browser-wait-text-rendered | fix(browser): let a scoped waitForText match only text the page renders | browser | P2 | 7h | browser-wait-text-regexp | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-wait-text-rendered) |
 | factory-droid-171-models | feat(catalog): add the Factory Droid models droid 1.7.1 serves | factory-droid |  | 4h | factory-droid-171-pin ([#18771](https://github.com/can1357/oh-my-pi/pull/18771)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-171-models) |
 | browser-cursor | feat(browser): draw the acting agent's cursor in OMP-driven tabs | browser | P2 | 0h | agent-identity | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-cursor) |
+| desktop-cursor | feat(coding-agent,natives): show each agent's cursor where its computer input lands on macOS | coding-agent | P2 | 0h | agent-identity | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/desktop-cursor) |
 
 ## Held (13)
 
@@ -108,9 +109,8 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | [#18784](https://github.com/can1357/oh-my-pi/pull/18784) | x11-takeover-user | fix(natives): keep X11 takeover from taking a typing user's keys | computer | P1 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-takeover-user) |
 | [#18795](https://github.com/can1357/oh-my-pi/pull/18795) | devin-retire-swe-1-6-fast | fix(catalog): drop Devin's retired SWE-1.6 Fast seed row | catalog | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-retire-swe-1-6-fast) |
 
-## Queued since the last plan (2)
+## Queued since the last plan (1)
 
 | id | title | area | priority | age | branch |
 |---|---|---|---|---|---|
 | atspi-unanswered-app | fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool | computer | P0 | 7d | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-unanswered-app) |
-| desktop-cursor | feat(coding-agent,natives): show each agent's cursor where its computer input lands on macOS | coding-agent | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/desktop-cursor) |
