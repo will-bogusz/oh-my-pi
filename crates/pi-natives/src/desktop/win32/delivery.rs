@@ -67,17 +67,22 @@ pub fn is_uwp_frame_class(class: &str) -> bool {
 pub const MAX_RUN_GRAPHEMES: usize = 32;
 
 /// Splits `text` into the runs takeover typing sends one `SendInput` call at
-/// a time: each ends after whitespace (a space, tab or line break, where an
-/// editor may run autocorrect or spell checking) or after
+/// a time: each ends after whitespace (spaces, tabs and line breaks, where
+/// an editor may run autocorrect or spell checking) or after
 /// [`MAX_RUN_GRAPHEMES`] graphemes.
 pub fn word_runs(text: &str) -> impl Iterator<Item = &str> {
-	let mut graphemes = xutf::graphemes_str(text);
+	let blank = |grapheme: &str| grapheme.chars().any(char::is_whitespace);
+	let mut graphemes = xutf::graphemes_str(text).peekable();
 	let mut start = 0;
 	std::iter::from_fn(move || {
 		let mut end = start;
-		for (count, grapheme) in (1..).zip(graphemes.by_ref()) {
+		for count in 1.. {
+			let Some(grapheme) = graphemes.next() else {
+				break;
+			};
 			end += grapheme.len();
-			if count == MAX_RUN_GRAPHEMES || grapheme.chars().any(char::is_whitespace) {
+			let word_ends = blank(grapheme) && !graphemes.peek().is_some_and(|next| blank(next));
+			if count == MAX_RUN_GRAPHEMES || word_ends {
 				break;
 			}
 		}
@@ -303,6 +308,7 @@ mod tests {
 	fn word_runs_end_after_whitespace_and_at_the_run_limit() {
 		let runs = word_runs("ab c\r\nd\te").collect::<Vec<_>>();
 		assert_eq!(runs, ["ab ", "c\r\n", "d\t", "e"]);
+		assert_eq!(word_runs("a    b\n\n  c").collect::<Vec<_>>(), ["a    ", "b\n\n  ", "c"]);
 		let long = "x".repeat(MAX_RUN_GRAPHEMES + 1);
 		assert_eq!(word_runs(&long).map(str::len).collect::<Vec<_>>(), [MAX_RUN_GRAPHEMES, 1]);
 		let emoji = "\u{1f469}\u{200d}\u{1f4bb} ok";

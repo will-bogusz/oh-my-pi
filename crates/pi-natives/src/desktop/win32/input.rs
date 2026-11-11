@@ -970,7 +970,7 @@ mod foreground {
 	use crate::desktop::win32::{
 		ax::{TypingField, Win32Ax},
 		delivery::{self, TextUnit, text_units},
-		readback::{self, Progress, Verdict},
+		readback::{self, Pace, Pacer, Progress, Verdict},
 		window,
 	};
 
@@ -997,8 +997,8 @@ mod foreground {
 	/// Time between reads of a field that does not show a run yet.
 	const RUN_POLL: Duration = Duration::from_millis(2);
 	/// An unassigned virtual key sent behind typed text to see when the target
-	/// has read it: no app binds it and it types nothing (`AutoHotkey` and
-	/// Cua's driver use it the same way).
+	/// has read it: it types nothing, and Cua's Windows driver sends it
+	/// behind text the same way (`AutoHotkey` uses it as its mask key).
 	const DRAIN_KEY: u16 = 0xe8;
 	/// Longest wait for the target to read typed text before the foreground
 	/// is handed back.
@@ -1590,8 +1590,8 @@ mod foreground {
 		let front = window::root(unsafe { GetForegroundWindow() });
 		let field = watch(ax, front, None);
 		send_text(None, text, field.as_ref().ok())?;
-		drain(front, "the front window")?;
-		confirm(field, text)
+		let unread = drain(front, "the front window");
+		confirm(field, text, unread)
 	}
 
 	/// The focused field of `root` to read typed text back from, or why
@@ -1621,9 +1621,15 @@ mod foreground {
 	/// foreground window, so handing it back early sends the end of long text
 	/// to the user's window. While this thread shares the target's input
 	/// queue, `GetKeyState` follows the keys that thread has read, so a key
-	/// sent behind the text shows when it got there. A thread that cannot be
-	/// joined is not waited for, as before.
-	fn drain(root: HWND, name: &str) -> CoreResult<()> {
+	/// sent behind the text shows when it got there. The key goes only while
+	/// `root` is in front: text whose Return moved the foreground on (opened
+	/// another window) took the rest with it, and there is nothing to wait
+	/// for. A thread that cannot be joined is not waited for, as before.
+	/// Returns why the target was not seen reading the text: the wait ran out,
+	/// was cancelled, or the foreground moved during it.
+	fn drain(root: HWND, name: &str) -> Option<String> {
+		// SAFETY: GetForegroundWindow has no preconditions.
+		let in_front = || window::root(unsafe { GetForegroundWindow() }) == root;
 		// SAFETY: a null process-id pointer is permitted; Win32 validates the
 		// handle.
 		let target = unsafe { GetWindowThreadProcessId(root, null_mut()) };
@@ -1631,80 +1637,77 @@ mod foreground {
 		let own = unsafe { GetCurrentThreadId() };
 		// SAFETY: scalar thread ids; failure is reported and leaves nothing to
 		// undo.
-		if target == 0 || target == own || unsafe { AttachThreadInput(own, target, 1) } == 0 {
-			return Ok(());
+		if target == 0
+			|| target == own
+			|| !in_front()
+			|| unsafe { AttachThreadInput(own, target, 1) } == 0
+		{
+			return None;
 		}
 		// SAFETY: no preconditions.
 		let before = unsafe { GetKeyState(i32::from(DRAIN_KEY)) } & 1;
 		let marker = [key_event(DRAIN_KEY, false), key_event(DRAIN_KEY, true)];
-		// The text is out, so the marker goes even after a cancel.
+		// The text is out, so the marker goes even after a cancel that came
+		// since; the wait below ends on it.
 		// SAFETY: `marker` is an initialized INPUT slice copied synchronously.
 		let sent =
 			unsafe { SendInput(marker.len() as u32, marker.as_ptr(), size_of::<INPUT>() as i32) };
 		let deadline = Instant::now() + DRAIN_TIMEOUT;
-		let read = sent as usize == marker.len()
-			&& loop {
-				// SAFETY: no preconditions.
-				if unsafe { GetKeyState(i32::from(DRAIN_KEY)) } & 1 != before {
-					break true;
+		let unread = (sent as usize == marker.len())
+			.then(|| {
+				loop {
+					// SAFETY: no preconditions.
+					if unsafe { GetKeyState(i32::from(DRAIN_KEY)) } & 1 != before {
+						break None;
+					}
+					if !in_front() {
+						break Some(format!(
+							"the foreground left {name} before it had read all the typed text, so the \
+							 rest may have reached the window in front"
+						));
+					}
+					if control::check().is_err() {
+						break Some(format!(
+							"the call was cancelled before {name} had read all the typed text"
+						));
+					}
+					if Instant::now() >= deadline {
+						break Some(format!(
+							"{name} had not read all the typed text {} s after it was sent; the rest may \
+							 reach whichever window is in front next",
+							DRAIN_TIMEOUT.as_secs()
+						));
+					}
+					std::thread::sleep(Duration::from_millis(1));
 				}
-				if Instant::now() >= deadline {
-					break false;
-				}
-				std::thread::sleep(Duration::from_millis(1));
-			};
+			})
+			.flatten();
 		// SAFETY: detaches the pair attached above.
 		unsafe { AttachThreadInput(own, target, 0) };
-		if read || sent as usize != marker.len() {
-			Ok(())
-		} else {
-			Err(DesktopError::input_failed(format!(
-				"{name} had not read all the typed text {} s after it was sent; the rest may reach \
-				 whichever window is in front next: inspect the target before typing again",
-				DRAIN_TIMEOUT.as_secs()
-			)))
-		}
-	}
-
-	/// How typing is paced by reading the field back.
-	#[derive(Clone, Copy, PartialEq, Eq)]
-	enum Pace {
-		/// One call per word, each once the field shows the one before.
-		Words,
-		/// One call per character, each once the field shows the one before:
-		/// the field dropped part of a word.
-		Characters,
-		/// No waits: no field to read, or one whose text cannot pace typing.
-		Off,
+		unread
 	}
 
 	/// Sends `text` one [`delivery::word_runs`] run per `SendInput` call; the
 	/// runs are bounded, so a short send is accounted and no call is as long
 	/// as the whole text. With `field`, each run waits for the field to show
-	/// the one before, so a control that drops text arriving while it is
-	/// still busy with the last word (Windows 11 Notepad keeps a few words of
-	/// a burst) gets it at its own pace; a field that comes up short gets one
-	/// character at a time from then on, and one that reads any other way
-	/// stops pacing.
+	/// it before the next goes ([`Pacer`]), so a control that drops text
+	/// arriving while it is still busy with the last word (Windows 11 Notepad
+	/// keeps a few words of a burst) gets it at its own pace.
 	fn send_text(target: Option<HWND>, text: &str, field: Option<&TypingField>) -> CoreResult<()> {
-		let mut pace = if field.is_some() {
-			Pace::Words
-		} else {
-			Pace::Off
-		};
+		let mut pacer = Pacer::new(field.is_some());
 		let mut shown = field.map(|field| field.before.clone());
 		let mut events = Vec::new();
+		let mut unit_events = [unicode_event(0, false); 4];
 		for run in delivery::word_runs(text) {
 			let mut rest = run;
 			while !rest.is_empty() {
-				let piece = if pace == Pace::Characters {
+				let piece = if pacer.pace == Pace::Characters {
 					graphemes_str(rest).next().unwrap_or(rest)
 				} else {
 					rest
 				};
 				rest = &rest[piece.len()..];
 				events.clear();
-				let mut unit_events = [unicode_event(0, false); 4];
 				for unit in text_units(piece) {
 					events.extend_from_slice(text_events(unit, &mut unit_events));
 				}
@@ -1713,13 +1716,10 @@ mod foreground {
 					None => send(&events)?,
 				}
 				if let (Some(field), Some(before)) = (field, shown.as_mut())
-					&& pace != Pace::Off
+					&& pacer.pace != Pace::Off
 				{
-					pace = match await_run(field, piece, before)? {
-						Progress::Shown => pace,
-						Progress::Short if pace == Pace::Words => Pace::Characters,
-						Progress::Short | Progress::Other => Pace::Off,
-					};
+					let (progress, changed) = await_run(field, piece, before)?;
+					pacer.after(progress, changed, rest.is_empty());
 				}
 			}
 		}
@@ -1728,14 +1728,20 @@ mod foreground {
 	}
 
 	/// Waits until `field`, which read `before` when `run` was sent, shows
-	/// it, or stops changing short of it; `before` becomes the last read.
-	fn await_run(field: &TypingField, run: &str, before: &mut String) -> CoreResult<Progress> {
+	/// it, stops changing short of it, or [`RUN_WAIT`] passes; `before`
+	/// becomes the last read. Returns how the field shows the run (`None`: it
+	/// could not be read) and whether its text changed.
+	fn await_run(
+		field: &TypingField,
+		run: &str,
+		before: &mut String,
+	) -> CoreResult<(Option<Progress>, bool)> {
 		let start = Instant::now();
 		let mut changed = start;
 		let mut last: Option<String> = None;
 		loop {
 			let Some(now) = field.read() else {
-				return Ok(Progress::Other);
+				return Ok((None, false));
 			};
 			let progress = readback::progress(run, before, &now);
 			let still = last.as_deref() == Some(now.as_str());
@@ -1746,8 +1752,9 @@ mod foreground {
 				|| (still && changed.elapsed() >= RUN_STILL)
 				|| start.elapsed() >= RUN_WAIT
 			{
+				let moved = now != *before;
 				*before = now;
-				return Ok(progress);
+				return Ok((Some(progress), moved));
 			}
 			last = Some(now);
 			control::check()?;
@@ -1758,12 +1765,18 @@ mod foreground {
 	/// Checks that `field` gained `text`, waiting up to [`READBACK_WAIT`] for
 	/// the app to show it. Characters missing from inside the text fail the
 	/// call naming what arrived ([`Verdict::Dropped`]); a field that cannot be
-	/// read, or reads any other way, leaves the call unconfirmed.
-	fn confirm(field: Result<TypingField, String>, text: &str) -> CoreResult<()> {
+	/// read, or reads any other way, leaves the call unconfirmed, and so does
+	/// an unreadable field the target was not seen reading (`unread`, from
+	/// [`drain`]), with that reason.
+	fn confirm(
+		field: Result<TypingField, String>,
+		text: &str,
+		unread: Option<String>,
+	) -> CoreResult<()> {
 		let field = match field {
 			Ok(field) => field,
 			Err(reason) => {
-				control::report_text_unconfirmed(reason);
+				control::report_text_unconfirmed(unread.unwrap_or(reason));
 				return Ok(());
 			},
 		};
@@ -1819,8 +1832,8 @@ mod foreground {
 			focus(ax)?;
 			let field = watch(ax, target, Some(id));
 			send_text(Some(target), text, field.as_ref().ok())?;
-			drain(target, &format!("window {id}"))?;
-			confirm(field, text)
+			let unread = drain(target, &format!("window {id}"));
+			confirm(field, text, unread)
 		})
 	}
 

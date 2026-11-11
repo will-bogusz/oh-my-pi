@@ -17,11 +17,12 @@
 - Fixed Linux computer reads crashing the app being read (Qt 5 and Qt 6 before 6.9.2 apps anywhere; GTK 3 and Firefox apps on distributions with at-spi2-core before 2.45, such as Ubuntu 22.04), and reading no text from the text fields of newer Qt apps ([#18823](https://github.com/can1357/oh-my-pi/pull/18823) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed macOS background left clicks crashing the page in Electron apps, and in Chrome when the click changes the URL in place (`history.pushState`, as single-page apps do) ([#18824](https://github.com/can1357/oh-my-pi/pull/18824) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed Windows element typing and key presses that ran in takeover, such as `el.type()` into a Chrome, Electron or WPF field, leaving the target window in front instead of handing focus back to the user's window; a user window switch before element focus now stops delivery instead of taking focus back ([#18919](https://github.com/can1357/oh-my-pi/pull/18919) by [@will-bogusz](https://github.com/will-bogusz))
+- Fixed Windows element typing and key presses that ran in takeover, such as `el.type()` into a Chrome, Electron or WPF field, leaving the target window in front instead of handing focus back to the user's window
+- Windows takeover `type` into Windows 11 Notepad no longer loses most of the text while reporting success: takeover typing sends a word per call and, into a field it can read, waits for the field to show each word before the next, waits for the target to read its keys before handing focus back, then reads the field back, failing with `InputFailed` naming what arrived when characters went missing
 
-### Fixed
+### Changed
 
-- Windows takeover `type` into Windows 11 Notepad no longer loses most of the text while reporting success: text for Notepad's editor is paced, and typing reads the focused field back, failing with `InputFailed` naming what arrived when characters went missing, and resolving `typeText` and `axType` to `{ unconfirmed, focusReturn }` when the field does not confirm the text
-- Windows takeover `type` into Windows 11 Notepad no longer loses most of the text while reporting success: takeover typing sends a word per call and, into a field it can read, waits for the field to show each word before the next, then reads the field back, failing with `InputFailed` naming what arrived when characters went missing, and resolving `typeText` and `axType` to `{ unconfirmed, focusReturn }` when the field does not confirm the text
+- `typeText` and `axType` on Windows resolve to `{ unconfirmed, focusReturn }`, with `unconfirmed` saying why the focused field did not confirm the typed text
 
 ## [18.18.8] - 2026-11-11
 

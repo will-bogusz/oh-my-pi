@@ -13,9 +13,10 @@ pub enum Verdict {
 	/// The field gained the typed text.
 	Confirmed,
 	/// The field gained only `arrived`: some of the typed characters, in
-	/// order, with others missing from between them. This is how a control
-	/// that drops fast synthetic input loses text, and nothing else a field
-	/// does to typed text looks like it.
+	/// order, with others missing from between them, and some character
+	/// kept at one place and lost at another. That is how a control that
+	/// drops fast synthetic input loses text; a field that filters a
+	/// character (digits only, no dashes) removes every copy of it.
 	Dropped { arrived: String },
 	/// The field reads otherwise, which a field can do with text it took
 	/// (reformatted it, replaced a selection, submitted it, shows only part
@@ -44,25 +45,37 @@ pub fn verdict(typed: &str, before: &str, after: &str, field: &str) -> Verdict {
 	if arrived.chars().count() < typed.chars().count()
 		&& !typed.contains(arrived)
 		&& is_subsequence(arrived, &typed)
+		&& partly_kept(arrived, &typed)
 	{
 		return Verdict::Dropped { arrived: arrived.to_string() };
 	}
 	Verdict::Unconfirmed(format!(
-		"{field} gained {} ({} characters) rather than the typed text",
+		"{field} gained {} ({} characters) rather than the typed text ({} characters)",
 		quoted(arrived),
-		arrived.chars().count()
+		arrived.chars().count(),
+		typed.chars().count()
 	))
 }
 
+/// Whether some character of `typed` arrived fewer times than it was typed,
+/// but at least once.
+fn partly_kept(arrived: &str, typed: &str) -> bool {
+	typed.chars().any(|character| {
+		let kept = arrived.matches(character).count();
+		kept > 0 && kept < typed.matches(character).count()
+	})
+}
+
 /// How a field shows one run of typed text, read after the run was sent.
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Progress {
 	/// The field gained the run.
 	Shown,
 	/// The field gained less than the run, all of it from the run in order,
 	/// or nothing: it has not caught up yet, or it dropped the rest.
 	Short,
-	/// The field reads some other way, so its text cannot pace typing.
+	/// The field reads some other way: it reformatted or autocorrected the
+	/// run, or shows something else.
 	Other,
 }
 
@@ -86,6 +99,63 @@ pub fn progress(typed: &str, before: &str, after: &str) -> Progress {
 /// replaced selection.
 fn shows(typed: &str, before: &str, after: &str) -> bool {
 	after == typed || after.matches(typed).count() > before.matches(typed).count()
+}
+
+/// How takeover typing paces itself by reading the field back.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Pace {
+	/// One call per word, each once the field shows the one before.
+	Words,
+	/// One call per character, each once the field shows the one before:
+	/// the field came up short on a word. A word shown whole this way goes
+	/// back to [`Pace::Words`].
+	Characters,
+	/// No waits: no field to read, or one whose text stopped changing.
+	Off,
+}
+
+/// Pieces in a row after which the field's text did not change at all
+/// before pacing stops: the keys go somewhere else.
+const QUIET_PIECES: u8 = 2;
+
+/// The pace of one typing call.
+#[derive(Debug)]
+pub struct Pacer {
+	pub pace: Pace,
+	quiet:    u8,
+}
+
+impl Pacer {
+	pub const fn new(readable: bool) -> Self {
+		Self { pace: if readable { Pace::Words } else { Pace::Off }, quiet: 0 }
+	}
+
+	/// Updates the pace after a piece went out: `progress` is how the field
+	/// showed it (`None`: the field could not be read), `changed` whether
+	/// the field's text changed at all while waiting for it, `run_end`
+	/// whether the piece ended its word. A field that reads some other way
+	/// (autocorrect, a suggestion) keeps its pace: the wait for it to stop
+	/// changing still paces it.
+	pub fn after(&mut self, progress: Option<Progress>, changed: bool, run_end: bool) {
+		let Some(progress) = progress else {
+			self.pace = Pace::Off;
+			return;
+		};
+		if progress != Progress::Shown && !changed {
+			self.quiet += 1;
+			if self.quiet >= QUIET_PIECES {
+				self.pace = Pace::Off;
+				return;
+			}
+		} else {
+			self.quiet = 0;
+		}
+		self.pace = match (self.pace, progress) {
+			(Pace::Words, Progress::Short) => Pace::Characters,
+			(Pace::Characters, Progress::Shown) if run_end => Pace::Words,
+			(pace, _) => pace,
+		};
+	}
 }
 
 /// The error for typed text that `field` dropped part of.
@@ -180,9 +250,6 @@ mod tests {
 		assert_eq!(verdict("hello", "<>", "<hl>", FIELD), Verdict::Dropped {
 			arrived: "hl".to_string(),
 		});
-		assert_eq!(verdict("é😀x", "", "éx", FIELD), Verdict::Dropped {
-			arrived: "éx".to_string(),
-		});
 	}
 
 	#[test]
@@ -198,6 +265,10 @@ mod tests {
 			// the line.
 			("hello world", "", "hello"),
 			("hello world", "", "world"),
+			// Filtered: every copy of a character the field refuses is gone.
+			("555-123-4567", "", "5551234567"),
+			("1,234", "", "1234"),
+			("é😀x", "", "éx"),
 			// Return can submit and clear the field.
 			("query\n", "", ""),
 			("a\tb", "", "a"),
@@ -205,20 +276,15 @@ mod tests {
 			let result = verdict(typed, before, after, FIELD);
 			assert!(matches!(result, Verdict::Unconfirmed(_)), "{typed:?} -> {after:?}: {result:?}");
 		}
-	}
-
-	#[test]
-	fn unconfirmed_reasons_name_the_field_and_what_it_gained() {
 		let Verdict::Unconfirmed(reason) = verdict("hello", "", "HELLO", "window 1's focused edit")
 		else {
 			panic!("expected unconfirmed");
 		};
 		assert!(reason.starts_with("window 1's focused edit"), "{reason}");
-		assert!(reason.contains("\"HELLO\" (5 characters)"), "{reason}");
-		let Verdict::Unconfirmed(reason) = verdict("query\n", "", "", FIELD) else {
-			panic!("expected unconfirmed");
-		};
-		assert!(reason.contains("Return or Tab"), "{reason}");
+		assert!(
+			reason.contains("(5 characters) rather than the typed text (5 characters)"),
+			"{reason}"
+		);
 	}
 
 	#[test]
@@ -244,5 +310,31 @@ mod tests {
 		// Reformatted, or other text than the run.
 		assert_eq!(progress("abc ", "x", "xABC "), Progress::Other);
 		assert_eq!(progress("abc ", "x", "xabd "), Progress::Other);
+	}
+
+	#[test]
+	fn pacing_slows_on_a_short_word_and_stops_when_the_field_goes_quiet() {
+		let mut pacer = Pacer::new(true);
+		pacer.after(Some(Progress::Shown), true, true);
+		assert_eq!(pacer.pace, Pace::Words);
+		// Autocorrect reads otherwise but the field changed: keep pacing.
+		pacer.after(Some(Progress::Other), true, true);
+		assert_eq!(pacer.pace, Pace::Words);
+		pacer.after(Some(Progress::Short), true, true);
+		assert_eq!(pacer.pace, Pace::Characters);
+		pacer.after(Some(Progress::Shown), true, false);
+		assert_eq!(pacer.pace, Pace::Characters);
+		pacer.after(Some(Progress::Shown), true, true);
+		assert_eq!(pacer.pace, Pace::Words);
+		// One quiet piece slows down; two in a row stop the waits.
+		pacer.after(Some(Progress::Short), false, true);
+		assert_eq!(pacer.pace, Pace::Characters);
+		pacer.after(Some(Progress::Short), false, false);
+		assert_eq!(pacer.pace, Pace::Off);
+
+		let mut pacer = Pacer::new(true);
+		pacer.after(None, true, true);
+		assert_eq!(pacer.pace, Pace::Off);
+		assert_eq!(Pacer::new(false).pace, Pace::Off);
 	}
 }

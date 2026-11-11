@@ -429,7 +429,8 @@ mod tests {
 		std::ptr::with_exposed_provenance_mut(window.id.parse::<usize>().unwrap())
 	}
 
-	/// The text of `window`'s editor once two reads 500 ms apart agree.
+	/// The text of `window`'s editor once two reads 500 ms apart agree, or
+	/// after 20 s.
 	fn editor_text(window: &DesktopWindow) -> String {
 		let automation = UIAutomation::new().unwrap();
 		let root = automation
@@ -449,11 +450,12 @@ mod tests {
 				.unwrap();
 			value.trim_end_matches(['\r', '\n']).to_string()
 		};
+		let deadline = Instant::now() + Duration::from_secs(20);
 		let mut last = read();
 		loop {
 			std::thread::sleep(Duration::from_millis(500));
 			let now = read();
-			if now == last {
+			if now == last || Instant::now() >= deadline {
 				return now;
 			}
 			last = now;
