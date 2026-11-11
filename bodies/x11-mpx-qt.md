@@ -4,7 +4,7 @@ I found that on X11, every `computer` session that had used background input cra
 
 With two PySide6 6.10.1 windows open on Xorg + mutter, a session that clicks and types into a GTK window and then ends killed both windows in 10 of 10 runs on `main` and in 0 of 10 with this PR.
 
-> **X11 context.** Background input drives a second "master" pointer and keyboard (XInput2 MPX) fed by uinput devices. Removing a master makes running Qt 6.5+ xcb clients free its child devices twice and segfault in `QXcbConnection::xi2SetupDevices()`: [QTBUG-146876](https://bugreports.qt.io/browse/QTBUG-146876), open and still in Qt 6.12.0 ([QTBUG-151420](https://bugreports.qt.io/browse/QTBUG-151420)). Qt 6.4 and 5 are not affected. Removing a master also crashes GTK3 apps when one of their popups holds a grab at that moment (Cua fixed the same in [trycua/cua@a08193ac9](https://github.com/trycua/cua/commit/a08193ac9)), so keeping masters covers GTK3 as well.
+> **X11 context.** Background input drives a second "master" pointer and keyboard (XInput2 MPX) fed by uinput devices. Removing a master makes running Qt 6.5+ xcb clients free its child devices twice and segfault in `QXcbConnection::xi2SetupDevices()`: [QTBUG-146876](https://bugreports.qt.io/browse/QTBUG-146876), open and still in Qt 6.12.0 ([QTBUG-151420](https://bugreports.qt.io/browse/QTBUG-151420)). Qt 6.4 and 5 are not affected.
 
 | When `main` removes a master | Qt 6.5+ apps on `main` | This PR |
 |---|---|---|
@@ -40,6 +40,7 @@ Guest: Ubuntu 24.04, Xorg 21.1.12, mutter 46.2, two PySide6 6.10.1 windows per t
 
 - mutter's GTK 4 frame helper, which mutter restarts, segfaulted 11 times in the 30 `main` trials and once in 40 with this PR (cause open).
 - Plain `xinput create-master` then `remove-master` on Xvfb, two windows × 10 per version: Qt 6.5.3, 6.6.3, 6.7.3, 6.8.3, 6.9.3, 6.10.0 and 6.10.1 lost 20 of 20 each; Qt 6.4.2 and 5.15.13 lost none. With openbox, adding a master, reattaching a slave and floating one each killed 0 of 30 Qt 6.10 and 6.12 windows; removing one killed 20 of 30.
+- Another driver's history reports that removing a master crashes a GTK3 app whose popup holds a grab ([trycua/cua@a08193ac9](https://github.com/trycua/cua/commit/a08193ac9)). Not reproduced here: with a session ending while a GTK3 popup was open, the GTK3 app stayed alive in 5 of 5 runs on `main`.
 
 </details>
 
