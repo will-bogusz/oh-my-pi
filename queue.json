@@ -20719,7 +20719,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-after-bash-revalidate",
    "host": "MacBook-Pro",
    "added": "2026-10-18T21:39:24Z",
-   "updated": "2026-11-11T11:42:58Z",
+   "updated": "2026-11-11T11:57:28Z",
    "note": "",
    "built": [
     {
@@ -21159,7 +21159,7 @@
     }
    ],
    "opened": "2026-10-19T01:07:22Z",
-   "advanced": "2026-11-11T11:42:58Z",
+   "advanced": "2026-11-11T11:57:28Z",
    "design_checks": [
     {
      "pr": 16274,
