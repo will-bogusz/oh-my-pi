@@ -2,7 +2,7 @@
 
 I made selector waits on Chromium-backed tabs and frames honor `state` and reject misspelled options instead of waiting for the wrong condition.
 
-Waiting for an already-removed element with `state: "hidden"` or `"detached"` went from a 20-second timeout to 0–5 ms, with five runs of each state.
+Waiting for an already-removed element with `state: "hidden"` or `"detached"` went from a 20-second timeout to 0–12 ms, with five runs of each state.
 
 This covers Chromium-backed tabs and their scoped frames, which is OMP's own Chromium and the Chrome relay, where the wait was measured. Tern and cmux are unchanged: Tern still reads only `visible`/`hidden` and cmux only `timeout`, so on those two a `state` or a misspelled option is still ignored and `state: "hidden"` still waits for the element to appear. Existing `visible`/`hidden` forms remain accepted; `detached` requires absence, not just invisibility, except that a `role/` selector never matches a hidden element, so its `detached` wait also ends when the match is hidden.
 
