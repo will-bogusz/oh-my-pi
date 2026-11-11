@@ -2792,12 +2792,13 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/print-hold",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-11-11T02:26:25Z",
+   "updated": "2026-11-11T06:06:11Z",
    "note": "",
    "advanced": "2026-11-11T02:26:25Z",
    "rebases_after": [
     16907,
-    18252
+    18252,
+    18838
    ]
   },
   {
@@ -75354,13 +75355,13 @@
    "needs": [],
    "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
    "body": "bodies/print-pref.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18838,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/print-pref",
    "host": "MacBook-Pro",
    "added": "2026-11-11T03:57:46Z",
-   "updated": "2026-11-11T06:01:49Z",
+   "updated": "2026-11-11T06:06:11Z",
    "note": "",
    "built": [
     {
@@ -75583,7 +75584,8 @@
      "host": "goliath",
      "tree": "013da98e89dc7eee9c3be329b7d22d0d865b86fe"
     }
-   ]
+   ],
+   "opened": "2026-11-11T06:06:11Z"
   }
  ],
  "watch": {
