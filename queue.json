@@ -89420,6 +89420,11 @@
     "sha": "095e3323b8bbd4dc762c06eb5656f176d5c2fa36",
     "at": "2026-11-11T21:50:58Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "095e3323b8bbd4dc762c06eb5656f176d5c2fa36",
+    "at": "2026-11-11T21:53:14Z",
+    "host": "goliath"
    }
   }
  },
