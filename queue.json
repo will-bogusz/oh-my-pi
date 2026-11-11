@@ -81283,7 +81283,7 @@
    "area": "computer",
    "priority": "P2",
    "needs": [],
-   "base": "7b42b1be6069b791c54e1c4c93d2070978d9e6bf",
+   "base": "73d7521269a1212fc2b2790a2e8c08424496c953",
    "body": "bodies/atspi-press-actions.md",
    "state": "open",
    "pr": 18921,
@@ -81291,7 +81291,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-press-actions",
    "host": "MacBook-Pro",
    "added": "2026-11-11T13:13:42Z",
-   "updated": "2026-11-11T16:28:42Z",
+   "updated": "2026-11-11T17:00:08Z",
    "note": "",
    "built": [
     {
@@ -81505,7 +81505,8 @@
     }
    ],
    "opened": "2026-11-11T16:28:14Z",
-   "readied": "2026-11-11T16:28:42Z"
+   "readied": "2026-11-11T16:28:42Z",
+   "advanced": "2026-11-11T17:00:08Z"
   },
   {
    "id": "atspi-qt-menus",
