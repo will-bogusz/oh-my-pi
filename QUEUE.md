@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 13:58Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 13:59Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 5 of 8 ready events used in the hour before the last plan, 3 left (plan of 2026-11-11 13:34Z on goliath; groups below are from it, states from the manifest)
@@ -46,7 +46,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | win-minimised-windows | fix(natives,coding-agent): show a minimized Windows app's window from apps.open instead of launching it again | computer | P2 | 4h | [#18222](https://github.com/can1357/oh-my-pi/pull/18222), win-setvalue-readback | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-minimised-windows) |
 | browser-select-objects | feat(browser): accept explicit dropdown option selectors | browser | P2 | 4h | [#18829](https://github.com/can1357/oh-my-pi/pull/18829), browser-wait-selector-state | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-select-objects) |
 | win-screen-locked | fix(natives,coding-agent): report unavailable Windows desktop sessions | computer | P2 | 4h | win-setvalue-readback | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-screen-locked) |
-| macos-ax-cancel-before-send | fix(natives): send no macOS AX action once its run is cancelled | natives | P2 | 3h | [#18898](https://github.com/can1357/oh-my-pi/pull/18898) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-ax-cancel-before-send) |
+| macos-ax-cancel-before-send | fix(natives): send no macOS AX action once its run is cancelled | natives | P2 | 4h | [#18898](https://github.com/can1357/oh-my-pi/pull/18898) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-ax-cancel-before-send) |
 | win-ax-states | fix(natives): expose Windows control state and stale-reference matches | computer | P2 | 3h | win-setvalue-readback | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-ax-states) |
 
 ## Stacked (24)
