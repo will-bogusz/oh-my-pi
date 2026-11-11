@@ -80247,8 +80247,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wait-ladder-context",
    "host": "MacBook-Pro",
    "added": "2026-11-11T10:13:40Z",
-   "updated": "2026-11-11T20:02:13Z",
-   "note": "QueueSkipper, 2026-11-11: merged tree built with PR 18786 f68cdf587a; native build/tests and workspace types pass. check:ts formatting failures also reproduce on PR 18924 and PR 18925 alone, while main passes; sibling owners fix after opening. Entry-owned files pass oxfmt.",
+   "updated": "2026-11-11T20:02:16Z",
+   "note": "QueueSkipper, 2026-11-11: accepted tree admission. Native build and 655 Rust tests pass; workspace types and 149 focused tests pass (3 skipped). check:ts format defects reproduce on PR 18924/18925 alone; SDK relay-toggle prefix test fails on PR 18786 f68cdf587a alone (4 pass/1 fail), not tree-specific. Sibling owners handle separately; entry files pass oxfmt.",
    "kind": "proposal",
    "built": [
     {
