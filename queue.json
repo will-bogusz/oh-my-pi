@@ -79014,7 +79014,7 @@
    "area": "browser",
    "priority": "P0",
    "needs": [],
-   "base": "7b42b1be6069b791c54e1c4c93d2070978d9e6bf",
+   "base": "50da2d357039404a81d7c64622740ce13e4c54b4",
    "body": "bodies/browser-main-wait-navigation.md",
    "state": "open",
    "pr": 18884,
@@ -79022,9 +79022,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/main-world-wait-navigation",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:58:14Z",
-   "updated": "2026-11-11T12:02:50Z",
+   "updated": "2026-11-11T18:16:57Z",
    "note": "",
-   "advanced": "2026-11-11T11:49:31Z",
+   "advanced": "2026-11-11T18:16:57Z",
    "built": [
     {
      "with": "#18676",
