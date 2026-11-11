@@ -1,8 +1,8 @@
 ## What
 
-I made a browser call that a page's print preview holds, in a browser omp attaches to, fail within about a second with an error naming the preview, instead of stalling to its timeout and getting the tab killed.
+I made a browser call that a page's print preview holds, in a browser omp attaches to, fail within about a second with an error naming the preview, instead of stalling to its timeout and losing the tab.
 
-In an attached Chrome (the relay, `app.cdp_url`, `app.path`), printing on a click stalled the next call to its timeout, then recovery stalled too and killed the tab. With this change the held call fails in 1.3 s and the tab keeps its page.
+In an attached Chrome (the relay, `app.cdp_url`, `app.path`), printing on a click stalled the next call to its timeout, then recovery stalled too: a tab omp created there was closed, and a tab borrowed from the user was released. With this change the held call fails in 1.3 s and the tab keeps its page.
 
 ## Why
 
@@ -10,7 +10,7 @@ Chrome's preview holds the page's script until somebody closes it, and nothing o
 
 **Decision for the maintainer:** report, not close. Cancelling through Chrome's internal preview markup worked in an earlier Linux probe, but that markup is private and the relay cannot reach `chrome://` pages. A run on a held page also fails even if it only waits: a 2.5 s wait failed in 1.304 s, 5/5.
 
-**Limits:** prints on load in attached browsers still behave as on `main`; `browser.pages()` with a popup preview still times out and kills the tab.
+**Limits:** prints on load in attached browsers still behave as on `main`; `browser.pages()` with a popup preview still times out, closing an omp-created tab or releasing a borrowed one. How often pages print in practice is not counted.
 
 ## Testing
 

@@ -77014,7 +77014,9 @@
    "title": "fix(coding-agent,browser-relay): fail a browser call a print preview holds in an attached browser within seconds",
    "area": "browser",
    "priority": "P2",
-   "needs": [],
+   "needs": [
+    "#18838"
+   ],
    "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
    "body": "bodies/relay-print-preview-error.md",
    "state": "queued",
@@ -77023,9 +77025,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-print-preview-error",
    "host": "MacBook-Pro",
    "added": "2026-11-11T07:04:56Z",
-   "updated": "2026-11-11T07:05:11Z",
-   "note": "Split out of #18838 (print-pref) at 0f5aa8ea5c with rounds 1-3 fixes; off main (its print-preview.ts comment names seedOwnedProfilePreferences from #18838; docs line 85 conflicts with #18838). Codex findings on #18838: (1) r4534637360 P1 print-preview.ts reuse the central timeout utility for bounded probes [fixed 156b3a509f]; (2) r4534637366 P1 relay-detach test replace the embedded Promise constructor [fixed 156b3a509f]; (3) r4534637376 P2 print-preview.ts use an intrinsic promise for the held-page probe [fixed 156b3a509f]; (4) r4534737688 P1 tab-worker.ts probe before a run timeout starts recovery [fixed 4b6bf8429f]; (5) r4534821357 P1 tab-worker.ts let the final print-preview probe finish [fixed 0f5aa8ea5c]; (6) r4534899898 P2 tab-supervisor.ts probe headed shared browsers that predate the preference [Not fixed yet].",
-   "hold": "Main, 2026-11-11: four Codex rounds in the probe/grace mechanism; design check before it opens"
+   "updated": "2026-11-11T09:37:00Z",
+   "note": "Split out of #18838 (print-pref) at 0f5aa8ea5c with rounds 1-3 fixes; off main (its print-preview.ts comment names seedOwnedProfilePreferences from #18838; docs line 85 conflicts with #18838). Codex findings on #18838: (1) r4534637360 P1 print-preview.ts reuse the central timeout utility for bounded probes [fixed 156b3a509f]; (2) r4534637366 P1 relay-detach test replace the embedded Promise constructor [fixed 156b3a509f]; (3) r4534637376 P2 print-preview.ts use an intrinsic promise for the held-page probe [fixed 156b3a509f]; (4) r4534737688 P1 tab-worker.ts probe before a run timeout starts recovery [fixed 4b6bf8429f]; (5) r4534821357 P1 tab-worker.ts let the final print-preview probe finish [fixed 0f5aa8ea5c]; (6) r4534899898 P2 tab-supervisor.ts probe headed shared browsers that predate the preference [Not fixed yet]."
   },
   {
    "id": "win-minimised-windows",
