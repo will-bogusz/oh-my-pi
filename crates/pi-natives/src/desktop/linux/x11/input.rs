@@ -1332,3 +1332,7 @@ mod tests {
 		assert_eq!(isolated(Ok(()), disturbed()).unwrap_err().message, "focus moved");
 	}
 }
+
+#[cfg(test)]
+#[path = "remap_tests.rs"]
+mod remap_tests;

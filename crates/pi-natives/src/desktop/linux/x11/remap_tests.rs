@@ -10,7 +10,7 @@ use std::{
 use x11rb::{connection::Connection, protocol::xproto::ConnectionExt as _};
 use xkeysym::Keysym;
 
-use super::{input::X11Input, keymap::Keymap};
+use super::{X11Input, super::keymap::{self, Keymap}};
 use crate::desktop::{backend::DeliveryMode, control, types::Target};
 
 #[link(name = "X11")]
@@ -73,6 +73,16 @@ fn server() -> (Server, String) {
 #[test]
 #[ignore = "starts Xvfb and uses Xlib"]
 fn remapped_xtest_text_is_translated_before_the_empty_rows_are_restored() {
+	text_is_translated(DeliveryMode::Foreground);
+}
+
+#[test]
+#[ignore = "starts Xvfb and uses Xlib"]
+fn remapped_send_event_text_is_translated_before_the_empty_rows_are_restored() {
+	text_is_translated(DeliveryMode::Background);
+}
+
+fn text_is_translated(mode: DeliveryMode) {
 	let (_server, display) = server();
 	let receiver_display = CString::new(display.clone()).unwrap();
 	let (ready, started) = std::sync::mpsc::channel();
@@ -134,8 +144,14 @@ fn remapped_xtest_text_is_translated_before_the_empty_rows_are_restored() {
 		.reply()
 		.unwrap();
 	let mut input = X11Input::new(Arc::clone(&conn), root).unwrap();
+	let target = if mode == DeliveryMode::Background {
+		input.mpx_unavailable = Some("XSendEvent fixture".into());
+		Target::Window(window.to_string())
+	} else {
+		Target::Desktop
+	};
 	let sent = std::time::Instant::now();
-	let result = input.type_text(&Target::Desktop, "héllo wörld ✓", DeliveryMode::Foreground);
+	let result = input.type_text(&target, "héllo wörld ✓", mode);
 	if result.is_err() {
 		use x11rb::protocol::xproto::{ClientMessageEvent, EventMask};
 		conn
@@ -153,7 +169,7 @@ fn remapped_xtest_text_is_translated_before_the_empty_rows_are_restored() {
 	result.unwrap();
 	assert_eq!(received, "héllo wörld ✓");
 	eprintln!(
-		"Xlib translated the complete text run in {:?}; remap grace is 100ms",
+		"Xlib {mode:?} translated the complete text run in {:?}; remap grace is 100ms",
 		translated.duration_since(sent)
 	);
 	let after = conn
@@ -190,7 +206,7 @@ fn remapped_text_restores_empty_rows_on_cancellation_and_unwind() {
 	let error = control::with_token_for_test(&token, || {
 		let mapping = map.bind_text(Arc::clone(&conn), "✓✓").unwrap();
 		let steps = map.plan_text("✓✓").unwrap();
-		let result = super::keymap::run_steps(&steps, |step| {
+		let result = keymap::run_steps(&steps, |step| {
 			use x11rb::protocol::xtest::ConnectionExt as _;
 			conn
 				.xtest_fake_input(
