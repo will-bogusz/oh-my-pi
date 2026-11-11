@@ -82590,6 +82590,11 @@
     "sha": "4b37dac48d8b5a1b560b5c3a489ff2767a8f7f2a",
     "at": "2026-11-11T09:57:51Z",
     "host": "goliath"
+   },
+   "macos": {
+    "sha": "4b37dac48d8b5a1b560b5c3a489ff2767a8f7f2a",
+    "at": "2026-11-11T09:58:38Z",
+    "host": "Wills-MacBook-Pro"
    }
   }
  },
