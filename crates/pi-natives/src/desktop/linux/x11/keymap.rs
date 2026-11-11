@@ -36,6 +36,7 @@ pub(super) struct Keymap {
 	/// Core modifier mask bit each modifier keycode sets while held.
 	modifier_masks:      Vec<(u8, u16)>,
 	device:             Option<u8>,
+	core_mapping:       bool,
 }
 
 impl Keymap {
@@ -94,6 +95,7 @@ impl Keymap {
 			.map_err(keymap_failed)?;
 		let mut map = Self::new(min_keycode, mapping.keysyms_per_keycode, mapping.keysyms, Vec::new());
 		map.device = Some(device_id);
+		map.core_mapping = false;
 		Ok(map)
 	}
 
@@ -118,7 +120,7 @@ impl Keymap {
 		else {
 			return Ok(core);
 		};
-		Ok(Self { modifier_masks: core.modifier_masks, ..Self::device(conn, device.into())? })
+		Ok(Self { modifier_masks: core.modifier_masks, core_mapping: true, ..Self::device(conn, device.into())? })
 	}
 
 	const fn new(
@@ -127,7 +129,7 @@ impl Keymap {
 		keysyms: Vec<u32>,
 		modifier_masks: Vec<(u8, u16)>,
 	) -> Self {
-		Self { min_keycode, keysyms_per_keycode, keysyms, modifier_masks, device: None }
+		Self { min_keycode, keysyms_per_keycode, keysyms, modifier_masks, device: None, core_mapping: true }
 	}
 
 	/// Keycode emitting `keysym` and whether Shift must be held for it. The
@@ -167,7 +169,7 @@ impl Keymap {
 
 	/// Reserve distinct empty rows for the entire run, never replacing a
 	/// symbol (including Escape) or reusing a row before clients translate it.
-	fn text_bindings(&self, text: &str) -> CoreResult<Vec<(u8, u32)>> {
+	fn text_bindings(&self, text: &str, core: Option<&Self>) -> CoreResult<Vec<(u8, u32)>> {
 		let mut missing = Vec::new();
 		for ch in text.chars() {
 			control::check()?;
@@ -184,6 +186,7 @@ impl Keymap {
 				.filter(|(_, row)| row.iter().all(|&symbol| symbol == 0))
 				.filter_map(|(index, _)| self.min_keycode.checked_add(u8::try_from(index).ok()?))
 				.filter(|code| self.modifier_mask(*code) == 0)
+				.filter(|&code| core.is_none_or(|map| map.empty_row(code)))
 				.collect()
 		};
 		if missing.len() > spare.len() {
@@ -195,24 +198,46 @@ impl Keymap {
 		Ok(spare.into_iter().zip(missing).collect())
 	}
 
+	fn empty_row(&self, code: u8) -> bool {
+		let width = usize::from(self.keysyms_per_keycode);
+		let Some(index) = code.checked_sub(self.min_keycode).map(usize::from) else {
+			return false;
+		};
+		width != 0 && self.keysyms.get(index * width..(index + 1) * width)
+			.is_some_and(|row| row.iter().all(|&symbol| symbol == 0))
+	}
+
 	pub(super) fn bind_text(&mut self, conn: Arc<RustConnection>, text: &str) -> CoreResult<TextMapping> {
-		let bindings = self.text_bindings(text)?;
+		let core = if self.core_mapping { Some(Self::core(&conn)?) } else { None };
+		let bindings = self.text_bindings(text, core.as_ref())?;
 		let mut guard = TextMapping {
 			conn,
-			device: self.device,
-			width: self.keysyms_per_keycode,
+			device: if self.core_mapping { None } else { self.device },
+			width: core.as_ref().map_or(self.keysyms_per_keycode, |map| map.keysyms_per_keycode),
 			bound: Vec::new(),
 		};
 		for (code, symbol) in bindings {
 			// Register before sending: even a failed round trip can have
 			// changed the server map.
 			guard.bound.push(code);
-			let mut row = vec![symbol; usize::from(guard.width)];
-			if let Err(error) = guard.write(code, &row) {
+			let row = vec![symbol; usize::from(guard.width)];
+			let result = guard.write(code, &row).and_then(|()| {
+				if let Some(device) = self.device {
+					let applied = Self::device(&guard.conn, device.into())?;
+					if applied.lookup(symbol) != Some((code, false)) {
+						return Err(DesktopError::input_failed(
+							"X11 device did not adopt the temporary text mapping; no input was sent"
+						));
+					}
+				}
+				Ok(())
+			});
+			if let Err(error) = result {
 				return guard.finish(Err(error));
 			}
-			let start = usize::from(code - self.min_keycode) * row.len();
-			self.keysyms[start..start + row.len()].swap_with_slice(&mut row);
+			let width = usize::from(self.keysyms_per_keycode);
+			let start = usize::from(code - self.min_keycode) * width;
+			self.keysyms[start..start + width].fill(symbol);
 		}
 		Ok(guard)
 	}
@@ -521,7 +546,7 @@ mod tests {
 		let mut map = keymap();
 		// A symbol on an otherwise unused level still occupies the row.
 		map.keysyms[(255 - 8) * 2 + 1] = Keysym::Escape.raw();
-		assert_eq!(map.text_bindings("é✓éa").unwrap(), vec![
+		assert_eq!(map.text_bindings("é✓éa", None).unwrap(), vec![
 			(254, keysym_for_key(KeyName::Char('é'))),
 			(253, keysym_for_key(KeyName::Char('✓'))),
 		]);
@@ -530,7 +555,7 @@ mod tests {
 	#[test]
 	fn insufficient_empty_rows_refuses_the_complete_run() {
 		let map = Keymap::new(8, 2, vec![0, 0, 0x61, 0x41], Vec::new());
-		let error = map.text_bindings("é✓").unwrap_err();
+		let error = map.text_bindings("é✓", None).unwrap_err();
 		assert!(error.message.contains("needs 2 spare keycodes but only 1"));
 	}
 

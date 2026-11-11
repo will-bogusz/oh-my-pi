@@ -81,7 +81,7 @@ fn remapped_xtest_text_is_translated_before_the_empty_rows_are_restored() {
 				}
 			}
 			XCloseDisplay(display);
-			text
+			(text, std::time::Instant::now())
 		}
 	});
 	started.recv().unwrap();
@@ -90,8 +90,11 @@ fn remapped_xtest_text_is_translated_before_the_empty_rows_are_restored() {
 	let conn = Arc::new(conn);
 	let before = conn.get_keyboard_mapping(conn.setup().min_keycode, conn.setup().max_keycode - conn.setup().min_keycode + 1).unwrap().reply().unwrap();
 	let mut input = X11Input::new(Arc::clone(&conn), root).unwrap();
+	let sent = std::time::Instant::now();
 	input.type_text(&Target::Desktop, "héllo wörld ✓", DeliveryMode::Foreground).unwrap();
-	assert_eq!(receiver.join().unwrap(), "héllo wörld ✓");
+	let (received, translated) = receiver.join().unwrap();
+	assert_eq!(received, "héllo wörld ✓");
+	eprintln!("Xlib translated the complete text run in {:?}; remap grace is 100ms", translated.duration_since(sent));
 	let after = conn.get_keyboard_mapping(conn.setup().min_keycode, conn.setup().max_keycode - conn.setup().min_keycode + 1).unwrap().reply().unwrap();
 	assert_eq!(after.keysyms, before.keysyms, "the core mapping is restored");
 	// Planning again must need the same temporary bindings, not find leftovers
