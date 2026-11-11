@@ -12,7 +12,7 @@ A click whose fetch answers after 300, 800 or 2000 ms, read at once with `tab.te
 | request never answers | 20/20 "Loading", 1 ms | 20/20 "Loading" at the bound, 3007 ms |
 | read with no action before it | no wait | no wait |
 
-The look's settle (`WorkerCore.#settleAfterAction`) is now paid before the first read after an action too. `settledRead()` wraps the tab reads (`text`, `html`, `value`, `attr`, `count`, `styles`, `is*`, `box`, `evaluate`, `extract`, `screenshot`, `diffScreenshot`, `pdf`, `a11y`, `url`, `title`); frame reads and element-handle reads (through `toActionableHandle`) settle the same way. Reads issued together share one settle, so `Promise.all([tab.text(a), tab.text(b)])` gets one answer. Reads an element action makes before dispatching its input run inside that action (an `AsyncLocalStorage` scope) and do not consume the mark. `cookies()`, `storage()` and the `waitFor*` helpers keep main's behaviour; the docs state that boundary.
+The first page read after an action waits before reading, rather than reading speculatively and reconciling the result. Tab, frame and element reads share that boundary; reads issued together share one wait. Reads needed to carry out an action do not consume it. `cookies()`, `storage()` and `waitFor*` keep main's behavior; Chromium `tab.url()` becomes asynchronous inside `tab.run` (below).
 
 ## Why
 
