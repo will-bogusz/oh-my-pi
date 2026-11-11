@@ -81154,5 +81154,11 @@
     "wake": ""
    }
   ]
+ },
+ "opening": {
+  "id": "x11-mpx-qt",
+  "token": "83ad5d94c95c4746a635df5ba33b35f0",
+  "host": "MacBook-Pro",
+  "at": "2026-11-11T03:44:34Z"
  }
 }
