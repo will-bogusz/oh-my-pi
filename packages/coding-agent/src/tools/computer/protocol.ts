@@ -1,5 +1,5 @@
 import type { ImageContent, TextContent } from "@oh-my-pi/pi-ai";
-import type { CaptureRegion, DesktopCapabilities, DesktopScreenState } from "@oh-my-pi/pi-natives";
+import type { CaptureRegion, DesktopCapabilities, DesktopCursor, DesktopScreenState } from "@oh-my-pi/pi-natives";
 import * as prompt from "@oh-my-pi/pi-utils/prompt";
 import escapeAfterCallMessage from "../../prompts/tools/computer-escape-after-call.md" with { type: "text" };
 import escapeRefusedMessage from "../../prompts/tools/computer-escape-refused.md" with { type: "text" };
@@ -21,6 +21,8 @@ export interface ComputerSessionSnapshot {
 	readOnly: boolean;
 	/** `computer.backgroundFallback`: what a refused background input call does. */
 	backgroundFallback: "takeover" | "refuse";
+	/** `computer.cursor`: the agent whose cursor the run's input draws; absent while the setting is off. */
+	cursor?: DesktopCursor;
 	/**
 	 * The agent turn the run belongs to, if any: once it acts, the display stays awake until that turn's
 	 * `release-display` rather than for the native grace period after its last request.

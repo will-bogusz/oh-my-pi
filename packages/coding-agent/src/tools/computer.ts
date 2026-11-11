@@ -2,10 +2,12 @@ import { type Type, type } from "@oh-my-pi/omptype";
 import type { AgentToolResult, ToolApprovalDecision } from "@oh-my-pi/pi-agent-core";
 import type { Model } from "@oh-my-pi/pi-ai";
 import { classifyModel } from "@oh-my-pi/pi-catalog/identity";
-import type { DesktopCapabilities } from "@oh-my-pi/pi-natives";
+import type { DesktopCapabilities, DesktopCursor } from "@oh-my-pi/pi-natives";
 import { once } from "@oh-my-pi/pi-utils";
+import { AGENT_COLOR_HEX, agentIdentity } from "@oh-my-pi/pi-tui/overlays/agent-identity";
 import { callSessionTool } from "../eval/js/tool-bridge";
 import type { EvalPreludeContext, EvalPreludeDefinition } from "../eval/preludes";
+import { MAIN_AGENT_ID } from "../registry/agent-registry";
 import computerUsePrompt from "../prompts/system/computer-use.md" with { type: "text" };
 import { enforceInlineByteCap } from "@oh-my-pi/pi-tui/tools/streaming-output";
 import { type ComputerCallStep, isReadOnlyComputerCall, renderComputerCall } from "./computer/call";
@@ -24,6 +26,7 @@ import { clampTimeout } from "./tool-timeouts";
 
 import {
 	cfgComputerBackgroundFallback,
+	cfgComputerCursor,
 	cfgComputerDisplay,
 	cfgComputerEnabled,
 	cfgComputerMaxHeight,
@@ -244,6 +247,12 @@ function resolveComputerRunCode(params: ComputerRunParams | ComputerCallParams):
 	throw new ToolError("Action 'run' requires exactly one of 'code' or 'fn'.");
 }
 
+/** The cursor `computer.cursor` draws for the session's agent: its name, in its identity colour. */
+function computerCursor(session: ToolSession): DesktopCursor {
+	const { id, label, color } = agentIdentity(session.getAgentId?.() ?? MAIN_AGENT_ID);
+	return { id, label, color: AGENT_COLOR_HEX[color] };
+}
+
 /** Freezes the current session settings into the snapshot every worker command carries. */
 function buildComputerSnapshot(session: ToolSession, readOnly: boolean): ComputerSessionSnapshot {
 	const coordinateSafe = usesCoordinateSafeImageSizing(session.getActiveModel?.());
@@ -262,6 +271,7 @@ function buildComputerSnapshot(session: ToolSession, readOnly: boolean): Compute
 		display: cfgComputerDisplay.get(session.settings),
 		readOnly,
 		backgroundFallback: cfgComputerBackgroundFallback.get(session.settings),
+		cursor: cfgComputerCursor.get(session.settings) ? computerCursor(session) : undefined,
 		displayTurn: computerTurnInFlight(session.getEvalKernelOwnerId?.() ?? undefined),
 	};
 }

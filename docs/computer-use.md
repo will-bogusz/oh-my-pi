@@ -27,6 +27,7 @@ tools:
 | `computer.maxWidth`           |     `3840` | Maximum screenshot width. Some model transports impose an effective coordinate-safe cap of 1280.                                                                                                                                                                                                                                                                 |
 | `computer.maxHeight`          |     `2400` | Maximum screenshot height. Some model transports impose an effective coordinate-safe cap of 896.                                                                                                                                                                                                                                                                 |
 | `computer.backgroundFallback` | `takeover` | What a window input call does when its background route is unavailable: `takeover` reruns that one call in takeover and returns focus to the user's app; `refuse` fails it with `BackgroundUnavailable`, takes nothing over, and also refuses the model's own foreground requests and, on macOS, its calls that open a menu (see _Screenshots and pixel input_). |
+| `computer.cursor`             |    `false` | On macOS 14 and later, draw an arrow in each agent's colour, with its name, where its input lands (see _Agent cursor_). Linux and Windows draw none. |
 
 There is no `computer.backend` setting: the native addon selects the platform backend. The `/computer`, `/computer on`, `/computer off`, and `/computer status` commands toggle or inspect the current session without writing config. Interactive and RPC CLI hosts watch settings files and reconcile enabled preludes for subsequent Eval calls; `/computer status` shows the effective setting. SDK hosts must refresh their settings themselves.
 
@@ -213,6 +214,10 @@ await computer.run(async ({ desktop, wait }) => {
 ```
 
 Inside `computer.run`, `wait(milliseconds)` sleeps and `wait(predicate, { timeout?, interval? })` polls until truthy. Prefer it to hand-written polling loops.
+
+## Agent cursor
+
+With `computer.cursor` on, a person watching the screen sees which agent acts where: each agent's input draws an arrow in that agent's identity colour (the main agent's is blue) with its name on a badge, gliding from its previous point and rippling on a click. Pointer input draws it at the point it was sent to once it is sent (a mouse hold as it starts), element actions at the element's center, and typing and keys at the agent's last point; it fades after 8 seconds idle and honors Reduce Motion. One helper process per omp process draws every agent of that process on click-through panels above app windows on every display (open menus stay above it), and exits with omp. Input never waits for it: events it cannot take at once are dropped. Display screenshots and window listings leave out the cursor helpers of every omp process, so no agent sees any agent's cursor; `screencapture` and other recordings show it. Any process named `omp-agent-cursor` is left out the same way. macOS before 14 draws none, since its display capture cannot leave the overlay out.
 
 ## Platforms
 

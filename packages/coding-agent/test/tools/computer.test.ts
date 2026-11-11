@@ -41,6 +41,7 @@ import type {
 	CaptureRegion,
 	DesktopCapabilities,
 	DesktopCapture,
+	DesktopCursor,
 	DesktopDisplay,
 	DesktopDragResult,
 	DesktopFocusReturn,
@@ -51,7 +52,8 @@ import type {
 	PointerOptions,
 } from "@oh-my-pi/pi-natives";
 
-import { cfgComputerEnabled } from "@oh-my-pi/pi-coding-agent/tools/settings";
+import { cfgComputerCursor, cfgComputerEnabled } from "@oh-my-pi/pi-coding-agent/tools/settings";
+import { AGENT_COLOR_HEX } from "@oh-my-pi/pi-tui/overlays/agent-identity";
 
 /** Method name of the last step in a facade call chain, or "" when the chain is malformed. */
 function terminalMethod(chain: unknown): string {
@@ -188,6 +190,11 @@ class FakeNativeSession implements NativeDesktopSession {
 		this.displayHolds.push("release");
 	}
 	setRunDeadline(_remainingMs: number): void {}
+	/** `setCursor` calls in order, one per run. */
+	readonly cursors: (DesktopCursor | null)[] = [];
+	setCursor(cursor: DesktopCursor | null): void {
+		this.cursors.push(cursor);
+	}
 	async listApplications() {
 		return [{ id: "test.editor", name: "Editor", path: "/Applications/Editor.app", running: true, pid: 123 }];
 	}
@@ -1471,6 +1478,38 @@ describe("computer prelude", () => {
 			{ session, toolCallId: "agent-id" },
 		);
 		expect(created).toEqual([expect.objectContaining({ agentId: "CursorChecks.Scout" })]);
+	});
+
+	it("sets the agent's cursor on each run while computer.cursor is on, and clears it once turned off", async () => {
+		const session: ToolSession = { ...toolSession(), getAgentId: () => "CursorChecks.Scout" };
+		const native = new FakeNativeSession();
+		const prelude = workerPrelude(session, native);
+		const run = (id: string) =>
+			prelude.invoke(
+				{ action: "run", code: "await desktop.windows()", read_only: true },
+				{ session, toolCallId: id },
+			);
+		await run("off-by-default");
+		cfgComputerCursor.override(session.settings, true);
+		await run("on");
+		cfgComputerCursor.override(session.settings, false);
+		await run("off-again");
+		expect(native.cursors).toEqual([
+			null,
+			{ id: "CursorChecks.Scout", label: "Scout", color: expect.stringMatching(/^#[0-9a-f]{6}$/) },
+			null,
+		]);
+	});
+
+	it("draws the main agent's cursor in blue under its own name", async () => {
+		const session = toolSession();
+		cfgComputerCursor.override(session.settings, true);
+		const native = new FakeNativeSession();
+		await workerPrelude(session, native).invoke(
+			{ action: "run", code: "await desktop.windows()", read_only: true },
+			{ session, toolCallId: "main-cursor" },
+		);
+		expect(native.cursors).toEqual([{ id: "Main", label: "Main", color: AGENT_COLOR_HEX.blue }]);
 	});
 });
 

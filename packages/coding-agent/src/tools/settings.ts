@@ -723,6 +723,19 @@ export const cfgComputerBackgroundFallback = register({
 	},
 });
 
+export const cfgComputerCursor = register({
+	id: "computer.cursor",
+	type: "boolean",
+	default: false,
+	ui: {
+		tab: "tools",
+		group: "Computer",
+		label: "Computer Agent Cursor",
+		description:
+			"Draw a cursor in each agent's colour, with its name, where the computer tool sends that agent's input (macOS 14 and later); agents' own screenshots never show it",
+	},
+});
+
 export const cfgImagesQuestionTimeoutMs = register({
 	id: "images.questionTimeoutMs",
 	type: "number",

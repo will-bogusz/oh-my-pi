@@ -19,6 +19,7 @@ import type {
 	CaptureRegion,
 	DesktopCapabilities,
 	DesktopCapture,
+	DesktopCursor,
 	DesktopDisplay,
 	DesktopDragResult,
 	DesktopFocusReturn,
@@ -87,6 +88,8 @@ export interface NativeDesktopSession {
 	releaseDisplayAwake(): void;
 	/** Sets when the current run ends, `remainingMs` from now; bounds how long input waits for the user to pause (macOS) or for a Wayland permission prompt. */
 	setRunDeadline(remainingMs: number): void;
+	/** Draws `cursor`'s arrow and name where this session's input lands (macOS), or with `null` removes it. */
+	setCursor(cursor: DesktopCursor | null): void;
 	listApplications(options?: ApplicationQuery): Promise<Application[]>;
 	openApplication(id: string, options?: ApplicationOpenOptions): Promise<OpenedApplication>;
 	menuItems(target: string, path?: string[]): Promise<MenuItem[]>;
@@ -1488,6 +1491,8 @@ export class ComputerWorkerCore {
 			// An Escape after the host's check still ends the run before the script starts.
 			this.#checkEscape();
 			session.setRunDeadline(deadline - performance.now());
+			// Each run carries the setting as it is now, so turning it on or off applies from the next run.
+			session.setCursor(message.session.cursor ?? null);
 			const { displayTurn } = active;
 			if (displayTurn !== undefined && displayTurn > this.#releasedTurn) session.holdDisplayUntilReleased();
 			// Under `refuse` no foreground control stands, including a grant the
