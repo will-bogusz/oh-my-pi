@@ -10,6 +10,7 @@ import { throwIfAborted } from "../tool-errors";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import { isPuppeteerTimeout } from "./launch";
 import relayTargetNotice from "../../prompts/tools/browser-relay-target.md" with { type: "text" };
+import discardedTargetNotice from "../../prompts/tools/browser-discarded-target.md" with { type: "text" };
 
 const ATTACH_TARGET_SKIP_PATTERN =
 	/request[\s_-]?handler|devtools|background[\s_-]?(?:page|host)|service[\s_-]?worker/i;
@@ -661,9 +662,7 @@ function selectRelayEntry(entries: RelayJsonEntry[], matcher: string): RelayJson
 	const live = hits.filter(e => e.discarded !== "true");
 	if (live.length > 0) return live[0]!;
 	if (hits.length > 0) {
-		throw new ToolError(
-			`No page target matched ${JSON.stringify(options.matcher)} after waiting ${RELAY_MATCH_SETTLE_MS / 1000}s for a newly opened tab. Pass a target id, URL or title substring (browser.targets() lists URLs before adopting), or omit target to open omp's own tab, with url to load the page there. Available pages:\n${summary}`,
-		);
+		throw new ToolError(prompt.render(discardedTargetNotice, { matcher: JSON.stringify(matcher) }).trim());
 	}
 	const summary = entries.map(e => `- ${e.id}  ${e.title || "(untitled)"}  ${e.url}`).join("\n");
 	throw new ToolError(
