@@ -73745,7 +73745,7 @@
    "area": "browser",
    "priority": "P1",
    "needs": [],
-   "base": "6dd7ddf5feab54da3c82b460ee390a7d09aeabaa",
+   "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
    "body": "bodies/browser-select-readback.md",
    "state": "queued",
    "pr": null,
@@ -73753,7 +73753,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-select-readback",
    "host": "MacBook-Pro",
    "added": "2026-11-11T00:14:36Z",
-   "updated": "2026-11-11T04:42:14Z",
+   "updated": "2026-11-11T04:43:05Z",
    "note": "",
    "built": [
     {
@@ -73976,7 +73976,8 @@
      "host": "goliath",
      "tree": "1f4e26890cd9c5d6b4bad808554c7d2b990cdcaa"
     }
-   ]
+   ],
+   "advanced": "2026-11-11T04:43:05Z"
   },
   {
    "id": "browser-download-missing-file",
