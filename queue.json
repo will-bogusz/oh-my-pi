@@ -73496,7 +73496,7 @@
    "branch": "will/x11-mpx-qt",
    "title": "fix(natives): stop X11 background input from crashing your running Qt 6.5+ apps",
    "area": "computer",
-   "priority": "P0",
+   "priority": "P1",
    "needs": [],
    "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
    "body": "bodies/x11-mpx-qt.md",
@@ -73506,7 +73506,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-mpx-qt",
    "host": "MacBook-Pro",
    "added": "2026-11-10T22:23:32Z",
-   "updated": "2026-11-11T03:47:59Z",
+   "updated": "2026-11-11T03:54:32Z",
    "note": "",
    "advanced": "2026-11-11T03:37:22Z",
    "built": [
