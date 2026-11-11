@@ -443,7 +443,7 @@ impl AxBackend for Win32Ax {
 			&native_role,
 			&fields
 				.each_ref()
-				.map(|field| field.as_ref().map(|value| value.as_deref()).map_err(|_| ())),
+				.map(|field| field.as_ref().map(|value| value.as_deref()).map_err(|()| ())),
 			toggle,
 		);
 		let [title, _, _, description, value, legacy_value] = fields;
@@ -596,7 +596,7 @@ impl AxBackend for Win32Ax {
 	}
 
 	fn destroyed(&mut self, handle: &AxHandle) -> bool {
-		Self::element(handle).ok().is_some_and(|element| {
+		Self::element(handle).is_ok_and(|element| {
 			let property_error = element.get_control_type().err().map(|error| error.code());
 			if property_error != Some(ax_states::ELEMENT_NOT_AVAILABLE) {
 				return false;
