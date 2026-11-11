@@ -72434,10 +72434,11 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-observe-settle",
    "host": "MacBook-Pro",
    "added": "2026-11-10T18:56:46Z",
-   "updated": "2026-11-10T22:13:06Z",
+   "updated": "2026-11-11T09:16:20Z",
    "note": "",
-   "hold": "observe-core series: opens when Brit agrees the series (Will)",
-   "advanced": "2026-11-10T22:13:06Z"
+   "hold": "Main, 2026-11-11: unheld on blind Sol+Opus; opens (proposal track) only after BrowserExperiments' blind Haiku table and quiet wall-time rerun are in the body",
+   "advanced": "2026-11-10T22:13:06Z",
+   "kind": "proposal"
   },
   {
    "id": "settle-reads",
