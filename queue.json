@@ -75196,7 +75196,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-covered-capture",
    "host": "MacBook-Pro",
    "added": "2026-11-10T20:41:59Z",
-   "updated": "2026-11-11T14:02:38Z",
+   "updated": "2026-11-11T15:50:12Z",
    "note": "",
    "built": [
     {
@@ -75319,7 +75319,17 @@
    ],
    "opened": "2026-11-10T22:05:36Z",
    "readied": "2026-11-10T22:05:58Z",
-   "advanced": "2026-11-11T14:02:38Z"
+   "advanced": "2026-11-11T14:02:38Z",
+   "design_checks": [
+    {
+     "pr": 18783,
+     "rounds": 6,
+     "at": "2026-11-11T15:50:12Z",
+     "verdict": "change",
+     "note": "named window pixmaps (shape-clipped) whenever CompositeNameWindowPixmap succeeds; root crop only on BadMatch inside a server grab; +16bpp decode",
+     "ref": "/Users/viathebrink/tmp/oh-my-pi/Design18783/18783.md"
+    }
+   ]
   },
   {
    "id": "x11-takeover-user",
