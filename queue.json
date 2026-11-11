@@ -77139,6 +77139,24 @@
    "added": "2026-11-11T09:39:32Z",
    "updated": "2026-11-11T09:39:32Z",
    "note": ""
+  },
+  {
+   "id": "win-menu-modal",
+   "branch": "will/win-menu-modal",
+   "title": "fix(natives): confirm Windows menu commands that open modal dialogs",
+   "area": "computer",
+   "priority": "P2",
+   "needs": [],
+   "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
+   "body": "bodies/win-menu-modal.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-menu-modal",
+   "host": "MacBook-Pro",
+   "added": "2026-11-11T09:48:16Z",
+   "updated": "2026-11-11T09:48:16Z",
+   "note": ""
   }
  ],
  "watch": {
