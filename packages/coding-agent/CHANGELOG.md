@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Breaking Changes
+
+- Inside `tab.run`, `tab.url()` on a Chromium tab now returns a promise, since it waits for the page after an action like the other reads: use `await tab.url()`; cmux and Tern tabs still return a string
+
 ### Added
 
 - Extensions can import the form theme, the native span helpers (`styledSpans`, `compactText`, `rowsText` and the rest of the ANSI/span conversions), the `xd://` URL helpers (`parseXdUrl` and friends) and the `cfgExtensionTranscriptPresenters` setting handle from `@oh-my-pi/pi-coding-agent` instead of internal module paths, which stop the extension from loading when a file moves ([#18849](https://github.com/can1357/oh-my-pi/pull/18849) by [@materemias](https://github.com/materemias))
@@ -11,6 +15,7 @@
 - Launch services now persist for non‑interactive sessions
 - The shell's built-in `jq` now behaves like jq 1.8.2 instead of jaq: the same output (number formatting, colors, `-S`, `--indent`, `--seq`, `--stream`), error messages and exit statuses, jq's full option set (`--version` reports `jq-1.8.2`), and its grammar and builtins (`?//`, `$__loc__`, modules, `getpath`/`setpath` creating missing paths, `|=` deletions, Oniguruma regexes, dates); it passes jq 1.8.2's own test suite
 - Browser `tab.observe()` and `tab.ariaSnapshot()` on Chromium tabs now wait, up to 3 seconds, for the requests and page updates the actions since your last look started, so a cell that clicks and then observes shows the result instead of the page before it; requests already open before the action do not delay the look
+- Browser reads on Chromium tabs (`text`, `html`, `value`, `evaluate`, `screenshot`, `url` and the other tab, frame and element reads) wait the same way after an action, so `click()` then `text()` reads the result instead of the loading state
 
 ### Fixed
 
@@ -59,10 +64,6 @@
 
 ## [18.18.7] - 2026-11-10
 
-### Breaking Changes
-
-- Inside `tab.run`, `tab.url()` on a Chromium tab now returns a promise, since it waits for the page after an action like the other reads: use `await tab.url()`; cmux and Tern tabs still return a string
-
 ### Added
 
 - `/usage` and `omp usage` show LiteLLM key and user budgets for the built-in `litellm` provider and every models.yml provider with `discovery.type: litellm`, unless listed in `disabledProviders` ([#17873](https://github.com/can1357/oh-my-pi/pull/17873) by [@maykonmichel](https://github.com/maykonmichel))
@@ -74,8 +75,6 @@
 - Sessions without a prompt UI (such as `omp -p`) no longer spend saved resets while auto-redeem is `unset`, even ones about to expire ([#18661](https://github.com/can1357/oh-my-pi/pull/18661))
 - Google Antigravity is back in `/login` and `omp login`, marked "(at your own risk)": a new login first explains that Google may suspend accounts that sign in from third-party tools and continues only after you type `yes`; saved Antigravity logins work again ([#18499](https://github.com/can1357/oh-my-pi/issues/18499))
 - On Windows, the bash tool's description tells the model it runs in an emulated bash environment, not cmd or PowerShell, so it writes bash instead of `dir`, `%VAR%` and other cmd syntax
-- Browser `tab.observe()` and `tab.ariaSnapshot()` on Chromium tabs now wait, up to 3 seconds, for the requests and page updates the actions since your last look started, so a cell that clicks and then observes shows the result instead of the page before it
-- Browser reads on Chromium tabs (`text`, `html`, `value`, `evaluate`, `screenshot`, `url` and the other tab, frame and element reads) wait the same way after an action, so `click()` then `text()` reads the result instead of the loading state
 
 ### Fixed
 
