@@ -16,7 +16,7 @@ Strings retain value-first, then label matching; Tern and cmux also retain primi
 
 An agent can pass the visible label correctly but wrap it in `{label: ...}`, a familiar selection API shape. Previously that failed even inside an otherwise correctly resolved shadow-root or frame handle.
 
-This adds the explicit forms rather than relying on a documentation warning. Validation is shared in `normalizeSelectOptions`; each backend retains its selection and event dispatch path. Post-handler selection readback is outside this change.
+This adds the explicit forms rather than relying on a documentation warning. Each backend retains its selection and event dispatch behavior. The post-handler selection readback already added by #18829 is preserved; this change only expands how callers identify an option.
 
 ## Testing
 
