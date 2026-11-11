@@ -77859,13 +77859,13 @@
    "needs": [],
    "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
    "body": "bodies/macos-press-disabled.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18898,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-press-disabled",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:58:05Z",
-   "updated": "2026-11-11T12:31:42Z",
+   "updated": "2026-11-11T13:04:22Z",
    "note": "",
    "built": [
     {
@@ -78048,7 +78048,8 @@
      "at": "2026-11-11T12:31:41Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-11T13:04:22Z"
   },
   {
    "id": "browser-main-wait-navigation",
