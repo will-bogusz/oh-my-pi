@@ -1,10 +1,10 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 06:06Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 06:07Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 5 of 8 ready events used in the hour before the last plan, 3 left (plan of 2026-11-11 05:55Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 0, conflict-held 19, stacked 16, held 17, parked 2, open PRs 40; merged 275, closed 29
+**Counts:** openable now 0, conflict-held 19, stacked 16, held 17, parked 2, open PRs 39; merged 275, closed 30
 
 ## Openable now (0)
 
@@ -25,7 +25,7 @@ none
 | browser-wait-predicate | feat(browser): add waitForFunction to tabs and frames | browser | P1 | 14h | [#18676](https://github.com/can1357/oh-my-pi/pull/18676), [#15508](https://github.com/can1357/oh-my-pi/pull/15508), [#18786](https://github.com/can1357/oh-my-pi/pull/18786), print-pref | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-wait-predicate) |
 | browser-run-node-hint | fix(browser): say where tab.run code runs when it reaches for a page global | browser | P2 | 13h | [#15508](https://github.com/can1357/oh-my-pi/pull/15508) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-run-node-hint) |
 | agent-identity | feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy | tui | P2 | 6h | [#18784](https://github.com/can1357/oh-my-pi/pull/18784) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/agent-identity) |
-| computer-run-failure-output | fix(computer): retain output and screenshots when a run fails | computer | P1 | 5h | [#18753](https://github.com/can1357/oh-my-pi/pull/18753) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-run-failure-output) |
+| computer-run-failure-output | fix(computer): retain output and screenshots when a run fails | computer | P1 | 6h | [#18753](https://github.com/can1357/oh-my-pi/pull/18753) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-run-failure-output) |
 | browser-click-frame-removed | fix(coding-agent): fail a click whose frame the page removed while the button was down | browser | P1 | 5h | [#18676](https://github.com/can1357/oh-my-pi/pull/18676) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-click-frame-removed) |
 | computer-filter-types | fix(computer): say window and element filters take text when given a RegExp | computer | P2 | 4h | [#18753](https://github.com/can1357/oh-my-pi/pull/18753) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-filter-types) |
 | covered-fill | fix(coding-agent): refuse browser keys aimed at a field a modal dialog covers | browser | P1 | 3h | [#18676](https://github.com/can1357/oh-my-pi/pull/18676) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/covered-fill) |
@@ -84,15 +84,14 @@ none
 | [#15128](https://github.com/can1357/oh-my-pi/pull/15128) | reset-restore-longest-wait | feat(coding-agent): restore the blocked account whose reset buys the most time | broker | P2 | 3h | Will, 2026-11-02: account broker redesign, on hold since 2026-11-02 | not checked or kept fresh | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-restore-longest-wait) |
 | [#15130](https://github.com/can1357/oh-my-pi/pull/15130) | reset-before-reserve | feat(coding-agent): opt in to spending a blocked account's saved reset before a reserve-only backup | broker | P2 | 3h | Will, 2026-11-02: account broker redesign, on hold since 2026-11-02 | not checked or kept fresh | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-before-reserve) |
 
-## Open PRs (40)
+## Open PRs (39)
 
 | PR | id | title | area | rank | open | plan | branch |
 |---|---|---|---|---|---|---|---|
-| [#15508](https://github.com/can1357/oh-my-pi/pull/15508) | print-hold | fix(coding-agent): keep browser calls going when a page calls window.print() | browser | P2 | 29d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/print-hold) |
 | [#16274](https://github.com/can1357/oh-my-pi/pull/16274) | read-after-bash-revalidate | fix(agent,coding-agent): re-read a file an earlier bash call changed in the same message | other | P1 | 23d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-after-bash-revalidate) |
 | [#17894](https://github.com/can1357/oh-my-pi/pull/17894) | relay-popup-lossless | fix(browser): send the user's keys back to their app while Chrome activates for a popup omp's relay tab opens on macOS | browser | P1 | 8d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-popup-lossless) |
 | [#16553](https://github.com/can1357/oh-my-pi/pull/16553) | click-place-release | fix(natives): keep a macOS drag from the user's app onto the target the user's pick | natives-macos | P1 | 21d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/click-place-release) |
-| [#16611](https://github.com/can1357/oh-my-pi/pull/16611) | read-audio-transcripts | feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio | catalog | P2 | 20d | rebase | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-audio-transcripts) |
+| [#16611](https://github.com/can1357/oh-my-pi/pull/16611) | read-audio-transcripts | feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio | catalog | P2 | 21d | rebase | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-audio-transcripts) |
 | [#18222](https://github.com/can1357/oh-my-pi/pull/18222) | computer-menu-subtree | feat(coding-agent): find nested menu commands in one read | computer | P2 | 5d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-menu-subtree) |
 | [#17897](https://github.com/can1357/oh-my-pi/pull/17897) | iphone-mirror-key-gap | perf(natives): type on iPhone Mirroring twice as fast | computer | P2 | 8d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-key-gap) |
 | [#17757](https://github.com/can1357/oh-my-pi/pull/17757) | macos-capture-geometry | fix(natives): match macOS window screenshots to the window on screen | computer | P0 | 9d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-capture-geometry) |
