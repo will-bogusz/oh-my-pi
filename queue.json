@@ -73506,7 +73506,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-mpx-qt",
    "host": "MacBook-Pro",
    "added": "2026-11-10T22:23:32Z",
-   "updated": "2026-11-11T03:47:37Z",
+   "updated": "2026-11-11T03:47:59Z",
    "note": "",
    "advanced": "2026-11-11T03:37:22Z",
    "built": [
@@ -73628,7 +73628,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-11-11T03:47:37Z"
+   "opened": "2026-11-11T03:47:37Z",
+   "readied": "2026-11-11T03:47:59Z"
   },
   {
    "id": "devin-retire-swe-1-6-fast",
