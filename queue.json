@@ -79482,7 +79482,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ax-ref-read-as",
    "host": "MacBook-Pro",
    "added": "2026-11-11T10:51:34Z",
-   "updated": "2026-11-11T12:38:47Z",
+   "updated": "2026-11-11T12:39:16Z",
    "note": "",
    "built": [
     {
@@ -79666,7 +79666,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-11-11T12:38:47Z"
+   "opened": "2026-11-11T12:38:47Z",
+   "readied": "2026-11-11T12:39:15Z"
   },
   {
    "id": "ax-row-action",
