@@ -17,6 +17,8 @@
 - Browser `tab.observe()` and `tab.ariaSnapshot()` on Chromium tabs now wait, up to 3 seconds, for the requests and page updates the actions since your last look started, so a cell that clicks and then observes shows the result instead of the page before it; requests already open before the action do not delay the look
 - Browser reads on Chromium tabs (`text`, `html`, `value`, `evaluate`, `screenshot`, `url` and the other tab, frame and element reads) wait the same way after an action, so `click()` then `text()` reads the result instead of the loading state
 - The browser tool steers agents to act and look in one Eval cell, ending it with `tab.observe()`, and to drop fixed sleeps after actions on Chromium tabs, where the next look or read now waits for the page; for later content it asks agents to read before choosing what text or element to wait for
+- The browser tool steers agents to act and look in one Eval cell, ending it with `tab.observe()`, and to drop fixed sleeps after actions on Chromium tabs, where the next look or read now waits for the page
+- Browser `tab.observe()` ids on Chromium and Tern tabs stay with their element across observations instead of restarting at 1, so an id from an earlier look no longer clicks whichever element now holds that number; a removed element's id fails as stale
 
 ### Fixed
 
@@ -76,10 +78,6 @@
 - Sessions without a prompt UI (such as `omp -p`) no longer spend saved resets while auto-redeem is `unset`, even ones about to expire ([#18661](https://github.com/can1357/oh-my-pi/pull/18661))
 - Google Antigravity is back in `/login` and `omp login`, marked "(at your own risk)": a new login first explains that Google may suspend accounts that sign in from third-party tools and continues only after you type `yes`; saved Antigravity logins work again ([#18499](https://github.com/can1357/oh-my-pi/issues/18499))
 - On Windows, the bash tool's description tells the model it runs in an emulated bash environment, not cmd or PowerShell, so it writes bash instead of `dir`, `%VAR%` and other cmd syntax
-- Browser `tab.observe()` and `tab.ariaSnapshot()` on Chromium tabs now wait, up to 3 seconds, for the requests and page updates the actions since your last look started, so a cell that clicks and then observes shows the result instead of the page before it
-- Browser reads on Chromium tabs (`text`, `html`, `value`, `evaluate`, `screenshot`, `url` and the other tab, frame and element reads) wait the same way after an action, so `click()` then `text()` reads the result instead of the loading state
-- The browser tool steers agents to act and look in one Eval cell, ending it with `tab.observe()`, and to drop fixed sleeps after actions on Chromium tabs, where the next look or read now waits for the page
-- Browser `tab.observe()` ids on Chromium and Tern tabs stay with their element across observations instead of restarting at 1, so an id from an earlier look no longer clicks whichever element now holds that number; a removed element's id fails as stale
 
 ### Fixed
 
