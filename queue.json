@@ -91265,5 +91265,11 @@
     "wake": ""
    }
   ]
+ },
+ "opening": {
+  "id": "wait-ladder-context",
+  "token": "adc97a8295be41d28e85ebf8fe6e9321",
+  "host": "MacBook-Pro",
+  "at": "2026-11-11T20:02:24Z"
  }
 }
