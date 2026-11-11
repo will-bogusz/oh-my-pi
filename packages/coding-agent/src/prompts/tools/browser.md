@@ -199,7 +199,7 @@ await tab.close()
 - NEVER alter the page with scripts to make a step look done (inserting controls, writing app state, revealing hidden elements).
 - When a step cannot be done through the page, say so.
 - When the user asks you to change the page with a script, do it.
-- On Chromium tabs, the next look or read after an action waits for the page to settle (navigation, requests the action started, DOM quiet), so fixed sleeps are not needed for that; on Tern and cmux, and for content the page renders later on its own timer, wait for it with `waitForText`/`waitForSelector`, never a fixed sleep.
+- On Chromium tabs, the next look or read after an action waits for the page to settle (navigation, requests the action started, DOM quiet), so fixed sleeps are not needed for that; on Tern and cmux, and for content the page renders later on its own timer, wait for text or an element the page has already shown you, or read first, then wait (`waitForText`/`waitForSelector`), never a fixed sleep.
 - `tab.run` has full Bun/Node and tool-bridge access; it is not sandboxed.
 - Relay and CDP actions operate on real user sessions.
 </critical>
