@@ -311,9 +311,15 @@ mod tests {
 		}
 	}
 
-	fn type_into_notepad(name: &str) -> (CoreResult<()>, String) {
+	/// Types [`text`] into a new Notepad file whose name starts with `prefix`
+	/// (a file Notepad has open already would reopen its tab, text and all).
+	fn type_into_notepad(prefix: &str) -> (CoreResult<()>, String) {
 		let mut backend = Win32Backend::new(DisplaySelector::Active).unwrap();
-		let window = notepad(&mut backend, name);
+		let stamp = std::time::SystemTime::now()
+			.duration_since(std::time::UNIX_EPOCH)
+			.unwrap()
+			.as_millis();
+		let window = notepad(&mut backend, &format!("{prefix}-{stamp}.txt"));
 		let token = CancellationSource::default().token();
 		let result = backend.type_text(
 			&Target::Window(window.id.clone()),
@@ -328,7 +334,7 @@ mod tests {
 	#[ignore = "opens Windows 11 Notepad and types into it; run with --ignored in a signed-in \
 	            desktop session"]
 	fn notepad_gets_typed_text_whole() {
-		let (result, got) = type_into_notepad("omp-type-whole.txt");
+		let (result, got) = type_into_notepad("omp-type-whole");
 		assert_eq!(got, text(), "type returned {result:?}");
 	}
 
@@ -336,7 +342,7 @@ mod tests {
 	#[ignore = "opens Windows 11 Notepad and types into it; run with --ignored in a signed-in \
 	            desktop session"]
 	fn typing_never_reports_text_notepad_lacks() {
-		let (result, got) = type_into_notepad("omp-type-honest.txt");
+		let (result, got) = type_into_notepad("omp-type-honest");
 		assert!(
 			result.is_err() || got == text(),
 			"type succeeded, but Notepad holds {} of {} characters: {got:?}",
