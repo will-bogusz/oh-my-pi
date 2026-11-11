@@ -77764,13 +77764,13 @@
    "needs": [],
    "base": "2fe56b70e07db0f045b510d201c2157b74276c8a",
    "body": "bodies/win-screen-locked.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18947,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-screen-locked",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:31:29Z",
-   "updated": "2026-11-11T21:54:54Z",
+   "updated": "2026-11-11T22:00:08Z",
    "note": "",
    "advanced": "2026-11-11T21:13:47Z",
    "built": [
@@ -78143,7 +78143,8 @@
      "at": "2026-11-11T21:54:47Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-11T22:00:08Z"
   },
   {
    "id": "win-setvalue-readback",
