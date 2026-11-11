@@ -1,6 +1,6 @@
 use std::hash::{DefaultHasher, Hash, Hasher};
 
-use super::super::{ax::AxProps, error::DesktopError};
+use super::super::{ax::AxProps, error::{DesktopError, ErrorCode}};
 
 // UIA_E_ELEMENTNOTAVAILABLE also describes unrealized virtualized items.
 pub(super) const ELEMENT_NOT_AVAILABLE: i32 = -2_147_220_991;
@@ -14,6 +14,14 @@ pub(super) fn uia_error(code: i32, message: String) -> DesktopError {
 		DesktopError::stale_ref(message)
 	} else {
 		DesktopError::ax_failed(message)
+	}
+}
+
+pub(super) fn walk_error(error: DesktopError) -> DesktopError {
+	if error.code == ErrorCode::StaleRef {
+		DesktopError::ax_failed(error.message)
+	} else {
+		error
 	}
 }
 
@@ -151,5 +159,16 @@ mod tests {
 		assert_ne!(identity("CheckBox", &changed, Ok(Some(0))), Some(original));
 		changed[1] = Err(());
 		assert_eq!(identity("CheckBox", &changed, Ok(Some(0))), None);
+	}
+
+	#[test]
+	fn unavailable_walk_nodes_are_not_reported_as_vanished() {
+		let error = walk_error(DesktopError::stale_ref("not available"));
+		assert_eq!(error.code, ErrorCode::AxFailed);
+		assert_eq!(error.message, "not available");
+		assert_eq!(
+			walk_error(DesktopError::window_not_found("closed")).code,
+			ErrorCode::WindowNotFound,
+		);
 	}
 }

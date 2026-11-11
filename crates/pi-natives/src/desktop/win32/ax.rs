@@ -500,7 +500,7 @@ impl AxBackend for Win32Ax {
 	}
 
 	fn walk_node(&mut self, handle: &AxHandle, _bounds: WalkBounds) -> CoreResult<(AxProps, Vec<AxHandle>)> {
-		let (props, children) = self.read_node(handle)?;
+		let (props, children) = self.read_node(handle).map_err(ax_states::walk_error)?;
 		Ok((props, children.into_iter().map(uia_handle).collect()))
 	}
 
