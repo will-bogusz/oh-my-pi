@@ -3781,15 +3781,15 @@
    "needs": [],
    "base": "b9b3cc4d69962e492197178155dd95216cd9c21b",
    "body": "bodies/r2/native-window-report.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18925,
    "closed_prs": [
     15575
    ],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/r2-native-window-report",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-11-11T15:50:49Z",
+   "updated": "2026-11-11T16:51:02Z",
    "note": "r2 restack 2026-10-18 (RelayTriage, TRIAGE.md in ~/tmp/oh-my-pi/relay-r2): sits on main + #15508 head 5ccf9eac6b (adjacent print-hold lines) 2026-11-02 (QueueRestructure): after Brit's merge round, a rebase must keep main's 1c45a9113ce (relay timeout typed by class; detach-report wait only in user-driven browsers), a47a579ff17 (acquireBrowser startRelay:false for a kept tab's close), 49a19f8ec19 (PI_BROWSER_RELAY_KEEP_FRONT=0 opt-out of the front-app hold: any new SkyLight/front-app call must honor it), 89833d37f43 (cancelled press releases on a sentinel off-page point; tab-worker click guard).",
    "advanced": "2026-11-11T14:01:02Z",
    "built": [
@@ -4182,7 +4182,8 @@
      "host": "MacBook-Pro",
      "tree": "6388dc54ea63d024bf535e8aba05ffe088172cd6"
     }
-   ]
+   ],
+   "opened": "2026-11-11T16:51:02Z"
   },
   {
    "id": "test-ownership-lock",
