@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Windows computer-tool guidance now describes control states and possible stale-reference replacement hints instead of calling them macOS-only.
+
 ## [18.18.8] - 2026-11-11
 
 ### Changed

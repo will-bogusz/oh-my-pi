@@ -104,7 +104,7 @@ mod tests {
 			focused: false,
 			bounds: None,
 			actions: Vec::new(),
-			child_count: 99,
+			child_count: 0,
 			identity: Some(7),
 			partial: false,
 			selected: false,
