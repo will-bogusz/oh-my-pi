@@ -64423,7 +64423,7 @@
    "branch": "will/atspi-unanswered-app",
    "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool",
    "area": "computer",
-   "priority": "P0",
+   "priority": "P1",
    "needs": [
     "atspi-action-names"
    ],
@@ -64435,7 +64435,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-unanswered-app",
    "host": "MacBook-Pro",
    "added": "2026-11-03T08:39:53Z",
-   "updated": "2026-11-11T16:52:30Z",
+   "updated": "2026-11-11T17:07:00Z",
    "note": "",
    "advanced": "2026-11-11T16:52:30Z",
    "built": [
@@ -78185,7 +78185,7 @@
    "branch": "will/win-menu-modal",
    "title": "fix(natives): confirm Windows menu commands that open modal dialogs",
    "area": "computer",
-   "priority": "P2",
+   "priority": "P1",
    "needs": [],
    "base": "73d7521269a1212fc2b2790a2e8c08424496c953",
    "body": "bodies/win-menu-modal.md",
@@ -78195,7 +78195,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-menu-modal",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:48:16Z",
-   "updated": "2026-11-11T16:59:03Z",
+   "updated": "2026-11-11T17:07:00Z",
    "note": "",
    "built": [
     {
@@ -79290,7 +79290,7 @@
    "branch": "will/macos-menu-miss-items",
    "title": "fix(natives): name the menu items on offer when a menu bar path misses",
    "area": "natives",
-   "priority": "P2",
+   "priority": "P1",
    "needs": [],
    "base": "73d7521269a1212fc2b2790a2e8c08424496c953",
    "body": "bodies/macos-menu-miss-items.md",
@@ -79300,7 +79300,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-menu-miss-items",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:58:16Z",
-   "updated": "2026-11-11T16:57:44Z",
+   "updated": "2026-11-11T17:07:00Z",
    "note": "",
    "built": [
     {
@@ -80797,7 +80797,7 @@
    "branch": "will/win-takeover-focus",
    "title": "fix(natives): hand the foreground back after Windows element takeover input",
    "area": "computer",
-   "priority": "P1",
+   "priority": "P0",
    "needs": [],
    "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
    "body": "bodies/win-takeover-focus.md",
@@ -80807,7 +80807,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-takeover-focus",
    "host": "MacBook-Pro",
    "added": "2026-11-11T11:46:35Z",
-   "updated": "2026-11-11T16:23:02Z",
+   "updated": "2026-11-11T17:07:00Z",
    "note": "",
    "built": [
     {
@@ -81028,7 +81028,7 @@
    "branch": "will/browser-wait-selector-state",
    "title": "fix(browser): honor selector wait states and reject unknown options",
    "area": "browser",
-   "priority": "P2",
+   "priority": "P1",
    "needs": [],
    "base": "73d7521269a1212fc2b2790a2e8c08424496c953",
    "body": "bodies/browser-wait-selector-state.md",
@@ -81038,7 +81038,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-wait-selector-state",
    "host": "MacBook-Pro",
    "added": "2026-11-11T12:16:01Z",
-   "updated": "2026-11-11T16:58:01Z",
+   "updated": "2026-11-11T17:07:00Z",
    "note": "",
    "built": [
     {
@@ -81281,7 +81281,7 @@
    "branch": "will/atspi-press-actions",
    "title": "fix(natives): press Chromium menu items, options and tabs on Linux",
    "area": "computer",
-   "priority": "P2",
+   "priority": "P0",
    "needs": [],
    "base": "73d7521269a1212fc2b2790a2e8c08424496c953",
    "body": "bodies/atspi-press-actions.md",
@@ -81291,7 +81291,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-press-actions",
    "host": "MacBook-Pro",
    "added": "2026-11-11T13:13:42Z",
-   "updated": "2026-11-11T17:00:08Z",
+   "updated": "2026-11-11T17:07:00Z",
    "note": "",
    "built": [
     {
