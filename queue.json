@@ -86405,8 +86405,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-11T14:35:38.138804Z",
-  "host": "goliath",
+  "at": "2026-11-11T14:39:31.907691Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -86502,27 +86502,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-02T03:27:31Z"
-   },
-   {
-    "id": "relay-popup-lossless",
-    "label": "#17894",
-    "number": 17894,
-    "state": "open",
-    "area": "browser",
-    "priority": "P1",
-    "title": "fix(browser): send the user's keys back to their app while Chrome activates for a popup omp's relay tab opens on macOS",
-    "action": "requeue",
-    "reasons": [
-     "conflicts with #16553 in crates/pi-natives/src/desktop/macos/skylight.rs"
-    ],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [
-     "#16553"
-    ],
-    "needs": [],
-    "created": "2026-11-03T02:14:16Z"
    },
    {
     "id": "upload-stall-error",
