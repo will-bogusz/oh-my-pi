@@ -82620,6 +82620,11 @@
     "sha": "90a38e2f1b50ff766d3cc688a1c5b34768908f1c",
     "at": "2026-11-11T09:59:03Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "90a38e2f1b50ff766d3cc688a1c5b34768908f1c",
+    "at": "2026-11-11T09:59:31Z",
+    "host": "goliath"
    }
   }
  },
