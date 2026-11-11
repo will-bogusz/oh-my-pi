@@ -2582,7 +2582,7 @@ mod tests {
 		ptr::NonNull,
 	};
 
-	use objc2_application_services::{AXError, AXUIElement, AXValue, AXValueType};
+	use objc2_application_services::{AXError, AXValue, AXValueType};
 	use objc2_core_foundation::{
 		CFArray, CFNumber, CFRetained, CFString, CFType, CFURL, Type, kCFNull,
 	};
