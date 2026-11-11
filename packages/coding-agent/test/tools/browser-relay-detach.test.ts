@@ -818,7 +818,8 @@ describe("relay tabs Chrome detaches omp from", () => {
 				});
 				expect(await printPreviewHolds(page, false)).toBe(false);
 				await page.mainFrame().client.send("Runtime.evaluate", {
-					expression: "Promise.resolve = globalThis.originalPromiseResolve; delete globalThis.originalPromiseResolve",
+					expression:
+						"Promise.resolve = globalThis.originalPromiseResolve; delete globalThis.originalPromiseResolve",
 				});
 				const promiseCheck = (params: unknown) => isRecord(params) && params.expression === "(async () => {})()";
 				const firstCheck = ext.nextSend("Runtime.evaluate", promiseCheck);
