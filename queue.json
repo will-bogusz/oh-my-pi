@@ -78269,6 +78269,24 @@
    "added": "2026-11-11T11:44:46Z",
    "updated": "2026-11-11T11:44:46Z",
    "note": ""
+  },
+  {
+   "id": "win-takeover-focus",
+   "branch": "will/win-takeover-focus",
+   "title": "fix(natives): hand the foreground back after Windows element takeover input",
+   "area": "computer",
+   "priority": "P1",
+   "needs": [],
+   "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
+   "body": "bodies/win-takeover-focus.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-takeover-focus",
+   "host": "MacBook-Pro",
+   "added": "2026-11-11T11:46:35Z",
+   "updated": "2026-11-11T11:46:35Z",
+   "note": ""
   }
  ],
  "watch": {
