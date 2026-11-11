@@ -70825,7 +70825,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "7b42b1be6069b791c54e1c4c93d2070978d9e6bf",
+   "base": "50da2d357039404a81d7c64622740ce13e4c54b4",
    "body": "bodies/computer-strict-options.md",
    "state": "open",
    "pr": 18753,
@@ -70833,7 +70833,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-strict-options",
    "host": "MacBook-Pro",
    "added": "2026-11-10T05:41:26Z",
-   "updated": "2026-11-11T11:44:10Z",
+   "updated": "2026-11-11T18:17:59Z",
    "note": "",
    "built": [
     {
@@ -71049,7 +71049,7 @@
    ],
    "opened": "2026-11-10T17:43:16Z",
    "readied": "2026-11-10T17:43:44Z",
-   "advanced": "2026-11-11T11:44:10Z",
+   "advanced": "2026-11-11T18:17:59Z",
    "design_checks": [
     {
      "pr": 18753,
