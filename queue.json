@@ -75406,7 +75406,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "17e8c17e5d3e60acb2239bf504a43865b04b6a31",
+   "base": "cc6189191a6e257fbac13466180ddb9531193b1b",
    "body": "bodies/x11-takeover-user.md",
    "state": "open",
    "pr": 18784,
@@ -75414,7 +75414,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-takeover-user",
    "host": "MacBook-Pro",
    "added": "2026-11-10T21:06:23Z",
-   "updated": "2026-11-11T16:52:38Z",
+   "updated": "2026-11-11T20:47:19Z",
    "note": "2026-11-11T10:39:00Z: --user-harm on UserIntervened the hand-back returned early when the EWMH active-window property lagged core focus, leaving the user's typing focused in the target (6 Codex finding rounds)",
    "built": [
     {
@@ -75537,7 +75537,7 @@
    ],
    "opened": "2026-11-10T22:08:26Z",
    "readied": "2026-11-10T22:08:49Z",
-   "advanced": "2026-11-11T16:52:38Z",
+   "advanced": "2026-11-11T20:47:19Z",
    "design_checks": [
     {
      "pr": 18784,
