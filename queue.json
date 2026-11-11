@@ -73825,6 +73825,24 @@
    "added": "2026-11-11T02:55:11Z",
    "updated": "2026-11-11T02:55:11Z",
    "note": ""
+  },
+  {
+   "id": "x11-click-stale-popup",
+   "branch": "will/x11-click-stale-popup",
+   "title": "fix(natives): refuse X11 presses outside an open popup of the app",
+   "area": "computer",
+   "priority": "P1",
+   "needs": [],
+   "base": "55251e34c26eeb5a31a5c86cedf243acd7e2cb23",
+   "body": "bodies/x11-click-stale-popup.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-click-stale-popup",
+   "host": "MacBook-Pro",
+   "added": "2026-11-11T03:06:32Z",
+   "updated": "2026-11-11T03:06:32Z",
+   "note": ""
   }
  ],
  "watch": {
