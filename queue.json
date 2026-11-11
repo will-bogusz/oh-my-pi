@@ -77000,6 +77000,24 @@
    "added": "2026-11-11T09:13:32Z",
    "updated": "2026-11-11T09:13:32Z",
    "note": ""
+  },
+  {
+   "id": "browser-select-objects",
+   "branch": "will/browser-select-objects",
+   "title": "feat(browser): accept explicit dropdown option selectors",
+   "area": "browser",
+   "priority": "P2",
+   "needs": [],
+   "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
+   "body": "bodies/browser-select-objects.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-select-objects",
+   "host": "MacBook-Pro",
+   "added": "2026-11-11T09:27:26Z",
+   "updated": "2026-11-11T09:27:26Z",
+   "note": ""
   }
  ],
  "watch": {
