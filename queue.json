@@ -78982,7 +78982,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "f2ee6ba9b3e00b379c7c12b9d99ef6369fd08f3f",
+   "base": "b9b3cc4d69962e492197178155dd95216cd9c21b",
    "body": "bodies/xproc-intervention.md",
    "state": "open",
    "pr": 18896,
@@ -78990,7 +78990,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/xproc-intervention",
    "host": "MacBook-Pro",
    "added": "2026-11-11T10:07:38Z",
-   "updated": "2026-11-11T13:15:42Z",
+   "updated": "2026-11-11T14:03:21Z",
    "note": "",
    "kind": "fix",
    "built": [
@@ -79186,7 +79186,7 @@
    ],
    "opened": "2026-11-11T12:51:12Z",
    "readied": "2026-11-11T12:51:38Z",
-   "advanced": "2026-11-11T13:15:42Z"
+   "advanced": "2026-11-11T14:03:21Z"
   },
   {
    "id": "wait-ladder-context",
