@@ -1,10 +1,10 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 13:12Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 13:13Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-11-11 11:54Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 5, conflict-held 21, stacked 17, held 12, parked 2, open PRs 48, queued since the last plan 10; merged 275, closed 30
+**Counts:** openable now 5, conflict-held 21, stacked 17, held 12, parked 2, open PRs 48, queued since the last plan 11; merged 275, closed 30
 
 ## Openable now (5)
 
@@ -13,7 +13,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | win-menu-modal | fix(natives): confirm Windows menu commands that open modal dialogs | computer | P2 | 3h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-menu-modal) |
 | macos-menu-miss-items | fix(natives): name the menu items on offer when a menu bar path misses | natives | P2 | 3h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-menu-miss-items) |
 | macos-ax-cancel-before-send | fix(natives): send no macOS AX action once its run is cancelled | natives | P2 | 3h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-ax-cancel-before-send) |
-| wait-ladder-context | feat(wait): reduce empty checks in large conversations | coding-agent | P2 | 2h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wait-ladder-context) |
+| wait-ladder-context | feat(wait): reduce empty checks in large conversations | coding-agent | P2 | 3h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wait-ladder-context) |
 | win-takeover-focus | fix(natives): hand the foreground back after Windows element takeover input | computer | P1 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-takeover-focus) |
 
 ## Conflict-held (21)
@@ -141,7 +141,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | [#18896](https://github.com/can1357/oh-my-pi/pull/18896) | xproc-intervention | fix(natives): stop macOS input refusals between omp processes | computer | P1 | 3h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/xproc-intervention) |
 | [#18892](https://github.com/can1357/oh-my-pi/pull/18892) | ax-ref-read-as | fix(natives): refuse macOS element actions once the ref's element reads as another control | computer | P0 | 2h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-ref-read-as) |
 
-## Queued since the last plan (10)
+## Queued since the last plan (11)
 
 | id | title | area | priority | age | branch |
 |---|---|---|---|---|---|
@@ -150,8 +150,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | act-look-prompt | docs(browser): teach acting and looking in one Eval cell without sleeps | browser | P2 | 18h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-act-look-prompt) |
 | observe-stable-ids | feat(browser): keep observe() ids stable across observations | browser | P2 | 18h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-observe-stable-ids) |
 | win-minimised-windows | fix(natives,coding-agent): show a minimized Windows app's window from apps.open instead of launching it again | computer | P2 | 4h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-minimised-windows) |
-| win-target-layout | fix(natives): map Windows keys on the receiving keyboard layout | computer | P1 | 3h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-target-layout) |
+| win-target-layout | fix(natives): map Windows keys on the receiving keyboard layout | computer | P1 | 4h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-target-layout) |
 | win-setvalue-readback | fix(natives): verify Windows value writes and notify combo selections | computer | P1 | 3h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-setvalue-readback) |
 | win-ax-states | fix(natives): expose Windows control state and stale-reference matches | computer | P2 | 2h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-ax-states) |
 | browser-wait-selector-state | fix(browser): honor selector wait states and reject unknown options | browser | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-wait-selector-state) |
 | win-focus-report | fix(natives): report where focus went after a Windows takeover | computer | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-focus-report) |
+| atspi-press-actions | fix(natives): press Chromium menu items, options and tabs on Linux | computer | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-press-actions) |
