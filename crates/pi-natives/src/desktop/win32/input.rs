@@ -1635,13 +1635,12 @@ mod foreground {
 		let target = unsafe { GetWindowThreadProcessId(root, null_mut()) };
 		// SAFETY: no preconditions.
 		let own = unsafe { GetCurrentThreadId() };
+		if target == 0 || target == own || !in_front() {
+			return None;
+		}
 		// SAFETY: scalar thread ids; failure is reported and leaves nothing to
 		// undo.
-		if target == 0
-			|| target == own
-			|| !in_front()
-			|| unsafe { AttachThreadInput(own, target, 1) } == 0
-		{
+		if unsafe { AttachThreadInput(own, target, 1) } == 0 {
 			return None;
 		}
 		// SAFETY: no preconditions.
