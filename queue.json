@@ -63939,7 +63939,7 @@
    "branch": "will/atspi-unanswered-app",
    "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool",
    "area": "computer",
-   "priority": "P1",
+   "priority": "P0",
    "needs": [
     "atspi-action-names"
    ],
@@ -63951,10 +63951,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-unanswered-app",
    "host": "MacBook-Pro",
    "added": "2026-11-03T08:39:53Z",
-   "updated": "2026-11-11T00:22:32Z",
+   "updated": "2026-11-11T00:23:13Z",
    "note": "",
-   "advanced": "2026-11-10T23:41:42Z",
-   "hold": "Main, 2026-11-11: waits for AtspiHarm's description paragraph and Main's P0 call"
+   "advanced": "2026-11-10T23:41:42Z"
   },
   {
    "id": "atspi-action-names",
