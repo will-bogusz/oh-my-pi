@@ -73013,7 +73013,7 @@
    "needs": [
     "settle-reads"
    ],
-   "base": "d717622cb903d78ac272b562f7c2f29fb94180d5",
+   "base": "0c7484cb249ee4ab7d02120596cc5322033b1d05",
    "body": "bodies/act-look-prompt.md",
    "state": "queued",
    "pr": null,
@@ -73021,7 +73021,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-act-look-prompt",
    "host": "MacBook-Pro",
    "added": "2026-11-10T18:57:06Z",
-   "updated": "2026-11-11T12:07:36Z",
+   "updated": "2026-11-11T12:11:02Z",
    "note": "",
    "hold": "Main, 2026-11-11: unheld on blind Sol+Opus; opens (proposal track) only after BrowserExperiments' blind Haiku table and quiet wall-time rerun are in the body",
    "kind": "proposal",
