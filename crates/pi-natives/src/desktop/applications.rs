@@ -55,8 +55,9 @@ pub struct ApplicationOpenOptions {
 }
 
 /// An opened application: its [`Application`] fields and the window it
-/// shows. On macOS `window` is its frontmost window once one is on screen;
-/// other platforms report none.
+/// shows. On macOS `window` is its frontmost window once one is on screen; on
+/// Windows it is the minimized window shown again instead of a second launch;
+/// otherwise none.
 #[napi(object)]
 #[derive(Clone, Debug)]
 pub struct OpenedApplication {
@@ -265,9 +266,9 @@ pub(crate) fn open(input: &str, options: ApplicationOpenOptions) -> CoreResult<O
 		}
 		let app = application(&apps, input)?;
 		let activate = options.activate.unwrap_or(false);
-		#[cfg(target_os = "macos")]
+		#[cfg(any(target_os = "macos", target_os = "windows"))]
 		return platform::open(app, activate);
-		#[cfg(not(target_os = "macos"))]
+		#[cfg(target_os = "linux")]
 		return platform::open(app, activate)
 			.map(|application| OpenedApplication::new(application, None));
 	}

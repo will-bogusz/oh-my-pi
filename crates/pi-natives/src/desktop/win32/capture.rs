@@ -1,7 +1,9 @@
 use std::{collections::HashSet, ffi::c_void};
 
 use image::{Rgba, RgbaImage};
-use windows_sys::Win32::UI::WindowsAndMessaging::GetWindowThreadProcessId;
+use windows_sys::Win32::UI::WindowsAndMessaging::{
+	GetWindowThreadProcessId, IsIconic, IsWindow, SHOW_WINDOW_CMD, ShowWindow,
+};
 use xcap::{Monitor, Window};
 
 use super::{
@@ -11,6 +13,7 @@ use super::{
 		types::{DesktopDisplay, DesktopWindow, DisplaySelector, Target},
 	},
 	geometry::PhysicalLayout,
+	reopen::{Reopen, Shown, reopen},
 };
 
 const MAX_LISTED_WINDOWS: usize = 48;
@@ -142,35 +145,95 @@ fn window_snapshots(focused_only: bool) -> CoreResult<Vec<DesktopWindow>> {
 		if !seen.insert(id) || window.is_minimized().unwrap_or(true) {
 			continue;
 		}
-		let (Ok(physical_x), Ok(physical_y), Ok(physical_width), Ok(physical_height)) =
-			(window.x(), window.y(), window.width(), window.height())
+		let Some(record) =
+			describe(&window, id, || focused_only || window.is_focused().unwrap_or(false))
 		else {
 			continue;
 		};
-		if physical_width < MIN_WINDOW_EDGE || physical_height < MIN_WINDOW_EDGE {
-			continue;
-		}
-		let title = window.title().unwrap_or_default();
-		let app = window.app_name().unwrap_or_default();
-		if title.is_empty() && app.is_empty() {
-			continue;
-		}
-		result.push(DesktopWindow {
-			id: id.to_string(),
-			title,
-			app,
-			pid: process_id(id),
-			x: physical_x,
-			y: physical_y,
-			width: physical_width,
-			height: physical_height,
-			focused: focused_only || window.is_focused().unwrap_or(false),
-		});
+		result.push(record);
 		if focused_only {
 			break;
 		}
 	}
 	Ok(result)
+}
+
+/// `window`'s record as `windows()` lists it, minimized or not; `None` when
+/// its geometry is unreadable, it is smaller than [`MIN_WINDOW_EDGE`], or it
+/// has neither title nor application name.
+fn describe(window: &Window, id: u32, focused: impl FnOnce() -> bool) -> Option<DesktopWindow> {
+	let (Ok(physical_x), Ok(physical_y), Ok(physical_width), Ok(physical_height)) =
+		(window.x(), window.y(), window.width(), window.height())
+	else {
+		return None;
+	};
+	if physical_width < MIN_WINDOW_EDGE || physical_height < MIN_WINDOW_EDGE {
+		return None;
+	}
+	let title = window.title().unwrap_or_default();
+	let app = window.app_name().unwrap_or_default();
+	if title.is_empty() && app.is_empty() {
+		return None;
+	}
+	Some(DesktopWindow {
+		id: id.to_string(),
+		title,
+		app,
+		pid: process_id(id),
+		x: physical_x,
+		y: physical_y,
+		width: physical_width,
+		height: physical_height,
+		focused: focused(),
+	})
+}
+
+/// Shows again, with `show`, the frontmost minimized window of the processes
+/// `owns` accepts when `windows()` lists none of their windows: `Restore`
+/// with the window as `windows()` now lists it, if it does. `Launch` when one
+/// of their windows is listed, none is minimized, or the window closed before
+/// it was shown.
+pub(in crate::desktop) fn restore_minimized(
+	mut owns: impl FnMut(u32) -> bool,
+	show: SHOW_WINDOW_CMD,
+) -> CoreResult<Reopen<Option<DesktopWindow>>> {
+	let native = Window::all().map_err(|error| metadata_error("window enumeration", error))?;
+	let mut seen = HashSet::new();
+	let windows = native.into_iter().filter_map(|window| {
+		let id = window.id().ok()?;
+		if !seen.insert(id) || !process_id(id).is_some_and(&mut owns) {
+			return None;
+		}
+		let shown = if describe(&window, id, || false).is_none() {
+			Shown::Unlisted
+		} else {
+			match window.is_minimized() {
+				Ok(false) => Shown::Listed,
+				Ok(true) => Shown::Minimized,
+				Err(_) => Shown::Unlisted,
+			}
+		};
+		Some(((id, window), shown))
+	});
+	let Reopen::Restore((id, window)) = reopen(windows) else {
+		return Ok(Reopen::Launch);
+	};
+	let hwnd = hwnd_from_id(id);
+	// SAFETY: Win32 validates the handle, which may have closed since the
+	// enumeration; the calls retain no borrowed state.
+	unsafe {
+		ShowWindow(hwnd, show);
+		if IsWindow(hwnd) == 0 {
+			return Ok(Reopen::Launch);
+		}
+		if IsIconic(hwnd) != 0 {
+			return Err(DesktopError::input_failed(format!(
+				"window {id} stayed minimized when it was restored; the application was not launched \
+				 again"
+			)));
+		}
+	}
+	Ok(Reopen::Restore(describe(&window, id, || window.is_focused().unwrap_or(false))))
 }
 
 fn capture_desktop(selector: &DisplaySelector) -> CoreResult<(RgbaImage, FrameGeometry)> {

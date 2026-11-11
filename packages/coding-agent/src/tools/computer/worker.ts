@@ -1931,7 +1931,9 @@ export class ComputerWorkerCore {
 						: "";
 				if (matches.length === 0) {
 					const app = typeof selector === "object" ? selector?.app : undefined;
-					const route = session.capabilities.backend === "quartz" ? "shows-window" : "launches";
+					const backend = session.capabilities.backend;
+					const route =
+						backend === "quartz" ? "shows-window" : backend === "win32" ? "restores-minimized" : "launches";
 					const lead = unfiltered
 						? `${unfiltered}, and none is open`
 						: `no window matches ${JSON.stringify(selector)}`;

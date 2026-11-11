@@ -9,8 +9,13 @@ mod geometry;
 mod input;
 #[cfg(target_os = "windows")]
 mod menus;
+#[cfg(any(target_os = "windows", test))]
+mod reopen;
 #[cfg(target_os = "windows")]
 mod window;
+
+#[cfg(target_os = "windows")]
+pub(super) use self::{capture::restore_minimized, reopen::Reopen};
 
 #[cfg(target_os = "windows")]
 use enigo::Enigo;

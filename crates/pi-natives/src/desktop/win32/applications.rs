@@ -59,7 +59,7 @@ use windows_sys::{
 				SEE_MASK_NOASYNC, SEE_MASK_NOCLOSEPROCESS, SHELLEXECUTEINFOW, SHGetKnownFolderPath,
 				ShellExecuteExW,
 			},
-			WindowsAndMessaging::{SW_SHOWNOACTIVATE, SW_SHOWNORMAL},
+			WindowsAndMessaging::{SW_RESTORE, SW_SHOWNOACTIVATE, SW_SHOWNORMAL},
 		},
 	},
 	core::GUID,
@@ -73,8 +73,11 @@ use winreg::{
 };
 
 use super::{
-	super::error::{CoreResult, DesktopError},
-	Application,
+	super::{
+		error::{CoreResult, DesktopError},
+		win32::{Reopen, restore_minimized},
+	},
+	Application, OpenedApplication,
 };
 
 const APP_PATHS: &str = r"Software\Microsoft\Windows\CurrentVersion\App Paths";
@@ -606,6 +609,54 @@ fn open_packaged(mut app: Application, activate: bool) -> CoreResult<Application
 	Ok(app)
 }
 
+/// Reads the keys [`running_processes`] records a process under: `aumid:<id>`
+/// for a packaged one and its image's path key.
+struct ProcessKeys {
+	image:    Vec<u16>,
+	identity: [u16; APPLICATION_USER_MODEL_ID_MAX_LENGTH as usize + 1],
+}
+
+impl ProcessKeys {
+	fn new() -> Self {
+		Self {
+			image:    vec![0u16; 32768],
+			identity: [0u16; APPLICATION_USER_MODEL_ID_MAX_LENGTH as usize + 1],
+		}
+	}
+
+	/// Calls `key` with each key of process `pid`; with none for a protected
+	/// process or one that exited.
+	fn read(&mut self, pid: u32, mut key: impl FnMut(String)) {
+		// SAFETY: querying a PID does not borrow process memory.
+		let process = unsafe { OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, 0, pid) };
+		if process.is_null() {
+			return;
+		}
+		let process = OwnedHandle(process);
+		let mut identity_length = self.identity.len() as u32;
+		// SAFETY: this process has query-limited rights and the output is
+		// writable. Unpackaged/protected processes simply have no AUMID.
+		if unsafe {
+			GetApplicationUserModelId(process.0, &mut identity_length, self.identity.as_mut_ptr())
+		} == 0
+			&& identity_length > 1
+			&& identity_length as usize <= self.identity.len()
+			&& let Ok(id) = String::from_utf16(&self.identity[..identity_length as usize - 1])
+		{
+			key(format!("aumid:{id}"));
+		}
+		let mut length = self.image.len() as u32;
+		// SAFETY: the process handle and writable output buffer are valid.
+		if unsafe { QueryFullProcessImageNameW(process.0, 0, self.image.as_mut_ptr(), &mut length) }
+			!= 0
+			&& let Ok(path) = String::from_utf16(&self.image[..length as usize])
+			&& let Ok(path) = path_string(Path::new(&path))
+		{
+			key(path_key(&path));
+		}
+	}
+}
+
 /// Running state is best-effort evidence, never a prerequisite for discovery.
 /// Protected processes and processes that exit during enumeration are skipped.
 fn running_processes() -> HashMap<String, u32> {
@@ -618,44 +669,17 @@ fn running_processes() -> HashMap<String, u32> {
 	let snapshot = OwnedHandle(snapshot);
 	let mut entry =
 		PROCESSENTRY32W { dwSize: size_of::<PROCESSENTRY32W>() as u32, ..Default::default() };
-	let mut image = vec![0u16; 32768];
-	let mut identity = [0u16; APPLICATION_USER_MODEL_ID_MAX_LENGTH as usize + 1];
+	let mut keys = ProcessKeys::new();
 	// SAFETY: entry has the required size and the snapshot remains owned here.
 	let mut more = unsafe { Process32FirstW(snapshot.0, &mut entry) } != 0;
 	while more {
-		// SAFETY: querying a PID does not borrow process memory.
-		let process =
-			unsafe { OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, 0, entry.th32ProcessID) };
-		if !process.is_null() {
-			let process = OwnedHandle(process);
-			let mut identity_length = identity.len() as u32;
-			// SAFETY: this process has query-limited rights and the output is
-			// writable. Unpackaged/protected processes simply have no AUMID.
-			if unsafe {
-				GetApplicationUserModelId(process.0, &mut identity_length, identity.as_mut_ptr())
-			} == 0
-				&& identity_length > 1
-				&& identity_length as usize <= identity.len()
-				&& let Ok(id) = String::from_utf16(&identity[..identity_length as usize - 1])
-			{
-				running
-					.entry(format!("aumid:{id}"))
-					.and_modify(|pid: &mut u32| *pid = (*pid).min(entry.th32ProcessID))
-					.or_insert(entry.th32ProcessID);
-			}
-			let mut length = image.len() as u32;
-			// SAFETY: the process handle and writable output buffer are valid.
-			if unsafe { QueryFullProcessImageNameW(process.0, 0, image.as_mut_ptr(), &mut length) }
-				!= 0
-				&& let Ok(path) = String::from_utf16(&image[..length as usize])
-				&& let Ok(path) = path_string(Path::new(&path))
-			{
-				running
-					.entry(path_key(&path))
-					.and_modify(|pid: &mut u32| *pid = (*pid).min(entry.th32ProcessID))
-					.or_insert(entry.th32ProcessID);
-			}
-		}
+		let pid = entry.th32ProcessID;
+		keys.read(pid, |key| {
+			running
+				.entry(key)
+				.and_modify(|lowest: &mut u32| *lowest = (*lowest).min(pid))
+				.or_insert(pid);
+		});
 		// SAFETY: same initialized entry and live snapshot as above.
 		more = unsafe { Process32NextW(snapshot.0, &mut entry) } != 0;
 	}
@@ -701,10 +725,36 @@ pub(super) fn from_path(path: &Path) -> CoreResult<Application> {
 	Ok(app)
 }
 
-pub(super) fn open(mut app: Application, activate: bool) -> CoreResult<Application> {
-	if app.path.starts_with(APPS_FOLDER_PREFIX) {
-		return open_packaged(app, activate);
+/// Opens `app`. A running application that `windows()` lists no window of,
+/// because its windows are minimized, gets the frontmost one shown again and
+/// returned instead of a launch, which can start a second instance.
+pub(super) fn open(app: Application, activate: bool) -> CoreResult<OpenedApplication> {
+	let packaged = app.path.starts_with(APPS_FOLDER_PREFIX);
+	if app.running {
+		// The key `running_processes` found `app` running under.
+		let key =
+			if packaged { format!("aumid:{}", app.id) } else { path_key(&executable_target(&app)?) };
+		let mut keys = ProcessKeys::new();
+		let mut owned = HashMap::new();
+		let owns = |pid| {
+			*owned.entry(pid).or_insert_with(|| {
+				let mut matched = false;
+				keys.read(pid, |process| matched |= process == key);
+				matched
+			})
+		};
+		// The launch's show states; Win32 documents `SW_RESTORE` for showing a
+		// minimized window.
+		let show = if activate { SW_RESTORE } else { SW_SHOWNOACTIVATE };
+		if let Reopen::Restore(window) = restore_minimized(owns, show)? {
+			return Ok(OpenedApplication::new(app, window));
+		}
 	}
+	let app = if packaged { open_packaged(app, activate)? } else { launch(app, activate)? };
+	Ok(OpenedApplication::new(app, None))
+}
+
+fn launch(mut app: Application, activate: bool) -> CoreResult<Application> {
 	// Revalidate in case an application was removed after discovery.
 	let metadata = fs::metadata(&app.path)
 		.map_err(|error| io_error(&format!("inspect application {}", app.path), error))?;
