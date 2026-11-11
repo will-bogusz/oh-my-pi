@@ -1,10 +1,10 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 01:53Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 01:54Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-11 00:51Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 3, conflict-held 13, stacked 17, held 13, open PRs 33, queued since the last plan 4; merged 275, closed 29
+**Counts:** openable now 3, conflict-held 13, stacked 17, held 13, open PRs 33, queued since the last plan 5; merged 275, closed 29
 
 ## Openable now (3)
 
@@ -70,7 +70,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | observe-stable-ids | feat(browser): keep observe() ids stable across observations | browser | P2 | 6h | observe-core series: opens when Brit agrees the series (Will) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-observe-stable-ids) |
 | browser-action-outcome | feat(browser): print what each browser action did to the page | browser | P2 | 6h | ActionOutcomePR, 2026-11-10: Haiku leg on this head did not reproduce the step saving (1.02x [0.84,1.25] vs earlier 0.86x); Sol leg on this head (guard-team, from 21:15Z) decides | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-action-outcome) |
 | eval-assign-echo | fix(coding-agent): print nothing for a JavaScript eval cell that ends in an assignment | eval | P1 | 6h | Main, 2026-11-10: awaiting model sample (changes every JS cell's return); bots ScreenshotOutput | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/eval-assign-echo) |
-| computer-guide-first-use | feat(coding-agent): send the computer guide with the first computer call | computer | P2 | 5h | Main, 2026-11-10: Haiku shows 1.19x steps on native tasks; waits for the Sol native legs and Will's call | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-guide-first-use) |
+| computer-guide-first-use | feat(coding-agent): send the computer guide with the first computer call | computer | P2 | 6h | Main, 2026-11-10: Haiku shows 1.19x steps on native tasks; waits for the Sol native legs and Will's call | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-guide-first-use) |
 
 ## Open PRs (33)
 
@@ -92,7 +92,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | [#18013](https://github.com/can1357/oh-my-pi/pull/18013) | wayland-ei-text | feat(natives): type text the wayland layout lacks through libei text | natives | P2 | 7d | keep; rebases after #18353 merges | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-ei-text) |
 | [#18125](https://github.com/can1357/oh-my-pi/pull/18125) | anthropic-web-search | fix(ai,coding-agent): keep Anthropic web search queries intact, always search, and report refusals | other | P2 | 6d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/anthropic-web-search) |
 | [#18624](https://github.com/can1357/oh-my-pi/pull/18624) | upload-stall-error | fix(ai): say whether an Anthropic request body finished uploading when its connection drops | other | P1 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/upload-stall-error) |
-| [#18676](https://github.com/can1357/oh-my-pi/pull/18676) | click-reresolve-detached | fix(coding-agent): look a click's selector up again when the page replaces its element | browser | P0 | 20h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/click-reresolve-detached) |
+| [#18676](https://github.com/can1357/oh-my-pi/pull/18676) | click-reresolve-detached | fix(coding-agent): look a click's selector up again when the page replaces its element | browser | P0 | 21h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/click-reresolve-detached) |
 | [#18737](https://github.com/can1357/oh-my-pi/pull/18737) | browser-call-timeout | fix(browser): give browser calls without a timeout the Eval cell's timeout | browser | P1 | 9h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-call-timeout) |
 | [#18753](https://github.com/can1357/oh-my-pi/pull/18753) | computer-strict-options | fix(computer): reject unknown helper option keys | computer | P1 | 8h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-strict-options) |
 | [#18738](https://github.com/can1357/oh-my-pi/pull/18738) | browser-console-shape | fix(browser): tell agents that treat console() or errors() as an array to read .entries | browser | P1 | 9h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-console-shape) |
@@ -110,7 +110,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | [#18784](https://github.com/can1357/oh-my-pi/pull/18784) | x11-takeover-user | fix(natives): keep X11 takeover from taking a typing user's keys | computer | P1 | 3h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-takeover-user) |
 | [#18795](https://github.com/can1357/oh-my-pi/pull/18795) | devin-retire-swe-1-6-fast | fix(catalog): drop Devin's retired SWE-1.6 Fast seed row | catalog | P0 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-retire-swe-1-6-fast) |
 
-## Queued since the last plan (4)
+## Queued since the last plan (5)
 
 | id | title | area | priority | age | branch |
 |---|---|---|---|---|---|
@@ -118,3 +118,4 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | relay-target-miss-hint | fix(browser): name the relay's own-tab open when a target matches no tab | browser | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-target-miss-hint) |
 | relay-detach-owned-close | fix(browser): say omp closed its own relay tab when Chrome's detach ends it | browser | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-detach-owned-close) |
 | macos-click-timestamp | fix(natives): stop macOS background left clicks from crashing Electron and Chrome pages | natives | P0 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-click-timestamp) |
+| atspi-huge-children | fix(natives): stop Linux accessibility reads from freezing apps that show long tables | computer | P0 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-huge-children) |

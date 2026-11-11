@@ -73630,6 +73630,24 @@
    "added": "2026-11-11T01:40:54Z",
    "updated": "2026-11-11T01:44:12Z",
    "note": ""
+  },
+  {
+   "id": "atspi-huge-children",
+   "branch": "will/atspi-huge-children",
+   "title": "fix(natives): stop Linux accessibility reads from freezing apps that show long tables",
+   "area": "computer",
+   "priority": "P0",
+   "needs": [],
+   "base": "6dd7ddf5feab54da3c82b460ee390a7d09aeabaa",
+   "body": "bodies/atspi-huge-children.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-huge-children",
+   "host": "MacBook-Pro",
+   "added": "2026-11-11T01:54:02Z",
+   "updated": "2026-11-11T01:54:02Z",
+   "note": ""
   }
  ],
  "watch": {
