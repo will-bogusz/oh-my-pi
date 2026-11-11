@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 02:40Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 02:41Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-11 02:36Z on MacBook-Pro; groups below are from it, states from the manifest)
@@ -16,7 +16,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | browser-download-missing-file | fix(coding-agent): fail a download wait when the saved file is not on this machine | browser | P2 | 2h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-download-missing-file) |
 | relay-target-miss-hint | fix(browser): name the relay's own-tab open when a target matches no tab | browser | P2 | 1h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-target-miss-hint) |
 | relay-detach-owned-close | fix(browser): say omp closed its own relay tab when Chrome's detach ends it | browser | P2 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-detach-owned-close) |
-| macos-click-timestamp | fix(natives): stop macOS background left clicks from crashing Electron and Chrome pages | natives | P0 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-click-timestamp) |
+| macos-click-timestamp | fix(natives): stop macOS background left clicks from crashing Electron and Chrome pages | natives | P0 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-click-timestamp) |
 | qt5-getall-crash | fix(natives): stop Linux computer reads from crashing Qt, GTK 3 and Firefox apps | computer | P0 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/qt5-getall-crash) |
 | x11-mpx-key-confirm | fix(natives): confirm every X11 virtual-keyboard key release, in order | computer | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-mpx-key-confirm) |
 
@@ -60,7 +60,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | upload-stall-error-all-providers | fix(ai,agent): say how far a request body uploaded when any provider's connection drops | other | P1 | 1d | [#18624](https://github.com/can1357/oh-my-pi/pull/18624) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/upload-stall-error-all-providers) |
 | browser-wait-text-regexp | fix(browser): accept a RegExp in waitForText, as waitForUrl does | browser | P2 | 10h | browser-wait-predicate | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-wait-text-regexp) |
 | browser-wait-text-rendered | fix(browser): let a scoped waitForText match only text the page renders | browser | P2 | 9h | browser-wait-text-regexp | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-wait-text-rendered) |
-| factory-droid-171-models | feat(catalog): add the Factory Droid models droid 1.7.1 serves | factory-droid |  | 6h | factory-droid-171-pin ([#18771](https://github.com/can1357/oh-my-pi/pull/18771)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-171-models) |
+| factory-droid-171-models | feat(catalog): add the Factory Droid models droid 1.7.1 serves | factory-droid |  | 7h | factory-droid-171-pin ([#18771](https://github.com/can1357/oh-my-pi/pull/18771)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-171-models) |
 | browser-cursor | feat(browser): draw the acting agent's cursor in OMP-driven tabs | browser | P2 | 3h | agent-identity | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-cursor) |
 | desktop-cursor | feat(coding-agent,natives): show each agent's cursor where its computer input lands on macOS | coding-agent | P2 | 2h | agent-identity | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/desktop-cursor) |
 
