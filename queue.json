@@ -79908,7 +79908,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-11T14:35:37Z",
+  "checked": "2026-11-11T15:05:44Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -79949,7 +79949,15 @@
     "title": "feat(wait): reduce empty checks in large conversations"
    }
   },
-  "conflicts": {},
+  "conflicts": {
+   "#18353": {
+    "since": "2026-11-11T15:05:44Z",
+    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
+    "files": [
+     "nix/native.nix"
+    ]
+   }
+  },
   "merged_through": "2026-11-11T13:55:07Z",
   "unreleased": {
    "18865": {
@@ -80028,7 +80036,6 @@
    16611,
    17610,
    17756,
-   17894,
    17897,
    18013,
    18125,
@@ -82380,6 +82387,15 @@
     "kind": "openable",
     "id": "r2/native-window-report",
     "title": "feat(coding-agent): name the native windows a browser call raised on macOS"
+   },
+   {
+    "at": "2026-11-11T15:05:44Z",
+    "kind": "conflict",
+    "label": "#18353",
+    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
+    "files": [
+     "nix/native.nix"
+    ]
    }
   ]
  },
@@ -86458,8 +86474,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-11T14:39:31.907691Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-11T15:05:44.959044Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -86912,8 +86928,10 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in nix/native.nix"
+    ],
     "note": "accepted pair with #18013",
     "over": [],
     "paired": [
@@ -87056,7 +87074,7 @@
     "action": "held",
     "reasons": [
      "held: Main, 2026-11-11: opens after atspi-unanswered-app (P0, first in Main's Linux order) merges; they conflict in linux/ax.rs",
-     "conflicts with #18892 in crates/pi-natives/src/desktop/mod.rs"
+     "conflicts with #18892 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/mod.rs"
     ],
     "note": "",
     "over": [],
@@ -87098,12 +87116,14 @@
     "action": "wait",
     "reasons": [
      "needs atspi-unanswered-app (queued)",
+     "conflicts with #18892 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with atspi-unanswered-app in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#18892",
      "atspi-unanswered-app"
     ],
     "needs": [
@@ -87146,7 +87166,7 @@
      "held: Main, 2026-11-11: opens after atspi-unanswered-app (P0) so it does not block it",
      "needs atspi-unanswered-app (queued)",
      "conflicts with #18783 in crates/pi-natives/Cargo.toml",
-     "conflicts with #18892 in crates/pi-natives/src/desktop/ax.rs",
+     "conflicts with #18892 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18353 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #18013 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/libei.rs",
      "conflicts with atspi-unanswered-app in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/wayland/libei.rs, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
@@ -87474,15 +87494,15 @@
     "title": "feat(browser): let observe() settle the effects of the preceding action",
     "action": "wait",
     "reasons": [
-     "conflicts with #18751 in packages/coding-agent/src/tools/browser/tab-worker.ts"
+     "needs #18751 (open)"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
+    "blocked_by": [],
+    "needs": [
      "#18751"
     ],
-    "needs": [],
     "created": "2026-11-10T18:56:46Z"
    },
    {
@@ -87495,15 +87515,12 @@
     "title": "feat(browser): settle the preceding action before reads too",
     "action": "wait",
     "reasons": [
-     "needs observe-settle (queued)",
-     "conflicts with #18751 in packages/coding-agent/src/tools/browser/tab-worker.ts"
+     "needs observe-settle (queued)"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#18751"
-    ],
+    "blocked_by": [],
     "needs": [
      "observe-settle"
     ],
@@ -87537,12 +87554,14 @@
     "action": "wait",
     "reasons": [
      "needs atspi-unanswered-app (queued)",
+     "conflicts with #18892 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with atspi-unanswered-app in crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/ax/menus.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#18892",
      "atspi-unanswered-app"
     ],
     "needs": [
@@ -87562,12 +87581,14 @@
     "reasons": [
      "held: Main, 2026-11-11: opens after atspi-unanswered-app (P0) so it does not block it",
      "needs atspi-unanswered-app (queued)",
+     "conflicts with #18892 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with atspi-unanswered-app in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#18892",
      "atspi-unanswered-app"
     ],
     "needs": [
@@ -87712,6 +87733,27 @@
     "created": "2026-11-11T09:59:13Z"
    },
    {
+    "id": "macos-ax-linked-label",
+    "label": "macos-ax-linked-label",
+    "number": null,
+    "state": "queued",
+    "area": "natives",
+    "priority": "P2",
+    "title": "fix(natives): name a macOS control by the label its AXTitleUIElement links to",
+    "action": "wait",
+    "reasons": [
+     "conflicts with #18892 in crates/pi-natives/src/desktop/macos/ax.rs"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "#18892"
+    ],
+    "needs": [],
+    "created": "2026-11-11T14:43:42Z"
+   },
+   {
     "id": "macos-menu-miss-items",
     "label": "macos-menu-miss-items",
     "number": null,
@@ -87742,6 +87784,7 @@
      "conflicts with #16553 in crates/pi-natives/src/desktop/macos/input.rs",
      "conflicts with #17756 in crates/pi-natives/src/desktop/macos/input.rs",
      "conflicts with #18753 in docs/computer-use.md",
+     "conflicts with #18892 in crates/pi-natives/src/desktop/macos/input.rs",
      "conflicts with #18897 in crates/pi-natives/src/desktop/macos/input.rs",
      "conflicts with #17897 in crates/pi-natives/src/desktop/macos/input.rs"
     ],
@@ -87752,6 +87795,7 @@
      "#16553",
      "#17756",
      "#18753",
+     "#18892",
      "#18897",
      "#17897"
     ],
@@ -87876,7 +87920,7 @@
     "title": "fix(natives): expose Windows control state and stale-reference matches",
     "action": "wait",
     "reasons": [
-     "conflicts with #18892 in crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with #18892 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs",
      "conflicts with win-setvalue-readback in crates/pi-natives/src/desktop/win32/ax.rs"
     ],
     "note": "",
@@ -88309,7 +88353,6 @@
     "action": "wait",
     "reasons": [
      "needs act-look-prompt (queued)",
-     "conflicts with #18751 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18772 in docs/tools/browser.md",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
@@ -88317,7 +88360,6 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18751",
      "#18772"
     ],
     "needs": [
