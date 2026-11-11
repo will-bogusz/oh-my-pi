@@ -74312,25 +74312,13 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-11T03:23:48Z",
+  "checked": "2026-11-11T03:54:34Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "macos-click-timestamp": {
-    "since": "2026-11-11T01:52:22Z",
-    "title": "fix(natives): stop macOS background left clicks from crashing Electron and Chrome pages"
-   },
-   "qt5-getall-crash": {
-    "since": "2026-11-11T02:22:35Z",
-    "title": "fix(natives): stop Linux computer reads from crashing Qt, GTK 3 and Firefox apps"
-   },
-   "x11-mpx-qt": {
-    "since": "2026-11-11T02:22:35Z",
-    "title": "fix(natives): stop X11 background input from crashing your running Qt 6.5+ apps"
-   },
-   "atspi-text-first": {
-    "since": "2026-11-11T03:23:48Z",
-    "title": "fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility"
+   "atspi-unanswered-app": {
+    "since": "2026-11-11T03:54:34Z",
+    "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool"
    },
    "browser-select-readback": {
     "since": "2026-11-11T00:21:30Z",
@@ -74409,7 +74397,10 @@
    18784,
    18786,
    18789,
-   18795
+   18795,
+   18823,
+   18824,
+   18825
   ],
   "post_merge": {
    "17831": {
@@ -76294,6 +76285,40 @@
     "files": [
      "MODULE.bazel.lock"
     ]
+   },
+   {
+    "at": "2026-11-11T03:54:34Z",
+    "kind": "openable",
+    "id": "atspi-unanswered-app",
+    "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool"
+   },
+   {
+    "at": "2026-11-11T03:54:34Z",
+    "kind": "unopenable",
+    "id": "macos-click-timestamp",
+    "title": "fix(natives): stop macOS background left clicks from crashing Electron and Chrome pages",
+    "why": "opened as #18824"
+   },
+   {
+    "at": "2026-11-11T03:54:34Z",
+    "kind": "unopenable",
+    "id": "qt5-getall-crash",
+    "title": "fix(natives): stop Linux computer reads from crashing Qt, GTK 3 and Firefox apps",
+    "why": "opened as #18823"
+   },
+   {
+    "at": "2026-11-11T03:54:34Z",
+    "kind": "unopenable",
+    "id": "x11-mpx-qt",
+    "title": "fix(natives): stop X11 background input from crashing your running Qt 6.5+ apps",
+    "why": "opened as #18825"
+   },
+   {
+    "at": "2026-11-11T03:54:34Z",
+    "kind": "unopenable",
+    "id": "atspi-text-first",
+    "title": "fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility",
+    "why": "plan: wait (conflicts with atspi-unanswered-app in crates/pi-natives/src/desktop/linux/wayland/mod.rs)"
    }
   ]
  },
@@ -79104,8 +79129,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-11T03:49:07.199896Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-11T03:54:35.656817Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 3,
@@ -79179,23 +79204,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T03:44:05Z"
-   },
-   {
-    "id": "x11-mpx-qt",
-    "label": "#18825",
-    "number": 18825,
-    "state": "open",
-    "area": "computer",
-    "priority": "P0",
-    "title": "fix(natives): stop X11 background input from crashing your running Qt 6.5+ apps",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-11T03:47:36Z"
    },
    {
     "id": "read-after-bash-revalidate",
@@ -79470,6 +79478,23 @@
     "created": "2026-11-11T03:40:30Z"
    },
    {
+    "id": "x11-mpx-qt",
+    "label": "#18825",
+    "number": 18825,
+    "state": "open",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): stop X11 background input from crashing your running Qt 6.5+ apps",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-11T03:47:36Z"
+   },
+   {
     "id": "factory-droid-171-pin",
     "label": "#18771",
     "number": 18771,
@@ -79727,19 +79752,15 @@
     "area": "computer",
     "priority": "P0",
     "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool",
-    "action": "wait",
-    "reasons": [
-     "conflicts with #18353 in MODULE.bazel.lock, crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
-     "conflicts with #18013 in MODULE.bazel.lock",
-     "conflicts with main in MODULE.bazel.lock"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [
+    "over": [
      "#18353",
      "#18013"
     ],
+    "paired": [],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-03T08:39:53Z"
    },
@@ -79751,12 +79772,16 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with atspi-unanswered-app in crates/pi-natives/src/desktop/linux/wayland/mod.rs"
+    ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "atspi-unanswered-app"
+    ],
     "needs": [],
     "created": "2026-11-11T02:21:41Z"
    },
@@ -79774,8 +79799,7 @@
      "conflicts with #18823 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18353 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #18013 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/libei.rs",
-     "conflicts with atspi-text-first in crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
-     "its need atspi-unanswered-app conflicts with main in MODULE.bazel.lock",
+     "conflicts with atspi-unanswered-app in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/wayland/libei.rs, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
@@ -79785,7 +79809,7 @@
      "#18823",
      "#18353",
      "#18013",
-     "atspi-text-first"
+     "atspi-unanswered-app"
     ],
     "needs": [
      "atspi-unanswered-app"
@@ -80125,14 +80149,13 @@
     "action": "wait",
     "reasons": [
      "needs atspi-unanswered-app (queued)",
-     "conflicts with atspi-text-first in crates/pi-natives/src/desktop/linux/ax.rs",
-     "its need atspi-unanswered-app conflicts with main in MODULE.bazel.lock"
+     "conflicts with atspi-unanswered-app in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "atspi-text-first"
+     "atspi-unanswered-app"
     ],
     "needs": [
      "atspi-unanswered-app"
@@ -80655,6 +80678,7 @@
      "conflicts with #18784 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with atspi-unanswered-app in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
@@ -80666,7 +80690,8 @@
      "#18783",
      "#18784",
      "#18353",
-     "#18222"
+     "#18222",
+     "atspi-unanswered-app"
     ],
     "needs": [
      "computer-ui-quiet"
