@@ -88500,6 +88500,11 @@
     "sha": "b7a0eee150cb0e096e3b8bb5ae0c5dbb86b95ad3",
     "at": "2026-11-11T17:24:37Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "b7a0eee150cb0e096e3b8bb5ae0c5dbb86b95ad3",
+    "at": "2026-11-11T17:26:49Z",
+    "host": "goliath"
    }
   }
  },
