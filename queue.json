@@ -79104,12 +79104,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-11T03:23:48.853768Z",
-  "host": "goliath",
+  "at": "2026-11-11T03:49:07.199896Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 3,
+   "left": 5
   },
   "rows": [
    {
@@ -79162,6 +79162,40 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-10T23:14:12Z"
+   },
+   {
+    "id": "macos-click-timestamp",
+    "label": "#18824",
+    "number": 18824,
+    "state": "open",
+    "area": "natives",
+    "priority": "P0",
+    "title": "fix(natives): stop macOS background left clicks from crashing Electron and Chrome pages",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-11T03:44:05Z"
+   },
+   {
+    "id": "x11-mpx-qt",
+    "label": "#18825",
+    "number": 18825,
+    "state": "open",
+    "area": "computer",
+    "priority": "P0",
+    "title": "fix(natives): stop X11 background input from crashing your running Qt 6.5+ apps",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-11T03:47:36Z"
    },
    {
     "id": "read-after-bash-revalidate",
@@ -79417,6 +79451,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-10T22:08:25Z"
+   },
+   {
+    "id": "qt5-getall-crash",
+    "label": "#18823",
+    "number": 18823,
+    "state": "open",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): stop Linux computer reads from crashing Qt, GTK 3 and Firefox apps",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-11T03:40:30Z"
    },
    {
     "id": "factory-droid-171-pin",
@@ -79693,57 +79744,6 @@
     "created": "2026-11-03T08:39:53Z"
    },
    {
-    "id": "macos-click-timestamp",
-    "label": "macos-click-timestamp",
-    "number": null,
-    "state": "queued",
-    "area": "natives",
-    "priority": "P0",
-    "title": "fix(natives): stop macOS background left clicks from crashing Electron and Chrome pages",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-11T01:40:54Z"
-   },
-   {
-    "id": "qt5-getall-crash",
-    "label": "qt5-getall-crash",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P0",
-    "title": "fix(natives): stop Linux computer reads from crashing Qt, GTK 3 and Firefox apps",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-11T02:06:11Z"
-   },
-   {
-    "id": "x11-mpx-qt",
-    "label": "x11-mpx-qt",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P0",
-    "title": "fix(natives): stop X11 background input from crashing your running Qt 6.5+ apps",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-10T22:23:32Z"
-   },
-   {
     "id": "atspi-text-first",
     "label": "atspi-text-first",
     "number": null,
@@ -79771,9 +79771,9 @@
     "action": "wait",
     "reasons": [
      "needs atspi-unanswered-app (queued)",
+     "conflicts with #18823 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18353 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #18013 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/libei.rs",
-     "conflicts with qt5-getall-crash in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with atspi-text-first in crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "its need atspi-unanswered-app conflicts with main in MODULE.bazel.lock",
      "conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
@@ -79782,9 +79782,9 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#18823",
      "#18353",
      "#18013",
-     "qt5-getall-crash",
      "atspi-text-first"
     ],
     "needs": [
@@ -80282,19 +80282,19 @@
     "action": "wait",
     "reasons": [
      "needs iphone-mirror-scroll-distance (queued)",
+     "conflicts with #18824 in crates/pi-natives/src/desktop/macos/input.rs",
      "conflicts with #17756 in crates/pi-natives/src/desktop/macos/input.rs",
      "conflicts with #18753 in docs/computer-use.md",
-     "conflicts with #17897 in crates/pi-natives/src/desktop/macos/input.rs",
-     "conflicts with macos-click-timestamp in crates/pi-natives/src/desktop/macos/input.rs"
+     "conflicts with #17897 in crates/pi-natives/src/desktop/macos/input.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#18824",
      "#17756",
      "#18753",
-     "#17897",
-     "macos-click-timestamp"
+     "#17897"
     ],
     "needs": [
      "iphone-mirror-scroll-distance"
