@@ -12,7 +12,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 |---|---|---|---|---|---|---|
 | win-menu-modal | fix(natives): confirm Windows menu commands that open modal dialogs | computer | P2 | 3h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-menu-modal) |
 | macos-press-disabled | fix(natives): refuse a macOS press on a disabled element | natives | P1 | 3h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-press-disabled) |
-| macos-menu-miss-items | fix(natives): name the menu items on offer when a menu bar path misses | natives | P2 | 2h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-menu-miss-items) |
+| macos-menu-miss-items | fix(natives): name the menu items on offer when a menu bar path misses | natives | P2 | 3h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-menu-miss-items) |
 | macos-ax-cancel-before-send | fix(natives): send no macOS AX action once its run is cancelled | natives | P2 | 2h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-ax-cancel-before-send) |
 | wait-ladder-context | feat(wait): reduce empty checks in large conversations | coding-agent | P2 | 2h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wait-ladder-context) |
 | win-takeover-focus | fix(natives): hand the foreground back after Windows element takeover input | computer | P1 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-takeover-focus) |
