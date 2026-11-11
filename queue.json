@@ -81608,6 +81608,26 @@
    "added": "2026-11-11T15:44:29Z",
    "updated": "2026-11-11T15:44:29Z",
    "note": ""
+  },
+  {
+   "id": "x11-mpx-reattach",
+   "branch": "will/x11-mpx-reattach",
+   "title": "fix(natives): keep X11 background input out of your window after a screen lock or VT switch",
+   "area": "computer",
+   "priority": "P0",
+   "needs": [
+    "#18825"
+   ],
+   "base": "ab2511e0326b837fd149701080c91f69fbccaa92",
+   "body": "bodies/x11-mpx-reattach.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-mpx-reattach",
+   "host": "MacBook-Pro",
+   "added": "2026-11-11T17:39:36Z",
+   "updated": "2026-11-11T17:39:36Z",
+   "note": ""
   }
  ],
  "watch": {
