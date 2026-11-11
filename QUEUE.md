@@ -4,16 +4,15 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-11 10:52Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 10, conflict-held 21, stacked 16, held 20, parked 2, open PRs 42; merged 275, closed 30
+**Counts:** openable now 9, conflict-held 21, stacked 16, held 20, parked 2, open PRs 43; merged 275, closed 30
 
-## Openable now (10)
+## Openable now (9)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
-| win-posted-modifiers | fix(natives): refuse Windows background input that holds a modifier | computer | P1 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-posted-modifiers) |
+| win-posted-modifiers | fix(natives): refuse Windows background input that holds a modifier | computer | P1 | 2h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-posted-modifiers) |
 | win-menu-modal | fix(natives): confirm Windows menu commands that open modal dialogs | computer | P2 | 1h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-menu-modal) |
 | macos-press-disabled | fix(natives): refuse a macOS press on a disabled element | natives | P1 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-press-disabled) |
-| browser-main-wait-navigation | fix(browser): rearm main-world waits after navigation | browser | P2 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/main-world-wait-navigation) |
 | macos-menu-miss-items | fix(natives): name the menu items on offer when a menu bar path misses | natives | P2 | 1h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-menu-miss-items) |
 | macos-ax-cancel-before-send | fix(natives): send no macOS AX action once its run is cancelled | natives | P2 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-ax-cancel-before-send) |
 | macos-layout-chords | fix(natives): press macOS key chords on the keys of the current keyboard layout | natives | P1 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-layout-chords) |
@@ -64,7 +63,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | browser-wait-text-regexp | fix(browser): accept a RegExp in waitForText, as waitForUrl does | browser | P2 | 19h | browser-wait-predicate | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-wait-text-regexp) |
 | browser-wait-text-rendered | fix(browser): let a scoped waitForText match only text the page renders | browser | P2 | 18h | browser-wait-text-regexp | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-wait-text-rendered) |
 | factory-droid-171-models | feat(catalog): add the Factory Droid models droid 1.7.1 serves | factory-droid |  | 15h | factory-droid-171-pin ([#18771](https://github.com/can1357/oh-my-pi/pull/18771)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-171-models) |
-| browser-cursor | feat(browser): draw the acting agent's cursor in OMP-driven tabs | browser | P2 | 11h | agent-identity | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-cursor) |
+| browser-cursor | feat(browser): draw the acting agent's cursor in OMP-driven tabs | browser | P2 | 12h | agent-identity | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-cursor) |
 | desktop-cursor | feat(coding-agent,natives): show each agent's cursor where its computer input lands on macOS | coding-agent | P2 | 11h | agent-identity | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/desktop-cursor) |
 | relay-print-preview-error | fix(coding-agent,browser-relay): fail a browser call a print preview holds in an attached browser within seconds | browser | P2 | 4h | [#18838](https://github.com/can1357/oh-my-pi/pull/18838) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-print-preview-error) |
 
@@ -100,7 +99,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | [#15128](https://github.com/can1357/oh-my-pi/pull/15128) | reset-restore-longest-wait | feat(coding-agent): restore the blocked account whose reset buys the most time | broker | P2 | 9h | Will, 2026-11-02: account broker redesign, on hold since 2026-11-02 | not checked or kept fresh | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-restore-longest-wait) |
 | [#15130](https://github.com/can1357/oh-my-pi/pull/15130) | reset-before-reserve | feat(coding-agent): opt in to spending a blocked account's saved reset before a reserve-only backup | broker | P2 | 9h | Will, 2026-11-02: account broker redesign, on hold since 2026-11-02 | not checked or kept fresh | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-before-reserve) |
 
-## Open PRs (42)
+## Open PRs (43)
 
 | PR | id | title | area | rank | open | plan | branch |
 |---|---|---|---|---|---|---|---|
@@ -146,3 +145,4 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | [#18828](https://github.com/can1357/oh-my-pi/pull/18828) | x11-mpx-key-confirm | fix(natives): confirm every X11 virtual-keyboard key release, in order | computer | P1 | 6h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-mpx-key-confirm) |
 | [#18838](https://github.com/can1357/oh-my-pi/pull/18838) | print-pref | fix(coding-agent): stop a page calling window.print() from hanging the browser omp launches | browser | P2 | 5h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/print-pref) |
 | [#18883](https://github.com/can1357/oh-my-pi/pull/18883) | browser-main-wait-globals | fix(browser): keep main-world waits from exposing query bindings | browser | P1 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/main-world-wait) |
+| [#18884](https://github.com/can1357/oh-my-pi/pull/18884) | browser-main-wait-navigation | fix(browser): rearm main-world waits after navigation | browser | P2 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/main-world-wait-navigation) |
