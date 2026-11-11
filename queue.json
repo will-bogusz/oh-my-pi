@@ -74779,7 +74779,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "55251e34c26eeb5a31a5c86cedf243acd7e2cb23",
+   "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
    "body": "bodies/x11-takeover-user.md",
    "state": "open",
    "pr": 18784,
@@ -74787,7 +74787,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-takeover-user",
    "host": "MacBook-Pro",
    "added": "2026-11-10T21:06:23Z",
-   "updated": "2026-11-11T02:05:19Z",
+   "updated": "2026-11-11T09:40:42Z",
    "note": "",
    "built": [
     {
@@ -74910,7 +74910,7 @@
    ],
    "opened": "2026-11-10T22:08:26Z",
    "readied": "2026-11-10T22:08:49Z",
-   "advanced": "2026-11-11T02:05:19Z"
+   "advanced": "2026-11-11T09:40:42Z"
   },
   {
    "id": "x11-mpx-qt",
