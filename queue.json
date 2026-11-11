@@ -75839,7 +75839,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-11T07:58:35Z",
+  "checked": "2026-11-11T09:00:24Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -80913,7 +80913,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-11T08:29:28.367253Z",
+  "at": "2026-11-11T09:00:25.105808Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -82287,6 +82287,7 @@
      "held: observe-core series: opens when Brit agrees the series (Will)",
      "needs settle-reads (queued)",
      "conflicts with #18737 in packages/coding-agent/src/prompts/tools/browser.md",
+     "conflicts with #18738 in packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18772 in docs/tools/browser.md",
      "conflicts with #18786 in packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18789 in packages/coding-agent/src/prompts/tools/browser.md",
@@ -82297,6 +82298,7 @@
     "paired": [],
     "blocked_by": [
      "#18737",
+     "#18738",
      "#18772",
      "#18786",
      "#18789"
@@ -82479,8 +82481,9 @@
     "area": "coding-agent",
     "priority": "P2",
     "title": "feat(coding-agent,natives): show each agent's cursor where its computer input lands on macOS",
-    "action": "wait",
+    "action": "held",
     "reasons": [
+     "held: CursorChecks, 2026-11-11: real check saw takeover UserIntervened 10/10 with computer.cursor on; untangling VM run (cursor vs cross-process ordering) pending",
      "needs agent-identity (queued)",
      "conflicts with #18784 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md"
     ],
@@ -82555,6 +82558,7 @@
      "needs act-look-prompt (queued)",
      "conflicts with #18676 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18737 in packages/coding-agent/src/prompts/tools/browser.md",
+     "conflicts with #18738 in packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18751 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18772 in docs/tools/browser.md",
      "conflicts with #18786 in packages/coding-agent/src/prompts/tools/browser.md",
@@ -82567,6 +82571,7 @@
     "blocked_by": [
      "#18676",
      "#18737",
+     "#18738",
      "#18751",
      "#18772",
      "#18786",
