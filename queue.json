@@ -77770,7 +77770,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-screen-locked",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:31:29Z",
-   "updated": "2026-11-11T22:12:28Z",
+   "updated": "2026-11-11T22:47:32Z",
    "note": "",
    "advanced": "2026-11-11T22:12:02Z",
    "built": [
@@ -78145,7 +78145,10 @@
     }
    ],
    "opened": "2026-11-11T22:00:08Z",
-   "readied": "2026-11-11T22:00:41Z"
+   "readied": "2026-11-11T22:00:41Z",
+   "rebases_after": [
+    18915
+   ]
   },
   {
    "id": "win-setvalue-readback",
