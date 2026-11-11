@@ -2,7 +2,7 @@
 
 I wanted the browser tool to tell the agent when its click opened something on screen the page can't answer, like a `<select>` menu, a colour picker or a passkey sheet, and hand it that window for the computer tool.
 
-On macOS, visible managed/spawned browsers and the relay now name native windows raised over the tab, with the id `computer.window(id)` takes. A window appearing within 2 s after a call returns is named by the next call; failed calls carry the same notices. Connected CDP endpoints are excluded because they may be remote or headless.
+On macOS, visible managed/spawned browsers and a loopback relay now name native windows raised over the tab, with the id `computer.window(id)` takes. A window appearing within 2 s after a call returns is named by the next call; failed calls carry the same notices. Connected CDP endpoints and remote relays are excluded.
 
 | pre-review visible Chrome checks; n=5 managed + 5 relay per arm | on screen | named before | named here, and `computer.window(id)` is that window |
 |---|---|---|---|
@@ -18,7 +18,7 @@ On macOS, visible managed/spawned browsers and the relay now name native windows
 Before, these windows appear while the call reports success. Read `roster.rs`, `native-windows.ts`, then `tab-worker.ts`.
 
 - The tab's current frame and visibility come from an isolated world, rechecked at the after-call and tail samples. A known browser pid restricts matching; ambiguous matches and popups overlapping another browser window are suppressed.
-- Windows are sampled in one window-server pass. Only never-seen windows of the tab's browser count; macOS-owned prompts and the page's own JavaScript dialogs remain outside this report.
+- Windows are sampled in one window-server pass. Only never-seen windows of the tab's browser count; macOS-owned prompts and the page's own JavaScript dialogs remain outside this report. Normal-window candidates matching browser page targets (such as OAuth popups) are excluded; an unreadable page-frame probe suppresses normal-window reports.
 - The report is always on for supported visible browsers. Pre-review measurements added 27–35 ms median per call; headless and connected-CDP calls skip it.
 
 Non-goals: answering windows; Linux and Windows. Untested: a user's window opening inside the tab's frame mid-call; `print()`. Merged #18838 disables printing in omp's Chrome profile, not attached browsers.
@@ -27,7 +27,7 @@ Known limit: a picker opened in a tab omp holds in the background, such as a rel
 
 ## Testing
 
-`bun test packages/coding-agent/test/tools/browser-native-windows.test.ts` on bench-mac exercises a real isolated headless Chrome plus fake rosters: 25 tests pass, including page-global overrides, tab moves, visibility switches, overlapping windows, and unterminated stdout. The new behavior regressions fail against the opening head; the page-global test also disproves the claimed main-world exposure in the pinned Puppeteer patch. `bun check --no-script -p packages/coding-agent/tsconfig.json` checks the payload and callers.
+`bun test packages/coding-agent/test/tools/browser-native-windows.test.ts` on bench-mac exercises real isolated headless Chrome plus fake rosters: 26 tests pass, including page-global overrides, page-backed popups, tab moves, visibility switches, overlapping windows, and unterminated stdout. Behavior regressions fail before their fixes; page-global overrides also disprove the claimed main-world exposure in the pinned Puppeteer patch. `bun check --no-script -p packages/coding-agent/tsconfig.json` passes.
 
 <details>
 <summary>Earlier visible-browser evidence</summary>
