@@ -13,7 +13,7 @@ The Chromium helper discarded `state`, so disappearance waits instead waited for
 ## Testing
 
 - Real headless Chromium: five repetitions of each state and legacy form; removed hidden/detached selectors time out on main and resolve with this fix. Invalid-key/value cells are rejected rather than accepted.
-- Real-worker regressions fail before and pass after, including live refs, scoped frames and document replacement. Focused suite: 41 pass, one desktop-only skip. Coding-agent type check passes.
+- Real-worker regressions fail before and pass after, including live refs, scoped frames and public detached waits across navigation. Dropping the state hand-through makes that public-path regression fail. Focused suite: 42 pass, one desktop-only skip. Coding-agent type check passes.
 - Re-run: `bun test packages/coding-agent/test/tools/browser-tab-worker-startup.test.ts packages/coding-agent/test/tools/browser-tern-tab.test.ts packages/coding-agent/test/tools/browser-cmux-page-text.test.ts`; `bun run --cwd packages/coding-agent check:types`.
 
 ---
