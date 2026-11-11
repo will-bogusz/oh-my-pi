@@ -658,6 +658,81 @@ impl AtSpiAx {
 	}
 }
 
+impl AtSpiAx {
+	/// Target-scoped hit testing does not infer ownership from desktop stacking.
+	pub(super) fn element_at_in(
+		&mut self,
+		window: &DesktopWindow,
+		x: f64,
+		y: f64,
+	) -> CoreResult<Option<AxHandle>> {
+		let root = self.window_root(window)?;
+		let root = Self::object(&root).clone();
+		let Self { rt, connection, native, frames } = self;
+		rt.block_on(async {
+			let bus = connection.connection();
+			let Some(placement) = frames.claim(bus, native.as_deref(), &root, x.round() as i32, y.round() as i32).await? else {
+				return Ok(None);
+			};
+			Self::descend(bus, root, placement, x.round() as i32, y.round() as i32).await
+		})
+	}
+
+	/// `false` means no action was sent; a failed action must never replay a click.
+	pub(super) fn click_at(&mut self, window: &DesktopWindow, windows: &[DesktopWindow], x: f64, y: f64) -> CoreResult<bool> {
+		let Ok(Some(handle)) = self.element_at_in(window, x, y) else {
+			return Ok(false);
+		};
+		if !self.window_id(&handle, windows).is_ok_and(|id| id == window.id) {
+			return Ok(false);
+		}
+		let object = Self::object(&handle).clone();
+		let Self { rt, connection, native, frames } = self;
+		rt.block_on(async {
+			let bus = connection.connection();
+			let Ok(accessible) = object.as_accessible_proxy(bus).await else { return Ok(false) };
+			let Ok(role) = accessible.get_role().await else { return Ok(false) };
+			let Ok(states) = accessible.get_state().await else { return Ok(false) };
+			let Some(bounds) = frames.screen_bounds(bus, native.as_deref(), &object).await else { return Ok(false) };
+			if !coordinate_click_element(role, states, &bounds, x, y) {
+				return Ok(false);
+			}
+			let Ok(action) = Self::action(bus, &object).await else { return Ok(false) };
+			let Ok(index) = coordinate_click_action(&action, &accessible).await else { return Ok(false) };
+			crate::desktop::control::check()?;
+			action.do_action(index).await
+				.map_err(|err| DesktopError::ax_failed(format!("AT-SPI coordinate action: {err}")))?
+				.ok_or_else(|| DesktopError::ax_failed("AT-SPI coordinate action failed"))?;
+			Ok(true)
+		})
+	}
+}
+
+fn coordinate_click_element(role: Role, states: StateSet, bounds: &AxBounds, x: f64, y: f64) -> bool {
+	// A positive role list excludes caret placement, custom drawing, paging,
+	// selection/activation differences, links and grabbing popup controls.
+	matches!(role, Role::Button | Role::CheckBox | Role::RadioButton | Role::ToggleButton)
+		&& state_enabled(states)
+		&& states.contains(State::Showing)
+		&& !states.contains(State::Editable)
+		&& !states.contains(State::HasPopup)
+		&& x >= bounds.x && y >= bounds.y
+		&& x < bounds.x + bounds.width && y < bounds.y + bounds.height
+}
+
+async fn coordinate_click_action(
+	action: &atspi::proxy::action::ActionProxy<'_>,
+	accessible: &atspi::proxy::accessible::AccessibleProxy<'_>,
+) -> CoreResult<i32> {
+	let index = resolve_action(action, accessible, "press").await?;
+	let name = action.get_name(index).await.map_err(|err| DesktopError::ax_failed(err.to_string()))?;
+	if ["press", "click", "activate", "invoke", "toggle", "check", "uncheck"].iter().any(|safe| name.eq_ignore_ascii_case(safe)) {
+		Ok(index)
+	} else {
+		Err(DesktopError::ax_failed("AT-SPI action is not a coordinate click"))
+	}
+}
+
 impl FrameCache {
 	/// `object`'s bounds in screen coordinates. A toolkit that cannot place its
 	/// windows (GTK4) reports every element at screen `0,0`; such an element is
@@ -1408,6 +1483,24 @@ mod tests {
 	use super::*;
 
 	#[test]
+	fn coordinate_clicks_require_a_showing_enabled_button_at_the_point() {
+		let bounds = AxBounds { x: 10.0, y: 20.0, width: 30.0, height: 40.0 };
+		let states = StateSet::new(State::Enabled | State::Showing);
+		for role in [Role::Button, Role::CheckBox, Role::RadioButton, Role::ToggleButton] {
+			assert!(coordinate_click_element(role, states, &bounds, 10.0, 20.0));
+		}
+		for role in [Role::Entry, Role::Text, Role::DrawingArea, Role::Canvas, Role::Slider, Role::ScrollBar, Role::ListItem, Role::TreeItem, Role::ComboBox, Role::Menu, Role::Link] {
+			assert!(!coordinate_click_element(role, states, &bounds, 10.0, 20.0));
+		}
+		for states in [StateSet::new(State::Showing), StateSet::new(State::Enabled), StateSet::new(State::Enabled | State::Showing | State::Editable), StateSet::new(State::Enabled | State::Showing | State::HasPopup)] {
+			assert!(!coordinate_click_element(Role::Button, states, &bounds, 10.0, 20.0));
+		}
+		for (x, y) in [(9.0, 20.0), (10.0, 19.0), (40.0, 20.0), (10.0, 60.0)] {
+			assert!(!coordinate_click_element(Role::Button, states, &bounds, x, y));
+		}
+	}
+
+	#[test]
 	fn generic_press_never_selects_an_unrelated_editing_action() {
 		let actions = ["buffer.delete-line", "clipboard.cut", "activate"];
 		assert_eq!(action_index(actions.into_iter(), "press"), Some(2));
@@ -1867,7 +1960,7 @@ mod tests {
 			&'static str,
 			Option<i32>,
 		);
-		const CASES: [Case; 7] = [
+		const CASES: [Case; 10] = [
 			// Firefox.
 			("/firefox", &[";;"], &["press"], 1, Role::Button, "press", Some(0)),
 			// A GTK app under a German locale.
@@ -1903,6 +1996,9 @@ mod tests {
 			),
 			// No activation at all is still refused.
 			("/menu_only", &["Show menu"], &["showMenu"], 1, Role::Button, "press", None),
+			("/qt_focus", &[], &["SetFocus", "press"], 2, Role::Button, "press", Some(1)),
+			("/ancestor", &[], &["clickAncestor"], 1, Role::Button, "press", Some(0)),
+			("/open", &[], &["open"], 1, Role::Button, "press", Some(0)),
 			// An app reporting a nonsense count is read only up to the cap.
 			("/huge", &[], &["press"], i32::MAX, Role::Button, "press", Some(0)),
 		];
@@ -1946,6 +2042,12 @@ mod tests {
 						server.reply(&header, &actions).await.unwrap();
 					},
 					"GetRole" => server.reply(&header, &(case.4 as u32)).await.unwrap(),
+					"DoAction" => {
+						let index: i32 = message.body().deserialize().unwrap();
+						assert_eq!(Some(index), case.6);
+						assert!(!matches!(case.0, "/ancestor" | "/open" | "/menu_only"));
+						server.reply(&header, &true).await.unwrap();
+					},
 					_ => server
 						.reply_error(&header, "org.freedesktop.DBus.Error.UnknownInterface", &"")
 						.await
@@ -1971,6 +2073,12 @@ mod tests {
 					let accessible = object.as_accessible_proxy(&client).await.unwrap();
 					let action = AtSpiAx::action(&client, &object).await.unwrap();
 					results.push(resolve_action(&action, &accessible, requested).await.ok());
+					let coordinate = coordinate_click_action(&action, &accessible).await.ok();
+					let expected = if matches!(path, "/ancestor" | "/open") { None } else { CASES.iter().find(|case| case.0 == path).unwrap().6 };
+					assert_eq!(coordinate, expected, "{path}");
+					if let Some(index) = coordinate {
+						assert!(action.do_action(index).await.unwrap());
+					}
 				}
 				let object = ObjectRefOwned::from_static_str_unchecked(PEER, "/huge");
 				let action = AtSpiAx::action(&client, &object).await.unwrap();

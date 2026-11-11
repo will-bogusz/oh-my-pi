@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Experimental X11 coordinate-click accessibility route, enabled only with `PI_X11_CLICK_ATSPI=1`: eligible background single left clicks can invoke a hit-tested button without activating its window. Default delivery is unchanged.
+
 ## [18.18.8] - 2026-11-11
 
 ### Changed

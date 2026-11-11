@@ -13,9 +13,9 @@ use input::X11Input;
 use super::ax::{AtSpiAx, ElementFocus};
 use crate::desktop::{
 	ax::AxHandle,
-	backend::{AxBackend, Backend, DeliveryMode, ElementDelivery, ElementInput, PointerEvent},
+	backend::{AxBackend, Backend, DeliveryMode, ElementDelivery, ElementInput, Modifiers, MouseButton, PointerEvent},
 	control::OperationToken,
-	error::{CoreResult, DesktopError},
+	error::{CoreResult, DesktopError, ErrorCode},
 	frame::FrameGeometry,
 	keys::KeyName,
 	types::{
@@ -38,6 +38,18 @@ impl X11Backend {
 			.ok()
 			.map(|ax| ax.with_native_windows(Box::new(capture.clone())));
 		Ok(Self { capture, input, ax, display_server: std::env::var("DISPLAY").ok() })
+	}
+}
+
+fn coordinate_action_point(event: &PointerEvent, mode: DeliveryMode, enabled: bool) -> Option<(f64, f64)> {
+	if enabled && mode == DeliveryMode::Background
+		&& let PointerEvent::Click { x, y, button: MouseButton::Left, count: 1, modifiers } = event
+		&& *modifiers == Modifiers::default()
+	{
+		// Common dispatch has already mapped screenshot pixels to screen coordinates.
+		Some((*x, *y))
+	} else {
+		None
 	}
 }
 
@@ -104,7 +116,19 @@ impl Backend for X11Backend {
 		token: &OperationToken,
 	) -> CoreResult<()> {
 		token.check()?;
-		self.input.pointer(target, event, mode)
+		let point = coordinate_action_point(&event, mode, std::env::var("PI_X11_CLICK_ATSPI").as_deref() == Ok("1"));
+		let result = self.input.pointer(target, event, mode);
+		if result.as_ref().is_err_and(|err| err.code == ErrorCode::BackgroundUnavailable)
+			&& let Target::Window(id) = target
+			&& let Some((x, y)) = point
+			&& let Some(ax) = &mut self.ax
+			&& let Ok(windows) = self.capture.windows()
+			&& let Some(window) = windows.iter().find(|window| window.id == *id)
+			&& ax.click_at(window, &windows, x, y)?
+		{
+			return Ok(());
+		}
+		result
 	}
 
 	fn type_text(
@@ -296,6 +320,18 @@ fn background_element_refusal(window: &str, focus: &ElementFocus) -> Option<Desk
 mod tests {
 	use super::*;
 	use crate::desktop::error::ErrorCode;
+
+	#[test]
+	fn coordinate_actions_require_an_opted_in_plain_background_click() {
+		let mut click = PointerEvent::Click { x: 123.0, y: 456.0, button: MouseButton::Left, count: 1, modifiers: Modifiers::default() };
+		assert_eq!(coordinate_action_point(&click, DeliveryMode::Background, true), Some((123.0, 456.0)));
+		assert_eq!(coordinate_action_point(&click, DeliveryMode::Background, false), None);
+		assert_eq!(coordinate_action_point(&click, DeliveryMode::Foreground, true), None);
+		if let PointerEvent::Click { count, .. } = &mut click { *count = 2; }
+		assert_eq!(coordinate_action_point(&click, DeliveryMode::Background, true), None);
+		let motion = PointerEvent::Move { x: 123.0, y: 456.0 };
+		assert_eq!(coordinate_action_point(&motion, DeliveryMode::Background, true), None);
+	}
 
 	/// Records which steps of an element input ran, in order.
 	struct Recorder {
