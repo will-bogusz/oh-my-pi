@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 21:44Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 21:45Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-11 21:42Z on goliath; groups below are from it, states from the manifest)
@@ -131,7 +131,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | [#18825](https://github.com/can1357/oh-my-pi/pull/18825) | x11-mpx-qt | fix(natives): stop X11 background input from crashing your running Qt 6.5+ apps | computer | P1 | 17h | keep; accepted pair with #18013; accepted pair with #18783 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-mpx-qt) |
 | [#18828](https://github.com/can1357/oh-my-pi/pull/18828) | x11-mpx-key-confirm | fix(natives): confirm every X11 virtual-keyboard key release, in order | computer | P1 | 16h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-mpx-key-confirm) |
 | [#18915](https://github.com/can1357/oh-my-pi/pull/18915) | win-setvalue-readback | fix(natives): verify Windows value writes and notify combo selections | computer | P1 | 5h | draft | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-setvalue-readback) |
-| [#18895](https://github.com/can1357/oh-my-pi/pull/18895) | win-posted-modifiers | fix(natives): refuse Windows background input that holds a modifier | computer | P1 | 8h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-posted-modifiers) |
+| [#18895](https://github.com/can1357/oh-my-pi/pull/18895) | win-posted-modifiers | fix(natives): refuse Windows background input that holds a modifier | computer | P1 | 9h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-posted-modifiers) |
 | [#18922](https://github.com/can1357/oh-my-pi/pull/18922) | win-menu-modal | fix(natives): confirm Windows menu commands that open modal dialogs | computer | P1 | 5h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-menu-modal) |
 | [#18883](https://github.com/can1357/oh-my-pi/pull/18883) | browser-main-wait-globals | fix(browser): keep main-world waits from exposing query bindings | browser | P0 | 10h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/main-world-wait) |
 | [#18898](https://github.com/can1357/oh-my-pi/pull/18898) | macos-press-disabled | fix(natives): refuse a macOS press on a disabled element | natives | P0 | 8h | keep; accepted pair with #18892 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-press-disabled) |
@@ -142,7 +142,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | [#18939](https://github.com/can1357/oh-my-pi/pull/18939) | wait-ladder-context | feat(wait): reduce empty checks in large conversations | coding-agent | P2 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wait-ladder-context) |
 | [#18892](https://github.com/can1357/oh-my-pi/pull/18892) | ax-ref-read-as | fix(natives): refuse macOS element actions once the ref's element reads as another control | computer | P1 | 9h | keep; accepted pair with #18898 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-ref-read-as) |
 | [#18919](https://github.com/can1357/oh-my-pi/pull/18919) | win-takeover-focus | fix(natives): hand the foreground back after Windows element takeover input | computer | P0 | 5h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-takeover-focus) |
-| [#18924](https://github.com/can1357/oh-my-pi/pull/18924) | browser-wait-selector-state | fix(browser): honor selector wait states and reject unknown options | browser | P1 | 4h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-wait-selector-state) |
+| [#18924](https://github.com/can1357/oh-my-pi/pull/18924) | browser-wait-selector-state | fix(browser): honor selector wait states and reject unknown options | browser | P1 | 5h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-wait-selector-state) |
 | [#18921](https://github.com/can1357/oh-my-pi/pull/18921) | atspi-press-actions | fix(natives): press Chromium menu items, options and tabs on Linux | computer | P0 | 5h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-press-actions) |
 
 ## Queued since the last plan (1)
