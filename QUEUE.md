@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 10:20Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 10:21Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-11 10:00Z on goliath; groups below are from it, states from the manifest)
@@ -61,7 +61,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | browser-wait-text-rendered | fix(browser): let a scoped waitForText match only text the page renders | browser | P2 | 17h | browser-wait-text-regexp | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-wait-text-rendered) |
 | factory-droid-171-models | feat(catalog): add the Factory Droid models droid 1.7.1 serves | factory-droid |  | 14h | factory-droid-171-pin ([#18771](https://github.com/can1357/oh-my-pi/pull/18771)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-171-models) |
 | browser-cursor | feat(browser): draw the acting agent's cursor in OMP-driven tabs | browser | P2 | 10h | agent-identity | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-cursor) |
-| desktop-cursor | feat(coding-agent,natives): show each agent's cursor where its computer input lands on macOS | coding-agent | P2 | 9h | agent-identity | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/desktop-cursor) |
+| desktop-cursor | feat(coding-agent,natives): show each agent's cursor where its computer input lands on macOS | coding-agent | P2 | 10h | agent-identity | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/desktop-cursor) |
 | relay-print-preview-error | fix(coding-agent,browser-relay): fail a browser call a print preview holds in an attached browser within seconds | browser | P2 | 3h | [#18838](https://github.com/can1357/oh-my-pi/pull/18838) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-print-preview-error) |
 
 ## Held (21)
@@ -119,7 +119,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | [#18753](https://github.com/can1357/oh-my-pi/pull/18753) | computer-strict-options | fix(computer): reject unknown helper option keys | computer | P1 | 16h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-strict-options) |
 | [#18738](https://github.com/can1357/oh-my-pi/pull/18738) | browser-console-shape | fix(browser): tell agents that treat console() or errors() as an array to read .entries | browser | P1 | 17h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-console-shape) |
 | [#18743](https://github.com/can1357/oh-my-pi/pull/18743) | computer-open-window | fix(natives): return the window showing a page from macOS apps.open in a browser | computer | P1 | 17h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-open-window) |
-| [#18750](https://github.com/can1357/oh-my-pi/pull/18750) | browser-hover-actionable | fix(browser): hover on a hidden match waits and names the reason, like click | browser | P1 | 16h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-hover-actionable) |
+| [#18750](https://github.com/can1357/oh-my-pi/pull/18750) | browser-hover-actionable | fix(browser): hover on a hidden match waits and names the reason, like click | browser | P1 | 17h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-hover-actionable) |
 | [#18751](https://github.com/can1357/oh-my-pi/pull/18751) | browser-run-main-world | fix(browser): run tab.run page evaluations in the page's main world | browser | P1 | 16h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-run-main-world) |
 | [#18840](https://github.com/can1357/oh-my-pi/pull/18840) | browser-run-node-hint | fix(browser): say where tab.run code runs when it reaches for a page global | browser | P0 | 3h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-run-node-hint) |
 | [#18786](https://github.com/can1357/oh-my-pi/pull/18786) | browser-core-first-use | feat(agent,coding-agent): send a short browser guide with the first browser call | browser | P2 | 12h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-core-first-use) |
