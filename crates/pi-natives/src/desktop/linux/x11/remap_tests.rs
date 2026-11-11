@@ -10,7 +10,10 @@ use std::{
 use x11rb::{connection::Connection, protocol::xproto::ConnectionExt as _};
 use xkeysym::Keysym;
 
-use super::{X11Input, super::keymap::{self, Keymap}};
+use super::{
+	super::keymap::{self, Keymap},
+	X11Input,
+};
 use crate::desktop::{backend::DeliveryMode, control, types::Target};
 
 #[link(name = "X11")]
