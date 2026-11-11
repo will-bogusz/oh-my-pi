@@ -69888,7 +69888,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-call-timeout",
    "host": "MacBook-Pro",
    "added": "2026-11-10T05:34:29Z",
-   "updated": "2026-11-11T04:37:38Z",
+   "updated": "2026-11-11T09:35:40Z",
    "note": "",
    "advanced": "2026-11-11T04:37:38Z",
    "built": [
@@ -70044,7 +70044,17 @@
     }
    ],
    "opened": "2026-11-10T16:35:50Z",
-   "readied": "2026-11-10T16:36:17Z"
+   "readied": "2026-11-10T16:36:17Z",
+   "design_checks": [
+    {
+     "pr": 18737,
+     "rounds": 8,
+     "at": "2026-11-11T09:35:39Z",
+     "verdict": "keep",
+     "note": "DesignChecks: lift stop; body correction: head raises Puppeteer protocol timeout to 301 s for tab workers",
+     "ref": "/Users/viathebrink/tmp/oh-my-pi/DesignChecks/DesignChecks.md"
+    }
+   ]
   },
   {
    "id": "browser-dead-tab-hint",
