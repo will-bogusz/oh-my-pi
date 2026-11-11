@@ -16,7 +16,7 @@
 - The shell's built-in `jq` now behaves like jq 1.8.2 instead of jaq: the same output (number formatting, colors, `-S`, `--indent`, `--seq`, `--stream`), error messages and exit statuses, jq's full option set (`--version` reports `jq-1.8.2`), and its grammar and builtins (`?//`, `$__loc__`, modules, `getpath`/`setpath` creating missing paths, `|=` deletions, Oniguruma regexes, dates); it passes jq 1.8.2's own test suite
 - Browser `tab.observe()` and `tab.ariaSnapshot()` on Chromium tabs now wait, up to 3 seconds, for the requests and page updates the actions since your last look started, so a cell that clicks and then observes shows the result instead of the page before it; requests already open before the action do not delay the look
 - Browser reads on Chromium tabs (`text`, `html`, `value`, `evaluate`, `screenshot`, `url` and the other tab, frame and element reads) wait the same way after an action, so `click()` then `text()` reads the result instead of the loading state
-- The browser tool steers agents to act and look in one Eval cell, ending it with `tab.observe()`, and to drop fixed sleeps after actions on Chromium tabs, where the next look or read now waits for the page
+- The browser tool steers agents to act and look in one Eval cell, ending it with `tab.observe()`, and to drop fixed sleeps after actions on Chromium tabs, where the next look or read now waits for the page; for later content it asks agents to read before choosing what text or element to wait for
 
 ### Fixed
 
