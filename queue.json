@@ -73576,6 +73576,24 @@
    "added": "2026-11-11T01:40:14Z",
    "updated": "2026-11-11T01:40:14Z",
    "note": ""
+  },
+  {
+   "id": "relay-target-miss-hint",
+   "branch": "will/relay-target-miss-hint",
+   "title": "fix(browser): name the relay's own-tab open when a target matches no tab",
+   "area": "browser",
+   "priority": "P2",
+   "needs": [],
+   "base": "55251e34c26eeb5a31a5c86cedf243acd7e2cb23",
+   "body": "bodies/relay-target-miss-hint.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-target-miss-hint",
+   "host": "MacBook-Pro",
+   "added": "2026-11-11T01:40:24Z",
+   "updated": "2026-11-11T01:40:24Z",
+   "note": ""
   }
  ],
  "watch": {
