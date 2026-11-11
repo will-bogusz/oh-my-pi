@@ -71381,7 +71381,7 @@
    "area": "browser",
    "priority": "P0",
    "needs": [],
-   "base": "7b42b1be6069b791c54e1c4c93d2070978d9e6bf",
+   "base": "f2ee6ba9b3e00b379c7c12b9d99ef6369fd08f3f",
    "body": "bodies/browser-run-node-hint.md",
    "state": "open",
    "pr": 18840,
@@ -71389,9 +71389,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-run-node-hint",
    "host": "MacBook-Pro",
    "added": "2026-11-10T16:48:01Z",
-   "updated": "2026-11-11T11:45:45Z",
+   "updated": "2026-11-11T12:27:53Z",
    "note": "",
-   "advanced": "2026-11-11T11:45:45Z",
+   "advanced": "2026-11-11T12:27:53Z",
    "built": [
     {
      "with": "#18676",
