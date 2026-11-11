@@ -75010,7 +75010,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-mpx-qt",
    "host": "MacBook-Pro",
    "added": "2026-11-10T22:23:32Z",
-   "updated": "2026-11-11T11:51:58Z",
+   "updated": "2026-11-11T15:25:40Z",
    "note": "",
    "advanced": "2026-11-11T11:51:58Z",
    "built": [
@@ -75133,7 +75133,17 @@
     }
    ],
    "opened": "2026-11-11T03:47:37Z",
-   "readied": "2026-11-11T03:47:59Z"
+   "readied": "2026-11-11T03:47:59Z",
+   "design_checks": [
+    {
+     "pr": 18825,
+     "rounds": 6,
+     "at": "2026-11-11T15:25:39Z",
+     "verdict": "change",
+     "note": "keep pool+holder; one push with the rebase: unplug poll matches id+name (R6) and only v2 pairs count toward the cap; decline next-holder-state findings naming follow-ups",
+     "ref": "/Users/viathebrink/tmp/oh-my-pi/Design18825/18825.md"
+    }
+   ]
   },
   {
    "id": "devin-retire-swe-1-6-fast",
