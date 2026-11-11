@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 10:23Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 10:25Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-11 10:00Z on goliath; groups below are from it, states from the manifest)
@@ -120,7 +120,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | [#18738](https://github.com/can1357/oh-my-pi/pull/18738) | browser-console-shape | fix(browser): tell agents that treat console() or errors() as an array to read .entries | browser | P1 | 17h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-console-shape) |
 | [#18743](https://github.com/can1357/oh-my-pi/pull/18743) | computer-open-window | fix(natives): return the window showing a page from macOS apps.open in a browser | computer | P1 | 17h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-open-window) |
 | [#18750](https://github.com/can1357/oh-my-pi/pull/18750) | browser-hover-actionable | fix(browser): hover on a hidden match waits and names the reason, like click | browser | P1 | 17h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-hover-actionable) |
-| [#18751](https://github.com/can1357/oh-my-pi/pull/18751) | browser-run-main-world | fix(browser): run tab.run page evaluations in the page's main world | browser | P1 | 16h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-run-main-world) |
+| [#18751](https://github.com/can1357/oh-my-pi/pull/18751) | browser-run-main-world | fix(browser): run tab.run page evaluations in the page's main world | browser | P1 | 17h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-run-main-world) |
 | [#18840](https://github.com/can1357/oh-my-pi/pull/18840) | browser-run-node-hint | fix(browser): say where tab.run code runs when it reaches for a page global | browser | P0 | 4h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-run-node-hint) |
 | [#18786](https://github.com/can1357/oh-my-pi/pull/18786) | browser-core-first-use | feat(agent,coding-agent): send a short browser guide with the first browser call | browser | P2 | 12h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-core-first-use) |
 | [#18789](https://github.com/can1357/oh-my-pi/pull/18789) | subagent-browser-relay | feat(coding-agent): keep subagents' browser tabs out of the user's Chrome and Tern pane unless asked | browser | P2 | 11h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/subagent-browser-relay) |
