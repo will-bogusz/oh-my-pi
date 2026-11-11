@@ -81256,6 +81256,26 @@
    "added": "2026-11-11T14:43:42Z",
    "updated": "2026-11-11T14:43:42Z",
    "note": ""
+  },
+  {
+   "id": "ax-ref-read-as-followup",
+   "branch": "will/ax-ref-read-as-followup",
+   "title": "fix(natives): skip unused ref-check reads and recover display refs",
+   "area": "computer",
+   "priority": "P2",
+   "needs": [
+    "ax-ref-read-as"
+   ],
+   "base": "8f4926af621992f46bd5d61d4abef83d43e9e1a2",
+   "body": "bodies/ax-ref-read-as-followup.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ax-ref-read-as-followup",
+   "host": "MacBook-Pro",
+   "added": "2026-11-11T15:44:29Z",
+   "updated": "2026-11-11T15:44:29Z",
+   "note": ""
   }
  ],
  "watch": {
