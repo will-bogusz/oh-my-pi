@@ -2,42 +2,36 @@
 
 I wanted `win.press("cmd+a")` to select all on a French keyboard instead of quitting the app.
 
-Local key chords on macOS (`press`, `holdKeys`, desktop and window targets, background and takeover) posted each character on its US (ANSI) key code. An app reads a key code through the current layout, so on French AZERTY `cmd+a` arrived as Cmd+Q and quit the app, `cmd+z` as Cmd+W and closed the window, a bare `z` typed `w`, and `1` typed `&`; the tool reported each as done. The layout lookup already existed for remote screens (Screen Sharing, iPhone Mirroring); local chords skipped it.
+macOS character chords now use an operation-local read of the active layout, including desktop and background calls. Takeover resolves it after target focus, so per-document input-source switching cannot reuse the previous app's map.
 
-Now a local chord's characters go through the current layout too:
-- a Command chord takes the key of the layout's Command layer, which is what an app matches a shortcut against (Russian puts Latin letters there, so `cmd+c` still copies);
-- a bare character takes its typing key with the Shift or Option it needs;
-- a Control or Option chord takes the layout key only when it needs no modifier the chord does not name, so AZERTY `ctrl+1` stays Ctrl on the `1` key, as the user presses it;
-- a character the layout lacks, a layout without key data, or a failed layout read leaves the character on its ANSI key, as before. A chord with no character (`enter`, `cmd+tab`) reads no layout.
+- Command shortcuts use the layout's Command layer; bare characters get the Shift or Option they need.
+- Control/Option shortcuts gain no unnamed modifier and reject numeric-keypad aliases, so AZERTY `ctrl+1` remains the number-row shortcut.
+- Failed layout reads stop before sending keys. Characters absent from the layout, or layouts without key data, retain the ANSI fallback; character-free chords read no layout.
 
-Typed text is unchanged: local `type` still sends Unicode event text, which 3e90f2f (PR 15193) settled. Chords were always key codes locally, so they cannot carry text and only the layout says which key a character is on.
+Local `type` still sends Unicode event text. Remote text retains its existing layout cache.
 
 ## Why
 
-On a French Mac the agent's first select-all quit the user's app, losing unsaved work, and the tool reported the key as pressed.
+Local chords previously used US key codes: on French AZERTY, `cmd+a` arrived as Cmd+Q and quit the app, while `cmd+z` closed its window. Both could report success despite losing the user's work.
 
 ## Testing
 
-TextEdit in a macOS 26.5.2 VM with Finder in front, addon swapped into `@oh-my-pi/pi-coding-agent`; each trial: `win.press("cmd+a")` then `win.type("Z")`; `win.type("hello")` then `win.press("cmd+z")`; `win.press("z")` then `win.press("1")`.
+Rechecked merge base `9369103e4a06` against final head `b4301e808147` in a fresh macOS 26.5.2 VM using TextEdit, with Finder in front before and after each cell. Each paired cell had 10 trials per route.
 
-| French AZERTY | main | this branch |
+| French AZERTY | Base: background / takeover | Head: background / takeover |
 |---|---|---|
-| `cmd+a` selects all (background / takeover) | 0/5, TextEdit quit 5/5 / 0/5, quit 5/5 | 30/30 / 29/30, no quit |
-| `cmd+z` undoes | 0/5 / 0/5 | 30/30 / 29/30 |
-| `z`, `1` type `z1` | `w&` every time | `z1` in takeover; `Z1` in the background |
+| `cmd+a` selects all | 0/10 / 0/10; quit every time | 10/10 / 10/10; no quits |
+| `z`, `1` type `z1` | `w&` 10/10 / 10/10 | `z1` 10/10 / 10/10 |
+| `cmd+z` undoes | 0/10 / 0/10; window closed | 10/10 / 10/10 |
 
-<details><summary>Trial notes, Russian, timing, limits</summary>
+Automatic capitalization was disabled and TextEdit restarted before each typing cell; this is not a capitalization fix. Dedicated takeover undo passed 30/30 with no success-reported miss. Switching US → French → US between calls selected all on 30/30 calls in each route (10 sequences each).
 
-The one takeover miss was the first takeover trial after the background ones: its `cmd+a` stopped with `InputFailed` (the window lost keyboard focus) and its `cmd+z` returned without undoing, the document still open; the next 29 trials were clean. On Russian, where the Command layer already matches ANSI, `cmd+a` and `cmd+z` worked on both builds (5/5), and a bare `z`, which no Russian key types, still falls back to the ANSI key (`я`). The capital `Z` and `Я` from a background bare key are the same on main (Russian `Я1` there too) and are not this change. A background `cmd+a` took 786 ms cold (keymap older than its 10 s cache) and 728 ms warm here, against 772 and 734 ms on main (3 each).
+Native macOS checks: `cargo test -p pi-natives --lib desktop::macos::keymap::tests::` (5 tests) and `cargo test -p pi-natives --lib local_chords_press_the_layouts_key_and_command_shortcuts_its_command_layer` pass. Production-only reversals fail the failed-read, stale-layout and keypad-shortcut regressions; macOS/Linux rust-check passed.
 
-Two limits stay as on main: a Command chord whose character the Command layer lacks (`cmd+/` on German or AZERTY) stays on its ANSI key, and keys held around clicks, drags and `holdMouse` still use ANSI keys.
-
-</details>
-
-`local_chords_press_the_layouts_key_and_command_shortcuts_its_command_layer` passes here; its `cmd+a` assertion, run through main's `chord_keys`, fails there (key 0, not 12). It also covers `ctrl+1`, a character-free chord reading no layout, and failed and cancelled reads. `command_shortcuts_map_to_the_key_of_the_layouts_command_layer` covers the keymap's Command layer.
+Limits unchanged: a character absent from the Command layer retains its ANSI key (`cmd+/` on German/AZERTY); keys held around clicks, drags and `holdMouse` still use ANSI keys.
 
 ---
 
 - [ ] `bun check` passes
 - [x] Tested locally
-- [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+- [x] CHANGELOG updated with the required attribution
