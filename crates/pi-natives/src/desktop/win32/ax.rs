@@ -16,7 +16,7 @@ use windows_sys::Win32::{
 
 use super::{
 	super::{
-		ax::{AxBounds, AxHandle, AxProps, normalize_role_uia},
+		ax::{AxBounds, AxHandle, AxProps, WalkBounds, normalize_role_uia},
 		backend::AxBackend,
 		error::{CoreResult, DesktopError},
 		types::DesktopWindow,
@@ -74,13 +74,103 @@ impl Win32Ax {
 		self.automation()?.get_raw_view_walker().map_err(ax_error)
 	}
 
-	fn read_children(&mut self, element: &UIElement) -> CoreResult<Vec<UIElement>> {
-		let condition = self
-			.automation()?
-			.create_true_condition()
+	fn read_node(&mut self, handle: &AxHandle) -> CoreResult<(AxProps, Vec<UIElement>)> {
+		let element = Self::element(handle)?;
+		let control_type = element.get_control_type().map_err(ax_error)?;
+		let native_role = control_type.to_string();
+		let automation = self.automation()?;
+		let cache = automation.create_cache_request().map_err(ax_error)?;
+		cache.set_tree_scope(TreeScope::Element).map_err(ax_error)?;
+		cache
+			.set_tree_filter(automation.create_true_condition().map_err(ax_error)?)
 			.map_err(ax_error)?;
+		for property in [
+			UIProperty::Name,
+			UIProperty::AutomationId,
+			UIProperty::ClassName,
+			UIProperty::HelpText,
+			UIProperty::ValueValue,
+			UIProperty::LegacyIAccessibleValue,
+			UIProperty::IsTogglePatternAvailable,
+			UIProperty::ToggleToggleState,
+			UIProperty::SelectionItemIsSelected,
+			UIProperty::IsExpandCollapsePatternAvailable,
+			UIProperty::ExpandCollapseExpandCollapseState,
+		] {
+			cache.add_property(property).map_err(ax_error)?;
+		}
+		let cached = element.build_updated_cache(&cache).map_err(ax_error)?;
+		let fields = [
+			cached_string(&cached, UIProperty::Name),
+			cached_string(&cached, UIProperty::AutomationId),
+			cached_string(&cached, UIProperty::ClassName),
+			cached_string(&cached, UIProperty::HelpText),
+			cached_string(&cached, UIProperty::ValueValue),
+			cached_string(&cached, UIProperty::LegacyIAccessibleValue),
+		];
+		let toggle =
+			cached_state(&cached, UIProperty::IsTogglePatternAvailable, UIProperty::ToggleToggleState);
+		let identity = ax_states::identity(
+			&native_role,
+			&fields.each_ref().map(|field| match field {
+				Ok(value) => Ok(value.as_deref()),
+				Err(()) => Err(()),
+			}),
+			toggle,
+		);
+		let [title, _, _, description, value, legacy_value] = fields;
+		let title = title.ok().flatten();
+		let description = description.ok().flatten();
+		let value = value.ok().flatten().or_else(|| legacy_value.ok().flatten());
+		let value = ax_states::toggle_value(value, toggle.ok().flatten());
+		let selected = ax_states::selected(
+			&native_role,
+			cached_bool(&cached, UIProperty::SelectionItemIsSelected).unwrap_or(false),
+		);
+		let expanded = ax_states::expanded(
+			cached_state(
+				&cached,
+				UIProperty::IsExpandCollapsePatternAvailable,
+				UIProperty::ExpandCollapseExpandCollapseState,
+			)
+			.ok()
+			.flatten(),
+		);
+		// UIA rectangles already use physical desktop pixels, the same
+		// native coordinate space as window metadata and capture geometry.
+		let bounds = element.get_bounding_rectangle().ok().map(|rect| AxBounds {
+			x:      f64::from(rect.get_left()),
+			y:      f64::from(rect.get_top()),
+			width:  f64::from(rect.get_right()) - f64::from(rect.get_left()),
+			height: f64::from(rect.get_bottom()) - f64::from(rect.get_top()),
+		});
+		let props = AxProps {
+			role: normalize_role_uia(&native_role),
+			native_role,
+			title,
+			value,
+			description,
+			enabled: element.is_enabled().unwrap_or(false),
+			focused: element.has_keyboard_focus().unwrap_or(false),
+			bounds,
+			actions: actions(element),
+			child_count: 0,
+			identity,
+			partial: identity.is_none(),
+			selected,
+			expanded,
+			role_name: None,
+		};
+		Ok(ax_states::with_children(props, self.read_children(element)))
+	}
+	fn read_children(&mut self, element: &UIElement) -> CoreResult<Vec<UIElement>> {
+		let automation = self.automation()?;
+		let condition = automation.create_true_condition().map_err(ax_error)?;
+		let cache = automation.create_cache_request().map_err(ax_error)?;
+		cache.set_tree_scope(TreeScope::Element).map_err(ax_error)?;
+		cache.set_tree_filter(condition.clone()).map_err(ax_error)?;
 		element
-			.find_all(TreeScope::Children, &condition)
+			.find_all_build_cache(TreeScope::Children, &condition, &cache)
 			.map_err(ax_error)
 	}
 
@@ -404,101 +494,21 @@ impl AxBackend for Win32Ax {
 			.map_err(ax_error)
 	}
 
+
 	fn props(&mut self, handle: &AxHandle) -> CoreResult<AxProps> {
-		let element = Self::element(handle)?;
-		let control_type = element.get_control_type().map_err(ax_error)?;
-		let native_role = control_type.to_string();
-		let cache = self
-			.automation()?
-			.create_cache_request()
-			.map_err(ax_error)?;
-		cache.set_tree_scope(TreeScope::Element).map_err(ax_error)?;
-		for property in [
-			UIProperty::Name,
-			UIProperty::AutomationId,
-			UIProperty::ClassName,
-			UIProperty::HelpText,
-			UIProperty::ValueValue,
-			UIProperty::LegacyIAccessibleValue,
-			UIProperty::IsTogglePatternAvailable,
-			UIProperty::ToggleToggleState,
-			UIProperty::SelectionItemIsSelected,
-			UIProperty::IsExpandCollapsePatternAvailable,
-			UIProperty::ExpandCollapseExpandCollapseState,
-		] {
-			cache.add_property(property).map_err(ax_error)?;
-		}
-		let cached = element.build_updated_cache(&cache).map_err(ax_error)?;
-		let fields = [
-			cached_string(&cached, UIProperty::Name),
-			cached_string(&cached, UIProperty::AutomationId),
-			cached_string(&cached, UIProperty::ClassName),
-			cached_string(&cached, UIProperty::HelpText),
-			cached_string(&cached, UIProperty::ValueValue),
-			cached_string(&cached, UIProperty::LegacyIAccessibleValue),
-		];
-		let toggle =
-			cached_state(&cached, UIProperty::IsTogglePatternAvailable, UIProperty::ToggleToggleState);
-		let identity = ax_states::identity(
-			&native_role,
-			&fields.each_ref().map(|field| match field {
-				Ok(value) => Ok(value.as_deref()),
-				Err(()) => Err(()),
-			}),
-			toggle,
-		);
-		let [title, _, _, description, value, legacy_value] = fields;
-		let title = title.ok().flatten();
-		let description = description.ok().flatten();
-		let value = value.ok().flatten().or_else(|| legacy_value.ok().flatten());
-		let value = ax_states::toggle_value(value, toggle.ok().flatten());
-		let selected = ax_states::selected(
-			&native_role,
-			cached_bool(&cached, UIProperty::SelectionItemIsSelected).unwrap_or(false),
-		);
-		let expanded = ax_states::expanded(
-			cached_state(
-				&cached,
-				UIProperty::IsExpandCollapsePatternAvailable,
-				UIProperty::ExpandCollapseExpandCollapseState,
-			)
-			.ok()
-			.flatten(),
-		);
-		let children = self.read_children(element);
-		let partial = identity.is_none() || children.is_err();
-		let child_count = children.map_or(0, |children| children.len().min(u32::MAX as usize) as u32);
-		// UIA rectangles already use physical desktop pixels, the same
-		// native coordinate space as window metadata and capture geometry.
-		let bounds = element.get_bounding_rectangle().ok().map(|rect| AxBounds {
-			x:      f64::from(rect.get_left()),
-			y:      f64::from(rect.get_top()),
-			width:  f64::from(rect.get_right()) - f64::from(rect.get_left()),
-			height: f64::from(rect.get_bottom()) - f64::from(rect.get_top()),
-		});
-		Ok(AxProps {
-			role: normalize_role_uia(&native_role),
-			native_role,
-			title,
-			value,
-			description,
-			enabled: element.is_enabled().unwrap_or(false),
-			focused: element.has_keyboard_focus().unwrap_or(false),
-			bounds,
-			actions: actions(element),
-			child_count,
-			identity,
-			partial,
-			selected,
-			expanded,
-			role_name: None,
-		})
+		self.read_node(handle).map(|(props, _)| props)
+	}
+
+	fn walk_node(&mut self, handle: &AxHandle, _bounds: WalkBounds) -> CoreResult<(AxProps, Vec<AxHandle>)> {
+		let (props, children) = self.read_node(handle)?;
+		Ok((props, children.into_iter().map(uia_handle).collect()))
 	}
 
 	fn children(&mut self, handle: &AxHandle) -> CoreResult<Vec<AxHandle>> {
 		let element = Self::element(handle)?;
 		Ok(self
-			.read_children(element)?
+			.read_children(element)
+			.unwrap_or_default()
 			.into_iter()
 			.map(uia_handle)
 			.collect())
@@ -603,7 +613,6 @@ impl AxBackend for Win32Ax {
 				return false;
 			}
 			ax_states::destroyed(
-				property_error,
 				element
 					.get_pattern::<UIVirtualizedItemPattern>()
 					.err()

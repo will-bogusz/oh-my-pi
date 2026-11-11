@@ -1,16 +1,12 @@
 use std::hash::{DefaultHasher, Hash, Hasher};
 
-use super::super::error::DesktopError;
+use super::super::{ax::AxProps, error::DesktopError};
 
 // UIA_E_ELEMENTNOTAVAILABLE also describes unrealized virtualized items.
 pub(super) const ELEMENT_NOT_AVAILABLE: i32 = -2_147_220_991;
 
-pub(super) const fn destroyed(
-	property_error: Option<i32>,
-	virtualized_pattern_error: Option<i32>,
-) -> bool {
-	matches!(property_error, Some(ELEMENT_NOT_AVAILABLE))
-		&& matches!(virtualized_pattern_error, Some(ELEMENT_NOT_AVAILABLE))
+pub(super) const fn destroyed(virtualized_pattern_error: Option<i32>) -> bool {
+	matches!(virtualized_pattern_error, Some(ELEMENT_NOT_AVAILABLE))
 }
 
 pub(super) fn uia_error(code: i32, message: String) -> DesktopError {
@@ -19,6 +15,18 @@ pub(super) fn uia_error(code: i32, message: String) -> DesktopError {
 	} else {
 		DesktopError::ax_failed(message)
 	}
+}
+
+pub(super) fn with_children<T, E>(mut props: AxProps, children: Result<Vec<T>, E>) -> (AxProps, Vec<T>) {
+	let children = match children {
+		Ok(children) => children,
+		Err(_) => {
+			props.partial = true;
+			Vec::new()
+		},
+	};
+	props.child_count = children.len().min(u32::MAX as usize) as u32;
+	(props, children)
 }
 
 pub(super) fn toggle_value(value: Option<String>, toggle: Option<i32>) -> Option<String> {
@@ -71,10 +79,9 @@ mod tests {
 		use super::super::super::error::ErrorCode;
 		assert_eq!(uia_error(ELEMENT_NOT_AVAILABLE, "gone".into()).code, ErrorCode::StaleRef);
 		assert_eq!(uia_error(-1, "failed".into()).code, ErrorCode::AxFailed);
-		assert!(destroyed(Some(ELEMENT_NOT_AVAILABLE), Some(ELEMENT_NOT_AVAILABLE)));
-		assert!(!destroyed(Some(ELEMENT_NOT_AVAILABLE), None));
-		assert!(!destroyed(Some(ELEMENT_NOT_AVAILABLE), Some(-1)));
-		assert!(!destroyed(None, Some(ELEMENT_NOT_AVAILABLE)));
+		assert!(destroyed(Some(ELEMENT_NOT_AVAILABLE)));
+		assert!(!destroyed(None));
+		assert!(!destroyed(Some(-1)));
 	}
 	#[test]
 	fn checkbox_states_preserve_other_values() {
@@ -83,6 +90,37 @@ mod tests {
 		assert_eq!(toggle_value(Some(String::new()), Some(2)).as_deref(), Some("2"));
 		assert_eq!(toggle_value(Some("custom".into()), Some(1)).as_deref(), Some("custom"));
 		assert_eq!(toggle_value(None, None), None);
+	}
+
+	#[test]
+	fn children_read_failures_keep_the_node_partial() {
+		let props = AxProps {
+			role: "checkbox".into(),
+			native_role: "CheckBox".into(),
+			title: Some("Remember me".into()),
+			value: Some("1".into()),
+			description: None,
+			enabled: true,
+			focused: false,
+			bounds: None,
+			actions: Vec::new(),
+			child_count: 99,
+			identity: Some(7),
+			partial: false,
+			selected: false,
+			expanded: None,
+			role_name: None,
+		};
+		let (props, children) = with_children(props, Err::<Vec<u8>, _>(()));
+		assert!(props.partial);
+		assert_eq!(props.title.as_deref(), Some("Remember me"));
+		assert_eq!(props.value.as_deref(), Some("1"));
+		assert_eq!(props.child_count, 0);
+		assert!(children.is_empty());
+		let (props, children) = with_children(props, Ok::<_, ()>(vec![1_u8]));
+		assert!(props.partial);
+		assert_eq!(props.child_count, 1);
+		assert_eq!(children, [1]);
 	}
 
 	#[test]
@@ -99,7 +137,10 @@ mod tests {
 
 	#[test]
 	fn recreated_controls_match_only_fully_read_identity() {
-		let fields = [Ok(Some("Remember me")), Ok(Some("remember")), Ok(Some("Button")), Ok(None)];
+		let fields = [
+			Ok(Some("Remember me")), Ok(Some("remember")), Ok(Some("Button")),
+			Ok(None), Ok(None), Ok(None),
+		];
 		let original = identity("CheckBox", &fields, Ok(Some(0))).unwrap();
 		assert_eq!(identity("CheckBox", &fields, Ok(Some(0))), Some(original));
 		assert_ne!(identity("RadioButton", &fields, Ok(Some(0))), Some(original));
