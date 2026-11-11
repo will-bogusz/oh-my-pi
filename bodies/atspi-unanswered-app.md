@@ -1,8 +1,8 @@
 ## What
 
-I gave every Linux AT-SPI request a 5 s limit and a cancel, and stopped OMP connecting to every app on the desktop, because one `ax()` read of an app whose dialog `press()` had just opened froze the `computer` tool for the rest of the session, and OMP's connection to every app kept that dialog from taking typed input.
+I gave Linux AT-SPI requests a 5 s limit and cancellation, and removed connections to every app, because one unresponsive app froze the computer tool for the rest of the session.
 
-In Audacity's Analyze ▸ Label Sounds…, a read of the app went from hanging every later `computer` call to the 120 s run timeout to a `Timeout` error after 5 s, with screenshots and input working at once.
+An Audacity dialog opened by `press()` or `menu.select()` now produces a `Timeout` after 5 s while screenshots and input remain usable, instead of blocking later calls until the 120 s run timeout.
 
 <picture>
   <source media="(min-width: 1244px) and (prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/3eaf1da9-931b-48ef-820f-b01e42c7fbee">
@@ -12,7 +12,13 @@ In Audacity's Analyze ▸ Label Sounds…, a read of the app went from hanging e
   <img width="780" alt="Timeline, main against this PR, after press() on Audacity's Analyze > Label Sounds... opens a modal dialog. main: the press returns and the dialog ignores typed input, ax() waits forever because Audacity answers no AT-SPI call, screenshot and Escape queue behind it and each call ends at the 120 s run timeout for the rest of the session, and ax() never runs again. This PR: the press returns, ax() fails with Timeout after 5 s, naming Audacity, the screenshot and Escape run at once and Escape closes the dialog, and ax() reads the window again." src="https://github.com/user-attachments/assets/e60134a7-96a8-415a-80b3-a35970bbb93f" />
 </picture>
 
-> **AT-SPI context.** On Linux, `ax()`, `press()` and `menu.select()` are D-Bus calls into the app, served on its main loop. GTK 3 apps reply to a press before running it inside their D-Bus handler ([`impl_DoAction`](https://gitlab.gnome.org/GNOME/at-spi2-core/-/blob/main/atk-adaptor/adaptors/action-adaptor.c)), so a press that opens a modal dialog leaves the app answering nothing until it closes. libatspi gives each call [800 ms](https://gitlab.gnome.org/GNOME/at-spi2-core/-/blob/main/atspi/atspi-misc.c); OMP waited forever.
+## Why
+
+AT-SPI requests occupied the sole desktop worker without a limit; cancellation could not interrupt them. Connecting peer-to-peer to every app also left Audacity's modal dialog ignoring typed input and could wedge the accessibility bus after idle client churn.
+
+The limit is per request, not libatspi's 800 ms per call: a request makes multiple calls, and a LibreOffice edit takes 1.75 s. Menu walks bound each call instead. Window enumeration skips apps that do not answer; targeted reads report `Timeout`. A timed-out command may still run later, which its error says.
+
+Not changed: clicking a closed menu's item can still fail with `InvalidCoordinateFrame`. The Audacity case has not been run on Wayland.
 
 <details><summary>Reading order (crates/pi-natives/src/desktop/)</summary>
 
@@ -25,23 +31,18 @@ In Audacity's Analyze ▸ Label Sounds…, a read of the app went from hanging e
 
 </details>
 
-## Why
-
-Every AT-SPI call ran in `rt.block_on` on the one desktop worker thread with no limit, so the read never returned, every later request queued behind it, and the host's cancel could not interrupt it.
-
-`atspi::AccessibilityConnection::new` also connects to every app peer to peer (atspi-connection's default `p2p`). One app not answering hung every new session and `menu.select()`, and with those connections open Audacity's dialog ignored typed input.
+<details><summary>Idle-bus failure and measurement</summary>
 
 Dropping the peer connections also stops an idle OMP from wedging itself and the accessibility bus. On `main`, atspi's peer listener subscribes OMP's bus connection to every `NameOwnerChanged`, and that connection is read only during a `computer` call: an OMP process that made one call and then saw 33 or more short-lived accessibility clients come and go (40 launches of KCalc, or 33 bare connections) hung on its next call and on every one after, on dbus-broker and dbus-daemon alike, because the listener waits for a reply queued behind its own full 64-message stream. Each such process also holds about 3.1 KB per client in dbus-broker against the user's shared 264 MiB accessibility-bus quota; with three of them the quota ran out after about 29,000 clients, the broker disconnected `at-spi2-registryd`, and a Qt 6 app started afterwards aborted at launch in libdbus (`QDBusConnectionPrivate::getNameOwnerNoCache`), the failure trycua/cua#4894 reports. On this branch the call after 1,000 clients took 0.15 s, and three idle processes held 0 bytes through 150,000 clients with the registry still up.
 
-Decisions:
-- 5 s per request, not libatspi's 800 ms per call: a request makes up to a dozen calls, and a LibreOffice text edit takes 1.75 s. Menu walks, hundreds of calls, bound each call.
-- zbus's `method_timeout` covers `Connection::call_method` only, not proxy calls.
-- `windows()` and focus search skip an app that does not answer; `elementAt()`, a window lookup without a pid, and a Wayland lookup of a skipped app's window fail with `Timeout`.
-- A press, value or menu command that times out may still run later; the error says so.
+</details>
 
-Not here: `click()` on a closed menu's item failing with `InvalidCoordinateFrame`.
+## Verification
 
-## Testing
+After rebasing onto main: `cargo build -p pi-natives` passed; `cargo test -p pi-natives --lib desktop::linux` passed all 85 tests. Linux and Windows `scripts/rust-check` passed.
+
+<details><summary>Live repro, regression tests and idle-bus evidence</summary>
+
 
 Live, native `DesktopSession`, Ubuntu 24.04 guest (Xorg, mutter), Audacity 3.4.2, Label Sounds opened by `axPerform(press)` or `menuSelect`:
 
@@ -61,8 +62,9 @@ Idle-bus case: Fedora 44 KDE Wayland guest (at-spi2-core 2.60.7, dbus-broker 37 
 
 Not run: the Audacity case on Wayland.
 
----
+
+</details>
 
 - [ ] `bun check` passes
 - [x] Tested locally
-- [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+- [x] CHANGELOG updated with the required attribution
