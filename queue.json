@@ -73743,7 +73743,7 @@
    "branch": "will/browser-select-readback",
    "title": "fix(coding-agent): return the options a page leaves selected after its change handlers",
    "area": "browser",
-   "priority": "P1",
+   "priority": "P0",
    "needs": [],
    "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
    "body": "bodies/browser-select-readback.md",
@@ -73753,7 +73753,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-select-readback",
    "host": "MacBook-Pro",
    "added": "2026-11-11T00:14:36Z",
-   "updated": "2026-11-11T05:06:44Z",
+   "updated": "2026-11-11T05:24:42Z",
    "note": "",
    "built": [
     {
@@ -73986,7 +73986,7 @@
    "branch": "will/browser-download-missing-file",
    "title": "fix(coding-agent): fail a download wait when the saved file is not on this machine",
    "area": "browser",
-   "priority": "P2",
+   "priority": "P0",
    "needs": [],
    "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
    "body": "bodies/browser-download-missing-file.md",
@@ -73996,7 +73996,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-download-missing-file",
    "host": "MacBook-Pro",
    "added": "2026-11-11T00:14:44Z",
-   "updated": "2026-11-11T05:10:46Z",
+   "updated": "2026-11-11T05:24:42Z",
    "note": "",
    "built": [
     {
@@ -74285,7 +74285,7 @@
    "branch": "will/relay-target-miss-hint",
    "title": "fix(browser): name the relay's own-tab open when a target matches no tab",
    "area": "browser",
-   "priority": "P2",
+   "priority": "P0",
    "needs": [],
    "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
    "body": "bodies/relay-target-miss-hint.md",
@@ -74295,7 +74295,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-target-miss-hint",
    "host": "MacBook-Pro",
    "added": "2026-11-11T01:40:24Z",
-   "updated": "2026-11-11T05:20:02Z",
+   "updated": "2026-11-11T05:24:42Z",
    "note": "",
    "built": [
     {
@@ -74528,7 +74528,7 @@
    "branch": "will/relay-detach-owned-close",
    "title": "fix(browser): say omp closed its own relay tab when Chrome's detach ends it",
    "area": "browser",
-   "priority": "P2",
+   "priority": "P1",
    "needs": [],
    "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
    "body": "bodies/relay-detach-owned-close.md",
@@ -74538,7 +74538,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-detach-owned-close",
    "host": "MacBook-Pro",
    "added": "2026-11-11T01:40:34Z",
-   "updated": "2026-11-11T05:15:14Z",
+   "updated": "2026-11-11T05:24:42Z",
    "note": "",
    "advanced": "2026-11-11T04:14:41Z",
    "built": [
