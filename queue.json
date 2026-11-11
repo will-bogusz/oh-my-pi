@@ -73500,13 +73500,13 @@
    "needs": [],
    "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
    "body": "bodies/x11-mpx-qt.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18825,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-mpx-qt",
    "host": "MacBook-Pro",
    "added": "2026-11-10T22:23:32Z",
-   "updated": "2026-11-11T03:37:22Z",
+   "updated": "2026-11-11T03:47:37Z",
    "note": "",
    "advanced": "2026-11-11T03:37:22Z",
    "built": [
@@ -73627,7 +73627,8 @@
      "at": "2026-11-11T03:22:03Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-11T03:47:37Z"
   },
   {
    "id": "devin-retire-swe-1-6-fast",
