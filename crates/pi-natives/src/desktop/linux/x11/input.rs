@@ -71,7 +71,7 @@ pub struct X11Input {
 	root:             Window,
 	atoms:            Atoms,
 	keymap:           Keymap,
-	text_mapping: TextMapping,
+	text_mapping:     TextMapping,
 	takeover_target:  Option<Window>,
 	takeover_pointer: Cell<Option<(i16, i16)>>,
 	/// Session-lived virtual master pair, created on first background use.
@@ -91,7 +91,7 @@ enum Keys<'a> {
 }
 
 struct PlannedKeys<'a> {
-	steps: Vec<KeyStep>,
+	steps:     Vec<KeyStep>,
 	remaining: Vec<&'a str>,
 }
 
@@ -721,7 +721,9 @@ impl X11Input {
 			let steps = if let Some(first) = segments.next() {
 				self.text_mapping.bind(&mut self.keymap, first)?;
 				self.keymap.plan_text(first)?
-			} else { Vec::new() };
+			} else {
+				Vec::new()
+			};
 			PlannedKeys { steps, remaining: segments.collect() }
 		} else {
 			self.text_mapping.hide(&mut self.keymap);
@@ -730,13 +732,20 @@ impl X11Input {
 		let before = self.text_mapping.presses();
 		body(self, plan).map_err(|mut error| {
 			if matches!(keys, Keys::Text(_)) && self.text_mapping.presses() != before {
-				error.message.push_str("; part of the text was sent before this error");
+				error
+					.message
+					.push_str("; part of the text was sent before this error");
 			}
 			error
 		})
 	}
 
-	fn deliver_planned(&mut self, plan: PlannedKeys<'_>, duration: Duration, window: Option<Window>) -> CoreResult<()> {
+	fn deliver_planned(
+		&mut self,
+		plan: PlannedKeys<'_>,
+		duration: Duration,
+		window: Option<Window>,
+	) -> CoreResult<()> {
 		let deliver = |this: &Self, steps: &[KeyStep]| match window {
 			Some(window) => this.send_key_steps(window, steps, duration),
 			None => this.xtest_steps(steps, duration),
@@ -755,7 +764,9 @@ impl X11Input {
 	}
 
 	fn send_keys(&mut self, window: Window, keys: Keys<'_>) -> CoreResult<()> {
-		self.with_planned_keys(keys, |this, plan| this.deliver_planned(plan, keys.duration(), Some(window)))
+		self.with_planned_keys(keys, |this, plan| {
+			this.deliver_planned(plan, keys.duration(), Some(window))
+		})
 	}
 
 	fn xtest_steps(&self, steps: &[KeyStep], duration: Duration) -> CoreResult<()> {
@@ -766,7 +777,9 @@ impl X11Input {
 				.map(|step| step.keycode),
 		)?;
 		keymap::run_steps_with_hold(steps, duration, |step| {
-			if step.press { self.text_mapping.pressed(step.keycode); }
+			if step.press {
+				self.text_mapping.pressed(step.keycode);
+			}
 			self.xtest_key(step.keycode, step.press)
 		})?;
 		self.conn.flush().map_err(input_failed)
@@ -782,7 +795,9 @@ impl X11Input {
 	) -> CoreResult<()> {
 		let mut state = 0u16;
 		keymap::run_steps_with_hold(steps, duration, |step| {
-			if step.press { self.text_mapping.pressed(step.keycode); }
+			if step.press {
+				self.text_mapping.pressed(step.keycode);
+			}
 			self.send_key(window, step.keycode, step.press, KeyButMask::from(state))?;
 			let mask = self.keymap.modifier_mask(step.keycode);
 			if step.press {

@@ -98,7 +98,7 @@ pub(super) struct Mpx {
 	pointer:         UInputDevice,
 	pointer_slave:   u16,
 	keyboard:        Option<VirtualKeyboard>,
-	text_mapping: TextMapping,
+	text_mapping:    TextMapping,
 	/// A timeout can leave kernel events in flight. Never retarget that pair
 	/// to another window after an uncertain dispatch.
 	uncertain:       bool,
@@ -384,7 +384,9 @@ impl Mpx {
 		})();
 		result.map_err(|mut error: DesktopError| {
 			if self.text_mapping.presses() != before {
-				error.message.push_str("; part of the text was sent before this error");
+				error
+					.message
+					.push_str("; part of the text was sent before this error");
 			}
 			error
 		})
@@ -531,7 +533,9 @@ impl Mpx {
 		let last_press = steps.iter().rposition(|step| step.press);
 		let mut index = 0;
 		keymap::run_steps(steps, |step| {
-			if step.press { self.text_mapping.pressed(step.keycode); }
+			if step.press {
+				self.text_mapping.pressed(step.keycode);
+			}
 			if index > 0 {
 				if last_press.is_none_or(|last| index > last) {
 					control::settle(KEY_DELAY);

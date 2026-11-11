@@ -32,7 +32,7 @@ pub(super) struct Keymap {
 	pub(super) keysyms_per_keycode: u8,
 	pub(super) keysyms:             Vec<u32>,
 	/// Core modifier mask bit each modifier keycode sets while held.
-	modifier_masks:      Vec<(u8, u16)>,
+	modifier_masks:                 Vec<(u8, u16)>,
 	pub(super) device:              Option<u8>,
 	pub(super) core_mapping:        bool,
 	pub(super) master:              Option<u8>,
@@ -187,7 +187,6 @@ impl Keymap {
 			.ok_or_else(|| DesktopError::input_failed("X11 keymap has no Shift key"))
 	}
 
-
 	pub(super) fn empty_row(&self, code: u8) -> bool {
 		let width = usize::from(self.keysyms_per_keycode);
 		let Some(index) = code.checked_sub(self.min_keycode).map(usize::from) else {
@@ -202,7 +201,11 @@ impl Keymap {
 
 	pub(super) fn refresh(&self, conn: &RustConnection) -> CoreResult<Self> {
 		if self.core_mapping {
-			if self.device.is_some() { Self::xtest(conn) } else { Self::core(conn) }
+			if self.device.is_some() {
+				Self::xtest(conn)
+			} else {
+				Self::core(conn)
+			}
 		} else if let Some(master) = self.master {
 			Self::mpx(conn, self.device.expect("device map").into(), master.into())
 		} else {
@@ -292,9 +295,6 @@ impl Keymap {
 			.fold(0, |mask, &(_, bit)| mask | bit)
 	}
 }
-
-
-
 
 /// Emits `steps` in order. When one fails, the keys this run still holds are
 /// released in reverse so no modifier is left chording later input. Once the
@@ -448,7 +448,6 @@ pub(super) fn keysym_for_key(key: KeyName) -> u32 {
 #[cfg(test)]
 mod tests {
 	use super::*;
-
 
 	const A: u8 = 38;
 	const ONE: u8 = 10;
