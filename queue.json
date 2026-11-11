@@ -70969,7 +70969,7 @@
    "area": "browser",
    "priority": "P1",
    "needs": [],
-   "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
+   "base": "7b42b1be6069b791c54e1c4c93d2070978d9e6bf",
    "body": "bodies/browser-hover-actionable.md",
    "state": "open",
    "pr": 18750,
@@ -70977,7 +70977,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-hover-actionable",
    "host": "MacBook-Pro",
    "added": "2026-11-10T16:34:24Z",
-   "updated": "2026-11-11T10:07:54Z",
+   "updated": "2026-11-11T11:43:52Z",
    "note": "",
    "built": [
     {
@@ -71143,7 +71143,7 @@
    ],
    "opened": "2026-11-10T17:21:25Z",
    "readied": "2026-11-10T17:21:54Z",
-   "advanced": "2026-11-11T10:07:33Z",
+   "advanced": "2026-11-11T11:43:52Z",
    "design_checks": [
     {
      "pr": 18750,
