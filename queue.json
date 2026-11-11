@@ -77379,6 +77379,24 @@
    "updated": "2026-11-11T10:13:50Z",
    "note": "",
    "kind": "proposal"
+  },
+  {
+   "id": "win-ax-states",
+   "branch": "will/win-ax-states",
+   "title": "fix(natives): expose Windows control state and stale-reference matches",
+   "area": "computer",
+   "priority": "P2",
+   "needs": [],
+   "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
+   "body": "bodies/win-ax-states.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-ax-states",
+   "host": "MacBook-Pro",
+   "added": "2026-11-11T10:16:04Z",
+   "updated": "2026-11-11T10:16:04Z",
+   "note": ""
   }
  ],
  "watch": {
