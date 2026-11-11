@@ -88241,8 +88241,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-11T15:05:44.959044Z",
-  "host": "goliath",
+  "at": "2026-11-11T15:56:49.073449Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -89364,6 +89364,30 @@
     "created": "2026-11-11T02:53:57Z"
    },
    {
+    "id": "ax-ref-read-as-followup",
+    "label": "ax-ref-read-as-followup",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P2",
+    "title": "fix(natives): skip unused ref-check reads and recover display refs",
+    "action": "wait",
+    "reasons": [
+     "needs #18892 (open)",
+     "conflicts with #18898 in crates/pi-natives/src/desktop/macos/ax.rs"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "#18898"
+    ],
+    "needs": [
+     "ax-ref-read-as"
+    ],
+    "created": "2026-11-11T15:44:29Z"
+   },
+   {
     "id": "browser-wait-selector-state",
     "label": "browser-wait-selector-state",
     "number": null,
@@ -90230,9 +90254,9 @@
      "needs token-count-policy (queued), wire-delta-count (queued)",
      "conflicts with #18771 in packages/ai/src/providers/factory-droid.ts",
      "conflicts with #17610 in packages/ai/src/providers/factory-droid.ts",
-     "its need token-count-policy conflicts with main in packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/test/context-fits-model.test.ts",
+     "its need token-count-policy conflicts with main in packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/session/session-stats.ts, packages/coding-agent/test/context-fits-model.test.ts",
      "its need wire-delta-count conflicts with main in packages/agent/src/tokenizer.ts, packages/ai/src/providers/factory-droid.ts, packages/coding-agent/src/session/session-maintenance.ts",
-     "conflicts with main in packages/agent/src/agent.ts, packages/ai/src/providers/factory-droid/gemini.ts"
+     "conflicts with main in packages/agent/src/agent.ts, packages/ai/src/providers/factory-droid/gemini.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/context-view.ts, packages/coding-agent/test/modes/context-view.test.ts, packages/tui/src/status-line/context-usage.ts, packages/tui/test/context-usage.test.ts"
     ],
     "note": "",
     "over": [],
@@ -90441,7 +90465,7 @@
     "action": "wait",
     "reasons": [
      "needs token-count-policy (queued)",
-     "its need token-count-policy conflicts with main in packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/test/context-fits-model.test.ts"
+     "its need token-count-policy conflicts with main in packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/session/session-stats.ts, packages/coding-agent/test/context-fits-model.test.ts"
     ],
     "note": "",
     "over": [],
@@ -90462,7 +90486,7 @@
     "title": "feat(catalog,coding-agent): token-count framing policy in KDL",
     "action": "wait",
     "reasons": [
-     "conflicts with main in packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/test/context-fits-model.test.ts"
+     "conflicts with main in packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/session/session-stats.ts, packages/coding-agent/test/context-fits-model.test.ts"
     ],
     "note": "",
     "over": [],
