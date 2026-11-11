@@ -77866,7 +77866,7 @@
    "branch": "will/macos-press-disabled",
    "title": "fix(natives): refuse a macOS press on a disabled element",
    "area": "natives",
-   "priority": "P1",
+   "priority": "P0",
    "needs": [],
    "base": "f2ee6ba9b3e00b379c7c12b9d99ef6369fd08f3f",
    "body": "bodies/macos-press-disabled.md",
@@ -77876,7 +77876,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-press-disabled",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:58:05Z",
-   "updated": "2026-11-11T13:24:20Z",
+   "updated": "2026-11-11T13:27:20Z",
    "note": "",
    "built": [
     {
@@ -79488,7 +79488,7 @@
    "branch": "will/ax-ref-read-as",
    "title": "fix(natives): refuse macOS element actions once the ref's element reads as another control",
    "area": "computer",
-   "priority": "P0",
+   "priority": "P1",
    "needs": [],
    "base": "f2ee6ba9b3e00b379c7c12b9d99ef6369fd08f3f",
    "body": "bodies/ax-ref-read-as.md",
@@ -79498,7 +79498,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ax-ref-read-as",
    "host": "MacBook-Pro",
    "added": "2026-11-11T10:51:34Z",
-   "updated": "2026-11-11T13:10:45Z",
+   "updated": "2026-11-11T13:27:20Z",
    "note": "",
    "built": [
     {
