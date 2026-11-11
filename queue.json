@@ -74035,7 +74035,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/qt5-getall-crash",
    "host": "MacBook-Pro",
    "added": "2026-11-11T02:06:11Z",
-   "updated": "2026-11-11T03:40:31Z",
+   "updated": "2026-11-11T03:40:52Z",
    "note": "Merges clean with atspi-unanswered-app 8800f10666 both orders (merged tree 778e58b0: 85 desktop::linux tests pass on goliath), #18783, #18784, x11-mpx-qt, atspi-text-first, atspi-value-readback. Conflicts textually with queued atspi-walk-reads (377c5f38), which already reads Text uncached in its own text_value: walk-reads rebases onto this and keeps one text_value. Value proxy left lazy on purpose (only Set; keeps set_value identical to main for the unanswered-app merge).",
    "built": [
     {
@@ -74157,7 +74157,8 @@
     }
    ],
    "advanced": "2026-11-11T03:37:08Z",
-   "opened": "2026-11-11T03:40:31Z"
+   "opened": "2026-11-11T03:40:31Z",
+   "readied": "2026-11-11T03:40:52Z"
   },
   {
    "id": "covered-fill",
