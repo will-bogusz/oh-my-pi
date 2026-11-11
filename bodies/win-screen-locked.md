@@ -12,10 +12,16 @@ The probe combines session state with access to the input desktop, following [Cu
 
 Review `win32/session.rs` first, then shared screen-state dispatch and the Windows annotations. macOS retains its existing explanations. The new guidance only explains an unavailable Windows desktop; no model trials were run.
 
-## Verification
+## Testing
 
 - Linux: `cargo test -p pi-natives --lib windows_screen_locked_verdict` fails with the original always-false verdict restored (1 failed), then passes (1 passed).
 - `rust-check --windows` (xwin clippy), Linux `rust-check`, and macOS `rust-check`: clippy and rustfmt passed.
 - `bun test packages/coding-agent/test/tools/computer.test.ts`: 146 passed. The Windows notice regression fails when either its capture annotation or run-state branch is reverted, and passes applied; macOS explanations remain covered.
 
-Live check on a Windows 11 desktop: pending.
+Live check on a Windows 11 guest, the console session locked with `LockWorkStation`, then `capabilities()`, a screenshot and a background `type("x")` into a Win32 window:
+
+| after locking | `main` | this PR |
+|---|---|---|
+| `capabilities().screenLocked` | `false` | `true` |
+| `screenshot()` | `CaptureFailed: ... The handle is invalid` | same error, tagged "(the screen is locked)", plus the run's lock note |
+| `type("x")` | success | `InputFailed`: no input was sent (the screen is locked) |
