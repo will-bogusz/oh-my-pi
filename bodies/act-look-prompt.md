@@ -38,7 +38,7 @@ Sol's step gain was concentrated in GOV.UK. Haiku re-checked more; one series ru
 
 </details>
 
-Prompt rendering is exercised with `bun test packages/coding-agent/test/tools/browser-prelude-documentation.test.ts`; model behavior evidence is the blind comparison above, not a prompt-string snapshot.
+The blind comparison above is the evidence for the wording change; a rendering or prompt-string assertion does not establish model behavior.
 
 ---
 
