@@ -81032,13 +81032,13 @@
    "needs": [],
    "base": "f2ee6ba9b3e00b379c7c12b9d99ef6369fd08f3f",
    "body": "bodies/browser-wait-selector-state.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18924,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-wait-selector-state",
    "host": "MacBook-Pro",
    "added": "2026-11-11T12:16:01Z",
-   "updated": "2026-11-11T15:50:49Z",
+   "updated": "2026-11-11T16:45:33Z",
    "note": "",
    "built": [
     {
@@ -81251,7 +81251,8 @@
      "host": "MacBook-Pro",
      "tree": "6388dc54ea63d024bf535e8aba05ffe088172cd6"
     }
-   ]
+   ],
+   "opened": "2026-11-11T16:45:33Z"
   },
   {
    "id": "win-focus-report",
