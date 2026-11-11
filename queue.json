@@ -89475,12 +89475,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-11T22:12:31.297215Z",
+  "at": "2026-11-11T23:13:20.196890Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 2,
-   "left": 6
+   "used": 0,
+   "left": 8
   },
   "rows": [
    {
@@ -89942,9 +89942,11 @@
     "title": "fix(natives): verify Windows value writes and notify combo selections",
     "action": "keep",
     "reasons": [],
-    "note": "",
+    "note": "accepted pair with #18947",
     "over": [],
-    "paired": [],
+    "paired": [
+     "#18947"
+    ],
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T16:16:48Z"
@@ -90008,16 +90010,14 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives,coding-agent): report unavailable Windows desktop sessions",
-    "action": "requeue",
-    "reasons": [
-     "conflicts with #18915 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/win32/mod.rs"
-    ],
-    "note": "",
+    "action": "keep",
+    "reasons": [],
+    "note": "accepted pair with #18915",
     "over": [],
-    "paired": [],
-    "blocked_by": [
+    "paired": [
      "#18915"
     ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T22:00:07Z"
    },
@@ -90361,6 +90361,7 @@
      "conflicts with #18914 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/wayland/libei.rs, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #18915 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/ax.rs",
      "conflicts with #18923 in crates/pi-natives/src/desktop/ax.rs",
+     "conflicts with #18947 in crates/pi-natives/Cargo.toml",
      "conflicts with #18353 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #18013 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/libei.rs",
      "conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
@@ -90376,6 +90377,7 @@
      "#18914",
      "#18915",
      "#18923",
+     "#18947",
      "#18353",
      "#18013"
     ],
@@ -91192,6 +91194,7 @@
     "action": "wait",
     "reasons": [
      "conflicts with #18915 in crates/pi-natives/src/desktop/win32/mod.rs",
+     "conflicts with #18947 in crates/pi-natives/src/desktop/win32/mod.rs",
      "conflicts with #18222 in packages/coding-agent/src/prompts/tools/computer.md"
     ],
     "note": "",
@@ -91199,6 +91202,7 @@
     "paired": [],
     "blocked_by": [
      "#18915",
+     "#18947",
      "#18222"
     ],
     "needs": [],
@@ -91355,6 +91359,7 @@
     "reasons": [
      "held: Main, 2026-11-11: stays held until #18786 merges with the typed-message guide channel (design check replace); then one property on the computer prelude, drop the wrap variant, re-run its blind legs",
      "needs #18786 (open)",
+     "conflicts with #18947 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/prompts/tools/eval.md, packages/coding-agent/src/tools/eval.ts",
      "conflicts with main in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/sdk-computer-prelude-toggle.test.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -91362,6 +91367,7 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#18947",
      "#18786"
     ],
     "needs": [
@@ -91388,6 +91394,7 @@
      "conflicts with #18892 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18895 in docs/tools/computer.md",
      "conflicts with #18915 in docs/tools/computer.md",
+     "conflicts with #18947 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/tools/eval.ts",
@@ -91405,6 +91412,7 @@
      "#18892",
      "#18895",
      "#18915",
+     "#18947",
      "#18353",
      "#18222",
      "#18786"
@@ -91433,6 +91441,7 @@
      "conflicts with #18895 in docs/tools/computer.md",
      "conflicts with #18914 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18915 in docs/tools/computer.md",
+     "conflicts with #18947 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
@@ -91450,6 +91459,7 @@
      "#18895",
      "#18914",
      "#18915",
+     "#18947",
      "#18353",
      "#18222",
      "#18925"
