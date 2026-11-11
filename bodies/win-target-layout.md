@@ -20,10 +20,16 @@ The pure regression checks recipient versus foreground layout selection without 
 
 - Linux: `cargo test -p pi-natives --lib keyboard_mapping_uses_the_receiving_windows_layout`: 1 failed with target selection disabled, 1 failed without the missing-layout fallback, and 1 passed with both enabled.
 - Linux `rust-check` and Windows `rust-check --windows` passed clippy and rustfmt; both platform records are saved.
-- Live check on a Windows 11 desktop: pending.
+- Live check on a Windows 11 guest, a Win32 edit window on the French AZERTY layout while omp's thread stays on en-US, background calls, the characters the window received:
+
+| call | `main` at 83de60a | this PR (default) | this PR, `backgroundFallback: "refuse"` |
+|---|---|---|---|
+| `press("&")` (unshifted on AZERTY) | `è`, success | `&` | `&` |
+| `press("1")` (Shift+& on AZERTY) | `&`, success | `1`, through takeover | refused, `BackgroundUnavailable`, nothing sent |
+| `press("q")`, `type("1q")` | `q`, `1q` | same | same |
 
 ---
 
 - [ ] `bun check` passes
-- [ ] Tested locally
+- [x] Tested locally
 - [x] CHANGELOG updated (PR attribution added when opened)
