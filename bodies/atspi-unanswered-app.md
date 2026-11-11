@@ -31,6 +31,8 @@ Every AT-SPI call ran in `rt.block_on` on the one desktop worker thread with no 
 
 `atspi::AccessibilityConnection::new` also connects to every app peer to peer (atspi-connection's default `p2p`). One app not answering hung every new session and `menu.select()`, and with those connections open Audacity's dialog ignored typed input.
 
+Dropping the peer connections also stops an idle OMP from wedging itself and the accessibility bus. On `main`, atspi's peer listener subscribes OMP's bus connection to every `NameOwnerChanged`, and that connection is read only during a `computer` call: an OMP process that made one call and then saw 33 or more short-lived accessibility clients come and go (40 launches of KCalc, or 33 bare connections) hung on its next call and on every one after, on dbus-broker and dbus-daemon alike, because the listener waits for a reply queued behind its own full 64-message stream. Each such process also holds about 3.1 KB per client in dbus-broker against the user's shared 264 MiB accessibility-bus quota; with three of them the quota ran out after about 29,000 clients, the broker disconnected `at-spi2-registryd`, and a Qt 6 app started afterwards aborted at launch in libdbus (`QDBusConnectionPrivate::getNameOwnerNoCache`), the failure trycua/cua#4894 reports. On this branch the call after 1,000 clients took 0.15 s, and three idle processes held 0 bytes through 150,000 clients with the registry still up.
+
 Decisions:
 - 5 s per request, not libatspi's 800 ms per call: a request makes up to a dozen calls, and a LibreOffice text edit takes 1.75 s. Menu walks, hundreds of calls, bound each call.
 - zbus's `method_timeout` covers `Connection::call_method` only, not proxy calls.
@@ -55,7 +57,9 @@ In two agent runs on `main` (dialog opened by `press()` in one, `menu.select()` 
 
 New tests: `an_app_that_stops_answering_fails_the_read_instead_of_skipping_each_node` (`ax.rs`), six in `linux/ax.rs` `tests::unanswered` over a peer-to-peer zbus app that never answers, and `a_window_of_an_application_that_did_not_answer_reports_the_timeout` (`wayland/mod.rs`). With any guard they cover reverted, its test fails or hangs. `cargo test -p pi-natives --lib desktop::`: 215 passed (Linux).
 
-Not run: Wayland live.
+Idle-bus case: Fedora 44 KDE Wayland guest (at-spi2-core 2.60.7, dbus-broker 37 as the accessibility bus, Qt 6.11.2), `main` 6dd7ddf5 against this branch's Cargo change, eval path with no model. One `computer.window(...).ax()`, then 40 short D-Bus connections opened and closed on the address from `org.a11y.Bus.GetAddress`, then a second call; `busctl --address=<a11y> call org.freedesktop.DBus /org/freedesktop/DBus org.freedesktop.DBus.Debug.Stats GetStats` gives the queued bytes (PeerAccounting OutgoingBytes).
+
+Not run: the Audacity case on Wayland.
 
 ---
 
