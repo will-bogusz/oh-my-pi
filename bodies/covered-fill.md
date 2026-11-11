@@ -12,7 +12,7 @@ With a `<dialog>` open over the page, `fill`, `type` and `press` on a field behi
 | no modal: a field under a banner, a board under a HUD, a field whose focus handler opens a picker over it | keys go where focus went | unchanged |
 | `click`, `dblclick`, `check` | already refused | unchanged |
 
-`showModal()` leaves the page behind the dialog unfocusable, so `focus()` did nothing and the keys went to the dialog. `fill`, `type` and `press` still focus first; when focus missed, they run click's hit test (`isClickActionable`) and, if the element is covered and an open modal dialog leaves it behind, throw click's error before any key (`refuseCoveredTarget`, `focusKeyTarget`). Tab, handle and frame forms share them; Tern's page kit applies the same rule. `drag` refuses any cover on an on-screen endpoint, as a click would.
+The guard preserves ordinary focus behavior under banners, HUDs and picker overlays; only a modal dialog's cover or a disabled key target is refused. Tab, handle and frame calls use the same decision, and Tern's page kit applies it too. `drag` refuses a covered on-screen endpoint.
 
 Not changed: `select`, `uploadFile` and radio `uncheck` set the named element's value directly; `focus` sends no input; `hover` is untouched; a field hidden by `inert` or `display:none` is out of scope. cmux sets values on the element itself and its `click` has no hit test either.
 
