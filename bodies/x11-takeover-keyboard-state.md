@@ -36,6 +36,8 @@ goliath, Xvfb + openbox, a GTK 3 entry focused, takeover `type("AbC1x")` through
 | `us,ru` group 2 and Caps Lock | `фИс1Ч` 2 / 2 | `AbC1x` 2 / 2 |
 | DE layout, Caps Lock | `aBc1X` 2 / 2 | `AbC1x` 2 / 2 |
 
+Rerun on a second rig (Ubuntu 22.04 arm64, Xvfb + openbox, GTK 3 and Qt 5 fixtures, Caps Lock on, n=10 each): `main` typed inverted case and reported success 20/20; this PR typed the exact text 20/20.
+
 After each run the user's state read back as before it (Caps Lock and group 2 still locked); a latched Control was used up, as the user's next key would have used it.
 
 - `xtest_text_types_through_a_neutral_keyboard_state` (`#[ignore]`, starts its own Xvfb): with Caps Lock and Control locked and group 2 locked, no key event carries Lock, Control or a group and the user's locks and group are back afterwards; a latched group is cleared and stays used up; a `CapsLock` chord still turns Caps Lock off. It fails on `main` at the first key's state.
