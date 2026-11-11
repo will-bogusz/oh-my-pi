@@ -379,7 +379,9 @@ fn row_matches(map: &Keymap, code: u8, symbol: u32) -> bool {
 			map.keysyms
 				.get(usize::from(index) * width..(usize::from(index) + 1) * width)
 		})
-		.is_some_and(|row| row.first() == Some(&symbol) && row.iter().all(|&value| value == 0 || value == symbol))
+		.is_some_and(|row| {
+			row.first() == Some(&symbol) && row.iter().all(|&value| value == 0 || value == symbol)
+		})
 }
 
 struct ServerGrab<'a>(&'a RustConnection);
