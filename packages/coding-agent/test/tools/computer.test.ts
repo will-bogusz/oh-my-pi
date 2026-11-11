@@ -2194,6 +2194,8 @@ describe("computer worker round trips", () => {
 				async () => (await desktop.window(42)).find({ title: /Save/ }),
 				async () => (await desktop.window(42)).find({ role: "button", value: 5 }),
 				async () => (await desktop.window(42)).find(/Save/),
+				// \`null\`, like a missing field, still filters nothing.
+				() => desktop.windows({ app: null, title: null }),
 			];
 			const errors = [];
 			for (const attempt of attempts) {
@@ -2203,18 +2205,20 @@ describe("computer worker round trips", () => {
 		);
 		expect(result.ok).toBe(true);
 		if (!result.ok) return;
-		const text = "text matched as a case-insensitive substring, not a RegExp";
+		// Each error names the call and field, then what it got.
+		const takes = (call: string, got: string) => expect.stringMatching(new RegExp(`^${call} .*; got ${got}$`));
 		expect(result.payload.returnValue).toEqual([
-			`window({ title }) takes ${text}; got a RegExp`,
-			`windows({ title }) takes ${text}; got a RegExp`,
-			`window({ app }) takes ${text}; got a RegExp`,
-			`windows({ title }) takes ${text}; got object`,
-			`window({ title }) takes ${text}; got a RegExp`,
-			`window() takes a window id or an { app, title } filter of ${text}; got a RegExp`,
-			`windows() takes an { app, title } filter of ${text}; got a RegExp`,
-			`find({ title }) takes ${text}; got a RegExp`,
-			`find({ value }) takes ${text}; got number`,
-			`find() takes a { role, title, value } query of ${text}; got a RegExp`,
+			takes("window\\(\\{ title \\}\\)", "a RegExp"),
+			takes("windows\\(\\{ title \\}\\)", "a RegExp"),
+			takes("window\\(\\{ app \\}\\)", "a RegExp"),
+			takes("windows\\(\\{ title \\}\\)", "object"),
+			takes("window\\(\\{ title \\}\\)", "a RegExp"),
+			takes("window\\(\\) takes a window id", "a RegExp"),
+			takes("windows\\(\\)", "a RegExp"),
+			takes("find\\(\\{ title \\}\\)", "a RegExp"),
+			takes("find\\(\\{ value \\}\\)", "number"),
+			takes("find\\(\\)", "a RegExp"),
+			"no error",
 		]);
 		expect(queried).toEqual([]);
 	});

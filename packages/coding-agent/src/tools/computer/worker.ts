@@ -308,12 +308,13 @@ const FILTER_TEXT = "text matched as a case-insensitive substring, not a RegExp"
  * reach `toLocaleLowerCase` or the native addon's conversion error, and neither names the filter.
  */
 function validateFilter(filter: unknown, call: string, takes: string, fields: readonly string[]): void {
-	if (filter === undefined || filter === null) return;
+	if (filter == null) return;
 	if (isRegExpLike(filter)) throw new ToolError(`${call}() takes ${takes} of ${FILTER_TEXT}; got a RegExp`);
 	if (typeof filter !== "object") return;
 	for (const field of fields) {
-		const value: unknown = (filter as Record<string, unknown>)[field];
-		if (value === undefined || typeof value === "string") continue;
+		const value: unknown = Reflect.get(filter, field);
+		// `null`, like a missing field, filters nothing.
+		if (value == null || typeof value === "string") continue;
 		const got = isRegExpLike(value) ? "a RegExp" : describeArgument(value);
 		throw new ToolError(`${call}({ ${field} }) takes ${FILTER_TEXT}; got ${got}`);
 	}
@@ -1319,7 +1320,7 @@ class Win {
 	}
 
 	async find(query: AxQuery): Promise<El[]> {
-		validateFilter(query, "find", "a { role, title, value } query", ["role", "title", "value"]);
+		validateFilter(query, "find", "a { role, title, value, limit } query", ["role", "title", "value"]);
 		const { signal } = this.#getContext();
 		return foundElements(
 			(await nativeCall(signal, () => this.#session.axQuery(this.id, query))).map(
