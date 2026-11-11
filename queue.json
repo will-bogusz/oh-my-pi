@@ -74526,7 +74526,7 @@
   {
    "id": "relay-detach-owned-close",
    "branch": "will/relay-detach-owned-close",
-   "title": "fix(browser): say omp closed its own relay tab when Chrome's detach ends it",
+   "title": "fix(browser): give owned relay tabs truthful detach recovery guidance",
    "area": "browser",
    "priority": "P1",
    "needs": [],
@@ -74538,7 +74538,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-detach-owned-close",
    "host": "MacBook-Pro",
    "added": "2026-11-11T01:40:34Z",
-   "updated": "2026-11-11T05:24:42Z",
+   "updated": "2026-11-11T05:29:28Z",
    "note": "",
    "advanced": "2026-11-11T04:14:41Z",
    "built": [

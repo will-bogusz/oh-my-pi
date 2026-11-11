@@ -1,24 +1,19 @@
 ## What
 
-I made the relay detach error say omp closed the tab when it was a tab omp opened, instead of saying it may still be open and to navigate it in Chrome, which sent agents looking through the user's Chrome for a tab that was already gone.
+I made relay detach errors distinguish tabs omp opened from borrowed tabs, so agents stop searching the user's Chrome for an owned tab that omp has tried to close.
 
-| Chrome detached omp, then | Tab omp opened, `main` | Tab omp opened, this PR |
-|---|---|---|
-| re-adoption refused (a password manager's frame) or the tab closed | "omp could not reattach to the tab, so it was released: either the tab was closed, or Chrome refuses the attach while … If the tab is still open, open it again once that frame is gone; if Chrome refused the attach, the relay hides the tab until its URL changes, so navigate it in Chrome first" | "omp could not reattach to the tab it had opened, so it closed it: either the tab had closed, or Chrome refuses the attach while … Open a new tab to continue; if another extension's frame was the cause, it can detach omp there again" |
-| the user cancelled Chrome's debugging bar | "omp released the tab; the relay hides it until its URL changes, so navigate it in Chrome, then open it again" | "omp closed the tab it had opened; open a new one to continue" |
-
-Borrowed tabs (opened with `app.target`) keep the old wording: they stay open in the user's Chrome.
+When reattachment fails or the user cancels Chrome's debugging bar, owned-tab errors say omp tried to close its tab and to open a new one. They do not claim closure succeeded: a refused `removeTab` can leave the tab open until the relay reconnects. Borrowed tabs keep their existing navigation/reopen guidance.
 
 ## Why
 
-When Chrome detaches omp and omp cannot take the tab back, it kills the tab, and the kill closes a tab omp opened (`forceKillTabTeardown` closes any `ownsPage` target). The message only described a borrowed tab. In one real session an agent got it on a tab omp had opened, listed the relay's pages over HTTP and ran AppleScript over the user's Chrome to close the leftover tabs; there were none. The wording now follows `tab.ownsPage` in `runInTab`'s `DebuggerDetachedError` branch (`tools/browser/tab-supervisor.ts`), the only place both messages are built; a later call on the killed tab repeats the same text.
+The old message described every tab as borrowed, even though teardown attempts to close owned tabs. Giving ownership-specific recovery guidance fixes that mismatch without promising a successful best-effort close or changing teardown behavior.
 
 ## Testing
 
-The detach harness's stand-in extension now answers `createTab` with its page and closes it on `removeTab`, so an open without `app.target` gives omp a tab it owns. A new test detaches that tab mid-call for both paths (refused re-adoption, cancelled debugging bar) and checks that the error says omp closed the tab it had opened, no longer says to navigate it in Chrome, and that the page really closed. With the fix reverted both cases fail on the old text; the page closes either way, so `main` already did the cleanup and only the message was wrong.
+The real headless Chromium relay harness covers refused reattachment and debugging-bar cancellation, each with both successful and refused `removeTab` replies. The refusal cases verify the Chrome target remains present and later calls retain truthful guidance. The regression fails against the previous head.
 
-```
-cd packages/coding-agent && bun test test/tools/browser-relay-detach.test.ts   # 18 pass
+```sh
+bun test packages/coding-agent/test/tools/browser-relay-detach.test.ts
 ```
 
 ---
