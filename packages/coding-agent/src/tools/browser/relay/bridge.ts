@@ -1533,7 +1533,7 @@ export class RelayBridge {
 					} else {
 						// Nobody can drive a tab the relay cannot attach: close it. When closing fails too, the
 						// reply still names the tab, so the client's own cleanup can close it later.
-						const closed = await this.#rpc({ op: "removeTab", tabId: result.tab.tabId }, inst).then(
+						const closed = await this.#closeTab(createdKey, created.tabId, inst).then(
 							() => true,
 							(error: unknown) => {
 								this.#log("closing a tab the relay could not attach failed", {
@@ -1545,7 +1545,8 @@ export class RelayBridge {
 						);
 						if (this.#conns.get(conn.id) !== conn) return;
 						if (closed) {
-							this.#replyError(conn, msg, `Cannot attach to the tab the relay opened for ${url}`);
+							const reason = created.refusal ? `: ${created.refusal}` : "";
+							this.#replyError(conn, msg, `Cannot attach to the tab the relay opened for ${url}${reason}`);
 							return;
 						}
 					}
