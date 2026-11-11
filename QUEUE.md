@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 11:09Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 11:10Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-11 10:52Z on MacBook-Pro; groups below are from it, states from the manifest)
@@ -139,7 +139,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | [#18825](https://github.com/can1357/oh-my-pi/pull/18825) | x11-mpx-qt | fix(natives): stop X11 background input from crashing your running Qt 6.5+ apps | computer | P1 | 7h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-mpx-qt) |
 | [#18795](https://github.com/can1357/oh-my-pi/pull/18795) | devin-retire-swe-1-6-fast | fix(catalog): drop Devin's retired SWE-1.6 Fast seed row | catalog | P0 | 11h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-retire-swe-1-6-fast) |
 | [#18829](https://github.com/can1357/oh-my-pi/pull/18829) | browser-select-readback | fix(coding-agent): return the options a page leaves selected after its change handlers | browser | P0 | 6h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-select-readback) |
-| [#18830](https://github.com/can1357/oh-my-pi/pull/18830) | browser-download-missing-file | fix(coding-agent): fail a download wait when the saved file is not on this machine | browser | P0 | 5h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-download-missing-file) |
+| [#18830](https://github.com/can1357/oh-my-pi/pull/18830) | browser-download-missing-file | fix(coding-agent): fail a download wait when the saved file is not on this machine | browser | P0 | 6h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-download-missing-file) |
 | [#18833](https://github.com/can1357/oh-my-pi/pull/18833) | relay-target-miss-hint | fix(browser): name the relay's own-tab open when a target matches no tab | browser | P0 | 5h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-target-miss-hint) |
 | [#18832](https://github.com/can1357/oh-my-pi/pull/18832) | relay-detach-owned-close | fix(browser): give owned relay tabs truthful detach recovery guidance | browser | P1 | 5h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-detach-owned-close) |
 | [#18824](https://github.com/can1357/oh-my-pi/pull/18824) | macos-click-timestamp | fix(natives): stop macOS background left clicks from crashing Electron and Chrome pages | natives | P0 | 7h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-click-timestamp) |
