@@ -73753,7 +73753,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-select-readback",
    "host": "MacBook-Pro",
    "added": "2026-11-11T00:14:36Z",
-   "updated": "2026-11-11T05:06:19Z",
+   "updated": "2026-11-11T05:06:44Z",
    "note": "",
    "built": [
     {
@@ -73978,7 +73978,8 @@
     }
    ],
    "advanced": "2026-11-11T04:43:05Z",
-   "opened": "2026-11-11T05:06:19Z"
+   "opened": "2026-11-11T05:06:19Z",
+   "readied": "2026-11-11T05:06:44Z"
   },
   {
    "id": "browser-download-missing-file",
