@@ -2,7 +2,7 @@
 
 I changed the browser prompt to teach act-then-look in one cell and to stop agents padding cells with fixed sleeps, now that the look and the reads after an action wait for the page on Chromium.
 
-With this wording on top of the look and read settle, a blind GPT-6.1 Sol run took 0.82x its base's steps [0.78, 0.86] and read a settling page 4 times in 124 reads instead of 19 in 34. Agents on Haiku 5.5 slept in half as many cells (31 against 57 over 12 runs each), but their steps did not fall (1.12x [0.99, 1.29]).
+With this wording on top of the look and read settle, a blind GPT-6.1 Sol run took 0.82x its base's steps [0.78, 0.86] and read a settling page 4 times in 124 reads instead of 19 in 34. Agents on Haiku 5.5 slept in half as many cells (31 against 57 over 12 runs each), but their steps did not fall (1.12x [0.99, 1.29]). Blind Opus 5.5 slept in 19 cells instead of 68 at unchanged steps (0.98x [0.88, 1.08]).
 
 - "Re-observe, then act in the same cell" becomes "Act and look in one cell: end a cell that acts with `await tab.observe()`", and both examples end their click with a look.
 - One `<critical>` line: on Chromium tabs the next look or read after an action waits for the page, so fixed sleeps are not needed for that; on Tern and cmux, and for content the page renders later on its own timer, wait with `waitForText`/`waitForSelector`.
@@ -32,7 +32,16 @@ The steps rise is mostly the records-table task (1.38x). An earlier Haiku leg of
 | GOV.UK maternity pay | 0.53x | 0.55x | 4/4, 4/4 |
 | all three [95% CI] | 0.82 [0.78, 0.86] | 0.84 [0.78, 0.91] | 12/12 both |
 
-Sol slept in no cell in either arm. The gain is the long GOV.UK flow, where it acts and reads in one cell; reads taken before the page settled fell from 19 of 34 to 4 of 124. Wall time (0.93 [0.86, 1.01]) was measured under heavy host load and is indicative only.
+Sol slept in no cell in either arm. The gain is the long GOV.UK flow, where it acts and reads in one cell; reads taken before the page settled fell from 19 of 34 to 4 of 124.
+
+| same stack vs its base, Claude Opus 5.5, blind, 3 tasks x 4 | steps | cells with a sleep | tokens | pass |
+|---|---|---|---|---|
+| SPA wizard | 1.00x | 10.5 -> 5 | 1.01x | 4/4, 4/4 |
+| records table | 0.88x | 6 -> 0 | 0.91x | 4/4, 4/4 |
+| GOV.UK maternity pay | 1.00x | 1 -> 0 | 1.02x | 4/4, 4/4 |
+| all three [95% CI] | 0.98 [0.88, 1.08] | 68 -> 19 in total | 1.01 [0.90, 1.13] | 12/12 both |
+
+Opus's steps held while its sleeps fell by three quarters (84 to 23); reads taken before the page settled fell from 38 of 63 to 17 of 59. Wall time in both blind legs ran under heavy host load and awaits a quiet rerun.
 
 ---
 
