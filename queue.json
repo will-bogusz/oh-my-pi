@@ -73539,6 +73539,26 @@
    "added": "2026-11-11T00:14:54Z",
    "updated": "2026-11-11T00:14:54Z",
    "note": ""
+  },
+  {
+   "id": "desktop-cursor",
+   "branch": "will/desktop-cursor",
+   "title": "feat(coding-agent,natives): show each agent's cursor where its computer input lands on macOS",
+   "area": "coding-agent",
+   "priority": "P2",
+   "needs": [
+    "agent-identity"
+   ],
+   "base": "5fe7fa3419951770bb9fb231b8e30839e9783976",
+   "body": "bodies/desktop-cursor.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/desktop-cursor",
+   "host": "MacBook-Pro",
+   "added": "2026-11-11T00:21:12Z",
+   "updated": "2026-11-11T00:21:12Z",
+   "note": ""
   }
  ],
  "watch": {
