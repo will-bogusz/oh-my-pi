@@ -1,14 +1,16 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 05:56Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 05:57Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 5 of 8 ready events used in the hour before the last plan, 3 left (plan of 2026-11-11 05:25Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 0, conflict-held 19, stacked 16, held 17, parked 2, open PRs 39, queued since the last plan 1; merged 275, closed 29
+**Ready budget:** 5 of 8 ready events used in the hour before the last plan, 3 left (plan of 2026-11-11 05:55Z on goliath; groups below are from it, states from the manifest)
+**Counts:** openable now 1, conflict-held 19, stacked 16, held 17, parked 2, open PRs 39; merged 275, closed 29
 
-## Openable now (0)
+## Openable now (1)
 
-none
+| id | title | area | priority | age | plan | branch |
+|---|---|---|---|---|---|---|
+| print-pref | fix(coding-agent,browser-relay): stop a page calling window.print() from hanging browser calls | browser | P1 | 1h | open (over #15508) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/print-pref) |
 
 ## Conflict-held (19)
 
@@ -22,7 +24,7 @@ none
 | token-count-policy | feat(catalog,coding-agent): token-count framing policy in KDL | catalog |  | 8d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/token-count-policy) |
 | wire-delta-count | refactor(agent,ai): count the anchored delta from the reader's transformed wire messages | other |  | 8d | [#18771](https://github.com/can1357/oh-my-pi/pull/18771), [#17610](https://github.com/can1357/oh-my-pi/pull/17610), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wire-delta-count) |
 | atspi-unanswered-app | fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool | computer | P0 | 7d | [#18823](https://github.com/can1357/oh-my-pi/pull/18823), [#18353](https://github.com/can1357/oh-my-pi/pull/18353), [#18013](https://github.com/can1357/oh-my-pi/pull/18013) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-unanswered-app) |
-| browser-wait-predicate | feat(browser): add waitForFunction to tabs and frames | browser | P1 | 14h | [#18676](https://github.com/can1357/oh-my-pi/pull/18676), [#15508](https://github.com/can1357/oh-my-pi/pull/15508), [#18786](https://github.com/can1357/oh-my-pi/pull/18786) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-wait-predicate) |
+| browser-wait-predicate | feat(browser): add waitForFunction to tabs and frames | browser | P1 | 14h | [#18676](https://github.com/can1357/oh-my-pi/pull/18676), [#15508](https://github.com/can1357/oh-my-pi/pull/15508), [#18786](https://github.com/can1357/oh-my-pi/pull/18786), print-pref | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-wait-predicate) |
 | browser-run-node-hint | fix(browser): say where tab.run code runs when it reaches for a page global | browser | P2 | 13h | [#15508](https://github.com/can1357/oh-my-pi/pull/15508) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-run-node-hint) |
 | agent-identity | feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy | tui | P2 | 6h | [#18784](https://github.com/can1357/oh-my-pi/pull/18784) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/agent-identity) |
 | computer-run-failure-output | fix(computer): retain output and screenshots when a run fails | computer | P1 | 5h | [#18753](https://github.com/can1357/oh-my-pi/pull/18753) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-run-failure-output) |
@@ -66,10 +68,10 @@ none
 | broker-reset-sweep | feat(coding-agent): spend saved resets from the auth broker before they expire | broker |  | 28d | Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-reset-sweep) |
 | broker-sweep-clients-defer | feat(ai,coding-agent): stop sessions sweeping saved resets the auth broker already spends | broker |  | 28d | Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-sweep-clients-defer) |
 | atspi-walk-reads | fix(natives): read each AT-SPI element in two concurrent rounds | computer | P1 | 7d | Main, 2026-11-11: opens after atspi-unanswered-app (P0) so it does not block it | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-walk-reads) |
-| observe-settle | feat(browser): let observe() settle the effects of the preceding action | browser | P1 | 10h | observe-core series: opens when Brit agrees the series (Will) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-observe-settle) |
-| settle-reads | feat(browser): settle the preceding action before reads too | browser | P1 | 10h | observe-core series: opens when Brit agrees the series (Will) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-settle-reads) |
-| act-look-prompt | docs(browser): teach acting and looking in one Eval cell without sleeps | browser | P2 | 10h | observe-core series: opens when Brit agrees the series (Will) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-act-look-prompt) |
-| observe-stable-ids | feat(browser): keep observe() ids stable across observations | browser | P2 | 10h | observe-core series: opens when Brit agrees the series (Will) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-observe-stable-ids) |
+| observe-settle | feat(browser): let observe() settle the effects of the preceding action | browser | P1 | 11h | observe-core series: opens when Brit agrees the series (Will) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-observe-settle) |
+| settle-reads | feat(browser): settle the preceding action before reads too | browser | P1 | 11h | observe-core series: opens when Brit agrees the series (Will) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-settle-reads) |
+| act-look-prompt | docs(browser): teach acting and looking in one Eval cell without sleeps | browser | P2 | 11h | observe-core series: opens when Brit agrees the series (Will) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-act-look-prompt) |
+| observe-stable-ids | feat(browser): keep observe() ids stable across observations | browser | P2 | 11h | observe-core series: opens when Brit agrees the series (Will) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-observe-stable-ids) |
 | browser-action-outcome | feat(browser): print what each browser action did to the page | browser | P2 | 10h | ActionOutcomePR, 2026-11-10: Haiku leg on this head did not reproduce the step saving (1.02x [0.84,1.25] vs earlier 0.86x); Sol leg on this head (guard-team, from 21:15Z) decides | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-action-outcome) |
 | eval-assign-echo | fix(coding-agent): print nothing for a JavaScript eval cell that ends in an assignment | eval | P1 | 10h | Main, 2026-11-10: awaiting model sample (changes every JS cell's return); bots ScreenshotOutput | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/eval-assign-echo) |
 | computer-guide-first-use | feat(coding-agent): send the computer guide with the first computer call | computer | P2 | 10h | Main, 2026-11-10: Haiku shows 1.19x steps on native tasks; waits for the Sol native legs and Will's call | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-guide-first-use) |
@@ -127,9 +129,3 @@ none
 | [#18824](https://github.com/can1357/oh-my-pi/pull/18824) | macos-click-timestamp | fix(natives): stop macOS background left clicks from crashing Electron and Chrome pages | natives | P0 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-click-timestamp) |
 | [#18823](https://github.com/can1357/oh-my-pi/pull/18823) | qt5-getall-crash | fix(natives): stop Linux computer reads from crashing Qt, GTK 3 and Firefox apps | computer | P1 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/qt5-getall-crash) |
 | [#18828](https://github.com/can1357/oh-my-pi/pull/18828) | x11-mpx-key-confirm | fix(natives): confirm every X11 virtual-keyboard key release, in order | computer | P1 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-mpx-key-confirm) |
-
-## Queued since the last plan (1)
-
-| id | title | area | priority | age | branch |
-|---|---|---|---|---|---|
-| print-pref | fix(coding-agent,browser-relay): stop a page calling window.print() from hanging browser calls | browser | P1 | 1h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/print-pref) |
