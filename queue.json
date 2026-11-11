@@ -70937,7 +70937,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-hover-actionable",
    "host": "MacBook-Pro",
    "added": "2026-11-10T16:34:24Z",
-   "updated": "2026-11-11T00:11:44Z",
+   "updated": "2026-11-11T09:35:46Z",
    "note": "",
    "built": [
     {
@@ -71103,7 +71103,17 @@
    ],
    "opened": "2026-11-10T17:21:25Z",
    "readied": "2026-11-10T17:21:54Z",
-   "advanced": "2026-11-11T00:11:44Z"
+   "advanced": "2026-11-11T00:11:44Z",
+   "design_checks": [
+    {
+     "pr": 18750,
+     "rounds": 6,
+     "at": "2026-11-11T09:35:44Z",
+     "verdict": "change",
+     "note": "DesignChecks: hover waits for a layout box only, then Puppeteer's hover(); drop coverage check and hand-made mouse move (18750/candidate-src.patch, replace actionableClickPoint with layout-only wait)",
+     "ref": "/Users/viathebrink/tmp/oh-my-pi/DesignChecks/DesignChecks.md"
+    }
+   ]
   },
   {
    "id": "browser-wait-text-regexp",
