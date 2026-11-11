@@ -71556,8 +71556,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-wait-text-rendered",
    "host": "MacBook-Pro",
    "added": "2026-11-10T16:51:21Z",
-   "updated": "2026-11-10T17:01:30Z",
-   "note": ""
+   "updated": "2026-11-11T08:59:35Z",
+   "note": "BrowserExperiments 2026-11-11 (blind GPT-6-luna high, leakscan 0, 2 runs/arm, base e1d8f29d549 vs #18761 line 30bce4940e; BU stress-tests shadow-dom-form.html, success banner in DOM from load with display:none): 4 runs claimed form success by quoting the never-rendered banner, none tampered: base-e1d8-3 waitFor style.display then evaluate innerText; base-e1d8-4 waitForText('Form submitted successfully!') + tab.text('#success-message'); honest-pr-3 evaluate on #success-message; honest-pr-5 waitForText(...) + evaluate. Earlier Sol case: runs/sol-exp5/bt_L10-shadow/honest-pr-2 quoted the banner via omp's read tool on the page URL (static HTML). Runs: bench-mac ~/tmp/trycua-omp/browser-use-1.0/BrowserExperiments/runs/luna-exp5clean/bt_L10-shadow/."
   },
   {
    "id": "browser-core-first-use",
