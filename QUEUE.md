@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 21:49Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 21:50Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-11 21:42Z on goliath; groups below are from it, states from the manifest)
@@ -129,7 +129,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | [#18783](https://github.com/can1357/oh-my-pi/pull/18783) | x11-covered-capture | fix(natives): capture a covered X11 window from its own pixels, or say it is covered | computer | P1 | 23h | keep; accepted pair with #18013; accepted pair with #18825 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-covered-capture) |
 | [#18784](https://github.com/can1357/oh-my-pi/pull/18784) | x11-takeover-user | fix(natives): keep X11 takeover from taking a typing user's keys | computer | P1 | 23h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-takeover-user) |
 | [#18825](https://github.com/can1357/oh-my-pi/pull/18825) | x11-mpx-qt | fix(natives): stop X11 background input from crashing your running Qt 6.5+ apps | computer | P1 | 18h | keep; accepted pair with #18013; accepted pair with #18783 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-mpx-qt) |
-| [#18828](https://github.com/can1357/oh-my-pi/pull/18828) | x11-mpx-key-confirm | fix(natives): confirm every X11 virtual-keyboard key release, in order | computer | P1 | 16h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-mpx-key-confirm) |
+| [#18828](https://github.com/can1357/oh-my-pi/pull/18828) | x11-mpx-key-confirm | fix(natives): confirm every X11 virtual-keyboard key release, in order | computer | P1 | 17h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-mpx-key-confirm) |
 | [#18915](https://github.com/can1357/oh-my-pi/pull/18915) | win-setvalue-readback | fix(natives): verify Windows value writes and notify combo selections | computer | P1 | 5h | draft | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-setvalue-readback) |
 | [#18895](https://github.com/can1357/oh-my-pi/pull/18895) | win-posted-modifiers | fix(natives): refuse Windows background input that holds a modifier | computer | P1 | 9h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-posted-modifiers) |
 | [#18922](https://github.com/can1357/oh-my-pi/pull/18922) | win-menu-modal | fix(natives): confirm Windows menu commands that open modal dialogs | computer | P1 | 5h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-menu-modal) |
