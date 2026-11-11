@@ -73878,7 +73878,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-click-timestamp",
    "host": "MacBook-Pro",
    "added": "2026-11-11T01:40:54Z",
-   "updated": "2026-11-11T03:44:06Z",
+   "updated": "2026-11-11T03:44:28Z",
    "note": "",
    "built": [
     {
@@ -74000,7 +74000,8 @@
     }
    ],
    "advanced": "2026-11-11T03:37:15Z",
-   "opened": "2026-11-11T03:44:06Z"
+   "opened": "2026-11-11T03:44:06Z",
+   "readied": "2026-11-11T03:44:28Z"
   },
   {
    "id": "atspi-huge-children",
