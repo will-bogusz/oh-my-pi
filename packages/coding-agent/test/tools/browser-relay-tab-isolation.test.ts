@@ -29,7 +29,8 @@ import {
 import { WorkerCore } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-worker";
 import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools/index";
 import { getPuppeteerDir } from "@oh-my-pi/pi-utils";
-import puppeteer, { type Browser, type Page, type WebWorker } from "puppeteer-core";
+import puppeteer, { type Browser, type Page } from "puppeteer-core";
+import { rejectionOf } from "../helpers/rejection";
 import { chromiumAvailable } from "./chromium-probe";
 
 const CHROMIUM_AVAILABLE = await chromiumAvailable();
@@ -289,13 +290,13 @@ async function activeChromeTabUrl(fixture: RelayFixture): Promise<unknown> {
 
 /** Whether the relay extension holds a `chrome.debugger` attachment on the tab: only its own answers a command. */
 async function relayAttached(fixture: RelayFixture, tabId: number): Promise<unknown> {
-	return await fixture.extension.evaluate(
+	return await fixture.inExtension(
 		`chrome.debugger.sendCommand({ tabId: ${tabId} }, "Runtime.evaluate", { expression: "1" }).then(() => true, () => false)`,
 	);
 }
 
 async function chromeTabIdOf(fixture: RelayFixture, url: string): Promise<number> {
-	const tabId = await fixture.extension.evaluate(
+	const tabId = await fixture.inExtension(
 		`chrome.tabs.query({}).then(tabs => tabs.find(tab => tab.url === ${JSON.stringify(url)})?.id)`,
 	);
 	if (typeof tabId !== "number") throw new Error(`No Chrome tab shows ${url}`);
@@ -752,8 +753,38 @@ describe.skipIf(!CHROMIUM_AVAILABLE)("relay tab ownership", () => {
 			await fixture.close();
 		}
 	}, 60_000);
-});
+	it("drops a closed relay target before recovery without attaching a supervisor discovery session", async () => {
+		const fixture = await launchRelayFixture();
+		const relay = await acquireBrowser({ kind: "relay", cdpUrl: fixture.cdpUrl }, { cwd: process.cwd() });
+		if (!("browser" in relay)) throw new Error("Expected relay Chromium connection");
+		const name = `relay-closed-recovery-${process.pid}`;
+		const referencesBefore = relay.refCount;
+		const { tab } = await acquireTab(name, relay, { timeoutMs: 15_000 });
+		try {
+			const closed = fixture.inExtension(`{
+				const { promise, resolve } = Promise.withResolvers();
+				const listener = tabId => {
+					if (tabId !== ${chromeTabId(tab.targetId)}) return;
+					chrome.tabs.onRemoved.removeListener(listener);
+					resolve();
+				};
+				chrome.tabs.onRemoved.addListener(listener);
+				promise;
+			}`);
+			const run = runInTab(name, { code: "await page.close(); await wait(60_000);", timeoutMs: 5_000, session });
+			await closed;
+			relay.browser.disconnect();
+			expect(await rejectionOf(run)).toBeInstanceOf(Error);
+			expect(getTabsMapForTest().has(name)).toBeFalse();
+			expect(relay.refCount).toBe(referencesBefore);
+		} finally {
+			await releaseTab(name).catch(() => undefined);
+			await releaseBrowser(relay, { kill: false });
+			await fixture.close();
+		}
+	}, 30_000);
 
+});
 describe.skipIf(!CHROMIUM_AVAILABLE)("owned tab recovery", () => {
 	it("keeps an owned target alive after a failed recovery init so a retry can adopt it", async () => {
 		const launched = await acquireBrowser({ kind: "headless", headless: true }, { cwd: process.cwd() });
