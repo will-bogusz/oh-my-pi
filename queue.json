@@ -81642,7 +81642,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-11T17:07:03Z",
+  "checked": "2026-11-11T18:07:59Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -88641,12 +88641,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-11T17:37:52.206046Z",
+  "at": "2026-11-11T18:08:00.431883Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 3,
-   "left": 5
+   "used": 0,
+   "left": 8
   },
   "rows": [
    {
@@ -89396,6 +89396,27 @@
     ],
     "needs": [],
     "created": "2026-11-11T01:54:02Z"
+   },
+   {
+    "id": "x11-mpx-reattach",
+    "label": "x11-mpx-reattach",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P0",
+    "title": "fix(natives): keep X11 background input out of your window after a screen lock or VT switch",
+    "action": "wait",
+    "reasons": [
+     "needs #18825 (open)"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [
+     "#18825"
+    ],
+    "created": "2026-11-11T17:39:36Z"
    },
    {
     "id": "atspi-combo-choice",
@@ -90407,7 +90428,7 @@
     "title": "feat(coding-agent): send the computer guide with the first computer call",
     "action": "held",
     "reasons": [
-     "held: Main, 2026-11-10: Haiku shows 1.19x steps on native tasks; waits for the Sol native legs and Will's call",
+     "held: Main, 2026-11-11: stays held until #18786 merges with the typed-message guide channel (design check replace); then one property on the computer prelude, drop the wrap variant, re-run its blind legs",
      "needs #18786 (open)",
      "conflicts with #18786 in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/prompts/tools/eval.md, packages/coding-agent/src/tools/eval.ts",
      "conflicts with main in packages/coding-agent/test/sdk-computer-prelude-toggle.test.ts"
@@ -90437,7 +90458,7 @@
      "conflicts with #18898 in docs/computer-use.md, docs/tools/computer.md",
      "conflicts with #18737 in packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts",
      "conflicts with #18753 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with #18783 in packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with #18783 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #18784 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18892 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18895 in docs/tools/computer.md",
@@ -90482,7 +90503,6 @@
      "conflicts with #18898 in crates/pi-natives/src/desktop/macos/ax.rs, docs/tools/computer.md",
      "conflicts with #18743 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with #18753 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with #18783 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18784 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18892 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18895 in docs/tools/computer.md",
@@ -90500,7 +90520,6 @@
      "#18898",
      "#18743",
      "#18753",
-     "#18783",
      "#18784",
      "#18892",
      "#18895",
