@@ -73521,6 +73521,24 @@
    "added": "2026-11-11T00:14:44Z",
    "updated": "2026-11-11T00:14:44Z",
    "note": ""
+  },
+  {
+   "id": "browser-click-frame-removed",
+   "branch": "will/browser-click-frame-removed",
+   "title": "fix(coding-agent): fail a click whose frame the page removed while the button was down",
+   "area": "browser",
+   "priority": "P1",
+   "needs": [],
+   "base": "6dd7ddf5feab54da3c82b460ee390a7d09aeabaa",
+   "body": "bodies/browser-click-frame-removed.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-click-frame-removed",
+   "host": "MacBook-Pro",
+   "added": "2026-11-11T00:14:54Z",
+   "updated": "2026-11-11T00:14:54Z",
+   "note": ""
   }
  ],
  "watch": {
