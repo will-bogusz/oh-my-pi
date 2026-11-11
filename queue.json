@@ -1,5 +1,5 @@
 {
- "version": 1,
+ "version": 2,
  "config": {},
  "entries": [
   {
@@ -419,9 +419,24 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/reset-restore-longest-wait",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-11-02T02:39:35Z",
+   "updated": "2026-11-11T02:34:40Z",
    "note": "Will, 2026-11-02: broker cluster on hold for redesign; not going to Brit; no worker on its Codex findings.",
-   "advanced": "2026-10-29T20:19:04Z"
+   "advanced": "2026-10-29T20:19:04Z",
+   "parked": {
+    "at": "2026-11-11T02:34:40Z",
+    "why": "Will, 2026-11-02: account broker redesign, on hold since 2026-11-02",
+    "roots": [
+     15128,
+     15130
+    ],
+    "bundle": [
+     "account-window-reserves",
+     "reset-account-optout",
+     "fallback-revert-when-healthy",
+     "broker-reset-sweep",
+     "broker-sweep-clients-defer"
+    ]
+   }
   },
   {
    "id": "reset-before-reserve",
@@ -438,7 +453,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/reset-before-reserve",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-11-02T02:39:38Z",
+   "updated": "2026-11-11T02:34:40Z",
    "note": "Will, 2026-11-02: broker cluster on hold for redesign; not going to Brit; no worker on its Codex findings.",
    "advanced": "2026-11-02T01:26:29Z",
    "built": [
@@ -523,7 +538,22 @@
      "at": "2026-10-17T18:18:26Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "parked": {
+    "at": "2026-11-11T02:34:40Z",
+    "why": "Will, 2026-11-02: account broker redesign, on hold since 2026-11-02",
+    "roots": [
+     15128,
+     15130
+    ],
+    "bundle": [
+     "account-window-reserves",
+     "reset-account-optout",
+     "fallback-revert-when-healthy",
+     "broker-reset-sweep",
+     "broker-sweep-clients-defer"
+    ]
+   }
   },
   {
    "id": "reset-account-optout",
