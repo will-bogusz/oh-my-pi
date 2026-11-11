@@ -1694,6 +1694,7 @@ mod foreground {
 	/// keeps a few words of a burst) gets it at its own pace.
 	fn send_text(target: Option<HWND>, text: &str, field: Option<&TypingField>) -> CoreResult<()> {
 		let mut pacer = Pacer::new(field.is_some());
+		let start = Instant::now();
 		let mut shown = field.map(|field| field.before.clone());
 		let mut events = Vec::new();
 		let mut unit_events = [unicode_event(0, false); 4];
@@ -1718,7 +1719,7 @@ mod foreground {
 					&& pacer.pace != Pace::Off
 				{
 					let (progress, changed) = await_run(field, piece, before)?;
-					pacer.after(progress, changed, rest.is_empty());
+					pacer.after(progress, changed, rest.is_empty(), start.elapsed());
 				}
 			}
 		}

@@ -4,6 +4,8 @@
 //! This module has no Windows imports, so the host test suite exercises the
 //! verdicts and their wording on every platform.
 
+use std::time::Duration;
+
 /// Characters of field text a message quotes.
 const QUOTED_CHARS: usize = 120;
 
@@ -117,6 +119,12 @@ pub enum Pace {
 /// Pieces in a row after which the field's text did not change at all
 /// before pacing stops: the keys go somewhere else.
 const QUIET_PIECES: u8 = 2;
+/// Longest a typing call waits on the field before sending the rest
+/// unpaced: a field that redraws slowly but keeps every key (Settings
+/// search took 100 s for 2,000 characters a word at a time) must not run
+/// the call into its time limit. Windows 11 Notepad shows 2,000 paced
+/// characters in about 8 s.
+pub const PACE_BUDGET: Duration = Duration::from_secs(30);
 
 /// The pace of one typing call.
 #[derive(Debug)]
@@ -135,9 +143,16 @@ impl Pacer {
 	/// the field's text changed at all while waiting for it, `run_end`
 	/// whether the piece ended its word. A field that reads some other way
 	/// (autocorrect, a suggestion) keeps its pace: the wait for it to stop
-	/// changing still paces it.
-	pub fn after(&mut self, progress: Option<Progress>, changed: bool, run_end: bool) {
-		let Some(progress) = progress else {
+	/// changing still paces it. Past [`PACE_BUDGET`] of `paced` time pacing
+	/// stops.
+	pub fn after(
+		&mut self,
+		progress: Option<Progress>,
+		changed: bool,
+		run_end: bool,
+		paced: Duration,
+	) {
+		let Some(progress) = progress.filter(|_| paced < PACE_BUDGET) else {
 			self.pace = Pace::Off;
 			return;
 		};
@@ -315,26 +330,30 @@ mod tests {
 	#[test]
 	fn pacing_slows_on_a_short_word_and_stops_when_the_field_goes_quiet() {
 		let mut pacer = Pacer::new(true);
-		pacer.after(Some(Progress::Shown), true, true);
+		pacer.after(Some(Progress::Shown), true, true, Duration::ZERO);
 		assert_eq!(pacer.pace, Pace::Words);
 		// Autocorrect reads otherwise but the field changed: keep pacing.
-		pacer.after(Some(Progress::Other), true, true);
+		pacer.after(Some(Progress::Other), true, true, Duration::ZERO);
 		assert_eq!(pacer.pace, Pace::Words);
-		pacer.after(Some(Progress::Short), true, true);
+		pacer.after(Some(Progress::Short), true, true, Duration::ZERO);
 		assert_eq!(pacer.pace, Pace::Characters);
-		pacer.after(Some(Progress::Shown), true, false);
+		pacer.after(Some(Progress::Shown), true, false, Duration::ZERO);
 		assert_eq!(pacer.pace, Pace::Characters);
-		pacer.after(Some(Progress::Shown), true, true);
+		pacer.after(Some(Progress::Shown), true, true, Duration::ZERO);
 		assert_eq!(pacer.pace, Pace::Words);
 		// One quiet piece slows down; two in a row stop the waits.
-		pacer.after(Some(Progress::Short), false, true);
+		pacer.after(Some(Progress::Short), false, true, Duration::ZERO);
 		assert_eq!(pacer.pace, Pace::Characters);
-		pacer.after(Some(Progress::Short), false, false);
+		pacer.after(Some(Progress::Short), false, false, Duration::ZERO);
 		assert_eq!(pacer.pace, Pace::Off);
 
 		let mut pacer = Pacer::new(true);
-		pacer.after(None, true, true);
+		pacer.after(None, true, true, Duration::ZERO);
 		assert_eq!(pacer.pace, Pace::Off);
 		assert_eq!(Pacer::new(false).pace, Pace::Off);
+
+		let mut pacer = Pacer::new(true);
+		pacer.after(Some(Progress::Shown), true, true, PACE_BUDGET);
+		assert_eq!(pacer.pace, Pace::Off);
 	}
 }
