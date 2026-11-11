@@ -21238,7 +21238,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-popup-lossless",
    "host": "MacBook-Pro",
    "added": "2026-10-19T00:03:17Z",
-   "updated": "2026-11-11T06:55:24Z",
+   "updated": "2026-11-11T10:15:11Z",
    "note": "HOLD (Will, 2026-10-18): waits for Will's OK on the Accessibility dependency 2026-11-02 (QueueRestructure): after Brit's merge round, a rebase must keep main's 1c45a9113ce (relay timeout typed by class; detach-report wait only in user-driven browsers), a47a579ff17 (acquireBrowser startRelay:false for a kept tab's close), 49a19f8ec19 (PI_BROWSER_RELAY_KEEP_FRONT=0 opt-out of the front-app hold: any new SkyLight/front-app call must honor it), 89833d37f43 (cancelled press releases on a sentinel off-page point; tab-worker click guard).",
    "advanced": "2026-11-11T06:55:24Z",
    "built": [
@@ -21454,7 +21454,17 @@
     }
    ],
    "opened": "2026-11-03T02:14:17Z",
-   "readied": "2026-11-03T02:14:42Z"
+   "readied": "2026-11-03T02:14:42Z",
+   "design_checks": [
+    {
+     "pr": 17894,
+     "rounds": 27,
+     "at": "2026-11-11T10:15:10Z",
+     "verdict": "close",
+     "note": "DesignChecks: keep main's behaviour. 33 of 40 findings structural to undoing a routing decision after the fact; 5 unresolved at the head incl. round 27 P1 (4534932336). Chrome activates for every page-opened window/tab (15/15 macOS VM); a typing-pause hold cuts loss 1.3-6.7x, never to zero. Main loses one key in ~1.3% of popup clicks made while the user types elsewhere. Close note drafted in the report for Will's approval.",
+     "ref": "/Users/viathebrink/tmp/oh-my-pi/DesignChecks/report-17894.md"
+    }
+   ]
   },
   {
    "id": "computer-ui-quiet",
