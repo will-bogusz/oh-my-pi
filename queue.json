@@ -80797,13 +80797,13 @@
    "needs": [],
    "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
    "body": "bodies/win-takeover-focus.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18919,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-takeover-focus",
    "host": "MacBook-Pro",
    "added": "2026-11-11T11:46:35Z",
-   "updated": "2026-11-11T15:50:49Z",
+   "updated": "2026-11-11T16:22:35Z",
    "note": "",
    "built": [
     {
@@ -81015,7 +81015,8 @@
      "host": "MacBook-Pro",
      "tree": "6388dc54ea63d024bf535e8aba05ffe088172cd6"
     }
-   ]
+   ],
+   "opened": "2026-11-11T16:22:35Z"
   },
   {
    "id": "browser-wait-selector-state",
