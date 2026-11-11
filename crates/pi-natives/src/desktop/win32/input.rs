@@ -989,7 +989,7 @@ mod foreground {
 	/// faster synthetic text ([`delivery::drops_fast_text`]): Windows 11
 	/// Notepad lost characters in 6 of 10 runs of 240 at 6 ms and none at 8
 	/// or 10 ms.
-	const SLOW_TEXT_GAP: Duration = Duration::from_millis(10);
+	const SLOW_TEXT_GAP: Duration = Duration::from_millis(0);
 
 	/// Activates the target for foreground input and hands the foreground back
 	/// to the user's window once the target has consumed it.
