@@ -17,12 +17,22 @@ Native Win32 and WinForms combos use background control messages and parent noti
 
 On Linux, `cargo test -p pi-natives --lib desktop::win32::value_write::tests`: four pure tests fail when routing, readback, planning and exact-case decisions are disabled; all four pass with those decisions restored. They exercise empty-value priority, legacy fallback, secure errors, disabled and unlisted combos, and case-insensitive candidate rejection without creating windows or sending desktop input.
 
+On Windows, `editing_an_unlisted_value_clears_the_previous_selection` opens a real editable combo box, selects an item, then writes text that matches no item: it fails without the selection reset (index stays `1`, expected `-1`) and passes on this branch.
+
 ## Verification
 
 - Linux and macOS: `rust-check` (clippy and rustfmt) passed.
 - Windows cross-build: `rust-check --windows` (xwin clippy and rustfmt) passed.
 
-Live check on a Windows 11 desktop: pending.
+Live check on a Windows 11 guest, a WinForms form, one `setValue` per control, the app's own change events logged:
+
+| `setValue` | `main` | this PR |
+|---|---|---|
+| DropDownList combo to `gamma` | success, the app saw no event | success, the app's selection handler fired (index 2) |
+| Editable combo to listed `green` | success, no event | success, selection handler fired (index 1) |
+| Editable combo to unlisted `purple` | success, no event | success, text handler fired, selection cleared (index -1) |
+| Uppercasing text box to `abc` | success, the field reads `ABC` | `AxFailed`: wrote "abc", the field now reads "ABC" |
+| Plain text box | success | success, same |
 
 ---
 
