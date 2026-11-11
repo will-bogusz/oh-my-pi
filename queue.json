@@ -73612,6 +73612,24 @@
    "added": "2026-11-11T01:40:34Z",
    "updated": "2026-11-11T01:40:34Z",
    "note": ""
+  },
+  {
+   "id": "macos-click-timestamp",
+   "branch": "will/macos-click-timestamp",
+   "title": "fix(natives): stop macOS background left clicks from crashing Electron and Chrome pages",
+   "area": "natives",
+   "priority": "P0",
+   "needs": [],
+   "base": "6dd7ddf5feab54da3c82b460ee390a7d09aeabaa",
+   "body": "bodies/macos-click-timestamp.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-click-timestamp",
+   "host": "MacBook-Pro",
+   "added": "2026-11-11T01:40:54Z",
+   "updated": "2026-11-11T01:40:54Z",
+   "note": ""
   }
  ],
  "watch": {
