@@ -355,12 +355,15 @@
 - `/context` shows loaded instruction files and skills in their own categories; System Prompt marks where each one sits without counting it twice, and notes when an extension or SDK callback changed the prompt after it was built ([#17971](https://github.com/can1357/oh-my-pi/pull/17971) by [@c-w-z](https://github.com/c-w-z))
 - Added Hacker News search (`web/hackernews`): `web_search` queries scoped to `site:news.ycombinator.com` now search HN stories and comments through the keyless HN Search API before the configured engines
 
+- Added a report of native windows to browser results on macOS: a `<select>` menu, colour or date picker, or a print, save, sign-in, passkey or permission sheet or bubble a call raised over its tab is named with its `computer.window()` id, by the next call when it shows just after the call returned, and on failed calls too ([#15575](https://github.com/can1357/oh-my-pi/pull/15575) by [@will-bogusz](https://github.com/will-bogusz))
+- Added file choosers to browser `tab.dialog()` and `tab.handleDialog()` on Chromium: a chooser a call opens is held instead of raising the OS file dialog, reported as `file-chooser`, and answered with `handleDialog({ accept: true, files })` or cancelled with `{ accept: false }` ([#15555](https://github.com/can1357/oh-my-pi/pull/15555) by [@will-bogusz](https://github.com/will-bogusz))
 ### Changed
 
 - A role edit in another omp instance no longer rewrites the `task` and `eval` tool descriptions of every running session, which was invalidating the Anthropic prompt cache from the tool definitions onward and dropping signed thinking blocks on prefix-bound models; the per-call model advertisement is now frozen into the base prompt surface and changes only when that surface rebuilds ([#18716](https://github.com/can1357/oh-my-pi/issues/18716), [#18732](https://github.com/can1357/oh-my-pi/pull/18732) by [@yuzu-octopus](https://github.com/yuzu-octopus))
 - Agent-to-agent messages now always reach the recipient as user turns: one that ends a `wait` arrives right after it instead of inside the `wait` tool result, and none is sent with developer or system authority
 - Launch services now persist for non‑interactive sessions
 - The shell's built-in `jq` now behaves like jq 1.8.2 instead of jaq: the same output (number formatting, colors, `-S`, `--indent`, `--seq`, `--stream`), error messages and exit statuses, jq's full option set (`--version` reports `jq-1.8.2`), and its grammar and builtins (`?//`, `$__loc__`, modules, `getpath`/`setpath` creating missing paths, `|=` deletions, Oniguruma regexes, dates); it passes jq 1.8.2's own test suite
+- Changed alerts in connected and relay Chromium browsers to stay open for the user instead of being accepted automatically ([#15555](https://github.com/can1357/oh-my-pi/pull/15555) by [@will-bogusz](https://github.com/will-bogusz))
 
 ### Fixed
 
@@ -387,6 +390,10 @@
 - `/tan` completion notices now quote the user's request and mark the result as the user's tangent, so the main agent no longer mistakes it for its own work
 - `omp zsh` with zsh-autosuggestions' `completion` strategy no longer echoes each typed key onto new lines: `vared` inside a `zpty` command now edits on the pty instead of the shell's terminal
 - An instruction file that leaves a code fence open has it closed at its end, so the rest of the system prompt is formatted as usual ([#17971](https://github.com/can1357/oh-my-pi/pull/17971) by [@c-w-z](https://github.com/c-w-z))
+- Fixed the browser relay attaching Chrome's debugger to every tab of the user's browser whenever omp connected; it now attaches only tabs omp opened or borrowed with `app.target`, and omp replaces a relay an older omp started (or reports one started by hand as out of date) instead of using it ([#15554](https://github.com/can1357/oh-my-pi/pull/15554) by [@will-bogusz](https://github.com/will-bogusz))
+- Fixed browser calls on Chromium hanging until the cell timed out, and the tab then being killed, when the page opened a confirm or prompt; other calls now fail at once naming `tab.handleDialog()` ([#15555](https://github.com/can1357/oh-my-pi/pull/15555) by [@will-bogusz](https://github.com/will-bogusz))
+- Fixed a Chromium browser tab being killed, its page still stopped in a JavaScript dialog, after a call timed out behind that dialog; omp now dismisses it and the tab recovers ([#15555](https://github.com/can1357/oh-my-pi/pull/15555) by [@will-bogusz](https://github.com/will-bogusz))
+- Fixed browser `tab.id(n)` calling an element stale in a later run once an earlier run had used that id ([#15555](https://github.com/can1357/oh-my-pi/pull/15555) by [@will-bogusz](https://github.com/will-bogusz))
 
 ### Fixed
 
