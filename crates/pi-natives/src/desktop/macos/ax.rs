@@ -29,8 +29,8 @@ pub(super) use selection::select_dragged;
 use super::{
 	super::{
 		ax::{
-			AxBounds, AxHandle, AxProps, WalkBounds, normalize_role_macos, text_readback,
-			truncate_chars,
+			AxBounds, AxHandle, AxProps, WalkBounds, confirm_read_as, normalize_role_macos,
+			require_read_as, text_readback, truncate_chars,
 		},
 		backend::{AxBackend, KeyboardFocus, is_raise_action, native_action_name},
 		control,
@@ -1121,6 +1121,7 @@ impl AxBackend for MacAx {
 
 	fn set_value(&mut self, h: &AxHandle, value: &str) -> CoreResult<()> {
 		let element = mac_handle(h)?;
+		require_read_as(|| read_as(element))?;
 		// A popup's value is chosen from its menu, not written. This runs before
 		// the text-target refusals: nothing is typed or written, and the verdict
 		// is the popup's own read-back after a real menu press.
@@ -1163,12 +1164,14 @@ impl AxBackend for MacAx {
 			control::check()?;
 			control::intervention::check_press()?;
 			set_string_value(element, "AXValue", value)?;
-			verify_text_value(element, value, value)
+			verify_text_value(element, value, value)?;
+			confirm_read_as(|| read_as(element))
 		})
 	}
 
 	fn focus(&mut self, h: &AxHandle) -> CoreResult<()> {
 		let element = mac_handle(h)?;
+		require_read_as(|| read_as(element))?;
 		skylight::with_background_guard(element_pid(element)?, || {
 			control::intervention::check_press()?;
 			set_focused(element)
@@ -1180,7 +1183,9 @@ impl AxBackend for MacAx {
 		h: &AxHandle,
 		request: &TextSelectRequest,
 	) -> CoreResult<AxTextSelection> {
-		selection::select(mac_handle(h)?, request)
+		let element = mac_handle(h)?;
+		require_read_as(|| read_as(element))?;
+		selection::select(element, request)
 	}
 
 	fn element_at(&mut self, x: f64, y: f64) -> CoreResult<Option<AxHandle>> {
@@ -1418,6 +1423,7 @@ fn perform_choosing(
 	// Read before any probe of the target, as for background input
 	// ([`input::EntryFront`]).
 	let entry_front = input::EntryFront::now();
+	require_read_as(|| read_as(element))?;
 	let actions = copy_strings_from_action_names(element)?;
 	let Some(native) = supported_action(&actions, action).cloned() else {
 		return Err(unsupported_action(&native_action_name(action), &actions));
@@ -1650,6 +1656,12 @@ fn verify_text_value(element: &AXUIElement, sent: &str, expected: &str) -> CoreR
 	text_readback(sent, expected, copy_string(element, "AXValue").as_deref(), is_secure(element))
 }
 
+/// What `element` reads as now, for [`require_read_as`]: its role and labels
+/// from one batched read.
+pub(super) fn read_as(element: &AXUIElement) -> CoreResult<AxProps> {
+	element_props(element, &NodeValues::read(element, NodeRead::Props), 0, WalkBounds::Skip)
+}
+
 fn is_secure(element: &AXUIElement) -> bool {
 	secure_subrole(copy_attribute_result(element, "AXSubrole").map(|value| {
 		match value {
@@ -1828,7 +1840,8 @@ fn insert_selected_text(
 	skylight::with_background_guard(pid, || {
 		control::intervention::check_press()?;
 		set_string_value(element, "AXSelectedText", text)?;
-		verify_text_value(element, text, &expected)
+		verify_text_value(element, text, &expected)?;
+		confirm_read_as(|| read_as(element))
 	})?;
 	Ok(true)
 }
@@ -2017,7 +2030,8 @@ impl TextField for LiveField<'_> {
 
 	fn insert(&self, text: &str) -> CoreResult<()> {
 		set_string_value(self.element, "AXSelectedText", text)?;
-		verify_text_value(self.element, text, text)
+		verify_text_value(self.element, text, text)?;
+		confirm_read_as(|| read_as(self.element))
 	}
 }
 

@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed macOS element actions going to a different control, and reporting success, when the app had handed the ref's element to that control, as Contacts does with an address's fields once the street is typed: the action now sends nothing and fails with `StaleRef`, giving that element a new ref and naming the one element that reads as the ref did
+- Fixed macOS element refs in a table row going stale whenever the app redraws the row, as Activity Monitor does with its process table every few seconds: a read or action on the ref now goes to the same place in the one row that still reads exactly as it did; otherwise `StaleRef` quotes that row as read and the matching row as it reads now
+
 ## [18.18.8] - 2026-11-11
 
 ### Changed

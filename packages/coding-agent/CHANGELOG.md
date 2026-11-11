@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed the macOS `computer` tool typing into or pressing a different control than the ref named, and reporting success, once the app reused the element for another control (Contacts' City field took the street's text): such a call now sends nothing and fails with `StaleRef` naming the right element
+- Fixed the macOS `computer` tool failing a click or press on an Activity Monitor process row, or any table row the app redrew since `ax()` read it, with `StaleRef`: the ref now follows the row when one row still reads exactly as it did, and the error otherwise shows the row then and now
+
 ## [18.18.8] - 2026-11-11
 
 ### Changed

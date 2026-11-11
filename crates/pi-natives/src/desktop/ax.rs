@@ -1,7 +1,9 @@
 use std::{
+	cell::RefCell,
 	collections::{HashMap, HashSet},
 	fmt::Write as _,
 	hash::{DefaultHasher, Hash, Hasher},
+	sync::Arc,
 };
 
 use super::{
@@ -163,6 +165,24 @@ struct Proof {
 	walk:     WholeWalk,
 }
 
+/// Where a ref's element sits in a table row that no other row of a walk of
+/// the whole window matched element for element. An app that rebuilds its
+/// rows as it refreshes, as Activity Monitor does every few seconds, draws
+/// the same row again from new elements; the ref follows it there
+/// ([`follow_row`]).
+#[derive(Clone)]
+struct RowProof {
+	/// The row's [`row_print`].
+	print:    u64,
+	/// Child indices from the row down to the element.
+	path:     Vec<usize>,
+	/// The element's own [`AxProps::identity`].
+	identity: u64,
+	walk:     WholeWalk,
+	/// What the row read, for the error that names a copy of the element.
+	text:     Arc<str>,
+}
+
 struct Registered {
 	handle:      AxHandle,
 	target_key:  String,
@@ -171,6 +191,7 @@ struct Registered {
 	/// role or label gets a new ref.
 	fingerprint: u64,
 	proof:       Option<Proof>,
+	row:         Option<RowProof>,
 }
 
 pub struct AxRegistry {
@@ -231,10 +252,7 @@ impl AxRegistry {
 		props: &AxProps,
 		uniqueness: Uniqueness,
 	) -> String {
-		let mut hasher = DefaultHasher::new();
-		props.role.hash(&mut hasher);
-		label(props).hash(&mut hasher);
-		let fingerprint = hasher.finish();
+		let fingerprint = fingerprint(props);
 		let identified = handle.identified();
 		let known = if identified {
 			self
@@ -263,15 +281,24 @@ impl AxRegistry {
 			}
 			id
 		});
+		// An earlier proof stands while the identity is unchanged, until a
+		// read that can tell decides it again.
+		let kept = |identity| props.identity == Some(identity);
+		let (earlier_proof, row) =
+			renewed
+				.and_then(|id| self.entries.remove(&id))
+				.map_or((None, None), |entry| {
+					(
+						entry.proof.filter(|proof| kept(proof.identity)),
+						entry.row.filter(|row| kept(row.identity)),
+					)
+				});
 		let proof = match uniqueness {
 			Uniqueness::Proven(walk) => props
 				.identity
 				.map(|identity| Proof { identity, walk: walk.clone() }),
 			Uniqueness::Shared => None,
-			Uniqueness::Unknown => renewed
-				.and_then(|id| self.entries.remove(&id))
-				.and_then(|entry| entry.proof)
-				.filter(|proof| props.identity == Some(proof.identity)),
+			Uniqueness::Unknown => earlier_proof,
 		};
 		self.entries.insert(id, Registered {
 			handle,
@@ -279,6 +306,7 @@ impl AxRegistry {
 			generation,
 			fingerprint,
 			proof,
+			row,
 		});
 		self.enforce_cap();
 		format!("e{id}")
@@ -304,6 +332,65 @@ impl AxRegistry {
 		self
 			.entry(reference)
 			.is_ok_and(|entry| entry.proof.is_some())
+	}
+
+	/// Holds the element action the current request makes on `reference` to
+	/// the role and label the ref was read with ([`require_read_as`]) until the
+	/// scope drops. `None` for a ref that no longer resolves.
+	pub(crate) fn expect_read_as(&self, reference: &str) -> Option<ReadAsScope> {
+		let fingerprint = self.entry(reference).ok()?.fingerprint;
+		READ_AS.with_borrow_mut(|read_as| {
+			*read_as = Some(ReadAs {
+				reference: reference.to_owned(),
+				fingerprint,
+				checked: false,
+				tripped: false,
+			});
+		});
+		Some(ReadAsScope(()))
+	}
+
+	/// Whether `reference` was read in a row no other row of the window
+	/// matched, so [`follow_row`] can follow the row's rebuilt copy.
+	pub(crate) fn has_row(&self, reference: &str) -> bool {
+		self.entry(reference).is_ok_and(|entry| entry.row.is_some())
+	}
+
+	/// What the row `reference` was read in read then.
+	pub(crate) fn row_text(&self, reference: &str) -> Option<Arc<str>> {
+		self
+			.entry(reference)
+			.ok()
+			.and_then(|entry| entry.row.as_ref())
+			.map(|row| row.text.clone())
+	}
+
+	/// Decides, for a read of the whole window, whether `reference` can follow
+	/// its row.
+	fn set_row(&mut self, reference: &str, row: Option<RowProof>) {
+		if let Some(entry) = ref_id(reference).and_then(|id| self.entries.get_mut(&id)) {
+			entry.row = row;
+		}
+	}
+
+	/// Points `reference` at `handle`, the element in its place in a rebuilt
+	/// copy of its row. Another ref that already names `handle` keeps it.
+	fn repoint(&mut self, reference: &str, handle: AxHandle, row: RowProof) {
+		let Some(id) = ref_id(reference) else { return };
+		let Some(entry) = self.entries.get_mut(&id) else {
+			return;
+		};
+		let old = std::mem::replace(&mut entry.handle, handle.clone());
+		entry.row = Some(row);
+		let Some(refs) = self.refs.get_mut(&entry.target_key) else {
+			return;
+		};
+		if refs.get(&old) == Some(&id) {
+			refs.remove(&old);
+		}
+		if handle.identified() {
+			refs.entry(handle).or_insert(id);
+		}
 	}
 
 	/// Drops expired refs. An identity a newer ref took over keeps pointing at
@@ -348,6 +435,119 @@ impl AxRegistry {
 /// The number in an `eN` ref.
 fn ref_id(reference: &str) -> Option<u64> {
 	reference.strip_prefix('e')?.parse().ok()
+}
+
+/// The role and label a ref was read with, as [`AxRegistry::register`]
+/// compares them: an element read again with others gets a new ref.
+fn fingerprint(props: &AxProps) -> u64 {
+	let mut hasher = DefaultHasher::new();
+	props.role.hash(&mut hasher);
+	label(props).hash(&mut hasher);
+	hasher.finish()
+}
+
+/// The ref the current request acts on, and what it was read as.
+struct ReadAs {
+	reference:   String,
+	fingerprint: u64,
+	/// Whether a backend has checked the element it acts on, so the elements
+	/// the action goes on to touch (a menu's items) are not held to it.
+	checked:     bool,
+	/// Whether the element read otherwise when a backend checked it.
+	tripped:     bool,
+}
+
+thread_local! {
+	/// Set by the worker thread for the one request it serves.
+	static READ_AS: RefCell<Option<ReadAs>> = const { RefCell::new(None) };
+}
+
+/// The current request's [`ReadAs`], cleared on drop.
+pub(crate) struct ReadAsScope(());
+
+impl ReadAsScope {
+	/// Ends the scope: whether a backend refused the action because the
+	/// element read with another role or label.
+	pub(crate) fn finish(self) -> bool {
+		let tripped =
+			READ_AS.with_borrow(|read_as| read_as.as_ref().is_some_and(|read_as| read_as.tripped));
+		drop(self);
+		tripped
+	}
+}
+
+impl Drop for ReadAsScope {
+	fn drop(&mut self) {
+		READ_AS.with_borrow_mut(Option::take);
+	}
+}
+
+/// What the element `props` reads now says against the current request's
+/// ref, `None` when it reads as the ref was read.
+fn read_otherwise(read_as: &mut ReadAs, props: &AxProps) -> Option<String> {
+	if read_as.fingerprint == fingerprint(props) {
+		return None;
+	}
+	read_as.tripped = true;
+	let mut message = format!("{} now reads as {}", read_as.reference, props.role);
+	if let Some(label) = label(props) {
+		message.push(' ');
+		push_quoted_label(&mut message, label);
+	}
+	Some(message)
+}
+
+/// Whether the current request holds an element action to its ref, and
+/// whether the element was checked already.
+fn read_as_state() -> Option<bool> {
+	READ_AS.with_borrow(|read_as| read_as.as_ref().map(|read_as| read_as.checked))
+}
+
+/// Compares the element `props` reads with the current request's ref.
+fn check_read_as(props: &AxProps) -> Option<String> {
+	READ_AS.with_borrow_mut(|read_as| {
+		let read_as = read_as.as_mut()?;
+		read_as.checked = true;
+		read_otherwise(read_as, props)
+	})
+}
+
+/// For a backend about to act on the element of the current request's ref,
+/// once it has read the user's front app: `StaleRef`, with nothing sent, when
+/// the element reads with another role or label than the ref was read with.
+/// An app can hand a control's element to another control: Contacts answers
+/// the element read as an address's "City" field as its "Street" field once
+/// the street is typed. `props` reads the element; outside such a request,
+/// or once the request's element was checked, nothing is read.
+pub(crate) fn require_read_as(props: impl FnOnce() -> CoreResult<AxProps>) -> CoreResult<()> {
+	if read_as_state() != Some(false) {
+		return Ok(());
+	}
+	match check_read_as(&props()?) {
+		None => Ok(()),
+		Some(message) => Err(DesktopError::stale_ref(format!(
+			"{message}, not with the role and label it was read with; nothing was sent"
+		))),
+	}
+}
+
+/// [`require_read_as`] for the read-back after a write to the checked
+/// element: a write it confirmed while it reads as another control may have
+/// gone to that one, so it is unconfirmed.
+pub(crate) fn confirm_read_as(props: impl FnOnce() -> CoreResult<AxProps>) -> CoreResult<()> {
+	if read_as_state() != Some(true) {
+		return Ok(());
+	}
+	match check_read_as(&props()?) {
+		None => Ok(()),
+		Some(message) => Err(DesktopError::new(
+			ErrorCode::AxUnconfirmed,
+			format!(
+				"the text was written, but {message} after the write, so it may have gone to that \
+				 control: read the window before retrying"
+			),
+		)),
+	}
 }
 
 /// What an `ax()` line says about writing an element's value.
@@ -804,9 +1004,8 @@ fn format_tree(
 	} else {
 		(None, focus.holds(backend, &node.handle, &node.props))
 	};
-	let uniqueness = identities.of(&node.props);
 	let reference =
-		registry.register(backend, target, generation, node.handle, &node.props, uniqueness);
+		identities.register(backend, registry, target, generation, node.handle, &node.props);
 	if !text.is_empty() {
 		text.push('\n');
 	}
@@ -1002,11 +1201,10 @@ pub fn query(
 		}) && contains(label(&node.props), title.as_ref())
 			&& contains(node.props.value.as_deref(), value.as_ref())
 		{
-			let uniqueness = identities.of(&node.props);
 			let mut props = node.props;
 			props.focused = focus.holds(backend, &node.handle, &props);
 			let reference =
-				registry.register(backend, target, generation, node.handle, &props, uniqueness);
+				identities.register(backend, registry, target, generation, node.handle, &props);
 			result.push(node_to_napi(reference, props));
 			if result.len() >= limit {
 				break;
@@ -1087,6 +1285,9 @@ struct ReadIdentities {
 	shared: HashSet<u64>,
 	/// The walk, when it read the whole window.
 	whole:  Option<WholeWalk>,
+	/// Where each element of a row no other row matched sits in it, when the
+	/// walk read the whole window.
+	rows:   HashMap<AxHandle, RowProof>,
 }
 
 impl ReadIdentities {
@@ -1102,7 +1303,12 @@ impl ReadIdentities {
 				shared.insert(identity);
 			}
 		}
-		Self { shared, whole: state.whole(root) }
+		let whole = state.whole(root);
+		let rows = match (tree, &whole) {
+			(Some(tree), Some(walk)) => row_places(tree, walk),
+			_ => HashMap::new(),
+		};
+		Self { shared, whole, rows }
 	}
 
 	/// A twin anywhere in the walk rules naming out, but only a walk of the
@@ -1114,19 +1320,199 @@ impl ReadIdentities {
 			_ => Uniqueness::Unknown,
 		}
 	}
+
+	/// Registers `handle`'s element as `register` does, then records where it
+	/// sits in its row when the walk read the whole window: a partial walk
+	/// leaves an earlier decision standing.
+	fn register(
+		&self,
+		backend: &mut dyn AxBackend,
+		registry: &mut AxRegistry,
+		target: &str,
+		generation: u64,
+		handle: AxHandle,
+		props: &AxProps,
+	) -> String {
+		let row = self.rows.get(&handle).cloned();
+		let reference = registry.register(backend, target, generation, handle, props, self.of(props));
+		if self.whole.is_some() {
+			registry.set_row(&reference, row);
+		}
+		reference
+	}
+}
+
+/// Role of a table or outline row, after normalization.
+const ROW: &str = "row";
+
+/// A row's elements, each as its depth below the row and its identity, in
+/// walk order, hashed: two rows match when they hold the same elements in
+/// the same places. `None` when an element of the row has no identity.
+fn row_print(row: &WalkNode) -> Option<u64> {
+	fn add(node: &WalkNode, depth: u32, hasher: &mut DefaultHasher) -> Option<()> {
+		depth.hash(hasher);
+		node.props.identity?.hash(hasher);
+		for child in &node.children {
+			add(child, depth + 1, hasher)?;
+		}
+		Some(())
+	}
+	let mut hasher = DefaultHasher::new();
+	add(row, 0, &mut hasher)?;
+	Some(hasher.finish())
+}
+
+/// Every row of `tree`, outer before inner, with its [`row_print`].
+fn rows_of(tree: &WalkNode) -> Vec<(&WalkNode, Option<u64>)> {
+	let mut rows = Vec::new();
+	let mut stack = vec![tree];
+	while let Some(node) = stack.pop() {
+		if node.props.role == ROW {
+			rows.push((node, row_print(node)));
+		}
+		stack.extend(node.children.iter().rev());
+	}
+	rows
+}
+
+/// What a row reads, label and value of each element in order, as an error
+/// quotes it: its first [`ROW_FIELDS`] fields.
+fn row_reading(row: &WalkNode) -> String {
+	let mut text = String::new();
+	let mut stack = vec![row];
+	let mut fields = 0;
+	while let Some(node) = stack.pop() {
+		stack.extend(node.children.iter().rev());
+		for field in [label(&node.props), node.props.value.as_deref()]
+			.into_iter()
+			.flatten()
+			.filter(|field| !field.is_empty())
+		{
+			if fields == ROW_FIELDS {
+				text.push_str(", …");
+				return text;
+			}
+			if fields > 0 {
+				text.push_str(", ");
+			}
+			push_quoted_label(&mut text, field);
+			fields += 1;
+		}
+	}
+	text
+}
+
+/// How many fields of a row an error quotes.
+const ROW_FIELDS: usize = 16;
+
+/// Where each element of a row of `tree` that no other row matches sits in
+/// it. An element of a row inside a row is placed in the inner one.
+fn row_places(tree: &WalkNode, walk: &WholeWalk) -> HashMap<AxHandle, RowProof> {
+	fn place(
+		node: &WalkNode,
+		path: &mut Vec<usize>,
+		row: &(u64, Arc<str>),
+		walk: &WholeWalk,
+		places: &mut HashMap<AxHandle, RowProof>,
+	) {
+		// A row's elements all have an identity, or it has no print.
+		if let Some(identity) = node.props.identity {
+			places.insert(node.handle.clone(), RowProof {
+				print: row.0,
+				path: path.clone(),
+				identity,
+				walk: walk.clone(),
+				text: row.1.clone(),
+			});
+		}
+		for (index, child) in node.children.iter().enumerate() {
+			path.push(index);
+			place(child, path, row, walk, places);
+			path.pop();
+		}
+	}
+	let rows = rows_of(tree);
+	let mut counts: HashMap<u64, u32> = HashMap::new();
+	for print in rows.iter().filter_map(|(_, print)| *print) {
+		*counts.entry(print).or_default() += 1;
+	}
+	let mut places = HashMap::new();
+	for (row, print) in rows {
+		if let Some(print) = print.filter(|print| counts[print] == 1) {
+			let text = row_reading(row).into();
+			place(row, &mut Vec::new(), &(print, text), walk, &mut places);
+		}
+	}
+	places
+}
+
+/// Points `reference` at the element in its place in the one row of
+/// `window` that reads, element for element, as the ref's row did when read,
+/// once the app has rebuilt that row from new elements: Activity Monitor
+/// does so with its process table every few seconds. Returns whether it did.
+/// Nothing follows when the ref was not read in a row no other row of a walk
+/// of the whole window matched, the window id now names another window,
+/// this walk could not read the whole window, or no row or several rows read
+/// that way now: a row whose elements changed may be another one. The walk
+/// reads as far as the one that placed the ref did, and at least as far as
+/// `find()` does; it stops with `Cancelled` once the current operation is
+/// cancelled.
+pub fn follow_row(
+	backend: &mut dyn AxBackend,
+	registry: &mut AxRegistry,
+	window: &DesktopWindow,
+	reference: &str,
+) -> CoreResult<bool> {
+	let Some(row) = registry.entry(reference)?.row.clone() else {
+		return Ok(false);
+	};
+	control::check()?;
+	let root = backend.window_root(window)?;
+	if root != row.walk.root {
+		return Ok(false);
+	}
+	let mut state = WalkState::new(
+		row.walk.max_nodes.max(FIND_MAX_NODES),
+		row.walk.max_depth.max(FIND_MAX_DEPTH),
+		WalkBounds::Skip,
+	)
+	.cancellable();
+	let tree = walk_raw(backend, root.clone(), 0, false, &mut state)?;
+	let (Some(tree), Some(walk)) = (tree, state.whole(&root)) else {
+		return Ok(false);
+	};
+	let rows = rows_of(&tree);
+	let mut same = rows.iter().filter(|(_, print)| *print == Some(row.print));
+	let (Some((copy, _)), None) = (same.next(), same.next()) else {
+		return Ok(false);
+	};
+	let Some(element) = row
+		.path
+		.iter()
+		.try_fold(*copy, |node, &index| node.children.get(index))
+	else {
+		return Ok(false);
+	};
+	if element.props.identity != Some(row.identity) {
+		return Ok(false);
+	}
+	let handle = element.handle.clone();
+	registry.repoint(reference, handle, RowProof { walk, ..row });
+	Ok(true)
 }
 
 /// The one element of `window` with the identity `reference` was read with,
 /// registered under the ref's target, for a `StaleRef` to name once the app
 /// has destroyed the ref's element, as apps do when they rebuild a row or a
 /// control in place. The ref itself keeps naming the destroyed element: equal
-/// fields do not prove the match is the same control. `None` when the ref's
-/// identity was not unique in a walk of the whole window, the window id now
-/// names another window, this walk could not read the whole window, zero or
-/// several elements match, or the registry cap evicted the match as it was
-/// registered. The walk reads as far as the one that proved the identity did,
-/// and at least as far as `find()` does; it stops with `Cancelled` once the
-/// current operation is cancelled.
+/// fields do not prove the match is the same control. For a ref read in a
+/// row, the match's row is recorded too, so the error can quote what it
+/// reads now. `None` when the ref's identity was not unique in a walk of the
+/// whole window, the window id now names another window, this walk could not
+/// read the whole window, zero or several elements match, or the registry
+/// cap evicted the match as it was registered. The walk reads as far as the
+/// one that proved the identity did, and at least as far as `find()` does;
+/// it stops with `Cancelled` once the current operation is cancelled.
 pub fn refind(
 	backend: &mut dyn AxBackend,
 	registry: &mut AxRegistry,
@@ -1137,6 +1523,7 @@ pub fn refind(
 	let (Some(proof), target) = (entry.proof.clone(), entry.target_key.clone()) else {
 		return Ok(None);
 	};
+	let in_row = entry.row.is_some();
 	// Finding a sheet's, popover's or menu's root walks the app's tree too.
 	control::check()?;
 	let root = backend.window_root(window)?;
@@ -1155,6 +1542,10 @@ pub fn refind(
 	let Some(walk) = state.whole(&root) else {
 		return Ok(None);
 	};
+	let mut rows = match &tree {
+		Some(tree) if in_row => row_places(tree, &walk),
+		_ => HashMap::new(),
+	};
 	let mut matches = Vec::new();
 	let mut stack: Vec<_> = tree.into_iter().collect();
 	while let Some(node) = stack.pop() {
@@ -1166,9 +1557,11 @@ pub fn refind(
 	let Ok([(handle, props)]) = <[_; 1]>::try_from(matches) else {
 		return Ok(None);
 	};
+	let row = rows.remove(&handle);
 	let generation = registry.current_generation(&target);
 	let found =
 		registry.register(backend, &target, generation, handle, &props, Uniqueness::Proven(&walk));
+	registry.set_row(&found, row);
 	// At the registry cap, registering it can evict its own generation: name
 	// no ref that already expired.
 	Ok(registry.resolve(&found).is_ok().then_some(found))

@@ -20,6 +20,7 @@ mod win32;
 
 use std::{
 	collections::HashMap,
+	fmt::Write as _,
 	panic::AssertUnwindSafe,
 	sync::{
 		Arc,
@@ -1049,6 +1050,11 @@ impl Worker {
 		}
 		token.check()?;
 		let _scope = token.enter();
+		// A ref whose row the app rebuilt names the row's copy before the
+		// request reads its element or its app.
+		if let Some(reference) = request.reference() {
+			self.follow_row(reference);
+		}
 		// Input the user's recent activity holds back fails here, before it
 		// takes the input lease.
 		#[cfg(target_os = "macos")]
@@ -1060,7 +1066,7 @@ impl Worker {
 				// names its match like one from the request itself.
 				Err(error) => {
 					return Err(match request.reference() {
-						Some(reference) => self.name_match(reference, error, token),
+						Some(reference) => self.name_match(reference, error, false, token),
 						None => error,
 					});
 				},
@@ -1078,6 +1084,12 @@ impl Worker {
 			.frame_target()
 			.and_then(|target| self.frames.remove(target.key()));
 		control::take_focus_return();
+		// An element action goes only to an element that still reads with the
+		// role and label its ref was read with ([`ax::require_read_as`]).
+		let read_as = request
+			.reference()
+			.filter(|_| request.is_mutation())
+			.and_then(|reference| self.registry.expect_read_as(reference));
 		// A read cancelled while it ran is discarded, a menu read included.
 		// Input's result stands, since it may have gone out: a cancel arriving
 		// after it stops the next call instead.
@@ -1107,27 +1119,63 @@ impl Worker {
 		// A `StaleRef` search reads the whole window, which can take long
 		// enough to keep other sessions from input: it runs once the call has
 		// released it.
+		let relabelled = read_as.is_some_and(|read_as| read_as.finish());
 		drop(lease);
 		match (result, request.reference()) {
-			(Err(error), Some(reference)) => Err(self.name_match(reference, error, token)),
+			(Err(error), Some(reference)) => Err(self.name_match(reference, error, relabelled, token)),
 			(result, _) => result,
+		}
+	}
+
+	/// Points `reference` at its element's place in the one rebuilt copy of
+	/// the row it was read in ([`ax::follow_row`]), once its own element is
+	/// provably destroyed. Only a ref read in a row no other row matched pays
+	/// the probe of its element. Anything that fails leaves the ref as it
+	/// was, for the request's own `StaleRef` to report.
+	fn follow_row(&mut self, reference: &str) {
+		if !self.registry.has_row(reference) {
+			return;
+		}
+		let (Ok(handle), Ok(target)) =
+			(self.registry.resolve(reference), self.registry.target(reference))
+		else {
+			return;
+		};
+		let destroyed = self
+			.backend
+			.as_mut()
+			.ok()
+			.and_then(|backend| backend.ax())
+			.is_some_and(|ax| ax.destroyed(&handle));
+		if !destroyed {
+			return;
+		}
+		let Ok(window) = self.window(&Target::Window(target)) else {
+			return;
+		};
+		let (backend, registry) = (&mut self.backend, &mut self.registry);
+		if let Some(ax) = backend.as_mut().ok().and_then(|backend| backend.ax()) {
+			let _ = ax::follow_row(ax, registry, &window, reference);
 		}
 	}
 
 	/// Names, in a `StaleRef` from `reference`'s element, the one element of
 	/// its window with the fields the ref was read with ([`ax::refind`]),
-	/// registered as a new ref. Nothing is sent to that element: equal fields
-	/// do not prove it is the same control, so the caller decides. Searches
-	/// only for a ref read with such fields, and only once its element is
-	/// provably destroyed.
+	/// registered as a new ref, and for a ref read in a row what its row read
+	/// then and the match's row reads now. Nothing is sent to that element:
+	/// equal fields do not prove it is the same control, so the caller
+	/// decides. Searches only for a ref read with such fields, and only once
+	/// its element is provably destroyed or, `relabelled`, reads as another
+	/// control; that one gets a ref of its own in the error too.
 	fn name_match(
 		&mut self,
 		reference: &str,
 		error: DesktopError,
+		relabelled: bool,
 		token: &OperationToken,
 	) -> DesktopError {
 		if error.code != ErrorCode::StaleRef
-			|| !self.registry.has_proof(reference)
+			|| !(relabelled || self.registry.has_proof(reference))
 			|| token.check().is_err()
 		{
 			return error;
@@ -1138,24 +1186,58 @@ impl Worker {
 		let Ok(target) = self.registry.target(reference) else {
 			return error;
 		};
-		let Ok(window) = self.window(&Target::Window(target)) else {
+		let Ok(window) = self.window(&Target::Window(target.clone())) else {
 			return error;
 		};
 		let (backend, registry) = (&mut self.backend, &mut self.registry);
 		let Some(ax) = backend.as_mut().ok().and_then(|backend| backend.ax()) else {
 			return error;
 		};
-		if !ax.destroyed(&handle) {
+		let mut message = if relabelled {
+			// The element still answers, as another control: give it a ref.
+			match ax::element_line(ax, registry, &target, handle) {
+				Ok(line) => format!(
+					"{reference} now reads as {}, not with the role and label it was read with; \
+					 nothing was sent.",
+					line.trim_start_matches("- ")
+				),
+				Err(_) => format!("{}.", error.message),
+			}
+		} else if ax.destroyed(&handle) {
+			format!("{reference} destroyed;")
+		} else {
 			return error;
+		};
+		let found = if registry.has_proof(reference) {
+			ax::refind(ax, registry, &window, reference).ok().flatten()
+		} else {
+			None
+		};
+		let Some(found) = found else {
+			if !relabelled {
+				return error;
+			}
+			message.push_str(" Re-run ax()/find()");
+			return DesktopError::stale_ref(message);
+		};
+		let _ = write!(
+			message,
+			" {found} is the one element in the window with the role, labels and value {reference} \
+			 was read with."
+		);
+		if let (Some(then), Some(now)) = (registry.row_text(reference), registry.row_text(&found)) {
+			let _ = write!(
+				message,
+				" {reference}'s row read {then}; {found}'s row reads {now}, and no row reads as \
+				 {reference}'s did."
+			);
 		}
-		match ax::refind(ax, registry, &window, reference) {
-			Ok(Some(found)) => DesktopError::stale_ref(format!(
-				"{reference} destroyed; {found} is the one element in the window with the role, \
-				 labels and value {reference} was read with. Equal fields do not prove it is the same \
-				 control: check {found} before acting on it, or re-run ax()/find()"
-			)),
-			_ => error,
-		}
+		let _ = write!(
+			message,
+			" Equal fields do not prove it is the same control: check {found} before acting on it, \
+			 or re-run ax()/find()"
+		);
+		DesktopError::stale_ref(message)
 	}
 
 	/// Watches the user's own input into the app `request` reads or acts on,
@@ -2722,6 +2804,12 @@ mod capture_tests {
 	struct FakeTree {
 		titles:            HashMap<u64, &'static str>,
 		children:          Vec<u64>,
+		/// Children of elements below the window, which have none otherwise.
+		kids:              HashMap<u64, Vec<u64>>,
+		/// Roles of elements below the window that are not buttons.
+		roles:             HashMap<u64, &'static str>,
+		/// Values of elements below the window, which have none otherwise.
+		values:            HashMap<u64, &'static str>,
 		destroyed:         HashSet<u64>,
 		pressed:           Vec<u64>,
 		/// A press is delivered, then the app replaces the pressed element with
@@ -2812,6 +2900,48 @@ mod capture_tests {
 	}
 
 	impl FakeWaylandBackend {
+		/// An element's props as `props` reads them, without counting the
+		/// read: what a backend checks the element reads as before acting.
+		fn read_as(&self, h: &AxHandle) -> CoreResult<AxProps> {
+			let (role, title, value) = match &self.tree {
+				Some(tree) => {
+					let tree = tree.lock();
+					let id = tree.element(h)?;
+					if id == 1 {
+						("window", None, None)
+					} else {
+						(
+							tree.roles.get(&id).copied().unwrap_or("button"),
+							tree.titles.get(&id).map(|title| (*title).to_string()),
+							tree.values.get(&id).map(|value| (*value).to_string()),
+						)
+					}
+				},
+				None => ("button", None, None),
+			};
+			Ok(AxProps {
+				role: role.to_string(),
+				native_role: role.to_string(),
+				identity: Some(ax::test_identity((role, &title))),
+				partial: false,
+				title,
+				value,
+				description: None,
+				enabled: true,
+				focused: false,
+				bounds: (!self.no_bounds).then_some(AxBounds {
+					x:      10.0,
+					y:      10.0,
+					width:  20.0,
+					height: 20.0,
+				}),
+				actions: Vec::new(),
+				child_count: 0,
+				selected: false,
+				role_name: None,
+			})
+		}
+
 		fn new() -> Self {
 			Self {
 				window: DesktopWindow {
@@ -2892,40 +3022,10 @@ mod capture_tests {
 		}
 
 		fn props(&mut self, h: &AxHandle) -> CoreResult<AxProps> {
-			let (role, title) = match &self.tree {
-				Some(tree) => {
-					let mut tree = tree.lock();
-					tree.reads += 1;
-					let id = tree.element(h)?;
-					if id == 1 {
-						("window", None)
-					} else {
-						("button", tree.titles.get(&id).map(|title| (*title).to_string()))
-					}
-				},
-				None => ("button", None),
-			};
-			Ok(AxProps {
-				role: role.to_string(),
-				native_role: role.to_string(),
-				identity: Some(ax::test_identity((role, &title))),
-				partial: false,
-				title,
-				value: None,
-				description: None,
-				enabled: true,
-				focused: false,
-				bounds: (!self.no_bounds).then_some(AxBounds {
-					x:      10.0,
-					y:      10.0,
-					width:  20.0,
-					height: 20.0,
-				}),
-				actions: Vec::new(),
-				child_count: 0,
-				selected: false,
-				role_name: None,
-			})
+			if let Some(tree) = &self.tree {
+				tree.lock().reads += 1;
+			}
+			self.read_as(h)
 		}
 
 		fn children(&mut self, h: &AxHandle) -> CoreResult<Vec<AxHandle>> {
@@ -2933,10 +3033,14 @@ mod capture_tests {
 				return Ok(Vec::new());
 			};
 			let tree = tree.lock();
-			Ok(if tree.element(h)? == 1 {
+			let id = tree.element(h)?;
+			Ok(if id == 1 {
 				tree.children.iter().map(|id| AxHandle::Test(*id)).collect()
 			} else {
-				Vec::new()
+				tree
+					.kids
+					.get(&id)
+					.map_or_default(|kids| kids.iter().map(|id| AxHandle::Test(*id)).collect())
 			})
 		}
 
@@ -2952,6 +3056,7 @@ mod capture_tests {
 				self.clicks.lock().push(format!("perform {action}"));
 				return Ok(());
 			};
+			ax::require_read_as(|| self.read_as(h))?;
 			let mut tree = tree.lock();
 			let id = tree.element(h)?;
 			if action != "press" {
@@ -3257,6 +3362,7 @@ mod capture_tests {
 				.queries_at_input
 				.lock()
 				.push(*self.window_queries.lock());
+			ax::require_read_as(|| self.read_as(h))?;
 			if let Some(tree) = &self.tree {
 				tree.lock().element(h)?;
 			}
@@ -3276,6 +3382,7 @@ mod capture_tests {
 				.queries_at_input
 				.lock()
 				.push(*self.window_queries.lock());
+			ax::require_read_as(|| self.read_as(element))?;
 			let (target, event) = backend::locate_element_click(self, element, click)?;
 			click.send(self, &target, event, &FrameGeometry::identity_global(), token)
 		}
@@ -3847,11 +3954,16 @@ mod capture_tests {
 	/// A worker whose window holds one button per `(id, title)`, read once by
 	/// `ax()`: the window is `e1` and the buttons `e2`, `e3`, … in order.
 	fn read_buttons(buttons: &[(u64, &'static str)]) -> (TestWorker, Arc<Mutex<FakeTree>>) {
-		let tree = Arc::new(Mutex::new(FakeTree {
+		read_tree(FakeTree {
 			titles: buttons.iter().copied().collect(),
 			children: buttons.iter().map(|(id, _)| *id).collect(),
 			..FakeTree::default()
-		}));
+		})
+	}
+
+	/// A worker whose window holds `tree`, read once by `ax()`.
+	fn read_tree(tree: FakeTree) -> (TestWorker, Arc<Mutex<FakeTree>>) {
+		let tree = Arc::new(Mutex::new(tree));
 		let mut backend = FakeWaylandBackend::new();
 		backend.tree = Some(Arc::clone(&tree));
 		let mut worker = worker_with(backend);
@@ -3912,6 +4024,192 @@ mod capture_tests {
 			.message
 			.strip_prefix(&format!("{reference} destroyed; "))?;
 		rest.split_whitespace().next().map(str::to_string)
+	}
+
+	/// A table row as its id and its elements, each a statictext.
+	type Row = (u64, &'static [(u64, &'static str)]);
+
+	const DOCK: Row = (10, &[(11, " Dock"), (12, "0.0"), (13, "375")]);
+	const EXTRA: Row = (20, &[(21, " Dock Extra"), (22, "0.0"), (23, "463")]);
+
+	/// The app shows `rows` in the window in place of what it showed.
+	fn show_rows(tree: &mut FakeTree, rows: &[Row]) {
+		tree.children = rows.iter().map(|(row, _)| *row).collect();
+		for &(row, cells) in rows {
+			tree.roles.insert(row, "row");
+			tree
+				.kids
+				.insert(row, cells.iter().map(|(id, _)| *id).collect());
+			for &(id, text) in cells {
+				tree.roles.insert(id, "statictext");
+				tree.titles.insert(id, text);
+			}
+		}
+	}
+
+	/// A worker whose window holds a table of `rows`, read once by `ax()`: the
+	/// window is `e1`, then each row and its elements are `e2`, `e3`, … in
+	/// order.
+	fn read_table(rows: &[Row]) -> (TestWorker, Arc<Mutex<FakeTree>>) {
+		let mut tree = FakeTree::default();
+		show_rows(&mut tree, rows);
+		read_tree(tree)
+	}
+
+	/// The app rebuilds its table, as Activity Monitor does as it refreshes:
+	/// every row and element shown is destroyed and `rows` shown instead.
+	fn rebuild_rows(tree: &Mutex<FakeTree>, rows: &[Row]) {
+		let mut tree = tree.lock();
+		let shown: Vec<u64> = tree
+			.children
+			.iter()
+			.flat_map(|row| std::iter::once(*row).chain(tree.kids[row].iter().copied()))
+			.collect();
+		tree.destroyed.extend(shown);
+		show_rows(&mut tree, rows);
+	}
+
+	#[test]
+	fn a_press_on_a_rebuilt_row_lands_in_the_same_place_of_its_one_copy() {
+		let (mut worker, tree) = read_table(&[DOCK, EXTRA]);
+		// The refresh also reorders the table.
+		rebuild_rows(&tree, &[
+			(30, &[(31, " Dock Extra"), (32, "0.0"), (33, "463")]),
+			(40, &[(41, " Dock"), (42, "0.0"), (43, "375")]),
+		]);
+		press(&mut worker, "e3").unwrap();
+		// An element other rows share follows its own row too, as does the row.
+		press(&mut worker, "e4").unwrap();
+		press(&mut worker, "e2").unwrap();
+		assert_eq!(tree.lock().pressed, [41, 42, 40]);
+		// The next read shows the copy under the ref that followed it.
+		let read = worker
+			.snapshot(&Target::Window(WAYLAND_ID.to_string()), &AxSnapshotOptions::default())
+			.unwrap();
+		assert!(read.text.contains("statictext \"Dock\" [ref=e3]"), "{}", read.text);
+	}
+
+	#[test]
+	fn a_row_that_reads_otherwise_is_not_followed_and_the_error_quotes_it_then_and_now() {
+		// Dock quit and started again under another pid: its name matches, its
+		// row does not.
+		let (mut worker, tree) = read_table(&[DOCK, EXTRA]);
+		rebuild_rows(&tree, &[
+			(40, &[(41, " Dock"), (42, "0.0"), (43, "2041")]),
+			(30, &[(31, " Dock Extra"), (32, "0.0"), (33, "463")]),
+		]);
+		let error = press(&mut worker, "e3").unwrap_err();
+		let found = named(&error, "e3").expect("the one \" Dock\" left");
+		assert!(
+			error.message.contains(&format!(
+				"e3's row read \"Dock\", \"0.0\", \"375\"; {found}'s row reads \"Dock\", \"0.0\", \
+				 \"2041\", and no row reads as e3's did."
+			)),
+			"{}",
+			error.message
+		);
+		// An element with no telling fields of its own gets the plain error.
+		let error = press(&mut worker, "e4").unwrap_err();
+		assert_eq!(named(&error, "e4"), None);
+		assert!(tree.lock().pressed.is_empty());
+	}
+
+	#[test]
+	fn a_rebuilt_row_with_two_copies_or_a_twin_when_read_follows_neither() {
+		{
+			let (mut worker, tree) = read_table(&[DOCK, EXTRA]);
+			rebuild_rows(&tree, &[
+				(30, &[(31, " Dock"), (32, "0.0"), (33, "375")]),
+				(40, &[(41, " Dock"), (42, "0.0"), (43, "375")]),
+			]);
+			assert_eq!(press(&mut worker, "e3").unwrap_err().code, ErrorCode::StaleRef);
+			assert!(tree.lock().pressed.is_empty());
+		}
+		// Two rows that read alike when read: neither can be told from the other.
+		let (mut worker, tree) =
+			read_table(&[DOCK, (20, &[(21, " Dock"), (22, "0.0"), (23, "375")])]);
+		rebuild_rows(&tree, &[(40, &[(41, " Dock"), (42, "0.0"), (43, "375")])]);
+		assert_eq!(press(&mut worker, "e3").unwrap_err().code, ErrorCode::StaleRef);
+		assert!(tree.lock().pressed.is_empty());
+	}
+
+	#[test]
+	fn only_a_ref_read_in_a_row_probes_its_element_before_the_request() {
+		{
+			let (mut worker, tree) = read_table(&[DOCK, EXTRA]);
+			press(&mut worker, "e3").unwrap();
+			assert_eq!(tree.lock().probes, 1);
+		}
+		let (mut worker, tree) = read_buttons(&[(2, "Go"), (3, "Stop")]);
+		press(&mut worker, "e2").unwrap();
+		assert_eq!(tree.lock().probes, 0);
+	}
+
+	/// Contacts answers the element read as an address's "City" field as its
+	/// "Street" field once typing the street adds a button at the head of the
+	/// row: each element now reads as the control before it.
+	fn shift_address_row(tree: &Mutex<FakeTree>) {
+		let mut tree = tree.lock();
+		tree
+			.titles
+			.extend([(2, "Remove Address"), (3, "Street"), (4, "City")]);
+		tree.children = vec![2, 3, 4];
+	}
+
+	#[test]
+	fn an_action_on_a_ref_whose_element_reads_as_another_control_is_refused_naming_both() {
+		let (mut worker, tree) = read_buttons(&[(2, "Street"), (3, "City")]);
+		shift_address_row(&tree);
+		let error = press(&mut worker, "e3").unwrap_err();
+		assert_eq!(error.code, ErrorCode::StaleRef, "{}", error.message);
+		assert!(
+			tree.lock().pressed.is_empty(),
+			"the press reached the element now reading \"Street\""
+		);
+		let now = error
+			.message
+			.strip_prefix("e3 now reads as button \"Street\" [ref=")
+			.and_then(|rest| rest.split(']').next())
+			.unwrap_or_else(|| panic!("{}", error.message));
+		let found = error
+			.message
+			.split(". ")
+			.find_map(|sentence| {
+				sentence.strip_suffix(
+					" is the one element in the window with the role, labels and value e3 was read with",
+				)
+			})
+			.unwrap_or_else(|| panic!("{}", error.message));
+		// Each named ref acts on the element it names now.
+		press(&mut worker, found).unwrap();
+		press(&mut worker, now).unwrap();
+		assert_eq!(tree.lock().pressed, [4, 3]);
+	}
+
+	#[test]
+	fn typing_into_a_ref_whose_element_reads_as_another_control_is_refused() {
+		let (mut worker, tree) = read_buttons(&[(2, "Street"), (3, "City")]);
+		shift_address_row(&tree);
+		let typed = call(
+			&mut worker,
+			|reply| Request::AxInput {
+				reference: "e3".to_owned(),
+				input: ElementInput::Text("Cupertino".to_owned()),
+				takeover: Takeover::new(None, None),
+				reply,
+			},
+			&granted(),
+		);
+		// The fake answers input that reaches it as unfocused, never `StaleRef`.
+		assert_eq!(typed.err().map(|error| error.code), Some(ErrorCode::StaleRef));
+	}
+
+	#[test]
+	fn an_element_whose_value_changed_keeps_taking_its_refs_actions() {
+		let (mut worker, tree) = read_buttons(&[(2, "Street")]);
+		tree.lock().values.insert(2, "10600 North Tantau Avenue");
+		press(&mut worker, "e2").unwrap();
+		assert_eq!(tree.lock().pressed, [2]);
 	}
 
 	#[test]
