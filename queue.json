@@ -86432,6 +86432,11 @@
     "sha": "265dee6426bc0575096e201059b4294ed7defcea",
     "at": "2026-11-11T14:47:02Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "265dee6426bc0575096e201059b4294ed7defcea",
+    "at": "2026-11-11T14:49:41Z",
+    "host": "goliath"
    }
   }
  },
