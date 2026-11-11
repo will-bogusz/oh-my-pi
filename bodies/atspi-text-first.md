@@ -36,6 +36,8 @@ The field ends as focusing it and typing would: the text replaces the selection 
 - A, route everywhere: Qt line edits get the exact text on X11 (9/9, 0 user characters lost), but digits-only line edits, spin boxes and combo editors stored "AB" and reported success (5/5 each).
 - B, decline (shipped): validators hold (30/30 per widget), but Qt line edits keep `main`'s takeover on X11 (0/10 exact, 23 user characters lost) and stay refused on Wayland.
 
+If the maintainer picks decline for `el.type`, `setValue` should decline the same fields.
+
 ## Testing
 
 Real OMP runs in Ubuntu 24.04 X11 and KDE Plasma Wayland guests, with QEMU keys typing into a second window for each whole trial and no-agent controls around each cell (0 characters lost). A false success on one arm meant 30 runs before the other was called clean.
@@ -68,3 +70,4 @@ Qt 6.10.1 (PySide6), Qt 5.15.13 (PyQt5), GTK 3.24.41, GTK 4.14.5. The measured b
 - [x] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
