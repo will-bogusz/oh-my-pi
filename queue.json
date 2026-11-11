@@ -81736,10 +81736,15 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-11T20:40:41Z",
+  "checked": "2026-11-11T21:11:12Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {},
+  "openable": {
+   "win-screen-locked": {
+    "since": "2026-11-11T21:11:12Z",
+    "title": "fix(natives,coding-agent): report unavailable Windows desktop sessions"
+   }
+  },
   "conflicts": {},
   "merged_through": "2026-11-11T13:55:07Z",
   "unreleased": {},
@@ -81778,7 +81783,6 @@
    18897,
    18898,
    18914,
-   18915,
    18919,
    18921,
    18922,
@@ -84254,6 +84258,12 @@
     "id": "wait-ladder-context",
     "title": "feat(wait): reduce empty checks in large conversations",
     "why": "opened as #18939"
+   },
+   {
+    "at": "2026-11-11T21:11:12Z",
+    "kind": "openable",
+    "id": "win-screen-locked",
+    "title": "fix(natives,coding-agent): report unavailable Windows desktop sessions"
    }
   ]
  },
