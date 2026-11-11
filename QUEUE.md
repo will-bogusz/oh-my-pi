@@ -1,10 +1,10 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 04:05Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 04:06Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 3 of 8 ready events used in the hour before the last plan, 5 left (plan of 2026-11-11 03:56Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 6, conflict-held 18, stacked 16, held 17, parked 2, open PRs 34, queued since the last plan 1; merged 275, closed 29
+**Counts:** openable now 6, conflict-held 18, stacked 16, held 18, parked 2, open PRs 34; merged 275, closed 29
 
 ## Openable now (6)
 
@@ -61,7 +61,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | browser-cursor | feat(browser): draw the acting agent's cursor in OMP-driven tabs | browser | P2 | 4h | agent-identity | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-cursor) |
 | desktop-cursor | feat(coding-agent,natives): show each agent's cursor where its computer input lands on macOS | coding-agent | P2 | 3h | agent-identity | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/desktop-cursor) |
 
-## Held (17)
+## Held (18)
 
 | id | title | area | priority | age | hold | branch |
 |---|---|---|---|---|---|---|
@@ -82,6 +82,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | atspi-huge-children | fix(natives): stop Linux accessibility reads from freezing apps that show long tables | computer | P0 | 2h | Main, 2026-11-11: opens after atspi-unanswered-app (P0, first in Main's Linux order) merges; they conflict in linux/ax.rs | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-huge-children) |
 | atspi-text-first | fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility | computer | P1 | 1h | Main, 2026-11-11: opens after atspi-unanswered-app (P0) so it does not block it | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-text-first) |
 | atspi-value-readback | fix(natives): read back AT-SPI numeric setValue before reporting success | computer | P2 | 1h | Main, 2026-11-11: opens after atspi-unanswered-app (P0) so it does not block it | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-value-readback) |
+| print-pref | fix(coding-agent,browser-relay): stop a page calling window.print() from hanging browser calls | browser | P1 | 0h | Main, 2026-11-11: macOS headed-Chrome run pending (agent://PrintPrefMac) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/print-pref) |
 
 ## Parked (2)
 
@@ -128,9 +129,3 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | [#18795](https://github.com/can1357/oh-my-pi/pull/18795) | devin-retire-swe-1-6-fast | fix(catalog): drop Devin's retired SWE-1.6 Fast seed row | catalog | P0 | 4h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-retire-swe-1-6-fast) |
 | [#18824](https://github.com/can1357/oh-my-pi/pull/18824) | macos-click-timestamp | fix(natives): stop macOS background left clicks from crashing Electron and Chrome pages | natives | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-click-timestamp) |
 | [#18823](https://github.com/can1357/oh-my-pi/pull/18823) | qt5-getall-crash | fix(natives): stop Linux computer reads from crashing Qt, GTK 3 and Firefox apps | computer | P1 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/qt5-getall-crash) |
-
-## Queued since the last plan (1)
-
-| id | title | area | priority | age | branch |
-|---|---|---|---|---|---|
-| print-pref | fix(coding-agent,browser-relay): stop a page calling window.print() from hanging browser calls | browser | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/print-pref) |
