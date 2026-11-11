@@ -77757,13 +77757,13 @@
    "needs": [],
    "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
    "body": "bodies/win-setvalue-readback.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18915,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-setvalue-readback",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:34:38Z",
-   "updated": "2026-11-11T15:50:49Z",
+   "updated": "2026-11-11T16:16:49Z",
    "note": "",
    "built": [
     {
@@ -77975,7 +77975,8 @@
      "host": "MacBook-Pro",
      "tree": "6388dc54ea63d024bf535e8aba05ffe088172cd6"
     }
-   ]
+   ],
+   "opened": "2026-11-11T16:16:49Z"
   },
   {
    "id": "win-posted-modifiers",
