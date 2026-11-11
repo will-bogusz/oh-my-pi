@@ -82428,6 +82428,11 @@
     "sha": "df33850ab6e0ddcc74538366e3756a45bc414dae",
     "at": "2026-11-11T09:42:07Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "df33850ab6e0ddcc74538366e3756a45bc414dae",
+    "at": "2026-11-11T09:43:25Z",
+    "host": "goliath"
    }
   }
  },
