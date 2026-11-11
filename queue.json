@@ -88950,8 +88950,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-11T20:40:41.826390Z",
-  "host": "goliath",
+  "at": "2026-11-11T20:58:50.365193Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 1,
@@ -89408,23 +89408,6 @@
     "created": "2026-11-11T16:11:06Z"
    },
    {
-    "id": "win-setvalue-readback",
-    "label": "#18915",
-    "number": 18915,
-    "state": "open",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives): verify Windows value writes and notify combo selections",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-11T16:16:48Z"
-   },
-   {
     "id": "win-menu-modal",
     "label": "#18922",
     "number": 18922,
@@ -89813,7 +89796,6 @@
      "conflicts with #18825 in crates/pi-natives/Cargo.toml",
      "conflicts with #18892 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18914 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/wayland/libei.rs, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
-     "conflicts with #18915 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/ax.rs",
      "conflicts with #18923 in crates/pi-natives/src/desktop/ax.rs",
      "conflicts with #18353 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #18013 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/libei.rs",
@@ -89828,7 +89810,6 @@
      "#18825",
      "#18892",
      "#18914",
-     "#18915",
      "#18923",
      "#18353",
      "#18013"
@@ -90571,15 +90552,13 @@
     "title": "fix(natives): expose Windows control state and stale-reference matches",
     "action": "wait",
     "reasons": [
-     "conflicts with #18892 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs",
-     "conflicts with #18915 in crates/pi-natives/src/desktop/win32/ax.rs"
+     "conflicts with #18892 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18892",
-     "#18915"
+     "#18892"
     ],
     "needs": [],
     "created": "2026-11-11T10:16:04Z"
@@ -90618,14 +90597,12 @@
     "title": "fix(natives,coding-agent): show a minimized Windows app's window from apps.open instead of launching it again",
     "action": "wait",
     "reasons": [
-     "conflicts with #18915 in crates/pi-natives/src/desktop/win32/mod.rs",
      "conflicts with #18222 in packages/coding-agent/src/prompts/tools/computer.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18915",
      "#18222"
     ],
     "needs": [],
@@ -90639,16 +90616,12 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives,coding-agent): report unavailable Windows desktop sessions",
-    "action": "wait",
-    "reasons": [
-     "conflicts with #18915 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/win32/mod.rs"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#18915"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T09:31:29Z"
    },
@@ -90832,10 +90805,10 @@
      "conflicts with #18784 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18892 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18895 in docs/tools/computer.md",
-     "conflicts with #18915 in docs/tools/computer.md",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/tools/eval.ts",
+     "conflicts with win-screen-locked in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
@@ -90849,10 +90822,10 @@
      "#18784",
      "#18892",
      "#18895",
-     "#18915",
      "#18353",
      "#18222",
-     "#18786"
+     "#18786",
+     "win-screen-locked"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -90877,10 +90850,10 @@
      "conflicts with #18892 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18895 in docs/tools/computer.md",
      "conflicts with #18914 in crates/pi-natives/src/desktop/mod.rs",
-     "conflicts with #18915 in docs/tools/computer.md",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with win-screen-locked in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
@@ -90894,10 +90867,10 @@
      "#18892",
      "#18895",
      "#18914",
-     "#18915",
      "#18353",
      "#18222",
-     "#18925"
+     "#18925",
+     "win-screen-locked"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -90966,6 +90939,7 @@
      "held: Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance",
      "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/turn-recovery.ts, packages/coding-agent/test/agent-session-retry-fallback.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with #18939 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in docs/advisor-watchdog.md, docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-advisors.ts, packages/coding-agent/src/session/turn-recovery.ts, packages/coding-agent/test/agent-session-retry-fallback.test.ts"
     ],
     "note": "",
@@ -90973,7 +90947,8 @@
     "paired": [],
     "blocked_by": [
      "#17610",
-     "#18786"
+     "#18786",
+     "#18939"
     ],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
@@ -91046,6 +91021,7 @@
      "held: Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance",
      "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #18786 in packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with #18939 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in docs/auth-broker-gateway.md, packages/ai/src/auth-broker/discover.ts, packages/ai/src/auth/types.ts, packages/ai/test/auth-storage-codex-selection.test.ts, packages/coding-agent/src/cli/usage-cli.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/claude-auto-reset.ts, packages/coding-agent/src/session/codex-auto-reset.ts, packages/coding-agent/test/claude-auto-reset-integration.test.ts, packages/coding-agent/test/claude-auto-reset.test.ts"
     ],
     "note": "",
@@ -91053,29 +91029,11 @@
     "paired": [],
     "blocked_by": [
      "#17610",
-     "#18786"
+     "#18786",
+     "#18939"
     ],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
-   },
-   {
-    "id": "browser-toggle-prefix",
-    "label": "browser-toggle-prefix",
-    "number": null,
-    "state": "queued",
-    "area": "browser",
-    "priority": "P3",
-    "title": "fix(coding-agent): rebuild the system prompt before readers see a browser toggle",
-    "action": "wait",
-    "reasons": [
-     "conflicts with main in (branch missing on the fork)"
-    ],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-11T20:07:49Z"
    },
    {
     "id": "encoded-prefix-count",
@@ -91091,6 +91049,7 @@
      "conflicts with #18771 in packages/ai/src/providers/factory-droid.ts",
      "conflicts with #17610 in packages/ai/src/providers/factory-droid.ts",
      "conflicts with #18786 in packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with #18939 in packages/coding-agent/src/session/agent-session.ts",
      "its need token-count-policy conflicts with main in packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/session/session-stats.ts, packages/coding-agent/test/context-fits-model.test.ts",
      "its need wire-delta-count conflicts with main in packages/agent/src/tokenizer.ts, packages/ai/src/providers/factory-droid.ts, packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with main in packages/agent/src/agent.ts, packages/ai/src/providers/factory-droid/gemini.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/context-view.ts, packages/coding-agent/test/modes/context-view.test.ts, packages/tui/src/status-line/context-usage.ts, packages/tui/test/context-usage.test.ts"
@@ -91101,7 +91060,8 @@
     "blocked_by": [
      "#18771",
      "#17610",
-     "#18786"
+     "#18786",
+     "#18939"
     ],
     "needs": [
      "token-count-policy",
@@ -91189,6 +91149,7 @@
      "needs reset-account-optout (queued)",
      "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #18786 in packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with #18939 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in packages/coding-agent/src/session/agent-session.ts"
     ],
     "note": "",
@@ -91196,7 +91157,8 @@
     "paired": [],
     "blocked_by": [
      "#17610",
-     "#18786"
+     "#18786",
+     "#18939"
     ],
     "needs": [
      "#15133"
@@ -91239,6 +91201,7 @@
     "reasons": [
      "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #18786 in packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with #18939 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/tui/src/chat/compaction-summary-message.ts"
     ],
     "note": "",
@@ -91246,7 +91209,8 @@
     "paired": [],
     "blocked_by": [
      "#17610",
-     "#18786"
+     "#18786",
+     "#18939"
     ],
     "needs": [],
     "created": "2026-10-20T23:41:41Z"
@@ -91334,7 +91298,12 @@
     "created": "2026-11-03T01:24:37Z"
    }
   ],
-  "drafts": [],
+  "drafts": [
+   {
+    "label": "#18915",
+    "created": "2026-11-11T16:16:48Z"
+   }
+  ],
   "parked": [
    {
     "label": "#15128",
