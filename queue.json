@@ -77522,7 +77522,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/main-world-wait-navigation",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:58:14Z",
-   "updated": "2026-11-11T11:39:58Z",
+   "updated": "2026-11-11T11:40:28Z",
    "note": "",
    "advanced": "2026-11-11T10:45:57Z",
    "built": [
@@ -77797,7 +77797,8 @@
      "tree": "7f38b215d2735a663a1299f21814d11c0f8f8349"
     }
    ],
-   "opened": "2026-11-11T11:39:58Z"
+   "opened": "2026-11-11T11:39:58Z",
+   "readied": "2026-11-11T11:40:28Z"
   },
   {
    "id": "macos-menu-miss-items",
