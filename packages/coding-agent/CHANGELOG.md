@@ -5,7 +5,7 @@
 ### Changed
 
 - Browser tasks start without reading `xd://eval/browser`: the first browser call of a conversation returns a short browser guide (helpers with their signatures, selector forms, the re-observe rule) with its output, and `xd://eval/browser` still holds the full guide
-- Sessions with `computer.enabled` that never call `computer` no longer carry its ~18.7k-character guide in the Eval tool description: the description keeps the one-line `computer` entry, the first computer call of a conversation returns the guide with its output, and `xd://eval/computer` still holds it
+- Sessions with `computer.enabled` that never call `computer` no longer carry its ~18.7k-character guide in the Eval tool description: the description keeps the one-line `computer` entry, the first computer call of a conversation returns the guide with its output, wrapped so the session's output line cap (`tools.outputMaxColumns`) cuts none of it, and `xd://eval/computer` still holds it
 
 ## [18.18.7] - 2026-11-10
 
