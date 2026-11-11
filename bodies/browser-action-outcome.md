@@ -2,7 +2,7 @@
 
 Models kept spending a whole cell just looking at the page to find out whether a click or fill had done anything, so I made each browser action print one line saying what it did.
 
-In a blind run on four browser tasks, GPT-6.1 Sol took 0.94x `main`'s steps [0.89, 0.997] and 0.90x its tokens with this head, with look-only cells down from 12 to 8; on Claude Haiku this head took 1.07x and 1.17x the steps in two blind legs, so the saving does not carry over to Haiku. In Chromium, `goto`, `click`, `fill`, `type`, `press` and `select` (tab, frame and element forms) now print into the cell output. Recorded on a bench signup wizard:
+In blind runs on four browser tasks this head took 0.89x `main`'s steps on Claude Opus 5.5 [0.83, 0.96] and 0.94x on GPT-6.1 Sol [0.89, 0.997], with fewer look-only cells on both; on Claude Haiku it took 1.07x and 1.17x the steps, so the saving is not claimed across models. In Chromium, `goto`, `click`, `fill`, `type`, `press` and `select` (tab, frame and element forms) now print into the cell output. Recorded on a bench signup wizard:
 
 ```js
 await tab.fill('#email', 'outcome@example.test');
@@ -50,6 +50,7 @@ Model runs on headless Chrome for Testing; ratios are geometric means of per-tas
 |---|---|---|---|---|---|
 | GPT-6.1 Sol medium, 4 x 3 | earlier | **0.91** [0.86, 0.97] | **0.89** [0.81, 0.98] | 35 -> 24 | 12/12 / 12/12 |
 | Claude Haiku 5.5 medium, 4 x 4 | earlier | 0.86 [0.75, 1.01] | 0.85 [0.73, 1.01] | 75 -> 67 | 15/16 / 16/16 |
+| Claude Opus 5.5 medium, 4 x 3, blind | this head | **0.89** [0.83, 0.96] | **0.88** [0.82, 0.95] | 11 -> 9 | 11/12 / 12/12 |
 | GPT-6.1 Sol medium, 4 x 3, blind | this head | **0.94** [0.89, 0.997] | **0.90** [0.84, 0.98] | 12 -> 8 | 12/12 / 12/12 |
 | Claude Haiku 5.5 medium, 4 x 4, blind | this head | 1.17 [0.99, 1.37] | **1.19** [1.02, 1.39] | 62 -> 73 | 15/16 / 16/16 |
 | Claude Haiku 5.5 medium, 4 x 4, blind | this head | 1.07 [0.91, 1.25] | 1.04 [0.88, 1.22] | 66 -> 67 | 16/16 / 14/16 |
