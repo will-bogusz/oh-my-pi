@@ -293,6 +293,9 @@ impl X11Input {
 			(Target::Desktop | Target::Display(_), _) => self.xtest_keys(keys),
 			(Target::Window(id), DeliveryMode::Foreground | DeliveryMode::ForegroundReturnFocus) => {
 				let window = parse_window(id)?;
+				if super::text_mapping::reverted("FOCUS") {
+					return self.with_foreground(window, FOREGROUND_KEYBOARD_SETTLE, |this| this.xtest_keys(keys));
+				}
 				self.with_planned_keys(keys, |this, plan| {
 					this.with_foreground(window, FOREGROUND_KEYBOARD_SETTLE, |this| {
 						this.deliver_planned(plan, keys.duration(), None)
@@ -730,7 +733,9 @@ impl X11Input {
 			PlannedKeys { steps: keys.plan(&self.keymap)?, remaining: Vec::new() }
 		};
 		let before = self.text_mapping.presses();
-		body(self, plan).map_err(|mut error| {
+		let result = body(self, plan);
+		if super::text_mapping::reverted("LIFETIME") { self.text_mapping.finish()?; }
+		result.map_err(|mut error| {
 			if matches!(keys, Keys::Text(_)) && self.text_mapping.presses() != before {
 				error
 					.message

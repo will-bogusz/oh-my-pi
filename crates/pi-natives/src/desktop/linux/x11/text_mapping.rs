@@ -20,6 +20,7 @@ use crate::desktop::{
 
 const REBIND_GRACE: Duration = Duration::from_millis(500);
 
+#[derive(Clone)]
 struct Binding {
 	code:     u8,
 	symbol:   u32,
@@ -218,7 +219,7 @@ impl TextMapping {
 
 	/// Explicit close consumes ownership even on failure, so Drop cannot retry.
 	pub(super) fn finish(&mut self) -> CoreResult<()> {
-		let bound = std::mem::take(&mut self.bound);
+		let bound = if reverted("CONSUME") { self.bound.clone() } else { std::mem::take(&mut self.bound) };
 		if bound.is_empty() {
 			return Ok(());
 		}
@@ -243,7 +244,7 @@ impl TextMapping {
 				let result = map.and_then(|map| {
 					let mut clear: Vec<_> = bound
 						.iter()
-						.filter(|binding| row_matches(&map, binding.code, binding.symbol))
+						.filter(|binding| reverted("OWNERSHIP") || row_matches(&map, binding.code, binding.symbol))
 						.map(|binding| (binding.code, 0))
 						.collect();
 					clear.sort_unstable_by_key(|&(code, _)| code);
@@ -263,7 +264,7 @@ impl TextMapping {
 		result.map_err(|error: DesktopError| {
 			DesktopError::input_failed(format!(
 				"{}failed to restore temporary X11 text keymap: {}",
-				if self.presses.get() == 0 {
+				if self.presses.get() == 0 || reverted("SENT_WORDING") {
 					""
 				} else {
 					"the text was sent; "
@@ -307,6 +308,7 @@ fn segments(
 				return Err(no_rows(1, 0));
 			}
 			if required.len() == capacity {
+				if reverted("SEGMENTS") { return Err(no_rows(required.len() + 1, capacity)); }
 				result.push(&text[start..index]);
 				start = index;
 				required.clear();
@@ -353,7 +355,7 @@ fn assignments(required: &[u32], available: &[u8], bound: &[Binding]) -> Vec<(u8
 								.iter()
 								.any(|&(candidate, _)| candidate == binding.code)
 					})
-					.min_by_key(|binding| binding.last_key.get())
+					.min_by(|left, right| if reverted("LRU") { right.last_key.get().cmp(&left.last_key.get()) } else { left.last_key.get().cmp(&right.last_key.get()) })
 					.map(|binding| binding.code)
 			})
 			.expect("segment fits available rows");
@@ -363,6 +365,7 @@ fn assignments(required: &[u32], available: &[u8], bound: &[Binding]) -> Vec<(u8
 }
 
 fn no_rows(needed: usize, available: usize) -> DesktopError {
+	if reverted("RECOVERY") { return DesktopError::input_failed(format!("X11 text needs {needed} spare keycodes but only {available} empty rows are available; reset the keyboard layout")); }
 	DesktopError::input_failed(format!(
 		"X11 text needs {needed} spare keycodes but only {available} empty rows are available; no \
 		 further input was sent. If a killed input tool left temporary mappings, reset the layout \
@@ -412,7 +415,7 @@ fn write_rows(
 	let mut start = 0;
 	while start < rows.len() {
 		let mut end = start + 1;
-		while end < rows.len() && rows[end - 1].0.checked_add(1) == Some(rows[end].0) {
+		while !reverted("BATCH") && end < rows.len() && rows[end - 1].0.checked_add(1) == Some(rows[end].0) {
 			end += 1;
 		}
 		buffer.clear();
@@ -473,4 +476,8 @@ mod tests {
 		assert!(error.message.contains("only 0"));
 		assert!(error.message.contains("setxkbmap"));
 	}
+}
+
+pub(super) fn reverted(name: &str) -> bool {
+	std::env::var("OMP_REVERT_X11").is_ok_and(|value| value == name)
 }
