@@ -29,7 +29,14 @@ Review first: `restore_minimized` in `win32/capture.rs` and `process_key` / `ope
 - `cargo test -p pi-natives --lib win32::reopen` on Linux: 3 pass; with `reopen` reverted to always launch and the shortcut check to always match, the all-minimized and shortcut-arguments tests fail.
 - `bun test test/tools/computer.test.ts`: 145 pass; the new Windows miss-hint case fails with the `worker.ts` route reverted.
 - `cargo xwin clippy` for `x86_64-pc-windows-msvc`, Linux and macOS clippy, rustfmt: clean on the branch's lines.
-- Live check on a Windows 11 desktop: pending.
+- Live check on a Windows 11 guest, Notepad's only window (`notes.txt`) minimized, `computer.apps.open` with Notepad's exact app id (the bare name "Notepad" is ambiguous on Windows 11):
+
+| | `main` | this PR |
+|---|---|---|
+| `apps.open(id)` | `window: null`; a second Notepad ("Untitled") opens, `notes.txt` stays minimized and unlisted | returns the `notes.txt` window, listed again, no second copy |
+| then `apps.open(id, { activate: true })` | `window: null`; a third Notepad opens | returns the same window, now in front |
+
+  The first restore after staging the desktop brought Notepad to the front in both runs, and so did one of two `ShowWindow(SW_SHOWNOACTIVATE)` calls made from a plain Python process with no omp involved; later non-activating restores through `apps.open` left the user's window in front 2 of 2 times.
 
 ---
 
