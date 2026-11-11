@@ -82470,6 +82470,11 @@
     "sha": "1ead45c949c43732c959ea4b83ebf1d8d39e352e",
     "at": "2026-11-11T09:47:50Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "1ead45c949c43732c959ea4b83ebf1d8d39e352e",
+    "at": "2026-11-11T09:48:51Z",
+    "host": "goliath"
    }
   }
  },
