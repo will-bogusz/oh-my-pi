@@ -225,6 +225,7 @@ impl Backend for Win32Backend {
 #[cfg(all(test, target_os = "windows"))]
 mod tests {
 	use std::{
+		fmt::Write as _,
 		process::Command,
 		time::{Duration, Instant},
 	};
@@ -240,30 +241,46 @@ mod tests {
 
 	/// 240 characters, each block numbered so a dropped one shows.
 	fn text() -> String {
-		(0..30).map(|k| format!("t{k:03}-ab ")).collect::<String>()[..240].to_string()
+		let mut text = (0..30).fold(String::new(), |mut text, k| {
+			let _ = write!(text, "t{k:03}-ab ");
+			text
+		});
+		text.truncate(240);
+		text
 	}
 
-	/// Windows 11 Notepad's window on a new empty file `name`.
+	/// Windows 11 Notepad's window on a new empty file `name`, once its editor
+	/// holds keyboard focus.
 	fn notepad(backend: &mut Win32Backend, name: &str) -> DesktopWindow {
 		let path = std::env::temp_dir().join(name);
 		std::fs::write(&path, "").unwrap();
+		// Notepad stays open for the test to type into; its launcher may hand
+		// the file to a running instance and exit.
+		#[expect(clippy::zombie_processes, reason = "Notepad outlives the test")]
 		Command::new("notepad.exe").arg(&path).spawn().unwrap();
 		let deadline = Instant::now() + Duration::from_secs(20);
 		loop {
-			let found = backend.windows().unwrap().into_iter().find(|window| {
-				window.title.starts_with(name) && window.title.ends_with("Notepad")
-			});
-			if let Some(window) = found {
-				// Notepad focuses its editor once the file has loaded.
-				std::thread::sleep(Duration::from_secs(1));
+			let found = backend
+				.windows()
+				.unwrap()
+				.into_iter()
+				.find(|window| window.title.starts_with(name) && window.title.ends_with("Notepad"));
+			if let Some(window) = found
+				&& window::focused_descendant(input_hwnd(&window))
+					.is_some_and(|focus| window::class_name(focus) == "RichEditD2DPT")
+			{
 				return window;
 			}
-			assert!(Instant::now() < deadline, "Notepad did not open {name}");
+			assert!(Instant::now() < deadline, "Notepad did not open {name} with its editor focused");
 			std::thread::sleep(Duration::from_millis(200));
 		}
 	}
 
-	/// The text of `window`'s editor once it stops changing.
+	fn input_hwnd(window: &DesktopWindow) -> windows_sys::Win32::Foundation::HWND {
+		std::ptr::with_exposed_provenance_mut(window.id.parse::<usize>().unwrap())
+	}
+
+	/// The text of `window`'s editor once two reads 500 ms apart agree.
 	fn editor_text(window: &DesktopWindow) -> String {
 		let automation = UIAutomation::new().unwrap();
 		let root = automation
@@ -276,7 +293,11 @@ mod tests {
 			.find_first()
 			.unwrap();
 		let read = || {
-			let value = editor.get_pattern::<UIValuePattern>().unwrap().get_value().unwrap();
+			let value = editor
+				.get_pattern::<UIValuePattern>()
+				.unwrap()
+				.get_value()
+				.unwrap();
 			value.trim_end_matches(['\r', '\n']).to_string()
 		};
 		let mut last = read();
