@@ -7,7 +7,6 @@ use std::{
 };
 
 use x11rb::{
-	connection::Connection,
 	protocol::{xinput::ConnectionExt as _, xproto::ConnectionExt as _},
 	rust_connection::RustConnection,
 };
@@ -371,6 +370,7 @@ fn no_rows(needed: usize, available: usize) -> DesktopError {
 	))
 }
 
+// XKB canonicalizes redundant levels to NoSymbol padding.
 fn row_matches(map: &Keymap, code: u8, symbol: u32) -> bool {
 	let width = usize::from(map.keysyms_per_keycode);
 	code
@@ -379,7 +379,7 @@ fn row_matches(map: &Keymap, code: u8, symbol: u32) -> bool {
 			map.keysyms
 				.get(usize::from(index) * width..(usize::from(index) + 1) * width)
 		})
-		.is_some_and(|row| !row.is_empty() && row.iter().all(|&value| value == symbol))
+		.is_some_and(|row| row.first() == Some(&symbol) && row.iter().all(|&value| value == 0 || value == symbol))
 }
 
 struct ServerGrab<'a>(&'a RustConnection);

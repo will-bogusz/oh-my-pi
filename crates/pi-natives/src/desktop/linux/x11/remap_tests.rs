@@ -312,18 +312,14 @@ fn a_foreign_rebinding_survives_session_restore() {
 		.unwrap()
 		.check()
 		.unwrap();
+	let rebound = foreign.get_keyboard_mapping(code, 1).unwrap().reply().unwrap();
 	mapping.finish().unwrap();
 	let after = foreign
 		.get_keyboard_mapping(code, 1)
 		.unwrap()
 		.reply()
 		.unwrap();
-	assert!(
-		after
-			.keysyms
-			.iter()
-			.all(|&symbol| symbol == Keysym::eacute.raw())
-	);
+	assert_eq!(after.keysyms, rebound.keysyms);
 }
 
 #[test]
@@ -465,4 +461,29 @@ fn remapped_device_text_restores_both_slave_and_master() {
 			.plan_text("✓")
 			.is_err()
 	);
+}
+
+#[test]
+#[ignore = "starts Xvfb"]
+fn contiguous_bindings_are_batched_and_reused_without_mapping_notifications() {
+	use x11rb::protocol::{Event, xproto::Mapping};
+	let (_server, display) = server();
+	let (conn, _) = x11rb::connect(Some(&display)).unwrap();
+	let conn = Arc::new(conn);
+	let count = conn.setup().max_keycode - conn.setup().min_keycode + 1;
+	let current = conn.get_keyboard_mapping(conn.setup().min_keycode, count).unwrap().reply().unwrap();
+	conn.change_keyboard_mapping(count, conn.setup().min_keycode, current.keysyms_per_keycode, &vec![0; current.keysyms.len()]).unwrap().check().unwrap();
+	let (observer, _) = x11rb::connect(Some(&display)).unwrap();
+	let notifications = || {
+		observer.get_input_focus().unwrap().reply().unwrap();
+		std::iter::from_fn(|| observer.poll_for_event().unwrap()).filter(|event| matches!(event, Event::MappingNotify(event) if event.request == Mapping::KEYBOARD)).count()
+	};
+	notifications();
+	let mut map = Keymap::core(&conn).unwrap();
+	let mut mapping = TextMapping::new(Arc::clone(&conn));
+	mapping.bind(&mut map, "éö✓").unwrap();
+	assert_eq!(notifications(), 1, "one contiguous mapping request");
+	mapping.bind(&mut map, "éö✓").unwrap();
+	assert_eq!(notifications(), 0, "a later run reuses the cached rows");
+	mapping.finish().unwrap();
 }
