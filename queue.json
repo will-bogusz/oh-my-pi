@@ -82142,15 +82142,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-11T21:42:04Z",
+  "checked": "2026-11-11T22:12:30Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {
-   "win-screen-locked": {
-    "since": "2026-11-11T21:11:12Z",
-    "title": "fix(natives,coding-agent): report unavailable Windows desktop sessions"
-   }
-  },
+  "openable": {},
   "conflicts": {},
   "merged_through": "2026-11-11T13:55:07Z",
   "unreleased": {},
@@ -82189,13 +82184,15 @@
    18897,
    18898,
    18914,
+   18915,
    18919,
    18921,
    18922,
    18923,
    18924,
    18925,
-   18939
+   18939,
+   18947
   ],
   "post_merge": {
    "16274": {
@@ -84654,6 +84651,13 @@
     "kind": "openable",
     "id": "win-screen-locked",
     "title": "fix(natives,coding-agent): report unavailable Windows desktop sessions"
+   },
+   {
+    "at": "2026-11-11T22:12:30Z",
+    "kind": "unopenable",
+    "id": "win-screen-locked",
+    "title": "fix(natives,coding-agent): report unavailable Windows desktop sessions",
+    "why": "opened as #18947"
    }
   ]
  },
@@ -89486,12 +89490,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-11T21:42:05.089418Z",
+  "at": "2026-11-11T22:12:31.297215Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 2,
+   "left": 6
   },
   "rows": [
    {
@@ -89944,6 +89948,23 @@
     "created": "2026-11-11T16:11:06Z"
    },
    {
+    "id": "win-setvalue-readback",
+    "label": "#18915",
+    "number": 18915,
+    "state": "open",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): verify Windows value writes and notify combo selections",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-11T16:16:48Z"
+   },
+   {
     "id": "win-menu-modal",
     "label": "#18922",
     "number": 18922,
@@ -89993,6 +90014,27 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T16:45:32Z"
+   },
+   {
+    "id": "win-screen-locked",
+    "label": "#18947",
+    "number": 18947,
+    "state": "open",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives,coding-agent): report unavailable Windows desktop sessions",
+    "action": "requeue",
+    "reasons": [
+     "conflicts with #18915 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/win32/mod.rs"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "#18915"
+    ],
+    "needs": [],
+    "created": "2026-11-11T22:00:07Z"
    },
    {
     "id": "factory-droid-171-pin",
@@ -90332,6 +90374,7 @@
      "conflicts with #18825 in crates/pi-natives/Cargo.toml",
      "conflicts with #18892 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18914 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/wayland/libei.rs, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
+     "conflicts with #18915 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/ax.rs",
      "conflicts with #18923 in crates/pi-natives/src/desktop/ax.rs",
      "conflicts with #18353 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #18013 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/libei.rs",
@@ -90346,6 +90389,7 @@
      "#18825",
      "#18892",
      "#18914",
+     "#18915",
      "#18923",
      "#18353",
      "#18013"
@@ -90737,6 +90781,27 @@
     "created": "2026-11-11T02:53:57Z"
    },
    {
+    "id": "atspi-write-timeout-warning",
+    "label": "atspi-write-timeout-warning",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P2",
+    "title": "fix(natives): preserve the empty-field warning on Linux write timeouts",
+    "action": "wait",
+    "reasons": [
+     "needs #18914 (open)"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [
+     "atspi-unanswered-app"
+    ],
+    "created": "2026-11-11T21:44:32Z"
+   },
+   {
     "id": "ax-ref-read-as-followup",
     "label": "ax-ref-read-as-followup",
     "number": null,
@@ -91094,13 +91159,15 @@
     "title": "fix(natives): expose Windows control state and stale-reference matches",
     "action": "wait",
     "reasons": [
-     "conflicts with #18892 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs"
+     "conflicts with #18892 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs",
+     "conflicts with #18915 in crates/pi-natives/src/desktop/win32/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18892"
+     "#18892",
+     "#18915"
     ],
     "needs": [],
     "created": "2026-11-11T10:16:04Z"
@@ -91139,33 +91206,18 @@
     "title": "fix(natives,coding-agent): show a minimized Windows app's window from apps.open instead of launching it again",
     "action": "wait",
     "reasons": [
+     "conflicts with #18915 in crates/pi-natives/src/desktop/win32/mod.rs",
      "conflicts with #18222 in packages/coding-agent/src/prompts/tools/computer.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#18915",
      "#18222"
     ],
     "needs": [],
     "created": "2026-11-11T09:06:32Z"
-   },
-   {
-    "id": "win-screen-locked",
-    "label": "win-screen-locked",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P2",
-    "title": "fix(natives,coding-agent): report unavailable Windows desktop sessions",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-11T09:31:29Z"
    },
    {
     "id": "x11-keysym-remap",
@@ -91319,15 +91371,13 @@
      "held: Main, 2026-11-11: stays held until #18786 merges with the typed-message guide channel (design check replace); then one property on the computer prelude, drop the wrap variant, re-run its blind legs",
      "needs #18786 (open)",
      "conflicts with #18786 in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/prompts/tools/eval.md, packages/coding-agent/src/tools/eval.ts",
-     "conflicts with win-screen-locked in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with main in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/sdk-computer-prelude-toggle.test.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18786",
-     "win-screen-locked"
+     "#18786"
     ],
     "needs": [
      "browser-core-first-use"
@@ -91352,10 +91402,10 @@
      "conflicts with #18784 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18892 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18895 in docs/tools/computer.md",
+     "conflicts with #18915 in docs/tools/computer.md",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/tools/eval.ts",
-     "conflicts with win-screen-locked in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
@@ -91369,10 +91419,10 @@
      "#18784",
      "#18892",
      "#18895",
+     "#18915",
      "#18353",
      "#18222",
-     "#18786",
-     "win-screen-locked"
+     "#18786"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -91397,10 +91447,10 @@
      "conflicts with #18892 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18895 in docs/tools/computer.md",
      "conflicts with #18914 in crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with #18915 in docs/tools/computer.md",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
-     "conflicts with win-screen-locked in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
@@ -91414,10 +91464,10 @@
      "#18892",
      "#18895",
      "#18914",
+     "#18915",
      "#18353",
      "#18222",
-     "#18925",
-     "win-screen-locked"
+     "#18925"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -91847,12 +91897,7 @@
     "created": "2026-11-03T01:24:37Z"
    }
   ],
-  "drafts": [
-   {
-    "label": "#18915",
-    "created": "2026-11-11T16:16:48Z"
-   }
-  ],
+  "drafts": [],
   "parked": [
    {
     "label": "#15128",
