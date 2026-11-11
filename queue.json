@@ -73807,6 +73807,24 @@
    "added": "2026-11-11T02:53:57Z",
    "updated": "2026-11-11T02:53:57Z",
    "note": ""
+  },
+  {
+   "id": "x11-takeover-keyboard-grab",
+   "branch": "will/x11-takeover-keyboard-grab",
+   "title": "fix(natives): refuse X11 XTest keys while another client grabs the keyboard",
+   "area": "computer",
+   "priority": "P1",
+   "needs": [],
+   "base": "6dd7ddf5feab54da3c82b460ee390a7d09aeabaa",
+   "body": "bodies/x11-takeover-keyboard-grab.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-takeover-keyboard-grab",
+   "host": "MacBook-Pro",
+   "added": "2026-11-11T02:55:11Z",
+   "updated": "2026-11-11T02:55:11Z",
+   "note": ""
   }
  ],
  "watch": {
