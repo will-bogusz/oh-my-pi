@@ -73561,10 +73561,14 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-11T00:21:30Z",
+  "checked": "2026-11-11T00:51:58Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
+   "atspi-unanswered-app": {
+    "since": "2026-11-11T00:51:58Z",
+    "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool"
+   },
    "browser-select-readback": {
     "since": "2026-11-11T00:21:30Z",
     "title": "fix(coding-agent): return the options a page leaves selected after its change handlers"
@@ -75425,6 +75429,12 @@
     "id": "agent-identity",
     "title": "feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy",
     "why": "plan: wait (conflicts with #18784 in docs/tools/computer.md)"
+   },
+   {
+    "at": "2026-11-11T00:51:58Z",
+    "kind": "openable",
+    "id": "atspi-unanswered-app",
+    "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool"
    }
   ]
  },
@@ -78075,7 +78085,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-11T00:21:31.309600Z",
+  "at": "2026-11-11T00:51:59.553524Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -78661,6 +78671,26 @@
     "created": "2026-11-10T22:28:45Z"
    },
    {
+    "id": "atspi-unanswered-app",
+    "label": "atspi-unanswered-app",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P0",
+    "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [
+     "#18353",
+     "#18013"
+    ],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-03T08:39:53Z"
+   },
+   {
     "id": "x11-mpx-qt",
     "label": "x11-mpx-qt",
     "number": null,
@@ -78682,30 +78712,6 @@
     "created": "2026-11-10T22:23:32Z"
    },
    {
-    "id": "atspi-unanswered-app",
-    "label": "atspi-unanswered-app",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool",
-    "action": "held",
-    "reasons": [
-     "held: Main, 2026-11-11: waits for AtspiHarm's description paragraph and Main's P0 call",
-     "conflicts with #18353 in MODULE.bazel.lock, crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
-     "conflicts with #18013 in MODULE.bazel.lock"
-    ],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [
-     "#18353",
-     "#18013"
-    ],
-    "needs": [],
-    "created": "2026-11-03T08:39:53Z"
-   },
-   {
     "id": "atspi-walk-reads",
     "label": "atspi-walk-reads",
     "number": null,
@@ -78718,6 +78724,7 @@
      "needs atspi-unanswered-app (queued)",
      "conflicts with #18353 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #18013 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/libei.rs",
+     "conflicts with atspi-unanswered-app in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/wayland/libei.rs, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
@@ -78725,7 +78732,8 @@
     "paired": [],
     "blocked_by": [
      "#18353",
-     "#18013"
+     "#18013",
+     "atspi-unanswered-app"
     ],
     "needs": [
      "atspi-unanswered-app"
@@ -79369,6 +79377,7 @@
      "conflicts with #18784 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with atspi-unanswered-app in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
@@ -79380,7 +79389,8 @@
      "#18783",
      "#18784",
      "#18353",
-     "#18222"
+     "#18222",
+     "atspi-unanswered-app"
     ],
     "needs": [
      "computer-ui-quiet"
