@@ -2,6 +2,8 @@
 //! virtual-keyboard routes, so every route picks the same keycodes and holds
 //! Shift for glyphs that live on the shifted level.
 
+use std::{sync::Arc, time::Duration};
+
 use x11rb::{
 	connection::Connection,
 	protocol::{xinput::ConnectionExt as _, xproto::ConnectionExt as _},
@@ -33,6 +35,7 @@ pub(super) struct Keymap {
 	keysyms:             Vec<u32>,
 	/// Core modifier mask bit each modifier keycode sets while held.
 	modifier_masks:      Vec<(u8, u16)>,
+	device:             Option<u8>,
 }
 
 impl Keymap {
@@ -89,7 +92,9 @@ impl Keymap {
 			.map_err(keymap_failed)?
 			.reply()
 			.map_err(keymap_failed)?;
-		Ok(Self::new(min_keycode, mapping.keysyms_per_keycode, mapping.keysyms, Vec::new()))
+		let mut map = Self::new(min_keycode, mapping.keysyms_per_keycode, mapping.keysyms, Vec::new());
+		map.device = Some(device_id);
+		Ok(map)
 	}
 
 	/// The core keyboard's `XTest` device map, plus the core modifier map.
@@ -122,7 +127,7 @@ impl Keymap {
 		keysyms: Vec<u32>,
 		modifier_masks: Vec<(u8, u16)>,
 	) -> Self {
-		Self { min_keycode, keysyms_per_keycode, keysyms, modifier_masks }
+		Self { min_keycode, keysyms_per_keycode, keysyms, modifier_masks, device: None }
 	}
 
 	/// Keycode emitting `keysym` and whether Shift must be held for it. The
@@ -158,6 +163,56 @@ impl Keymap {
 			.or_else(|| self.lookup(Keysym::Shift_R.raw()))
 			.map(|(keycode, _)| keycode)
 			.ok_or_else(|| DesktopError::input_failed("X11 keymap has no Shift key"))
+	}
+
+	/// Reserve distinct empty rows for the entire run, never replacing a
+	/// symbol (including Escape) or reusing a row before clients translate it.
+	fn text_bindings(&self, text: &str) -> CoreResult<Vec<(u8, u32)>> {
+		let mut missing = Vec::new();
+		for ch in text.chars() {
+			control::check()?;
+			let symbol = keysym_for_key(KeyName::Char(ch));
+			if self.lookup(symbol).is_none() && !missing.contains(&symbol) {
+				missing.push(symbol);
+			}
+		}
+		let width = usize::from(self.keysyms_per_keycode);
+		let spare: Vec<_> = if width == 0 {
+			Vec::new()
+		} else {
+			self.keysyms.chunks_exact(width).enumerate().rev()
+				.filter(|(_, row)| row.iter().all(|&symbol| symbol == 0))
+				.filter_map(|(index, _)| self.min_keycode.checked_add(u8::try_from(index).ok()?))
+				.filter(|code| self.modifier_mask(*code) == 0)
+				.collect()
+		};
+		if missing.len() > spare.len() {
+			return Err(DesktopError::input_failed(format!(
+				"X11 text needs {} spare keycodes but only {} empty rows are available; no input was sent",
+				missing.len(), spare.len()
+			)));
+		}
+		Ok(spare.into_iter().zip(missing).collect())
+	}
+
+	pub(super) fn bind_text(&mut self, conn: Arc<RustConnection>, text: &str) -> CoreResult<TextMapping> {
+		let bindings = self.text_bindings(text)?;
+		let mut guard = TextMapping {
+			conn,
+			device: self.device,
+			width: self.keysyms_per_keycode,
+			bound: Vec::new(),
+		};
+		for (code, symbol) in bindings {
+			// Register before sending: even a failed round trip can have
+			// changed the server map.
+			guard.bound.push(code);
+			let mut row = vec![symbol; usize::from(guard.width)];
+			guard.write(code, &row)?;
+			let start = usize::from(code - self.min_keycode) * row.len();
+			self.keysyms[start..start + row.len()].swap_with_slice(&mut row);
+		}
+		Ok(guard)
 	}
 
 	/// Press/release steps typing `text`; shifted glyphs are wrapped in Shift.
@@ -240,6 +295,69 @@ impl Keymap {
 			.iter()
 			.filter(|&&(candidate, _)| candidate == keycode)
 			.fold(0, |mask, &(_, bit)| mask | bit)
+	}
+}
+
+/// Owns the server-side bindings independently of cancellation and unwinding.
+pub(super) struct TextMapping {
+	conn: Arc<RustConnection>,
+	device: Option<u8>,
+	width: u8,
+	bound: Vec<u8>,
+}
+
+impl TextMapping {
+	fn write(&self, code: u8, row: &[u32]) -> CoreResult<()> {
+		if let Some(device) = self.device {
+			self.conn.xinput_change_device_key_mapping(device, code, self.width, 1, row)
+				.map_err(keymap_failed)?.check().map_err(keymap_failed)
+		} else {
+			self.conn.change_keyboard_mapping(1, code, self.width, row)
+				.map_err(keymap_failed)?.check().map_err(keymap_failed)
+		}
+	}
+
+	fn restore(&mut self) -> CoreResult<()> {
+		if self.bound.is_empty() {
+			return Ok(());
+		}
+		// MappingNotify precedes each key, but clients can translate a queued
+		// key lazily. Keep the run's map alive through their dispatch.
+		std::thread::sleep(Duration::from_millis(100));
+		let empty = vec![0; usize::from(self.width)];
+		let mut failure = None;
+		for &code in &self.bound {
+			if let Err(error) = self.write(code, &empty) {
+				failure = Some(error);
+			}
+		}
+		if let Some(error) = failure {
+			return Err(DesktopError::input_failed(format!(
+				"failed to restore temporary X11 text keymap: {}", error.message
+			)));
+		}
+		self.bound.clear();
+		Ok(())
+	}
+
+	pub(super) fn finish(mut self, result: CoreResult<()>) -> CoreResult<()> {
+		let restored = self.restore();
+		match (result, restored) {
+			(Err(mut error), Err(restore)) => {
+				error.message.push_str(&format!("; {}", restore.message));
+				Err(error)
+			},
+			(result, Ok(())) => result,
+			(Ok(()), Err(error)) => Err(error),
+		}
+	}
+}
+
+impl Drop for TextMapping {
+	fn drop(&mut self) {
+		if let Err(error) = self.restore() {
+			eprintln!("{}", error.message);
+		}
 	}
 }
 
@@ -395,6 +513,24 @@ pub(super) fn keysym_for_key(key: KeyName) -> u32 {
 #[cfg(test)]
 mod tests {
 	use super::*;
+
+	#[test]
+	fn text_reserves_distinct_highest_empty_rows_for_the_whole_run() {
+		let mut map = keymap();
+		// A symbol on an otherwise unused level still occupies the row.
+		map.keysyms[(255 - 8) * 2 + 1] = Keysym::Escape.raw();
+		assert_eq!(map.text_bindings("é✓éa").unwrap(), vec![
+			(254, keysym_for_key(KeyName::Char('é'))),
+			(253, keysym_for_key(KeyName::Char('✓'))),
+		]);
+	}
+
+	#[test]
+	fn insufficient_empty_rows_refuses_the_complete_run() {
+		let map = Keymap::new(8, 2, vec![0, 0, 0x61, 0x41], Vec::new());
+		let error = map.text_bindings("é✓").unwrap_err();
+		assert!(error.message.contains("needs 2 spare keycodes but only 1"));
+	}
 
 	const A: u8 = 38;
 	const ONE: u8 = 10;

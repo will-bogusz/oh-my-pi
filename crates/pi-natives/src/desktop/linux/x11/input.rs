@@ -236,16 +236,27 @@ impl X11Input {
 		input: &ElementInput,
 		prepare: impl FnOnce() -> CoreResult<()>,
 	) -> CoreResult<()> {
-		self.keymap = Keymap::core(&self.conn)?;
+		self.keymap = Keymap::xtest(&self.conn)?;
 		let keys = match input {
 			ElementInput::Text(text) => Keys::Text(text),
 			ElementInput::Chord(keys) => Keys::Chord(keys),
 		};
-		let steps = keys.plan(&self.keymap)?;
-		self.with_foreground(window, FOREGROUND_KEYBOARD_SETTLE, |this| {
-			prepare()?;
-			this.xtest_steps(&steps, keys.duration())
-		})
+		let mapping = if let Keys::Text(text) = keys {
+			Some(self.keymap.bind_text(Arc::clone(&self.conn), text)?)
+		} else {
+			None
+		};
+		let result = (|| {
+			let steps = keys.plan(&self.keymap)?;
+			self.with_foreground(window, FOREGROUND_KEYBOARD_SETTLE, |this| {
+				prepare()?;
+				this.xtest_steps(&steps, keys.duration())
+			})
+		})();
+		match mapping {
+			Some(mapping) => mapping.finish(result),
+			None => result,
+		}
 	}
 
 	pub(crate) fn hold_keys(
@@ -281,14 +292,12 @@ impl X11Input {
 		};
 		match (target, mode) {
 			(Target::Desktop | Target::Display(_), _) => {
-				let steps = keys.plan(&self.keymap)?;
-				self.xtest_steps(&steps, keys.duration())
+				self.xtest_keys(keys)
 			},
 			(Target::Window(id), DeliveryMode::Foreground | DeliveryMode::ForegroundReturnFocus) => {
 				let window = parse_window(id)?;
-				let steps = keys.plan(&self.keymap)?;
 				self.with_foreground(window, FOREGROUND_KEYBOARD_SETTLE, |this| {
-					this.xtest_steps(&steps, keys.duration())
+					this.xtest_keys(keys)
 				})
 			},
 			(Target::Window(id), DeliveryMode::Background) => {
@@ -307,9 +316,7 @@ impl X11Input {
 					"its toolkit needs core input, which cannot preserve MPX focus isolation",
 				));
 			}
-			let steps = keys.plan(&self.keymap)?;
-			return self.send_key_steps(window, &steps, keys.duration());
-		}
+			return self.send_keys(window, keys);
 		let pid = self.wm().owning_pid(window);
 		// Empty text plans no keys, so it stays the no-op it is everywhere.
 		if pid.is_some_and(toolkit::process_reads_core_keyboard) && !matches!(keys, Keys::Text("")) {
@@ -360,8 +367,7 @@ impl X11Input {
 				),
 			));
 		}
-		let steps = keys.plan(&self.keymap)?;
-		self.send_key_steps(window, &steps, keys.duration())
+		self.send_keys(window, keys)
 	}
 
 	/// Activates `window`, confirms the WM made it the active window holding
@@ -704,6 +710,34 @@ impl X11Input {
 			},
 		}
 	}
+	fn xtest_keys(&mut self, keys: Keys<'_>) -> CoreResult<()> {
+		let mapping = if let Keys::Text(text) = keys {
+			Some(self.keymap.bind_text(Arc::clone(&self.conn), text)?)
+		} else {
+			None
+		};
+		let result = keys.plan(&self.keymap)
+			.and_then(|steps| self.xtest_steps(&steps, keys.duration()));
+		match mapping {
+			Some(mapping) => mapping.finish(result),
+			None => result,
+		}
+	}
+
+	fn send_keys(&mut self, window: Window, keys: Keys<'_>) -> CoreResult<()> {
+		let mapping = if let Keys::Text(text) = keys {
+			Some(self.keymap.bind_text(Arc::clone(&self.conn), text)?)
+		} else {
+			None
+		};
+		let result = keys.plan(&self.keymap)
+			.and_then(|steps| self.send_key_steps(window, &steps, keys.duration()));
+		match mapping {
+			Some(mapping) => mapping.finish(result),
+			None => result,
+		}
+	}
+
 
 	fn xtest_steps(&self, steps: &[KeyStep], duration: Duration) -> CoreResult<()> {
 		self.check_released_keys(

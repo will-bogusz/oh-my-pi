@@ -17,7 +17,7 @@
 
 use std::{
 	fs, io,
-	sync::atomic::{AtomicU16, Ordering},
+	sync::{Arc, atomic::{AtomicU16, Ordering}},
 	time::{Duration, Instant},
 };
 
@@ -82,7 +82,7 @@ const OWNER_PREFIX: &str = "OMP MPX v1.";
 static NONCE: AtomicU16 = AtomicU16::new(1);
 
 pub(super) struct Mpx {
-	conn:            RustConnection,
+	conn:            Arc<RustConnection>,
 	root:            Window,
 	atoms:           Atoms,
 	/// Bottom-right screen corner: the virtual cursor rests there between
@@ -125,6 +125,7 @@ enum Raw {
 impl Mpx {
 	pub(super) fn create() -> CoreResult<Self> {
 		let (conn, screen) = x11rb::connect(None).map_err(mpx_failed)?;
+		let conn = Arc::new(conn);
 		let (root, park) = {
 			let info = &conn.setup().roots[screen];
 			let corner = |size: u16| i16::try_from(size.saturating_sub(1)).unwrap_or(i16::MAX);
@@ -363,8 +364,10 @@ impl Mpx {
 
 	pub(super) fn type_text(&mut self, target: Window, text: &str) -> CoreResult<()> {
 		self.begin()?;
-		let steps = self.keyboard_keymap()?.plan_text(text)?;
-		self.deliver_keys(target, &steps)
+		let mut keymap = self.keyboard_keymap()?;
+		let mapping = keymap.bind_text(Arc::clone(&self.conn), text)?;
+		let result = keymap.plan_text(text).and_then(|steps| self.deliver_keys(target, &steps));
+		mapping.finish(result)
 	}
 
 	pub(super) fn key_chord(&mut self, target: Window, keys: &[KeyName]) -> CoreResult<()> {

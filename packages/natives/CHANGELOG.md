@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- X11 computer typing accepts characters outside the keyboard layout, including accents and Unicode symbols, using temporary empty keycodes that are restored after the text run.
+
 ## [18.18.8] - 2026-11-11
 
 ### Changed
