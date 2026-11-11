@@ -75366,27 +75366,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-11T04:55:02Z",
+  "checked": "2026-11-11T05:25:43Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {
-   "browser-select-readback": {
-    "since": "2026-11-11T00:21:30Z",
-    "title": "fix(coding-agent): return the options a page leaves selected after its change handlers"
-   },
-   "browser-download-missing-file": {
-    "since": "2026-11-11T00:21:30Z",
-    "title": "fix(coding-agent): fail a download wait when the saved file is not on this machine"
-   },
-   "relay-detach-owned-close": {
-    "since": "2026-11-11T01:52:22Z",
-    "title": "fix(browser): say omp closed its own relay tab when Chrome's detach ends it"
-   },
-   "relay-target-miss-hint": {
-    "since": "2026-11-11T01:52:22Z",
-    "title": "fix(browser): name the relay's own-tab open when a target matches no tab"
-   }
-  },
+  "openable": {},
   "conflicts": {
    "#16611": {
     "since": "2026-11-05T14:32:39Z",
@@ -75432,7 +75415,12 @@
    18795,
    18823,
    18824,
-   18825
+   18825,
+   18828,
+   18829,
+   18830,
+   18832,
+   18833
   ],
   "post_merge": {
    "17831": {
@@ -77365,6 +77353,34 @@
     "id": "x11-mpx-key-confirm",
     "title": "fix(natives): confirm every X11 virtual-keyboard key release, in order",
     "why": "opened as #18828"
+   },
+   {
+    "at": "2026-11-11T05:25:43Z",
+    "kind": "unopenable",
+    "id": "browser-select-readback",
+    "title": "fix(coding-agent): return the options a page leaves selected after its change handlers",
+    "why": "opened as #18829"
+   },
+   {
+    "at": "2026-11-11T05:25:43Z",
+    "kind": "unopenable",
+    "id": "browser-download-missing-file",
+    "title": "fix(coding-agent): fail a download wait when the saved file is not on this machine",
+    "why": "opened as #18830"
+   },
+   {
+    "at": "2026-11-11T05:25:43Z",
+    "kind": "unopenable",
+    "id": "relay-detach-owned-close",
+    "title": "fix(browser): say omp closed its own relay tab when Chrome's detach ends it",
+    "why": "opened as #18832"
+   },
+   {
+    "at": "2026-11-11T05:25:43Z",
+    "kind": "unopenable",
+    "id": "relay-target-miss-hint",
+    "title": "fix(browser): name the relay's own-tab open when a target matches no tab",
+    "why": "opened as #18833"
    }
   ]
  },
@@ -80260,8 +80276,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-11T05:20:26.181839Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-11T05:25:44.390969Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 5,
@@ -80369,6 +80385,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T05:10:20Z"
+   },
+   {
+    "id": "relay-target-miss-hint",
+    "label": "#18833",
+    "number": 18833,
+    "state": "open",
+    "area": "browser",
+    "priority": "P0",
+    "title": "fix(browser): name the relay's own-tab open when a target matches no tab",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-11T05:19:29Z"
    },
    {
     "id": "read-after-bash-revalidate",
@@ -80796,23 +80829,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-10T19:09:04Z"
-   },
-   {
-    "id": "relay-target-miss-hint",
-    "label": "#18833",
-    "number": 18833,
-    "state": "open",
-    "area": "browser",
-    "priority": "P2",
-    "title": "fix(browser): name the relay's own-tab open when a target matches no tab",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-11T05:19:29Z"
    },
    {
     "id": "iphone-mirror-key-gap",
@@ -81523,6 +81539,7 @@
      "needs #15508 (open), r2/native-window-report (queued)",
      "conflicts with #18676 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18830 in docs/tools/browser.md",
+     "conflicts with #18833 in packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/test/tools/browser-attach.test.ts",
      "conflicts with #17894 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "conflicts with #18737 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "conflicts with #18738 in docs/tools/browser.md",
@@ -81530,7 +81547,6 @@
      "conflicts with #18751 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18772 in docs/tools/browser.md",
      "conflicts with #18832 in packages/coding-agent/src/tools/browser/tab-supervisor.ts",
-     "conflicts with #18833 in packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/test/tools/browser-attach.test.ts",
      "conflicts with #18776 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18786 in docs/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md, packages/browser-relay/README.md",
@@ -81543,6 +81559,7 @@
     "blocked_by": [
      "#18676",
      "#18830",
+     "#18833",
      "#17894",
      "#18737",
      "#18738",
@@ -81550,7 +81567,6 @@
      "#18751",
      "#18772",
      "#18832",
-     "#18833",
      "#18776",
      "#18786",
      "#18789"
