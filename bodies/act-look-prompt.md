@@ -2,32 +2,46 @@
 
 I changed the browser prompt to teach act-then-look in one cell and to stop agents padding cells with fixed sleeps, now that the look and the reads after an action wait for the page on Chromium.
 
-In blind runs GPT-6.1 Sol took 0.82x and 0.92x its base's steps in two legs, all of the gain in the one long GOV.UK task; Claude Opus 5.5's steps are unchanged (0.98x, 0.97x) but it sleeps 3.6x and 5.3x less; Claude Haiku 5.5 stops sleeping (93 to 2) at 1.12x steps [0.97, 1.30]. Wall time on a quiet host is within noise for all three.
+For later timer-driven content, the line now says to wait for text or an element the page has already shown, or read first and then choose a wait target. This replaces the open-ended "wait for it", which led agents to guess text that was not on that page.
 
-- "Re-observe, then act in the same cell" becomes "Act and look in one cell: end a cell that acts with `await tab.observe()`", and both examples end their click with a look.
-- One `<critical>` line: on Chromium tabs the next look or read after an action waits for the page, so fixed sleeps are not needed for that; on Tern and cmux, and for content the page renders later on its own timer, wait with `waitForText`/`waitForSelector`.
+The examples end their action with `await tab.observe()`. Chromium's automatic settle and the explicit condition waits for Tern, cmux and later timer-driven content remain distinct.
 
 ## Why
 
-The Waiting line already says to wait for text, a URL or a selector instead of sleeping, yet agents slept in 30% of browser cells on Haiku 5.5 and 61% on Opus 5.5 on main, and spent a second cell on the look after most actions. An earlier no-sleep sentence tried on main alone removed the sleeps but made Opus slower (1.37x steps): without the read settle, it read "Loading" and re-checked. So this line needs the read settle under it.
+The earlier wording produced guessed-text wait timeouts in 3 of 8 Sol wizard runs. One target was on the next page; another was only a select-option label. Reading before choosing a target avoids teaching agents to replace fixed sleeps with speculative waits.
+
+The sentence still needs the read settle beneath it: on main alone an earlier no-sleep instruction removed sleeps but made Opus take 1.37x as many steps, reading "Loading" and re-checking. This is not a claim that all timer-driven content is ready when the DOM first goes quiet.
 
 ## Testing
 
-Runs on bench-mac, headless Chrome for Testing through `browser.cdpUrl`, graded by each bench task's own grader, blind (neutral directory and tree names), the stack with observe-stable-ids on top against its base, 3 tasks x 4 runs per arm. Ratios are the geometric mean over tasks of stack/base task means, 95% bootstrap intervals. Tasks: an SPA wizard with staged renders, a records table with confirm dialogs, and the live GOV.UK maternity pay calculator. Where a model has two legs, the second was taken on a quiet host (load under 32).
+Blind wording comparison, headless Chrome for Testing: current wording at `3778d45907` against that head plus the one-line change at `a26eec9288`. Those measurements predate the separate pre-existing-request fix; they are not attributed to the newly restacked head. Every run remained under the host-load ceiling and arm-name leak checks were clean. Ratios below are new/current; intervals are 95% bootstrap intervals.
 
-| model | steps | tokens | sleeps, base -> stack | wall, quiet host | pass, base / stack |
-|---|---|---|---|---|---|
-| GPT-6.1 Sol | **0.82** [0.78, 0.86]; 0.92 [0.83, 1.00] | 0.84 [0.78, 0.91]; 0.98 [0.88, 1.09] | 0 -> 0 | 1.06 [0.95, 1.17] | 12/12 / 12/12 both legs |
-| Claude Opus 5.5 | 0.98 [0.88, 1.08]; 0.97 [0.90, 1.03] | 1.01 [0.90, 1.13]; 1.04 [0.98, 1.11] | 84 -> 23; 80 -> 15 | 0.93 [0.77, 1.11] | 12/12 / 12/12; 11/12 / 12/12 |
-| Claude Haiku 5.5 | 1.12 [0.97, 1.30] | 1.14 [0.98, 1.36] | 93 -> 2 | 0.85 [0.69, 1.08] | 11/12 / 10/12 |
+| Wording comparison | Wait calls, current → new | Runs with wait timeout | Sleeps | Pass, current / new | Steps ratio | Wall ratio |
+|---|---|---|---|---|---|---|
+| GPT-6.1 Sol medium, wizard, 10 per arm | 26 → 0 | 1/10 → 0/10 | 0 → 0 | 10/10 / 10/10 | 1.05 [1.00, 1.12] | 1.03 [0.92, 1.14] |
+| Claude Opus 5.5 medium, wizard and records, 4 per task per arm | 24 → 34 | 0/8 → 0/8 | 34 → 19 | 8/8 / 8/8 | 1.00 [0.88, 1.12] | not used |
 
-- Sol's step gain is the GOV.UK task (0.53x in the first leg); on the SPA wizard its quiet-host wall time was 1.28x, which we have not traced.
-- Haiku re-checked the page more on the stack (39 cells against 30), and one stack run closed the GOV.UK result tab the prompt asks to keep open.
-- The failed runs we could inspect (Opus base, one per arm on Haiku) were harness artefacts.
-- Wall time comes only from runs taken on a quiet host; the first Sol and Opus legs ran under heavy load and are not used for it.
+The new wording eliminated Sol's wait calls in this sample and did not bring Opus's sleeps back. It does not establish a wall-time improvement; Opus's step interval also spans no change.
+
+<details>
+<summary>Earlier blind complete-series comparison against main</summary>
+
+Three tasks, four runs per task per arm: staged SPA wizard, records table, live GOV.UK maternity calculator. Ratios compare the full series at `172f0187d0` with `e1d8f29d549`, not the wording change alone. Wall figures are from the quiet-host rerun.
+
+| Model | Steps, first / quiet leg | Sleeps, base → series | Quiet wall ratio | Pass, base / series |
+|---|---|---|---|---|
+| GPT-6.1 Sol | 0.82 [0.78, 0.86]; 0.92 [0.83, 1.00] | 0 → 0 | 1.06 [0.95, 1.17] | 12/12 / 12/12 both legs |
+| Claude Opus 5.5 | 0.98 [0.88, 1.08]; 0.97 [0.90, 1.03] | 84 → 23; 80 → 15 | 0.93 [0.77, 1.11] | 12/12 / 12/12; 11/12 / 12/12 |
+| Claude Haiku 5.5 | 1.12 [0.97, 1.30] | 93 → 2 | 0.85 [0.69, 1.08] | 11/12 / 10/12 |
+
+Sol's step gain was concentrated in GOV.UK. Haiku re-checked more; one series run closed its result tab. No quiet-host wall speedup was established.
+
+</details>
+
+Prompt rendering is exercised with `bun test packages/coding-agent/test/tools/browser-prelude-documentation.test.ts`; model behavior evidence is the blind comparison above, not a prompt-string snapshot.
 
 ---
 
-- [x] `bun check` passes
+- [ ] `bun check` passes
 - [x] Tested locally
-- [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+- [x] CHANGELOG updated (queued, attribution added on opening)
