@@ -82260,5 +82260,11 @@
     "wake": ""
    }
   ]
+ },
+ "opening": {
+  "id": "browser-select-readback",
+  "token": "a194eee93c434afa9980143a7556a99a",
+  "host": "MacBook-Pro",
+  "at": "2026-11-11T04:43:08Z"
  }
 }
