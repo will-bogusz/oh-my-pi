@@ -81035,7 +81035,7 @@
    "area": "browser",
    "priority": "P1",
    "needs": [],
-   "base": "73d7521269a1212fc2b2790a2e8c08424496c953",
+   "base": "0ef8a9e7c2fd9870cead2c12839a665ee15fe852",
    "body": "bodies/browser-wait-selector-state.md",
    "state": "open",
    "pr": 18924,
@@ -81043,7 +81043,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-wait-selector-state",
    "host": "MacBook-Pro",
    "added": "2026-11-11T12:16:01Z",
-   "updated": "2026-11-11T17:25:09Z",
+   "updated": "2026-11-11T17:40:49Z",
    "note": "",
    "built": [
     {
@@ -81259,7 +81259,7 @@
    ],
    "opened": "2026-11-11T16:45:33Z",
    "readied": "2026-11-11T16:46:02Z",
-   "advanced": "2026-11-11T17:25:09Z"
+   "advanced": "2026-11-11T17:40:49Z"
   },
   {
    "id": "win-focus-report",
