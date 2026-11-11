@@ -74821,7 +74821,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-takeover-user",
    "host": "MacBook-Pro",
    "added": "2026-11-10T21:06:23Z",
-   "updated": "2026-11-11T10:39:05Z",
+   "updated": "2026-11-11T13:10:49Z",
    "note": "2026-11-11T10:39:00Z: --user-harm on UserIntervened the hand-back returned early when the EWMH active-window property lagged core focus, leaving the user's typing focused in the target (6 Codex finding rounds)",
    "built": [
     {
@@ -74944,7 +74944,17 @@
    ],
    "opened": "2026-11-10T22:08:26Z",
    "readied": "2026-11-10T22:08:49Z",
-   "advanced": "2026-11-11T10:39:05Z"
+   "advanced": "2026-11-11T10:39:05Z",
+   "design_checks": [
+    {
+     "pr": 18784,
+     "rounds": 7,
+     "at": "2026-11-11T13:10:46Z",
+     "verdict": "change",
+     "note": "Keep the listener + server-state mechanism. One last push: (1) restore_activation decides and waits by core focus and always asks the WM, Wm::activate's restoring rechecks kept in core-focus form; (2) R7: user check right before the client message/SetInputFocus in Wm::activate, and the same before ax.focus in the element-keys body; (3) no pointer warp once the user pressed or holds a button; (4) delete the dead KEY_REPEAT arm and the doc/body sentences about repeats. Body states the floor and what counts as the user stepping in. Later 'press between check and act' findings: decline.",
+     "ref": "/Users/viathebrink/tmp/oh-my-pi/Design18784/18784.md"
+    }
+   ]
   },
   {
    "id": "x11-mpx-qt",
