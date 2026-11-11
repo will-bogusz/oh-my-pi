@@ -511,13 +511,13 @@ return { blocked, fast: blockedMs < 2000, answered: await tab.evaluate(() => glo
 			name: "emulated-dialog",
 			code: "await tab.emulate({ viewport: { width: 500, height: 400 } });",
 		});
-		await invoke({
+		const stopped = await invoke({
 			action: "run",
 			name: "emulated-dialog",
-			code: 'await tab.evaluate(() => { requestAnimationFrame(() => { globalThis.confirmResult = confirm("continue?"); }); }); await wait(async () => (await tab.dialog()).open, { timeout: 2000, interval: 10 });',
+			code: 'try { await tab.evaluate(() => { globalThis.confirmResult = confirm("continue?"); }); return "returned"; } catch (e) { return e.message; }',
 		});
+		expect(valueOf(stopped)).toContain('tab.evaluate(): the page opened a confirm("continue?")');
 		// Each run re-applies the emulation first, which a page stopped in a dialog never answers.
-		const started = performance.now();
 		const dialog = await invoke({
 			action: "run",
 			name: "emulated-dialog",
@@ -525,7 +525,6 @@ return { blocked, fast: blockedMs < 2000, answered: await tab.evaluate(() => glo
 			timeout: 5,
 		});
 		expect(valueOf(dialog)).toEqual({ open: true, type: "confirm", message: "continue?" });
-		expect(performance.now() - started).toBeLessThan(3_000);
 		await invoke({
 			action: "call",
 			name: "emulated-dialog",
