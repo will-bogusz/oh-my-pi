@@ -3789,7 +3789,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/r2-native-window-report",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-11-11T15:48:22Z",
+   "updated": "2026-11-11T15:48:37Z",
    "note": "r2 restack 2026-10-18 (RelayTriage, TRIAGE.md in ~/tmp/oh-my-pi/relay-r2): sits on main + #15508 head 5ccf9eac6b (adjacent print-hold lines) 2026-11-02 (QueueRestructure): after Brit's merge round, a rebase must keep main's 1c45a9113ce (relay timeout typed by class; detach-report wait only in user-driven browsers), a47a579ff17 (acquireBrowser startRelay:false for a kept tab's close), 49a19f8ec19 (PI_BROWSER_RELAY_KEEP_FRONT=0 opt-out of the front-app hold: any new SkyLight/front-app call must honor it), 89833d37f43 (cancelled press releases on a sentinel off-page point; tab-worker click guard).",
    "advanced": "2026-11-11T14:01:02Z",
    "built": [
@@ -4141,6 +4141,16 @@
      "with_tip": "dcb0ec5bb9af61bc148fcf65c611fa564e86bfdf",
      "at": "2026-11-11T15:48:15Z",
      "host": "MacBook-Pro"
+    },
+    {
+     "with": "#18013",
+     "code": "d73ec4222a3bc5d9fadf91f682d2bc579c71cf80",
+     "with_code": "29d5c984de4f2255e364348219395f6e162aa67d",
+     "tip": "3b11d88d25ceeca91d553723da4b7747ba93641d",
+     "with_tip": "dca33eaa93459bd3ed8b45e4d799024de21f685c",
+     "at": "2026-11-11T15:48:36Z",
+     "host": "MacBook-Pro",
+     "tree": "5d6e194da1a9bd4618cd360f52eedf7abaa72dfb"
     }
    ]
   },
@@ -77686,7 +77696,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-setvalue-readback",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:34:38Z",
-   "updated": "2026-11-11T15:47:50Z",
+   "updated": "2026-11-11T15:48:37Z",
    "note": "",
    "built": [
     {
@@ -77857,6 +77867,16 @@
      "with_tip": "dcb0ec5bb9af61bc148fcf65c611fa564e86bfdf",
      "at": "2026-11-11T15:47:43Z",
      "host": "MacBook-Pro"
+    },
+    {
+     "with": "#18013",
+     "code": "9060ab6231e3fcbd3bac83ba2814c9601ca9f814",
+     "with_code": "29d5c984de4f2255e364348219395f6e162aa67d",
+     "tip": "a341439e535050e82eef9faba2f4a086dcb94f4c",
+     "with_tip": "dca33eaa93459bd3ed8b45e4d799024de21f685c",
+     "at": "2026-11-11T15:48:36Z",
+     "host": "MacBook-Pro",
+     "tree": "5d6e194da1a9bd4618cd360f52eedf7abaa72dfb"
     }
    ]
   },
@@ -78078,7 +78098,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-menu-modal",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:48:16Z",
-   "updated": "2026-11-11T15:27:40Z",
+   "updated": "2026-11-11T15:48:37Z",
    "note": "",
    "built": [
     {
@@ -78343,6 +78363,16 @@
      "at": "2026-11-11T15:27:38Z",
      "host": "MacBook-Pro",
      "tree": "6ce62f6c79b7f2adfd317e515a607e425fdcd0e5"
+    },
+    {
+     "with": "#18013",
+     "code": "ad11431c4b75eb7de8b2cb1f552955007c26c151",
+     "with_code": "29d5c984de4f2255e364348219395f6e162aa67d",
+     "tip": "dbe7d6eed72b93560dfad8d01f1c8011ac3fe6a8",
+     "with_tip": "dca33eaa93459bd3ed8b45e4d799024de21f685c",
+     "at": "2026-11-11T15:48:36Z",
+     "host": "MacBook-Pro",
+     "tree": "5d6e194da1a9bd4618cd360f52eedf7abaa72dfb"
     }
    ]
   },
@@ -79150,7 +79180,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-menu-miss-items",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:58:16Z",
-   "updated": "2026-11-11T15:27:40Z",
+   "updated": "2026-11-11T15:48:37Z",
    "note": "",
    "built": [
     {
@@ -79415,6 +79445,16 @@
      "at": "2026-11-11T15:27:38Z",
      "host": "MacBook-Pro",
      "tree": "6ce62f6c79b7f2adfd317e515a607e425fdcd0e5"
+    },
+    {
+     "with": "#18013",
+     "code": "758295735dc48cb4bbd25acb7158a3bdcbd9189d",
+     "with_code": "29d5c984de4f2255e364348219395f6e162aa67d",
+     "tip": "44cb2814ada040e8d46f7fdc6c7f01a63e11eae6",
+     "with_tip": "dca33eaa93459bd3ed8b45e4d799024de21f685c",
+     "at": "2026-11-11T15:48:36Z",
+     "host": "MacBook-Pro",
+     "tree": "5d6e194da1a9bd4618cd360f52eedf7abaa72dfb"
     }
    ]
   },
@@ -80614,7 +80654,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-takeover-focus",
    "host": "MacBook-Pro",
    "added": "2026-11-11T11:46:35Z",
-   "updated": "2026-11-11T15:48:00Z",
+   "updated": "2026-11-11T15:48:37Z",
    "note": "",
    "built": [
     {
@@ -80785,6 +80825,16 @@
      "with_tip": "dcb0ec5bb9af61bc148fcf65c611fa564e86bfdf",
      "at": "2026-11-11T15:47:54Z",
      "host": "MacBook-Pro"
+    },
+    {
+     "with": "#18013",
+     "code": "47cf0e2f2bbccf32e10c58c268abb559039b687b",
+     "with_code": "29d5c984de4f2255e364348219395f6e162aa67d",
+     "tip": "0d3ceaeb6911947de91ea282ed8b6a1c16b82138",
+     "with_tip": "dca33eaa93459bd3ed8b45e4d799024de21f685c",
+     "at": "2026-11-11T15:48:36Z",
+     "host": "MacBook-Pro",
+     "tree": "5d6e194da1a9bd4618cd360f52eedf7abaa72dfb"
     }
    ]
   },
@@ -81043,7 +81093,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-press-actions",
    "host": "MacBook-Pro",
    "added": "2026-11-11T13:13:42Z",
-   "updated": "2026-11-11T15:48:11Z",
+   "updated": "2026-11-11T15:48:37Z",
    "note": "",
    "built": [
     {
@@ -81214,6 +81264,16 @@
      "with_tip": "dcb0ec5bb9af61bc148fcf65c611fa564e86bfdf",
      "at": "2026-11-11T15:48:04Z",
      "host": "MacBook-Pro"
+    },
+    {
+     "with": "#18013",
+     "code": "ac3802bb09f4b11727b338c63ea1e060e0d14728",
+     "with_code": "29d5c984de4f2255e364348219395f6e162aa67d",
+     "tip": "d80fdb57f0f072eceb19cd278525a724ed06d989",
+     "with_tip": "dca33eaa93459bd3ed8b45e4d799024de21f685c",
+     "at": "2026-11-11T15:48:36Z",
+     "host": "MacBook-Pro",
+     "tree": "5d6e194da1a9bd4618cd360f52eedf7abaa72dfb"
     }
    ]
   },
