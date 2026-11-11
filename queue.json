@@ -73703,6 +73703,24 @@
    "added": "2026-11-11T02:21:41Z",
    "updated": "2026-11-11T02:21:54Z",
    "note": "LinuxTextFinish 2026-11-11: overlaps (no needs): code conflict with queued atspi-unanswered-app (linux/wayland/mod.rs) and atspi-walk-reads (linux/ax.rs); same files as open #18013 (merges clean) and #18784 (CHANGELOG-only conflict); reuses #18220's merged text_readback; merges clean with qt5-getall-crash (same ax.rs). Linux-only Rust diff: rust-check linux recorded at 82bde80f19; review stamped needs-changes at eb0a087bcd, findings fixed."
+  },
+  {
+   "id": "x11-xtest-release",
+   "branch": "will/x11-xtest-release",
+   "title": "fix(natives): release X11 XTest keys and buttons a killed omp held",
+   "area": "computer",
+   "priority": "P1",
+   "needs": [],
+   "base": "6dd7ddf5feab54da3c82b460ee390a7d09aeabaa",
+   "body": "bodies/x11-xtest-release.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-xtest-release",
+   "host": "MacBook-Pro",
+   "added": "2026-11-11T02:31:05Z",
+   "updated": "2026-11-11T02:31:05Z",
+   "note": ""
   }
  ],
  "watch": {
