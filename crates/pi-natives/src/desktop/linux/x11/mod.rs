@@ -2,6 +2,7 @@ mod capture;
 mod input;
 mod keymap;
 mod mpx;
+mod text_mapping;
 mod toolkit;
 mod uinput;
 mod wm;
