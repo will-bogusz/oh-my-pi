@@ -79774,6 +79774,26 @@
    "added": "2026-11-11T13:13:42Z",
    "updated": "2026-11-11T13:13:42Z",
    "note": ""
+  },
+  {
+   "id": "atspi-qt-menus",
+   "branch": "will/atspi-qt-menus",
+   "title": "fix(natives): let Linux menu.select walk into Qt apps' menus",
+   "area": "computer",
+   "priority": "P2",
+   "needs": [
+    "atspi-unanswered-app"
+   ],
+   "base": "c49b777b23e050bd1aadf6fcaa93c6b0e53f484c",
+   "body": "bodies/atspi-qt-menus.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-qt-menus",
+   "host": "MacBook-Pro",
+   "added": "2026-11-11T13:21:21Z",
+   "updated": "2026-11-11T13:21:21Z",
+   "note": ""
   }
  ],
  "watch": {
