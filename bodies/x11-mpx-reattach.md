@@ -1,6 +1,6 @@
 ## What
 
-I found that after I locked the screen on a LightDM desktop and came back, or switched to another virtual terminal and back, omp's "background" typing and clicks on X11 went into the window I was working in while the call told the agent they had reached its target; now omp puts its virtual devices back before each call, and fails instead of reporting success when it cannot.
+I found that after I locked the screen on a LightDM desktop and came back, or switched to another virtual terminal and back, omp's "background" typing and clicks on X11 went into the window I was working in while the call told the agent they had reached its target; now omp puts its virtual devices back before each call, and fails instead of reporting success when it can't.
 
 After a screen lock unlocked with the password, omp's text and click went into the user's window in 10 of 10 trials on `main`, every call reporting success; with this change they reached the target 10 of 10 times.
 
@@ -23,9 +23,9 @@ Each background call now asks the server where its devices sit, in one round tri
 Decisions:
 - A query, not XI2 hierarchy events, which help only if every event loop keeps them; nothing but omp puts its device back, so a move still shows at the call's end.
 - Attach back rather than refuse, or every call after a lock would refuse; the keyboard gets a new one's warm-up key, with its focus cleared first.
-- Pointer gestures check both devices, `holdKeys` included.
+- Gestures check both devices, `holdKeys` too.
 
-Input sent after a move and before the call ends is reported, not recalled.
+Input sent after a mid-call move is reported, not recalled.
 
 ## Testing
 
