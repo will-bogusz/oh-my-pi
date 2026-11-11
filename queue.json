@@ -63290,8 +63290,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-ei-text",
    "host": "MacBook-Pro",
    "added": "2026-11-03T06:23:33Z",
-   "updated": "2026-11-11T03:56:04Z",
-   "note": "",
+   "updated": "2026-11-11T10:09:28Z",
+   "note": "Main, 2026-11-11: accepted pair with #18783 (one-line adjacent Cargo.toml dependency edit: #18783's x11rb render feature next to this PR's reis line); not requeued; whichever merges second takes the one-line rebase.",
    "advanced": "2026-11-11T03:56:04Z",
    "built": [
     {
@@ -63388,7 +63388,8 @@
    "opened": "2026-11-03T22:44:08Z",
    "readied": "2026-11-03T22:44:32Z",
    "rebases_after": [
-    18353
+    18353,
+    18783
    ]
   },
   {
