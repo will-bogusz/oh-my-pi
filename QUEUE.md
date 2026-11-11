@@ -1,12 +1,12 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 16:23Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 16:28Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-11 15:56Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 6, conflict-held 26, stacked 25, held 11, parked 2, open PRs 36; merged 289, closed 31
+**Counts:** openable now 5, conflict-held 26, stacked 25, held 11, parked 2, open PRs 37; merged 289, closed 31
 
-## Openable now (6)
+## Openable now (5)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
@@ -15,7 +15,6 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | macos-menu-miss-items | fix(natives): name the menu items on offer when a menu bar path misses | natives | P2 | 6h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-menu-miss-items) |
 | wait-ladder-context | feat(wait): reduce empty checks in large conversations | coding-agent | P2 | 6h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wait-ladder-context) |
 | browser-wait-selector-state | fix(browser): honor selector wait states and reject unknown options | browser | P2 | 4h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-wait-selector-state) |
-| atspi-press-actions | fix(natives): press Chromium menu items, options and tabs on Linux | computer | P2 | 3h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-press-actions) |
 
 ## Conflict-held (26)
 
@@ -41,7 +40,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | x11-click-stale-popup | fix(natives): refuse X11 presses outside an open popup of the app | computer | P1 | 13h | [#18784](https://github.com/can1357/oh-my-pi/pull/18784) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-click-stale-popup) |
 | relay-print-preview-error | fix(coding-agent,browser-relay): fail a browser call a print preview holds in an attached browser within seconds | browser | P2 | 9h | [#18737](https://github.com/can1357/oh-my-pi/pull/18737) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-print-preview-error) |
 | win-minimised-windows | fix(natives,coding-agent): show a minimized Windows app's window from apps.open instead of launching it again | computer | P2 | 7h | [#18222](https://github.com/can1357/oh-my-pi/pull/18222), win-setvalue-readback | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-minimised-windows) |
-| browser-select-objects | feat(browser): accept explicit dropdown option selectors | browser | P2 | 6h | browser-wait-selector-state | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-select-objects) |
+| browser-select-objects | feat(browser): accept explicit dropdown option selectors | browser | P2 | 7h | browser-wait-selector-state | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-select-objects) |
 | win-screen-locked | fix(natives,coding-agent): report unavailable Windows desktop sessions | computer | P2 | 6h | win-setvalue-readback | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-screen-locked) |
 | macos-ax-cancel-before-send | fix(natives): send no macOS AX action once its run is cancelled | natives | P2 | 6h | [#18898](https://github.com/can1357/oh-my-pi/pull/18898) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-ax-cancel-before-send) |
 | win-ax-states | fix(natives): expose Windows control state and stale-reference matches | computer | P2 | 6h | [#18892](https://github.com/can1357/oh-my-pi/pull/18892), win-setvalue-readback | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-ax-states) |
@@ -101,7 +100,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | [#15128](https://github.com/can1357/oh-my-pi/pull/15128) | reset-restore-longest-wait | feat(coding-agent): restore the blocked account whose reset buys the most time | broker | P2 | 13h | Will, 2026-11-02: account broker redesign, on hold since 2026-11-02 | not checked or kept fresh | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-restore-longest-wait) |
 | [#15130](https://github.com/can1357/oh-my-pi/pull/15130) | reset-before-reserve | feat(coding-agent): opt in to spending a blocked account's saved reset before a reserve-only backup | broker | P2 | 13h | Will, 2026-11-02: account broker redesign, on hold since 2026-11-02 | not checked or kept fresh | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-before-reserve) |
 
-## Open PRs (36)
+## Open PRs (37)
 
 | PR | id | title | area | rank | open | plan | branch |
 |---|---|---|---|---|---|---|---|
@@ -115,13 +114,13 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | [#18013](https://github.com/can1357/oh-my-pi/pull/18013) | wayland-ei-text | feat(natives): type text the wayland layout lacks through libei text | natives | P2 | 7d | keep; accepted pair with #18353; accepted pair with #18783 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-ei-text) |
 | [#18914](https://github.com/can1357/oh-my-pi/pull/18914) | atspi-unanswered-app | fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool | computer | P0 | 8d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-unanswered-app) |
 | [#18125](https://github.com/can1357/oh-my-pi/pull/18125) | anthropic-web-search | fix(ai,coding-agent): keep Anthropic web search queries intact, always search, and report refusals | other | P2 | 6d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/anthropic-web-search) |
-| [#18624](https://github.com/can1357/oh-my-pi/pull/18624) | upload-stall-error | fix(ai): say whether an Anthropic request body finished uploading when its connection drops | other | P1 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/upload-stall-error) |
+| [#18624](https://github.com/can1357/oh-my-pi/pull/18624) | upload-stall-error | fix(ai): say whether an Anthropic request body finished uploading when its connection drops | other | P1 | 2d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/upload-stall-error) |
 | [#18737](https://github.com/can1357/oh-my-pi/pull/18737) | browser-call-timeout | fix(browser): give browser calls without a timeout the Eval cell's timeout | browser | P1 | 23h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-call-timeout) |
 | [#18753](https://github.com/can1357/oh-my-pi/pull/18753) | computer-strict-options | fix(computer): reject unknown helper option keys | computer | P1 | 22h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-strict-options) |
 | [#18738](https://github.com/can1357/oh-my-pi/pull/18738) | browser-console-shape | fix(browser): tell agents that treat console() or errors() as an array to read .entries | browser | P1 | 23h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-console-shape) |
 | [#18743](https://github.com/can1357/oh-my-pi/pull/18743) | computer-open-window | fix(natives): return the window showing a page from macOS apps.open in a browser | computer | P1 | 23h | keep; accepted pair with #16553 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-open-window) |
 | [#18750](https://github.com/can1357/oh-my-pi/pull/18750) | browser-hover-actionable | fix(browser): hover on a hidden match waits and names the reason, like click | browser | P1 | 23h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-hover-actionable) |
-| [#18751](https://github.com/can1357/oh-my-pi/pull/18751) | browser-run-main-world | fix(browser): run tab.run page evaluations in the page's main world | browser | P1 | 22h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-run-main-world) |
+| [#18751](https://github.com/can1357/oh-my-pi/pull/18751) | browser-run-main-world | fix(browser): run tab.run page evaluations in the page's main world | browser | P1 | 23h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-run-main-world) |
 | [#18786](https://github.com/can1357/oh-my-pi/pull/18786) | browser-core-first-use | feat(agent,coding-agent): send a short browser guide with the first browser call | browser | P2 | 18h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-core-first-use) |
 | [#18789](https://github.com/can1357/oh-my-pi/pull/18789) | subagent-browser-relay | feat(coding-agent): keep subagents' browser tabs out of the user's Chrome and Tern pane unless asked | browser | P2 | 17h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/subagent-browser-relay) |
 | [#18775](https://github.com/can1357/oh-my-pi/pull/18775) | eval-error-frames | fix(coding-agent): print a failed JavaScript cell's own frames, not omp's host stack | eval | P1 | 19h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/eval-error-frames) |
@@ -141,3 +140,4 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | [#18896](https://github.com/can1357/oh-my-pi/pull/18896) | xproc-intervention | fix(natives): stop macOS input refusals between omp processes | computer | P1 | 3h | keep; accepted pair with #16553 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/xproc-intervention) |
 | [#18892](https://github.com/can1357/oh-my-pi/pull/18892) | ax-ref-read-as | fix(natives): refuse macOS element actions once the ref's element reads as another control | computer | P1 | 3h | keep; accepted pair with #18898 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-ref-read-as) |
 | [#18919](https://github.com/can1357/oh-my-pi/pull/18919) | win-takeover-focus | fix(natives): hand the foreground back after Windows element takeover input | computer | P1 | 4h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-takeover-focus) |
+| [#18921](https://github.com/can1357/oh-my-pi/pull/18921) | atspi-press-actions | fix(natives): press Chromium menu items, options and tabs on Linux | computer | P2 | 3h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-press-actions) |
