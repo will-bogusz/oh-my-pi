@@ -36409,7 +36409,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/click-place-release",
    "host": "MacBook-Pro",
    "added": "2026-10-20T20:11:57Z",
-   "updated": "2026-11-11T14:11:02Z",
+   "updated": "2026-11-11T14:19:34Z",
    "note": "",
    "built": [
     {
@@ -36460,6 +36460,9 @@
      "note": "click placer replaced by event-field placement (f40 press, drag-pasteboard-gated f91 release) at main's annotated tap; A/B n=10 holds on every cell vs main and the old head",
      "ref": "/Users/viathebrink/tmp/oh-my-pi/DesignChecks/report-16553.md"
     }
+   ],
+   "rebases_after": [
+    18743
    ]
   },
   {
