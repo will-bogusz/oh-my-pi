@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed `computer.apps.open` on Windows launching an app again when all its windows are minimized, which can start a second copy; it now shows the frontmost window again and returns it as `window`
+
 ## [18.18.8] - 2026-11-11
 
 ### Changed
@@ -11,7 +15,6 @@
 
 ### Fixed
 
-- Fixed `computer.apps.open` on Windows launching an app again when all its windows are minimized, which can start a second copy; it now shows the frontmost window again and returns it as `window`
 - Fixed a crash when parsing Markdown with very deeply nested lists or block quotes, such as a line of several hundred `- ` markers, which made editing such files kill the process ([#18707](https://github.com/can1357/oh-my-pi/issues/18707))
 - Fixed the shell's `git` builtin on Windows with `bash.gitGuard` (or smart git) on failing every allowed command with exit 127 (`…\Git\cmd\git: No such file or directory`); it now runs `git.exe` ([#18722](https://github.com/can1357/oh-my-pi/issues/18722))
 - Computer element searches accept native role names, spaced role names such as `text field`, and `radiobutton` for macOS `radio` controls without changing printed accessibility roles ([#18745](https://github.com/can1357/oh-my-pi/pull/18745) by [@will-bogusz](https://github.com/will-bogusz))
