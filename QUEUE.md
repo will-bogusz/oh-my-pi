@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 04:43Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 04:44Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 3 of 8 ready events used in the hour before the last plan, 5 left (plan of 2026-11-11 04:08Z on MacBook-Pro; groups below are from it, states from the manifest)
@@ -127,5 +127,5 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | [#18784](https://github.com/can1357/oh-my-pi/pull/18784) | x11-takeover-user | fix(natives): keep X11 takeover from taking a typing user's keys | computer | P1 | 6h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-takeover-user) |
 | [#18825](https://github.com/can1357/oh-my-pi/pull/18825) | x11-mpx-qt | fix(natives): stop X11 background input from crashing your running Qt 6.5+ apps | computer | P1 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-mpx-qt) |
 | [#18795](https://github.com/can1357/oh-my-pi/pull/18795) | devin-retire-swe-1-6-fast | fix(catalog): drop Devin's retired SWE-1.6 Fast seed row | catalog | P0 | 5h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-retire-swe-1-6-fast) |
-| [#18824](https://github.com/can1357/oh-my-pi/pull/18824) | macos-click-timestamp | fix(natives): stop macOS background left clicks from crashing Electron and Chrome pages | natives | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-click-timestamp) |
+| [#18824](https://github.com/can1357/oh-my-pi/pull/18824) | macos-click-timestamp | fix(natives): stop macOS background left clicks from crashing Electron and Chrome pages | natives | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-click-timestamp) |
 | [#18823](https://github.com/can1357/oh-my-pi/pull/18823) | qt5-getall-crash | fix(natives): stop Linux computer reads from crashing Qt, GTK 3 and Firefox apps | computer | P1 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/qt5-getall-crash) |
