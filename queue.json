@@ -70245,7 +70245,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-strict-options",
    "host": "MacBook-Pro",
    "added": "2026-11-10T05:41:26Z",
-   "updated": "2026-11-11T00:03:33Z",
+   "updated": "2026-11-11T09:35:51Z",
    "note": "",
    "built": [
     {
@@ -70461,7 +70461,17 @@
    ],
    "opened": "2026-11-10T17:43:16Z",
    "readied": "2026-11-10T17:43:44Z",
-   "advanced": "2026-11-11T00:03:33Z"
+   "advanced": "2026-11-11T00:03:33Z",
+   "design_checks": [
+    {
+     "pr": 18753,
+     "rounds": 6,
+     "at": "2026-11-11T09:35:51Z",
+     "verdict": "keep",
+     "note": "DesignChecks: lift stop; ordinary polish",
+     "ref": "/Users/viathebrink/tmp/oh-my-pi/DesignChecks/DesignChecks.md"
+    }
+   ]
   },
   {
    "id": "browser-console-shape",
