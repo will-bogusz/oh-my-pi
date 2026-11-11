@@ -55,8 +55,10 @@ pub struct ApplicationOpenOptions {
 }
 
 /// An opened application: its [`Application`] fields and the window it
-/// shows. On macOS `window` is its frontmost window once one is on screen; on
-/// Windows it is the minimized window shown again instead of a second launch;
+/// shows.
+///
+/// On macOS `window` is its frontmost window once one is on screen; on
+/// Windows it is a minimized window shown again instead of a second launch;
 /// otherwise none.
 #[napi(object)]
 #[derive(Clone, Debug)]

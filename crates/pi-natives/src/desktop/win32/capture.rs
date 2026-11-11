@@ -1,8 +1,8 @@
-use std::{collections::HashSet, ffi::c_void};
+use std::{collections::HashSet, ffi::c_void, time::Duration};
 
 use image::{Rgba, RgbaImage};
 use windows_sys::Win32::UI::WindowsAndMessaging::{
-	GetWindowThreadProcessId, IsIconic, IsWindow, SHOW_WINDOW_CMD, ShowWindow,
+	GetWindowThreadProcessId, IsIconic, IsWindow, SW_RESTORE, SW_SHOWNOACTIVATE, ShowWindow,
 };
 use xcap::{Monitor, Window};
 
@@ -14,6 +14,7 @@ use super::{
 	},
 	geometry::PhysicalLayout,
 	reopen::{Reopen, Shown, reopen},
+	window,
 };
 
 const MAX_LISTED_WINDOWS: usize = 48;
@@ -188,16 +189,19 @@ fn describe(window: &Window, id: u32, focused: impl FnOnce() -> bool) -> Option<
 	})
 }
 
-/// Shows again, with `show`, the frontmost minimized window of the processes
-/// `owns` accepts when `windows()` lists none of their windows: `Restore`
-/// with the window as `windows()` now lists it, if it does. `Launch` when one
-/// of their windows is listed, none is minimized, or the window closed before
+/// Shows again the frontmost minimized window of the processes `owns`
+/// accepts when `windows()` lists none of their windows, bringing it to the
+/// front only when `activate`: `Restore` with the window as `windows()` now
+/// lists it, if it does. `Launch` when one of their windows is listed, none
+/// is minimized, the window list cannot be read, or the window closed before
 /// it was shown.
 pub(in crate::desktop) fn restore_minimized(
 	mut owns: impl FnMut(u32) -> bool,
-	show: SHOW_WINDOW_CMD,
+	activate: bool,
 ) -> CoreResult<Reopen<Option<DesktopWindow>>> {
-	let native = Window::all().map_err(|error| metadata_error("window enumeration", error))?;
+	let Ok(native) = Window::all() else {
+		return Ok(Reopen::Launch);
+	};
 	let mut seen = HashSet::new();
 	let windows = native.into_iter().filter_map(|window| {
 		let id = window.id().ok()?;
@@ -215,25 +219,41 @@ pub(in crate::desktop) fn restore_minimized(
 		};
 		Some(((id, window), shown))
 	});
-	let Reopen::Restore((id, window)) = reopen(windows) else {
+	let Reopen::Restore((id, native)) = reopen(windows) else {
 		return Ok(Reopen::Launch);
 	};
 	let hwnd = hwnd_from_id(id);
+	// Without activation the window comes back at its normal size even if it
+	// was maximized: no show state restores a maximized window without
+	// activating it, and activation would take the user's foreground.
+	let show = if activate {
+		SW_RESTORE
+	} else {
+		SW_SHOWNOACTIVATE
+	};
 	// SAFETY: Win32 validates the handle, which may have closed since the
 	// enumeration; the calls retain no borrowed state.
-	unsafe {
+	let (open, iconic) = unsafe {
 		ShowWindow(hwnd, show);
-		if IsWindow(hwnd) == 0 {
-			return Ok(Reopen::Launch);
-		}
-		if IsIconic(hwnd) != 0 {
-			return Err(DesktopError::input_failed(format!(
-				"window {id} stayed minimized when it was restored; the application was not launched \
-				 again"
-			)));
-		}
+		(IsWindow(hwnd) != 0, IsIconic(hwnd) != 0)
+	};
+	if !open {
+		return Ok(Reopen::Launch);
 	}
-	Ok(Reopen::Restore(describe(&window, id, || window.is_focused().unwrap_or(false))))
+	if iconic {
+		let reason =
+			window::uipi_block(hwnd).map_or_else(String::new, |reason| format!(": {reason}"));
+		return Err(DesktopError::input_failed(format!(
+			"window {id} stayed minimized when it was restored{reason}; the application was not \
+			 launched again"
+		)));
+	}
+	if activate {
+		// A refusal shows as the returned window's `focused: false`.
+		window::activate(hwnd)?;
+		window::wait_for_foreground(hwnd, Duration::from_millis(500))?;
+	}
+	Ok(Reopen::Restore(describe(&native, id, || native.is_focused().unwrap_or(false))))
 }
 
 fn capture_desktop(selector: &DisplaySelector) -> CoreResult<(RgbaImage, FrameGeometry)> {

@@ -3082,8 +3082,11 @@ export declare function notebookToEditableText(json: string, displayPath: string
 
 /**
  * An opened application: its [`Application`] fields and the window it
- * shows. On macOS `window` is its frontmost window once one is on screen;
- * other platforms report none.
+ * shows.
+ *
+ * On macOS `window` is its frontmost window once one is on screen; on
+ * Windows it is a minimized window shown again instead of a second launch;
+ * otherwise none.
  */
 export interface OpenedApplication {
   id: string

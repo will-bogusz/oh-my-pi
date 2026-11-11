@@ -41,6 +41,14 @@ pub(super) fn reopen<W>(windows: impl IntoIterator<Item = (W, Shown)>) -> Reopen
 	minimized.map_or(Reopen::Launch, Reopen::Restore)
 }
 
+/// Whether the processes running a shortcut's executable are the shortcut's
+/// own: one with arguments shares its executable with other launches (two
+/// scripts run by `pythonw.exe`, a browser profile), whose windows are not
+/// its own.
+pub(in crate::desktop) fn shortcut_owns_executable(arguments: &str) -> bool {
+	arguments.trim().is_empty()
+}
+
 #[cfg(test)]
 mod tests {
 	use super::*;
@@ -57,5 +65,11 @@ mod tests {
 		// application already shows a window `windows()` can find.
 		assert_eq!(reopen([(1, Shown::Minimized), (2, Shown::Listed)]), Reopen::Launch);
 		assert_eq!(reopen([(1, Shown::Unlisted)]), Reopen::Launch);
+	}
+
+	#[test]
+	fn a_shortcut_with_arguments_does_not_claim_its_executables_windows() {
+		assert!(!shortcut_owns_executable(r#"--profile-directory="Profile 1""#));
+		assert!(shortcut_owns_executable(" "));
 	}
 }

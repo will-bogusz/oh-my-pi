@@ -59,7 +59,7 @@ use windows_sys::{
 				SEE_MASK_NOASYNC, SEE_MASK_NOCLOSEPROCESS, SHELLEXECUTEINFOW, SHGetKnownFolderPath,
 				ShellExecuteExW,
 			},
-			WindowsAndMessaging::{SW_RESTORE, SW_SHOWNOACTIVATE, SW_SHOWNORMAL},
+			WindowsAndMessaging::{SW_SHOWNOACTIVATE, SW_SHOWNORMAL},
 		},
 	},
 	core::GUID,
@@ -75,7 +75,7 @@ use winreg::{
 use super::{
 	super::{
 		error::{CoreResult, DesktopError},
-		win32::{Reopen, restore_minimized},
+		win32::{Reopen, restore_minimized, shortcut_owns_executable},
 	},
 	Application, OpenedApplication,
 };
@@ -292,6 +292,19 @@ impl ShortcutReader {
 			io_error(&format!("resolve shortcut target {}", target.display()), error)
 		})?;
 		path_string(&target).map(Some)
+	}
+
+	/// Arguments of the shortcut the last [`Self::target`] call loaded.
+	fn arguments(&self) -> CoreResult<String> {
+		let mut arguments = vec![0u16; 32768];
+		// SAFETY: the output slice is writable and outlives the call.
+		unsafe { self.link.GetArguments(&mut arguments) }
+			.map_err(|error| hresult_error("read shortcut arguments", error.code().0))?;
+		let length = arguments
+			.iter()
+			.position(|unit| *unit == 0)
+			.unwrap_or(arguments.len());
+		Ok(String::from_utf16_lossy(&arguments[..length]))
 	}
 }
 
@@ -725,15 +738,30 @@ pub(super) fn from_path(path: &Path) -> CoreResult<Application> {
 	Ok(app)
 }
 
+/// The key [`running_processes`] records `app`'s own processes under; `None`
+/// for a shortcut whose executable's processes need not be its own.
+fn process_key(app: &Application) -> CoreResult<Option<String>> {
+	if app.path.starts_with(APPS_FOLDER_PREFIX) {
+		return Ok(Some(format!("aumid:{}", app.id)));
+	}
+	if has_extension(Path::new(&app.path), "exe") {
+		return Ok(Some(path_key(&app.path)));
+	}
+	let _apartment = Apartment::enter()?;
+	let shortcut = ShortcutReader::new()?;
+	let Some(target) = shortcut.target(Path::new(&app.path))? else {
+		return Ok(None);
+	};
+	Ok(shortcut_owns_executable(&shortcut.arguments()?).then(|| path_key(&target)))
+}
+
 /// Opens `app`. A running application that `windows()` lists no window of,
 /// because its windows are minimized, gets the frontmost one shown again and
 /// returned instead of a launch, which can start a second instance.
 pub(super) fn open(app: Application, activate: bool) -> CoreResult<OpenedApplication> {
-	let packaged = app.path.starts_with(APPS_FOLDER_PREFIX);
-	if app.running {
-		// The key `running_processes` found `app` running under.
-		let key =
-			if packaged { format!("aumid:{}", app.id) } else { path_key(&executable_target(&app)?) };
+	if app.running
+		&& let Some(key) = process_key(&app)?
+	{
 		let mut keys = ProcessKeys::new();
 		let mut owned = HashMap::new();
 		let owns = |pid| {
@@ -743,14 +771,15 @@ pub(super) fn open(app: Application, activate: bool) -> CoreResult<OpenedApplica
 				matched
 			})
 		};
-		// The launch's show states; Win32 documents `SW_RESTORE` for showing a
-		// minimized window.
-		let show = if activate { SW_RESTORE } else { SW_SHOWNOACTIVATE };
-		if let Reopen::Restore(window) = restore_minimized(owns, show)? {
+		if let Reopen::Restore(window) = restore_minimized(owns, activate)? {
 			return Ok(OpenedApplication::new(app, window));
 		}
 	}
-	let app = if packaged { open_packaged(app, activate)? } else { launch(app, activate)? };
+	let app = if app.path.starts_with(APPS_FOLDER_PREFIX) {
+		open_packaged(app, activate)?
+	} else {
+		launch(app, activate)?
+	};
 	Ok(OpenedApplication::new(app, None))
 }
 

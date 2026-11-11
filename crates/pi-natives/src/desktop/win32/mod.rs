@@ -15,15 +15,17 @@ mod reopen;
 mod window;
 
 #[cfg(target_os = "windows")]
-pub(super) use self::{capture::restore_minimized, reopen::Reopen};
-
-#[cfg(target_os = "windows")]
 use enigo::Enigo;
 #[cfg(target_os = "windows")]
 use image::RgbaImage;
 
 #[cfg(target_os = "windows")]
 use self::ax::Win32Ax;
+#[cfg(target_os = "windows")]
+pub(super) use self::{
+	capture::restore_minimized,
+	reopen::{Reopen, shortcut_owns_executable},
+};
 #[cfg(target_os = "windows")]
 use super::ax::AxHandle;
 #[cfg(target_os = "windows")]
