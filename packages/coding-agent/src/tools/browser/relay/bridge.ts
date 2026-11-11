@@ -1451,7 +1451,13 @@ export class RelayBridge {
 				const parsed = typeof msg.params?.targetId === "string" ? parseTargetId(msg.params.targetId) : null;
 				const tab = parsed ? this.#tabs.get(parsed.key) : undefined;
 				if (!parsed || !tab || !this.#eligible(tab)) {
-					this.#replyError(conn, msg, `No target with id ${String(msg.params?.targetId)}`);
+					this.#replyError(
+						conn,
+						msg,
+						tab?.refusal
+							? `Cannot attach to tab ${tab.tabKey} (${tab.url}): ${tab.refusal}`
+							: `No target with id ${String(msg.params?.targetId)}`,
+					);
 					return;
 				}
 				if (tab.discarded) {
@@ -1462,7 +1468,8 @@ export class RelayBridge {
 				if (conn.autoAttach) {
 					if (!(await this.#attachFor(conn, tab))) {
 						if (conn.claims.delete(tab.tabKey)) this.#syncTabGrouping(tab);
-						this.#replyError(conn, msg, `Cannot attach to tab ${tab.tabKey} (${tab.url})`);
+						const reason = tab.refusal ? `: ${tab.refusal}` : "";
+						this.#replyError(conn, msg, `Cannot attach to tab ${tab.tabKey} (${tab.url})${reason}`);
 						return;
 					}
 					this.#emitTabAttached(conn, tab);
@@ -1550,7 +1557,7 @@ export class RelayBridge {
 					} else {
 						// Nobody can drive a tab the relay cannot attach: close it. When closing fails too, the
 						// reply still names the tab, so the client's own cleanup can close it later.
-						const closed = await this.#rpc({ op: "removeTab", tabId: result.tab.tabId }, inst).then(
+						const closed = await this.#closeTab(createdKey, created.tabId, inst).then(
 							() => true,
 							(error: unknown) => {
 								this.#log("closing a tab the relay could not attach failed", {
@@ -1562,7 +1569,8 @@ export class RelayBridge {
 						);
 						if (this.#conns.get(conn.id) !== conn) return;
 						if (closed) {
-							this.#replyError(conn, msg, `Cannot attach to the tab the relay opened for ${url}`);
+							const reason = created.refusal ? `: ${created.refusal}` : "";
+							this.#replyError(conn, msg, `Cannot attach to the tab the relay opened for ${url}${reason}`);
 							return;
 						}
 					}
