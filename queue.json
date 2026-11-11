@@ -79501,7 +79501,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "f2ee6ba9b3e00b379c7c12b9d99ef6369fd08f3f",
+   "base": "b9b3cc4d69962e492197178155dd95216cd9c21b",
    "body": "bodies/ax-ref-read-as.md",
    "state": "open",
    "pr": 18892,
@@ -79509,7 +79509,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ax-ref-read-as",
    "host": "MacBook-Pro",
    "added": "2026-11-11T10:51:34Z",
-   "updated": "2026-11-11T13:39:41Z",
+   "updated": "2026-11-11T13:59:15Z",
    "note": "",
    "built": [
     {
@@ -79695,7 +79695,7 @@
    ],
    "opened": "2026-11-11T12:38:47Z",
    "readied": "2026-11-11T12:39:15Z",
-   "advanced": "2026-11-11T13:33:24Z",
+   "advanced": "2026-11-11T13:59:15Z",
    "rebases_after": [
     18898
    ]
