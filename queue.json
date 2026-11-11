@@ -73706,7 +73706,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-11T01:52:22Z",
+  "checked": "2026-11-11T02:22:35Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -73717,6 +73717,14 @@
    "macos-click-timestamp": {
     "since": "2026-11-11T01:52:22Z",
     "title": "fix(natives): stop macOS background left clicks from crashing Electron and Chrome pages"
+   },
+   "qt5-getall-crash": {
+    "since": "2026-11-11T02:22:35Z",
+    "title": "fix(natives): stop Linux computer reads from crashing Qt, GTK 3 and Firefox apps"
+   },
+   "x11-mpx-qt": {
+    "since": "2026-11-11T02:22:35Z",
+    "title": "fix(natives): stop X11 background input from crashing your running Qt 6.5+ apps"
    },
    "browser-select-readback": {
     "since": "2026-11-11T00:21:30Z",
@@ -75610,6 +75618,18 @@
     "kind": "openable",
     "id": "relay-target-miss-hint",
     "title": "fix(browser): name the relay's own-tab open when a target matches no tab"
+   },
+   {
+    "at": "2026-11-11T02:22:35Z",
+    "kind": "openable",
+    "id": "qt5-getall-crash",
+    "title": "fix(natives): stop Linux computer reads from crashing Qt, GTK 3 and Firefox apps"
+   },
+   {
+    "at": "2026-11-11T02:22:35Z",
+    "kind": "openable",
+    "id": "x11-mpx-qt",
+    "title": "fix(natives): stop X11 background input from crashing your running Qt 6.5+ apps"
    }
   ]
  },
@@ -78370,8 +78390,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-11T02:11:03.702972Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-11T02:22:36.533221Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -79036,16 +79056,35 @@
     "area": "computer",
     "priority": "P0",
     "title": "fix(natives): stop X11 background input from crashing your running Qt 6.5+ apps",
-    "action": "held",
-    "reasons": [
-     "held: Main, 2026-11-11: wait for LinuxMined's grabbed-pair fix head, then rebuild the natives tree"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-10T22:23:32Z"
+   },
+   {
+    "id": "atspi-text-first",
+    "label": "atspi-text-first",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility",
+    "action": "wait",
+    "reasons": [
+     "conflicts with atspi-unanswered-app in crates/pi-natives/src/desktop/linux/wayland/mod.rs"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "atspi-unanswered-app"
+    ],
+    "needs": [],
+    "created": "2026-11-11T02:21:41Z"
    },
    {
     "id": "atspi-walk-reads",
@@ -79136,6 +79175,27 @@
     ],
     "needs": [],
     "created": "2026-11-11T00:07:07Z"
+   },
+   {
+    "id": "covered-fill",
+    "label": "covered-fill",
+    "number": null,
+    "state": "queued",
+    "area": "browser",
+    "priority": "P1",
+    "title": "fix(coding-agent): refuse browser keys aimed at a field a modal dialog covers",
+    "action": "wait",
+    "reasons": [
+     "conflicts with #18676 in packages/coding-agent/src/tools/browser/frames.ts"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "#18676"
+    ],
+    "needs": [],
+    "created": "2026-11-11T02:11:47Z"
    },
    {
     "id": "eval-assign-echo",
