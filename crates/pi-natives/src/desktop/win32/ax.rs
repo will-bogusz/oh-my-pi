@@ -401,16 +401,15 @@ impl AxBackend for Win32Ax {
 			cached_string(&cached, UIProperty::Name), cached_string(&cached, UIProperty::AutomationId),
 			cached_string(&cached, UIProperty::ClassName), cached_string(&cached, UIProperty::HelpText),
 			cached_string(&cached, UIProperty::ValueValue), cached_string(&cached, UIProperty::LegacyIAccessibleValue),
-			cached_state(&cached, UIProperty::IsTogglePatternAvailable, UIProperty::ToggleToggleState)
-				.map(|state| ax_states::toggle_value(None, state)),
 		];
+		let toggle = cached_state(&cached, UIProperty::IsTogglePatternAvailable, UIProperty::ToggleToggleState);
 		let identity = ax_states::identity(&native_role,
-			&fields.each_ref().map(|field| field.as_ref().map(|value| value.as_deref()).map_err(|_| ())));
-		let [title, _, _, description, value, legacy_value, toggle] = fields;
+			&fields.each_ref().map(|field| field.as_ref().map(|value| value.as_deref()).map_err(|_| ())), toggle);
+		let [title, _, _, description, value, legacy_value] = fields;
 		let title = title.ok().flatten();
 		let description = description.ok().flatten();
-		let value = value.ok().flatten().or_else(|| legacy_value.ok().flatten())
-			.or_else(|| toggle.ok().flatten());
+		let value = value.ok().flatten().or_else(|| legacy_value.ok().flatten());
+		let value = ax_states::toggle_value(value, toggle.ok().flatten());
 		let selected = ax_states::selected(&native_role,
 			cached_bool(&cached, UIProperty::SelectionItemIsSelected).unwrap_or(false));
 		let expanded = ax_states::expanded(cached_state(&cached,

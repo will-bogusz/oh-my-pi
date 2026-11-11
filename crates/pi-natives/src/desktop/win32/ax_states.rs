@@ -39,12 +39,13 @@ pub(super) const fn expanded(state: Option<i32>) -> Option<bool> {
 	}
 }
 
-pub(super) fn identity(role: &str, fields: &[Result<Option<&str>, ()>]) -> Option<u64> {
+pub(super) fn identity(role: &str, fields: &[Result<Option<&str>, ()>], toggle: Result<Option<i32>, ()>) -> Option<u64> {
 	let mut hash = DefaultHasher::new();
 	role.hash(&mut hash);
 	for field in fields {
 		field.as_ref().ok()?.filter(|value| !value.is_empty()).hash(&mut hash);
 	}
+	toggle.ok()?.hash(&mut hash);
 	Some(hash.finish())
 }
 
@@ -86,13 +87,15 @@ mod tests {
 	#[test]
 	fn recreated_controls_match_only_fully_read_identity() {
 		let fields = [Ok(Some("Remember me")), Ok(Some("remember")), Ok(Some("Button")), Ok(None)];
-		let original = identity("CheckBox", &fields).unwrap();
-		assert_eq!(identity("CheckBox", &fields), Some(original));
-		assert_ne!(identity("RadioButton", &fields), Some(original));
+		let original = identity("CheckBox", &fields, Ok(Some(0))).unwrap();
+		assert_eq!(identity("CheckBox", &fields, Ok(Some(0))), Some(original));
+		assert_ne!(identity("RadioButton", &fields, Ok(Some(0))), Some(original));
+		assert_ne!(identity("CheckBox", &fields, Ok(Some(1))), Some(original));
+		assert_eq!(identity("CheckBox", &fields, Err(())), None);
 		let mut changed = fields;
 		changed[1] = Ok(Some("other"));
-		assert_ne!(identity("CheckBox", &changed), Some(original));
+		assert_ne!(identity("CheckBox", &changed, Ok(Some(0))), Some(original));
 		changed[1] = Err(());
-		assert_eq!(identity("CheckBox", &changed), None);
+		assert_eq!(identity("CheckBox", &changed, Ok(Some(0))), None);
 	}
 }
