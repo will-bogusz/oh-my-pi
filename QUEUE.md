@@ -4,7 +4,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 
 **Opening:** not paused
 **Ready budget:** 5 of 8 ready events used in the hour before the last plan, 3 left (plan of 2026-11-11 13:11Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 7, conflict-held 23, stacked 22, held 12, parked 2, open PRs 48, queued since the last plan 3; merged 275, closed 30
+**Counts:** openable now 7, conflict-held 22, stacked 22, held 13, parked 2, open PRs 48, queued since the last plan 3; merged 275, closed 30
 
 ## Openable now (7)
 
@@ -18,7 +18,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | win-takeover-focus | fix(natives): hand the foreground back after Windows element takeover input | computer | P1 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-takeover-focus) |
 | browser-wait-selector-state | fix(browser): honor selector wait states and reject unknown options | browser | P2 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-wait-selector-state) |
 
-## Conflict-held (23)
+## Conflict-held (22)
 
 | id | title | area | priority | age | blocked by | branch |
 |---|---|---|---|---|---|---|
@@ -44,7 +44,6 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | x11-takeover-keyboard-grab | fix(natives): refuse X11 XTest keys while another client grabs the keyboard | computer | P1 | 10h | [#18784](https://github.com/can1357/oh-my-pi/pull/18784) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-takeover-keyboard-grab) |
 | x11-click-stale-popup | fix(natives): refuse X11 presses outside an open popup of the app | computer | P1 | 10h | [#18784](https://github.com/can1357/oh-my-pi/pull/18784) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-click-stale-popup) |
 | browser-select-objects | feat(browser): accept explicit dropdown option selectors | browser | P2 | 3h | [#18829](https://github.com/can1357/oh-my-pi/pull/18829), browser-wait-selector-state | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-select-objects) |
-| win-ax-states | fix(natives): expose Windows control state and stale-reference matches | computer | P2 | 3h | [#18892](https://github.com/can1357/oh-my-pi/pull/18892), win-setvalue-readback | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-ax-states) |
 
 ## Stacked (22)
 
@@ -73,7 +72,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | ax-row-action | fix(natives): follow rebuilt macOS table rows without selecting a neighbour | computer | P1 | 1h | ax-ref-read-as ([#18892](https://github.com/can1357/oh-my-pi/pull/18892)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-row-action) |
 | win-focus-report | fix(natives): report where focus went after a Windows takeover | computer | P2 | 0h | win-takeover-focus | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-focus-report) |
 
-## Held (12)
+## Held (13)
 
 | id | title | area | priority | age | hold | branch |
 |---|---|---|---|---|---|---|
@@ -89,6 +88,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | atspi-text-first | fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility | computer | P1 | 11h | Main, 2026-11-11: opens after atspi-unanswered-app (P0) so it does not block it | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-text-first) |
 | atspi-value-readback | fix(natives): read back AT-SPI numeric setValue before reporting success | computer | P2 | 10h | Main, 2026-11-11: opens after atspi-unanswered-app (P0) so it does not block it | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-value-readback) |
 | win-minimised-windows | fix(natives,coding-agent): show a minimized Windows app's window from apps.open instead of launching it again | computer | P2 | 4h | Main, 2026-11-11: prompt changed; stays queued until Main arranges model samples | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-minimised-windows) |
+| win-ax-states | fix(natives): expose Windows control state and stale-reference matches | computer | P2 | 3h | Main, 2026-11-11: prompt changed; stays queued until Main arranges model samples | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-ax-states) |
 
 ## Parked (2)
 

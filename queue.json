@@ -79476,8 +79476,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-ax-states",
    "host": "MacBook-Pro",
    "added": "2026-11-11T10:16:04Z",
-   "updated": "2026-11-11T12:56:23Z",
-   "note": ""
+   "updated": "2026-11-11T13:22:06Z",
+   "note": "",
+   "hold": "Main, 2026-11-11: prompt changed; stays queued until Main arranges model samples"
   },
   {
    "id": "ax-ref-read-as",
