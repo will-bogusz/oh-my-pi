@@ -81769,7 +81769,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-11T21:11:12Z",
+  "checked": "2026-11-11T21:42:04Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -82024,22 +82024,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-04T21:14:27Z",
-    "kind": "merged",
-    "number": 18012,
-    "title": "fix(natives): report Wayland input unavailable when no RemoteDesktop portal exists",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-04T21:14:27Z",
-    "kind": "merged",
-    "number": 18011,
-    "title": "fix(natives): read GTK3 file dialogs as AT-SPI windows",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
    {
     "at": "2026-11-05T00:16:49Z",
     "kind": "openable",
@@ -89061,12 +89045,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-11T21:11:57.764544Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-11T21:42:05.089418Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 1,
-   "left": 7
+   "used": 0,
+   "left": 8
   },
   "rows": [
    {
@@ -89290,9 +89274,11 @@
     "title": "fix(browser): run tab.run page evaluations in the page's main world",
     "action": "keep",
     "reasons": [],
-    "note": "",
+    "note": "accepted pair with #18772",
     "over": [],
-    "paired": [],
+    "paired": [
+     "#18772"
+    ],
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-10T17:23:38Z"
@@ -89322,16 +89308,14 @@
     "area": "browser",
     "priority": "P1",
     "title": "fix(browser): print every observed element, one line each, instead of cutting at 100",
-    "action": "requeue",
-    "reasons": [
-     "conflicts with #18751 in docs/tools/browser.md"
-    ],
-    "note": "",
+    "action": "keep",
+    "reasons": [],
+    "note": "accepted pair with #18751",
     "over": [],
-    "paired": [],
-    "blocked_by": [
+    "paired": [
      "#18751"
     ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-10T20:05:43Z"
    },
@@ -90212,12 +90196,14 @@
     "action": "wait",
     "reasons": [
      "needs #18751 (open)",
+     "conflicts with #18772 in docs/tools/browser.md",
      "conflicts with #18925 in packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#18772",
      "#18925"
     ],
     "needs": [
@@ -90236,6 +90222,7 @@
     "action": "wait",
     "reasons": [
      "needs observe-settle (queued)",
+     "conflicts with #18772 in docs/tools/browser.md",
      "conflicts with #18924 in packages/coding-agent/src/tools/browser/frames.ts",
      "conflicts with #18925 in packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
@@ -90243,6 +90230,7 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#18772",
      "#18924",
      "#18925"
     ],
@@ -90604,6 +90592,7 @@
      "conflicts with #18738 in docs/tools/browser.md",
      "conflicts with #18750 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18751 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #18772 in docs/tools/browser.md",
      "conflicts with #18924 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18776 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18786 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts",
@@ -90619,6 +90608,7 @@
      "#18738",
      "#18750",
      "#18751",
+     "#18772",
      "#18924",
      "#18776",
      "#18786",
@@ -90771,12 +90761,15 @@
     "title": "docs(browser): teach acting and looking in one Eval cell without sleeps",
     "action": "wait",
     "reasons": [
-     "needs settle-reads (queued)"
+     "needs settle-reads (queued)",
+     "conflicts with #18772 in docs/tools/browser.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#18772"
+    ],
     "needs": [
      "settle-reads"
     ],
@@ -91079,6 +91072,7 @@
      "needs act-look-prompt (queued)",
      "conflicts with #18737 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18750 in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #18772 in docs/tools/browser.md",
      "conflicts with #18924 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18925 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
@@ -91089,6 +91083,7 @@
     "blocked_by": [
      "#18737",
      "#18750",
+     "#18772",
      "#18924",
      "#18925"
     ],
@@ -91163,10 +91158,9 @@
      "conflicts with #17610 in packages/ai/src/providers/factory-droid.ts",
      "conflicts with #18786 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #18939 in packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with win-screen-locked in packages/ai/src/providers/google-gemini-cli.ts",
      "its need token-count-policy conflicts with main in packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/session/session-stats.ts, packages/coding-agent/test/context-fits-model.test.ts",
      "its need wire-delta-count conflicts with main in packages/agent/src/tokenizer.ts, packages/ai/src/providers/factory-droid.ts, packages/coding-agent/src/session/session-maintenance.ts",
-     "conflicts with main in packages/agent/src/agent.ts, packages/ai/src/providers/factory-droid/gemini.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/context-view.ts, packages/coding-agent/test/modes/context-view.test.ts, packages/tui/src/status-line/context-usage.ts, packages/tui/test/context-usage.test.ts"
+     "conflicts with main in packages/agent/src/agent.ts, packages/ai/src/providers/factory-droid/gemini.ts, packages/ai/src/providers/google-gemini-cli.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/context-view.ts, packages/coding-agent/test/modes/context-view.test.ts, packages/tui/src/status-line/context-usage.ts, packages/tui/test/context-usage.test.ts"
     ],
     "note": "",
     "over": [],
@@ -91175,8 +91169,7 @@
      "#18771",
      "#17610",
      "#18786",
-     "#18939",
-     "win-screen-locked"
+     "#18939"
     ],
     "needs": [
      "token-count-policy",
