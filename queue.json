@@ -81527,7 +81527,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-11T09:07:21.456436Z",
+  "at": "2026-11-11T09:19:32.072397Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -82437,6 +82437,23 @@
     "created": "2026-11-09T18:20:14Z"
    },
    {
+    "id": "win-target-layout",
+    "label": "win-target-layout",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): map Windows keys on the receiving keyboard layout",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-11T09:13:32Z"
+   },
+   {
     "id": "x11-click-stale-popup",
     "label": "x11-click-stale-popup",
     "number": null,
@@ -82557,7 +82574,7 @@
     "title": "feat(browser): let observe() settle the effects of the preceding action",
     "action": "held",
     "reasons": [
-     "held: observe-core series: opens when Brit agrees the series (Will)",
+     "held: Main, 2026-11-11: unheld on blind Sol+Opus; opens (proposal track) only after BrowserExperiments' blind Haiku table and quiet wall-time rerun are in the body",
      "conflicts with #18751 in packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
@@ -82579,7 +82596,7 @@
     "title": "feat(browser): settle the preceding action before reads too",
     "action": "held",
     "reasons": [
-     "held: observe-core series: opens when Brit agrees the series (Will)",
+     "held: Main, 2026-11-11: unheld on blind Sol+Opus; opens (proposal track) only after BrowserExperiments' blind Haiku table and quiet wall-time rerun are in the body",
      "needs observe-settle (queued)",
      "conflicts with #18751 in packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
@@ -82921,24 +82938,15 @@
     "title": "docs(browser): teach acting and looking in one Eval cell without sleeps",
     "action": "held",
     "reasons": [
-     "held: observe-core series: opens when Brit agrees the series (Will)",
+     "held: Main, 2026-11-11: unheld on blind Sol+Opus; opens (proposal track) only after BrowserExperiments' blind Haiku table and quiet wall-time rerun are in the body",
      "needs settle-reads (queued)",
-     "conflicts with #18737 in packages/coding-agent/src/prompts/tools/browser.md",
-     "conflicts with #18738 in packages/coding-agent/src/prompts/tools/browser.md",
-     "conflicts with #18772 in docs/tools/browser.md",
-     "conflicts with #18786 in packages/coding-agent/src/prompts/tools/browser.md",
-     "conflicts with #18789 in packages/coding-agent/src/prompts/tools/browser.md",
-     "conflicts with main in packages/coding-agent/src/prompts/tools/browser.md"
+     "conflicts with #18772 in docs/tools/browser.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18737",
-     "#18738",
-     "#18772",
-     "#18786",
-     "#18789"
+     "#18772"
     ],
     "needs": [
      "settle-reads"
@@ -82974,9 +82982,8 @@
     "area": "browser",
     "priority": "P2",
     "title": "feat(browser): print what each browser action did to the page",
-    "action": "held",
+    "action": "wait",
     "reasons": [
-     "held: ActionOutcomePR, 2026-11-10: Haiku leg on this head did not reproduce the step saving (1.02x [0.84,1.25] vs earlier 0.86x); Sol leg on this head (guard-team, from 21:15Z) decides",
      "conflicts with #18786 in packages/coding-agent/src/prompts/tools/browser.md"
     ],
     "note": "",
@@ -83194,28 +83201,19 @@
     "title": "feat(browser): keep observe() ids stable across observations",
     "action": "held",
     "reasons": [
-     "held: observe-core series: opens when Brit agrees the series (Will)",
+     "held: Main, 2026-11-11: unheld on blind Sol+Opus; opens (proposal track) only after BrowserExperiments' blind Haiku table and quiet wall-time rerun are in the body",
      "needs act-look-prompt (queued)",
      "conflicts with #18676 in packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with #18737 in packages/coding-agent/src/prompts/tools/browser.md",
-     "conflicts with #18738 in packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18751 in packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with #18772 in docs/tools/browser.md",
-     "conflicts with #18786 in packages/coding-agent/src/prompts/tools/browser.md",
-     "conflicts with #18789 in packages/coding-agent/src/prompts/tools/browser.md",
-     "its need act-look-prompt conflicts with main in packages/coding-agent/src/prompts/tools/browser.md"
+     "conflicts with #18772 in docs/tools/browser.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
      "#18676",
-     "#18737",
-     "#18738",
      "#18751",
-     "#18772",
-     "#18786",
-     "#18789"
+     "#18772"
     ],
     "needs": [
      "act-look-prompt"
