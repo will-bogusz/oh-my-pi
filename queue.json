@@ -74488,9 +74488,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/desktop-cursor",
    "host": "MacBook-Pro",
    "added": "2026-11-11T00:21:12Z",
-   "updated": "2026-11-11T08:36:50Z",
-   "note": "",
-   "hold": "CursorChecks, 2026-11-11: real check saw takeover UserIntervened 10/10 with computer.cursor on; untangling VM run (cursor vs cross-process ordering) pending"
+   "updated": "2026-11-11T09:03:14Z",
+   "note": ""
   },
   {
    "id": "computer-filter-types",
