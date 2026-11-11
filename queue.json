@@ -73996,7 +73996,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-download-missing-file",
    "host": "MacBook-Pro",
    "added": "2026-11-11T00:14:44Z",
-   "updated": "2026-11-11T05:10:21Z",
+   "updated": "2026-11-11T05:10:46Z",
    "note": "",
    "built": [
     {
@@ -74221,7 +74221,8 @@
     }
    ],
    "advanced": "2026-11-11T05:06:53Z",
-   "opened": "2026-11-11T05:10:21Z"
+   "opened": "2026-11-11T05:10:21Z",
+   "readied": "2026-11-11T05:10:46Z"
   },
   {
    "id": "browser-click-frame-removed",
