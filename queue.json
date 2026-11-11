@@ -77238,6 +77238,24 @@
    "added": "2026-11-11T09:58:16Z",
    "updated": "2026-11-11T09:58:16Z",
    "note": ""
+  },
+  {
+   "id": "macos-ax-cancel-before-send",
+   "branch": "will/macos-ax-cancel-before-send",
+   "title": "fix(natives): send no macOS AX action once its run is cancelled",
+   "area": "natives",
+   "priority": "P2",
+   "needs": [],
+   "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
+   "body": "bodies/macos-ax-cancel-before-send.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-ax-cancel-before-send",
+   "host": "MacBook-Pro",
+   "added": "2026-11-11T09:59:13Z",
+   "updated": "2026-11-11T09:59:13Z",
+   "note": ""
   }
  ],
  "watch": {
