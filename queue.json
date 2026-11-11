@@ -20719,7 +20719,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-after-bash-revalidate",
    "host": "MacBook-Pro",
    "added": "2026-10-18T21:39:24Z",
-   "updated": "2026-11-11T04:57:02Z",
+   "updated": "2026-11-11T09:35:26Z",
    "note": "",
    "built": [
     {
@@ -21159,7 +21159,17 @@
     }
    ],
    "opened": "2026-10-19T01:07:22Z",
-   "advanced": "2026-11-11T04:57:02Z"
+   "advanced": "2026-11-11T04:57:02Z",
+   "design_checks": [
+    {
+     "pr": 16274,
+     "rounds": 16,
+     "at": "2026-11-11T09:35:26Z",
+     "verdict": "change",
+     "note": "DesignChecks: fix the writer rule (function-valued approvals make read/grep/glob writers; read after read runs twice). Patch 16274/writer-rule.patch; drop round-12/13 tests, decline those cases as on main; body restates writer list + re-measured cost",
+     "ref": "/Users/viathebrink/tmp/oh-my-pi/DesignChecks/DesignChecks.md"
+    }
+   ]
   },
   {
    "id": "natives-dts-regen",
