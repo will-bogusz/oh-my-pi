@@ -88860,12 +88860,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-11T19:39:01.116196Z",
-  "host": "goliath",
+  "at": "2026-11-11T19:43:42.903161Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 1,
+   "left": 7
   },
   "rows": [
    {
@@ -89547,6 +89547,23 @@
     "created": "2026-11-10T20:37:04Z"
    },
    {
+    "id": "browser-core-first-use",
+    "label": "#18786",
+    "number": 18786,
+    "state": "open",
+    "area": "browser",
+    "priority": "P2",
+    "title": "feat(agent,coding-agent): send a short browser guide with the first browser call",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-10T22:11:20Z"
+   },
+   {
     "id": "subagent-browser-relay",
     "label": "#18789",
     "number": 18789,
@@ -89972,13 +89989,15 @@
     "action": "wait",
     "reasons": [
      "conflicts with #18924 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #18786 in packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with main in packages/coding-agent/src/tools/browser/frames.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18924"
+     "#18924",
+     "#18786"
     ],
     "needs": [],
     "created": "2026-11-10T15:45:44Z"
@@ -90388,6 +90407,7 @@
      "conflicts with #18751 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18924 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18776 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #18786 in docs/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts",
      "its need r2/page-waiting conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-detach.test.ts"
@@ -90402,6 +90422,7 @@
      "#18751",
      "#18924",
      "#18776",
+     "#18786",
      "#18789"
     ],
     "needs": [
@@ -90601,13 +90622,15 @@
     "title": "feat(browser): print what each browser action did to the page",
     "action": "wait",
     "reasons": [
-     "conflicts with #18924 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts"
+     "conflicts with #18924 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts",
+     "conflicts with #18786 in packages/coding-agent/src/prompts/tools/browser.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18924"
+     "#18924",
+     "#18786"
     ],
     "needs": [],
     "created": "2026-11-10T19:19:48Z"
@@ -90670,12 +90693,15 @@
     "reasons": [
      "held: Main, 2026-11-11: stays held until #18786 merges with the typed-message guide channel (design check replace); then one property on the computer prelude, drop the wrap variant, re-run its blind legs",
      "needs #18786 (open)",
+     "conflicts with #18786 in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/prompts/tools/eval.md, packages/coding-agent/src/tools/eval.ts",
      "conflicts with main in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/sdk-computer-prelude-toggle.test.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#18786"
+    ],
     "needs": [
      "browser-core-first-use"
     ],
@@ -90702,6 +90728,7 @@
      "conflicts with #18915 in docs/tools/computer.md",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with #18786 in packages/coding-agent/src/tools/eval.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
@@ -90717,7 +90744,8 @@
      "#18895",
      "#18915",
      "#18353",
-     "#18222"
+     "#18222",
+     "#18786"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -90830,13 +90858,15 @@
     "reasons": [
      "held: Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance",
      "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/turn-recovery.ts, packages/coding-agent/test/agent-session-retry-fallback.test.ts",
+     "conflicts with #18786 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in docs/advisor-watchdog.md, docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-advisors.ts, packages/coding-agent/src/session/turn-recovery.ts, packages/coding-agent/test/agent-session-retry-fallback.test.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#17610"
+     "#17610",
+     "#18786"
     ],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
@@ -90908,13 +90938,15 @@
     "reasons": [
      "held: Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance",
      "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with #18786 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in docs/auth-broker-gateway.md, packages/ai/src/auth-broker/discover.ts, packages/ai/src/auth/types.ts, packages/ai/test/auth-storage-codex-selection.test.ts, packages/coding-agent/src/cli/usage-cli.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/claude-auto-reset.ts, packages/coding-agent/src/session/codex-auto-reset.ts, packages/coding-agent/test/claude-auto-reset-integration.test.ts, packages/coding-agent/test/claude-auto-reset.test.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#17610"
+     "#17610",
+     "#18786"
     ],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
@@ -90949,6 +90981,7 @@
      "needs token-count-policy (queued), wire-delta-count (queued)",
      "conflicts with #18771 in packages/ai/src/providers/factory-droid.ts",
      "conflicts with #17610 in packages/ai/src/providers/factory-droid.ts",
+     "conflicts with #18786 in packages/coding-agent/src/session/agent-session.ts",
      "its need token-count-policy conflicts with main in packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/session/session-stats.ts, packages/coding-agent/test/context-fits-model.test.ts",
      "its need wire-delta-count conflicts with main in packages/agent/src/tokenizer.ts, packages/ai/src/providers/factory-droid.ts, packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with main in packages/agent/src/agent.ts, packages/ai/src/providers/factory-droid/gemini.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/context-view.ts, packages/coding-agent/test/modes/context-view.test.ts, packages/tui/src/status-line/context-usage.ts, packages/tui/test/context-usage.test.ts"
@@ -90958,7 +90991,8 @@
     "paired": [],
     "blocked_by": [
      "#18771",
-     "#17610"
+     "#17610",
+     "#18786"
     ],
     "needs": [
      "token-count-policy",
@@ -91045,13 +91079,15 @@
      "held: Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance",
      "needs reset-account-optout (queued)",
      "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with #18786 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in packages/coding-agent/src/session/agent-session.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#17610"
+     "#17610",
+     "#18786"
     ],
     "needs": [
      "#15133"
@@ -91093,13 +91129,15 @@
     "action": "wait",
     "reasons": [
      "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with #18786 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/tui/src/chat/compaction-summary-message.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#17610"
+     "#17610",
+     "#18786"
     ],
     "needs": [],
     "created": "2026-10-20T23:41:41Z"
@@ -91187,12 +91225,7 @@
     "created": "2026-11-03T01:24:37Z"
    }
   ],
-  "drafts": [
-   {
-    "label": "#18786",
-    "created": "2026-11-10T22:11:20Z"
-   }
-  ],
+  "drafts": [],
   "parked": [
    {
     "label": "#15128",
