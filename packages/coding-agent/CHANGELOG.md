@@ -38,6 +38,7 @@
 - The shell's built-in `jq` no longer slows down quadratically on repeated updates such as `reduce range(n) as $i ([]; . + [$i])`
 - `/tan` completion notices now quote the user's request and mark the result as the user's tangent, so the main agent no longer mistakes it for its own work
 - `omp zsh` with zsh-autosuggestions' `completion` strategy no longer echoes each typed key onto new lines: `vared` inside a `zpty` command now edits on the pty instead of the shell's terminal
+- In a browser omp attaches to (the relay, `app.cdp_url`, `app.path`), a call that a page's print preview holds now fails within about a second with an error saying a print preview is open and what clears it (the user cancels it, or navigating away), instead of timing out and killing the tab; the tab keeps its page, including with a one-second call timeout. A page replacing `Promise` does not cause an unrelated preview to abort its calls
 
 ### Fixed
 

@@ -28,6 +28,7 @@ import {
 	recordSharedTarget,
 	type SharedTargetScope,
 } from "./orphan-registry";
+import { PRINT_PREVIEW_PROBE_TIMEOUT_MS } from "./print-preview";
 import { stopSharedBrowserIfUnreachable } from "./shared-daemon";
 import {
 	acquireBrowser,
@@ -1114,7 +1115,7 @@ async function runInTabWithSnapshot(
 		try {
 			const result = await raceWithTimeout(
 				promise,
-				opts.timeoutMs + GRACE_MS,
+				opts.timeoutMs + GRACE_MS + (tab.kindTag === "headless" ? 0 : PRINT_PREVIEW_PROBE_TIMEOUT_MS),
 				"Browser code execution hung past grace; tab killed",
 				async reason => await forceKillTab(name, reason),
 			);
@@ -1955,6 +1956,7 @@ async function buildInitPayload(browser: PuppeteerBrowserHandle, opts: AcquireTa
 		ignoreHttpsErrors: opts.ignoreHttpsErrors,
 		userDriven,
 		relay: browser.kind.kind === "relay",
+		printPreview: true,
 	};
 }
 
@@ -2170,6 +2172,8 @@ async function recycleTimedOutWorkerTab(
 		recover: opts.recover ?? true,
 		userDriven: tab.kindTag === "connected" || tab.kindTag === "relay",
 		relay: tab.kindTag === "relay",
+		// Headless Chrome never stalls on a print preview; a recycled tab of any other kind can.
+		printPreview: tab.kindTag !== "headless",
 	};
 	// A release can land while the new worker starts: it tore down the worker it saw, so a
 	// replacement published after it would drive a closed tab.
