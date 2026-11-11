@@ -671,36 +671,63 @@ impl AtSpiAx {
 		let Self { rt, connection, native, frames } = self;
 		rt.block_on(async {
 			let bus = connection.connection();
-			let Some(placement) = frames.claim(bus, native.as_deref(), &root, x.round() as i32, y.round() as i32).await? else {
+			let Some(placement) = frames
+				.claim(bus, native.as_deref(), &root, x.round() as i32, y.round() as i32)
+				.await?
+			else {
 				return Ok(None);
 			};
 			Self::descend(bus, root, placement, x.round() as i32, y.round() as i32).await
 		})
 	}
 
-	/// `false` means no action was sent; a failed action must never replay a click.
-	pub(super) fn click_at(&mut self, window: &DesktopWindow, windows: &[DesktopWindow], x: f64, y: f64) -> CoreResult<bool> {
+	/// `false` means no action was sent; a failed action must never replay a
+	/// click.
+	pub(super) fn click_at(
+		&mut self,
+		window: &DesktopWindow,
+		windows: &[DesktopWindow],
+		x: f64,
+		y: f64,
+	) -> CoreResult<bool> {
 		let Ok(Some(handle)) = self.element_at_in(window, x, y) else {
 			return Ok(false);
 		};
-		if !self.window_id(&handle, windows).is_ok_and(|id| id == window.id) {
+		if !self
+			.window_id(&handle, windows)
+			.is_ok_and(|id| id == window.id)
+		{
 			return Ok(false);
 		}
 		let object = Self::object(&handle).clone();
 		let Self { rt, connection, native, frames } = self;
 		rt.block_on(async {
 			let bus = connection.connection();
-			let Ok(accessible) = object.as_accessible_proxy(bus).await else { return Ok(false) };
-			let Ok(role) = accessible.get_role().await else { return Ok(false) };
-			let Ok(states) = accessible.get_state().await else { return Ok(false) };
-			let Some(bounds) = frames.screen_bounds(bus, native.as_deref(), &object).await else { return Ok(false) };
+			let Ok(accessible) = object.as_accessible_proxy(bus).await else {
+				return Ok(false);
+			};
+			let Ok(role) = accessible.get_role().await else {
+				return Ok(false);
+			};
+			let Ok(states) = accessible.get_state().await else {
+				return Ok(false);
+			};
+			let Some(bounds) = frames.screen_bounds(bus, native.as_deref(), &object).await else {
+				return Ok(false);
+			};
 			if !coordinate_click_element(role, states, &bounds, x, y) {
 				return Ok(false);
 			}
-			let Ok(action) = Self::action(bus, &object).await else { return Ok(false) };
-			let Ok(index) = coordinate_click_action(&action, &accessible).await else { return Ok(false) };
+			let Ok(action) = Self::action(bus, &object).await else {
+				return Ok(false);
+			};
+			let Ok(index) = coordinate_click_action(&action, &accessible).await else {
+				return Ok(false);
+			};
 			crate::desktop::control::check()?;
-			action.do_action(index).await
+			action
+				.do_action(index)
+				.await
 				.map_err(|err| DesktopError::ax_failed(format!("AT-SPI coordinate action: {err}")))?
 				.ok_or_else(|| DesktopError::ax_failed("AT-SPI coordinate action failed"))?;
 			Ok(true)
@@ -708,7 +735,13 @@ impl AtSpiAx {
 	}
 }
 
-fn coordinate_click_element(role: Role, states: StateSet, bounds: &AxBounds, x: f64, y: f64) -> bool {
+fn coordinate_click_element(
+	role: Role,
+	states: StateSet,
+	bounds: &AxBounds,
+	x: f64,
+	y: f64,
+) -> bool {
 	// A positive role list excludes caret placement, custom drawing, paging,
 	// selection/activation differences, links and grabbing popup controls.
 	matches!(role, Role::Button | Role::CheckBox | Role::RadioButton | Role::ToggleButton)
@@ -717,8 +750,10 @@ fn coordinate_click_element(role: Role, states: StateSet, bounds: &AxBounds, x: 
 		&& !states.contains(State::Editable)
 		&& !states.contains(State::Expandable)
 		&& !states.contains(State::HasPopup)
-		&& x >= bounds.x && y >= bounds.y
-		&& x < bounds.x + bounds.width && y < bounds.y + bounds.height
+		&& x >= bounds.x
+		&& y >= bounds.y
+		&& x < bounds.x + bounds.width
+		&& y < bounds.y + bounds.height
 }
 
 async fn coordinate_click_action(
@@ -726,8 +761,14 @@ async fn coordinate_click_action(
 	accessible: &atspi::proxy::accessible::AccessibleProxy<'_>,
 ) -> CoreResult<i32> {
 	let index = resolve_action(action, accessible, "press").await?;
-	let name = action.get_name(index).await.map_err(|err| DesktopError::ax_failed(err.to_string()))?;
-	if ["press", "click", "activate", "invoke", "toggle", "check", "uncheck"].iter().any(|safe| name.eq_ignore_ascii_case(safe)) {
+	let name = action
+		.get_name(index)
+		.await
+		.map_err(|err| DesktopError::ax_failed(err.to_string()))?;
+	if ["press", "click", "activate", "invoke", "toggle", "check", "uncheck"]
+		.iter()
+		.any(|safe| name.eq_ignore_ascii_case(safe))
+	{
 		Ok(index)
 	} else {
 		Err(DesktopError::ax_failed("AT-SPI action is not a coordinate click"))
@@ -1490,10 +1531,28 @@ mod tests {
 		for role in [Role::Button, Role::CheckBox, Role::RadioButton, Role::ToggleButton] {
 			assert!(coordinate_click_element(role, states, &bounds, 10.0, 20.0));
 		}
-		for role in [Role::Entry, Role::Text, Role::DrawingArea, Role::Canvas, Role::Slider, Role::ScrollBar, Role::ListItem, Role::TreeItem, Role::ComboBox, Role::Menu, Role::Link] {
+		for role in [
+			Role::Entry,
+			Role::Text,
+			Role::DrawingArea,
+			Role::Canvas,
+			Role::Slider,
+			Role::ScrollBar,
+			Role::ListItem,
+			Role::TreeItem,
+			Role::ComboBox,
+			Role::Menu,
+			Role::Link,
+		] {
 			assert!(!coordinate_click_element(role, states, &bounds, 10.0, 20.0));
 		}
-		for states in [StateSet::new(State::Showing), StateSet::new(State::Enabled), StateSet::new(State::Enabled | State::Showing | State::Editable), StateSet::new(State::Enabled | State::Showing | State::HasPopup), StateSet::new(State::Enabled | State::Showing | State::Expandable)] {
+		for states in [
+			StateSet::new(State::Showing),
+			StateSet::new(State::Enabled),
+			StateSet::new(State::Enabled | State::Showing | State::Editable),
+			StateSet::new(State::Enabled | State::Showing | State::HasPopup),
+			StateSet::new(State::Enabled | State::Showing | State::Expandable),
+		] {
 			assert!(!coordinate_click_element(Role::Button, states, &bounds, 10.0, 20.0));
 		}
 		for (x, y) in [(9.0, 20.0), (10.0, 19.0), (40.0, 20.0), (10.0, 60.0)] {
@@ -2075,7 +2134,11 @@ mod tests {
 					let action = AtSpiAx::action(&client, &object).await.unwrap();
 					results.push(resolve_action(&action, &accessible, requested).await.ok());
 					let coordinate = coordinate_click_action(&action, &accessible).await.ok();
-					let expected = if matches!(path, "/ancestor" | "/open") { None } else { CASES.iter().find(|case| case.0 == path).unwrap().6 };
+					let expected = if matches!(path, "/ancestor" | "/open") {
+						None
+					} else {
+						CASES.iter().find(|case| case.0 == path).unwrap().6
+					};
 					assert_eq!(coordinate, expected, "{path}");
 					if let Some(index) = coordinate {
 						assert!(action.do_action(index).await.unwrap().is_some());

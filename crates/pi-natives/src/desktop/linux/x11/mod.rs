@@ -13,7 +13,10 @@ use input::X11Input;
 use super::ax::{AtSpiAx, ElementFocus};
 use crate::desktop::{
 	ax::AxHandle,
-	backend::{AxBackend, Backend, DeliveryMode, ElementDelivery, ElementInput, Modifiers, MouseButton, PointerEvent},
+	backend::{
+		AxBackend, Backend, DeliveryMode, ElementDelivery, ElementInput, Modifiers, MouseButton,
+		PointerEvent,
+	},
 	control::OperationToken,
 	error::{CoreResult, DesktopError, ErrorCode},
 	frame::FrameGeometry,
@@ -41,12 +44,18 @@ impl X11Backend {
 	}
 }
 
-fn coordinate_action_point(event: &PointerEvent, mode: DeliveryMode, enabled: bool) -> Option<(f64, f64)> {
-	if enabled && mode == DeliveryMode::Background
+fn coordinate_action_point(
+	event: &PointerEvent,
+	mode: DeliveryMode,
+	enabled: bool,
+) -> Option<(f64, f64)> {
+	if enabled
+		&& mode == DeliveryMode::Background
 		&& let PointerEvent::Click { x, y, button: MouseButton::Left, count: 1, modifiers } = event
 		&& *modifiers == Modifiers::default()
 	{
-		// Common dispatch has already mapped screenshot pixels to screen coordinates.
+		// Common dispatch has already mapped screenshot pixels to screen
+		// coordinates.
 		Some((*x, *y))
 	} else {
 		None
@@ -116,9 +125,15 @@ impl Backend for X11Backend {
 		token: &OperationToken,
 	) -> CoreResult<()> {
 		token.check()?;
-		let point = coordinate_action_point(&event, mode, std::env::var("PI_X11_CLICK_ATSPI").as_deref() == Ok("1"));
+		let point = coordinate_action_point(
+			&event,
+			mode,
+			std::env::var("PI_X11_CLICK_ATSPI").as_deref() == Ok("1"),
+		);
 		let result = self.input.pointer(target, event, mode);
-		if result.as_ref().is_err_and(|err| err.code == ErrorCode::BackgroundUnavailable)
+		if result
+			.as_ref()
+			.is_err_and(|err| err.code == ErrorCode::BackgroundUnavailable)
 			&& let Target::Window(id) = target
 			&& let Some((x, y)) = point
 			&& let Some(ax) = &mut self.ax
@@ -323,22 +338,56 @@ mod tests {
 
 	#[test]
 	fn coordinate_actions_require_an_opted_in_plain_background_click() {
-		let mut click = PointerEvent::Click { x: 123.0, y: 456.0, button: MouseButton::Left, count: 1, modifiers: Modifiers::default() };
-		assert_eq!(coordinate_action_point(&click, DeliveryMode::Background, true), Some((123.0, 456.0)));
+		let mut click = PointerEvent::Click {
+			x:         123.0,
+			y:         456.0,
+			button:    MouseButton::Left,
+			count:     1,
+			modifiers: Modifiers::default(),
+		};
+		assert_eq!(
+			coordinate_action_point(&click, DeliveryMode::Background, true),
+			Some((123.0, 456.0))
+		);
 		assert_eq!(coordinate_action_point(&click, DeliveryMode::Background, false), None);
 		assert_eq!(coordinate_action_point(&click, DeliveryMode::Foreground, true), None);
-		if let PointerEvent::Click { count, .. } = &mut click { *count = 2; }
+		if let PointerEvent::Click { count, .. } = &mut click {
+			*count = 2;
+		}
 		assert_eq!(coordinate_action_point(&click, DeliveryMode::Background, true), None);
 		let motion = PointerEvent::Move { x: 123.0, y: 456.0 };
 		for button in [MouseButton::Right, MouseButton::Middle] {
-			let event = PointerEvent::Click { x: 123.0, y: 456.0, button, count: 1, modifiers: Modifiers::default() };
+			let event = PointerEvent::Click {
+				x: 123.0,
+				y: 456.0,
+				button,
+				count: 1,
+				modifiers: Modifiers::default(),
+			};
 			assert_eq!(coordinate_action_point(&event, DeliveryMode::Background, true), None);
 		}
-		let modified = PointerEvent::Click { x: 123.0, y: 456.0, button: MouseButton::Left, count: 1, modifiers: Modifiers { shift: true, ..Modifiers::default() } };
+		let modified = PointerEvent::Click {
+			x:         123.0,
+			y:         456.0,
+			button:    MouseButton::Left,
+			count:     1,
+			modifiers: Modifiers { shift: true, ..Modifiers::default() },
+		};
 		assert_eq!(coordinate_action_point(&modified, DeliveryMode::Background, true), None);
 		for event in [
-			PointerEvent::Hold { x: 123.0, y: 456.0, button: MouseButton::Left, keys: Vec::new(), duration: std::time::Duration::from_secs(1) },
-			PointerEvent::Drag { path: vec![(123.0, 456.0), (124.0, 456.0)], button: MouseButton::Left, modifiers: Modifiers::default(), keys: Vec::new() },
+			PointerEvent::Hold {
+				x:        123.0,
+				y:        456.0,
+				button:   MouseButton::Left,
+				keys:     Vec::new(),
+				duration: std::time::Duration::from_secs(1),
+			},
+			PointerEvent::Drag {
+				path:      vec![(123.0, 456.0), (124.0, 456.0)],
+				button:    MouseButton::Left,
+				modifiers: Modifiers::default(),
+				keys:      Vec::new(),
+			},
 		] {
 			assert_eq!(coordinate_action_point(&event, DeliveryMode::Background, true), None);
 		}
