@@ -4,7 +4,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 
 **Opening:** not paused
 **Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-11-11 11:54Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 8, conflict-held 21, stacked 17, held 16, parked 2, open PRs 45, queued since the last plan 5; merged 275, closed 30
+**Counts:** openable now 8, conflict-held 21, stacked 17, held 15, parked 2, open PRs 45, queued since the last plan 6; merged 275, closed 30
 
 ## Openable now (8)
 
@@ -67,7 +67,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | relay-print-preview-error | fix(coding-agent,browser-relay): fail a browser call a print preview holds in an attached browser within seconds | browser | P2 | 5h | [#18838](https://github.com/can1357/oh-my-pi/pull/18838) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-print-preview-error) |
 | ax-row-action | fix(natives): follow rebuilt macOS table rows without selecting a neighbour | computer | P1 | 1h | ax-ref-read-as ([#18892](https://github.com/can1357/oh-my-pi/pull/18892)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-row-action) |
 
-## Held (16)
+## Held (15)
 
 | id | title | area | priority | age | hold | branch |
 |---|---|---|---|---|---|---|
@@ -78,7 +78,6 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | broker-reset-sweep | feat(coding-agent): spend saved resets from the auth broker before they expire | broker |  | 28d | Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-reset-sweep) |
 | broker-sweep-clients-defer | feat(ai,coding-agent): stop sessions sweeping saved resets the auth broker already spends | broker |  | 28d | Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-sweep-clients-defer) |
 | atspi-walk-reads | fix(natives): read each AT-SPI element in two concurrent rounds | computer | P1 | 8d | Main, 2026-11-11: opens after atspi-unanswered-app (P0) so it does not block it | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-walk-reads) |
-| settle-reads | feat(browser): settle the preceding action before reads too | browser | P1 | 17h | Main, 2026-11-11: unheld on blind Sol+Opus; opens (proposal track) only after BrowserExperiments' blind Haiku table and quiet wall-time rerun are in the body | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-settle-reads) |
 | computer-guide-first-use | feat(coding-agent): send the computer guide with the first computer call | computer | P2 | 16h | Main, 2026-11-10: Haiku shows 1.19x steps on native tasks; waits for the Sol native legs and Will's call | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-guide-first-use) |
 | atspi-huge-children | fix(natives): stop Linux accessibility reads from freezing apps that show long tables | computer | P0 | 10h | Main, 2026-11-11: opens after atspi-unanswered-app (P0, first in Main's Linux order) merges; they conflict in linux/ax.rs | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-huge-children) |
 | atspi-text-first | fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility | computer | P1 | 10h | Main, 2026-11-11: opens after atspi-unanswered-app (P0) so it does not block it | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-text-first) |
@@ -145,11 +144,12 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | [#18884](https://github.com/can1357/oh-my-pi/pull/18884) | browser-main-wait-navigation | fix(browser): rearm main-world waits after navigation | browser | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/main-world-wait-navigation) |
 | [#18892](https://github.com/can1357/oh-my-pi/pull/18892) | ax-ref-read-as | fix(natives): refuse macOS element actions once the ref's element reads as another control | computer | P0 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-ref-read-as) |
 
-## Queued since the last plan (5)
+## Queued since the last plan (6)
 
 | id | title | area | priority | age | branch |
 |---|---|---|---|---|---|
 | observe-settle | feat(browser): let observe() settle the effects of the preceding action | browser | P1 | 17h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-observe-settle) |
+| settle-reads | feat(browser): settle the preceding action before reads too | browser | P1 | 17h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-settle-reads) |
 | act-look-prompt | docs(browser): teach acting and looking in one Eval cell without sleeps | browser | P2 | 17h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-act-look-prompt) |
 | observe-stable-ids | feat(browser): keep observe() ids stable across observations | browser | P2 | 17h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-observe-stable-ids) |
 | win-setvalue-readback | fix(natives): verify Windows value writes and notify combo selections | computer | P1 | 3h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-setvalue-readback) |
