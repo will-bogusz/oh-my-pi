@@ -4,7 +4,7 @@
 
 ### Fixed
 
-- On Windows, `computer.window({ app })` for an app whose windows are all minimized points you to `computer.apps.open`, which brings that app's window back
+- Removed the computer guide's claim that Windows `computer.apps.open` always returns `window: null`; restoring a minimized window now returns that window
 
 ## [18.18.8] - 2026-11-11
 

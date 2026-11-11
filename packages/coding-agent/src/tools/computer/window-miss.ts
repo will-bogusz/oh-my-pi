@@ -8,10 +8,10 @@ const MAX_TITLE_CHARS = 80;
 
 /**
  * What `computer.apps.open` does for an app with no listed window: on macOS it also shows a window of a running app
- * that has none and returns it; on Windows it shows a running app's minimized window again and returns it; elsewhere
- * it only launches. A read-only run still gets the hint, since the next call can open the app.
+ * that has none and returns it; elsewhere it only launches. A read-only run still gets the hint, since the next call
+ * can open the app.
  */
-export type AppOpenRoute = "shows-window" | "restores-minimized" | "launches";
+export type AppOpenRoute = "shows-window" | "launches";
 
 /** Matches a lowercased app-name substring or PID membership for a resolved application identity. */
 export function matchesWindowApp(window: DesktopWindow, app: string, pids?: ReadonlySet<number>): boolean {
@@ -32,9 +32,7 @@ export function describeWindowMiss(
 	const hint =
 		route === "shows-window"
 			? `${call} opens it by that exact name or ID, or shows a window of it if it runs without one, and returns it with that window (window: null if none appears within 3 s).\n`
-			: route === "restores-minimized"
-				? `${call} launches it by that exact name or ID, or, if it runs with every window minimized, shows its frontmost one again and returns it with that window.\n`
-				: `${call} launches it by that exact name or ID.\n`;
+			: `${call} launches it by that exact name or ID.\n`;
 	const note =
 		needle !== undefined && !windows.some(matched)
 			? `No open window belongs to an app matching ${JSON.stringify(app)}.\n${hint}`

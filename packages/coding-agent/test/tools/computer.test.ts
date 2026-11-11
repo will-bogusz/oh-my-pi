@@ -1897,12 +1897,6 @@ describe("computer worker round trips", () => {
 			}
 		}
 
-		class WindowsSession extends FakeNativeSession {
-			override get capabilities(): DesktopCapabilities {
-				return { ...super.capabilities, backend: "win32" };
-			}
-		}
-
 		async function missMessage(
 			windows: DesktopWindow[],
 			selector: string,
@@ -1959,15 +1953,6 @@ describe("computer worker round trips", () => {
 			const hint = lines.find(line => line.startsWith('computer.apps.open("Calendar")'));
 			expect(hint).toContain("shows a window of it if it runs without one");
 			expect(hint).toContain("window: null if none appears");
-		});
-
-		it("on Windows names apps.open as the call that also shows a running app's minimized window and returns it", async () => {
-			const lines = (
-				await missMessage(desktopWindows, '{ app: "Calendar" }', { native: new WindowsSession() })
-			).split("\n");
-			const hint = lines.find(line => line.startsWith('computer.apps.open("Calendar")'));
-			expect(hint).toContain("if it runs with every window minimized");
-			expect(hint).toContain("returns it with that window");
 		});
 
 		it("names apps.open when no window is open at all, and in a read-only run such as a direct window call", async () => {
