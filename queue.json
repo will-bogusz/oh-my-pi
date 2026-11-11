@@ -81672,7 +81672,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-11T18:07:59Z",
+  "checked": "2026-11-11T18:38:11Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -81683,78 +81683,7 @@
   },
   "conflicts": {},
   "merged_through": "2026-11-11T13:55:07Z",
-  "unreleased": {
-   "18865": {
-    "title": "fix(coding-agent): print nothing for a JavaScript eval cell that ends in an assignment",
-    "merge_commit": "58f020f5b6494d28571dc20f1027ca6c0b175e47",
-    "merged_at": "2026-11-11T13:55:07Z"
-   },
-   "18840": {
-    "title": "fix(browser): say where tab.run code runs when it reaches for a page global",
-    "merge_commit": "10a95c883976fa56b6c760f6034f5a71e1471210",
-    "merged_at": "2026-11-11T13:55:07Z"
-   },
-   "18838": {
-    "title": "fix(coding-agent): stop a page calling window.print() from hanging the browser omp launches",
-    "merge_commit": "c47a7fefff94cf5a70787b4068d499e1f0c68ddd",
-    "merged_at": "2026-11-11T13:55:07Z"
-   },
-   "18833": {
-    "title": "fix(browser): name the relay's own-tab open when a target matches no tab",
-    "merge_commit": "02c2bfa8a9be23367eb528056a4b08175b5946d4",
-    "merged_at": "2026-11-11T13:55:07Z"
-   },
-   "18832": {
-    "title": "fix(browser): give owned relay tabs truthful detach recovery guidance",
-    "merge_commit": "06776dba22f4a34704488d3af2fa4b7c52ff2410",
-    "merged_at": "2026-11-11T13:55:07Z"
-   },
-   "18830": {
-    "title": "fix(coding-agent): fail a download wait when the saved file is not on this machine",
-    "merge_commit": "4a76166fe7c81c11a02be7b527565e884cddd015",
-    "merged_at": "2026-11-11T13:55:07Z"
-   },
-   "18829": {
-    "title": "fix(coding-agent): return the options a page leaves selected after its change handlers",
-    "merge_commit": "68c99fc2470b0d1d2a119e2841bcca139d022fd7",
-    "merged_at": "2026-11-11T13:55:07Z"
-   },
-   "18824": {
-    "title": "fix(natives): stop macOS background left clicks from crashing Electron and Chrome pages",
-    "merge_commit": "dedac96a9b24ab54dc535267967ae864d97f9174",
-    "merged_at": "2026-11-11T13:55:07Z"
-   },
-   "18823": {
-    "title": "fix(natives): stop Linux computer reads from crashing Qt, GTK 3 and Firefox apps",
-    "merge_commit": "16ca13d05c50da22b2cb78fe20e9f87d2b00d1c3",
-    "merged_at": "2026-11-11T13:55:07Z"
-   },
-   "18795": {
-    "title": "fix(catalog): drop Devin's retired SWE-1.6 Fast seed row",
-    "merge_commit": "3af9a2c45eecfd781e2aa8f74cc3cd8d218b6ab1",
-    "merged_at": "2026-11-11T13:55:07Z"
-   },
-   "18766": {
-    "title": "fix(catalog): identify Devin requests as CLI 3000.12.43",
-    "merge_commit": "b5e40952057622e12281f37533d22deed645aa1b",
-    "merged_at": "2026-11-11T13:55:07Z"
-   },
-   "18676": {
-    "title": "fix(coding-agent): look a click's selector up again when the page replaces its element",
-    "merge_commit": "ee8160ffb86af8fb882a437ab26a2ca7360a5d6b",
-    "merged_at": "2026-11-11T13:55:07Z"
-   },
-   "17757": {
-    "title": "fix(natives): match macOS window screenshots to the window on screen",
-    "merge_commit": "61f01d06fafbf434b28dd337a5d0785a380e40aa",
-    "merged_at": "2026-11-11T13:55:07Z"
-   },
-   "16274": {
-    "title": "fix(agent,coding-agent): re-read a file an earlier bash call changed in the same message",
-    "merge_commit": "a5201c069a85d19943b2c6da52a8515211a37316",
-    "merged_at": "2026-11-11T13:55:07Z"
-   }
-  },
+  "unreleased": {},
   "ready": [
    16553,
    16611,
@@ -84184,6 +84113,104 @@
     "id": "r2/native-window-report",
     "title": "feat(coding-agent): name the native windows a browser call raised on macOS",
     "why": "opened as #18925"
+   },
+   {
+    "at": "2026-11-11T18:38:11Z",
+    "kind": "released",
+    "number": 18865,
+    "title": "fix(coding-agent): print nothing for a JavaScript eval cell that ends in an assignment",
+    "tag": "v18.18.9"
+   },
+   {
+    "at": "2026-11-11T18:38:11Z",
+    "kind": "released",
+    "number": 18840,
+    "title": "fix(browser): say where tab.run code runs when it reaches for a page global",
+    "tag": "v18.18.9"
+   },
+   {
+    "at": "2026-11-11T18:38:11Z",
+    "kind": "released",
+    "number": 18838,
+    "title": "fix(coding-agent): stop a page calling window.print() from hanging the browser omp launches",
+    "tag": "v18.18.9"
+   },
+   {
+    "at": "2026-11-11T18:38:11Z",
+    "kind": "released",
+    "number": 18833,
+    "title": "fix(browser): name the relay's own-tab open when a target matches no tab",
+    "tag": "v18.18.9"
+   },
+   {
+    "at": "2026-11-11T18:38:11Z",
+    "kind": "released",
+    "number": 18832,
+    "title": "fix(browser): give owned relay tabs truthful detach recovery guidance",
+    "tag": "v18.18.9"
+   },
+   {
+    "at": "2026-11-11T18:38:11Z",
+    "kind": "released",
+    "number": 18830,
+    "title": "fix(coding-agent): fail a download wait when the saved file is not on this machine",
+    "tag": "v18.18.9"
+   },
+   {
+    "at": "2026-11-11T18:38:11Z",
+    "kind": "released",
+    "number": 18829,
+    "title": "fix(coding-agent): return the options a page leaves selected after its change handlers",
+    "tag": "v18.18.9"
+   },
+   {
+    "at": "2026-11-11T18:38:11Z",
+    "kind": "released",
+    "number": 18824,
+    "title": "fix(natives): stop macOS background left clicks from crashing Electron and Chrome pages",
+    "tag": "v18.18.9"
+   },
+   {
+    "at": "2026-11-11T18:38:11Z",
+    "kind": "released",
+    "number": 18823,
+    "title": "fix(natives): stop Linux computer reads from crashing Qt, GTK 3 and Firefox apps",
+    "tag": "v18.18.9"
+   },
+   {
+    "at": "2026-11-11T18:38:11Z",
+    "kind": "released",
+    "number": 18795,
+    "title": "fix(catalog): drop Devin's retired SWE-1.6 Fast seed row",
+    "tag": "v18.18.9"
+   },
+   {
+    "at": "2026-11-11T18:38:11Z",
+    "kind": "released",
+    "number": 18766,
+    "title": "fix(catalog): identify Devin requests as CLI 3000.12.43",
+    "tag": "v18.18.9"
+   },
+   {
+    "at": "2026-11-11T18:38:11Z",
+    "kind": "released",
+    "number": 18676,
+    "title": "fix(coding-agent): look a click's selector up again when the page replaces its element",
+    "tag": "v18.18.9"
+   },
+   {
+    "at": "2026-11-11T18:38:11Z",
+    "kind": "released",
+    "number": 17757,
+    "title": "fix(natives): match macOS window screenshots to the window on screen",
+    "tag": "v18.18.9"
+   },
+   {
+    "at": "2026-11-11T18:38:11Z",
+    "kind": "released",
+    "number": 16274,
+    "title": "fix(agent,coding-agent): re-read a file an earlier bash call changed in the same message",
+    "tag": "v18.18.9"
    }
   ]
  },
@@ -88724,8 +88751,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-11T18:14:42.144951Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-11T18:38:11.860077Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -89165,10 +89192,8 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in MODULE.bazel.lock"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "accepted pair with #18353; accepted pair with #18013",
     "over": [],
     "paired": [
@@ -89306,10 +89331,8 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in MODULE.bazel.lock"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "accepted pair with #18013; accepted pair with #18914",
     "over": [],
     "paired": [
@@ -89362,10 +89385,8 @@
     "area": "natives",
     "priority": "P2",
     "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in MODULE.bazel.lock"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "accepted pair with #18353; accepted pair with #18914; accepted pair with #18783; accepted pair with #18825",
     "over": [],
     "paired": [
@@ -89520,8 +89541,7 @@
      "needs #18914 (open)",
      "conflicts with #18921 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18892 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "its need #18914 conflicts with main in MODULE.bazel.lock"
+     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
     "over": [],
@@ -89577,7 +89597,6 @@
      "conflicts with #18923 in crates/pi-natives/src/desktop/ax.rs",
      "conflicts with #18353 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #18013 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/libei.rs",
-     "its need #18914 conflicts with main in MODULE.bazel.lock",
      "conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
@@ -89634,12 +89653,15 @@
     "title": "fix(coding-agent): fail a click whose frame the page removed while the button was down",
     "action": "wait",
     "reasons": [
+     "conflicts with #18750 in packages/coding-agent/src/tools/browser/interactions.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/interactions.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#18750"
+    ],
     "needs": [],
     "created": "2026-11-11T00:14:54Z"
    },
@@ -89930,8 +89952,7 @@
      "needs #18914 (open)",
      "conflicts with #18921 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18892 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/ax/menus.rs",
-     "its need #18914 conflicts with main in MODULE.bazel.lock"
+     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/ax/menus.rs"
     ],
     "note": "",
     "over": [],
@@ -89959,8 +89980,7 @@
      "needs #18914 (open)",
      "conflicts with #18921 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18892 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "its need #18914 conflicts with main in MODULE.bazel.lock"
+     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
     "over": [],
