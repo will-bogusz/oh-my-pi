@@ -79300,7 +79300,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-menu-miss-items",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:58:16Z",
-   "updated": "2026-11-11T17:07:00Z",
+   "updated": "2026-11-11T17:21:23Z",
    "note": "",
    "built": [
     {
@@ -79599,7 +79599,7 @@
    ],
    "opened": "2026-11-11T16:39:42Z",
    "readied": "2026-11-11T16:40:10Z",
-   "advanced": "2026-11-11T16:57:44Z"
+   "advanced": "2026-11-11T17:21:23Z"
   },
   {
    "id": "macos-ax-cancel-before-send",
