@@ -77762,7 +77762,7 @@
    "area": "computer",
    "priority": "P2",
    "needs": [],
-   "base": "2fe56b70e07db0f045b510d201c2157b74276c8a",
+   "base": "d210c3065783f63b994da7dba31f572bcf6e5261",
    "body": "bodies/win-screen-locked.md",
    "state": "open",
    "pr": 18947,
@@ -77770,9 +77770,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-screen-locked",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:31:29Z",
-   "updated": "2026-11-11T22:00:41Z",
+   "updated": "2026-11-11T22:12:02Z",
    "note": "",
-   "advanced": "2026-11-11T21:13:47Z",
+   "advanced": "2026-11-11T22:12:02Z",
    "built": [
     {
      "with": "#18883",
