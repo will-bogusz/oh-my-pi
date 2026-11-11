@@ -73759,8 +73759,127 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-click-timestamp",
    "host": "MacBook-Pro",
    "added": "2026-11-11T01:40:54Z",
-   "updated": "2026-11-11T01:44:12Z",
-   "note": ""
+   "updated": "2026-11-11T03:21:44Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#17757",
+     "code": "9116635d60609d2eef75c51d8fed7497d76777be",
+     "with_code": "57c8b56de66790faec97d3d41e37b747521b4588",
+     "tip": "f150e5cbf3688daf16a78c9fc670df0af7427db6",
+     "with_tip": "8754c2b2eb9b67f7ee342ec55b96b65464c13c9c",
+     "at": "2026-11-11T03:21:37Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#16553",
+     "code": "9116635d60609d2eef75c51d8fed7497d76777be",
+     "with_code": "432ad760bb724ebf42ba3b5f60661a3f8d20b1b0",
+     "tip": "f150e5cbf3688daf16a78c9fc670df0af7427db6",
+     "with_tip": "bce3313da96a3074e73393570fe2ab20be849a15",
+     "at": "2026-11-11T03:21:42Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#17756",
+     "code": "9116635d60609d2eef75c51d8fed7497d76777be",
+     "with_code": "a6e6573a4b74d0002eefa7c7dfd2b5b4255dfc18",
+     "tip": "f150e5cbf3688daf16a78c9fc670df0af7427db6",
+     "with_tip": "731826d835c2a1f4d82bc4c289ee90bfa481b92c",
+     "at": "2026-11-11T03:21:42Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#17894",
+     "code": "9116635d60609d2eef75c51d8fed7497d76777be",
+     "with_code": "e1a4161f70c06a5343f78435177dd0a754db2bdd",
+     "tip": "f150e5cbf3688daf16a78c9fc670df0af7427db6",
+     "with_tip": "3f031305162f96deca1349c800c027acad3fbca3",
+     "at": "2026-11-11T03:21:42Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#18743",
+     "code": "9116635d60609d2eef75c51d8fed7497d76777be",
+     "with_code": "3dbf708240c8ec0e55ba3bf5050bde7015842912",
+     "tip": "f150e5cbf3688daf16a78c9fc670df0af7427db6",
+     "with_tip": "1fd711498db007158431078d17f53718a0cf9cb0",
+     "at": "2026-11-11T03:21:42Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#18783",
+     "code": "9116635d60609d2eef75c51d8fed7497d76777be",
+     "with_code": "e3bfcf20ad3df17a54713ed3b97f4943e4b9eab6",
+     "tip": "f150e5cbf3688daf16a78c9fc670df0af7427db6",
+     "with_tip": "013a4f72761ba306e19c5f6d889f1f1db3bae0c8",
+     "at": "2026-11-11T03:21:42Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#18784",
+     "code": "9116635d60609d2eef75c51d8fed7497d76777be",
+     "with_code": "284bdefa50382f9d65fd1c9a855c4a5fb131ca07",
+     "tip": "f150e5cbf3688daf16a78c9fc670df0af7427db6",
+     "with_tip": "dbadf87c8f2c779f2ad415f7db92411606bba13b",
+     "at": "2026-11-11T03:21:42Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#18353",
+     "code": "9116635d60609d2eef75c51d8fed7497d76777be",
+     "with_code": "e3c9aebb2721c896b8b9a33fbf3c51a44bf47eb1",
+     "tip": "f150e5cbf3688daf16a78c9fc670df0af7427db6",
+     "with_tip": "5bcde5607fb19a75edc09993460f7cdb3ed5cd56",
+     "at": "2026-11-11T03:21:42Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#17897",
+     "code": "9116635d60609d2eef75c51d8fed7497d76777be",
+     "with_code": "2bbb547591ae156ccac7af195b43202e415d1bd2",
+     "tip": "f150e5cbf3688daf16a78c9fc670df0af7427db6",
+     "with_tip": "6de362e43c98a6f523070879be75c9a79f8690ce",
+     "at": "2026-11-11T03:21:43Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#18013",
+     "code": "9116635d60609d2eef75c51d8fed7497d76777be",
+     "with_code": "591392596409a94d9ced5f17570207812c58dfd8",
+     "tip": "f150e5cbf3688daf16a78c9fc670df0af7427db6",
+     "with_tip": "7b48a592bceb26869ce02241eda53704e1b43f58",
+     "at": "2026-11-11T03:21:43Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "atspi-unanswered-app",
+     "code": "9116635d60609d2eef75c51d8fed7497d76777be",
+     "with_code": "4bfcdb3736ae1fbf6339de744cde4043f8b56efe",
+     "tip": "f150e5cbf3688daf16a78c9fc670df0af7427db6",
+     "with_tip": "8800f1066682315cd31a14938eaf3c04d27d7172",
+     "at": "2026-11-11T03:21:43Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "qt5-getall-crash",
+     "code": "9116635d60609d2eef75c51d8fed7497d76777be",
+     "with_code": "4673cd784d091e970f8ab1d7d8e6c328785d2449",
+     "tip": "f150e5cbf3688daf16a78c9fc670df0af7427db6",
+     "with_tip": "0bb789248031e81c7d54ed902ea929c2a6d107ec",
+     "at": "2026-11-11T03:21:43Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "x11-mpx-qt",
+     "code": "9116635d60609d2eef75c51d8fed7497d76777be",
+     "with_code": "af5d759c896044c705faab06afc8b73a5e5bc2ed",
+     "tip": "f150e5cbf3688daf16a78c9fc670df0af7427db6",
+     "with_tip": "81a7bcd2c6b5df336adef3dd30c8b3562c051103",
+     "at": "2026-11-11T03:21:43Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "atspi-huge-children",
