@@ -81746,6 +81746,26 @@
    "updated": "2026-11-11T20:48:47Z",
    "note": "Main, 2026-11-11: queue-only follow-up; no code, not built. Pre-existing on main 50da2d3570: browser.enabled listener in packages/coding-agent/src/session/agent-session.ts:#reconcileEvalPreludeSetting, lines 3185-3190, awaits MCP filtering before the prompt rebuild. Four synchronous readers can see the old prefix in that window: packages/coding-agent/src/modes/controllers/tan-command-controller.ts:TanCommandController.start; packages/coding-agent/src/session/context-view.ts:appendSystemPromptEntries; packages/coding-agent/src/modes/rpc/rpc-mode.ts:get_state; packages/coding-agent/src/modes/controllers/extension-ui-controller.ts:contextActions.getSystemPrompt. Keep separate from PR 18786; test-only correction there waits for reconcile.",
    "merged_by": "ancestor"
+  },
+  {
+   "id": "atspi-write-timeout-warning",
+   "branch": "will/atspi-write-timeout-warning",
+   "title": "fix(natives): preserve the empty-field warning on Linux write timeouts",
+   "area": "computer",
+   "priority": "P2",
+   "needs": [
+    "atspi-unanswered-app"
+   ],
+   "base": "4988c32c9a9fd59f2497bd05d3c9c40b72036089",
+   "body": "bodies/atspi-write-timeout-warning.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-write-timeout-warning",
+   "host": "MacBook-Pro",
+   "added": "2026-11-11T21:44:32Z",
+   "updated": "2026-11-11T21:44:32Z",
+   "note": ""
   }
  ],
  "watch": {
