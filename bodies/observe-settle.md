@@ -2,32 +2,56 @@
 
 I made the first look after an action wait for what that action started, so a cell can click and then call `observe()` and see the result instead of the page before it.
 
-On Chromium tabs, the first `observe()` or `ariaSnapshot()` after an action now waits for the fetch, XHR and main-frame document requests begun since the action, then for 150 ms without DOM changes. The wait is bounded at 3 s, or half the call's own budget when that is shorter, and then the page is read as it is.
+On Chromium tabs, the first `observe()` or `ariaSnapshot()` after an action waits for its main-frame document, fetch and XHR requests, then 150 ms without DOM changes. The wait is capped at 3 s, or half the call's budget when shorter. Concurrent looks share it; cmux and Tern are unchanged.
 
-| | main | this PR |
-|---|---|---|
-| click starts a fetch answered 400 ms later, `observe()` in the same cell | lists the page before the response | lists the result |
-| `observe()` with no action before it | no wait | no wait |
-| request the action started never answers | | read as it is at the bound |
-| request the page had open before the action (long poll, beacon) | | not waited for |
+**Cost:** the first read after navigation now waits for the page's ongoing data loading and quiet DOM, up to the bound: about 0.6 s on MDN and 2.7 s on BBC News in this census. Main adds no settle wait and can read a half-loaded page; its scripted delayed-fetch reads returned in about 1 ms and were stale.
 
-The heart is `WorkerCore.#settleAfterAction` in `tab-worker.ts`. Actions mark the tab: `input()` for raw input, navigations, `handleDialog` and frame actions, `act()` for selector actions, and the element-handle actions. The next look pays the mark. It reads the tab's existing request log through `BrowserNetworkManager.hasPendingRequests(since)`, so it adds no listener, then runs the page-side `waitForQuietDom`, which ignores `style`/`class` churn such as spinners. Looks issued together share one settle. Waits and reads that shared main's navigation barrier with actions (`waitFor*`, `evaluate`, `cookies`, `storage`, `frames`, `highlight`) keep that barrier through `documentOp()` and do not mark. cmux and Tern tabs are unchanged.
+A load-time long poll made the first read take 3.01 s in 20/20 scripted loads. After one initial read, a DOM-only click with that poll still pending took 159 ms, not another 3 s.
 
 ## Why
 
-#16907 made a call after a navigating click wait for the new document, but nothing waits for the requests and DOM updates an action starts inside a page. So `click(); observe()` in one cell lists a form before its save lands, and agents spend a second cell on every look or pad cells with fixed sleeps. This is the first of four PRs (look settle, read settle, prompt line, stable ids); it is useful alone.
+#16907 waits for a navigation's new document, but not the in-page fetch and DOM updates an action starts. `click(); observe()` can therefore list a form before its save lands. The next look pays one bounded wait rather than requiring a fixed sleep.
 
-## Open questions
+Skipping chunked responses is unsafe: a finite response with immediate headers and a delayed body was read stale in 20/20 trials.
 
-- **The 3 s bound.** A request the action started that never answers (a hung API, a long poll opened by the click) costs the look the full bound. The first look after `browser.open` or `goto` also counts the requests the page load started. A shorter bound returns sooner on such pages and reads slow fetches as "Loading" more often.
-- **Whether to skip long-lived requests.** Browser Use treats a request in flight for over 1.5 s as background and caps its wait at 0.8 s. That would return "Loading" for a 2 s fetch, so this PR waits for every request the action started, up to the bound, and skips only requests that predate the action.
+A measured alternative, available if the maintainer prefers it, stops waiting for navigation-started requests after `load` and quiet DOM while still waiting for click-started requests. It kept both click probes fresh and shortened MDN and BBC reads, but trades away waiting for deferred navigation content. The fixed policy had 0/60 public-page cap hits, so this alternative is not adopted here.
 
 ## Testing
 
-`bun test packages/coding-agent/test/tools/browser-observe.test.ts`, `browser observe after an action`: a click whose fetch Chromium delays by 400 ms (`page.emulateNetworkConditions`, so no server sleeps), a never-answering request inside a 3 s cell, and a request opened before the click. The first fails on main (the fetched "Saved" is missing).
+`bun test packages/coding-agent/test/tools/browser-observe.test.ts packages/coding-agent/test/tools/browser-tern-tab.test.ts packages/coding-agent/test/tools/browser-network.test.ts`: 42 pass. The same-clock-tick request regression fails with timestamp selection restored. Delayed-header and delayed-body click probes: main 20/20 stale each, this policy 0/20 each. Coding-agent `check:types` passes; root `check:ts` is blocked by unrelated main formatting in `agent-session-async-delivery.test.ts`.
+
+<details>
+<summary>First-navigation cost: model-free headless Chromium, five loads per page</summary>
+
+The complete settle series was measured with `browser.open(wait_until: "domcontentloaded")`, immediately followed by its first `text()` read. Numbers are median settle milliseconds, excluding open; every fixed-policy sample ended at quiet DOM, not the cap. Across 60 public samples, 28 waited for requests and then quiet DOM, 32 needed only quiet DOM. No baseline sample hit the cap.
+
+| Page | Fixed policy ms | Skip streams ms | Stop load requests after load ms | Both ms |
+|---|---:|---:|---:|---:|
+| GitHub repo | 266 | 246 | 221 | 262 |
+| GitHub PR | 323 | 284 | 305 | 309 |
+| GOV.UK | 159 | 157 | 154 | 160 |
+| Wikipedia | 180 | 244 | 238 | 188 |
+| MDN | 580 | 572 | 154 | 155 |
+| Google results | 971 | 1017 | 1103 | 795 |
+| Hacker News | 152 | 152 | 154 | 153 |
+| BBC News | 2658 | 3010 | 967 | 890 |
+| React docs | 265 | 284 | 317 | 325 |
+| npm | blocked | blocked | blocked | blocked |
+| Stack Overflow | blocked | blocked | blocked | blocked |
+| YouTube | shell only | 3045* | shell only | shell only |
+| Signup fixture, normal setup | 158 | 162 | 155 | 160 |
+| Records fixture, normal setup | 157 | 160 | 157 | 159 |
+
+npm and Stack Overflow were security-blocked in all 40 attempts; YouTube returned only its playback timer in 19/20. *One readable YouTube result, after a cap, is not a five-load median. Fixtures retain their normal two-second setup interval. The immediate signup first read instead returns its loading redirect screen; none of the candidates waits for that future timer.
+
+Cap hits over 60 public loads: fixed 0, streams 4, navigation 0, both 0. Three streams-arm BBC caps held advertising fetches with response headers; one YouTube cap held media fetches without headers. Stream/both candidates each caused 20/20 stale finite chunked-body reads and were rejected. Navigation kept 0/20 on both click-fetch probes and reduced the scripted load-poll first read from 3034 to 160 ms, but has no demonstrated real-page cap reduction here.
+
+All runs used a native addon reporting 18.18.6 with 18.18.8 source; no native API changed in this patch, but the version mismatch is a comparison caveat. These are five-load observations, not a guarantee of freshness or stable speedups on public pages.
+
+</details>
 
 ---
 
-- [x] `bun check` passes
+- [ ] `bun check` passes
 - [x] Tested locally
-- [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+- [x] CHANGELOG updated (queued, attribution added on opening)
