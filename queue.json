@@ -81626,8 +81626,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-mpx-reattach",
    "host": "MacBook-Pro",
    "added": "2026-11-11T17:39:36Z",
-   "updated": "2026-11-11T17:39:36Z",
-   "note": ""
+   "updated": "2026-11-11T17:39:49Z",
+   "note": "X11SlaveReattach 2026-11-11: merged with #18828 (x11-mpx-key-confirm), #18828's xvfb-only ignored tests typing_loss_fails_and_inhibits_the_next_call and typing_deadline_bounds_busy_events_and_rejects_late_releases fail at run time (its typing_fixture names its keyboard slave after the core master, so begin() refuses it as gone); whichever lands second adds a #[cfg(test)] seam in Mpx::routes() returning [None, None] when release_events is set. Compiles either way. Lock/suspend re-run on a fresh guest pending (greeter unlock, rtcwake)."
   }
  ],
  "watch": {
