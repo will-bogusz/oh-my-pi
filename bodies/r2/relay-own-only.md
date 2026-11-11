@@ -7,6 +7,7 @@ Whenever omp touched the relay, Chrome's debugger got attached to every tab I ha
 | tabs the relay attaches when omp connects | every eligible tab in every connected browser | only tabs omp opened or borrowed with `app.target` |
 | a user tab blocked on `confirm()` | `browser.pages()` on omp's relay connection hangs | returns at once; omp never touches that tab |
 | `app.target` | the supervisor attaches tabs to pick one | picked from the relay's `/json` listing; the tab worker claims it, which attaches only that tab |
+| open without `app.target` | creates omp's own tab | unchanged; omitting the target does not borrow the user's active tab |
 | popup or `target=_blank` from omp's tab | attached but unowned: in `browser.pages()`, no `popup` event | not attached until adopted with `app.target`; this PR does not own popups (below) |
 | a relay client attaching a tab it never opened or claimed | allowed | refused; the error names `OMP.claimTarget` and `app.target` |
 | an attachment left by an earlier relay process | stays | taken off at the extension's hello when nobody holds it |
