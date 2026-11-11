@@ -163,6 +163,7 @@ impl Win32Ax {
 		};
 		Ok(ax_states::with_children(props, self.read_children(element)))
 	}
+
 	fn read_children(&mut self, element: &UIElement) -> CoreResult<Vec<UIElement>> {
 		let automation = self.automation()?;
 		let condition = automation.create_true_condition().map_err(ax_error)?;
@@ -494,12 +495,15 @@ impl AxBackend for Win32Ax {
 			.map_err(ax_error)
 	}
 
-
 	fn props(&mut self, handle: &AxHandle) -> CoreResult<AxProps> {
 		self.read_node(handle).map(|(props, _)| props)
 	}
 
-	fn walk_node(&mut self, handle: &AxHandle, _bounds: WalkBounds) -> CoreResult<(AxProps, Vec<AxHandle>)> {
+	fn walk_node(
+		&mut self,
+		handle: &AxHandle,
+		_bounds: WalkBounds,
+	) -> CoreResult<(AxProps, Vec<AxHandle>)> {
 		let (props, children) = self.read_node(handle).map_err(ax_states::walk_error)?;
 		Ok((props, children.into_iter().map(uia_handle).collect()))
 	}

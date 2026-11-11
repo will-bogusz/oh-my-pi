@@ -1,6 +1,9 @@
 use std::hash::{DefaultHasher, Hash, Hasher};
 
-use super::super::{ax::AxProps, error::{DesktopError, ErrorCode}};
+use super::super::{
+	ax::AxProps,
+	error::{DesktopError, ErrorCode},
+};
 
 // UIA_E_ELEMENTNOTAVAILABLE also describes unrealized virtualized items.
 pub(super) const ELEMENT_NOT_AVAILABLE: i32 = -2_147_220_991;
@@ -25,7 +28,10 @@ pub(super) fn walk_error(error: DesktopError) -> DesktopError {
 	}
 }
 
-pub(super) fn with_children<T, E>(mut props: AxProps, children: Result<Vec<T>, E>) -> (AxProps, Vec<T>) {
+pub(super) fn with_children<T, E>(
+	mut props: AxProps,
+	children: Result<Vec<T>, E>,
+) -> (AxProps, Vec<T>) {
 	let children = match children {
 		Ok(children) => children,
 		Err(_) => {
@@ -103,21 +109,21 @@ mod tests {
 	#[test]
 	fn children_read_failures_keep_the_node_partial() {
 		let props = AxProps {
-			role: "checkbox".into(),
+			role:        "checkbox".into(),
 			native_role: "CheckBox".into(),
-			title: Some("Remember me".into()),
-			value: Some("1".into()),
+			title:       Some("Remember me".into()),
+			value:       Some("1".into()),
 			description: None,
-			enabled: true,
-			focused: false,
-			bounds: None,
-			actions: Vec::new(),
+			enabled:     true,
+			focused:     false,
+			bounds:      None,
+			actions:     Vec::new(),
 			child_count: 0,
-			identity: Some(7),
-			partial: false,
-			selected: false,
-			expanded: None,
-			role_name: None,
+			identity:    Some(7),
+			partial:     false,
+			selected:    false,
+			expanded:    None,
+			role_name:   None,
 		};
 		let (props, children) = with_children(props, Err::<Vec<u8>, _>(()));
 		assert!(props.partial);
@@ -146,8 +152,12 @@ mod tests {
 	#[test]
 	fn recreated_controls_match_only_fully_read_identity() {
 		let fields = [
-			Ok(Some("Remember me")), Ok(Some("remember")), Ok(Some("Button")),
-			Ok(None), Ok(None), Ok(None),
+			Ok(Some("Remember me")),
+			Ok(Some("remember")),
+			Ok(Some("Button")),
+			Ok(None),
+			Ok(None),
+			Ok(None),
 		];
 		let original = identity("CheckBox", &fields, Ok(Some(0))).unwrap();
 		assert_eq!(identity("CheckBox", &fields, Ok(Some(0))), Some(original));
