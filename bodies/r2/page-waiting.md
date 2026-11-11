@@ -8,7 +8,7 @@ On Chromium, a JavaScript dialog the page leaves open and a file chooser omp hol
 - Alerts in connected and relay browsers stay open for the user instead of being accepted. Managed browsers and beforeunload are unchanged.
 - A call that times out behind a dialog dismisses it, so the tab recovers instead of being killed.
 
-A `print()` omp holds is reported but never pending. Tern rejects `files`; cmux still rejects dialog calls. Also fixed: `tab.id(n)` called an element stale in a later run once an earlier run had used it (the deadline wrapper here bound the cached handle to the run that first used it).
+Printing is disabled in omp's own Chrome profile by merged #18838; attached browsers retain their print settings, and printing is not a pending dialog state here. Tern rejects `files`; cmux still rejects dialog calls. Also fixed: `tab.id(n)` called an element stale in a later run once an earlier run had used it (the deadline wrapper here bound the cached handle to the run that first used it).
 
 ## Why
 
