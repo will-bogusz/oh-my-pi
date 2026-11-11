@@ -246,6 +246,20 @@ pub struct DesktopDragResult {
 	pub focus_return: Option<DesktopFocusReturn>,
 }
 
+/// What a typing call did.
+#[napi(object)]
+#[derive(Debug, Clone)]
+pub struct DesktopTypeResult {
+	/// Why the text was sent but could not be confirmed to have arrived, read
+	/// back from the focused field; absent when it was confirmed or the
+	/// backend does not read typed text back (only Windows takeover typing
+	/// does).
+	pub unconfirmed:  Option<String>,
+	/// Where focus ended when typing ran in takeover; see
+	/// [`DesktopFocusReturn`].
+	pub focus_return: Option<DesktopFocusReturn>,
+}
+
 #[napi(object)]
 #[derive(Debug, Clone, Copy)]
 pub struct DesktopControlState {

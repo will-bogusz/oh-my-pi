@@ -938,23 +938,27 @@ mod background {
 }
 
 mod foreground {
-	use std::time::Duration;
+	use std::{
+		ptr::null_mut,
+		time::{Duration, Instant},
+	};
 
 	use windows_sys::Win32::{
 		Foundation::{HWND, POINT},
+		System::Threading::{AttachThreadInput, GetCurrentThreadId},
 		UI::{
 			Input::KeyboardAndMouse::{
-				INPUT, INPUT_0, INPUT_KEYBOARD, INPUT_MOUSE, KEYBDINPUT, KEYEVENTF_EXTENDEDKEY,
-				KEYEVENTF_KEYUP, KEYEVENTF_UNICODE, MAPVK_VK_TO_VSC, MOUSEEVENTF_ABSOLUTE,
-				MOUSEEVENTF_HWHEEL, MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_LEFTUP, MOUSEEVENTF_MIDDLEDOWN,
-				MOUSEEVENTF_MIDDLEUP, MOUSEEVENTF_MOVE, MOUSEEVENTF_RIGHTDOWN, MOUSEEVENTF_RIGHTUP,
-				MOUSEEVENTF_VIRTUALDESK, MOUSEEVENTF_WHEEL, MOUSEINPUT, MapVirtualKeyW, SendInput,
-				VK_RETURN,
+				GetKeyState, INPUT, INPUT_0, INPUT_KEYBOARD, INPUT_MOUSE, KEYBDINPUT,
+				KEYEVENTF_EXTENDEDKEY, KEYEVENTF_KEYUP, KEYEVENTF_UNICODE, MAPVK_VK_TO_VSC,
+				MOUSEEVENTF_ABSOLUTE, MOUSEEVENTF_HWHEEL, MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_LEFTUP,
+				MOUSEEVENTF_MIDDLEDOWN, MOUSEEVENTF_MIDDLEUP, MOUSEEVENTF_MOVE, MOUSEEVENTF_RIGHTDOWN,
+				MOUSEEVENTF_RIGHTUP, MOUSEEVENTF_VIRTUALDESK, MOUSEEVENTF_WHEEL, MOUSEINPUT,
+				MapVirtualKeyW, SendInput, VK_RETURN,
 			},
 			WindowsAndMessaging::{
 				GA_ROOTOWNER, GetAncestor, GetCursorPos, GetForegroundWindow, GetSystemMetrics,
-				IsWindow, SM_CXVIRTUALSCREEN, SM_CYVIRTUALSCREEN, SM_XVIRTUALSCREEN, SM_YVIRTUALSCREEN,
-				SetCursorPos, WindowFromPoint,
+				GetWindowThreadProcessId, IsWindow, SM_CXVIRTUALSCREEN, SM_CYVIRTUALSCREEN,
+				SM_XVIRTUALSCREEN, SM_YVIRTUALSCREEN, SetCursorPos, WindowFromPoint,
 			},
 		},
 	};
@@ -964,7 +968,9 @@ mod foreground {
 		CoreResult, DesktopError, KeyName, Modifiers, MouseButton, PointerEvent, background, control,
 	};
 	use crate::desktop::win32::{
-		delivery::{TextUnit, text_units},
+		ax::{TypingField, Win32Ax},
+		delivery::{self, TextUnit, text_units},
+		readback::{self, Progress, Verdict},
 		window,
 	};
 
@@ -978,6 +984,25 @@ mod foreground {
 	const ACTIVATION_TIMEOUT: Duration = Duration::from_millis(500);
 	/// Time between drag moves.
 	const DRAG_STEP: Duration = Duration::from_millis(16);
+	/// Longest wait for a field to show typed text before it is read as
+	/// missing.
+	const READBACK_WAIT: Duration = Duration::from_millis(500);
+	/// Time between reads of a field that does not show typed text yet.
+	const READBACK_POLL: Duration = Duration::from_millis(25);
+	/// Longest wait for a field to show one run of typed text.
+	const RUN_WAIT: Duration = Duration::from_secs(1);
+	/// A field whose text has not changed for this long after a run has
+	/// taken what it will of it.
+	const RUN_STILL: Duration = Duration::from_millis(60);
+	/// Time between reads of a field that does not show a run yet.
+	const RUN_POLL: Duration = Duration::from_millis(2);
+	/// An unassigned virtual key sent behind typed text to see when the target
+	/// has read it: no app binds it and it types nothing (`AutoHotkey` and
+	/// Cua's driver use it the same way).
+	const DRAIN_KEY: u16 = 0xe8;
+	/// Longest wait for the target to read typed text before the foreground
+	/// is handed back.
+	const DRAIN_TIMEOUT: Duration = Duration::from_secs(5);
 
 	/// Activates the target for foreground input and hands the foreground back
 	/// to the user's window once the target has consumed it.
@@ -1557,21 +1582,144 @@ mod foreground {
 		}
 	}
 
-	/// Bounded packets preserve short-send accounting without constructing an
-	/// uninterruptible `SendInput` batch proportional to the entire text.
-	pub(super) fn type_desktop(text: &str) -> CoreResult<()> {
-		send_text(None, text)
+	pub(super) fn type_desktop(ax: &mut Win32Ax, text: &str) -> CoreResult<()> {
+		if text.is_empty() {
+			return Ok(());
+		}
+		// SAFETY: GetForegroundWindow has no preconditions.
+		let front = window::root(unsafe { GetForegroundWindow() });
+		let field = watch(ax, front, None);
+		send_text(None, text, field.as_ref().ok())?;
+		drain(front, "the front window")?;
+		confirm(field, text)
 	}
 
-	fn send_text(target: Option<HWND>, text: &str) -> CoreResult<()> {
-		let mut events = [unicode_event(0, false); 4];
-		for grapheme in graphemes_str(text) {
-			control::check()?;
-			for unit in text_units(grapheme) {
-				let events = text_events(unit, &mut events);
+	/// The focused field of `root` to read typed text back from, or why
+	/// there is none; `id` is the target window's.
+	fn watch(ax: &mut Win32Ax, root: HWND, id: Option<&str>) -> Result<TypingField, String> {
+		let class = window::class_name(root);
+		if delivery::is_terminal_class(&class) {
+			let name = id.map_or_else(|| "the front window".to_string(), |id| format!("window {id}"));
+			return Err(format!(
+				"{name} is a terminal, whose screen shows what its program echoes rather than the \
+				 typed text"
+			));
+		}
+		// A UWP frame belongs to ApplicationFrameHost and its focused element
+		// to the hosted app, so only other windows are held to their process.
+		let process = (id.is_some() && !delivery::is_uwp_frame_class(&class)).then(|| {
+			let mut pid = 0;
+			// SAFETY: `pid` is writable; Win32 validates the handle.
+			unsafe { GetWindowThreadProcessId(root, &mut pid) };
+			pid
+		});
+		ax.typing_field(id, process)
+	}
+
+	/// Waits until the thread that owns `root` has read every key sent so
+	/// far: keys still queued when the foreground moves on go to the next
+	/// foreground window, so handing it back early sends the end of long text
+	/// to the user's window. While this thread shares the target's input
+	/// queue, `GetKeyState` follows the keys that thread has read, so a key
+	/// sent behind the text shows when it got there. A thread that cannot be
+	/// joined is not waited for, as before.
+	fn drain(root: HWND, name: &str) -> CoreResult<()> {
+		// SAFETY: a null process-id pointer is permitted; Win32 validates the
+		// handle.
+		let target = unsafe { GetWindowThreadProcessId(root, null_mut()) };
+		// SAFETY: no preconditions.
+		let own = unsafe { GetCurrentThreadId() };
+		// SAFETY: scalar thread ids; failure is reported and leaves nothing to
+		// undo.
+		if target == 0 || target == own || unsafe { AttachThreadInput(own, target, 1) } == 0 {
+			return Ok(());
+		}
+		// SAFETY: no preconditions.
+		let before = unsafe { GetKeyState(i32::from(DRAIN_KEY)) } & 1;
+		let marker = [key_event(DRAIN_KEY, false), key_event(DRAIN_KEY, true)];
+		// The text is out, so the marker goes even after a cancel.
+		// SAFETY: `marker` is an initialized INPUT slice copied synchronously.
+		let sent =
+			unsafe { SendInput(marker.len() as u32, marker.as_ptr(), size_of::<INPUT>() as i32) };
+		let deadline = Instant::now() + DRAIN_TIMEOUT;
+		let read = sent as usize == marker.len()
+			&& loop {
+				// SAFETY: no preconditions.
+				if unsafe { GetKeyState(i32::from(DRAIN_KEY)) } & 1 != before {
+					break true;
+				}
+				if Instant::now() >= deadline {
+					break false;
+				}
+				std::thread::sleep(Duration::from_millis(1));
+			};
+		// SAFETY: detaches the pair attached above.
+		unsafe { AttachThreadInput(own, target, 0) };
+		if read || sent as usize != marker.len() {
+			Ok(())
+		} else {
+			Err(DesktopError::input_failed(format!(
+				"{name} had not read all the typed text {} s after it was sent; the rest may reach \
+				 whichever window is in front next: inspect the target before typing again",
+				DRAIN_TIMEOUT.as_secs()
+			)))
+		}
+	}
+
+	/// How typing is paced by reading the field back.
+	#[derive(Clone, Copy, PartialEq, Eq)]
+	enum Pace {
+		/// One call per word, each once the field shows the one before.
+		Words,
+		/// One call per character, each once the field shows the one before:
+		/// the field dropped part of a word.
+		Characters,
+		/// No waits: no field to read, or one whose text cannot pace typing.
+		Off,
+	}
+
+	/// Sends `text` one [`delivery::word_runs`] run per `SendInput` call; the
+	/// runs are bounded, so a short send is accounted and no call is as long
+	/// as the whole text. With `field`, each run waits for the field to show
+	/// the one before, so a control that drops text arriving while it is
+	/// still busy with the last word (Windows 11 Notepad keeps a few words of
+	/// a burst) gets it at its own pace; a field that comes up short gets one
+	/// character at a time from then on, and one that reads any other way
+	/// stops pacing.
+	fn send_text(target: Option<HWND>, text: &str, field: Option<&TypingField>) -> CoreResult<()> {
+		let mut pace = if field.is_some() {
+			Pace::Words
+		} else {
+			Pace::Off
+		};
+		let mut shown = field.map(|field| field.before.clone());
+		let mut events = Vec::new();
+		for run in delivery::word_runs(text) {
+			let mut rest = run;
+			while !rest.is_empty() {
+				let piece = if pace == Pace::Characters {
+					graphemes_str(rest).next().unwrap_or(rest)
+				} else {
+					rest
+				};
+				rest = &rest[piece.len()..];
+				events.clear();
+				let mut unit_events = [unicode_event(0, false); 4];
+				for unit in text_units(piece) {
+					events.extend_from_slice(text_events(unit, &mut unit_events));
+				}
 				match target {
-					Some(target) => send_to(target, events)?,
-					None => send(events)?,
+					Some(target) => send_to(target, &events)?,
+					None => send(&events)?,
+				}
+				if let (Some(field), Some(before)) = (field, shown.as_mut())
+					&& pace != Pace::Off
+				{
+					pace = match await_run(field, piece, before)? {
+						Progress::Shown => pace,
+						Progress::Short if pace == Pace::Words => Pace::Characters,
+						Progress::Short | Progress::Other => Pace::Off,
+					};
 				}
 			}
 		}
@@ -1579,12 +1727,88 @@ mod foreground {
 		Ok(())
 	}
 
+	/// Waits until `field`, which read `before` when `run` was sent, shows
+	/// it, or stops changing short of it; `before` becomes the last read.
+	fn await_run(field: &TypingField, run: &str, before: &mut String) -> CoreResult<Progress> {
+		let start = Instant::now();
+		let mut changed = start;
+		let mut last: Option<String> = None;
+		loop {
+			let Some(now) = field.read() else {
+				return Ok(Progress::Other);
+			};
+			let progress = readback::progress(run, before, &now);
+			let still = last.as_deref() == Some(now.as_str());
+			if !still {
+				changed = Instant::now();
+			}
+			if progress == Progress::Shown
+				|| (still && changed.elapsed() >= RUN_STILL)
+				|| start.elapsed() >= RUN_WAIT
+			{
+				*before = now;
+				return Ok(progress);
+			}
+			last = Some(now);
+			control::check()?;
+			std::thread::sleep(RUN_POLL);
+		}
+	}
+
+	/// Checks that `field` gained `text`, waiting up to [`READBACK_WAIT`] for
+	/// the app to show it. Characters missing from inside the text fail the
+	/// call naming what arrived ([`Verdict::Dropped`]); a field that cannot be
+	/// read, or reads any other way, leaves the call unconfirmed.
+	fn confirm(field: Result<TypingField, String>, text: &str) -> CoreResult<()> {
+		let field = match field {
+			Ok(field) => field,
+			Err(reason) => {
+				control::report_text_unconfirmed(reason);
+				return Ok(());
+			},
+		};
+		let deadline = Instant::now() + READBACK_WAIT;
+		loop {
+			let Some(after) = field.read() else {
+				control::report_text_unconfirmed(format!("reading {} back failed", field.name));
+				return Ok(());
+			};
+			let verdict = readback::verdict(text, &field.before, &after, &field.name);
+			if verdict == Verdict::Confirmed {
+				return Ok(());
+			}
+			if Instant::now() >= deadline {
+				return match verdict {
+					Verdict::Dropped { arrived } => Err(DesktopError::input_failed(
+						readback::dropped_message(text, &field.name, &arrived),
+					)),
+					Verdict::Unconfirmed(reason) => {
+						control::report_text_unconfirmed(reason);
+						Ok(())
+					},
+					Verdict::Confirmed => Ok(()),
+				};
+			}
+			// The text is out, so a cancel ends the wait without failing the
+			// call.
+			if control::check().is_err() {
+				control::report_text_unconfirmed(format!(
+					"the call was cancelled before {} showed the text",
+					field.name
+				));
+				return Ok(());
+			}
+			std::thread::sleep(READBACK_POLL);
+		}
+	}
+
 	/// Takeover text for window `id`; `focus` runs under the foreground guard
-	/// as in [`key_chord`].
+	/// as in [`key_chord`], before the focused field is read for [`confirm`].
 	pub(super) fn type_text(
+		ax: &mut Win32Ax,
 		id: &str,
 		text: &str,
-		focus: impl FnOnce() -> CoreResult<()>,
+		focus: impl FnOnce(&mut Win32Ax) -> CoreResult<()>,
 	) -> CoreResult<()> {
 		control::check()?;
 		background::ensure_text_supported(id, background::hwnd(id)?)?;
@@ -1592,8 +1816,11 @@ mod foreground {
 			return Ok(());
 		}
 		ForegroundGuard::activate(id, KEY_SETTLE)?.run(|target| {
-			focus()?;
-			send_text(Some(target), text)
+			focus(ax)?;
+			let field = watch(ax, target, Some(id));
+			send_text(Some(target), text, field.as_ref().ok())?;
+			drain(target, &format!("window {id}"))?;
+			confirm(field, text)
 		})
 	}
 
@@ -1721,14 +1948,22 @@ pub(super) fn pointer(
 	}
 }
 
-pub(super) fn type_text(target: &Target, text: &str, mode: DeliveryMode) -> CoreResult<()> {
+/// Types `text`. Takeover typing reads the focused field back afterwards:
+/// text it did not gain fails the call, and a field that cannot be read
+/// leaves the call unconfirmed ([`control::take_text_unconfirmed`]).
+pub(super) fn type_text(
+	ax: &mut Win32Ax,
+	target: &Target,
+	text: &str,
+	mode: DeliveryMode,
+) -> CoreResult<()> {
 	control::check()?;
 	match target {
-		Target::Desktop | Target::Display(_) => foreground::type_desktop(text),
+		Target::Desktop | Target::Display(_) => foreground::type_desktop(ax, text),
 		Target::Window(id) if mode == DeliveryMode::Background => {
 			background::type_text(id, text, None)
 		},
-		Target::Window(id) => foreground::type_text(id, text, || Ok(())),
+		Target::Window(id) => foreground::type_text(ax, id, text, |_| Ok(())),
 	}
 }
 
@@ -1768,17 +2003,18 @@ pub(super) fn element_background(id: &str, element: HWND, input: &ElementInput) 
 /// keyboard focus, run once the target is in front so the user's window is
 /// the one the foreground returns to.
 pub(super) fn element_foreground(
+	ax: &mut Win32Ax,
 	id: &str,
 	input: &ElementInput,
-	focus: impl FnOnce() -> CoreResult<()>,
+	focus: impl FnOnce(&mut Win32Ax) -> CoreResult<()>,
 ) -> CoreResult<()> {
 	control::check()?;
 	match input {
-		ElementInput::Text(text) => foreground::type_text(id, text, focus),
+		ElementInput::Text(text) => foreground::type_text(ax, id, text, focus),
 		ElementInput::Chord(keys) if keys.is_empty() => {
 			Err(DesktopError::input_failed("key chord is empty"))
 		},
-		ElementInput::Chord(keys) => foreground::key_chord(id, keys, focus),
+		ElementInput::Chord(keys) => foreground::key_chord(id, keys, || focus(ax)),
 	}
 }
 

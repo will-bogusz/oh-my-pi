@@ -63,6 +63,30 @@ pub fn is_uwp_frame_class(class: &str) -> bool {
 	matches!(class, "ApplicationFrameWindow" | "Windows.UI.Core.CoreWindow")
 }
 
+/// Most graphemes takeover typing sends in one `SendInput` call.
+pub const MAX_RUN_GRAPHEMES: usize = 32;
+
+/// Splits `text` into the runs takeover typing sends one `SendInput` call at
+/// a time: each ends after whitespace (a space, tab or line break, where an
+/// editor may run autocorrect or spell checking) or after
+/// [`MAX_RUN_GRAPHEMES`] graphemes.
+pub fn word_runs(text: &str) -> impl Iterator<Item = &str> {
+	let mut graphemes = xutf::graphemes_str(text);
+	let mut start = 0;
+	std::iter::from_fn(move || {
+		let mut end = start;
+		for (count, grapheme) in (1..).zip(graphemes.by_ref()) {
+			end += grapheme.len();
+			if count == MAX_RUN_GRAPHEMES || grapheme.chars().any(char::is_whitespace) {
+				break;
+			}
+		}
+		let run = (end > start).then(|| &text[start..end]);
+		start = end;
+		run
+	})
+}
+
 /// Terminal hosts (Windows Terminal, console host, mintty, Vim, Neovim) read
 /// text through their console or VT input channel rather than `WM_CHAR`.
 pub fn is_terminal_class(class: &str) -> bool {
@@ -273,6 +297,17 @@ mod tests {
 
 	const fn background(class: &str) -> TargetTraits<'_> {
 		TargetTraits { class, chromium_descendant: false, foreground: false, xaml_host: false }
+	}
+
+	#[test]
+	fn word_runs_end_after_whitespace_and_at_the_run_limit() {
+		let runs = word_runs("ab c\r\nd\te").collect::<Vec<_>>();
+		assert_eq!(runs, ["ab ", "c\r\n", "d\t", "e"]);
+		let long = "x".repeat(MAX_RUN_GRAPHEMES + 1);
+		assert_eq!(word_runs(&long).map(str::len).collect::<Vec<_>>(), [MAX_RUN_GRAPHEMES, 1]);
+		let emoji = "\u{1f469}\u{200d}\u{1f4bb} ok";
+		assert_eq!(word_runs(emoji).collect::<Vec<_>>(), ["\u{1f469}\u{200d}\u{1f4bb} ", "ok"]);
+		assert_eq!(word_runs("").count(), 0);
 	}
 
 	#[test]
