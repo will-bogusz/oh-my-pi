@@ -156,7 +156,7 @@ export type WorkerInitPayload =
 			 * browser.
 			 */
 			userDriven?: boolean;
-			/** The browser is the omp relay: downloads arrive as page events, and the relay names where Chrome saved them. */
+			/** The omp relay: downloads arrive as page events; claim owned/borrowed tabs before adopting them. */
 			relay?: boolean;
 			/**
 			 * The browser draws its windows on the user's screen, so a call can raise native ones, and this tab list says
