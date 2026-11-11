@@ -78788,7 +78788,7 @@
    "area": "natives",
    "priority": "P1",
    "needs": [],
-   "base": "b9b3cc4d69962e492197178155dd95216cd9c21b",
+   "base": "9369103e4a06d099f3060aea95dae2fb7782cd9b",
    "body": "bodies/macos-layout-chords.md",
    "state": "open",
    "pr": 18897,
@@ -78796,7 +78796,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-layout-chords",
    "host": "MacBook-Pro",
    "added": "2026-11-11T10:01:18Z",
-   "updated": "2026-11-11T13:58:30Z",
+   "updated": "2026-11-11T14:18:47Z",
    "note": "",
    "built": [
     {
@@ -78982,7 +78982,7 @@
    ],
    "opened": "2026-11-11T12:58:05Z",
    "readied": "2026-11-11T12:58:35Z",
-   "advanced": "2026-11-11T13:58:30Z"
+   "advanced": "2026-11-11T14:18:47Z"
   },
   {
    "id": "xproc-intervention",
