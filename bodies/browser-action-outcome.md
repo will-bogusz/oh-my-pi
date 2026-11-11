@@ -2,7 +2,7 @@
 
 Models kept spending a whole cell just looking at the page to find out whether a click or fill had done anything, so I made each browser action print one line saying what it did.
 
-With an earlier build of this change, GPT-6.1 Sol went from 35 look-only cells to 24 on four browser tasks and took 0.91x `main`'s steps; on Claude Haiku this head took 1.07x and 1.17x the steps in two blind legs, so the saving does not carry over to Haiku. In Chromium, `goto`, `click`, `fill`, `type`, `press` and `select` (tab, frame and element forms) now print into the cell output. Recorded on a bench signup wizard:
+In a blind run on four browser tasks, GPT-6.1 Sol took 0.94x `main`'s steps [0.89, 0.997] and 0.90x its tokens with this head, with look-only cells down from 12 to 8; on Claude Haiku this head took 1.07x and 1.17x the steps in two blind legs, so the saving does not carry over to Haiku. In Chromium, `goto`, `click`, `fill`, `type`, `press` and `select` (tab, frame and element forms) now print into the cell output. Recorded on a bench signup wizard:
 
 ```js
 await tab.fill('#email', 'outcome@example.test');
@@ -50,12 +50,13 @@ Model runs on headless Chrome for Testing; ratios are geometric means of per-tas
 |---|---|---|---|---|---|
 | GPT-6.1 Sol medium, 4 x 3 | earlier | **0.91** [0.86, 0.97] | **0.89** [0.81, 0.98] | 35 -> 24 | 12/12 / 12/12 |
 | Claude Haiku 5.5 medium, 4 x 4 | earlier | 0.86 [0.75, 1.01] | 0.85 [0.73, 1.01] | 75 -> 67 | 15/16 / 16/16 |
+| GPT-6.1 Sol medium, 4 x 3, blind | this head | **0.94** [0.89, 0.997] | **0.90** [0.84, 0.98] | 12 -> 8 | 12/12 / 12/12 |
 | Claude Haiku 5.5 medium, 4 x 4, blind | this head | 1.17 [0.99, 1.37] | **1.19** [1.02, 1.39] | 62 -> 73 | 15/16 / 16/16 |
 | Claude Haiku 5.5 medium, 4 x 4, blind | this head | 1.07 [0.91, 1.25] | 1.04 [0.88, 1.22] | 66 -> 67 | 16/16 / 14/16 |
 
 <details><summary>The earlier build, and Haiku on this head</summary>
 
-The earlier build printed the same lines without `yet`, ignored every style and class change and read back the focused field. On this head the product configurator cost Haiku most (1.26x and 1.21x the median steps). Part of that is a correct line: Haiku often clicks a colour's caption, which does nothing, then reads `no change yet` and spends cells finding the swatch, but some long runs never saw that line. The PR's two FAILs in the second leg fetched Chrome's `/json/list` themselves, which the bench grader counts as a browser bypass. In the same leg the code with no prompt line took 1.00x [0.88, 1.15] the steps and the earlier prompt wording 1.11x [0.96, 1.30], so no wording made a measurable difference. Wall time: Sol 1.03x [0.90, 1.17]; Haiku 1.11x [0.92, 1.32] and 1.13x [0.98, 1.31], on a shared host.
+The earlier build printed the same lines without `yet`, ignored every style and class change and read back the focused field. On this head the product configurator showed no gain on Sol either (1.04x mean steps, same median), and the blind Sol leg's upper bound only just clears 1.0. It cost Haiku most (1.26x and 1.21x the median steps). Part of that is a correct line: Haiku often clicks a colour's caption, which does nothing, then reads `no change yet` and spends cells finding the swatch, but some long runs never saw that line. The PR's two FAILs in the second leg fetched Chrome's `/json/list` themselves, which the bench grader counts as a browser bypass. In the same leg the code with no prompt line took 1.00x [0.88, 1.15] the steps and the earlier prompt wording 1.11x [0.96, 1.30], so no wording made a measurable difference. Wall time: Sol 1.03x [0.90, 1.17]; Haiku 1.11x [0.92, 1.32] and 1.13x [0.98, 1.31], on a shared host.
 
 </details>
 
