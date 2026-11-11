@@ -80839,8 +80839,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-11T06:26:07.719958Z",
-  "host": "goliath",
+  "at": "2026-11-11T06:44:03.380250Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 2,
@@ -82274,12 +82274,14 @@
     "action": "wait",
     "reasons": [
      "needs agent-identity (queued)",
+     "conflicts with #18840 in packages/coding-agent/src/tools/browser/tab-protocol.ts",
      "conflicts with #18838 in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#18840",
      "#18838"
     ],
     "needs": [
