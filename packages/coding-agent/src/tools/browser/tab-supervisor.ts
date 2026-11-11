@@ -677,8 +677,9 @@ async function navigateOpenedTab(
 ): Promise<string | undefined> {
 	const remainingMs = opts.timeoutMs - (performance.now() - startedAt);
 	const gotoMs = Math.max(1, Math.round(remainingMs - Math.min(OPEN_NAVIGATION_REPORT_MS, remainingMs / 2)));
+	let navigation: RunResultOk;
 	try {
-		await runInTabWithSnapshot(
+		navigation = await runInTabWithSnapshot(
 			name,
 			{
 				code: `await tab.goto(${JSON.stringify(url)}, { waitUntil: ${JSON.stringify(opts.waitUntil ?? "load")} });`,
@@ -716,6 +717,11 @@ async function navigateOpenedTab(
 		await rollBackCreatedTab(name, created);
 		throw new ToolAbortError("Browser tab open aborted");
 	}
+	const note = navigation.displays
+		.filter(display => display.type === "text")
+		.map(display => display.text)
+		.join("\n");
+	return note || undefined;
 }
 
 /** Close a tab its failed open created, unless something already replaced or closed it. */
