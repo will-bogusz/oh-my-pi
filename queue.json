@@ -80799,7 +80799,7 @@
    "area": "computer",
    "priority": "P0",
    "needs": [],
-   "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
+   "base": "73d7521269a1212fc2b2790a2e8c08424496c953",
    "body": "bodies/win-takeover-focus.md",
    "state": "open",
    "pr": 18919,
@@ -80807,7 +80807,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-takeover-focus",
    "host": "MacBook-Pro",
    "added": "2026-11-11T11:46:35Z",
-   "updated": "2026-11-11T17:07:00Z",
+   "updated": "2026-11-11T17:15:37Z",
    "note": "",
    "built": [
     {
@@ -81021,7 +81021,8 @@
     }
    ],
    "opened": "2026-11-11T16:22:35Z",
-   "readied": "2026-11-11T16:23:02Z"
+   "readied": "2026-11-11T16:23:02Z",
+   "advanced": "2026-11-11T17:15:37Z"
   },
   {
    "id": "browser-wait-selector-state",
