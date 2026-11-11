@@ -62746,7 +62746,7 @@
    "area": "computer",
    "priority": "P2",
    "needs": [],
-   "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
+   "base": "7b42b1be6069b791c54e1c4c93d2070978d9e6bf",
    "body": "bodies/wayland-pipewire-dlopen.md",
    "state": "open",
    "pr": 18353,
@@ -62754,9 +62754,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-pipewire-dlopen",
    "host": "MacBook-Pro",
    "added": "2026-11-03T05:43:31Z",
-   "updated": "2026-11-11T03:55:42Z",
+   "updated": "2026-11-11T11:48:08Z",
    "note": "",
-   "advanced": "2026-11-11T03:55:42Z",
+   "advanced": "2026-11-11T11:48:08Z",
    "built": [
     {
      "with": "#17757",
