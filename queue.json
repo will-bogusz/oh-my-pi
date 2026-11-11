@@ -75838,7 +75838,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-11T07:27:45Z",
+  "checked": "2026-11-11T07:58:35Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -76011,24 +76011,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-04T07:29:23Z",
-    "kind": "conflict",
-    "label": "#16553",
-    "title": "fix(natives): keep a macOS drag from the user's app onto the target the user's pick",
-    "files": [
-     "crates/pi-natives/src/desktop/macos/skylight.rs"
-    ]
-   },
-   {
-    "at": "2026-11-04T07:29:23Z",
-    "kind": "conflict",
-    "label": "#17747",
-    "title": "fix(agent,coding-agent): read the history behind an OpenAI remote compaction after a model switch",
-    "files": [
-     "packages/coding-agent/src/sdk.ts"
-    ]
-   },
    {
     "at": "2026-11-04T13:35:51Z",
     "kind": "conflict",
