@@ -77299,9 +77299,56 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/xproc-intervention",
    "host": "MacBook-Pro",
    "added": "2026-11-11T10:07:38Z",
-   "updated": "2026-11-11T10:08:00Z",
+   "updated": "2026-11-11T10:08:14Z",
    "note": "",
-   "kind": "fix"
+   "kind": "fix",
+   "built": [
+    {
+     "with": "#16553",
+     "code": "873e016f2c1de2dca277b4103c96f06d859e2b86",
+     "with_code": "de210f4f0f93167c7afd0ab48077ca42b2bd0f06",
+     "tip": "d3fc3a6aa80f4f82f25bc12222caf0b46c8abc47",
+     "with_tip": "cacd8a129d036e8e5b6b8195f0939dd6072863bd",
+     "at": "2026-11-11T10:08:04Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#17757",
+     "code": "873e016f2c1de2dca277b4103c96f06d859e2b86",
+     "with_code": "57c8b56de66790faec97d3d41e37b747521b4588",
+     "tip": "d3fc3a6aa80f4f82f25bc12222caf0b46c8abc47",
+     "with_tip": "d6202d7c80e96eda7ffdaafd3d8c22ba3bab79a1",
+     "at": "2026-11-11T10:08:13Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#17756",
+     "code": "873e016f2c1de2dca277b4103c96f06d859e2b86",
+     "with_code": "00b33a7b015bc7730a8a6926657f2a3f49039187",
+     "tip": "d3fc3a6aa80f4f82f25bc12222caf0b46c8abc47",
+     "with_tip": "8572025768f7d2c7789cd500f9e0ecb239ce3f1a",
+     "at": "2026-11-11T10:08:13Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#18824",
+     "code": "873e016f2c1de2dca277b4103c96f06d859e2b86",
+     "with_code": "9116635d60609d2eef75c51d8fed7497d76777be",
+     "tip": "d3fc3a6aa80f4f82f25bc12222caf0b46c8abc47",
+     "with_tip": "0d964114cab2278163d33845737a85df8faa60a0",
+     "at": "2026-11-11T10:08:13Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "macos-scroll-direction",
+     "code": "873e016f2c1de2dca277b4103c96f06d859e2b86",
+     "with_code": "77665e693fe101119cd907f5007a48a52b4f7077",
+     "tip": "d3fc3a6aa80f4f82f25bc12222caf0b46c8abc47",
+     "with_tip": "94190cd775d64eb2a669a1df03ec705f664abaee",
+     "at": "2026-11-11T10:08:13Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   }
  ],
  "watch": {
