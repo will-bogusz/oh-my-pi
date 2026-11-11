@@ -81690,7 +81690,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-11T18:38:11Z",
+  "checked": "2026-11-11T19:08:24Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -81945,30 +81945,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-04T18:41:47Z",
-    "kind": "merged",
-    "number": 17885,
-    "title": "feat(ai,catalog): identify Factory Droid requests as droid 1.1.0",
-    "merged_by": "H4vC",
-    "maintainer_commits": 1
-   },
-   {
-    "at": "2026-11-04T18:41:47Z",
-    "kind": "merged",
-    "number": 17862,
-    "title": "feat(catalog): add Muse Spark 1.3 to Factory Droid",
-    "merged_by": "H4vC",
-    "maintainer_commits": 1
-   },
-   {
-    "at": "2026-11-04T18:41:47Z",
-    "kind": "merged",
-    "number": 17861,
-    "title": "feat(ai,catalog,coding-agent): add Factory Droid Gemini 4 Argon with its request dialect",
-    "merged_by": "H4vC",
-    "maintainer_commits": 1
-   },
    {
     "at": "2026-11-04T21:14:27Z",
     "kind": "merged",
@@ -88822,7 +88798,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-11T18:38:11.860077Z",
+  "at": "2026-11-11T19:08:25.104285Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -90250,6 +90226,27 @@
     ],
     "needs": [],
     "created": "2026-11-11T14:43:42Z"
+   },
+   {
+    "id": "macos-press-click-hint",
+    "label": "macos-press-click-hint",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P2",
+    "title": "fix(natives): point a refused macOS press at the element's own click",
+    "action": "wait",
+    "reasons": [
+     "conflicts with #18892 in crates/pi-natives/src/desktop/macos/ax.rs"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "#18892"
+    ],
+    "needs": [],
+    "created": "2026-11-11T18:49:11Z"
    },
    {
     "id": "macos-scroll-direction",
