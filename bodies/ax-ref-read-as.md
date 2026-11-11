@@ -22,7 +22,7 @@ Reading order: `require_read_as`, `confirm_read_as`, `find_read_as` (`desktop/ax
 
 In six runs of one Contacts task on our benchmark (2026-11-10), four saved "10600 North Tantau AvenueCupertino" / "CA" / "95014" and the model reported the address verified. The tool prompt already says a ref lasts until its role or label changes; `AxRegistry::resolve` never checked.
 
-- Rejected: following the control to its new element. Equal labels do not prove the same control: a version that followed rebuilt Activity Monitor rows opened the wrong process in 2 of 10 trials. In Contacts no candidate is named, since its second, empty address row also has a "City".
+- Rejected: following the control to its new element. A version that followed rebuilt Activity Monitor rows opened the wrong process in 2 of 10 trials. In Contacts no candidate is named, since its second, empty address row also has a "City".
 - Costs: a control whose own title flips (Play to Pause) is refused too; the error's new ref takes the action. Window refs, and reads the app leaves half answered, are exempt. One batched read per action; Linux and Windows unchanged.
 
 ## Testing
