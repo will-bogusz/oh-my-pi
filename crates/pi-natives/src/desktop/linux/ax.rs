@@ -2141,7 +2141,7 @@ mod tests {
 					};
 					assert_eq!(coordinate, expected, "{path}");
 					if let Some(index) = coordinate {
-						assert!(action.do_action(index).await.unwrap().is_some());
+						assert!(action.do_action(index).await.unwrap());
 					}
 				}
 				let object = ObjectRefOwned::from_static_str_unchecked(PEER, "/huge");
