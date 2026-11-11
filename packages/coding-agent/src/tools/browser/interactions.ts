@@ -302,11 +302,15 @@ export async function isClickActionable(
 	return await untilAborted(signal, () => handle.evaluate(clickActionableInPage, flags));
 }
 
+/** Briefly tolerate loading overlays without waiting on an open menu for the full action timeout. */
+const CLICK_COVER_GRACE_MS = 500;
+
 async function actionableClickPoint(
 	handle: ElementHandle,
 	label: string,
 	signal: AbortSignal | undefined,
 	options: ClickAtOptions,
+	coverGraceMs: number,
 ): Promise<ClickPoint> {
 	await untilAborted(signal, () =>
 		handle.evaluate(el => {
@@ -316,6 +320,7 @@ async function actionableClickPoint(
 	);
 	let previous = await untilAborted(signal, () => handle.boundingBox());
 	let refusal: string | undefined;
+	let coveredSince: number | undefined;
 	try {
 		while (true) {
 			throwIfAborted(signal);
@@ -332,7 +337,13 @@ async function actionableClickPoint(
 			// ElementHandle.boundingBox() is relative to the main frame; elementFromPoint() above is frame-local.
 			if (stable && result.ok && current) return { x: current.x + result.x, y: current.y + result.y };
 			if (stable && !result.ok && result.coveredBy) {
-				throw new ToolError(`${label} blocked: covered by ${result.coveredBy}`);
+				const now = performance.now();
+				coveredSince ??= now;
+				if (now - coveredSince >= coverGraceMs) {
+					throw new ToolError(`${label} blocked: covered by ${result.coveredBy}`);
+				}
+			} else if (result.ok || !result.coveredBy) {
+				coveredSince = undefined;
 			}
 			refusal = result.ok ? "still moving" : result.coveredBy ? `covered by ${result.coveredBy}` : result.reason;
 			previous = current;
@@ -356,8 +367,9 @@ export async function clickElement(
 	label: string,
 	signal?: AbortSignal,
 	options: ClickAtOptions = {},
+	coverGraceMs = CLICK_COVER_GRACE_MS,
 ): Promise<void> {
-	const point = await actionableClickPoint(handle, label, signal, options);
+	const point = await actionableClickPoint(handle, label, signal, options, coverGraceMs);
 	const watch = await untilAborted(signal, () =>
 		handle.evaluateHandle(el => {
 			interface InputEvent {
@@ -1536,7 +1548,7 @@ async function catchChooserInput(
 		await untilAborted(signal, () => session.send("Page.setInterceptFileChooserDialog", { enabled: true }));
 		// The wait covers the click, so a target that only becomes clickable later counts as a drop zone.
 		timer = setTimeout(() => resolve(null), FILE_CHOOSER_WAIT_MS);
-		await clickElement(handle, label, signal);
+		await clickElement(handle, label, signal, {}, 0);
 		const chooser = await untilAborted(signal, () => opened);
 		if (!chooser) return null;
 		if (chooser.backendNodeId === undefined) {

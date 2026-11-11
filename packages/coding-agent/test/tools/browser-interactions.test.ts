@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import { afterAll, beforeAll, describe, expect, spyOn, test } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
@@ -10,12 +10,14 @@ import {
 	clickElement,
 	clickQueryHandlerText,
 	fillViaHandle,
+	prepareElementUpload,
 	resolveActionableQueryHandlerClickTarget,
 	TypingInterruptedError,
 } from "@oh-my-pi/pi-coding-agent/tools/browser/interactions";
 import { acquireBrowser, releaseBrowser } from "@oh-my-pi/pi-coding-agent/tools/browser/registry";
 import { releaseAllTabs } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-supervisor";
 import { TERN_KIT_SOURCE } from "@oh-my-pi/pi-coding-agent/tools/browser/tern/page-kit";
+import { UploadStaging } from "@oh-my-pi/pi-coding-agent/tools/browser/upload-files";
 import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools/index";
 import { rejectionOf } from "../helpers/rejection";
 import { chromiumAvailable } from "./chromium-probe";
@@ -93,6 +95,55 @@ afterAll(async () => {
 });
 
 describe.skipIf(!CHROMIUM_AVAILABLE)("browser click timeouts", () => {
+	test.each([
+		{ name: "clicks when the cover clears within the grace", clearAt: 300, upload: false, clicked: true },
+		{ name: "refuses a cover that outlasts the grace", clearAt: 600, upload: false, clicked: false },
+		{ name: "still refuses a covered upload chooser without clicking", clearAt: 300, upload: true, clicked: false },
+	])("$name", async ({ clearAt, upload, clicked }) => {
+		const browserHandle = await acquireBrowser({ kind: "headless", headless: true }, { cwd: process.cwd() });
+		if (!("browser" in browserHandle)) throw new Error("Expected a Puppeteer browser");
+		const page = await browserHandle.browser.newPage();
+		let elapsed = 0;
+		let cleared = false;
+		const clock = spyOn(performance, "now").mockImplementation(() => elapsed);
+		const sleep = spyOn(Bun, "sleep").mockImplementation(async duration => {
+			if (typeof duration !== "number") throw new Error("Expected a numeric polling delay");
+			elapsed += duration;
+			if (!cleared && elapsed >= clearAt) {
+				await page.$eval("#overlay", element => element.remove());
+				cleared = true;
+			}
+		});
+		try {
+			await page.setContent(html);
+			const target = await page.$("#covered");
+			if (!target) throw new Error("Expected covered target");
+			await target.evaluate(element => {
+				const page = globalThis as unknown as {
+					addEventListener(type: string, listener: () => void, capture: boolean): void;
+				};
+				page.addEventListener("click", () => element.setAttribute("data-clicked", "yes"), true);
+			});
+			const action = upload
+				? prepareElementUpload(page, target, [uploadPath], "covered target", "paths", new UploadStaging(tempDir))
+				: clickElement(target, "covered target");
+			if (clicked) {
+				await action;
+				expect(await target.evaluate(element => element.getAttribute("data-clicked"))).toBe("yes");
+			} else {
+				expect(String(await rejectionOf(action))).toContain("blocked: covered by <div#overlay>");
+				expect(await target.evaluate(element => element.getAttribute("data-clicked"))).toBeNull();
+				expect(cleared).toBe(false);
+			}
+			await target.dispose();
+		} finally {
+			sleep.mockRestore();
+			clock.mockRestore();
+			await page.close().catch(() => undefined);
+			if (browserHandle.browser.connected) await releaseBrowser(browserHandle, { kill: true });
+		}
+	});
+
 	test("rejects promptly when a text-click candidate evaluation is aborted", async () => {
 		const browserHandle = await acquireBrowser({ kind: "headless", headless: true }, { cwd: process.cwd() });
 		if (!("browser" in browserHandle)) throw new Error("Expected a Puppeteer browser");
