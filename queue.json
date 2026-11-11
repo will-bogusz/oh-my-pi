@@ -81724,15 +81724,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-11T20:09:49Z",
+  "checked": "2026-11-11T20:40:41Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {
-   "wait-ladder-context": {
-    "since": "2026-11-11T10:31:11Z",
-    "title": "feat(wait): reduce empty checks in large conversations"
-   }
-  },
+  "openable": {},
   "conflicts": {},
   "merged_through": "2026-11-11T13:55:07Z",
   "unreleased": {},
@@ -81777,7 +81772,8 @@
    18922,
    18923,
    18924,
-   18925
+   18925,
+   18939
   ],
   "post_merge": {
    "16274": {
@@ -84239,6 +84235,13 @@
     "number": 16274,
     "title": "fix(agent,coding-agent): re-read a file an earlier bash call changed in the same message",
     "tag": "v18.18.9"
+   },
+   {
+    "at": "2026-11-11T20:40:41Z",
+    "kind": "unopenable",
+    "id": "wait-ladder-context",
+    "title": "feat(wait): reduce empty checks in large conversations",
+    "why": "opened as #18939"
    }
   ]
  },
@@ -88936,7 +88939,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-11T20:09:50.544912Z",
+  "at": "2026-11-11T20:40:41.826390Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -89672,6 +89675,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T16:51:01Z"
+   },
+   {
+    "id": "wait-ladder-context",
+    "label": "#18939",
+    "number": 18939,
+    "state": "open",
+    "area": "coding-agent",
+    "priority": "P2",
+    "title": "feat(wait): reduce empty checks in large conversations",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-11T20:18:51Z"
    },
    {
     "id": "atspi-huge-children",
@@ -90770,7 +90790,7 @@
      "held: Main, 2026-11-11: stays held until #18786 merges with the typed-message guide channel (design check replace); then one property on the computer prelude, drop the wrap variant, re-run its blind legs",
      "needs #18786 (open)",
      "conflicts with #18786 in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/prompts/tools/eval.md, packages/coding-agent/src/tools/eval.ts",
-     "conflicts with main in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/sdk-computer-prelude-toggle.test.ts"
+     "conflicts with main in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/sdk-computer-prelude-toggle.test.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
     "over": [],
@@ -90805,7 +90825,7 @@
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/tools/eval.ts",
-     "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/computer/worker.ts"
+     "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
     "over": [],
@@ -91026,23 +91046,6 @@
     ],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
-   },
-   {
-    "id": "wait-ladder-context",
-    "label": "wait-ladder-context",
-    "number": null,
-    "state": "queued",
-    "area": "coding-agent",
-    "priority": "P2",
-    "title": "feat(wait): reduce empty checks in large conversations",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-11T10:13:40Z"
    },
    {
     "id": "browser-toggle-prefix",
