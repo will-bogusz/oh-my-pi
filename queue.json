@@ -77412,7 +77412,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-11T10:00:57Z",
+  "checked": "2026-11-11T10:31:11Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -77428,6 +77428,10 @@
     "since": "2026-11-11T10:00:57Z",
     "title": "fix(natives): refuse Windows background input that holds a modifier"
    },
+   "xproc-intervention": {
+    "since": "2026-11-11T10:31:11Z",
+    "title": "fix(natives): stop macOS input refusals between omp processes"
+   },
    "browser-main-wait-navigation": {
     "since": "2026-11-11T10:00:57Z",
     "title": "fix(browser): rearm main-world waits after navigation"
@@ -77439,6 +77443,14 @@
    "macos-menu-miss-items": {
     "since": "2026-11-11T10:00:57Z",
     "title": "fix(natives): name the menu items on offer when a menu bar path misses"
+   },
+   "win-menu-modal": {
+    "since": "2026-11-11T10:31:11Z",
+    "title": "fix(natives): confirm Windows menu commands that open modal dialogs"
+   },
+   "wait-ladder-context": {
+    "since": "2026-11-11T10:31:11Z",
+    "title": "feat(wait): reduce empty checks in large conversations"
    }
   },
   "conflicts": {
@@ -79498,6 +79510,24 @@
     "id": "win-target-layout",
     "title": "fix(natives): map Windows keys on the receiving keyboard layout",
     "why": "plan: held (held: WindowsMined, 2026-11-11: live Windows trial pending; unhold when its body carries the result; conflicts with win-posted-modifiers in crates/pi-natives/src/desktop/win32/input.rs)"
+   },
+   {
+    "at": "2026-11-11T10:31:11Z",
+    "kind": "openable",
+    "id": "xproc-intervention",
+    "title": "fix(natives): stop macOS input refusals between omp processes"
+   },
+   {
+    "at": "2026-11-11T10:31:11Z",
+    "kind": "openable",
+    "id": "win-menu-modal",
+    "title": "fix(natives): confirm Windows menu commands that open modal dialogs"
+   },
+   {
+    "at": "2026-11-11T10:31:11Z",
+    "kind": "openable",
+    "id": "wait-ladder-context",
+    "title": "feat(wait): reduce empty checks in large conversations"
    }
   ]
  },
@@ -82927,12 +82957,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-11T10:00:57.875281Z",
+  "at": "2026-11-11T10:31:12.511959Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 1,
-   "left": 7
+   "used": 0,
+   "left": 8
   },
   "rows": [
    {
@@ -83214,7 +83244,7 @@
     "state": "open",
     "area": "browser",
     "priority": "P1",
-    "title": "fix(browser): check a hover target the way a click target is checked",
+    "title": "fix(browser): hover on a hidden match waits and names the reason, like click",
     "action": "keep",
     "reasons": [],
     "note": "",
@@ -83302,9 +83332,11 @@
     "title": "fix(natives): capture a covered X11 window from its own pixels, or say it is covered",
     "action": "keep",
     "reasons": [],
-    "note": "",
+    "note": "accepted pair with #18013",
     "over": [],
-    "paired": [],
+    "paired": [
+     "#18013"
+    ],
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-10T22:05:35Z"
@@ -83351,16 +83383,12 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): stop X11 background input from crashing your running Qt 6.5+ apps",
-    "action": "requeue",
-    "reasons": [
-     "conflicts with #18784 in crates/pi-natives/src/desktop/linux/x11/mpx.rs"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#18784"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T03:47:36Z"
    },
@@ -83563,18 +83591,15 @@
     "area": "natives",
     "priority": "P2",
     "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "action": "requeue",
-    "reasons": [
-     "conflicts with #18783 in crates/pi-natives/Cargo.toml"
-    ],
-    "note": "accepted pair with #18353",
+    "action": "keep",
+    "reasons": [],
+    "note": "accepted pair with #18353; accepted pair with #18783",
     "over": [],
     "paired": [
-     "#18353"
-    ],
-    "blocked_by": [
+     "#18353",
      "#18783"
     ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-03T22:44:07Z"
    },
@@ -83676,14 +83701,16 @@
     "action": "wait",
     "reasons": [
      "conflicts with #18823 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with #18353 in MODULE.bazel.lock, crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs"
+     "conflicts with #18353 in MODULE.bazel.lock, crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
+     "conflicts with #18013 in MODULE.bazel.lock"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
      "#18823",
-     "#18353"
+     "#18353",
+     "#18013"
     ],
     "needs": [],
     "created": "2026-11-03T08:39:53Z"
@@ -83722,6 +83749,7 @@
      "conflicts with #18783 in crates/pi-natives/Cargo.toml",
      "conflicts with #18823 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18353 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
+     "conflicts with #18013 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/libei.rs",
      "conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
@@ -83730,7 +83758,8 @@
     "blocked_by": [
      "#18783",
      "#18823",
-     "#18353"
+     "#18353",
+     "#18013"
     ],
     "needs": [
      "atspi-unanswered-app"
@@ -83839,6 +83868,25 @@
     "created": "2026-10-30T21:35:55Z"
    },
    {
+    "id": "macos-layout-chords",
+    "label": "macos-layout-chords",
+    "number": null,
+    "state": "queued",
+    "area": "natives",
+    "priority": "P1",
+    "title": "fix(natives): press macOS key chords on the keys of the current keyboard layout",
+    "action": "held",
+    "reasons": [
+     "held: MacMined, 2026-11-11: 30-trial French fix run pending on a queued bench-mac lease; body cells update after"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-11T10:01:18Z"
+   },
+   {
     "id": "macos-press-disabled",
     "label": "macos-press-disabled",
     "number": null,
@@ -83923,15 +83971,15 @@
     "action": "held",
     "reasons": [
      "held: WindowsMined, 2026-11-11: live Windows trial pending; unhold when its body carries the result",
-     "conflicts with win-posted-modifiers in crates/pi-natives/src/desktop/win32/input.rs"
+     "needs win-posted-modifiers (queued)"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
+    "blocked_by": [],
+    "needs": [
      "win-posted-modifiers"
     ],
-    "needs": [],
     "created": "2026-11-11T09:13:32Z"
    },
    {
@@ -83987,14 +84035,16 @@
     "action": "wait",
     "reasons": [
      "conflicts with #18783 in crates/pi-natives/Cargo.toml",
-     "conflicts with #18784 in crates/pi-natives/src/desktop/linux/x11/input.rs"
+     "conflicts with #18784 in crates/pi-natives/src/desktop/linux/x11/input.rs",
+     "conflicts with #18013 in crates/pi-natives/Cargo.toml"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
      "#18783",
-     "#18784"
+     "#18784",
+     "#18013"
     ],
     "needs": [],
     "created": "2026-11-11T02:32:01Z"
@@ -84021,6 +84071,23 @@
     ],
     "needs": [],
     "created": "2026-11-11T02:31:05Z"
+   },
+   {
+    "id": "xproc-intervention",
+    "label": "xproc-intervention",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): stop macOS input refusals between omp processes",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-11T10:07:38Z"
    },
    {
     "id": "browser-wait-predicate",
@@ -84444,6 +84511,25 @@
     "created": "2026-11-11T07:04:56Z"
    },
    {
+    "id": "win-ax-states",
+    "label": "win-ax-states",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P2",
+    "title": "fix(natives): expose Windows control state and stale-reference matches",
+    "action": "held",
+    "reasons": [
+     "held: WindowsMined, 2026-11-11: live Windows trial running; body gets the result"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-11T10:16:04Z"
+   },
+   {
     "id": "win-menu-modal",
     "label": "win-menu-modal",
     "number": null,
@@ -84451,10 +84537,8 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): confirm Windows menu commands that open modal dialogs",
-    "action": "held",
-    "reasons": [
-     "held: WindowsMined, 2026-11-11: live Windows trial running; body gets the result"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -84922,6 +85006,23 @@
     ],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
+   },
+   {
+    "id": "wait-ladder-context",
+    "label": "wait-ladder-context",
+    "number": null,
+    "state": "queued",
+    "area": "coding-agent",
+    "priority": "P2",
+    "title": "feat(wait): reduce empty checks in large conversations",
+    "action": "next-hour",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-11T10:13:40Z"
    },
    {
     "id": "encoded-prefix-count",
