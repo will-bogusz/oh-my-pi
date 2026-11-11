@@ -35,9 +35,9 @@ pub(super) struct Keymap {
 	keysyms:             Vec<u32>,
 	/// Core modifier mask bit each modifier keycode sets while held.
 	modifier_masks:      Vec<(u8, u16)>,
-	device:             Option<u8>,
-	core_mapping:       bool,
-	master:             Option<u8>,
+	device:              Option<u8>,
+	core_mapping:        bool,
+	master:              Option<u8>,
 }
 
 impl Keymap {
@@ -94,7 +94,8 @@ impl Keymap {
 			.map_err(keymap_failed)?
 			.reply()
 			.map_err(keymap_failed)?;
-		let mut map = Self::new(min_keycode, mapping.keysyms_per_keycode, mapping.keysyms, Vec::new());
+		let mut map =
+			Self::new(min_keycode, mapping.keysyms_per_keycode, mapping.keysyms, Vec::new());
 		map.device = Some(device_id);
 		map.core_mapping = false;
 		Ok(map)
@@ -129,7 +130,11 @@ impl Keymap {
 		else {
 			return Ok(core);
 		};
-		Ok(Self { modifier_masks: core.modifier_masks, core_mapping: true, ..Self::device(conn, device.into())? })
+		Ok(Self {
+			modifier_masks: core.modifier_masks,
+			core_mapping: true,
+			..Self::device(conn, device.into())?
+		})
 	}
 
 	const fn new(
@@ -138,7 +143,15 @@ impl Keymap {
 		keysyms: Vec<u32>,
 		modifier_masks: Vec<(u8, u16)>,
 	) -> Self {
-		Self { min_keycode, keysyms_per_keycode, keysyms, modifier_masks, device: None, core_mapping: true, master: None }
+		Self {
+			min_keycode,
+			keysyms_per_keycode,
+			keysyms,
+			modifier_masks,
+			device: None,
+			core_mapping: true,
+			master: None,
+		}
 	}
 
 	/// Keycode emitting `keysym` and whether Shift must be held for it. The
@@ -194,7 +207,11 @@ impl Keymap {
 		let spare: Vec<_> = if width == 0 {
 			Vec::new()
 		} else {
-			self.keysyms.chunks_exact(width).enumerate().rev()
+			self
+				.keysyms
+				.chunks_exact(width)
+				.enumerate()
+				.rev()
 				.filter(|(_, row)| row.iter().all(|&symbol| symbol == 0))
 				.filter_map(|(index, _)| self.min_keycode.checked_add(u8::try_from(index).ok()?))
 				.filter(|code| self.modifier_mask(*code) == 0)
@@ -203,8 +220,10 @@ impl Keymap {
 		};
 		if missing.len() > spare.len() {
 			return Err(DesktopError::input_failed(format!(
-				"X11 text needs {} spare keycodes but only {} empty rows are available; no input was sent",
-				missing.len(), spare.len()
+				"X11 text needs {} spare keycodes but only {} empty rows are available; no input was \
+				 sent",
+				missing.len(),
+				spare.len()
 			)));
 		}
 		Ok(spare.into_iter().zip(missing).collect())
@@ -215,11 +234,18 @@ impl Keymap {
 		let Some(index) = code.checked_sub(self.min_keycode).map(usize::from) else {
 			return false;
 		};
-		width != 0 && self.keysyms.get(index * width..(index + 1) * width)
-			.is_some_and(|row| row.iter().all(|&symbol| symbol == 0))
+		width != 0
+			&& self
+				.keysyms
+				.get(index * width..(index + 1) * width)
+				.is_some_and(|row| row.iter().all(|&symbol| symbol == 0))
 	}
 
-	pub(super) fn bind_text(&mut self, conn: Arc<RustConnection>, text: &str) -> CoreResult<TextMapping> {
+	pub(super) fn bind_text(
+		&mut self,
+		conn: Arc<RustConnection>,
+		text: &str,
+	) -> CoreResult<TextMapping> {
 		let mut bindings = self.text_bindings(text, None)?;
 		let core = if bindings.is_empty() {
 			None
@@ -238,8 +264,16 @@ impl Keymap {
 		let mut guard = TextMapping {
 			conn,
 			device: if self.core_mapping { None } else { self.device },
-			width: if self.core_mapping { core.as_ref().map_or(self.keysyms_per_keycode, |map| map.keysyms_per_keycode) } else { self.keysyms_per_keycode },
-			master: self.master.zip(core.as_ref().map(|map| map.keysyms_per_keycode)),
+			width: if self.core_mapping {
+				core
+					.as_ref()
+					.map_or(self.keysyms_per_keycode, |map| map.keysyms_per_keycode)
+			} else {
+				self.keysyms_per_keycode
+			},
+			master: self
+				.master
+				.zip(core.as_ref().map(|map| map.keysyms_per_keycode)),
 			bound: Vec::new(),
 		};
 		for (code, symbol) in bindings {
@@ -252,7 +286,7 @@ impl Keymap {
 					let applied = Self::device(&guard.conn, device.into())?;
 					if applied.lookup(symbol) != Some((code, false)) {
 						return Err(DesktopError::input_failed(
-							"X11 device did not adopt the temporary text mapping; no input was sent"
+							"X11 device did not adopt the temporary text mapping; no input was sent",
 						));
 					}
 				}
@@ -353,28 +387,37 @@ impl Keymap {
 
 /// Owns the server-side bindings independently of cancellation and unwinding.
 pub(super) struct TextMapping {
-	conn: Arc<RustConnection>,
+	conn:   Arc<RustConnection>,
 	device: Option<u8>,
-	width: u8,
+	width:  u8,
 	master: Option<(u8, u8)>,
-	bound: Vec<u8>,
+	bound:  Vec<u8>,
 }
 
 impl TextMapping {
 	fn write(&self, code: u8, row: &[u32]) -> CoreResult<()> {
 		let result = if let Some(device) = self.device {
-			self.conn.xinput_change_device_key_mapping(device, code, self.width, 1, row)
-				.map_err(keymap_failed).and_then(|cookie| cookie.check().map_err(keymap_failed))
+			self
+				.conn
+				.xinput_change_device_key_mapping(device, code, self.width, 1, row)
+				.map_err(keymap_failed)
+				.and_then(|cookie| cookie.check().map_err(keymap_failed))
 		} else {
-			self.conn.change_keyboard_mapping(1, code, self.width, row)
-				.map_err(keymap_failed).and_then(|cookie| cookie.check().map_err(keymap_failed))
+			self
+				.conn
+				.change_keyboard_mapping(1, code, self.width, row)
+				.map_err(keymap_failed)
+				.and_then(|cookie| cookie.check().map_err(keymap_failed))
 		};
 		// A slave's next key copies its map to its master. Restore that copy
 		// too, even when the slave's restore failed.
 		let master = if let Some((device, width)) = self.master {
 			let row = vec![row[0]; usize::from(width)];
-			self.conn.xinput_change_device_key_mapping(device, code, width, 1, &row)
-				.map_err(keymap_failed).and_then(|cookie| cookie.check().map_err(keymap_failed))
+			self
+				.conn
+				.xinput_change_device_key_mapping(device, code, width, 1, &row)
+				.map_err(keymap_failed)
+				.and_then(|cookie| cookie.check().map_err(keymap_failed))
 		} else {
 			Ok(())
 		};
@@ -397,7 +440,8 @@ impl TextMapping {
 		}
 		if let Some(error) = failure {
 			return Err(DesktopError::input_failed(format!(
-				"failed to restore temporary X11 text keymap: {}", error.message
+				"failed to restore temporary X11 text keymap: {}",
+				error.message
 			)));
 		}
 		self.bound.clear();

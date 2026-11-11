@@ -17,7 +17,10 @@
 
 use std::{
 	fs, io,
-	sync::{Arc, atomic::{AtomicU16, Ordering}},
+	sync::{
+		Arc,
+		atomic::{AtomicU16, Ordering},
+	},
 	time::{Duration, Instant},
 };
 
@@ -366,7 +369,9 @@ impl Mpx {
 		self.begin()?;
 		let mut keymap = self.keyboard_keymap()?;
 		let mapping = keymap.bind_text(Arc::clone(&self.conn), text)?;
-		let result = keymap.plan_text(text).and_then(|steps| self.deliver_keys(target, &steps));
+		let result = keymap
+			.plan_text(text)
+			.and_then(|steps| self.deliver_keys(target, &steps));
 		mapping.finish(result)
 	}
 
