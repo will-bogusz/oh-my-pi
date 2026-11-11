@@ -77760,7 +77760,7 @@
    "branch": "will/win-screen-locked",
    "title": "fix(natives,coding-agent): report unavailable Windows desktop sessions",
    "area": "computer",
-   "priority": "P2",
+   "priority": "P1",
    "needs": [],
    "base": "d210c3065783f63b994da7dba31f572bcf6e5261",
    "body": "bodies/win-screen-locked.md",
@@ -77770,7 +77770,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-screen-locked",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:31:29Z",
-   "updated": "2026-11-11T22:12:02Z",
+   "updated": "2026-11-11T22:12:28Z",
    "note": "",
    "advanced": "2026-11-11T22:12:02Z",
    "built": [
