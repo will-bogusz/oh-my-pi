@@ -77212,7 +77212,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/main-world-wait",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:58:00Z",
-   "updated": "2026-11-11T11:33:31Z",
+   "updated": "2026-11-11T11:33:56Z",
    "note": "",
    "built": [
     {
@@ -77486,7 +77486,8 @@
      "tree": "7f38b215d2735a663a1299f21814d11c0f8f8349"
     }
    ],
-   "opened": "2026-11-11T11:33:31Z"
+   "opened": "2026-11-11T11:33:31Z",
+   "readied": "2026-11-11T11:33:56Z"
   },
   {
    "id": "macos-press-disabled",
