@@ -18,6 +18,7 @@ use crate::desktop::{backend::DeliveryMode, control, types::Target};
 
 #[link(name = "X11")]
 unsafe extern "C" {
+	fn XInitThreads() -> c_int;
 	fn XOpenDisplay(name: *const c_char) -> *mut c_void;
 	fn XCloseDisplay(display: *mut c_void) -> c_int;
 	fn XDefaultRootWindow(display: *mut c_void) -> c_ulong;
@@ -86,6 +87,11 @@ fn remapped_send_event_text_is_translated_before_the_empty_rows_are_restored() {
 }
 
 fn text_is_translated(mode: DeliveryMode) {
+	static XLIB: std::sync::Once = std::sync::Once::new();
+	XLIB.call_once(|| {
+		// SAFETY: this precedes both fixture threads' first Xlib call.
+		assert_ne!(unsafe { XInitThreads() }, 0);
+	});
 	let (_server, display) = server();
 	let receiver_display = CString::new(display.clone()).unwrap();
 	let (ready, started) = std::sync::mpsc::channel();
