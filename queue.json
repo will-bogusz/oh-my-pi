@@ -88383,6 +88383,11 @@
     "sha": "da35a48ed814fdb87bb8ecfe380c96a3a52ceac1",
     "at": "2026-11-11T16:58:37Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "da35a48ed814fdb87bb8ecfe380c96a3a52ceac1",
+    "at": "2026-11-11T16:59:54Z",
+    "host": "goliath"
    }
   },
   "a3f7dacb94128a6489ee8179fde02c6602d6b1ce": {
