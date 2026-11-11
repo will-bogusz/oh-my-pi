@@ -88464,6 +88464,11 @@
     "sha": "a18e0fc33b07fe9d2d2351c45f0c810767b5db91",
     "at": "2026-11-11T17:12:59Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "a18e0fc33b07fe9d2d2351c45f0c810767b5db91",
+    "at": "2026-11-11T17:20:04Z",
+    "host": "goliath"
    }
   }
  },
