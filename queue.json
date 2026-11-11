@@ -78222,6 +78222,11 @@
     "sha": "c2a2e1aca8b60d0e22f77369734a8fe800ccf91f",
     "at": "2026-11-11T01:59:03Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "c2a2e1aca8b60d0e22f77369734a8fe800ccf91f",
+    "at": "2026-11-11T02:04:47Z",
+    "host": "goliath"
    }
   },
   "3694933a19a48a5d7c83e0401630a78d74ada8d0": {
