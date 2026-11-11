@@ -79870,7 +79870,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-11T14:04:44Z",
+  "checked": "2026-11-11T14:35:37Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -79902,20 +79902,16 @@
     "since": "2026-11-11T10:31:11Z",
     "title": "fix(natives): confirm Windows menu commands that open modal dialogs"
    },
+   "r2/native-window-report": {
+    "since": "2026-11-11T14:35:37Z",
+    "title": "feat(coding-agent): name the native windows a browser call raised on macOS"
+   },
    "wait-ladder-context": {
     "since": "2026-11-11T10:31:11Z",
     "title": "feat(wait): reduce empty checks in large conversations"
    }
   },
-  "conflicts": {
-   "#16611": {
-    "since": "2026-11-05T14:32:39Z",
-    "title": "feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio",
-    "files": [
-     "packages/ai/src/providers/openai-shared.ts"
-    ]
-   }
-  },
+  "conflicts": {},
   "merged_through": "2026-11-11T13:55:07Z",
   "unreleased": {
    "18865": {
@@ -82340,6 +82336,12 @@
     "kind": "openable",
     "id": "atspi-unanswered-app",
     "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool"
+   },
+   {
+    "at": "2026-11-11T14:35:37Z",
+    "kind": "openable",
+    "id": "r2/native-window-report",
+    "title": "feat(coding-agent): name the native windows a browser call raised on macOS"
    }
   ]
  },
@@ -86377,8 +86379,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-11T14:16:04.737920Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-11T14:35:38.138804Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -86448,9 +86450,12 @@
     "title": "fix(natives): place macOS clicks for the focus guard where WindowServer routed them",
     "action": "keep",
     "reasons": [],
-    "note": "",
+    "note": "accepted pair with #18743; accepted pair with #18896",
     "over": [],
-    "paired": [],
+    "paired": [
+     "#18743",
+     "#18896"
+    ],
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-20T20:20:43Z"
@@ -86552,16 +86557,14 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): return the window showing a page from macOS apps.open in a browser",
-    "action": "requeue",
-    "reasons": [
-     "conflicts with #16553 in crates/pi-natives/src/desktop/macos/mod.rs"
-    ],
-    "note": "",
+    "action": "keep",
+    "reasons": [],
+    "note": "accepted pair with #16553",
     "over": [],
-    "paired": [],
-    "blocked_by": [
+    "paired": [
      "#16553"
     ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-10T16:42:22Z"
    },
@@ -86764,16 +86767,14 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): stop macOS input refusals between omp processes",
-    "action": "requeue",
-    "reasons": [
-     "conflicts with #16553 in crates/pi-natives/src/desktop/control/macos.rs"
-    ],
-    "note": "",
+    "action": "keep",
+    "reasons": [],
+    "note": "accepted pair with #16553",
     "over": [],
-    "paired": [],
-    "blocked_by": [
+    "paired": [
      "#16553"
     ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T12:51:11Z"
    },
@@ -88134,6 +88135,7 @@
     "reasons": [
      "needs computer-ui-quiet (queued)",
      "conflicts with #18898 in crates/pi-natives/src/desktop/macos/ax.rs, docs/tools/computer.md",
+     "conflicts with #18743 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with #18753 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18783 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18784 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md",
@@ -88150,6 +88152,7 @@
     "paired": [],
     "blocked_by": [
      "#18898",
+     "#18743",
      "#18753",
      "#18783",
      "#18784",
