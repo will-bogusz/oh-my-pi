@@ -80875,12 +80875,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-11T06:56:55.318079Z",
-  "host": "goliath",
+  "at": "2026-11-11T07:10:25.138400Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 2,
-   "left": 6
+   "used": 1,
+   "left": 7
   },
   "rows": [
    {
@@ -81436,17 +81436,13 @@
     "state": "open",
     "area": "browser",
     "priority": "P2",
-    "title": "fix(coding-agent,browser-relay): stop a page calling window.print() from hanging browser calls",
-    "action": "requeue",
-    "reasons": [
-     "conflicts with #18737 in packages/coding-agent/src/tools/browser/tab-supervisor.ts"
-    ],
+    "title": "fix(coding-agent): stop a page calling window.print() from hanging the browser omp launches",
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#18737"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T06:06:09Z"
    },
@@ -81889,6 +81885,7 @@
     "action": "wait",
     "reasons": [
      "conflicts with #18676 in packages/coding-agent/src/tools/browser/frames.ts",
+     "conflicts with #18838 in docs/tools/browser.md",
      "conflicts with #18786 in packages/coding-agent/src/prompts/tools/browser.md"
     ],
     "note": "",
@@ -81896,6 +81893,7 @@
     "paired": [],
     "blocked_by": [
      "#18676",
+     "#18838",
      "#18786"
     ],
     "needs": [],
@@ -81983,12 +81981,15 @@
     "title": "fix(browser): accept a RegExp in waitForText, as waitForUrl does",
     "action": "wait",
     "reasons": [
-     "needs browser-wait-predicate (queued)"
+     "needs browser-wait-predicate (queued)",
+     "conflicts with #18838 in docs/tools/browser.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#18838"
+    ],
     "needs": [
      "browser-wait-predicate"
     ],
@@ -82004,12 +82005,15 @@
     "title": "fix(browser): let a scoped waitForText match only text the page renders",
     "action": "wait",
     "reasons": [
-     "needs browser-wait-text-regexp (queued)"
+     "needs browser-wait-text-regexp (queued)",
+     "conflicts with #18838 in docs/tools/browser.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#18838"
+    ],
     "needs": [
      "browser-wait-text-regexp"
     ],
@@ -82102,13 +82106,15 @@
     "action": "wait",
     "reasons": [
      "needs r2/native-window-report (queued)",
-     "conflicts with #18833 in packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/test/tools/browser-attach.test.ts"
+     "conflicts with #18833 in packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/test/tools/browser-attach.test.ts",
+     "conflicts with #18838 in docs/tools/browser.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18833"
+     "#18833",
+     "#18838"
     ],
     "needs": [
      "r2/native-window-report"
@@ -82135,6 +82141,7 @@
      "conflicts with #18750 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18751 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18772 in docs/tools/browser.md",
+     "conflicts with #18838 in docs/tools/browser.md",
      "conflicts with #18776 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18786 in docs/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md, packages/browser-relay/README.md",
@@ -82153,6 +82160,7 @@
      "#18750",
      "#18751",
      "#18772",
+     "#18838",
      "#18776",
      "#18786",
      "#18789"
@@ -82183,6 +82191,7 @@
      "conflicts with #18751 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18772 in docs/tools/browser.md",
      "conflicts with #18832 in packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/test/tools/browser-relay-detach.test.ts",
+     "conflicts with #18838 in docs/tools/browser.md",
      "conflicts with #18776 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18786 in docs/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts",
@@ -82204,6 +82213,7 @@
      "#18751",
      "#18772",
      "#18832",
+     "#18838",
      "#18776",
      "#18786",
      "#18789"
@@ -82213,6 +82223,30 @@
      "r2/page-waiting"
     ],
     "created": "2026-10-13T21:47:19Z"
+   },
+   {
+    "id": "relay-print-preview-error",
+    "label": "relay-print-preview-error",
+    "number": null,
+    "state": "queued",
+    "area": "browser",
+    "priority": "P2",
+    "title": "fix(coding-agent,browser-relay): fail a browser call a print preview holds in an attached browser within seconds",
+    "action": "held",
+    "reasons": [
+     "held: Main, 2026-11-11: four Codex rounds in the probe/grace mechanism; design check before it opens",
+     "conflicts with #18737 in packages/coding-agent/src/tools/browser/tab-supervisor.ts",
+     "conflicts with #18838 in docs/tools/browser.md"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "#18737",
+     "#18838"
+    ],
+    "needs": [],
+    "created": "2026-11-11T07:04:56Z"
    },
    {
     "id": "act-look-prompt",
@@ -82527,13 +82561,15 @@
     "title": "feat(coding-agent): name the native windows a browser call raised on macOS",
     "action": "wait",
     "reasons": [
-     "conflicts with #17894 in crates/pi-natives/src/desktop/macos/mod.rs"
+     "conflicts with #17894 in crates/pi-natives/src/desktop/macos/mod.rs",
+     "conflicts with #18838 in docs/tools/browser.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#17894"
+     "#17894",
+     "#18838"
     ],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
@@ -82559,6 +82595,7 @@
      "conflicts with #18750 in packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18751 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18772 in docs/tools/browser.md",
+     "conflicts with #18838 in docs/tools/browser.md",
      "conflicts with #18776 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18786 in docs/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md",
@@ -82578,6 +82615,7 @@
      "#18750",
      "#18751",
      "#18772",
+     "#18838",
      "#18776",
      "#18786",
      "#18789"
