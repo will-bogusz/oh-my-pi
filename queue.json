@@ -88260,6 +88260,13 @@
     "at": "2026-11-11T16:16:11Z",
     "host": "goliath"
    }
+  },
+  "eb5af4576babbf9c2744a1f1ce658b1ef2fd3d85": {
+   "windows": {
+    "sha": "56990f64cd8da18048dfe2b4b478e4f28e6d362f",
+    "at": "2026-11-11T16:19:35Z",
+    "host": "goliath"
+   }
   }
  },
  "plan": {
