@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 04:14Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 04:15Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 3 of 8 ready events used in the hour before the last plan, 5 left (plan of 2026-11-11 04:08Z on MacBook-Pro; groups below are from it, states from the manifest)
@@ -11,7 +11,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
 | browser-select-readback | fix(coding-agent): return the options a page leaves selected after its change handlers | browser | P1 | 4h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-select-readback) |
-| browser-download-missing-file | fix(coding-agent): fail a download wait when the saved file is not on this machine | browser | P2 | 3h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-download-missing-file) |
+| browser-download-missing-file | fix(coding-agent): fail a download wait when the saved file is not on this machine | browser | P2 | 4h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-download-missing-file) |
 | relay-target-miss-hint | fix(browser): name the relay's own-tab open when a target matches no tab | browser | P2 | 2h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-target-miss-hint) |
 | relay-detach-owned-close | fix(browser): say omp closed its own relay tab when Chrome's detach ends it | browser | P2 | 2h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-detach-owned-close) |
 | x11-mpx-key-confirm | fix(natives): confirm every X11 virtual-keyboard key release, in order | computer | P1 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-mpx-key-confirm) |
@@ -32,7 +32,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | browser-run-node-hint | fix(browser): say where tab.run code runs when it reaches for a page global | browser | P2 | 11h | [#15508](https://github.com/can1357/oh-my-pi/pull/15508) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-run-node-hint) |
 | agent-identity | feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy | tui | P2 | 4h | [#18784](https://github.com/can1357/oh-my-pi/pull/18784) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/agent-identity) |
 | computer-run-failure-output | fix(computer): retain output and screenshots when a run fails | computer | P1 | 4h | [#18753](https://github.com/can1357/oh-my-pi/pull/18753) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-run-failure-output) |
-| browser-click-frame-removed | fix(coding-agent): fail a click whose frame the page removed while the button was down | browser | P1 | 3h | [#18676](https://github.com/can1357/oh-my-pi/pull/18676) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-click-frame-removed) |
+| browser-click-frame-removed | fix(coding-agent): fail a click whose frame the page removed while the button was down | browser | P1 | 4h | [#18676](https://github.com/can1357/oh-my-pi/pull/18676) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-click-frame-removed) |
 | computer-filter-types | fix(computer): say window and element filters take text when given a RegExp | computer | P2 | 2h | [#18753](https://github.com/can1357/oh-my-pi/pull/18753) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-filter-types) |
 | covered-fill | fix(coding-agent): refuse browser keys aimed at a field a modal dialog covers | browser | P1 | 2h | [#18676](https://github.com/can1357/oh-my-pi/pull/18676) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/covered-fill) |
 | x11-xtest-release | fix(natives): release X11 XTest keys and buttons a killed omp held | computer | P1 | 1h | [#18784](https://github.com/can1357/oh-my-pi/pull/18784), [#18222](https://github.com/can1357/oh-my-pi/pull/18222) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-xtest-release) |
