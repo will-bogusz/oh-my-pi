@@ -76810,7 +76810,7 @@
    "area": "browser",
    "priority": "P2",
    "needs": [],
-   "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
+   "base": "7b42b1be6069b791c54e1c4c93d2070978d9e6bf",
    "body": "bodies/print-pref.md",
    "state": "open",
    "pr": 18838,
@@ -76818,7 +76818,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/print-pref",
    "host": "MacBook-Pro",
    "added": "2026-11-11T03:57:46Z",
-   "updated": "2026-11-11T07:16:39Z",
+   "updated": "2026-11-11T11:45:37Z",
    "note": "",
    "built": [
     {
@@ -77044,7 +77044,7 @@
    ],
    "opened": "2026-11-11T06:06:11Z",
    "readied": "2026-11-11T06:06:53Z",
-   "advanced": "2026-11-11T07:16:39Z"
+   "advanced": "2026-11-11T11:45:37Z"
   },
   {
    "id": "relay-print-preview-error",
