@@ -73651,13 +73651,17 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-11T00:51:58Z",
+  "checked": "2026-11-11T01:52:22Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
    "atspi-unanswered-app": {
     "since": "2026-11-11T00:51:58Z",
     "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool"
+   },
+   "macos-click-timestamp": {
+    "since": "2026-11-11T01:52:22Z",
+    "title": "fix(natives): stop macOS background left clicks from crashing Electron and Chrome pages"
    },
    "browser-select-readback": {
     "since": "2026-11-11T00:21:30Z",
@@ -73666,6 +73670,14 @@
    "browser-download-missing-file": {
     "since": "2026-11-11T00:21:30Z",
     "title": "fix(coding-agent): fail a download wait when the saved file is not on this machine"
+   },
+   "relay-detach-owned-close": {
+    "since": "2026-11-11T01:52:22Z",
+    "title": "fix(browser): say omp closed its own relay tab when Chrome's detach ends it"
+   },
+   "relay-target-miss-hint": {
+    "since": "2026-11-11T01:52:22Z",
+    "title": "fix(browser): name the relay's own-tab open when a target matches no tab"
    }
   },
   "conflicts": {
@@ -75525,6 +75537,24 @@
     "kind": "openable",
     "id": "atspi-unanswered-app",
     "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool"
+   },
+   {
+    "at": "2026-11-11T01:52:22Z",
+    "kind": "openable",
+    "id": "macos-click-timestamp",
+    "title": "fix(natives): stop macOS background left clicks from crashing Electron and Chrome pages"
+   },
+   {
+    "at": "2026-11-11T01:52:22Z",
+    "kind": "openable",
+    "id": "relay-detach-owned-close",
+    "title": "fix(browser): say omp closed its own relay tab when Chrome's detach ends it"
+   },
+   {
+    "at": "2026-11-11T01:52:22Z",
+    "kind": "openable",
+    "id": "relay-target-miss-hint",
+    "title": "fix(browser): name the relay's own-tab open when a target matches no tab"
    }
   ]
  },
@@ -78235,7 +78265,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-11T00:51:59.553524Z",
+  "at": "2026-11-11T01:52:23.317167Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -78841,6 +78871,23 @@
     "created": "2026-11-03T08:39:53Z"
    },
    {
+    "id": "macos-click-timestamp",
+    "label": "macos-click-timestamp",
+    "number": null,
+    "state": "queued",
+    "area": "natives",
+    "priority": "P0",
+    "title": "fix(natives): stop macOS background left clicks from crashing Electron and Chrome pages",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-11T01:40:54Z"
+   },
+   {
     "id": "x11-mpx-qt",
     "label": "x11-mpx-qt",
     "number": null,
@@ -79171,6 +79218,27 @@
     "created": "2026-11-10T16:51:21Z"
    },
    {
+    "id": "computer-filter-types",
+    "label": "computer-filter-types",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P2",
+    "title": "fix(computer): say window and element filters take text when given a RegExp",
+    "action": "wait",
+    "reasons": [
+     "conflicts with #18753 in packages/coding-agent/src/tools/computer/worker.ts"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "#18753"
+    ],
+    "needs": [],
+    "created": "2026-11-11T01:40:14Z"
+   },
+   {
     "id": "computer-ui-quiet",
     "label": "computer-ui-quiet",
     "number": null,
@@ -79208,7 +79276,8 @@
      "needs iphone-mirror-scroll-distance (queued)",
      "conflicts with #17756 in crates/pi-natives/src/desktop/macos/input.rs",
      "conflicts with #18753 in docs/computer-use.md",
-     "conflicts with #17897 in crates/pi-natives/src/desktop/macos/input.rs"
+     "conflicts with #17897 in crates/pi-natives/src/desktop/macos/input.rs",
+     "conflicts with macos-click-timestamp in crates/pi-natives/src/desktop/macos/input.rs"
     ],
     "note": "",
     "over": [],
@@ -79216,7 +79285,8 @@
     "blocked_by": [
      "#17756",
      "#18753",
-     "#17897"
+     "#17897",
+     "macos-click-timestamp"
     ],
     "needs": [
      "iphone-mirror-scroll-distance"
@@ -79357,6 +79427,40 @@
      "r2/page-waiting"
     ],
     "created": "2026-10-13T21:47:19Z"
+   },
+   {
+    "id": "relay-detach-owned-close",
+    "label": "relay-detach-owned-close",
+    "number": null,
+    "state": "queued",
+    "area": "browser",
+    "priority": "P2",
+    "title": "fix(browser): say omp closed its own relay tab when Chrome's detach ends it",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-11T01:40:34Z"
+   },
+   {
+    "id": "relay-target-miss-hint",
+    "label": "relay-target-miss-hint",
+    "number": null,
+    "state": "queued",
+    "area": "browser",
+    "priority": "P2",
+    "title": "fix(browser): name the relay's own-tab open when a target matches no tab",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-11T01:40:24Z"
    },
    {
     "id": "act-look-prompt",
@@ -79673,6 +79777,7 @@
      "conflicts with #18750 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18751 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18776 in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with relay-detach-owned-close in packages/coding-agent/src/tools/browser/tab-supervisor.ts",
      "conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
@@ -79685,7 +79790,8 @@
      "#18743",
      "#18750",
      "#18751",
-     "#18776"
+     "#18776",
+     "relay-detach-owned-close"
     ],
     "needs": [
      "#15508"
