@@ -28,7 +28,7 @@ In six runs of one Contacts task on our benchmark (2026-11-10), four saved "1060
 ## Testing
 
 - Contacts: the table, a no-model script in a fresh macOS 26 VM.
-- Activity Monitor (read, wait, double-click the " Dock" ref), on this branch before its review fixes (9fa8920446): after a 20 s wait 40 of 40 refused and opened nothing; after a random 0-6 s wait 23 of 30 opened Dock, 7 refused, none opened another process.
+- Activity Monitor (read, wait, double-click the " Dock" ref): after a 20 s wait 40 of 40 refused and opened nothing, on this head and before the review fixes; after a random 0-6 s wait (before them) 23 of 30 opened Dock, 7 refused, none another process.
 - `cargo test -p pi-natives --lib -- desktop::` passes on macOS. Of seven new tests on the fake AX backend, the four expecting a refusal or an unconfirmed write fail on `origin/main`; the three guarding against refusing (changed value, busy app, retitled window) pass on both. `rust-check` passes on macOS, Linux and Windows.
 
 ---
