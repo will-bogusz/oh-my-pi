@@ -77350,6 +77350,24 @@
      "host": "MacBook-Pro"
     }
    ]
+  },
+  {
+   "id": "wait-ladder-context",
+   "branch": "will/wait-ladder-context",
+   "title": "feat(wait): reduce empty checks in large conversations",
+   "area": "coding-agent",
+   "priority": "P2",
+   "needs": [],
+   "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
+   "body": "bodies/wait-ladder-context.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wait-ladder-context",
+   "host": "MacBook-Pro",
+   "added": "2026-11-11T10:13:40Z",
+   "updated": "2026-11-11T10:13:40Z",
+   "note": ""
   }
  ],
  "watch": {
