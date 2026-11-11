@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- With a modal dialog open, browser `fill`, `type` and `press` aimed at a field behind it now fail naming what covers it, as `click` does, instead of typing into the dialog's button and reporting success; `press` also refuses a disabled element, and Chromium `drag` refuses a covered start or end
+
 ## [18.20.0] - 2026-11-12
 
 ### Breaking Changes

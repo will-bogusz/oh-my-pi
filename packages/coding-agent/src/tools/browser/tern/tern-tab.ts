@@ -1958,7 +1958,10 @@ export class TernTab implements InProcessRunTab {
 	/** {@link press} inside `frame`. */
 	async pressIn(key: string, opts: { selector?: string | TernSelector } | undefined, frame: FramePath): Promise<void> {
 		assertTabPressArgs(key, opts);
-		if (opts?.selector) await this.focus(opts.selector, frame);
+		if (opts?.selector) {
+			await this.#target(`tab.press(${JSON.stringify(key)})`, opts.selector, "press", frame);
+			await this.#kit("focus", [this.#spec(opts.selector)], frame);
+		}
 		await this.#input(pressSteps(key, this.#mods));
 	}
 
