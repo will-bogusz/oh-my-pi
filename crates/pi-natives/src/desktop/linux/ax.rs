@@ -2077,7 +2077,7 @@ mod tests {
 					let expected = if matches!(path, "/ancestor" | "/open") { None } else { CASES.iter().find(|case| case.0 == path).unwrap().6 };
 					assert_eq!(coordinate, expected, "{path}");
 					if let Some(index) = coordinate {
-						assert!(action.do_action(index).await.unwrap());
+						assert!(action.do_action(index).await.unwrap().is_some());
 					}
 				}
 				let object = ObjectRefOwned::from_static_str_unchecked(PEER, "/huge");

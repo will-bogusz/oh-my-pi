@@ -330,6 +330,18 @@ mod tests {
 		if let PointerEvent::Click { count, .. } = &mut click { *count = 2; }
 		assert_eq!(coordinate_action_point(&click, DeliveryMode::Background, true), None);
 		let motion = PointerEvent::Move { x: 123.0, y: 456.0 };
+		for button in [MouseButton::Right, MouseButton::Middle] {
+			let event = PointerEvent::Click { x: 123.0, y: 456.0, button, count: 1, modifiers: Modifiers::default() };
+			assert_eq!(coordinate_action_point(&event, DeliveryMode::Background, true), None);
+		}
+		let modified = PointerEvent::Click { x: 123.0, y: 456.0, button: MouseButton::Left, count: 1, modifiers: Modifiers { shift: true, ..Modifiers::default() } };
+		assert_eq!(coordinate_action_point(&modified, DeliveryMode::Background, true), None);
+		for event in [
+			PointerEvent::Hold { x: 123.0, y: 456.0, button: MouseButton::Left, keys: Vec::new(), duration: std::time::Duration::from_secs(1) },
+			PointerEvent::Drag { path: vec![(123.0, 456.0), (124.0, 456.0)], button: MouseButton::Left, modifiers: Modifiers::default(), keys: Vec::new() },
+		] {
+			assert_eq!(coordinate_action_point(&event, DeliveryMode::Background, true), None);
+		}
 		assert_eq!(coordinate_action_point(&motion, DeliveryMode::Background, true), None);
 	}
 
