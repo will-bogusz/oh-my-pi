@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed macOS background input leaving its target in front after you clicked in your own app while that app was busy or hung, or just before a session's first action; a drag and drop from your app onto the target now counts as choosing it ([#16553](https://github.com/can1357/oh-my-pi/pull/16553) by [@will-bogusz](https://github.com/will-bogusz))
+
 ## [18.18.8] - 2026-11-11
 
 ### Changed
