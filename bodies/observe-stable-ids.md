@@ -12,6 +12,8 @@ I made an element keep its `observe()` id while it stays on the page, so an id f
 
 IDs name the original node in its original document, never a replacement with a matching role or label. Releasing a cached handle does not make its still-live element stale. Chromium retains the 5,000 most recently observed elements beyond the latest listing; evicted ids fail stale rather than being recycled. Tern uses per-document identity; cmux keeps its own refs.
 
+## Why
+
 Rejected: re-attaching an id to a "same" element by role, name and position after a re-render. On a list that re-renders after a delete, the old row's Remove id would land on the next row's Remove.
 
 ## Open questions
