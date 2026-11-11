@@ -21,9 +21,8 @@ use super::{
 		error::{CoreResult, DesktopError},
 		types::DesktopWindow,
 	},
-	window,
+	ax_states, window,
 };
-use super::ax_states;
 
 /// Ancestors of a hit-tested element searched for the control that owns it.
 const MAX_PRESS_ANCESTORS: usize = 8;
@@ -76,8 +75,13 @@ impl Win32Ax {
 	}
 
 	fn read_children(&mut self, element: &UIElement) -> CoreResult<Vec<UIElement>> {
-		let condition = self.automation()?.create_true_condition().map_err(ax_error)?;
-		element.find_all(TreeScope::Children, &condition).map_err(ax_error)
+		let condition = self
+			.automation()?
+			.create_true_condition()
+			.map_err(ax_error)?;
+		element
+			.find_all(TreeScope::Children, &condition)
+			.map_err(ax_error)
 	}
 
 	/// Top-level window hosting `element`, found through the nearest ancestor
@@ -105,7 +109,9 @@ impl Win32Ax {
 	) -> CoreResult<()> {
 		let Some(root) = self.host_root(element) else {
 			element.get_control_type().map_err(ax_error)?;
-			return Err(DesktopError::ax_failed("cannot establish the native window hosting this UIA element"));
+			return Err(DesktopError::ax_failed(
+				"cannot establish the native window hosting this UIA element",
+			));
 		};
 		window::ensure_pattern_safe(root)?;
 		call()
@@ -273,7 +279,6 @@ const fn coordinate_click_supported(control_type: ControlType) -> bool {
 	)
 }
 
-
 fn actions(element: &UIElement) -> Vec<String> {
 	let can_invoke = element.get_pattern::<UIInvokePattern>().is_ok();
 	let can_toggle = element.get_pattern::<UITogglePattern>().is_ok();
@@ -311,9 +316,11 @@ fn actions(element: &UIElement) -> Vec<String> {
 	actions
 }
 
-
 fn cached_string(element: &UIElement, property: UIProperty) -> Result<Option<String>, ()> {
-	match element.get_cached_property_value(property).and_then(|value| value.get_value()) {
+	match element
+		.get_cached_property_value(property)
+		.and_then(|value| value.get_value())
+	{
 		Ok(Value::STRING(value)) => Ok((!value.is_empty()).then_some(value)),
 		Ok(Value::EMPTY) => Ok(None),
 		_ => Err(()),
@@ -321,15 +328,27 @@ fn cached_string(element: &UIElement, property: UIProperty) -> Result<Option<Str
 }
 
 fn cached_bool(element: &UIElement, property: UIProperty) -> Result<bool, ()> {
-	match element.get_cached_property_value(property).and_then(|value| value.get_value()) {
+	match element
+		.get_cached_property_value(property)
+		.and_then(|value| value.get_value())
+	{
 		Ok(Value::BOOL(value)) => Ok(value),
 		_ => Err(()),
 	}
 }
 
-fn cached_state(element: &UIElement, available: UIProperty, state: UIProperty) -> Result<Option<i32>, ()> {
-	if !cached_bool(element, available)? { return Ok(None); }
-	match element.get_cached_property_value(state).and_then(|value| value.get_value()) {
+fn cached_state(
+	element: &UIElement,
+	available: UIProperty,
+	state: UIProperty,
+) -> Result<Option<i32>, ()> {
+	if !cached_bool(element, available)? {
+		return Ok(None);
+	}
+	match element
+		.get_cached_property_value(state)
+		.and_then(|value| value.get_value())
+	{
 		Ok(Value::I4(value) | Value::INT(value)) => Ok(Some(value)),
 		_ => Err(()),
 	}
@@ -353,7 +372,9 @@ impl AxBackend for Win32Ax {
 		let element = Self::element(handle)?;
 		let Some(root) = self.host_root(element) else {
 			element.get_control_type().map_err(ax_error)?;
-			return Err(DesktopError::ax_failed("cannot establish the native window hosting this UIA element"));
+			return Err(DesktopError::ax_failed(
+				"cannot establish the native window hosting this UIA element",
+			));
 		};
 		// SAFETY: IsWindow validates the provider-supplied native handle.
 		if unsafe { IsWindow(root) } == 0 {
@@ -387,34 +408,62 @@ impl AxBackend for Win32Ax {
 		let element = Self::element(handle)?;
 		let control_type = element.get_control_type().map_err(ax_error)?;
 		let native_role = control_type.to_string();
-		let cache = self.automation()?.create_cache_request().map_err(ax_error)?;
+		let cache = self
+			.automation()?
+			.create_cache_request()
+			.map_err(ax_error)?;
 		cache.set_tree_scope(TreeScope::Element).map_err(ax_error)?;
 		for property in [
-			UIProperty::Name, UIProperty::AutomationId, UIProperty::ClassName,
-			UIProperty::HelpText, UIProperty::ValueValue, UIProperty::LegacyIAccessibleValue,
-			UIProperty::IsTogglePatternAvailable, UIProperty::ToggleToggleState,
-			UIProperty::SelectionItemIsSelected, UIProperty::IsExpandCollapsePatternAvailable,
+			UIProperty::Name,
+			UIProperty::AutomationId,
+			UIProperty::ClassName,
+			UIProperty::HelpText,
+			UIProperty::ValueValue,
+			UIProperty::LegacyIAccessibleValue,
+			UIProperty::IsTogglePatternAvailable,
+			UIProperty::ToggleToggleState,
+			UIProperty::SelectionItemIsSelected,
+			UIProperty::IsExpandCollapsePatternAvailable,
 			UIProperty::ExpandCollapseExpandCollapseState,
-		] { cache.add_property(property).map_err(ax_error)?; }
+		] {
+			cache.add_property(property).map_err(ax_error)?;
+		}
 		let cached = element.build_updated_cache(&cache).map_err(ax_error)?;
 		let fields = [
-			cached_string(&cached, UIProperty::Name), cached_string(&cached, UIProperty::AutomationId),
-			cached_string(&cached, UIProperty::ClassName), cached_string(&cached, UIProperty::HelpText),
-			cached_string(&cached, UIProperty::ValueValue), cached_string(&cached, UIProperty::LegacyIAccessibleValue),
+			cached_string(&cached, UIProperty::Name),
+			cached_string(&cached, UIProperty::AutomationId),
+			cached_string(&cached, UIProperty::ClassName),
+			cached_string(&cached, UIProperty::HelpText),
+			cached_string(&cached, UIProperty::ValueValue),
+			cached_string(&cached, UIProperty::LegacyIAccessibleValue),
 		];
-		let toggle = cached_state(&cached, UIProperty::IsTogglePatternAvailable, UIProperty::ToggleToggleState);
-		let identity = ax_states::identity(&native_role,
-			&fields.each_ref().map(|field| field.as_ref().map(|value| value.as_deref()).map_err(|_| ())), toggle);
+		let toggle =
+			cached_state(&cached, UIProperty::IsTogglePatternAvailable, UIProperty::ToggleToggleState);
+		let identity = ax_states::identity(
+			&native_role,
+			&fields
+				.each_ref()
+				.map(|field| field.as_ref().map(|value| value.as_deref()).map_err(|_| ())),
+			toggle,
+		);
 		let [title, _, _, description, value, legacy_value] = fields;
 		let title = title.ok().flatten();
 		let description = description.ok().flatten();
 		let value = value.ok().flatten().or_else(|| legacy_value.ok().flatten());
 		let value = ax_states::toggle_value(value, toggle.ok().flatten());
-		let selected = ax_states::selected(&native_role,
-			cached_bool(&cached, UIProperty::SelectionItemIsSelected).unwrap_or(false));
-		let expanded = ax_states::expanded(cached_state(&cached,
-			UIProperty::IsExpandCollapsePatternAvailable, UIProperty::ExpandCollapseExpandCollapseState)
-			.ok().flatten());
+		let selected = ax_states::selected(
+			&native_role,
+			cached_bool(&cached, UIProperty::SelectionItemIsSelected).unwrap_or(false),
+		);
+		let expanded = ax_states::expanded(
+			cached_state(
+				&cached,
+				UIProperty::IsExpandCollapsePatternAvailable,
+				UIProperty::ExpandCollapseExpandCollapseState,
+			)
+			.ok()
+			.flatten(),
+		);
 		let children = self.read_children(element);
 		let partial = identity.is_none() || children.is_err();
 		let child_count = children.map_or(0, |children| children.len().min(u32::MAX as usize) as u32);
@@ -552,8 +601,13 @@ impl AxBackend for Win32Ax {
 			if property_error != Some(ax_states::ELEMENT_NOT_AVAILABLE) {
 				return false;
 			}
-			ax_states::destroyed(property_error,
-				element.get_pattern::<UIVirtualizedItemPattern>().err().map(|error| error.code()))
+			ax_states::destroyed(
+				property_error,
+				element
+					.get_pattern::<UIVirtualizedItemPattern>()
+					.err()
+					.map(|error| error.code()),
+			)
 		})
 	}
 

@@ -5,7 +5,10 @@ use super::super::error::DesktopError;
 // UIA_E_ELEMENTNOTAVAILABLE also describes unrealized virtualized items.
 pub(super) const ELEMENT_NOT_AVAILABLE: i32 = -2_147_220_991;
 
-pub(super) const fn destroyed(property_error: Option<i32>, virtualized_pattern_error: Option<i32>) -> bool {
+pub(super) const fn destroyed(
+	property_error: Option<i32>,
+	virtualized_pattern_error: Option<i32>,
+) -> bool {
 	matches!(property_error, Some(ELEMENT_NOT_AVAILABLE))
 		&& matches!(virtualized_pattern_error, Some(ELEMENT_NOT_AVAILABLE))
 }
@@ -19,12 +22,14 @@ pub(super) fn uia_error(code: i32, message: String) -> DesktopError {
 }
 
 pub(super) fn toggle_value(value: Option<String>, toggle: Option<i32>) -> Option<String> {
-	value.filter(|value| !value.is_empty()).or_else(|| match toggle {
-		Some(0) => Some("0".into()),
-		Some(1) => Some("1".into()),
-		Some(2) => Some("2".into()),
-		_ => None,
-	})
+	value
+		.filter(|value| !value.is_empty())
+		.or_else(|| match toggle {
+			Some(0) => Some("0".into()),
+			Some(1) => Some("1".into()),
+			Some(2) => Some("2".into()),
+			_ => None,
+		})
 }
 
 pub(super) fn selected(role: &str, selected: bool) -> bool {
@@ -39,11 +44,19 @@ pub(super) const fn expanded(state: Option<i32>) -> Option<bool> {
 	}
 }
 
-pub(super) fn identity(role: &str, fields: &[Result<Option<&str>, ()>], toggle: Result<Option<i32>, ()>) -> Option<u64> {
+pub(super) fn identity(
+	role: &str,
+	fields: &[Result<Option<&str>, ()>],
+	toggle: Result<Option<i32>, ()>,
+) -> Option<u64> {
 	let mut hash = DefaultHasher::new();
 	role.hash(&mut hash);
 	for field in fields {
-		field.as_ref().ok()?.filter(|value| !value.is_empty()).hash(&mut hash);
+		field
+			.as_ref()
+			.ok()?
+			.filter(|value| !value.is_empty())
+			.hash(&mut hash);
 	}
 	toggle.ok()?.hash(&mut hash);
 	Some(hash.finish())

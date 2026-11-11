@@ -112,7 +112,8 @@ pub struct AxProps {
 	pub partial:     bool,
 	/// Whether a row, cell, button or file icon reports itself selected.
 	pub selected:    bool,
-	/// Whether an expandable control is expanded; `None` for leaves or unknown state.
+	/// Whether an expandable control is expanded; `None` for leaves or unknown
+	/// state.
 	pub expanded:    Option<bool>,
 	/// A name the platform derives when the element has neither title nor
 	/// description, such as a window's close button.
