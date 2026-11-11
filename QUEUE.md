@@ -1,14 +1,21 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 10:01Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 10:03Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-11 09:30Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 0, conflict-held 21, stacked 15, held 21, parked 2, open PRs 41, queued since the last plan 7; merged 275, closed 30
+**Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-11 10:00Z on goliath; groups below are from it, states from the manifest)
+**Counts:** openable now 6, conflict-held 21, stacked 16, held 21, parked 2, open PRs 41; merged 275, closed 30
 
-## Openable now (0)
+## Openable now (6)
 
-none
+| id | title | area | priority | age | plan | branch |
+|---|---|---|---|---|---|---|
+| win-posted-modifiers | fix(natives): refuse Windows background input that holds a modifier | computer | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-posted-modifiers) |
+| browser-main-wait-globals | fix(browser): keep main-world waits from exposing query bindings | browser | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/main-world-wait) |
+| macos-press-disabled | fix(natives): refuse a macOS press on a disabled element | natives | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-press-disabled) |
+| browser-main-wait-navigation | fix(browser): rearm main-world waits after navigation | browser | P2 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/main-world-wait-navigation) |
+| macos-menu-miss-items | fix(natives): name the menu items on offer when a menu bar path misses | natives | P2 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-menu-miss-items) |
+| macos-ax-cancel-before-send | fix(natives): send no macOS AX action once its run is cancelled | natives | P2 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-ax-cancel-before-send) |
 
 ## Conflict-held (21)
 
@@ -16,13 +23,13 @@ none
 |---|---|---|---|---|---|---|
 | r2/native-window-report | feat(coding-agent): name the native windows a browser call raised on macOS | browser | P2 | 28d | [#17894](https://github.com/can1357/oh-my-pi/pull/17894) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/r2/native-window-report) |
 | factory-droid-web-search | feat(coding-agent): search the web through a Factory Droid login (web/factory) | web | P2 | 23d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-web-search) |
-| computer-ui-quiet | fix(computer): wait for the app to finish reacting before the next read or input | computer | P2 | 23d | [#18783](https://github.com/can1357/oh-my-pi/pull/18783), [#18784](https://github.com/can1357/oh-my-pi/pull/18784), [#18222](https://github.com/can1357/oh-my-pi/pull/18222) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-ui-quiet) |
+| computer-ui-quiet | fix(computer): wait for the app to finish reacting before the next read or input | computer | P2 | 23d | [#18783](https://github.com/can1357/oh-my-pi/pull/18783), [#18784](https://github.com/can1357/oh-my-pi/pull/18784), [#18222](https://github.com/can1357/oh-my-pi/pull/18222), macos-press-disabled | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-ui-quiet) |
 | compaction-trigger | feat(coding-agent): record what triggered each compaction | other |  | 21d | [#17610](https://github.com/can1357/oh-my-pi/pull/17610), [#18786](https://github.com/can1357/oh-my-pi/pull/18786), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/compaction-trigger) |
 | iphone-mirror-scroll-distance | fix(natives): scroll iPhone Mirroring the whole distance asked for in the background | computer | P1 | 11d | [#17756](https://github.com/can1357/oh-my-pi/pull/17756) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-scroll-distance) |
 | text-reader-usage-shift | fix(coding-agent): price a text-only fallback's archive text, not the failed request's frames, in the fit check | coding-agent |  | 10d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/text-reader-usage-shift) |
 | token-count-policy | feat(catalog,coding-agent): token-count framing policy in KDL | catalog |  | 8d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/token-count-policy) |
 | wire-delta-count | refactor(agent,ai): count the anchored delta from the reader's transformed wire messages | other |  | 8d | [#18771](https://github.com/can1357/oh-my-pi/pull/18771), [#17610](https://github.com/can1357/oh-my-pi/pull/17610), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wire-delta-count) |
-| atspi-unanswered-app | fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool | computer | P0 | 8d | [#18823](https://github.com/can1357/oh-my-pi/pull/18823), [#18353](https://github.com/can1357/oh-my-pi/pull/18353), [#18013](https://github.com/can1357/oh-my-pi/pull/18013) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-unanswered-app) |
+| atspi-unanswered-app | fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool | computer | P0 | 8d | [#18823](https://github.com/can1357/oh-my-pi/pull/18823), [#18353](https://github.com/can1357/oh-my-pi/pull/18353) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-unanswered-app) |
 | browser-wait-predicate | feat(browser): add waitForFunction to tabs and frames | browser | P1 | 18h | [#18676](https://github.com/can1357/oh-my-pi/pull/18676), [#18786](https://github.com/can1357/oh-my-pi/pull/18786) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-wait-predicate) |
 | browser-action-outcome | feat(browser): print what each browser action did to the page | browser | P2 | 14h | [#18786](https://github.com/can1357/oh-my-pi/pull/18786) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-action-outcome) |
 | agent-identity | feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy | tui | P2 | 10h | [#18784](https://github.com/can1357/oh-my-pi/pull/18784) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/agent-identity) |
@@ -31,12 +38,12 @@ none
 | computer-filter-types | fix(computer): say window and element filters take text when given a RegExp | computer | P2 | 8h | [#18753](https://github.com/can1357/oh-my-pi/pull/18753) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-filter-types) |
 | covered-fill | fix(coding-agent): refuse browser keys aimed at a field a modal dialog covers | browser | P1 | 7h | [#18676](https://github.com/can1357/oh-my-pi/pull/18676) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/covered-fill) |
 | x11-xtest-release | fix(natives): release X11 XTest keys and buttons a killed omp held | computer | P1 | 7h | [#18784](https://github.com/can1357/oh-my-pi/pull/18784), [#18222](https://github.com/can1357/oh-my-pi/pull/18222) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-xtest-release) |
-| x11-takeover-keyboard-state | fix(natives): type X11 XTest text through a neutral keyboard state | computer | P1 | 7h | [#18784](https://github.com/can1357/oh-my-pi/pull/18784), [#18013](https://github.com/can1357/oh-my-pi/pull/18013) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-takeover-keyboard-state) |
+| x11-takeover-keyboard-state | fix(natives): type X11 XTest text through a neutral keyboard state | computer | P1 | 7h | [#18783](https://github.com/can1357/oh-my-pi/pull/18783), [#18784](https://github.com/can1357/oh-my-pi/pull/18784) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-takeover-keyboard-state) |
 | x11-takeover-keyboard-grab | fix(natives): refuse X11 XTest keys while another client grabs the keyboard | computer | P1 | 7h | [#18784](https://github.com/can1357/oh-my-pi/pull/18784) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-takeover-keyboard-grab) |
 | x11-click-stale-popup | fix(natives): refuse X11 presses outside an open popup of the app | computer | P1 | 6h | [#18784](https://github.com/can1357/oh-my-pi/pull/18784) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-click-stale-popup) |
 | browser-select-objects | feat(browser): accept explicit dropdown option selectors | browser | P2 | 0h | [#18829](https://github.com/can1357/oh-my-pi/pull/18829) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-select-objects) |
 
-## Stacked (15)
+## Stacked (16)
 
 | id | title | area | priority | age | needs | branch |
 |---|---|---|---|---|---|---|
@@ -55,6 +62,7 @@ none
 | factory-droid-171-models | feat(catalog): add the Factory Droid models droid 1.7.1 serves | factory-droid |  | 14h | factory-droid-171-pin ([#18771](https://github.com/can1357/oh-my-pi/pull/18771)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-171-models) |
 | browser-cursor | feat(browser): draw the acting agent's cursor in OMP-driven tabs | browser | P2 | 10h | agent-identity | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-cursor) |
 | desktop-cursor | feat(coding-agent,natives): show each agent's cursor where its computer input lands on macOS | coding-agent | P2 | 9h | agent-identity | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/desktop-cursor) |
+| relay-print-preview-error | fix(coding-agent,browser-relay): fail a browser call a print preview holds in an attached browser within seconds | browser | P2 | 2h | [#18838](https://github.com/can1357/oh-my-pi/pull/18838) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-print-preview-error) |
 
 ## Held (21)
 
@@ -103,7 +111,7 @@ none
 | [#17756](https://github.com/can1357/oh-my-pi/pull/17756) | iphone-mirror-pointer | fix(natives): keep background iPhone Mirroring taps reaching the phone after a takeover tap | computer | P1 | 9d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-pointer) |
 | [#17610](https://github.com/can1357/oh-my-pi/pull/17610) | claude-refusal-strip-retry | fix(ai,coding-agent): carry other models' reasoning to Claude and retry its refusal without it | other | P2 | 10d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/claude-refusal-strip-retry) |
 | [#18353](https://github.com/can1357/oh-my-pi/pull/18353) | wayland-pipewire-dlopen | fix(natives): load libpipewire at runtime so released addons capture on Wayland | computer | P2 | 4d | keep; accepted pair with #18013 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-pipewire-dlopen) |
-| [#18013](https://github.com/can1357/oh-my-pi/pull/18013) | wayland-ei-text | feat(natives): type text the wayland layout lacks through libei text | natives | P2 | 7d | keep; accepted pair with #18353 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-ei-text) |
+| [#18013](https://github.com/can1357/oh-my-pi/pull/18013) | wayland-ei-text | feat(natives): type text the wayland layout lacks through libei text | natives | P2 | 7d | requeue; accepted pair with #18353 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-ei-text) |
 | [#18125](https://github.com/can1357/oh-my-pi/pull/18125) | anthropic-web-search | fix(ai,coding-agent): keep Anthropic web search queries intact, always search, and report refusals | other | P2 | 6d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/anthropic-web-search) |
 | [#18624](https://github.com/can1357/oh-my-pi/pull/18624) | upload-stall-error | fix(ai): say whether an Anthropic request body finished uploading when its connection drops | other | P1 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/upload-stall-error) |
 | [#18676](https://github.com/can1357/oh-my-pi/pull/18676) | click-reresolve-detached | fix(coding-agent): look a click's selector up again when the page replaces its element | browser | P0 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/click-reresolve-detached) |
@@ -118,13 +126,13 @@ none
 | [#18789](https://github.com/can1357/oh-my-pi/pull/18789) | subagent-browser-relay | feat(coding-agent): keep subagents' browser tabs out of the user's Chrome and Tern pane unless asked | browser | P2 | 11h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/subagent-browser-relay) |
 | [#18766](https://github.com/can1357/oh-my-pi/pull/18766) | devin-pin-31243 | fix(catalog): identify Devin requests as CLI 3000.12.43 | catalog | P2 | 14h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-pin-31243) |
 | [#18775](https://github.com/can1357/oh-my-pi/pull/18775) | eval-error-frames | fix(coding-agent): print a failed JavaScript cell's own frames, not omp's host stack | eval | P1 | 13h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/eval-error-frames) |
-| [#18865](https://github.com/can1357/oh-my-pi/pull/18865) | eval-assign-echo | fix(coding-agent): print nothing for a JavaScript eval cell that ends in an assignment | eval | P1 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/eval-assign-echo) |
+| [#18865](https://github.com/can1357/oh-my-pi/pull/18865) | eval-assign-echo | fix(coding-agent): print nothing for a JavaScript eval cell that ends in an assignment | eval | P2 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/eval-assign-echo) |
 | [#18772](https://github.com/can1357/oh-my-pi/pull/18772) | observe-print | fix(browser): print every observed element, one line each, instead of cutting at 100 | browser | P1 | 13h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/observe-print) |
 | [#18771](https://github.com/can1357/oh-my-pi/pull/18771) | factory-droid-171-pin | feat(ai,catalog): identify Factory Droid requests as droid 1.7.1 | factory-droid | P1 | 14h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-171-pin) |
 | [#18776](https://github.com/can1357/oh-my-pi/pull/18776) | screenshot-result-line | feat(coding-agent): report browser screenshots and opens on one line | browser | P2 | 13h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/screenshot-result-line) |
 | [#18783](https://github.com/can1357/oh-my-pi/pull/18783) | x11-covered-capture | fix(natives): capture a covered X11 window from its own pixels, or say it is covered | computer | P1 | 11h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-covered-capture) |
 | [#18784](https://github.com/can1357/oh-my-pi/pull/18784) | x11-takeover-user | fix(natives): keep X11 takeover from taking a typing user's keys | computer | P1 | 11h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-takeover-user) |
-| [#18825](https://github.com/can1357/oh-my-pi/pull/18825) | x11-mpx-qt | fix(natives): stop X11 background input from crashing your running Qt 6.5+ apps | computer | P1 | 6h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-mpx-qt) |
+| [#18825](https://github.com/can1357/oh-my-pi/pull/18825) | x11-mpx-qt | fix(natives): stop X11 background input from crashing your running Qt 6.5+ apps | computer | P1 | 6h | requeue | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-mpx-qt) |
 | [#18795](https://github.com/can1357/oh-my-pi/pull/18795) | devin-retire-swe-1-6-fast | fix(catalog): drop Devin's retired SWE-1.6 Fast seed row | catalog | P0 | 10h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-retire-swe-1-6-fast) |
 | [#18829](https://github.com/can1357/oh-my-pi/pull/18829) | browser-select-readback | fix(coding-agent): return the options a page leaves selected after its change handlers | browser | P0 | 4h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-select-readback) |
 | [#18830](https://github.com/can1357/oh-my-pi/pull/18830) | browser-download-missing-file | fix(coding-agent): fail a download wait when the saved file is not on this machine | browser | P0 | 4h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-download-missing-file) |
@@ -134,15 +142,3 @@ none
 | [#18823](https://github.com/can1357/oh-my-pi/pull/18823) | qt5-getall-crash | fix(natives): stop Linux computer reads from crashing Qt, GTK 3 and Firefox apps | computer | P1 | 6h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/qt5-getall-crash) |
 | [#18828](https://github.com/can1357/oh-my-pi/pull/18828) | x11-mpx-key-confirm | fix(natives): confirm every X11 virtual-keyboard key release, in order | computer | P1 | 5h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-mpx-key-confirm) |
 | [#18838](https://github.com/can1357/oh-my-pi/pull/18838) | print-pref | fix(coding-agent): stop a page calling window.print() from hanging the browser omp launches | browser | P2 | 3h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/print-pref) |
-
-## Queued since the last plan (7)
-
-| id | title | area | priority | age | branch |
-|---|---|---|---|---|---|
-| relay-print-preview-error | fix(coding-agent,browser-relay): fail a browser call a print preview holds in an attached browser within seconds | browser | P2 | 2h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-print-preview-error) |
-| win-posted-modifiers | fix(natives): refuse Windows background input that holds a modifier | computer | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-posted-modifiers) |
-| browser-main-wait-globals | fix(browser): keep main-world waits from exposing query bindings | browser | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/main-world-wait) |
-| macos-press-disabled | fix(natives): refuse a macOS press on a disabled element | natives | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-press-disabled) |
-| browser-main-wait-navigation | fix(browser): rearm main-world waits after navigation | browser | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/main-world-wait-navigation) |
-| macos-menu-miss-items | fix(natives): name the menu items on offer when a menu bar path misses | natives | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-menu-miss-items) |
-| macos-ax-cancel-before-send | fix(natives): send no macOS AX action once its run is cancelled | natives | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-ax-cancel-before-send) |
