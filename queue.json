@@ -81054,7 +81054,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-wait-selector-state",
    "host": "MacBook-Pro",
    "added": "2026-11-11T12:16:01Z",
-   "updated": "2026-11-11T17:51:23Z",
+   "updated": "2026-11-11T18:13:22Z",
    "note": "",
    "built": [
     {
@@ -81270,7 +81270,17 @@
    ],
    "opened": "2026-11-11T16:45:33Z",
    "readied": "2026-11-11T16:46:02Z",
-   "advanced": "2026-11-11T17:51:23Z"
+   "advanced": "2026-11-11T17:51:23Z",
+   "design_checks": [
+    {
+     "pr": 18924,
+     "rounds": 6,
+     "at": "2026-11-11T18:13:22Z",
+     "verdict": "change",
+     "note": "NARROW: cmux-tab.ts, tern-tab.ts and their tests back to main; docs+CHANGELOG scoped to Chromium-backed tabs/frames. 7 of 12 Codex findings sat on lines the measured defect never needed (cmux built a visibility wait checked only on a mocked socket; Tern only on a fake daemon). Patch: 41 pass/1 skip, types clean, cells 5/5.",
+     "ref": "/Users/viathebrink/tmp/oh-my-pi/queuepilot/design/18924.md"
+    }
+   ]
   },
   {
    "id": "win-focus-report",
