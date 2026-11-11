@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 12:38Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 12:39Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-11-11 11:54Z on MacBook-Pro; groups below are from it, states from the manifest)
@@ -35,7 +35,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | atspi-unanswered-app | fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool | computer | P0 | 8d | [#18823](https://github.com/can1357/oh-my-pi/pull/18823), [#18353](https://github.com/can1357/oh-my-pi/pull/18353), [#18013](https://github.com/can1357/oh-my-pi/pull/18013), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-unanswered-app) |
 | browser-wait-predicate | feat(browser): add waitForFunction to tabs and frames | browser | P1 | 20h | [#18676](https://github.com/can1357/oh-my-pi/pull/18676), [#18786](https://github.com/can1357/oh-my-pi/pull/18786) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-wait-predicate) |
 | browser-action-outcome | feat(browser): print what each browser action did to the page | browser | P2 | 17h | [#18786](https://github.com/can1357/oh-my-pi/pull/18786) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-action-outcome) |
-| agent-identity | feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy | tui | P2 | 12h | [#18784](https://github.com/can1357/oh-my-pi/pull/18784) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/agent-identity) |
+| agent-identity | feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy | tui | P2 | 13h | [#18784](https://github.com/can1357/oh-my-pi/pull/18784) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/agent-identity) |
 | computer-run-failure-output | fix(computer): retain output and screenshots when a run fails | computer | P1 | 12h | [#18753](https://github.com/can1357/oh-my-pi/pull/18753) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-run-failure-output) |
 | browser-click-frame-removed | fix(coding-agent): fail a click whose frame the page removed while the button was down | browser | P1 | 12h | [#18676](https://github.com/can1357/oh-my-pi/pull/18676) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-click-frame-removed) |
 | computer-filter-types | fix(computer): say window and element filters take text when given a RegExp | computer | P2 | 10h | [#18753](https://github.com/can1357/oh-my-pi/pull/18753) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-filter-types) |
