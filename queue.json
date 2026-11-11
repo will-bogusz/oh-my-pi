@@ -73198,7 +73198,7 @@
    "area": "browser",
    "priority": "P2",
    "needs": [],
-   "base": "e325ffc73ab86e03bdd20a91b77d8e2b3964c906",
+   "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
    "body": "bodies/screenshot-result-line.md",
    "state": "open",
    "pr": 18776,
@@ -73206,7 +73206,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/screenshot-result-line",
    "host": "MacBook-Pro",
    "added": "2026-11-10T19:42:48Z",
-   "updated": "2026-11-10T20:37:33Z",
+   "updated": "2026-11-11T08:36:53Z",
    "note": "",
    "built": [
     {
@@ -73416,7 +73416,7 @@
      "host": "MacBook-Pro"
     }
    ],
-   "advanced": "2026-11-10T20:17:46Z",
+   "advanced": "2026-11-11T08:36:53Z",
    "opened": "2026-11-10T20:37:05Z",
    "readied": "2026-11-10T20:37:32Z"
   },
