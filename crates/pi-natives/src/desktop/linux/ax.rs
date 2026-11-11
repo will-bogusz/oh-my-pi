@@ -715,6 +715,7 @@ fn coordinate_click_element(role: Role, states: StateSet, bounds: &AxBounds, x: 
 		&& state_enabled(states)
 		&& states.contains(State::Showing)
 		&& !states.contains(State::Editable)
+		&& !states.contains(State::Expandable)
 		&& !states.contains(State::HasPopup)
 		&& x >= bounds.x && y >= bounds.y
 		&& x < bounds.x + bounds.width && y < bounds.y + bounds.height
@@ -1492,7 +1493,7 @@ mod tests {
 		for role in [Role::Entry, Role::Text, Role::DrawingArea, Role::Canvas, Role::Slider, Role::ScrollBar, Role::ListItem, Role::TreeItem, Role::ComboBox, Role::Menu, Role::Link] {
 			assert!(!coordinate_click_element(role, states, &bounds, 10.0, 20.0));
 		}
-		for states in [StateSet::new(State::Showing), StateSet::new(State::Enabled), StateSet::new(State::Enabled | State::Showing | State::Editable), StateSet::new(State::Enabled | State::Showing | State::HasPopup)] {
+		for states in [StateSet::new(State::Showing), StateSet::new(State::Enabled), StateSet::new(State::Enabled | State::Showing | State::Editable), StateSet::new(State::Enabled | State::Showing | State::HasPopup), StateSet::new(State::Enabled | State::Showing | State::Expandable)] {
 			assert!(!coordinate_click_element(Role::Button, states, &bounds, 10.0, 20.0));
 		}
 		for (x, y) in [(9.0, 20.0), (10.0, 19.0), (40.0, 20.0), (10.0, 60.0)] {
