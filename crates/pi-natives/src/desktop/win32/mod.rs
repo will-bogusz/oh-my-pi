@@ -221,3 +221,106 @@ impl Backend for Win32Backend {
 		Some(&mut self.ax)
 	}
 }
+
+#[cfg(all(test, target_os = "windows"))]
+mod tests {
+	use std::{
+		process::Command,
+		time::{Duration, Instant},
+	};
+
+	use uiautomation::{
+		UIAutomation,
+		patterns::UIValuePattern,
+		types::{ControlType, Handle},
+	};
+
+	use super::*;
+	use crate::desktop::control::CancellationSource;
+
+	/// 240 characters, each block numbered so a dropped one shows.
+	fn text() -> String {
+		(0..30).map(|k| format!("t{k:03}-ab ")).collect::<String>()[..240].to_string()
+	}
+
+	/// Windows 11 Notepad's window on a new empty file `name`.
+	fn notepad(backend: &mut Win32Backend, name: &str) -> DesktopWindow {
+		let path = std::env::temp_dir().join(name);
+		std::fs::write(&path, "").unwrap();
+		Command::new("notepad.exe").arg(&path).spawn().unwrap();
+		let deadline = Instant::now() + Duration::from_secs(20);
+		loop {
+			let found = backend.windows().unwrap().into_iter().find(|window| {
+				window.title.starts_with(name) && window.title.ends_with("Notepad")
+			});
+			if let Some(window) = found {
+				// Notepad focuses its editor once the file has loaded.
+				std::thread::sleep(Duration::from_secs(1));
+				return window;
+			}
+			assert!(Instant::now() < deadline, "Notepad did not open {name}");
+			std::thread::sleep(Duration::from_millis(200));
+		}
+	}
+
+	/// The text of `window`'s editor once it stops changing.
+	fn editor_text(window: &DesktopWindow) -> String {
+		let automation = UIAutomation::new().unwrap();
+		let root = automation
+			.element_from_handle(Handle::from(window.id.parse::<isize>().unwrap()))
+			.unwrap();
+		let editor = automation
+			.create_matcher()
+			.from(root)
+			.control_type(ControlType::Document)
+			.find_first()
+			.unwrap();
+		let read = || {
+			let value = editor.get_pattern::<UIValuePattern>().unwrap().get_value().unwrap();
+			value.trim_end_matches(['\r', '\n']).to_string()
+		};
+		let mut last = read();
+		loop {
+			std::thread::sleep(Duration::from_millis(500));
+			let now = read();
+			if now == last {
+				return now;
+			}
+			last = now;
+		}
+	}
+
+	fn type_into_notepad(name: &str) -> (CoreResult<()>, String) {
+		let mut backend = Win32Backend::new(DisplaySelector::Active).unwrap();
+		let window = notepad(&mut backend, name);
+		let token = CancellationSource::default().token();
+		let result = backend.type_text(
+			&Target::Window(window.id.clone()),
+			&text(),
+			DeliveryMode::ForegroundReturnFocus,
+			&token,
+		);
+		(result, editor_text(&window))
+	}
+
+	#[test]
+	#[ignore = "opens Windows 11 Notepad and types into it; run with --ignored in a signed-in \
+	            desktop session"]
+	fn notepad_gets_typed_text_whole() {
+		let (result, got) = type_into_notepad("omp-type-whole.txt");
+		assert_eq!(got, text(), "type returned {result:?}");
+	}
+
+	#[test]
+	#[ignore = "opens Windows 11 Notepad and types into it; run with --ignored in a signed-in \
+	            desktop session"]
+	fn typing_never_reports_text_notepad_lacks() {
+		let (result, got) = type_into_notepad("omp-type-honest.txt");
+		assert!(
+			result.is_err() || got == text(),
+			"type succeeded, but Notepad holds {} of {} characters: {got:?}",
+			got.chars().count(),
+			text().chars().count()
+		);
+	}
+}
