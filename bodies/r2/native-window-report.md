@@ -23,7 +23,7 @@ Before, these windows appear while the call reports success. Read `roster.rs`, `
 
 Non-goals: answering windows; Linux and Windows. Untested: a user's window opening inside the tab's frame mid-call; `print()`. Merged #18838 disables printing in omp's Chrome profile, not attached browsers.
 
-Known limit: a picker opened in a tab omp holds in the background, such as a relay tab it opened itself (#16119), isn't named.
+Known limits: a picker in a background tab isn't named. Native tooltip windows may meet the popup geometry filter and be reported as panels/pickers even when their text is in the DOM; distinguishing those needs native role metadata beyond this roster. Tooltip behavior has not been reproduced in the headless-only review checks.
 
 ## Testing
 
