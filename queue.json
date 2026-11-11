@@ -72846,9 +72846,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-action-outcome",
    "host": "MacBook-Pro",
    "added": "2026-11-10T19:19:48Z",
-   "updated": "2026-11-10T22:13:06Z",
+   "updated": "2026-11-11T09:09:31Z",
    "note": "",
-   "hold": "ActionOutcomePR, 2026-11-10: Haiku leg on this head did not reproduce the step saving (1.02x [0.84,1.25] vs earlier 0.86x); Sol leg on this head (guard-team, from 21:15Z) decides",
+   "hold": "Main, 2026-11-11: Sol blind 0.94 [0.89, 0.997] only just clears 1.0 and both blind Haiku legs went the other way; waits for BrowserExperiments' blind Opus leg: opens as a proposal only if Opus steps <= 1.0 with pass rate not worse, else park with the three tables in its notes",
    "advanced": "2026-11-10T22:13:06Z"
   },
   {
