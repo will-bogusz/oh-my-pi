@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 17:36Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 17:37Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 8 of 8 ready events used in the hour before the last plan, 0 left (plan of 2026-11-11 17:07Z on goliath; groups below are from it, states from the manifest)
@@ -123,7 +123,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | [#18775](https://github.com/can1357/oh-my-pi/pull/18775) | eval-error-frames | fix(coding-agent): print a failed JavaScript cell's own frames, not omp's host stack | eval | P1 | 21h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/eval-error-frames) |
 | [#18772](https://github.com/can1357/oh-my-pi/pull/18772) | observe-print | fix(browser): print every observed element, one line each, instead of cutting at 100 | browser | P1 | 21h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/observe-print) |
 | [#18771](https://github.com/can1357/oh-my-pi/pull/18771) | factory-droid-171-pin | feat(ai,catalog): identify Factory Droid requests as droid 1.7.1 | factory-droid | P1 | 21h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-171-pin) |
-| [#18776](https://github.com/can1357/oh-my-pi/pull/18776) | screenshot-result-line | feat(coding-agent): report browser screenshots and opens on one line | browser | P2 | 20h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/screenshot-result-line) |
+| [#18776](https://github.com/can1357/oh-my-pi/pull/18776) | screenshot-result-line | feat(coding-agent): report browser screenshots and opens on one line | browser | P2 | 21h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/screenshot-result-line) |
 | [#18783](https://github.com/can1357/oh-my-pi/pull/18783) | x11-covered-capture | fix(natives): capture a covered X11 window from its own pixels, or say it is covered | computer | P1 | 19h | keep; accepted pair with #18013 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-covered-capture) |
 | [#18784](https://github.com/can1357/oh-my-pi/pull/18784) | x11-takeover-user | fix(natives): keep X11 takeover from taking a typing user's keys | computer | P1 | 19h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-takeover-user) |
 | [#18825](https://github.com/can1357/oh-my-pi/pull/18825) | x11-mpx-qt | fix(natives): stop X11 background input from crashing your running Qt 6.5+ apps | computer | P1 | 13h | requeue | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-mpx-qt) |

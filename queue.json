@@ -75554,7 +75554,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-mpx-qt",
    "host": "MacBook-Pro",
    "added": "2026-11-10T22:23:32Z",
-   "updated": "2026-11-11T16:52:41Z",
+   "updated": "2026-11-11T17:37:15Z",
    "note": "",
    "advanced": "2026-11-11T16:52:41Z",
    "built": [
@@ -75687,6 +75687,9 @@
      "note": "keep pool+holder; one push with the rebase: unplug poll matches id+name (R6) and only v2 pairs count toward the cap; decline next-holder-state findings naming follow-ups",
      "ref": "/Users/viathebrink/tmp/oh-my-pi/Design18825/18825.md"
     }
+   ],
+   "rebases_after": [
+    18013
    ]
   },
   {
