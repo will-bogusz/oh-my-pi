@@ -120,36 +120,49 @@ pub const READ_TIMEOUT: Duration = Duration::from_millis(250);
 #[derive(Clone, Copy, Debug)]
 pub struct Waits {
 	/// Longest wait for a field to show one piece of typed text.
-	pub run:         Duration,
+	pub run:           Duration,
 	/// A field whose text has not changed for this long after a piece has
 	/// taken what it will of it.
-	pub run_still:   Duration,
+	pub run_still:     Duration,
 	/// Time between reads of a field that does not show a piece yet.
-	pub run_poll:    Duration,
-	/// Longest a typing call paces itself before sending the rest unpaced,
-	/// counted from its first key.
-	pub pace_budget: Duration,
+	pub run_poll:      Duration,
+	/// Pacing time allowed per typed character ([`Waits::pace_budget`]).
+	pub pace_per_char: Duration,
+	/// Least and most pacing time allowed one call.
+	pub pace_min:      Duration,
+	pub pace_max:      Duration,
 	/// Longest wait after the last key for the field to show the text.
-	pub check:       Duration,
+	pub check:         Duration,
 	/// The check ends once the field's text has not changed for this long.
-	pub check_still: Duration,
+	pub check_still:   Duration,
 	/// Time between reads of a field that does not show the text yet.
-	pub check_poll:  Duration,
+	pub check_poll:    Duration,
 }
 
 impl Waits {
 	/// The waits of takeover typing. Windows 11 Notepad shows 2,000 paced
-	/// characters in about 8 s; a field that redraws more slowly than that
-	/// gets the rest unpaced.
+	/// characters in about 8 s (4 ms each); a field that redraws more slowly
+	/// than the budget allows gets the rest unpaced.
 	pub const TYPING: Self = Self {
-		run:         Duration::from_secs(1),
-		run_still:   Duration::from_millis(60),
-		run_poll:    Duration::from_millis(2),
-		pace_budget: Duration::from_secs(30),
-		check:       Duration::from_secs(1),
-		check_still: Duration::from_millis(300),
-		check_poll:  Duration::from_millis(25),
+		run:           Duration::from_secs(1),
+		run_still:     Duration::from_millis(60),
+		run_poll:      Duration::from_millis(2),
+		pace_per_char: Duration::from_millis(10),
+		pace_min:      Duration::from_secs(1),
+		pace_max:      Duration::from_secs(30),
+		check:         Duration::from_secs(1),
+		check_still:   Duration::from_millis(300),
+		check_poll:    Duration::from_millis(25),
 	};
+
+	/// Longest a call typing `chars` characters paces itself before sending
+	/// the rest unpaced, counted from its first key.
+	pub fn pace_budget(&self, chars: usize) -> Duration {
+		self
+			.pace_per_char
+			.saturating_mul(u32::try_from(chars).unwrap_or(u32::MAX))
+			.clamp(self.pace_min, self.pace_max)
+	}
 }
 
 /// A field typed text is read back from.
@@ -233,7 +246,7 @@ impl Pacer {
 /// reads and its error stops typing. Returns the field's text when last
 /// read, if a read while pacing succeeded.
 ///
-/// Pacing adds at most `waits.pace_budget` plus one read
+/// Pacing adds at most [`Waits::pace_budget`] plus one read
 /// (2 × [`READ_TIMEOUT`]) to the call.
 pub fn send_paced<F: Field, E>(
 	text: &str,
@@ -243,7 +256,7 @@ pub fn send_paced<F: Field, E>(
 	mut send: impl FnMut(&str) -> Result<(), E>,
 	mut check: impl FnMut() -> Result<(), E>,
 ) -> Result<Option<String>, E> {
-	let mut pacer = Pacer::new(field.is_some(), waits.pace_budget);
+	let mut pacer = Pacer::new(field.is_some(), waits.pace_budget(text.chars().count()));
 	let start = clock.now();
 	let mut shown = field.map(|(_, before)| before.to_string());
 	let mut last = None;
@@ -534,7 +547,7 @@ mod tests {
 
 	#[test]
 	fn pacing_slows_on_a_short_word_and_stops_when_the_field_goes_quiet() {
-		let budget = Waits::TYPING.pace_budget;
+		let budget = Waits::TYPING.pace_max;
 		let mut pacer = Pacer::new(true, budget);
 		pacer.after(Some(Progress::Shown), true, true, Duration::ZERO);
 		assert_eq!(pacer.pace, Pace::Words);
@@ -689,8 +702,10 @@ mod tests {
 		assert!(matches!(verdict, Verdict::Unconfirmed(_)), "{verdict:?}");
 		let waits = Waits::TYPING;
 		// Pacing ran into its budget, and the check into its limit.
-		assert!(took >= waits.pace_budget + waits.check, "{took:?}");
-		assert!(took <= waits.pace_budget + waits.check + 2 * READ, "{took:?}");
+		let budget = waits.pace_budget(2000);
+		assert_eq!(budget, Duration::from_secs(20));
+		assert!(took >= budget + waits.check, "{took:?}");
+		assert!(took <= budget + waits.check + 2 * READ, "{took:?}");
 	}
 
 	#[test]
@@ -733,7 +748,7 @@ mod tests {
 			"{reason}"
 		);
 		let waits = Waits::TYPING;
-		assert!(took <= waits.pace_budget + waits.check + 2 * READ, "{took:?}");
+		assert!(took <= waits.pace_budget(240) + waits.check + 2 * READ, "{took:?}");
 	}
 
 	#[test]

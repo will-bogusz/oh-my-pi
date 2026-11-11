@@ -10,6 +10,7 @@
 
 - The macOS addon's install name is `@rpath/libpi_natives.dylib` instead of the directory it was built in ([#18911](https://github.com/can1357/oh-my-pi/pull/18911))
 - A set `OMP_APPLEFM_SWIFTC` must name a usable Swift 6.4+ compiler with a macOS 27+ SDK: the build now fails instead of falling back to Xcode, the Command Line Tools, or a build without Apple Foundation Models ([#16584](https://github.com/can1357/oh-my-pi/pull/16584) by [@honsunrise](https://github.com/honsunrise))
+- `typeText` and `axType` on Windows resolve to `{ unconfirmed, focusReturn }`, with `unconfirmed` saying why the focused field did not confirm the typed text
 
 ### Fixed
 
@@ -17,12 +18,7 @@
 - Fixed Linux computer reads crashing the app being read (Qt 5 and Qt 6 before 6.9.2 apps anywhere; GTK 3 and Firefox apps on distributions with at-spi2-core before 2.45, such as Ubuntu 22.04), and reading no text from the text fields of newer Qt apps ([#18823](https://github.com/can1357/oh-my-pi/pull/18823) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed macOS background left clicks crashing the page in Electron apps, and in Chrome when the click changes the URL in place (`history.pushState`, as single-page apps do) ([#18824](https://github.com/can1357/oh-my-pi/pull/18824) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed Windows element typing and key presses that ran in takeover, such as `el.type()` into a Chrome, Electron or WPF field, leaving the target window in front instead of handing focus back to the user's window; a user window switch before element focus now stops delivery instead of taking focus back ([#18919](https://github.com/can1357/oh-my-pi/pull/18919) by [@will-bogusz](https://github.com/will-bogusz))
-- Fixed Windows element typing and key presses that ran in takeover, such as `el.type()` into a Chrome, Electron or WPF field, leaving the target window in front instead of handing focus back to the user's window
-- Windows takeover `type` into Windows 11 Notepad no longer loses most of the text while reporting success: takeover typing sends a word per call and, into a field it can read, waits for the field to show each word before the next, waits for the target to read its keys before handing focus back, then reads the field back, failing with `InputFailed` naming what arrived when characters went missing
-
-### Changed
-
-- `typeText` and `axType` on Windows resolve to `{ unconfirmed, focusReturn }`, with `unconfirmed` saying why the focused field did not confirm the typed text
+- Windows takeover `type` into Windows 11 Notepad no longer loses most of the text while reporting success: takeover typing sends a word per call and, into a field it can read, waits for the field to show each word before the next, waits for the target to read its keys before handing focus back, then reads the field back, failing with `InputFailed` naming what arrived when characters went missing; every UI Automation read of the field gives up after 250 ms, so a field that answers slowly or not at all never holds the call
 
 ## [18.18.8] - 2026-11-11
 
