@@ -74304,14 +74304,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-11T02:53:00Z",
+  "checked": "2026-11-11T03:23:48Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "atspi-unanswered-app": {
-    "since": "2026-11-11T00:51:58Z",
-    "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool"
-   },
    "macos-click-timestamp": {
     "since": "2026-11-11T01:52:22Z",
     "title": "fix(natives): stop macOS background left clicks from crashing Electron and Chrome pages"
@@ -74323,6 +74319,10 @@
    "x11-mpx-qt": {
     "since": "2026-11-11T02:22:35Z",
     "title": "fix(natives): stop X11 background input from crashing your running Qt 6.5+ apps"
+   },
+   "atspi-text-first": {
+    "since": "2026-11-11T03:23:48Z",
+    "title": "fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility"
    },
    "browser-select-readback": {
     "since": "2026-11-11T00:21:30Z",
@@ -74352,71 +74352,24 @@
     "files": [
      "packages/ai/src/providers/openai-shared.ts"
     ]
+   },
+   "#18353": {
+    "since": "2026-11-11T03:23:48Z",
+    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
+    "files": [
+     "MODULE.bazel.lock"
+    ]
+   },
+   "#18013": {
+    "since": "2026-11-11T03:23:48Z",
+    "title": "feat(natives): type text the wayland layout lacks through libei text",
+    "files": [
+     "MODULE.bazel.lock"
+    ]
    }
   },
   "merged_through": "2026-11-10T22:02:28Z",
-  "unreleased": {
-   "18773": {
-    "title": "fix(coding-agent): keep a child omp's browser tabs out of its parent's Tern pane and cmux workspace",
-    "merge_commit": "827d50cac3718d9e2b82326f024b1d28e68d219e",
-    "merged_at": "2026-11-10T22:02:27Z"
-   },
-   "18768": {
-    "title": "fix(catalog): show list prices for Factory Droid Fable 5.1, GLM 5.2 Fast and Muse Spark Open",
-    "merge_commit": "1e60ff458b5a3b9fe50981d30bb79be276121385",
-    "merged_at": "2026-11-10T22:02:27Z"
-   },
-   "18767": {
-    "title": "fix(catalog): show Factory Droid's Gemini 4 Argon credit promotion",
-    "merge_commit": "c8bc4c707a95c4dd4cd76a701dcc8efd940744f3",
-    "merged_at": "2026-11-10T22:02:27Z"
-   },
-   "18761": {
-    "title": "fix(browser): have agents report a step the page cannot do instead of faking it",
-    "merge_commit": "67669e6d06d45ddb3ea9189d3f1371b60e369ead",
-    "merged_at": "2026-11-10T22:02:27Z"
-   },
-   "18746": {
-    "title": "fix(natives): wait for another session's input lock before failing InputBusy",
-    "merge_commit": "0198fc0ac2ffde96712fa23d5e5b64ab24dbcccd",
-    "merged_at": "2026-11-10T22:02:27Z"
-   },
-   "18745": {
-    "title": "fix(natives): accept aliases in computer role searches",
-    "merge_commit": "2683884786f2a81e4fbf00696c6722a8739df165",
-    "merged_at": "2026-11-10T22:02:27Z"
-   },
-   "18744": {
-    "title": "fix(coding-agent): prefer exact app names when selecting windows",
-    "merge_commit": "c28aafca99731e80c6258e7437d5af12433abf9e",
-    "merged_at": "2026-11-10T22:02:27Z"
-   },
-   "18739": {
-    "title": "fix(browser): point calls on a tab that is not open at browser.open()",
-    "merge_commit": "1fe8469b25abbbec5a17733b5d144669186af0f8",
-    "merged_at": "2026-11-10T22:02:27Z"
-   },
-   "18675": {
-    "title": "fix(natives): send macOS keys for a window to the sheet focused on it",
-    "merge_commit": "0bd53d7fbb6224cc1482ce289ab1234459269e80",
-    "merged_at": "2026-11-10T22:02:27Z"
-   },
-   "18680": {
-    "title": "fix(natives): restore Finder with its desktop focus after macOS background input",
-    "merge_commit": "2ff8afcd5ff31c41845b344f6d63577e1dfaa862",
-    "merged_at": "2026-11-10T22:02:28Z"
-   },
-   "18658": {
-    "title": "fix(coding-agent): preserve role selectors across locales and document waits",
-    "merge_commit": "03614503e84b381ebddc40ca537685f59c3f4cc6",
-    "merged_at": "2026-11-10T22:02:28Z"
-   },
-   "18657": {
-    "title": "fix(browser-relay): keep a shared child frame attached when one connection turns auto-attach off",
-    "merge_commit": "990816641c5c34989dd6fe909bc09adc46c14a2e",
-    "merged_at": "2026-11-10T22:02:28Z"
-   }
-  },
+  "unreleased": {},
   "ready": [
    15508,
    16274,
@@ -76218,6 +76171,121 @@
     "kind": "openable",
     "id": "x11-mpx-key-confirm",
     "title": "fix(natives): confirm every X11 virtual-keyboard key release, in order"
+   },
+   {
+    "at": "2026-11-11T03:23:48Z",
+    "kind": "released",
+    "number": 18773,
+    "title": "fix(coding-agent): keep a child omp's browser tabs out of its parent's Tern pane and cmux workspace",
+    "tag": "v18.18.8"
+   },
+   {
+    "at": "2026-11-11T03:23:48Z",
+    "kind": "released",
+    "number": 18768,
+    "title": "fix(catalog): show list prices for Factory Droid Fable 5.1, GLM 5.2 Fast and Muse Spark Open",
+    "tag": "v18.18.8"
+   },
+   {
+    "at": "2026-11-11T03:23:48Z",
+    "kind": "released",
+    "number": 18767,
+    "title": "fix(catalog): show Factory Droid's Gemini 4 Argon credit promotion",
+    "tag": "v18.18.8"
+   },
+   {
+    "at": "2026-11-11T03:23:48Z",
+    "kind": "released",
+    "number": 18761,
+    "title": "fix(browser): have agents report a step the page cannot do instead of faking it",
+    "tag": "v18.18.8"
+   },
+   {
+    "at": "2026-11-11T03:23:48Z",
+    "kind": "released",
+    "number": 18746,
+    "title": "fix(natives): wait for another session's input lock before failing InputBusy",
+    "tag": "v18.18.8"
+   },
+   {
+    "at": "2026-11-11T03:23:48Z",
+    "kind": "released",
+    "number": 18745,
+    "title": "fix(natives): accept aliases in computer role searches",
+    "tag": "v18.18.8"
+   },
+   {
+    "at": "2026-11-11T03:23:48Z",
+    "kind": "released",
+    "number": 18744,
+    "title": "fix(coding-agent): prefer exact app names when selecting windows",
+    "tag": "v18.18.8"
+   },
+   {
+    "at": "2026-11-11T03:23:48Z",
+    "kind": "released",
+    "number": 18739,
+    "title": "fix(browser): point calls on a tab that is not open at browser.open()",
+    "tag": "v18.18.8"
+   },
+   {
+    "at": "2026-11-11T03:23:48Z",
+    "kind": "released",
+    "number": 18675,
+    "title": "fix(natives): send macOS keys for a window to the sheet focused on it",
+    "tag": "v18.18.8"
+   },
+   {
+    "at": "2026-11-11T03:23:48Z",
+    "kind": "released",
+    "number": 18680,
+    "title": "fix(natives): restore Finder with its desktop focus after macOS background input",
+    "tag": "v18.18.8"
+   },
+   {
+    "at": "2026-11-11T03:23:48Z",
+    "kind": "released",
+    "number": 18658,
+    "title": "fix(coding-agent): preserve role selectors across locales and document waits",
+    "tag": "v18.18.8"
+   },
+   {
+    "at": "2026-11-11T03:23:48Z",
+    "kind": "released",
+    "number": 18657,
+    "title": "fix(browser-relay): keep a shared child frame attached when one connection turns auto-attach off",
+    "tag": "v18.18.8"
+   },
+   {
+    "at": "2026-11-11T03:23:48Z",
+    "kind": "openable",
+    "id": "atspi-text-first",
+    "title": "fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility"
+   },
+   {
+    "at": "2026-11-11T03:23:48Z",
+    "kind": "unopenable",
+    "id": "atspi-unanswered-app",
+    "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool",
+    "why": "plan: wait (conflicts with #18353 in MODULE.bazel.lock, crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs; conflicts with #18013 in MODULE.bazel.lock; conflicts with main in MODULE.bazel.lock)"
+   },
+   {
+    "at": "2026-11-11T03:23:48Z",
+    "kind": "conflict",
+    "label": "#18353",
+    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
+    "files": [
+     "MODULE.bazel.lock"
+    ]
+   },
+   {
+    "at": "2026-11-11T03:23:48Z",
+    "kind": "conflict",
+    "label": "#18013",
+    "title": "feat(natives): type text the wayland layout lacks through libei text",
+    "files": [
+     "MODULE.bazel.lock"
+    ]
    }
   ]
  },
@@ -79028,8 +79096,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-11T02:36:32.132893Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-11T03:23:48.853768Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -79418,8 +79486,10 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in MODULE.bazel.lock"
+    ],
     "note": "accepted pair with #18013",
     "over": [],
     "paired": [
@@ -79490,8 +79560,10 @@
     "area": "natives",
     "priority": "P2",
     "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in MODULE.bazel.lock"
+    ],
     "note": "accepted pair with #18353",
     "over": [],
     "paired": [
@@ -79596,15 +79668,19 @@
     "area": "computer",
     "priority": "P0",
     "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with #18353 in MODULE.bazel.lock, crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
+     "conflicts with #18013 in MODULE.bazel.lock",
+     "conflicts with main in MODULE.bazel.lock"
+    ],
     "note": "",
-    "over": [
+    "over": [],
+    "paired": [],
+    "blocked_by": [
      "#18353",
      "#18013"
     ],
-    "paired": [],
-    "blocked_by": [],
     "needs": [],
     "created": "2026-11-03T08:39:53Z"
    },
@@ -79667,16 +79743,12 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility",
-    "action": "wait",
-    "reasons": [
-     "conflicts with atspi-unanswered-app in crates/pi-natives/src/desktop/linux/wayland/mod.rs"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "atspi-unanswered-app"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T02:21:41Z"
    },
@@ -79693,8 +79765,9 @@
      "needs atspi-unanswered-app (queued)",
      "conflicts with #18353 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #18013 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/libei.rs",
-     "conflicts with atspi-unanswered-app in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/wayland/libei.rs, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with qt5-getall-crash in crates/pi-natives/src/desktop/linux/ax.rs",
+     "conflicts with atspi-text-first in crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
+     "its need atspi-unanswered-app conflicts with main in MODULE.bazel.lock",
      "conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
@@ -79703,8 +79776,8 @@
     "blocked_by": [
      "#18353",
      "#18013",
-     "atspi-unanswered-app",
-     "qt5-getall-crash"
+     "qt5-getall-crash",
+     "atspi-text-first"
     ],
     "needs": [
      "atspi-unanswered-app"
@@ -79853,6 +79926,27 @@
     "created": "2026-11-09T18:20:14Z"
    },
    {
+    "id": "x11-click-stale-popup",
+    "label": "x11-click-stale-popup",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): refuse X11 presses outside an open popup of the app",
+    "action": "wait",
+    "reasons": [
+     "conflicts with #18784 in crates/pi-natives/src/desktop/linux/x11/input.rs"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "#18784"
+    ],
+    "needs": [],
+    "created": "2026-11-11T03:06:32Z"
+   },
+   {
     "id": "x11-mpx-key-confirm",
     "label": "x11-mpx-key-confirm",
     "number": null,
@@ -79868,6 +79962,27 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T02:32:46Z"
+   },
+   {
+    "id": "x11-takeover-keyboard-grab",
+    "label": "x11-takeover-keyboard-grab",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): refuse X11 XTest keys while another client grabs the keyboard",
+    "action": "wait",
+    "reasons": [
+     "conflicts with #18784 in crates/pi-natives/src/desktop/linux/x11/input.rs"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "#18784"
+    ],
+    "needs": [],
+    "created": "2026-11-11T02:55:11Z"
    },
    {
     "id": "x11-takeover-keyboard-state",
@@ -79990,6 +80105,31 @@
      "observe-settle"
     ],
     "created": "2026-11-10T18:56:55Z"
+   },
+   {
+    "id": "atspi-value-readback",
+    "label": "atspi-value-readback",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P2",
+    "title": "fix(natives): read back AT-SPI numeric setValue before reporting success",
+    "action": "wait",
+    "reasons": [
+     "needs atspi-unanswered-app (queued)",
+     "conflicts with atspi-text-first in crates/pi-natives/src/desktop/linux/ax.rs",
+     "its need atspi-unanswered-app conflicts with main in MODULE.bazel.lock"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "atspi-text-first"
+    ],
+    "needs": [
+     "atspi-unanswered-app"
+    ],
+    "created": "2026-11-11T02:53:57Z"
    },
    {
     "id": "browser-download-missing-file",
@@ -80507,7 +80647,6 @@
      "conflicts with #18784 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with atspi-unanswered-app in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
@@ -80519,8 +80658,7 @@
      "#18783",
      "#18784",
      "#18353",
-     "#18222",
-     "atspi-unanswered-app"
+     "#18222"
     ],
     "needs": [
      "computer-ui-quiet"
