@@ -78187,7 +78187,7 @@
    "area": "computer",
    "priority": "P2",
    "needs": [],
-   "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
+   "base": "73d7521269a1212fc2b2790a2e8c08424496c953",
    "body": "bodies/win-menu-modal.md",
    "state": "open",
    "pr": 18922,
@@ -78195,7 +78195,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-menu-modal",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:48:16Z",
-   "updated": "2026-11-11T16:34:28Z",
+   "updated": "2026-11-11T16:59:03Z",
    "note": "",
    "built": [
     {
@@ -78493,7 +78493,8 @@
     }
    ],
    "opened": "2026-11-11T16:34:00Z",
-   "readied": "2026-11-11T16:34:28Z"
+   "readied": "2026-11-11T16:34:28Z",
+   "advanced": "2026-11-11T16:59:03Z"
   },
   {
    "id": "browser-main-wait-globals",
