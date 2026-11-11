@@ -75988,7 +75988,7 @@
    "area": "browser",
    "priority": "P1",
    "needs": [],
-   "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
+   "base": "7b42b1be6069b791c54e1c4c93d2070978d9e6bf",
    "body": "bodies/relay-detach-owned-close.md",
    "state": "open",
    "pr": 18832,
@@ -75996,9 +75996,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-detach-owned-close",
    "host": "MacBook-Pro",
    "added": "2026-11-11T01:40:34Z",
-   "updated": "2026-11-11T05:29:39Z",
+   "updated": "2026-11-11T11:45:21Z",
    "note": "",
-   "advanced": "2026-11-11T05:29:39Z",
+   "advanced": "2026-11-11T11:45:21Z",
    "built": [
     {
      "with": "#18676",
