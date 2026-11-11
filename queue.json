@@ -78320,8 +78320,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-11T01:52:23.317167Z",
-  "host": "goliath",
+  "at": "2026-11-11T02:05:26.883206Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -78906,6 +78906,23 @@
     "created": "2026-11-10T22:28:45Z"
    },
    {
+    "id": "atspi-huge-children",
+    "label": "atspi-huge-children",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P0",
+    "title": "fix(natives): stop Linux accessibility reads from freezing apps that show long tables",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-11T01:54:02Z"
+   },
+   {
     "id": "atspi-unanswered-app",
     "label": "atspi-unanswered-app",
     "number": null,
@@ -78913,15 +78930,20 @@
     "area": "computer",
     "priority": "P0",
     "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [
-     "#18353",
-     "#18013"
+    "action": "wait",
+    "reasons": [
+     "conflicts with #18353 in MODULE.bazel.lock, crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
+     "conflicts with #18013 in MODULE.bazel.lock",
+     "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
+    "note": "",
+    "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#18353",
+     "#18013",
+     "atspi-huge-children"
+    ],
     "needs": [],
     "created": "2026-11-03T08:39:53Z"
    },
@@ -78950,16 +78972,14 @@
     "area": "computer",
     "priority": "P0",
     "title": "fix(natives): stop X11 background input from crashing your running Qt 6.5+ apps",
-    "action": "wait",
+    "action": "held",
     "reasons": [
-     "conflicts with #18784 in crates/pi-natives/src/desktop/linux/x11/mpx.rs"
+     "held: Main, 2026-11-11: wait for LinuxMined's grabbed-pair fix head, then rebuild the natives tree"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#18784"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-10T22:23:32Z"
    },
@@ -78976,7 +78996,7 @@
      "needs atspi-unanswered-app (queued)",
      "conflicts with #18353 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #18013 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/libei.rs",
-     "conflicts with atspi-unanswered-app in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/wayland/libei.rs, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
+     "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
@@ -78985,7 +79005,7 @@
     "blocked_by": [
      "#18353",
      "#18013",
-     "atspi-unanswered-app"
+     "atspi-huge-children"
     ],
     "needs": [
      "atspi-unanswered-app"
@@ -79686,7 +79706,7 @@
      "conflicts with #18784 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with atspi-unanswered-app in crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
@@ -79699,7 +79719,7 @@
      "#18784",
      "#18353",
      "#18222",
-     "atspi-unanswered-app"
+     "atspi-huge-children"
     ],
     "needs": [
      "computer-ui-quiet"
