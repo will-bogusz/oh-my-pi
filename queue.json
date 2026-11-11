@@ -81669,6 +81669,24 @@
    "added": "2026-11-11T18:13:37Z",
    "updated": "2026-11-11T18:13:37Z",
    "note": ""
+  },
+  {
+   "id": "macos-press-click-hint",
+   "branch": "will/macos-press-click-hint",
+   "title": "fix(natives): point a refused macOS press at the element's own click",
+   "area": "computer",
+   "priority": "P2",
+   "needs": [],
+   "base": "50da2d357039404a81d7c64622740ce13e4c54b4",
+   "body": "bodies/macos-press-click-hint.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-press-click-hint",
+   "host": "MacBook-Pro",
+   "added": "2026-11-11T18:49:11Z",
+   "updated": "2026-11-11T18:49:11Z",
+   "note": ""
   }
  ],
  "watch": {
