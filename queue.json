@@ -81690,7 +81690,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-11T19:08:24Z",
+  "checked": "2026-11-11T19:39:00Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -81725,7 +81725,6 @@
    18776,
    18783,
    18784,
-   18786,
    18789,
    18825,
    18828,
@@ -88856,8 +88855,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-11T19:12:01.070481Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-11T19:39:01.116196Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -89117,12 +89116,16 @@
     "area": "browser",
     "priority": "P1",
     "title": "fix(browser): print every observed element, one line each, instead of cutting at 100",
-    "action": "keep",
-    "reasons": [],
+    "action": "requeue",
+    "reasons": [
+     "conflicts with #18751 in docs/tools/browser.md"
+    ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#18751"
+    ],
     "needs": [],
     "created": "2026-11-10T20:05:43Z"
    },
@@ -90378,7 +90381,6 @@
      "conflicts with #18738 in docs/tools/browser.md",
      "conflicts with #18750 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18751 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with #18772 in docs/tools/browser.md",
      "conflicts with #18924 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18776 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts",
@@ -90393,7 +90395,6 @@
      "#18738",
      "#18750",
      "#18751",
-     "#18772",
      "#18924",
      "#18776",
      "#18789"
@@ -90553,15 +90554,12 @@
     "title": "docs(browser): teach acting and looking in one Eval cell without sleeps",
     "action": "wait",
     "reasons": [
-     "needs settle-reads (queued)",
-     "conflicts with #18772 in docs/tools/browser.md"
+     "needs settle-reads (queued)"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#18772"
-    ],
+    "blocked_by": [],
     "needs": [
      "settle-reads"
     ],
@@ -90851,7 +90849,6 @@
      "needs act-look-prompt (queued)",
      "conflicts with #18737 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18750 in packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with #18772 in docs/tools/browser.md",
      "conflicts with #18924 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18925 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
@@ -90862,7 +90859,6 @@
     "blocked_by": [
      "#18737",
      "#18750",
-     "#18772",
      "#18924",
      "#18925"
     ],
