@@ -73509,7 +73509,7 @@
    "area": "eval",
    "priority": "P1",
    "needs": [],
-   "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
+   "base": "7b42b1be6069b791c54e1c4c93d2070978d9e6bf",
    "body": "bodies/eval-error-frames.md",
    "state": "open",
    "pr": 18775,
@@ -73517,9 +73517,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/eval-error-frames",
    "host": "MacBook-Pro",
    "added": "2026-11-10T19:06:45Z",
-   "updated": "2026-11-11T09:49:41Z",
+   "updated": "2026-11-11T11:44:20Z",
    "note": "",
-   "advanced": "2026-11-11T09:49:41Z",
+   "advanced": "2026-11-11T11:44:20Z",
    "built": [
     {
      "with": "#18658",
