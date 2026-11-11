@@ -441,11 +441,9 @@ impl AxBackend for Win32Ax {
 			cached_state(&cached, UIProperty::IsTogglePatternAvailable, UIProperty::ToggleToggleState);
 		let identity = ax_states::identity(
 			&native_role,
-			&fields.each_ref().map(|field| {
-				field
-					.as_ref()
-					.map(|value| value.as_deref())
-					.map_err(|()| ())
+			&fields.each_ref().map(|field| match field {
+				Ok(value) => Ok(value.as_deref()),
+				Err(()) => Err(()),
 			}),
 			toggle,
 		);
