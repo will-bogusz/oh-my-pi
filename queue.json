@@ -81713,14 +81713,15 @@
    "needs": [],
    "base": "50da2d357039404a81d7c64622740ce13e4c54b4",
    "body": null,
-   "state": "queued",
+   "state": "merged",
    "pr": null,
    "closed_prs": [],
    "worktree": null,
    "host": "MacBook-Pro",
    "added": "2026-11-11T20:07:49Z",
-   "updated": "2026-11-11T20:07:53Z",
-   "note": "Main, 2026-11-11: queue-only follow-up; no code, not built. Pre-existing on main 50da2d3570: browser.enabled listener in packages/coding-agent/src/session/agent-session.ts:#reconcileEvalPreludeSetting, lines 3185-3190, awaits MCP filtering before the prompt rebuild. Four synchronous readers can see the old prefix in that window: packages/coding-agent/src/modes/controllers/tan-command-controller.ts:TanCommandController.start; packages/coding-agent/src/session/context-view.ts:appendSystemPromptEntries; packages/coding-agent/src/modes/rpc/rpc-mode.ts:get_state; packages/coding-agent/src/modes/controllers/extension-ui-controller.ts:contextActions.getSystemPrompt. Keep separate from PR 18786; test-only correction there waits for reconcile."
+   "updated": "2026-11-11T20:48:47Z",
+   "note": "Main, 2026-11-11: queue-only follow-up; no code, not built. Pre-existing on main 50da2d3570: browser.enabled listener in packages/coding-agent/src/session/agent-session.ts:#reconcileEvalPreludeSetting, lines 3185-3190, awaits MCP filtering before the prompt rebuild. Four synchronous readers can see the old prefix in that window: packages/coding-agent/src/modes/controllers/tan-command-controller.ts:TanCommandController.start; packages/coding-agent/src/session/context-view.ts:appendSystemPromptEntries; packages/coding-agent/src/modes/rpc/rpc-mode.ts:get_state; packages/coding-agent/src/modes/controllers/extension-ui-controller.ts:contextActions.getSystemPrompt. Keep separate from PR 18786; test-only correction there waits for reconcile.",
+   "merged_by": "ancestor"
   }
  ],
  "watch": {
