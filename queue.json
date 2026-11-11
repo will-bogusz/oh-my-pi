@@ -77090,8 +77090,10 @@
    "title": "fix(natives): map Windows keys on the receiving keyboard layout",
    "area": "computer",
    "priority": "P1",
-   "needs": [],
-   "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
+   "needs": [
+    "win-posted-modifiers"
+   ],
+   "base": "037116ff4ae0276dd225c6d686a9629a43089222",
    "body": "bodies/win-target-layout.md",
    "state": "queued",
    "pr": null,
@@ -77099,7 +77101,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-target-layout",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:13:32Z",
-   "updated": "2026-11-11T09:40:13Z",
+   "updated": "2026-11-11T10:23:14Z",
    "note": "",
    "hold": "WindowsMined, 2026-11-11: live Windows trial pending; unhold when its body carries the result"
   },

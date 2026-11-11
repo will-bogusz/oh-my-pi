@@ -2,11 +2,13 @@
 
 I fixed Windows keys so they use the receiving app's layout, not omp's.
 
-Characters and shortcut scan codes now use the receiving window thread's layout for background and takeover input. Desktop/display input uses the foreground window's layout and supplies modifiers required by character keys, such as Shift for `?` on en-US. Characters absent from that layout are still refused.
+Characters and shortcut scan codes now use the receiving window thread's layout for background and takeover input. The background modifier refusal uses that same mapping: keys needing Shift or AltGr are refused before posting so the default `backgroundFallback` reruns them in takeover; keys needing no modifier still post plainly.
+
+Desktop/display input uses the foreground window's layout and supplies modifiers required by character keys, such as Shift for `?` on en-US. Characters absent from that layout are still refused.
 
 ## Why
 
-Windows can keep different keyboard layouts per app. Resolving keys on omp's worker thread can therefore report success while typing another character, such as swapping y/z between en-US and de-DE.
+Windows can keep different keyboard layouts per app. Resolving keys on omp's worker thread can therefore report success while typing another character, such as swapping y/z between en-US and de-DE, or miss the Shift required for `1` on French AZERTY when deciding whether background posting is safe.
 
 The layout is passed explicitly to character and scan-code mapping rather than changing omp's thread layout. Console windows that report no layout retain omp's worker-thread mapping. Related precedent: [Cua PR 6201](https://github.com/trycua/cua/pull/6201). Unicode text delivery is not changed.
 
