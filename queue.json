@@ -83029,6 +83029,11 @@
     "sha": "9dd4e74f28d1aee12dcc62d9ceaf24f5bddc3ac4",
     "at": "2026-11-11T10:55:23Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "9dd4e74f28d1aee12dcc62d9ceaf24f5bddc3ac4",
+    "at": "2026-11-11T10:56:55Z",
+    "host": "goliath"
    }
   }
  },
