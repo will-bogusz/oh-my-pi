@@ -10,13 +10,14 @@ Windows always reported an unlocked screen. An unavailable session could leave t
 
 The probe combines session state with access to the input desktop, following [Cua PR 5266](https://github.com/trycua/cua/pull/5266). [Microsoft documents](https://learn.microsoft.com/en-us/windows/win32/api/wtsapi32/ns-wtsapi32-wtsinfoex_level1_w) the lock flags; the Windows 7 inversion does not apply to the supported runtime. Display sleep remains unreported because its notification needs ongoing registration.
 
-Review `win32/session.rs` first, then shared screen-state dispatch and the Windows annotations. macOS retains its existing explanations. The new guidance only explains an unavailable Windows desktop; no model trials were run.
+Review `win32/session.rs` first, then shared screen-state dispatch and the Windows annotations; macOS retains its existing explanations. Duplicate Windows guide instructions and the run note's retry directive were dropped. Remaining runtime notes only diagnose the unavailable desktop and capture/input evidence limits; capabilities and errors name the condition.
 
 ## Testing
 
 - Linux: `cargo test -p pi-natives --lib windows_screen_locked_verdict` fails with the original always-false verdict restored (1 failed), then passes (1 passed).
 - `rust-check --windows` (xwin clippy), Linux `rust-check`, and macOS `rust-check`: clippy and rustfmt passed.
 - `bun test packages/coding-agent/test/tools/computer.test.ts`: 146 passed. The Windows notice regression fails when either its capture annotation or run-state branch is reverted, and passes applied; macOS explanations remain covered.
+- Precheck's behavior NOTE covers the two runtime templates: the Windows arms contain condition facts, not new behavioral instructions. No model-efficacy claim is made.
 
 Live check on a Windows 11 guest, the console session locked with `LockWorkStation`, then `capabilities()`, a screenshot and a background `type("x")` into a Win32 window:
 
