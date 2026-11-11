@@ -77187,7 +77187,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
+   "base": "b9b3cc4d69962e492197178155dd95216cd9c21b",
    "body": "bodies/win-posted-modifiers.md",
    "state": "open",
    "pr": 18895,
@@ -77195,7 +77195,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-posted-modifiers",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:39:32Z",
-   "updated": "2026-11-11T12:45:40Z",
+   "updated": "2026-11-11T14:03:11Z",
    "note": "",
    "built": [
     {
@@ -77380,7 +77380,8 @@
     }
    ],
    "opened": "2026-11-11T12:45:03Z",
-   "readied": "2026-11-11T12:45:40Z"
+   "readied": "2026-11-11T12:45:40Z",
+   "advanced": "2026-11-11T14:03:11Z"
   },
   {
    "id": "win-menu-modal",
