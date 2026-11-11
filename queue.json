@@ -79165,7 +79165,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-11T03:56:12.111615Z",
+  "at": "2026-11-11T04:08:09.667510Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -79784,15 +79784,20 @@
     "area": "computer",
     "priority": "P0",
     "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with #18823 in crates/pi-natives/src/desktop/linux/ax.rs",
+     "conflicts with #18353 in MODULE.bazel.lock, crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
+     "conflicts with #18013 in MODULE.bazel.lock"
+    ],
     "note": "",
-    "over": [
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "#18823",
      "#18353",
      "#18013"
     ],
-    "paired": [],
-    "blocked_by": [],
     "needs": [],
     "created": "2026-11-03T08:39:53Z"
    },
@@ -79804,16 +79809,14 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility",
-    "action": "wait",
+    "action": "held",
     "reasons": [
-     "conflicts with atspi-unanswered-app in crates/pi-natives/src/desktop/linux/wayland/mod.rs"
+     "held: Main, 2026-11-11: opens after atspi-unanswered-app (P0) so it does not block it"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "atspi-unanswered-app"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T02:21:41Z"
    },
@@ -79825,13 +79828,13 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): read each AT-SPI element in two concurrent rounds",
-    "action": "wait",
+    "action": "held",
     "reasons": [
+     "held: Main, 2026-11-11: opens after atspi-unanswered-app (P0) so it does not block it",
      "needs atspi-unanswered-app (queued)",
      "conflicts with #18823 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18353 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #18013 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/libei.rs",
-     "conflicts with atspi-unanswered-app in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/wayland/libei.rs, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
@@ -79840,8 +79843,7 @@
     "blocked_by": [
      "#18823",
      "#18353",
-     "#18013",
-     "atspi-unanswered-app"
+     "#18013"
     ],
     "needs": [
      "atspi-unanswered-app"
@@ -79967,6 +79969,28 @@
     ],
     "needs": [],
     "created": "2026-10-30T21:35:55Z"
+   },
+   {
+    "id": "print-pref",
+    "label": "print-pref",
+    "number": null,
+    "state": "queued",
+    "area": "browser",
+    "priority": "P1",
+    "title": "fix(coding-agent,browser-relay): stop a page calling window.print() from hanging browser calls",
+    "action": "held",
+    "reasons": [
+     "held: Main, 2026-11-11: macOS headed-Chrome run pending (agent://PrintPrefMac)",
+     "conflicts with #15508 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "#15508"
+    ],
+    "needs": [],
+    "created": "2026-11-11T03:57:46Z"
    },
    {
     "id": "upload-stall-error-all-providers",
@@ -80178,16 +80202,17 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): read back AT-SPI numeric setValue before reporting success",
-    "action": "wait",
+    "action": "held",
     "reasons": [
+     "held: Main, 2026-11-11: opens after atspi-unanswered-app (P0) so it does not block it",
      "needs atspi-unanswered-app (queued)",
-     "conflicts with atspi-unanswered-app in crates/pi-natives/src/desktop/linux/ax.rs"
+     "conflicts with #18823 in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "atspi-unanswered-app"
+     "#18823"
     ],
     "needs": [
      "atspi-unanswered-app"
@@ -80522,7 +80547,7 @@
     "area": "browser",
     "priority": "P2",
     "title": "fix(browser): name the relay's own-tab open when a target matches no tab",
-    "action": "next-hour",
+    "action": "open",
     "reasons": [],
     "note": "",
     "over": [],
@@ -80710,7 +80735,6 @@
      "conflicts with #18784 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with atspi-unanswered-app in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
@@ -80722,8 +80746,7 @@
      "#18783",
      "#18784",
      "#18353",
-     "#18222",
-     "atspi-unanswered-app"
+     "#18222"
     ],
     "needs": [
      "computer-ui-quiet"

@@ -3,21 +3,20 @@
 Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 04:12Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 3 of 8 ready events used in the hour before the last plan, 5 left (plan of 2026-11-11 03:56Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 6, conflict-held 18, stacked 16, held 18, parked 2, open PRs 34; merged 275, closed 29
+**Ready budget:** 3 of 8 ready events used in the hour before the last plan, 5 left (plan of 2026-11-11 04:08Z on MacBook-Pro; groups below are from it, states from the manifest)
+**Counts:** openable now 5, conflict-held 19, stacked 16, held 18, parked 2, open PRs 34; merged 275, closed 29
 
-## Openable now (6)
+## Openable now (5)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
-| atspi-unanswered-app | fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool | computer | P0 | 7d | open (over #18353, #18013) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-unanswered-app) |
 | browser-select-readback | fix(coding-agent): return the options a page leaves selected after its change handlers | browser | P1 | 3h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-select-readback) |
 | browser-download-missing-file | fix(coding-agent): fail a download wait when the saved file is not on this machine | browser | P2 | 3h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-download-missing-file) |
-| relay-target-miss-hint | fix(browser): name the relay's own-tab open when a target matches no tab | browser | P2 | 2h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-target-miss-hint) |
+| relay-target-miss-hint | fix(browser): name the relay's own-tab open when a target matches no tab | browser | P2 | 2h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-target-miss-hint) |
 | relay-detach-owned-close | fix(browser): say omp closed its own relay tab when Chrome's detach ends it | browser | P2 | 2h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-detach-owned-close) |
 | x11-mpx-key-confirm | fix(natives): confirm every X11 virtual-keyboard key release, in order | computer | P1 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-mpx-key-confirm) |
 
-## Conflict-held (18)
+## Conflict-held (19)
 
 | id | title | area | priority | age | blocked by | branch |
 |---|---|---|---|---|---|---|
@@ -28,6 +27,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | text-reader-usage-shift | fix(coding-agent): price a text-only fallback's archive text, not the failed request's frames, in the fit check | coding-agent |  | 10d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/text-reader-usage-shift) |
 | token-count-policy | feat(catalog,coding-agent): token-count framing policy in KDL | catalog |  | 8d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/token-count-policy) |
 | wire-delta-count | refactor(agent,ai): count the anchored delta from the reader's transformed wire messages | other |  | 8d | [#18771](https://github.com/can1357/oh-my-pi/pull/18771), [#17610](https://github.com/can1357/oh-my-pi/pull/17610), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wire-delta-count) |
+| atspi-unanswered-app | fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool | computer | P0 | 7d | [#18823](https://github.com/can1357/oh-my-pi/pull/18823), [#18353](https://github.com/can1357/oh-my-pi/pull/18353), [#18013](https://github.com/can1357/oh-my-pi/pull/18013) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-unanswered-app) |
 | browser-wait-predicate | feat(browser): add waitForFunction to tabs and frames | browser | P1 | 12h | [#18676](https://github.com/can1357/oh-my-pi/pull/18676), [#15508](https://github.com/can1357/oh-my-pi/pull/15508), [#18786](https://github.com/can1357/oh-my-pi/pull/18786) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-wait-predicate) |
 | browser-run-node-hint | fix(browser): say where tab.run code runs when it reaches for a page global | browser | P2 | 11h | [#15508](https://github.com/can1357/oh-my-pi/pull/15508) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-run-node-hint) |
 | agent-identity | feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy | tui | P2 | 4h | [#18784](https://github.com/can1357/oh-my-pi/pull/18784) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/agent-identity) |
