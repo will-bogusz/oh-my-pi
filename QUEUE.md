@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 16:53Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 16:54Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-11 15:56Z on MacBook-Pro; groups below are from it, states from the manifest)
@@ -143,6 +143,6 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | id | title | area | priority | age | branch |
 |---|---|---|---|---|---|
 | atspi-walk-reads | fix(natives): read each AT-SPI element in two concurrent rounds | computer | P1 | 8d | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-walk-reads) |
-| atspi-huge-children | fix(natives): stop Linux accessibility reads from freezing apps that show long tables | computer | P0 | 14h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-huge-children) |
+| atspi-huge-children | fix(natives): stop Linux accessibility reads from freezing apps that show long tables | computer | P0 | 15h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-huge-children) |
 | atspi-text-first | fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility | computer | P1 | 14h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-text-first) |
-| atspi-value-readback | fix(natives): read back AT-SPI numeric setValue before reporting success | computer | P2 | 13h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-value-readback) |
+| atspi-value-readback | fix(natives): read back AT-SPI numeric setValue before reporting success | computer | P2 | 14h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-value-readback) |
