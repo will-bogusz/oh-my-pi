@@ -73810,7 +73810,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-11T02:22:35Z",
+  "checked": "2026-11-11T02:53:00Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -73834,6 +73834,10 @@
     "since": "2026-11-11T00:21:30Z",
     "title": "fix(coding-agent): return the options a page leaves selected after its change handlers"
    },
+   "x11-mpx-key-confirm": {
+    "since": "2026-11-11T02:53:00Z",
+    "title": "fix(natives): confirm every X11 virtual-keyboard key release, in order"
+   },
    "browser-download-missing-file": {
     "since": "2026-11-11T00:21:30Z",
     "title": "fix(coding-agent): fail a download wait when the saved file is not on this machine"
@@ -73848,24 +73852,6 @@
    }
   },
   "conflicts": {
-   "#15128": {
-    "since": "2026-11-10T17:46:03Z",
-    "title": "feat(coding-agent): restore the blocked account whose reset buys the most time",
-    "files": [
-     "docs/settings.md",
-     "packages/coding-agent/src/session/agent-session.ts",
-     "packages/coding-agent/src/session/claude-auto-reset.ts",
-     "packages/coding-agent/src/session/codex-auto-reset.ts",
-     "packages/coding-agent/test/codex-auto-reset.test.ts"
-    ]
-   },
-   "#15130": {
-    "since": "2026-11-10T17:46:03Z",
-    "title": "feat(coding-agent): opt in to spending a blocked account's saved reset before a reserve-only backup",
-    "files": [
-     "packages/coding-agent/src/session/agent-session.ts"
-    ]
-   },
    "#16611": {
     "since": "2026-11-05T14:32:39Z",
     "title": "feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio",
@@ -73938,8 +73924,6 @@
    }
   },
   "ready": [
-   15128,
-   15130,
    15508,
    16274,
    16553,
@@ -75734,6 +75718,12 @@
     "kind": "openable",
     "id": "x11-mpx-qt",
     "title": "fix(natives): stop X11 background input from crashing your running Qt 6.5+ apps"
+   },
+   {
+    "at": "2026-11-11T02:53:00Z",
+    "kind": "openable",
+    "id": "x11-mpx-key-confirm",
+    "title": "fix(natives): confirm every X11 virtual-keyboard key release, in order"
    }
   ]
  },
