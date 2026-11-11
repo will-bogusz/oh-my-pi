@@ -74684,7 +74684,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/observe-print",
    "host": "MacBook-Pro",
    "added": "2026-11-10T19:33:45Z",
-   "updated": "2026-11-11T19:32:09Z",
+   "updated": "2026-11-11T21:18:32Z",
    "note": "",
    "built": [
     {
@@ -74900,6 +74900,9 @@
      "note": "Print the one-line form only while every object in the observation is as observe() returned it (snapshot of prototype, own keys, data values, enumerability, compared at print; hook only on its own object); anything edited goes to plain inspect with the 100 cut lifted. Replaces the descriptor-walking formatter: same size (82 vs 80 code lines), unedited output byte-identical on 623/623 recorded observations so the measured numbers stand (-4.05% input tokens, -5.46% cost by replay). PR head still throws on R6a/R6b and on 4 unraised shapes; patch: 0 throws / 0 Eval code run over 29 + 103 + 29 probe shapes. 0 of 8,479 recorded cells ever edit an observation, so this closes a regression class, not a real-use bug. Not a far smaller mechanism. Independent sceptic: holds for plain payloads after one revision.",
      "ref": "/Users/viathebrink/tmp/oh-my-pi/Design18772/18772.md"
     }
+   ],
+   "rebases_after": [
+    18751
    ]
   },
   {
