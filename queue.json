@@ -73558,6 +73558,24 @@
    "added": "2026-11-11T00:21:12Z",
    "updated": "2026-11-11T00:21:12Z",
    "note": ""
+  },
+  {
+   "id": "computer-filter-types",
+   "branch": "will/computer-filter-types",
+   "title": "fix(computer): say window and element filters take text when given a RegExp",
+   "area": "computer",
+   "priority": "P2",
+   "needs": [],
+   "base": "55251e34c26eeb5a31a5c86cedf243acd7e2cb23",
+   "body": "bodies/computer-filter-types.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-filter-types",
+   "host": "MacBook-Pro",
+   "added": "2026-11-11T01:40:14Z",
+   "updated": "2026-11-11T01:40:14Z",
+   "note": ""
   }
  ],
  "watch": {
