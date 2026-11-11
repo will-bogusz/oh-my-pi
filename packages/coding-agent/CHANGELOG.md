@@ -16,6 +16,7 @@
 - The shell's built-in `jq` no longer slows down quadratically on repeated updates such as `reduce range(n) as $i ([]; . + [$i])`
 - `/tan` completion notices now quote the user's request and mark the result as the user's tangent, so the main agent no longer mistakes it for its own work
 - `omp zsh` with zsh-autosuggestions' `completion` strategy no longer echoes each typed key onto new lines: `vared` inside a `zpty` command now edits on the pty instead of the shell's terminal
+- The `computer` tool's `type` on Windows 11 Notepad no longer loses most of the text while reporting success, and on Windows it says in its output when the focused field did not confirm the typed text
 
 ### Fixed
 

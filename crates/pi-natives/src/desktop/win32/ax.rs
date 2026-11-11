@@ -4,7 +4,7 @@ use uiautomation::{
 	UIAutomation, UIElement,
 	patterns::{
 		UIExpandCollapsePattern, UIInvokePattern, UILegacyIAccessiblePattern, UIScrollItemPattern,
-		UISelectionItemPattern, UITogglePattern, UIValuePattern,
+		UISelectionItemPattern, UITextPattern, UITogglePattern, UIValuePattern,
 	},
 	types::{ControlType, ExpandCollapseState, Handle, Point, UIProperty},
 	variants::Value,
@@ -167,6 +167,91 @@ impl Win32Ax {
 			element = walker.get_parent(&element).map_err(ax_error)?;
 		}
 		Ok(false)
+	}
+
+	/// The element holding keyboard focus, to read typed text back from, named
+	/// `window {id}'s focused <control type>` when `id` gives the target
+	/// window, else `the focused <control type>`; with `process`, the element
+	/// must belong to it. `Err` says why its text cannot be read back: focus
+	/// in another process, not an editable edit or document, a password field,
+	/// no `ValuePattern` or `TextPattern`, or more text than is worth reading
+	/// twice.
+	pub(super) fn typing_field(
+		&mut self,
+		id: Option<&str>,
+		process: Option<u32>,
+	) -> Result<TypingField, String> {
+		let element = self
+			.automation()
+			.and_then(|automation| automation.get_focused_element().map_err(ax_error))
+			.map_err(|error| format!("no element reports keyboard focus ({})", error.message))?;
+		let kind = element
+			.get_localized_control_type()
+			.ok()
+			.filter(|kind| !kind.is_empty())
+			.unwrap_or_else(|| "element".to_string());
+		let name = match id {
+			Some(id) => format!("window {id}'s focused {kind}"),
+			None => format!("the focused {kind}"),
+		};
+		if let Some(pid) = process
+			&& element.get_process_id().ok() != Some(pid)
+		{
+			return Err(format!("keyboard focus is in another process than {name}'s window"));
+		}
+		if !matches!(element.get_control_type(), Ok(ControlType::Edit | ControlType::Document)) {
+			return Err(format!("{name} is not a text field"));
+		}
+		match element.is_password() {
+			Ok(false) => {},
+			Ok(true) => {
+				return Err(format!("{name} is a password field, whose text is never read back"));
+			},
+			Err(_) => return Err(format!("{name} does not say whether it is a password field")),
+		}
+		if let Ok(pattern) = element.get_pattern::<UIValuePattern>()
+			&& pattern.is_readonly().unwrap_or(false)
+		{
+			return Err(format!("{name} is read-only"));
+		}
+		let mut field = TypingField { element, name, before: String::new() };
+		field.before = field
+			.read()
+			.ok_or_else(|| format!("{} does not expose its text to UI Automation", field.name))?;
+		if field.before.len() > MAX_READBACK_BYTES {
+			return Err(format!("{} holds too much text to read back", field.name));
+		}
+		Ok(field)
+	}
+}
+
+/// Largest field text read back after typing; each read copies all of it
+/// across processes.
+const MAX_READBACK_BYTES: usize = 256 * 1024;
+
+/// A focused element whose text typing is checked against.
+pub(super) struct TypingField {
+	element:    UIElement,
+	/// What messages call it.
+	pub name:   String,
+	/// Its text before typing.
+	pub before: String,
+}
+
+impl TypingField {
+	/// Its text now, from its `ValuePattern` (single-line fields, web inputs,
+	/// Windows 11 Notepad) or else its `TextPattern` (multi-line `EDIT` and
+	/// `RichEdit` controls offer only that); `None` when neither reads.
+	pub(super) fn read(&self) -> Option<String> {
+		if let Ok(pattern) = self.element.get_pattern::<UIValuePattern>() {
+			return pattern.get_value().ok();
+		}
+		self
+			.element
+			.get_pattern::<UITextPattern>()
+			.and_then(|pattern| pattern.get_document_range())
+			.and_then(|range| range.get_text(-1))
+			.ok()
 	}
 }
 

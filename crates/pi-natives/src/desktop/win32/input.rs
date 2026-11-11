@@ -938,7 +938,7 @@ mod background {
 }
 
 mod foreground {
-	use std::time::Duration;
+	use std::time::{Duration, Instant};
 
 	use windows_sys::Win32::{
 		Foundation::{HWND, POINT},
@@ -953,8 +953,8 @@ mod foreground {
 			},
 			WindowsAndMessaging::{
 				GA_ROOTOWNER, GetAncestor, GetCursorPos, GetForegroundWindow, GetSystemMetrics,
-				IsWindow, SM_CXVIRTUALSCREEN, SM_CYVIRTUALSCREEN, SM_XVIRTUALSCREEN, SM_YVIRTUALSCREEN,
-				SetCursorPos, WindowFromPoint,
+				GetWindowThreadProcessId, IsWindow, SM_CXVIRTUALSCREEN, SM_CYVIRTUALSCREEN,
+				SM_XVIRTUALSCREEN, SM_YVIRTUALSCREEN, SetCursorPos, WindowFromPoint,
 			},
 		},
 	};
@@ -964,7 +964,9 @@ mod foreground {
 		CoreResult, DesktopError, KeyName, Modifiers, MouseButton, PointerEvent, background, control,
 	};
 	use crate::desktop::win32::{
-		delivery::{TextUnit, text_units},
+		ax::{TypingField, Win32Ax},
+		delivery::{self, TextUnit, text_units},
+		readback::{self, Verdict},
 		window,
 	};
 
@@ -978,6 +980,16 @@ mod foreground {
 	const ACTIVATION_TIMEOUT: Duration = Duration::from_millis(500);
 	/// Time between drag moves.
 	const DRAG_STEP: Duration = Duration::from_millis(16);
+	/// Longest wait for a field to show typed text before it is read as
+	/// missing.
+	const READBACK_WAIT: Duration = Duration::from_millis(500);
+	/// Time between reads of a field that does not show typed text yet.
+	const READBACK_POLL: Duration = Duration::from_millis(25);
+	/// Time between characters typed into a control that keeps only some of
+	/// faster synthetic text ([`delivery::drops_fast_text`]): Windows 11
+	/// Notepad lost characters in 6 of 10 runs of 240 at 6 ms and none at 8
+	/// or 10 ms.
+	const SLOW_TEXT_GAP: Duration = Duration::from_millis(10);
 
 	/// Activates the target for foreground input and hands the foreground back
 	/// to the user's window once the target has consumed it.
@@ -1538,15 +1550,62 @@ mod foreground {
 
 	/// Bounded packets preserve short-send accounting without constructing an
 	/// uninterruptible `SendInput` batch proportional to the entire text.
-	pub(super) fn type_desktop(text: &str) -> CoreResult<()> {
-		send_text(None, text)
+	pub(super) fn type_desktop(ax: &mut Win32Ax, text: &str) -> CoreResult<()> {
+		if text.is_empty() {
+			return Ok(());
+		}
+		// SAFETY: GetForegroundWindow has no preconditions.
+		let front = window::root(unsafe { GetForegroundWindow() });
+		let field = watch(ax, front, None);
+		send_text(None, text, text_gap(front))?;
+		confirm(field, text)
 	}
 
-	fn send_text(target: Option<HWND>, text: &str) -> CoreResult<()> {
+	/// The pause after each character typed into `root`, decided by the
+	/// control that holds its keyboard focus.
+	fn text_gap(root: HWND) -> Duration {
+		match window::focused_descendant(root) {
+			Some(focus) if delivery::drops_fast_text(&window::class_name(focus)) => SLOW_TEXT_GAP,
+			_ => Duration::ZERO,
+		}
+	}
+
+	/// The focused field of `root` to read typed text back from, or why
+	/// there is none; `id` is the target window's.
+	fn watch(ax: &mut Win32Ax, root: HWND, id: Option<&str>) -> Result<TypingField, String> {
+		let class = window::class_name(root);
+		if delivery::is_terminal_class(&class) {
+			let name = id.map_or_else(|| "the front window".to_string(), |id| format!("window {id}"));
+			return Err(format!(
+				"{name} is a terminal, whose screen shows what its program echoes rather than the \
+				 typed text"
+			));
+		}
+		// A UWP frame belongs to ApplicationFrameHost and its focused element
+		// to the hosted app, so only other windows are held to their process.
+		let process = (id.is_some() && !delivery::is_uwp_frame_class(&class)).then(|| {
+			let mut pid = 0;
+			// SAFETY: `pid` is writable; Win32 validates the handle.
+			unsafe { GetWindowThreadProcessId(root, &mut pid) };
+			pid
+		});
+		ax.typing_field(id, process)
+	}
+
+	fn send_text(target: Option<HWND>, text: &str, gap: Duration) -> CoreResult<()> {
 		let mut events = [unicode_event(0, false); 4];
+		let mut first = true;
 		for grapheme in graphemes_str(text) {
 			control::check()?;
 			for unit in text_units(grapheme) {
+				if !first && !gap.is_zero() {
+					// A high-resolution sleep: the cancellable wait rounds up to
+					// the system timer tick, about 16 ms, and the per-unit check
+					// still stops a cancelled call within one gap.
+					std::thread::sleep(gap);
+					control::check()?;
+				}
+				first = false;
 				let events = text_events(unit, &mut events);
 				match target {
 					Some(target) => send_to(target, events)?,
@@ -1558,13 +1617,64 @@ mod foreground {
 		Ok(())
 	}
 
-	pub(super) fn type_text(id: &str, text: &str) -> CoreResult<()> {
+	/// Checks that `field` gained `text`, waiting up to [`READBACK_WAIT`] for
+	/// the app to show it. Characters missing from inside the text fail the
+	/// call naming what arrived ([`Verdict::Dropped`]); a field that cannot be
+	/// read, or reads any other way, leaves the call unconfirmed.
+	fn confirm(field: Result<TypingField, String>, text: &str) -> CoreResult<()> {
+		let field = match field {
+			Ok(field) => field,
+			Err(reason) => {
+				control::report_text_unconfirmed(reason);
+				return Ok(());
+			},
+		};
+		let deadline = Instant::now() + READBACK_WAIT;
+		loop {
+			let Some(after) = field.read() else {
+				control::report_text_unconfirmed(format!("reading {} back failed", field.name));
+				return Ok(());
+			};
+			let verdict = readback::verdict(text, &field.before, &after, &field.name);
+			if verdict == Verdict::Confirmed {
+				return Ok(());
+			}
+			if Instant::now() >= deadline {
+				return match verdict {
+					Verdict::Dropped { arrived } => Err(DesktopError::input_failed(
+						readback::dropped_message(text, &field.name, &arrived),
+					)),
+					Verdict::Unconfirmed(reason) => {
+						control::report_text_unconfirmed(reason);
+						Ok(())
+					},
+					Verdict::Confirmed => Ok(()),
+				};
+			}
+			// The text is out, so a cancel ends the wait without failing the
+			// call.
+			if control::check().is_err() {
+				control::report_text_unconfirmed(format!(
+					"the call was cancelled before {} showed the text",
+					field.name
+				));
+				return Ok(());
+			}
+			std::thread::sleep(READBACK_POLL);
+		}
+	}
+
+	pub(super) fn type_text(ax: &mut Win32Ax, id: &str, text: &str) -> CoreResult<()> {
 		control::check()?;
 		background::ensure_text_supported(id, background::hwnd(id)?)?;
 		if text.is_empty() {
 			return Ok(());
 		}
-		ForegroundGuard::activate(id, KEY_SETTLE)?.run(|target| send_text(Some(target), text))
+		ForegroundGuard::activate(id, KEY_SETTLE)?.run(|target| {
+			let field = watch(ax, target, Some(id));
+			send_text(Some(target), text, text_gap(target))?;
+			confirm(field, text)
+		})
 	}
 
 	#[cfg(test)]
@@ -1668,14 +1778,22 @@ pub(super) fn pointer(
 	}
 }
 
-pub(super) fn type_text(target: &Target, text: &str, mode: DeliveryMode) -> CoreResult<()> {
+/// Types `text`. Takeover typing reads the focused field back afterwards:
+/// text it did not gain fails the call, and a field that cannot be read
+/// leaves the call unconfirmed ([`control::take_text_unconfirmed`]).
+pub(super) fn type_text(
+	ax: &mut Win32Ax,
+	target: &Target,
+	text: &str,
+	mode: DeliveryMode,
+) -> CoreResult<()> {
 	control::check()?;
 	match target {
-		Target::Desktop | Target::Display(_) => foreground::type_desktop(text),
+		Target::Desktop | Target::Display(_) => foreground::type_desktop(ax, text),
 		Target::Window(id) if mode == DeliveryMode::Background => {
 			background::type_text(id, text, None)
 		},
-		Target::Window(id) => foreground::type_text(id, text),
+		Target::Window(id) => foreground::type_text(ax, id, text),
 	}
 }
 

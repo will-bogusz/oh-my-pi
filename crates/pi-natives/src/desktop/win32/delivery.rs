@@ -63,6 +63,15 @@ pub fn is_uwp_frame_class(class: &str) -> bool {
 	matches!(class, "ApplicationFrameWindow" | "Windows.UI.Core.CoreWindow")
 }
 
+/// Controls that keep only some of the synthetic characters sent faster than
+/// about one per 10 ms, even after their thread has read every one: the
+/// Direct2D `RichEdit` of Windows 11 Notepad (`RichEditD2DPT`). Classic
+/// `RichEdit`, `EDIT`, WPF, Qt, Chromium, Windows Terminal and a XAML
+/// `TextBox` take unpaced text whole.
+pub fn drops_fast_text(focus_class: &str) -> bool {
+	focus_class.starts_with("RichEditD2D")
+}
+
 /// Terminal hosts (Windows Terminal, console host, mintty, Vim, Neovim) read
 /// text through their console or VT input channel rather than `WM_CHAR`.
 pub fn is_terminal_class(class: &str) -> bool {
@@ -273,6 +282,14 @@ mod tests {
 
 	const fn background(class: &str) -> TargetTraits<'_> {
 		TargetTraits { class, chromium_descendant: false, foreground: false, xaml_host: false }
+	}
+
+	#[test]
+	fn only_direct2d_rich_edits_need_paced_text() {
+		assert!(drops_fast_text("RichEditD2DPT"));
+		for class in ["Edit", "RichEdit20W", "RICHEDIT50W", "Chrome_WidgetWin_1", "Notepad"] {
+			assert!(!drops_fast_text(class), "{class}");
+		}
 	}
 
 	#[test]

@@ -25,6 +25,7 @@ import type {
 	DesktopPoint,
 	DesktopScreenState,
 	DesktopSessionOptions,
+	DesktopTypeResult,
 	DesktopWindow,
 	OpenedApplication,
 	PointerOptions,
@@ -63,6 +64,8 @@ import { describeWindowMiss, matchesWindowApp } from "./window-miss";
 
 /** A native input call; resolves to its takeover focus report when it took over. */
 type InputCall = Promise<DesktopFocusReturn | null | void>;
+/** A native typing call; resolves to whether its text was confirmed and its takeover focus report. */
+type TypeCall = Promise<DesktopTypeResult | null | void>;
 
 /** Native desktop operations consumed by the script runtime. */
 export interface NativeDesktopSession {
@@ -106,7 +109,7 @@ export interface NativeDesktopSession {
 	moveMouse(target: string, x: number, y: number, opts?: PointerOptions | null): InputCall;
 	drag(target: string, points: DesktopPoint[], opts?: PointerOptions | null): Promise<DesktopDragResult | null | void>;
 	scroll(target: string, x: number, y: number, dx: number, dy: number, opts?: PointerOptions | null): InputCall;
-	typeText(target: string, text: string, opts?: PointerOptions | null): InputCall;
+	typeText(target: string, text: string, opts?: PointerOptions | null): TypeCall;
 	keyChord(target: string, keys: string[], opts?: PointerOptions | null): InputCall;
 	raiseWindow(windowId: string): Promise<void>;
 	axSnapshot(target: string, opts?: AxSnapshotOptions | null): Promise<{ text: string }>;
@@ -122,7 +125,7 @@ export interface NativeDesktopSession {
 	axSelectText(ref: string, text: string, opts?: AxSelectTextOptions | null): Promise<AxTextSelection>;
 	axFocus(ref: string): Promise<void>;
 	axClick(ref: string, opts?: PointerOptions | null): InputCall;
-	axType(ref: string, text: string, opts?: PointerOptions | null): InputCall;
+	axType(ref: string, text: string, opts?: PointerOptions | null): TypeCall;
 	axKeyChord(ref: string, keys: string[], opts?: PointerOptions | null): InputCall;
 	close(): Promise<void>;
 }
@@ -558,6 +561,15 @@ async function focusReport(
 }
 
 /**
+ * Says that typed text went out but the focused field, read back, did not
+ * confirm it took the text, so the call's success covers sending only.
+ */
+function reportUnconfirmed(context: ComputerRunContext, reason: string | undefined): void {
+	if (!reason) return;
+	context.output.push({ type: "text", text: `type could not confirm the field took the text: ${reason}` });
+}
+
+/**
  * Sends one window input call. A model-supplied `takeover: true` is refused
  * under `computer.backgroundFallback: "refuse"`. When the background route
  * throws `BackgroundUnavailable`, which native raises only before any of the
@@ -838,9 +850,13 @@ class El {
 		guardRun(context, "type");
 		validateString(text, "type(text)");
 		const native = pointerOptions(options);
-		await sendInput(this.#session, context, "type", native.takeover, fallback =>
-			this.#session.axType(this.ref, text, { ...native, ...fallback }),
-		);
+		let unconfirmed: string | undefined;
+		await sendInput(this.#session, context, "type", native.takeover, async fallback => {
+			const result = await this.#session.axType(this.ref, text, { ...native, ...fallback });
+			unconfirmed = result?.unconfirmed;
+			return result?.focusReturn;
+		});
+		reportUnconfirmed(context, unconfirmed);
 	}
 
 	async click(options?: ClickOptions): Promise<void> {
@@ -1168,14 +1184,20 @@ class Win {
 		const context = this.#guardInput("type");
 		validateString(text, "type(text)");
 		const native = pointerOptions(options);
+		let unconfirmed: string | undefined;
 		await sendInput(
 			this.#session,
 			context,
 			"type",
 			native.takeover,
-			fallback => this.#session.typeText(this.id, text, { ...native, ...fallback }),
+			async fallback => {
+				const result = await this.#session.typeText(this.id, text, { ...native, ...fallback });
+				unconfirmed = result?.unconfirmed;
+				return result?.focusReturn;
+			},
 			this.pid,
 		);
+		reportUnconfirmed(context, unconfirmed);
 	}
 
 	async press(chord: string | string[], options?: InputOptions): Promise<void> {

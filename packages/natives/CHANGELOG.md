@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Windows takeover `type` into Windows 11 Notepad no longer loses most of the text while reporting success: text for Notepad's editor is paced, and typing reads the focused field back, failing with `InputFailed` naming what arrived when characters went missing, and resolving `typeText` and `axType` to `{ unconfirmed, focusReturn }` when the field does not confirm the text
+
 ## [18.18.8] - 2026-11-11
 
 ### Changed
