@@ -26,3 +26,9 @@ Live check on a Windows 11 guest, the console session locked with `LockWorkStati
 | `capabilities().screenLocked` | `false` | `true` |
 | `screenshot()` | `CaptureFailed: ... The handle is invalid` | same error, tagged "(the screen is locked)", plus the run's lock note |
 | `type("x")` | success | `InputFailed`: no input was sent (the screen is locked) |
+
+---
+
+- [ ] `bun check` passes
+- [x] Tested locally
+- [ ] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
