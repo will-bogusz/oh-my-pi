@@ -77172,7 +77172,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-posted-modifiers",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:39:32Z",
-   "updated": "2026-11-11T12:45:03Z",
+   "updated": "2026-11-11T12:45:40Z",
    "note": "",
    "built": [
     {
@@ -77356,7 +77356,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-11-11T12:45:03Z"
+   "opened": "2026-11-11T12:45:03Z",
+   "readied": "2026-11-11T12:45:40Z"
   },
   {
    "id": "win-menu-modal",
