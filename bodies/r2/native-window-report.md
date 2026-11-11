@@ -9,7 +9,7 @@ On macOS, in a browser that shows its windows, a call's result now names each wi
 | `<select>`, colour input, date `showPicker()` | menu or picker 30/30 | 0/30 | 30/30 |
 | notification or geolocation permission | bubble 16/20 (Chrome stopped asking the 5th time) | 0/16 | 16/16 |
 | passkey `credentials.create()` | sheet 10/10, takes focus from the user's app on both | 0/10 | 10/10 |
-| plain button, `fill`, `print()` (held) | nothing | 0/30 | 0/30 |
+| plain button, `fill` | nothing | 0/20 | 0/20 |
 | `confirm()` | Chrome's dialog 10/10 | 0/10 (`tab.dialog()` reports it) | 0/10, left to `tab.dialog()` |
 | another app's window opening over the tab during each call | 100/100 | 0/100 | 0/100 |
 
@@ -23,7 +23,7 @@ Before, these windows appear while the call reports success. Read `roster.rs`, `
 - Cost: +27 to +35 ms median per call (n=50 per arm per browser); headless skips it.
 - Maintenance: rests on Chrome drawing menus above normal windows and sheets inside the tab's window; else the report goes quiet, not wrong.
 
-Non-goals: answering the windows; Linux and Windows. Untested: a window the user opens in that browser inside the tab's frame mid-call would be named.
+Non-goals: answering the windows; Linux and Windows. Untested: a window the user opens in that browser inside the tab's frame mid-call would be named; a page calling `print()` was not measured.
 
 Known limit: a picker opened in a tab omp holds in the background, such as a relay tab it opened itself (#16119), isn't named.
 
