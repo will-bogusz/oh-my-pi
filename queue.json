@@ -77409,6 +77409,24 @@
    "updated": "2026-11-11T10:26:08Z",
    "note": "",
    "hold": "WindowsMined, 2026-11-11: live Windows trial running; body gets the result"
+  },
+  {
+   "id": "ax-ref-read-as",
+   "branch": "will/ax-ref-read-as",
+   "title": "fix(natives): refuse macOS element actions once the ref's element reads as another control",
+   "area": "computer",
+   "priority": "P0",
+   "needs": [],
+   "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
+   "body": "bodies/ax-ref-read-as.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ax-ref-read-as",
+   "host": "MacBook-Pro",
+   "added": "2026-11-11T10:51:34Z",
+   "updated": "2026-11-11T10:51:34Z",
+   "note": ""
   }
  ],
  "watch": {
