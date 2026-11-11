@@ -80239,7 +80239,7 @@
    "area": "coding-agent",
    "priority": "P2",
    "needs": [],
-   "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
+   "base": "50da2d357039404a81d7c64622740ce13e4c54b4",
    "body": "bodies/wait-ladder-context.md",
    "state": "queued",
    "pr": null,
@@ -80247,7 +80247,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wait-ladder-context",
    "host": "MacBook-Pro",
    "added": "2026-11-11T10:13:40Z",
-   "updated": "2026-11-11T15:50:49Z",
+   "updated": "2026-11-11T19:50:15Z",
    "note": "",
    "kind": "proposal",
    "built": [
@@ -80561,7 +80561,8 @@
      "host": "MacBook-Pro",
      "tree": "6388dc54ea63d024bf535e8aba05ffe088172cd6"
     }
-   ]
+   ],
+   "advanced": "2026-11-11T19:50:15Z"
   },
   {
    "id": "win-ax-states",
