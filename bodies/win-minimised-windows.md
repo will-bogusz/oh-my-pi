@@ -2,7 +2,7 @@
 
 I made `apps.open` on Windows bring back an app whose windows are all minimized instead of launching it again, since minimizing made the app vanish from the computer tool.
 
-`computer.windows()` on Windows leaves minimized windows out, so an app whose windows were all minimized had no window the model could find, and `computer.apps.open(app)`, which the `window()` miss error points to, ran the shell launch again and could start a second copy. Now it shows that app's frontmost minimized window again and returns it as `window`, as macOS `apps.open` already does for a running app with no window on screen.
+`computer.windows()` on Windows leaves minimized windows out, so an app whose windows were all minimized had no window the model could find, and `computer.apps.open(app)`, which the existing `window()` miss error points to, ran the shell launch again and could start a second copy. Now it shows that app's frontmost minimized window again and returns it as `window`, as macOS `apps.open` already does for a running app with no window on screen.
 
 | `apps.open` on Windows | `main` | this PR |
 |---|---|---|
@@ -18,17 +18,16 @@ I made `apps.open` on Windows bring back an app whose windows are all minimized 
 
 I rejected listing minimized windows with a `minimized` flag: that changes `DesktopWindow` on every backend, and every caller that captures or sends input to a listed window would have to refuse minimized ones. macOS already leaves them out of `windows()` and brings the app back through `apps.open`; Windows now keeps that contract.
 
-A window belongs to the app when its process has the key `apps.list()` matched the app by (image path, or AUMID when packaged); `running_processes` and the new check share that read (`ProcessKeys`), and "listed" is the filter `windows()` applies (`describe`). A window list that cannot be read launches, as on `main`.
-
-Non-goals: an app with a listed window plus minimized ones still launches; UWP frames owned by ApplicationFrameHost are not matched and launch as before.
+Window ownership uses the same image-path/AUMID keys as `apps.list()`. An unreadable window list launches as before. An app with a listed window or a UWP frame owned by ApplicationFrameHost still launches.
 
 Review first: `restore_minimized` in `win32/capture.rs` and `process_key` / `open` in `win32/applications.rs`.
 
 ## Testing
 
 - `cargo test -p pi-natives --lib win32::reopen` on Linux: 3 pass; with `reopen` reverted to always launch and the shortcut check to always match, the all-minimized and shortcut-arguments tests fail.
-- `bun test test/tools/computer.test.ts`: 145 pass; the new Windows miss-hint case fails with the `worker.ts` route reverted.
+- `bun test test/tools/computer.test.ts`: 144 pass after removing the new Windows wording-only case and keeping the existing miss hint unchanged.
 - `cargo xwin clippy` for `x86_64-pc-windows-msvc`, Linux and macOS clippy, rustfmt: clean on the branch's lines.
+- No model sample set: the added Windows guide sentence and miss-hint wording were dropped. The existing error already names `apps.open`; its returned `window` explains the result. The guide only loses the now-false claim that all non-macOS opens return null. This is not a measured agent-behavior improvement.
 - Live check on a Windows 11 guest, Notepad's only window (`notes.txt`) minimized, `computer.apps.open` with Notepad's exact app id (the bare name "Notepad" is ambiguous on Windows 11):
 
 | | `main` | this PR |
