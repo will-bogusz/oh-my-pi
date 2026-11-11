@@ -74295,7 +74295,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-target-miss-hint",
    "host": "MacBook-Pro",
    "added": "2026-11-11T01:40:24Z",
-   "updated": "2026-11-11T05:19:30Z",
+   "updated": "2026-11-11T05:20:02Z",
    "note": "",
    "built": [
     {
@@ -74520,7 +74520,8 @@
     }
    ],
    "advanced": "2026-11-11T05:15:24Z",
-   "opened": "2026-11-11T05:19:30Z"
+   "opened": "2026-11-11T05:19:30Z",
+   "readied": "2026-11-11T05:20:02Z"
   },
   {
    "id": "relay-detach-owned-close",
