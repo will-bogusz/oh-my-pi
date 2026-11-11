@@ -64427,7 +64427,7 @@
    "needs": [
     "atspi-action-names"
    ],
-   "base": "17e8c17e5d3e60acb2239bf504a43865b04b6a31",
+   "base": "50da2d357039404a81d7c64622740ce13e4c54b4",
    "body": "bodies/atspi-unanswered-app.md",
    "state": "open",
    "pr": 18914,
@@ -64435,9 +64435,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-unanswered-app",
    "host": "MacBook-Pro",
    "added": "2026-11-03T08:39:53Z",
-   "updated": "2026-11-11T17:07:00Z",
+   "updated": "2026-11-11T18:19:41Z",
    "note": "",
-   "advanced": "2026-11-11T16:52:30Z",
+   "advanced": "2026-11-11T18:19:41Z",
    "built": [
     {
      "with": "#17757",
