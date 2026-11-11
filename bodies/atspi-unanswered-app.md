@@ -37,9 +37,9 @@ Dropping the peer connections also stops an idle OMP from wedging itself and the
 
 </details>
 
-## Verification
+## Testing
 
-After rebasing onto main: `cargo build -p pi-natives` passed; `cargo test -p pi-natives --lib desktop::linux` passed all 85 tests. Linux and Windows `scripts/rust-check` passed.
+After rebasing onto main: `cargo build -p pi-natives` passed; `cargo test -p pi-natives --lib desktop::linux` passed all 85 tests. Linux, Windows and macOS `scripts/rust-check` passed.
 
 <details><summary>Live repro, regression tests and idle-bus evidence</summary>
 
