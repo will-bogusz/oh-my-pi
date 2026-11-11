@@ -45,10 +45,14 @@ Headless Chrome for Testing on macOS; `user-` cases drive a separate Chromium th
 | picker | base | 5 | page gets AbortError 5/5; notice in result 0/5 |
 | picker | after | 5 | page gets AbortError 5/5; notice in result 5/5 |
 
+<details><summary>Regression and prototype evidence</summary>
+
 - On the tree without this change, 24 of its tests fail: 12 in `browser-nav-frames-dialogs.test.ts`, 10 in `browser-upload-chooser.test.ts` (one is main's chooser-cancel test, now expecting the hold) and 2 in `browser-upload-contents.test.ts`; the `tab.id(n)` test fails with its fix reverted.
 - `browser-nav-frames-dialogs`, `browser-upload-chooser` and `browser-upload-contents` with the stacked suites (`browser-interactions`, `browser-native-windows`, `browser-input-release`, `browser-relay-bridge`, `browser-relay-tab-isolation`): 239 pass; `check:types`, oxlint and oxfmt pass.
 - `handleDialog({ files })` vs a separate `tab.chooseFiles()`, 15 runs each on gpt-5.6-luna: both 15/15, but with `chooseFiles` the model read `dialog()` as closed while a chooser waited.
 - Visible relay run of the prototype (macOS VM, CfT 150, before #16119 opened omp's own relay tabs in the background): no Open panel, focus stays in the front app, uploads answered (3/3); `main` shows the panel and reports nothing (2/2).
+
+</details>
 
 ---
 
