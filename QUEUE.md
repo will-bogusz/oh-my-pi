@@ -4,7 +4,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 
 **Opening:** not paused
 **Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-11 21:11Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 1, conflict-held 28, stacked 29, held 7, parked 2, open PRs 42; merged 290, closed 31
+**Counts:** openable now 1, conflict-held 28, stacked 29, held 7, parked 2, open PRs 42, queued since the last plan 1; merged 290, closed 31
 
 ## Openable now (1)
 
@@ -75,7 +75,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | win-focus-report | fix(natives): report where focus went after a Windows takeover | computer | P2 | 8h | win-takeover-focus ([#18919](https://github.com/can1357/oh-my-pi/pull/18919)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-focus-report) |
 | atspi-qt-menus | fix(natives): let Linux menu.select walk into Qt apps' menus | computer | P2 | 8h | atspi-unanswered-app ([#18914](https://github.com/can1357/oh-my-pi/pull/18914)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-qt-menus) |
 | atspi-combo-choice | fix(natives): choose Linux combo box options without opening their keyboard-grabbing list | computer | P1 | 8h | atspi-unanswered-app ([#18914](https://github.com/can1357/oh-my-pi/pull/18914)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-combo-choice) |
-| ax-ref-read-as-followup | fix(natives): skip unused ref-check reads and recover display refs | computer | P2 | 5h | ax-ref-read-as ([#18892](https://github.com/can1357/oh-my-pi/pull/18892)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-ref-read-as-followup) |
+| ax-ref-read-as-followup | fix(natives): skip unused ref-check reads and recover display refs | computer | P2 | 6h | ax-ref-read-as ([#18892](https://github.com/can1357/oh-my-pi/pull/18892)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-ref-read-as-followup) |
 | x11-mpx-reattach | fix(natives): keep X11 background input out of your window after a screen lock or VT switch | computer | P0 | 4h | [#18825](https://github.com/can1357/oh-my-pi/pull/18825) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-mpx-reattach) |
 | click-snapshot-first | fix(natives): start the macOS click record before the tap that feeds it | computer | P2 | 3h | [#16553](https://github.com/can1357/oh-my-pi/pull/16553) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/click-snapshot-first) |
 
@@ -144,3 +144,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | [#18919](https://github.com/can1357/oh-my-pi/pull/18919) | win-takeover-focus | fix(natives): hand the foreground back after Windows element takeover input | computer | P0 | 5h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-takeover-focus) |
 | [#18924](https://github.com/can1357/oh-my-pi/pull/18924) | browser-wait-selector-state | fix(browser): honor selector wait states and reject unknown options | browser | P1 | 4h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-wait-selector-state) |
 | [#18921](https://github.com/can1357/oh-my-pi/pull/18921) | atspi-press-actions | fix(natives): press Chromium menu items, options and tabs on Linux | computer | P0 | 5h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-press-actions) |
+
+## Queued since the last plan (1)
+
+| id | title | area | priority | age | branch |
+|---|---|---|---|---|---|
+| atspi-write-timeout-warning | fix(natives): preserve the empty-field warning on Linux write timeouts | computer | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-write-timeout-warning) |
