@@ -70791,7 +70791,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-hover-actionable",
    "host": "MacBook-Pro",
    "added": "2026-11-10T16:34:24Z",
-   "updated": "2026-11-10T23:53:48Z",
+   "updated": "2026-11-11T00:11:44Z",
    "note": "",
    "built": [
     {
@@ -70957,7 +70957,7 @@
    ],
    "opened": "2026-11-10T17:21:25Z",
    "readied": "2026-11-10T17:21:54Z",
-   "advanced": "2026-11-10T23:53:48Z"
+   "advanced": "2026-11-11T00:11:44Z"
   },
   {
    "id": "browser-wait-text-regexp",
