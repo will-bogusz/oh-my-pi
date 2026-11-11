@@ -73787,6 +73787,26 @@
    "added": "2026-11-11T02:32:46Z",
    "updated": "2026-11-11T02:32:46Z",
    "note": ""
+  },
+  {
+   "id": "atspi-value-readback",
+   "branch": "will/atspi-value-readback",
+   "title": "fix(natives): read back AT-SPI numeric setValue before reporting success",
+   "area": "computer",
+   "priority": "P2",
+   "needs": [
+    "atspi-unanswered-app"
+   ],
+   "base": "8800f1066682315cd31a14938eaf3c04d27d7172",
+   "body": "bodies/atspi-value-readback.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-value-readback",
+   "host": "MacBook-Pro",
+   "added": "2026-11-11T02:53:57Z",
+   "updated": "2026-11-11T02:53:57Z",
+   "note": ""
   }
  ],
  "watch": {
