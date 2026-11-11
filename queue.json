@@ -78287,6 +78287,24 @@
    "added": "2026-11-11T11:46:35Z",
    "updated": "2026-11-11T11:46:35Z",
    "note": ""
+  },
+  {
+   "id": "browser-wait-selector-state",
+   "branch": "will/browser-wait-selector-state",
+   "title": "fix(browser): honor selector wait states and reject unknown options",
+   "area": "browser",
+   "priority": "P2",
+   "needs": [],
+   "base": "f2ee6ba9b3e00b379c7c12b9d99ef6369fd08f3f",
+   "body": "bodies/browser-wait-selector-state.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-wait-selector-state",
+   "host": "MacBook-Pro",
+   "added": "2026-11-11T12:16:01Z",
+   "updated": "2026-11-11T12:16:01Z",
+   "note": ""
   }
  ],
  "watch": {
