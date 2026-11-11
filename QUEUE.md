@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 08:52Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 08:53Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-11 08:29Z on goliath; groups below are from it, states from the manifest)
@@ -70,7 +70,7 @@ none
 | observe-stable-ids | feat(browser): keep observe() ids stable across observations | browser | P2 | 13h | observe-core series: opens when Brit agrees the series (Will) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-observe-stable-ids) |
 | browser-action-outcome | feat(browser): print what each browser action did to the page | browser | P2 | 13h | ActionOutcomePR, 2026-11-10: Haiku leg on this head did not reproduce the step saving (1.02x [0.84,1.25] vs earlier 0.86x); Sol leg on this head (guard-team, from 21:15Z) decides | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-action-outcome) |
 | eval-assign-echo | fix(coding-agent): print nothing for a JavaScript eval cell that ends in an assignment | eval | P1 | 13h | Main, 2026-11-10: awaiting model sample (changes every JS cell's return); bots ScreenshotOutput | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/eval-assign-echo) |
-| computer-guide-first-use | feat(coding-agent): send the computer guide with the first computer call | computer | P2 | 12h | Main, 2026-11-10: Haiku shows 1.19x steps on native tasks; waits for the Sol native legs and Will's call | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-guide-first-use) |
+| computer-guide-first-use | feat(coding-agent): send the computer guide with the first computer call | computer | P2 | 13h | Main, 2026-11-10: Haiku shows 1.19x steps on native tasks; waits for the Sol native legs and Will's call | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-guide-first-use) |
 | desktop-cursor | feat(coding-agent,natives): show each agent's cursor where its computer input lands on macOS | coding-agent | P2 | 8h | CursorChecks, 2026-11-11: real check saw takeover UserIntervened 10/10 with computer.cursor on; untangling VM run (cursor vs cross-process ordering) pending | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/desktop-cursor) |
 | atspi-huge-children | fix(natives): stop Linux accessibility reads from freezing apps that show long tables | computer | P0 | 6h | Main, 2026-11-11: opens after atspi-unanswered-app (P0, first in Main's Linux order) merges; they conflict in linux/ax.rs | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-huge-children) |
 | atspi-text-first | fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility | computer | P1 | 6h | Main, 2026-11-11: opens after atspi-unanswered-app (P0) so it does not block it | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-text-first) |

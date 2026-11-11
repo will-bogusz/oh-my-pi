@@ -80866,6 +80866,11 @@
     "sha": "182af325712aa0ae84785d9f4542201146d7daf1",
     "at": "2026-11-11T08:52:27Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "182af325712aa0ae84785d9f4542201146d7daf1",
+    "at": "2026-11-11T08:53:40Z",
+    "host": "goliath"
    }
   },
   "fbf9cb5828205172f2dc376464ec40c6fe6cc2e4": {
