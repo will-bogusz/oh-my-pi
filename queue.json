@@ -77865,7 +77865,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-press-disabled",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:58:05Z",
-   "updated": "2026-11-11T13:04:22Z",
+   "updated": "2026-11-11T13:04:50Z",
    "note": "",
    "built": [
     {
@@ -78049,7 +78049,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-11-11T13:04:22Z"
+   "opened": "2026-11-11T13:04:22Z",
+   "readied": "2026-11-11T13:04:50Z"
   },
   {
    "id": "browser-main-wait-navigation",
