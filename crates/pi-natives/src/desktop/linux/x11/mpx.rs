@@ -43,6 +43,7 @@ use x11rb::{
 use super::{
 	input::button_detail,
 	keymap::{self, KeyStep, Keymap},
+	text_mapping::TextMapping,
 	uinput::{UInputDevice, X_KEYCODE_OFFSET},
 	wm::{Atoms, Wm, refusal},
 };
@@ -97,6 +98,7 @@ pub(super) struct Mpx {
 	pointer:         UInputDevice,
 	pointer_slave:   u16,
 	keyboard:        Option<VirtualKeyboard>,
+	text_mapping: TextMapping,
 	/// A timeout can leave kernel events in flight. Never retarget that pair
 	/// to another window after an uncertain dispatch.
 	uncertain:       bool,
@@ -181,6 +183,7 @@ impl Mpx {
 			},
 		};
 		set_flat_acceleration(&conn, pointer_slave);
+		let text_mapping = TextMapping::new(Arc::clone(&conn));
 		let mpx = Self {
 			conn,
 			root,
@@ -194,6 +197,7 @@ impl Mpx {
 			keyboard: None,
 			uncertain: false,
 			sent: false,
+			text_mapping,
 		};
 		mpx.park();
 		Ok(mpx)
@@ -368,11 +372,22 @@ impl Mpx {
 	pub(super) fn type_text(&mut self, target: Window, text: &str) -> CoreResult<()> {
 		self.begin()?;
 		let mut keymap = self.keyboard_keymap()?;
-		let mapping = keymap.bind_text(Arc::clone(&self.conn), text)?;
-		let result = keymap
-			.plan_text(text)
-			.and_then(|steps| self.deliver_keys(target, &steps));
-		mapping.finish(result)
+		let segments = self.text_mapping.plan(&mut keymap, text)?;
+		let before = self.text_mapping.presses();
+		let result = (|| {
+			for segment in segments {
+				self.text_mapping.bind(&mut keymap, segment)?;
+				let steps = keymap.plan_text(segment)?;
+				self.deliver_keys(target, &steps)?;
+			}
+			Ok(())
+		})();
+		result.map_err(|mut error: DesktopError| {
+			if self.text_mapping.presses() != before {
+				error.message.push_str("; part of the text was sent before this error");
+			}
+			error
+		})
 	}
 
 	pub(super) fn key_chord(&mut self, target: Window, keys: &[KeyName]) -> CoreResult<()> {
@@ -516,6 +531,7 @@ impl Mpx {
 		let last_press = steps.iter().rposition(|step| step.press);
 		let mut index = 0;
 		keymap::run_steps(steps, |step| {
+			if step.press { self.text_mapping.pressed(step.keycode); }
 			if index > 0 {
 				if last_press.is_none_or(|last| index > last) {
 					control::settle(KEY_DELAY);
@@ -648,7 +664,9 @@ impl Mpx {
 	fn keyboard_keymap(&mut self) -> CoreResult<Keymap> {
 		let slave = self.ensure_keyboard()?.slave;
 		// The desktop can reconfigure a hot-plugged device between actions.
-		Keymap::mpx(&self.conn, slave, self.master_keyboard)
+		let mut map = Keymap::mpx(&self.conn, slave, self.master_keyboard)?;
+		self.text_mapping.hide(&mut map);
+		Ok(map)
 	}
 
 	fn ensure_keyboard(&mut self) -> CoreResult<&mut VirtualKeyboard> {
@@ -766,6 +784,7 @@ impl Mpx {
 
 impl Drop for Mpx {
 	fn drop(&mut self) {
+		let _ = self.text_mapping.finish();
 		// Unplug the slaves first so the removal never hands a live slave back
 		// to the user's core devices.
 		if let Some(mut keyboard) = self.keyboard.take() {

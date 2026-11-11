@@ -4,7 +4,7 @@
 
 ### Fixed
 
-- X11 computer typing accepts characters outside the keyboard layout, including accents and Unicode symbols, using temporary empty keycodes that are restored after the text run.
+- Fixed X11 typing of characters outside the keyboard layout, including non-Latin text, failing with "X11 keymap has no keycode for keysym ...". Temporary keycodes stay bound for the session and are restored on close; chords and holds of characters outside the layout still refuse.
 
 ## [18.18.8] - 2026-11-11
 

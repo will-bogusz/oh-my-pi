@@ -2,8 +2,6 @@
 //! virtual-keyboard routes, so every route picks the same keycodes and holds
 //! Shift for glyphs that live on the shifted level.
 
-use std::{sync::Arc, time::Duration};
-
 use x11rb::{
 	connection::Connection,
 	protocol::{xinput::ConnectionExt as _, xproto::ConnectionExt as _},
@@ -30,14 +28,14 @@ pub(super) struct KeyStep {
 const XTEST_KEYBOARD: &[u8] = b"Virtual core XTEST keyboard";
 
 pub(super) struct Keymap {
-	min_keycode:         u8,
-	keysyms_per_keycode: u8,
-	keysyms:             Vec<u32>,
+	pub(super) min_keycode:         u8,
+	pub(super) keysyms_per_keycode: u8,
+	pub(super) keysyms:             Vec<u32>,
 	/// Core modifier mask bit each modifier keycode sets while held.
 	modifier_masks:      Vec<(u8, u16)>,
-	device:              Option<u8>,
-	core_mapping:        bool,
-	master:              Option<u8>,
+	pub(super) device:              Option<u8>,
+	pub(super) core_mapping:        bool,
+	pub(super) master:              Option<u8>,
 }
 
 impl Keymap {
@@ -156,7 +154,7 @@ impl Keymap {
 
 	/// Keycode emitting `keysym` and whether Shift must be held for it. The
 	/// unshifted level wins when a keysym appears on both.
-	fn lookup(&self, keysym: u32) -> Option<(u8, bool)> {
+	pub(super) fn lookup(&self, keysym: u32) -> Option<(u8, bool)> {
 		let width = usize::from(self.keysyms_per_keycode);
 		if width == 0 {
 			return None;
@@ -189,47 +187,8 @@ impl Keymap {
 			.ok_or_else(|| DesktopError::input_failed("X11 keymap has no Shift key"))
 	}
 
-	/// Reserve distinct empty rows for the entire run, never replacing a
-	/// symbol (including Escape) or reusing a row before clients translate it.
-	fn text_bindings(&self, text: &str, core: Option<&Self>) -> CoreResult<Vec<(u8, u32)>> {
-		let mut missing = Vec::new();
-		for ch in text.chars() {
-			control::check()?;
-			let symbol = keysym_for_key(KeyName::Char(ch));
-			if self.lookup(symbol).is_none() && !missing.contains(&symbol) {
-				missing.push(symbol);
-			}
-		}
-		if missing.is_empty() {
-			return Ok(Vec::new());
-		}
-		let width = usize::from(self.keysyms_per_keycode);
-		let spare: Vec<_> = if width == 0 {
-			Vec::new()
-		} else {
-			self
-				.keysyms
-				.chunks_exact(width)
-				.enumerate()
-				.rev()
-				.filter(|(_, row)| row.iter().all(|&symbol| symbol == 0))
-				.filter_map(|(index, _)| self.min_keycode.checked_add(u8::try_from(index).ok()?))
-				.filter(|code| self.modifier_mask(*code) == 0)
-				.filter(|&code| core.is_none_or(|map| map.empty_row(code)))
-				.collect()
-		};
-		if missing.len() > spare.len() {
-			return Err(DesktopError::input_failed(format!(
-				"X11 text needs {} spare keycodes but only {} empty rows are available; no input was \
-				 sent",
-				missing.len(),
-				spare.len()
-			)));
-		}
-		Ok(spare.into_iter().zip(missing).collect())
-	}
 
-	fn empty_row(&self, code: u8) -> bool {
+	pub(super) fn empty_row(&self, code: u8) -> bool {
 		let width = usize::from(self.keysyms_per_keycode);
 		let Some(index) = code.checked_sub(self.min_keycode).map(usize::from) else {
 			return false;
@@ -241,65 +200,14 @@ impl Keymap {
 				.is_some_and(|row| row.iter().all(|&symbol| symbol == 0))
 	}
 
-	pub(super) fn bind_text(
-		&mut self,
-		conn: Arc<RustConnection>,
-		text: &str,
-	) -> CoreResult<TextMapping> {
-		let mut bindings = self.text_bindings(text, None)?;
-		let core = if bindings.is_empty() {
-			None
-		} else if self.core_mapping && self.device.is_some() {
-			Some(Self::core(&conn)?)
+	pub(super) fn refresh(&self, conn: &RustConnection) -> CoreResult<Self> {
+		if self.core_mapping {
+			if self.device.is_some() { Self::xtest(conn) } else { Self::core(conn) }
 		} else if let Some(master) = self.master {
-			Some(Self::device(&conn, master.into())?)
+			Self::mpx(conn, self.device.expect("device map").into(), master.into())
 		} else {
-			None
-		};
-		if let Some(core) = &core
-			&& bindings.iter().any(|&(code, _)| !core.empty_row(code))
-		{
-			bindings = self.text_bindings(text, Some(core))?;
+			Self::device(conn, self.device.expect("device map").into())
 		}
-		let mut guard = TextMapping {
-			conn,
-			device: if self.core_mapping { None } else { self.device },
-			width: if self.core_mapping {
-				core
-					.as_ref()
-					.map_or(self.keysyms_per_keycode, |map| map.keysyms_per_keycode)
-			} else {
-				self.keysyms_per_keycode
-			},
-			master: self
-				.master
-				.zip(core.as_ref().map(|map| map.keysyms_per_keycode)),
-			bound: Vec::new(),
-		};
-		for (code, symbol) in bindings {
-			// Register before sending: even a failed round trip can have
-			// changed the server map.
-			guard.bound.push(code);
-			let row = vec![symbol; usize::from(guard.width)];
-			let result = guard.write(code, &row).and_then(|()| {
-				if let Some(device) = self.device {
-					let applied = Self::device(&guard.conn, device.into())?;
-					if applied.lookup(symbol) != Some((code, false)) {
-						return Err(DesktopError::input_failed(
-							"X11 device did not adopt the temporary text mapping; no input was sent",
-						));
-					}
-				}
-				Ok(())
-			});
-			if let Err(error) = result {
-				return guard.finish(Err(error));
-			}
-			let width = usize::from(self.keysyms_per_keycode);
-			let start = usize::from(code - self.min_keycode) * width;
-			self.keysyms[start..start + width].fill(symbol);
-		}
-		Ok(guard)
 	}
 
 	/// Press/release steps typing `text`; shifted glyphs are wrapped in Shift.
@@ -385,90 +293,8 @@ impl Keymap {
 	}
 }
 
-/// Owns the server-side bindings independently of cancellation and unwinding.
-pub(super) struct TextMapping {
-	conn:   Arc<RustConnection>,
-	device: Option<u8>,
-	width:  u8,
-	master: Option<(u8, u8)>,
-	bound:  Vec<u8>,
-}
 
-impl TextMapping {
-	fn write(&self, code: u8, row: &[u32]) -> CoreResult<()> {
-		let result = if let Some(device) = self.device {
-			self
-				.conn
-				.xinput_change_device_key_mapping(device, code, self.width, 1, row)
-				.map_err(keymap_failed)
-				.and_then(|cookie| cookie.check().map_err(keymap_failed))
-		} else {
-			self
-				.conn
-				.change_keyboard_mapping(1, code, self.width, row)
-				.map_err(keymap_failed)
-				.and_then(|cookie| cookie.check().map_err(keymap_failed))
-		};
-		// A slave's next key copies its map to its master. Restore that copy
-		// too, even when the slave's restore failed.
-		let master = if let Some((device, width)) = self.master {
-			let row = vec![row[0]; usize::from(width)];
-			self
-				.conn
-				.xinput_change_device_key_mapping(device, code, width, 1, &row)
-				.map_err(keymap_failed)
-				.and_then(|cookie| cookie.check().map_err(keymap_failed))
-		} else {
-			Ok(())
-		};
-		result.and(master)
-	}
 
-	fn restore(&mut self) -> CoreResult<()> {
-		if self.bound.is_empty() {
-			return Ok(());
-		}
-		// MappingNotify precedes each key, but clients can translate a queued
-		// key lazily. Keep the run's map alive through their dispatch.
-		std::thread::sleep(Duration::from_millis(100));
-		let empty = vec![0; usize::from(self.width)];
-		let mut failure = None;
-		for &code in &self.bound {
-			if let Err(error) = self.write(code, &empty) {
-				failure = Some(error);
-			}
-		}
-		if let Some(error) = failure {
-			return Err(DesktopError::input_failed(format!(
-				"failed to restore temporary X11 text keymap: {}",
-				error.message
-			)));
-		}
-		self.bound.clear();
-		Ok(())
-	}
-
-	pub(super) fn finish<T>(mut self, result: CoreResult<T>) -> CoreResult<T> {
-		let restored = self.restore();
-		match (result, restored) {
-			(Err(mut error), Err(restore)) => {
-				error.message.push_str("; ");
-				error.message.push_str(&restore.message);
-				Err(error)
-			},
-			(result, Ok(())) => result,
-			(Ok(_), Err(error)) => Err(error),
-		}
-	}
-}
-
-impl Drop for TextMapping {
-	fn drop(&mut self) {
-		if let Err(error) = self.restore() {
-			eprintln!("{}", error.message);
-		}
-	}
-}
 
 /// Emits `steps` in order. When one fails, the keys this run still holds are
 /// released in reverse so no modifier is left chording later input. Once the
@@ -623,25 +449,6 @@ pub(super) fn keysym_for_key(key: KeyName) -> u32 {
 mod tests {
 	use super::*;
 
-	#[test]
-	fn text_reserves_distinct_highest_empty_rows_for_the_whole_run() {
-		let mut map = keymap();
-		// A symbol on an otherwise unused level still occupies the row.
-		map.keysyms[(255 - 8) * 2 + 1] = Keysym::Escape.raw();
-		let mut core = keymap();
-		core.keysyms[(254 - 8) * 2] = Keysym::Escape.raw();
-		assert_eq!(map.text_bindings("é✓éa", Some(&core)).unwrap(), vec![
-			(253, keysym_for_key(KeyName::Char('é'))),
-			(252, keysym_for_key(KeyName::Char('✓'))),
-		]);
-	}
-
-	#[test]
-	fn insufficient_empty_rows_refuses_the_complete_run() {
-		let map = Keymap::new(8, 2, vec![0, 0, 0x61, 0x41], Vec::new());
-		let error = map.text_bindings("é✓", None).unwrap_err();
-		assert!(error.message.contains("needs 2 spare keycodes but only 1"));
-	}
 
 	const A: u8 = 38;
 	const ONE: u8 = 10;

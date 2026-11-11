@@ -35,6 +35,7 @@ use x11rb::{
 use super::{
 	keymap::{self, KeyStep, Keymap},
 	mpx::Mpx,
+	text_mapping::TextMapping,
 	toolkit, uinput,
 	wm::{Atoms, FocusSnapshot, Wm},
 };
@@ -70,6 +71,7 @@ pub struct X11Input {
 	root:             Window,
 	atoms:            Atoms,
 	keymap:           Keymap,
+	text_mapping: TextMapping,
 	takeover_target:  Option<Window>,
 	takeover_pointer: Cell<Option<(i16, i16)>>,
 	/// Session-lived virtual master pair, created on first background use.
@@ -86,6 +88,11 @@ enum Keys<'a> {
 	Text(&'a str),
 	Chord(&'a [KeyName]),
 	Hold(&'a [KeyName], Duration),
+}
+
+struct PlannedKeys<'a> {
+	steps: Vec<KeyStep>,
+	remaining: Vec<&'a str>,
 }
 
 impl Keys<'_> {
@@ -124,6 +131,7 @@ impl X11Input {
 		let keymap = Keymap::core(&conn)?;
 		let atoms = Atoms::intern(&conn)?;
 		let mpx_unavailable = mpx_probe(&conn).err();
+		let text_mapping = TextMapping::new(Arc::clone(&conn));
 		Ok(Self {
 			conn,
 			root,
@@ -133,6 +141,7 @@ impl X11Input {
 			takeover_pointer: Cell::new(None),
 			mpx: None,
 			mpx_unavailable,
+			text_mapping,
 		})
 	}
 
@@ -241,22 +250,12 @@ impl X11Input {
 			ElementInput::Text(text) => Keys::Text(text),
 			ElementInput::Chord(keys) => Keys::Chord(keys),
 		};
-		let mapping = if let Keys::Text(text) = keys {
-			Some(self.keymap.bind_text(Arc::clone(&self.conn), text)?)
-		} else {
-			None
-		};
-		let result = (|| {
-			let steps = keys.plan(&self.keymap)?;
-			self.with_foreground(window, FOREGROUND_KEYBOARD_SETTLE, |this| {
+		self.with_planned_keys(keys, |this, plan| {
+			this.with_foreground(window, FOREGROUND_KEYBOARD_SETTLE, |this| {
 				prepare()?;
-				this.xtest_steps(&steps, keys.duration())
+				this.deliver_planned(plan, keys.duration(), None)
 			})
-		})();
-		match mapping {
-			Some(mapping) => mapping.finish(result),
-			None => result,
-		}
+		})
 	}
 
 	pub(crate) fn hold_keys(
@@ -294,7 +293,11 @@ impl X11Input {
 			(Target::Desktop | Target::Display(_), _) => self.xtest_keys(keys),
 			(Target::Window(id), DeliveryMode::Foreground | DeliveryMode::ForegroundReturnFocus) => {
 				let window = parse_window(id)?;
-				self.with_foreground(window, FOREGROUND_KEYBOARD_SETTLE, |this| this.xtest_keys(keys))
+				self.with_planned_keys(keys, |this, plan| {
+					this.with_foreground(window, FOREGROUND_KEYBOARD_SETTLE, |this| {
+						this.deliver_planned(plan, keys.duration(), None)
+					})
+				})
 			},
 			(Target::Window(id), DeliveryMode::Background) => {
 				let window = parse_window(id)?;
@@ -708,34 +711,51 @@ impl X11Input {
 		}
 	}
 
-	fn xtest_keys(&mut self, keys: Keys<'_>) -> CoreResult<()> {
-		let mapping = if let Keys::Text(text) = keys {
-			Some(self.keymap.bind_text(Arc::clone(&self.conn), text)?)
+	fn with_planned_keys<'a>(
+		&mut self,
+		keys: Keys<'a>,
+		body: impl FnOnce(&mut Self, PlannedKeys<'a>) -> CoreResult<()>,
+	) -> CoreResult<()> {
+		let plan = if let Keys::Text(text) = keys {
+			let mut segments = self.text_mapping.plan(&mut self.keymap, text)?.into_iter();
+			let steps = if let Some(first) = segments.next() {
+				self.text_mapping.bind(&mut self.keymap, first)?;
+				self.keymap.plan_text(first)?
+			} else { Vec::new() };
+			PlannedKeys { steps, remaining: segments.collect() }
 		} else {
-			None
+			self.text_mapping.hide(&mut self.keymap);
+			PlannedKeys { steps: keys.plan(&self.keymap)?, remaining: Vec::new() }
 		};
-		let result = keys
-			.plan(&self.keymap)
-			.and_then(|steps| self.xtest_steps(&steps, keys.duration()));
-		match mapping {
-			Some(mapping) => mapping.finish(result),
-			None => result,
+		let before = self.text_mapping.presses();
+		body(self, plan).map_err(|mut error| {
+			if matches!(keys, Keys::Text(_)) && self.text_mapping.presses() != before {
+				error.message.push_str("; part of the text was sent before this error");
+			}
+			error
+		})
+	}
+
+	fn deliver_planned(&mut self, plan: PlannedKeys<'_>, duration: Duration, window: Option<Window>) -> CoreResult<()> {
+		let deliver = |this: &Self, steps: &[KeyStep]| match window {
+			Some(window) => this.send_key_steps(window, steps, duration),
+			None => this.xtest_steps(steps, duration),
+		};
+		deliver(self, &plan.steps)?;
+		for segment in plan.remaining {
+			self.text_mapping.bind(&mut self.keymap, segment)?;
+			let steps = self.keymap.plan_text(segment)?;
+			deliver(self, &steps)?;
 		}
+		Ok(())
+	}
+
+	fn xtest_keys(&mut self, keys: Keys<'_>) -> CoreResult<()> {
+		self.with_planned_keys(keys, |this, plan| this.deliver_planned(plan, keys.duration(), None))
 	}
 
 	fn send_keys(&mut self, window: Window, keys: Keys<'_>) -> CoreResult<()> {
-		let mapping = if let Keys::Text(text) = keys {
-			Some(self.keymap.bind_text(Arc::clone(&self.conn), text)?)
-		} else {
-			None
-		};
-		let result = keys
-			.plan(&self.keymap)
-			.and_then(|steps| self.send_key_steps(window, &steps, keys.duration()));
-		match mapping {
-			Some(mapping) => mapping.finish(result),
-			None => result,
-		}
+		self.with_planned_keys(keys, |this, plan| this.deliver_planned(plan, keys.duration(), Some(window)))
 	}
 
 	fn xtest_steps(&self, steps: &[KeyStep], duration: Duration) -> CoreResult<()> {
@@ -746,6 +766,7 @@ impl X11Input {
 				.map(|step| step.keycode),
 		)?;
 		keymap::run_steps_with_hold(steps, duration, |step| {
+			if step.press { self.text_mapping.pressed(step.keycode); }
 			self.xtest_key(step.keycode, step.press)
 		})?;
 		self.conn.flush().map_err(input_failed)
@@ -761,6 +782,7 @@ impl X11Input {
 	) -> CoreResult<()> {
 		let mut state = 0u16;
 		keymap::run_steps_with_hold(steps, duration, |step| {
+			if step.press { self.text_mapping.pressed(step.keycode); }
 			self.send_key(window, step.keycode, step.press, KeyButMask::from(state))?;
 			let mask = self.keymap.modifier_mask(step.keycode);
 			if step.press {
