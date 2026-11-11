@@ -208,7 +208,9 @@ impl Keymap {
 			// changed the server map.
 			guard.bound.push(code);
 			let mut row = vec![symbol; usize::from(guard.width)];
-			guard.write(code, &row)?;
+			if let Err(error) = guard.write(code, &row) {
+				return guard.finish(Err(error));
+			}
 			let start = usize::from(code - self.min_keycode) * row.len();
 			self.keysyms[start..start + row.len()].swap_with_slice(&mut row);
 		}
@@ -340,7 +342,7 @@ impl TextMapping {
 		Ok(())
 	}
 
-	pub(super) fn finish(mut self, result: CoreResult<()>) -> CoreResult<()> {
+	pub(super) fn finish<T>(mut self, result: CoreResult<T>) -> CoreResult<T> {
 		let restored = self.restore();
 		match (result, restored) {
 			(Err(mut error), Err(restore)) => {
@@ -348,7 +350,7 @@ impl TextMapping {
 				Err(error)
 			},
 			(result, Ok(())) => result,
-			(Ok(()), Err(error)) => Err(error),
+			(Ok(_), Err(error)) => Err(error),
 		}
 	}
 }

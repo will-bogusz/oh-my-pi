@@ -317,6 +317,7 @@ impl X11Input {
 				));
 			}
 			return self.send_keys(window, keys);
+		}
 		let pid = self.wm().owning_pid(window);
 		// Empty text plans no keys, so it stays the no-op it is everywhere.
 		if pid.is_some_and(toolkit::process_reads_core_keyboard) && !matches!(keys, Keys::Text("")) {

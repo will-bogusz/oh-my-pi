@@ -11,7 +11,7 @@ use x11rb::{connection::Connection, protocol::xproto::ConnectionExt as _};
 use xkeysym::Keysym;
 
 use super::{input::X11Input, keymap::Keymap};
-use crate::desktop::{backend::DeliveryMode, error::DesktopError, types::Target};
+use crate::desktop::{backend::DeliveryMode, control, types::Target};
 
 #[link(name = "X11")]
 unsafe extern "C" {
@@ -106,10 +106,21 @@ fn remapped_text_restores_empty_rows_on_error_and_unwind() {
 	let (conn, _) = x11rb::connect(Some(&display)).unwrap();
 	let conn = Arc::new(conn);
 	let mut map = Keymap::xtest(&conn).unwrap();
-	let mapping = map.bind_text(Arc::clone(&conn), "✓").unwrap();
-	assert!(map.plan_text("✓").is_ok());
-	let error = mapping.finish(Err(DesktopError::input_failed("injected mid-run error"))).unwrap_err();
-	assert!(error.message.contains("injected mid-run error"));
+	let source = control::CancellationSource::default();
+	let token = source.token();
+	let error = control::with_token_for_test(&token, || {
+		let mapping = map.bind_text(Arc::clone(&conn), "✓✓").unwrap();
+		let steps = map.plan_text("✓✓").unwrap();
+		let result = super::keymap::run_steps(&steps, |step| {
+			use x11rb::protocol::xtest::ConnectionExt as _;
+			conn.xtest_fake_input(if step.press { 2 } else { 3 }, step.keycode, 0, conn.setup().roots[0].root, 0, 0, 0)
+				.unwrap().check().unwrap();
+			if step.press { source.cancel(); }
+			Ok(())
+		});
+		mapping.finish(result)
+	}).unwrap_err();
+	assert!(error.message.to_lowercase().contains("cancel"), "{}", error.message);
 	assert!(Keymap::xtest(&conn).unwrap().plan_text("✓").is_err());
 	let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
 		let mut map = Keymap::xtest(&conn).unwrap();
