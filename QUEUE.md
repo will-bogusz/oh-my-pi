@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 18:19Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 18:20Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-11 18:14Z on MacBook-Pro; groups below are from it, states from the manifest)
@@ -59,7 +59,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | gemma-tokenizer | feat(natives,catalog): count Gemini in the Gemma vocabulary | catalog |  | 8d | token-count-policy | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/gemma-tokenizer) |
 | encoded-prefix-count | fix(ai,agent,tui,coding-agent): count the system prompt and tools as the provider request encodes them | other |  | 8d | token-count-policy, wire-delta-count | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/encoded-prefix-count) |
 | atspi-walk-reads | fix(natives): read each AT-SPI element in two concurrent rounds | computer | P1 | 8d | atspi-unanswered-app ([#18914](https://github.com/can1357/oh-my-pi/pull/18914)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-walk-reads) |
-| upload-stall-error-all-providers | fix(ai,agent): say how far a request body uploaded when any provider's connection drops | other | P1 | 1d | [#18624](https://github.com/can1357/oh-my-pi/pull/18624) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/upload-stall-error-all-providers) |
+| upload-stall-error-all-providers | fix(ai,agent): say how far a request body uploaded when any provider's connection drops | other | P1 | 2d | [#18624](https://github.com/can1357/oh-my-pi/pull/18624) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/upload-stall-error-all-providers) |
 | browser-wait-text-regexp | fix(browser): accept a RegExp in waitForText, as waitForUrl does | browser | P2 | 1d | browser-wait-predicate | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-wait-text-regexp) |
 | browser-wait-text-rendered | fix(browser): let a scoped waitForText match only text the page renders | browser | P2 | 1d | browser-wait-text-regexp | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-wait-text-rendered) |
 | observe-settle | feat(browser): let observe() settle the effects of the preceding action | browser | P1 | 23h | [#18751](https://github.com/can1357/oh-my-pi/pull/18751) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-observe-settle) |
