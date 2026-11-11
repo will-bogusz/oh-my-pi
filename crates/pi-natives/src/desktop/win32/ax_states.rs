@@ -1,3 +1,16 @@
+use super::super::error::DesktopError;
+
+// UIA_E_ELEMENTNOTAVAILABLE is proof the provider no longer has the element.
+pub(super) const ELEMENT_NOT_AVAILABLE: i32 = -2_147_220_991;
+
+pub(super) fn uia_error(code: i32, message: String) -> DesktopError {
+	if code == ELEMENT_NOT_AVAILABLE {
+		DesktopError::stale_ref(message)
+	} else {
+		DesktopError::ax_failed(message)
+	}
+}
+
 use std::{collections::hash_map::DefaultHasher, hash::{Hash, Hasher}};
 
 pub(super) fn toggle_value(value: Option<String>, toggle: Option<i32>) -> Option<String> {
@@ -34,6 +47,12 @@ pub(super) fn identity(role: &str, fields: &[Result<Option<&str>, ()>]) -> Optio
 mod tests {
 	use super::*;
 
+	#[test]
+	fn destroyed_elements_report_stale_instead_of_generic_failure() {
+		use super::super::super::error::ErrorCode;
+		assert_eq!(uia_error(ELEMENT_NOT_AVAILABLE, "gone".into()).code, ErrorCode::StaleRef);
+		assert_eq!(uia_error(-1, "failed".into()).code, ErrorCode::AxFailed);
+	}
 	#[test]
 	fn checkbox_states_preserve_other_values() {
 		assert_eq!(toggle_value(None, Some(0)).as_deref(), Some("0"));

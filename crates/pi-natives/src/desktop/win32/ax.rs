@@ -98,9 +98,10 @@ impl Win32Ax {
 		element: &UIElement,
 		call: impl FnOnce() -> CoreResult<()>,
 	) -> CoreResult<()> {
-		let root = self.host_root(element).ok_or_else(|| {
-			DesktopError::ax_failed("cannot establish the native window hosting this UIA element")
-		})?;
+		let Some(root) = self.host_root(element) else {
+			element.get_control_type().map_err(ax_error)?;
+			return Err(DesktopError::ax_failed("cannot establish the native window hosting this UIA element"));
+		};
 		window::ensure_pattern_safe(root)?;
 		call()
 	}
@@ -171,8 +172,8 @@ impl Win32Ax {
 	}
 }
 
-fn ax_error(error: impl std::fmt::Display) -> DesktopError {
-	DesktopError::ax_failed(format!("UI Automation failed: {error}"))
+fn ax_error(error: uiautomation::Error) -> DesktopError {
+	ax_states::uia_error(error.code(), format!("UI Automation failed: {error}"))
 }
 
 /// Handle for `element` carrying the `RuntimeId` that identifies it across
@@ -267,9 +268,6 @@ const fn coordinate_click_supported(control_type: ControlType) -> bool {
 	)
 }
 
-fn optional(value: Result<String, uiautomation::Error>) -> Option<String> {
-	value.ok().filter(|value| !value.is_empty())
-}
 
 fn actions(element: &UIElement) -> Vec<String> {
 	let can_invoke = element.get_pattern::<UIInvokePattern>().is_ok();
@@ -308,20 +306,6 @@ fn actions(element: &UIElement) -> Vec<String> {
 	actions
 }
 
-fn value(element: &UIElement) -> Option<String> {
-	element
-		.get_pattern::<UIValuePattern>()
-		.and_then(|pattern| pattern.get_value())
-		.ok()
-		.filter(|value| !value.is_empty())
-		.or_else(|| {
-			element
-				.get_pattern::<UILegacyIAccessiblePattern>()
-				.and_then(|pattern| pattern.get_value())
-				.ok()
-				.filter(|value| !value.is_empty())
-		})
-}
 
 fn cached_string(element: &UIElement, property: UIProperty) -> Result<Option<String>, ()> {
 	match element.get_cached_property_value(property).and_then(|value| value.get_value()) {
@@ -331,15 +315,18 @@ fn cached_string(element: &UIElement, property: UIProperty) -> Result<Option<Str
 	}
 }
 
-fn cached_bool(element: &UIElement, property: UIProperty) -> bool {
-	matches!(element.get_cached_property_value(property).and_then(|value| value.get_value()), Ok(Value::BOOL(true)))
+fn cached_bool(element: &UIElement, property: UIProperty) -> Result<bool, ()> {
+	match element.get_cached_property_value(property).and_then(|value| value.get_value()) {
+		Ok(Value::BOOL(value)) => Ok(value),
+		_ => Err(()),
+	}
 }
 
-fn cached_state(element: &UIElement, available: UIProperty, state: UIProperty) -> Option<i32> {
-	if !cached_bool(element, available) { return None; }
+fn cached_state(element: &UIElement, available: UIProperty, state: UIProperty) -> Result<Option<i32>, ()> {
+	if !cached_bool(element, available)? { return Ok(None); }
 	match element.get_cached_property_value(state).and_then(|value| value.get_value()) {
-		Ok(Value::I4(value) | Value::INT(value)) => Some(value),
-		_ => None,
+		Ok(Value::I4(value) | Value::INT(value)) => Ok(Some(value)),
+		_ => Err(()),
 	}
 }
 
@@ -358,9 +345,11 @@ fn truncate(value: impl ToString) -> String {
 
 impl AxBackend for Win32Ax {
 	fn window_id(&mut self, handle: &AxHandle, windows: &[DesktopWindow]) -> CoreResult<String> {
-		let root = self.host_root(Self::element(handle)?).ok_or_else(|| {
-			DesktopError::ax_failed("cannot establish the native window hosting this UIA element")
-		})?;
+		let element = Self::element(handle)?;
+		let Some(root) = self.host_root(element) else {
+			element.get_control_type().map_err(ax_error)?;
+			return Err(DesktopError::ax_failed("cannot establish the native window hosting this UIA element"));
+		};
 		// SAFETY: IsWindow validates the provider-supplied native handle.
 		if unsafe { IsWindow(root) } == 0 {
 			return Err(DesktopError::window_not_found("the UIA element's window no longer exists"));
@@ -407,18 +396,21 @@ impl AxBackend for Win32Ax {
 			cached_string(&cached, UIProperty::Name), cached_string(&cached, UIProperty::AutomationId),
 			cached_string(&cached, UIProperty::ClassName), cached_string(&cached, UIProperty::HelpText),
 			cached_string(&cached, UIProperty::ValueValue), cached_string(&cached, UIProperty::LegacyIAccessibleValue),
+			cached_state(&cached, UIProperty::IsTogglePatternAvailable, UIProperty::ToggleToggleState)
+				.map(|state| ax_states::toggle_value(None, state)),
 		];
 		let identity = ax_states::identity(&native_role,
 			&fields.each_ref().map(|field| field.as_ref().map(|value| value.as_deref()).map_err(|_| ())));
-		let [title, _, _, description, value, legacy_value] = fields;
+		let [title, _, _, description, value, legacy_value, toggle] = fields;
 		let title = title.ok().flatten();
 		let description = description.ok().flatten();
-		let value = value.ok().flatten().or_else(|| legacy_value.ok().flatten());
-		let value = ax_states::toggle_value(value, cached_state(
-			&cached, UIProperty::IsTogglePatternAvailable, UIProperty::ToggleToggleState));
-		let selected = ax_states::selected(&native_role, cached_bool(&cached, UIProperty::SelectionItemIsSelected));
+		let value = value.ok().flatten().or_else(|| legacy_value.ok().flatten())
+			.or_else(|| toggle.ok().flatten());
+		let selected = ax_states::selected(&native_role,
+			cached_bool(&cached, UIProperty::SelectionItemIsSelected).unwrap_or(false));
 		let expanded = ax_states::expanded(cached_state(&cached,
-			UIProperty::IsExpandCollapsePatternAvailable, UIProperty::ExpandCollapseExpandCollapseState));
+			UIProperty::IsExpandCollapsePatternAvailable, UIProperty::ExpandCollapseExpandCollapseState)
+			.ok().flatten());
 		let walker = self.walker()?;
 		let children = walker.get_children(element);
 		let partial = identity.is_none() || children.is_err();
@@ -551,6 +543,12 @@ impl AxBackend for Win32Ax {
 			.map(uia_handle)
 			.map(Some)
 			.map_err(ax_error)
+	}
+
+	fn destroyed(&mut self, handle: &AxHandle) -> bool {
+		Self::element(handle).ok().is_some_and(|element| {
+			element.get_control_type().is_err_and(|error| error.code() == ax_states::ELEMENT_NOT_AVAILABLE)
+		})
 	}
 
 	fn attributes(&mut self, handle: &AxHandle) -> CoreResult<Vec<(String, String)>> {
