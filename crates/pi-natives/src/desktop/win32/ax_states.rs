@@ -32,12 +32,11 @@ pub(super) fn with_children<T, E>(
 	mut props: AxProps,
 	children: Result<Vec<T>, E>,
 ) -> (AxProps, Vec<T>) {
-	let children = match children {
-		Ok(children) => children,
-		Err(_) => {
-			props.partial = true;
-			Vec::new()
-		},
+	let children = if let Ok(children) = children {
+		children
+	} else {
+		props.partial = true;
+		Vec::new()
 	};
 	props.child_count = children.len().min(u32::MAX as usize) as u32;
 	(props, children)
