@@ -8,7 +8,7 @@ Now a local chord's characters go through the current layout too:
 - a Command chord takes the key of the layout's Command layer, which is what an app matches a shortcut against (Russian puts Latin letters there, so `cmd+c` still copies);
 - a bare character takes its typing key with the Shift or Option it needs;
 - a Control or Option chord takes the layout key only when it needs no modifier the chord does not name, so AZERTY `ctrl+1` stays Ctrl on the `1` key, as the user presses it;
-- a character the layout lacks, a layout without key data, or a failed layout read leaves the character on its ANSI key, as before. A chord with no character (`enter`, `cmd+tab`) reads no layout. Two limits stay as on main: a Command chord whose character the Command layer lacks (`cmd+/` on German or AZERTY) stays on its ANSI key, and keys held around clicks, drags and `holdMouse` still use ANSI keys.
+- a character the layout lacks, a layout without key data, or a failed layout read leaves the character on its ANSI key, as before. A chord with no character (`enter`, `cmd+tab`) reads no layout.
 
 Typed text is unchanged: local `type` still sends Unicode event text, which 3e90f2f (PR 15193) settled. Chords were always key codes locally, so they cannot carry text and only the layout says which key a character is on.
 
@@ -26,7 +26,13 @@ TextEdit in a macOS 26.5.2 VM with Finder in front, addon swapped into `@oh-my-p
 | `cmd+z` undoes | 0/5 / 0/5 | 30/30 / 29/30 |
 | `z`, `1` type `z1` | `w&` every time | `z1` in takeover; `Z1` in the background |
 
+<details><summary>Trial notes, Russian, timing, limits</summary>
+
 The one takeover miss was the first takeover trial after the background ones: its `cmd+a` stopped with `InputFailed` (the window lost keyboard focus) and its `cmd+z` returned without undoing, the document still open; the next 29 trials were clean. On Russian, where the Command layer already matches ANSI, `cmd+a` and `cmd+z` worked on both builds (5/5), and a bare `z`, which no Russian key types, still falls back to the ANSI key (`я`). The capital `Z` and `Я` from a background bare key are the same on main (Russian `Я1` there too) and are not this change. A background `cmd+a` took 786 ms cold (keymap older than its 10 s cache) and 728 ms warm here, against 772 and 734 ms on main (3 each).
+
+Two limits stay as on main: a Command chord whose character the Command layer lacks (`cmd+/` on German or AZERTY) stays on its ANSI key, and keys held around clicks, drags and `holdMouse` still use ANSI keys.
+
+</details>
 
 `local_chords_press_the_layouts_key_and_command_shortcuts_its_command_layer` passes here; its `cmd+a` assertion, run through main's `chord_keys`, fails there (key 0, not 12). It also covers `ctrl+1`, a character-free chord reading no layout, and failed and cancelled reads. `command_shortcuts_map_to_the_key_of_the_layouts_command_layer` covers the keymap's Command layer.
 
