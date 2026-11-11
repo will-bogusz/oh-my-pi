@@ -75245,9 +75245,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-guide-first-use",
    "host": "MacBook-Pro",
    "added": "2026-11-10T19:53:35Z",
-   "updated": "2026-11-10T21:39:42Z",
+   "updated": "2026-11-11T17:43:32Z",
    "note": "",
-   "hold": "Main, 2026-11-10: Haiku shows 1.19x steps on native tasks; waits for the Sol native legs and Will's call"
+   "hold": "Main, 2026-11-11: stays held until #18786 merges with the typed-message guide channel (design check replace); then one property on the computer prelude, drop the wrap variant, re-run its blind legs"
   },
   {
    "id": "x11-covered-capture",
