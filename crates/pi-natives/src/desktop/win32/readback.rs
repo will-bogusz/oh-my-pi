@@ -98,11 +98,17 @@ pub fn progress(typed: &str, before: &str, after: &str) -> Progress {
 	}
 }
 
-/// Whether `after` holds `typed` where `before` did not: more copies than
-/// before is an insertion; the whole text being the typed text is a
-/// replaced selection.
+/// Whether `after` holds `typed` where `before` did not: the field changed,
+/// gained at least as many characters as were typed, and holds one more
+/// copy of them, or it replaced a selection and its whole text is the typed
+/// text. Text the field held already cannot stand in for keys that did not
+/// arrive: `"ha"` that gained one `"ha"` of a typed `"haha"` does not show
+/// it.
 fn shows(typed: &str, before: &str, after: &str) -> bool {
-	after == typed || after.matches(typed).count() > before.matches(typed).count()
+	after != before
+		&& ((replaced(before, after) && after == typed)
+			|| (gained(before, after).chars().count() >= typed.chars().count()
+				&& after.matches(typed).count() > before.matches(typed).count()))
 }
 
 /// Pieces in a row after which the field's text did not change at all
@@ -246,8 +252,9 @@ impl Pacer {
 /// reads and its error stops typing. Returns the field's text when last
 /// read, if a read while pacing succeeded.
 ///
-/// Pacing adds at most [`Waits::pace_budget`] plus one read
-/// (2 × [`READ_TIMEOUT`]) to the call.
+/// Pacing adds at most [`Waits::pace_budget`], plus the wait for the piece
+/// in flight when the budget ran out (`waits.run` and one read, 2 ×
+/// [`READ_TIMEOUT`]), to the call.
 pub fn send_paced<F: Field, E>(
 	text: &str,
 	field: Option<(&F, &str)>,
@@ -323,22 +330,56 @@ fn await_piece<E>(
 	}
 }
 
-/// Checks that `field` (what messages call it), which read `before` when
-/// typing began and `last` when last read while pacing, gained `typed`.
-/// Reads until the field shows the text, its text stops changing for
+/// What typing sent and saw, for [`check_typed`].
+pub struct Sent<'a> {
+	/// The typed text.
+	pub typed:  &'a str,
+	/// The field's text when typing began.
+	pub before: &'a str,
+	/// Its text when last read while pacing.
+	pub last:   Option<String>,
+	/// Why the target was not seen reading all the keys, if it was not.
+	pub unread: Option<String>,
+}
+
+/// Checks that `field` (what messages call it) gained `sent.typed`. Reads
+/// until the field shows the text, its text stops changing for
 /// `waits.check_still`, `waits.check` passes, a read fails, or `cancelled`
 /// says so; no read starts after `waits.check`, so the check ends within it
 /// plus one read (2 × [`READ_TIMEOUT`]). The verdict is that of the last
 /// read, and a failed read leaves the call unconfirmed, saying what the
-/// field last read.
+/// field last read. With `sent.unread`, anything short of the text is
+/// unconfirmed with that reason first, never [`Verdict::Dropped`]: keys
+/// still queued may yet arrive.
 pub fn check_typed(
+	field: &impl Field,
+	name: &str,
+	sent: Sent<'_>,
+	clock: &impl Clock,
+	waits: &Waits,
+	cancelled: impl FnMut() -> bool,
+) -> Verdict {
+	let Sent { typed, before, last, unread } = sent;
+	match (read_until_settled(field, name, typed, before, last, (clock, waits), cancelled), unread) {
+		(Verdict::Confirmed, _) => Verdict::Confirmed,
+		(verdict, None) => verdict,
+		(Verdict::Dropped { arrived }, Some(unread)) => {
+			Verdict::Unconfirmed(format!("{unread}; {}", dropped_message(typed, name, &arrived)))
+		},
+		(Verdict::Unconfirmed(reason), Some(unread)) => {
+			Verdict::Unconfirmed(format!("{unread}; {reason}"))
+		},
+	}
+}
+
+/// [`check_typed`]'s reads.
+fn read_until_settled(
 	field: &impl Field,
 	name: &str,
 	typed: &str,
 	before: &str,
 	last: Option<String>,
-	clock: &impl Clock,
-	waits: &Waits,
+	(clock, waits): (&impl Clock, &Waits),
 	mut cancelled: impl FnMut() -> bool,
 ) -> Verdict {
 	let start = clock.now();
@@ -407,6 +448,19 @@ fn may_leave_field(typed: &str) -> bool {
 /// The part of `after` that differs from `before`: what an insertion at the
 /// caret inserted.
 fn gained<'a>(before: &str, after: &'a str) -> &'a str {
+	let (prefix, suffix) = common_ends(before, after);
+	&after[prefix..after.len() - suffix]
+}
+
+/// Whether `after` lost some of `before`: typing replaced a selection.
+fn replaced(before: &str, after: &str) -> bool {
+	let (prefix, suffix) = common_ends(before, after);
+	prefix + suffix < before.len()
+}
+
+/// Byte lengths of the longest common prefix of `before` and `after`, and of
+/// the longest common suffix of what follows it.
+fn common_ends(before: &str, after: &str) -> (usize, usize) {
 	let prefix = before
 		.chars()
 		.zip(after.chars())
@@ -420,7 +474,7 @@ fn gained<'a>(before: &str, after: &'a str) -> &'a str {
 		.take_while(|(left, right)| left == right)
 		.map(|(character, _)| character.len_utf8())
 		.sum::<usize>();
-	&after[prefix..after.len() - suffix]
+	(prefix, suffix)
 }
 
 fn is_subsequence(part: &str, whole: &str) -> bool {
@@ -462,7 +516,6 @@ mod tests {
 			("a", "a", "aa"),
 			// Select-all then type: the field is the typed text.
 			("foo", "foo.txt", "foo"),
-			("abc", "abc", "abc"),
 			("one\ntwo", "", "one\r\ntwo"),
 			("one\ntwo", "", "one\rtwo"),
 		] {
@@ -472,6 +525,25 @@ mod tests {
 				"{typed:?} into {before:?}"
 			);
 		}
+	}
+
+	#[test]
+	fn text_the_field_held_never_stands_in_for_keys_that_did_not_arrive() {
+		for (typed, before, after) in [
+			// Nothing arrived into a field that already read as typed.
+			("abc", "abc", "abc"),
+			// What arrived plus what was there spells the typed text.
+			("haha", "ha", "haha"),
+			("aa", "xa", "xaa"),
+			("http://example.com", "http://", "http://example.com"),
+		] {
+			let result = verdict(typed, before, after, FIELD);
+			assert!(
+				matches!(result, Verdict::Unconfirmed(_)),
+				"{typed:?} into {before:?}: {result:?}"
+			);
+		}
+		assert_eq!(progress("ab ", "ab ", "ab "), Progress::Short);
 	}
 
 	#[test]
@@ -625,8 +697,8 @@ mod tests {
 				|| Ok(()),
 			)
 			.unwrap();
-			let verdict =
-				check_typed(self, FIELD, typed, "", last, self.clock, &Waits::TYPING, || false);
+			let sent = Sent { typed, before: "", last, unread: None };
+			let verdict = check_typed(self, FIELD, sent, self.clock, &Waits::TYPING, || false);
 			(verdict, self.clock.now().saturating_sub(start))
 		}
 	}
@@ -663,7 +735,7 @@ mod tests {
 		let Verdict::Unconfirmed(reason) = verdict else {
 			panic!("expected unconfirmed: {verdict:?}");
 		};
-		assert_eq!(reason, "reading the field back failed or took longer than 250 ms");
+		assert!(reason.starts_with("reading the field back failed or took longer than"), "{reason}");
 		assert_eq!(field.sent.borrow().as_str(), words(2000));
 	}
 
@@ -704,6 +776,8 @@ mod tests {
 		// Pacing ran into its budget, and the check into its limit.
 		let budget = waits.pace_budget(2000);
 		assert_eq!(budget, Duration::from_secs(20));
+		assert_eq!(waits.pace_budget(1), waits.pace_min);
+		assert_eq!(waits.pace_budget(100_000), waits.pace_max);
 		assert!(took >= budget + waits.check, "{took:?}");
 		assert!(took <= budget + waits.check + 2 * READ, "{took:?}");
 	}
@@ -762,5 +836,80 @@ mod tests {
 		// One read per word and one to check.
 		let reads = typed.split_inclusive(' ').count() as u32 + 1;
 		assert_eq!(took, reads * Duration::from_millis(1));
+	}
+
+	#[test]
+	fn keys_the_target_was_not_seen_reading_are_never_called_dropped() {
+		let clock = FakeClock::default();
+		// Keeps a scattered few characters, as Notepad does.
+		let field =
+			FakeField::new(&clock, Duration::from_millis(1), |_, _| Some("t0-b t1".to_string()));
+		let sent = Sent {
+			typed:  "t000-ab t001-ab",
+			before: "",
+			last:   None,
+			unread: Some("the target had not read all the typed text".to_string()),
+		};
+		let Verdict::Unconfirmed(reason) =
+			check_typed(&field, FIELD, sent, &clock, &Waits::TYPING, || false)
+		else {
+			panic!("expected unconfirmed");
+		};
+		assert!(reason.starts_with("the target had not read all the typed text; "), "{reason}");
+		assert!(reason.contains("only 7 arrived"), "{reason}");
+	}
+
+	#[test]
+	fn a_cancel_ends_the_check_unconfirmed() {
+		let clock = FakeClock::default();
+		let field = FakeField::new(&clock, Duration::from_millis(1), |_, _| Some("ab".to_string()));
+		let sent = Sent { typed: "abc", before: "", last: None, unread: None };
+		let Verdict::Unconfirmed(reason) =
+			check_typed(&field, FIELD, sent, &clock, &Waits::TYPING, || true)
+		else {
+			panic!("expected unconfirmed");
+		};
+		assert!(reason.contains("cancelled"), "{reason}");
+		assert!(clock.now() < Waits::TYPING.check_still, "{:?}", clock.now());
+	}
+
+	#[test]
+	fn a_failed_send_or_cancel_stops_typing() {
+		let clock = FakeClock::default();
+		let field = FakeField::new(&clock, Duration::from_millis(1), |_, _| Some(String::new()));
+		let mut sent = 0;
+		let result = send_paced(
+			&words(240),
+			Some((&field, "")),
+			&clock,
+			&Waits::TYPING,
+			|_| {
+				sent += 1;
+				if sent == 3 {
+					Err("send failed")
+				} else {
+					Ok(())
+				}
+			},
+			|| Ok(()),
+		);
+		assert_eq!(result, Err("send failed"));
+		assert_eq!(sent, 3);
+		// The field never shows anything: the cancel check between reads stops
+		// the first wait.
+		let mut sent = 0;
+		let result = send_paced(
+			&words(240),
+			Some((&field, "")),
+			&clock,
+			&Waits::TYPING,
+			|_| {
+				sent += 1;
+				Ok(())
+			},
+			|| Err("cancelled"),
+		);
+		assert_eq!(result, Err("cancelled"));
+		assert_eq!(sent, 1);
 	}
 }

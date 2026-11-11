@@ -577,7 +577,8 @@ function reportUnconfirmed(context: ComputerRunContext, reason: string | undefin
  * which is never rerun), and the call did not set `takeover`, the setting
  * decides: `takeover` reruns that call in takeover, handing focus back
  * to the user's app, and reports it in the run output; `refuse` fails without
- * taking over.
+ * taking over. `confirmed` says whether the target was seen taking the
+ * input; one that was not is reported as sent rather than delivered.
  */
 async function sendInput(
 	session: NativeDesktopSession,
@@ -586,6 +587,7 @@ async function sendInput(
 	takeover: boolean | undefined,
 	send: (fallback?: Fallback) => InputCall,
 	target?: number,
+	confirmed: () => boolean = () => true,
 ): Promise<void> {
 	if (takeover === true) {
 		refuseForeground(
@@ -638,7 +640,7 @@ async function sendInput(
 		const focus = await focusReport(session, context.signal, report, target);
 		context.output.push({
 			type: "text",
-			text: `${method} ran in takeover because ${why}; the input was delivered, and ${focus}`,
+			text: `${method} ran in takeover because ${why}; the input was ${confirmed() ? "delivered" : "sent"}, and ${focus}`,
 		});
 	}
 }
@@ -851,11 +853,19 @@ class El {
 		validateString(text, "type(text)");
 		const native = pointerOptions(options);
 		let unconfirmed: string | undefined;
-		await sendInput(this.#session, context, "type", native.takeover, async fallback => {
-			const result = await this.#session.axType(this.ref, text, { ...native, ...fallback });
-			unconfirmed = result?.unconfirmed;
-			return result?.focusReturn;
-		});
+		await sendInput(
+			this.#session,
+			context,
+			"type",
+			native.takeover,
+			async fallback => {
+				const result = await this.#session.axType(this.ref, text, { ...native, ...fallback });
+				unconfirmed = result?.unconfirmed;
+				return result?.focusReturn;
+			},
+			undefined,
+			() => !unconfirmed,
+		);
 		reportUnconfirmed(context, unconfirmed);
 	}
 
@@ -1196,6 +1206,7 @@ class Win {
 				return result?.focusReturn;
 			},
 			this.pid,
+			() => !unconfirmed,
 		);
 		reportUnconfirmed(context, unconfirmed);
 	}

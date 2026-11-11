@@ -217,10 +217,16 @@ impl Win32Ax {
 		id: Option<&str>,
 		process: Option<u32>,
 	) -> Result<TypingField, String> {
-		let element = self
+		let automation = self
 			.bounded_automation()
-			.and_then(|automation| automation.get_focused_element().map_err(ax_error))
-			.map_err(|error| format!("no element reports keyboard focus ({})", error.message))?;
+			.map_err(|error| format!("no UI Automation client ({})", error.message))?;
+		let element = automation.get_focused_element().map_err(|error| {
+			if timed_out(&error) {
+				unanswered("the focused element")
+			} else {
+				format!("no element reports keyboard focus ({})", ax_error(error).message)
+			}
+		})?;
 		let kind = element
 			.get_localized_control_type()
 			.ok()
@@ -230,44 +236,59 @@ impl Win32Ax {
 			Some(id) => format!("window {id}'s focused {kind}"),
 			None => format!("the focused {kind}"),
 		};
-		if let Some(pid) = process
-			&& element.get_process_id().ok() != Some(pid)
-		{
-			return Err(format!("keyboard focus is in another process than {name}'s window"));
+		if let Some(pid) = process {
+			match element.get_process_id() {
+				Ok(owner) if owner == pid => {},
+				Err(error) if timed_out(&error) => return Err(unanswered(&name)),
+				_ => return Err(format!("keyboard focus is in another process than {name}'s window")),
+			}
 		}
-		if !matches!(element.get_control_type(), Ok(ControlType::Edit | ControlType::Document)) {
-			return Err(format!("{name} is not a text field"));
+		match element.get_control_type() {
+			Ok(ControlType::Edit | ControlType::Document) => {},
+			Err(error) if timed_out(&error) => return Err(unanswered(&name)),
+			_ => return Err(format!("{name} is not a text field")),
 		}
 		match element.is_password() {
 			Ok(false) => {},
 			Ok(true) => {
 				return Err(format!("{name} is a password field, whose text is never read back"));
 			},
+			Err(error) if timed_out(&error) => return Err(unanswered(&name)),
 			Err(_) => return Err(format!("{name} does not say whether it is a password field")),
 		}
-		let source = if let Ok(pattern) = element.get_pattern::<UIValuePattern>() {
-			if pattern.is_readonly().unwrap_or(false) {
-				return Err(format!("{name} is read-only"));
-			}
-			TextSource::Value(pattern)
-		} else if let Ok(pattern) = element.get_pattern::<UITextPattern>() {
-			TextSource::Document(pattern)
-		} else {
-			return Err(format!("{name} does not expose its text to UI Automation"));
+		let source = match element.get_pattern::<UIValuePattern>() {
+			Ok(pattern) => match pattern.is_readonly() {
+				Ok(true) => return Err(format!("{name} is read-only")),
+				Err(error) if timed_out(&error) => return Err(unanswered(&name)),
+				_ => TextSource::Value(pattern),
+			},
+			Err(error) if timed_out(&error) => return Err(unanswered(&name)),
+			Err(_) => match element.get_pattern::<UITextPattern>() {
+				Ok(pattern) => TextSource::Document(pattern),
+				Err(error) if timed_out(&error) => return Err(unanswered(&name)),
+				Err(_) => return Err(format!("{name} does not expose its text to UI Automation")),
+			},
 		};
-		let mut field = TypingField { source, name, before: String::new() };
-		field.before = field.read().ok_or_else(|| {
-			format!(
-				"{} did not give its text to UI Automation within {} ms",
-				field.name,
-				readback::READ_TIMEOUT.as_millis()
-			)
-		})?;
+		let mut field = TypingField { _automation: automation, source, name, before: String::new() };
+		field.before = field.read().ok_or_else(|| unanswered(&field.name))?;
 		if field.before.len() > MAX_READBACK_BYTES {
 			return Err(format!("{} holds too much text to read back", field.name));
 		}
 		Ok(field)
 	}
+}
+
+/// `UIA_E_TIMEOUT` (0x80131505): a provider did not answer within the
+/// client's timeout.
+const UIA_E_TIMEOUT: i32 = -2_146_233_083;
+
+fn timed_out(error: &uiautomation::Error) -> bool {
+	error.code() == UIA_E_TIMEOUT
+}
+
+/// Why a typing field is not read back when `what` did not answer.
+fn unanswered(what: &str) -> String {
+	format!("{what} did not answer UI Automation within {} ms", readback::READ_TIMEOUT.as_millis())
 }
 
 /// Largest field text read back after typing; each read copies all of it
@@ -284,11 +305,14 @@ enum TextSource {
 
 /// A focused element whose text typing is checked against.
 pub(super) struct TypingField {
-	source:     TextSource,
+	/// The bounded client the element and its pattern came from, held so
+	/// its timeouts last as long as they are read.
+	_automation: UIAutomation,
+	source:      TextSource,
 	/// What messages call it.
-	pub name:   String,
+	pub name:    String,
 	/// Its text before typing.
-	pub before: String,
+	pub before:  String,
 }
 
 impl readback::Field for TypingField {
@@ -715,5 +739,22 @@ mod tests {
 		] {
 			assert!(coordinate_click_supported(role), "{role:?}");
 		}
+	}
+
+	#[test]
+	fn typing_reads_get_their_own_time_limits() {
+		let timeouts = |automation: IUIAutomation2| {
+			// SAFETY: property getters on a live interface.
+			unsafe {
+				(automation.ConnectionTimeout().unwrap(), automation.TransactionTimeout().unwrap())
+			}
+		};
+		let mut ax = Win32Ax::new();
+		let bounded: IUIAutomation = ax.bounded_automation().unwrap().into();
+		assert_eq!(timeouts(bounded.cast().unwrap()), (250, 250));
+		// SAFETY: `bounded_automation` initialized COM on this thread.
+		let plain: IUIAutomation2 =
+			unsafe { CoCreateInstance(&CUIAutomation8, None, CLSCTX_INPROC_SERVER) }.unwrap();
+		assert_eq!(timeouts(plain), (2000, 20000));
 	}
 }

@@ -985,7 +985,8 @@ mod foreground {
 	const DRAG_STEP: Duration = Duration::from_millis(16);
 	/// An unassigned virtual key sent behind typed text to see when the target
 	/// has read it: it types nothing, and Cua's Windows driver sends it
-	/// behind text the same way (`AutoHotkey` uses it as its mask key).
+	/// behind text the same way (AutoHotkey's documentation names it
+	/// as an unassigned key).
 	const DRAIN_KEY: u16 = 0xe8;
 	/// Longest wait for the target to read typed text before the foreground
 	/// is handed back.
@@ -1725,9 +1726,8 @@ mod foreground {
 	/// being its text when last read while pacing. Characters missing from
 	/// inside the text fail the call naming what arrived
 	/// ([`Verdict::Dropped`]); a field that cannot be read, or reads any other
-	/// way, leaves the call unconfirmed, and so does an unreadable field the
-	/// target was not seen reading (`unread`, from [`drain`]), with that
-	/// reason.
+	/// way, leaves the call unconfirmed, and so does a target not seen reading
+	/// all the keys (`unread`, from [`drain`]), with that reason.
 	fn confirm(
 		field: Result<TypingField, String>,
 		text: &str,
@@ -1741,12 +1741,11 @@ mod foreground {
 				return Ok(());
 			},
 		};
+		let sent = readback::Sent { typed: text, before: &field.before, last, unread };
 		match readback::check_typed(
 			&field,
 			&field.name,
-			text,
-			&field.before,
-			last,
+			sent,
 			&Wall(Instant::now()),
 			&Waits::TYPING,
 			|| control::check().is_err(),

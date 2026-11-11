@@ -4160,15 +4160,19 @@ describe("computer background fallback", () => {
 		const native = new TypingSession();
 		const typed = await run(native, 'await (await desktop.window("42")).type("hi")', "takeover");
 		expect(texts(typed)).toEqual([
-			`type ran in takeover because ${reason}; the input was delivered, and focus returned to Notes`,
+			`type ran in takeover because ${reason}; the input was sent, and focus returned to Notes`,
 			said,
 		]);
 		const element = await run(native, 'await (await desktop.ref("e1")).type("hi", { takeover: true })', "takeover");
 		expect(texts(element)).toEqual([said]);
 
-		// Negative control: confirmed text adds nothing.
+		// Negative control: confirmed text adds nothing, and the fallback says it
+		// was delivered.
 		native.result = { focusReturn: native.report ?? undefined };
 		expect(texts(await run(native, 'await (await desktop.ref("e1")).type("hi")', "takeover"))).toEqual([]);
+		expect(texts(await run(native, 'await (await desktop.window("42")).type("hi")', "takeover"))).toEqual([
+			`type ran in takeover because ${reason}; the input was delivered, and focus returned to Notes`,
+		]);
 	});
 
 	it("refuses without a takeover under refuse, and tells the model so without suggesting one", async () => {

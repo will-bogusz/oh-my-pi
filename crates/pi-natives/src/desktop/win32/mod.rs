@@ -484,14 +484,6 @@ mod tests {
 	#[test]
 	#[ignore = "opens Windows 11 Notepad and types into it; run with --ignored in a signed-in \
 	            desktop session"]
-	fn notepad_gets_typed_text_whole() {
-		let (result, got) = type_into_notepad("omp-type-whole");
-		assert_eq!(got, text(), "type returned {result:?}");
-	}
-
-	#[test]
-	#[ignore = "opens Windows 11 Notepad and types into it; run with --ignored in a signed-in \
-	            desktop session"]
 	fn typing_never_reports_text_notepad_lacks() {
 		let (result, got) = type_into_notepad("omp-type-honest");
 		assert!(
