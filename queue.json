@@ -79875,6 +79875,24 @@
    "added": "2026-11-11T13:55:21Z",
    "updated": "2026-11-11T13:55:21Z",
    "note": ""
+  },
+  {
+   "id": "macos-ax-linked-label",
+   "branch": "will/macos-ax-linked-label",
+   "title": "fix(natives): name a macOS control by the label its AXTitleUIElement links to",
+   "area": "natives",
+   "priority": "P2",
+   "needs": [],
+   "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
+   "body": "bodies/macos-ax-linked-label.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-ax-linked-label",
+   "host": "MacBook-Pro",
+   "added": "2026-11-11T14:43:42Z",
+   "updated": "2026-11-11T14:43:42Z",
+   "note": ""
   }
  ],
  "watch": {
