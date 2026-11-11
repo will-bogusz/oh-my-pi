@@ -73503,6 +73503,24 @@
    "added": "2026-11-11T00:14:36Z",
    "updated": "2026-11-11T00:14:36Z",
    "note": ""
+  },
+  {
+   "id": "browser-download-missing-file",
+   "branch": "will/browser-download-missing-file",
+   "title": "fix(coding-agent): fail a download wait when the saved file is not on this machine",
+   "area": "browser",
+   "priority": "P2",
+   "needs": [],
+   "base": "6dd7ddf5feab54da3c82b460ee390a7d09aeabaa",
+   "body": "bodies/browser-download-missing-file.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-download-missing-file",
+   "host": "MacBook-Pro",
+   "added": "2026-11-11T00:14:44Z",
+   "updated": "2026-11-11T00:14:44Z",
+   "note": ""
   }
  ],
  "watch": {
