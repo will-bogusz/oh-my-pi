@@ -74272,8 +74272,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-value-readback",
    "host": "MacBook-Pro",
    "added": "2026-11-11T02:53:57Z",
-   "updated": "2026-11-11T02:53:57Z",
-   "note": ""
+   "updated": "2026-11-11T04:05:31Z",
+   "note": "",
+   "hold": "Main, 2026-11-11: opens after atspi-unanswered-app (P0) so it does not block it"
   },
   {
    "id": "x11-takeover-keyboard-grab",
