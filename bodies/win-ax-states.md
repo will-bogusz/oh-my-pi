@@ -13,7 +13,9 @@ I fixed Windows accessibility reads so the agent can see control state and get h
 
 Raw-view caches share one children read per walk node. A failed children read keeps the node partial; unavailable metadata also blocks uniqueness. Identity hashes control type, labels, AutomationId, class and values, not RuntimeId.
 
-Unavailable element operations report `StaleRef`; unsupported/null VirtualizedItem reads never prove destruction. Expansion needs a shared optional state because available actions do not identify the current state; macOS/Linux leave it unset. Prompt text changes only to stop calling these Windows capabilities macOS-only.
+Unavailable element operations report `StaleRef`; unsupported/null VirtualizedItem reads never prove destruction. Expansion needs a shared optional state because available actions do not identify the current state; macOS/Linux leave it unset.
+
+No added model instructions are needed: results identify selection/expansion states and stale-reference errors. Numeric checkbox values are standard UIA toggle states (`0` off, `1` on, `2` indeterminate), observable before and after an action. No model trials were run.
 
 ## Testing
 
