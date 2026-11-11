@@ -985,7 +985,7 @@ mod foreground {
 	const DRAG_STEP: Duration = Duration::from_millis(16);
 	/// An unassigned virtual key sent behind typed text to see when the target
 	/// has read it: it types nothing, and Cua's Windows driver sends it
-	/// behind text the same way (AutoHotkey's documentation names it
+	/// behind text the same way (the `AutoHotkey` documentation names it
 	/// as an unassigned key).
 	const DRAIN_KEY: u16 = 0xe8;
 	/// Longest wait for the target to read typed text before the foreground
