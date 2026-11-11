@@ -86351,6 +86351,11 @@
     "sha": "3b11d88d25ceeca91d553723da4b7747ba93641d",
     "at": "2026-11-11T14:25:22Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "3b11d88d25ceeca91d553723da4b7747ba93641d",
+    "at": "2026-11-11T14:26:39Z",
+    "host": "goliath"
    }
   }
  },
