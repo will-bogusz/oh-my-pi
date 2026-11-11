@@ -75137,13 +75137,13 @@
    "needs": [],
    "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
    "body": "bodies/x11-mpx-key-confirm.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18828,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-mpx-key-confirm",
    "host": "MacBook-Pro",
    "added": "2026-11-11T02:32:46Z",
-   "updated": "2026-11-11T04:46:58Z",
+   "updated": "2026-11-11T04:50:24Z",
    "note": "",
    "built": [
     {
@@ -75276,7 +75276,8 @@
      "tree": "1f4e26890cd9c5d6b4bad808554c7d2b990cdcaa"
     }
    ],
-   "advanced": "2026-11-11T04:46:58Z"
+   "advanced": "2026-11-11T04:46:58Z",
+   "opened": "2026-11-11T04:50:24Z"
   },
   {
    "id": "atspi-value-readback",
