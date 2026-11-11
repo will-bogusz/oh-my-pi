@@ -16,7 +16,7 @@ The modal regression failed with the original send-only verdict restored. Restor
 
 - Linux: `cargo test -p pi-natives --lib desktop::win32::menu_delivery`.
 - Linux `rust-check` and Windows `rust-check --windows`: clippy and rustfmt passed and recorded on the final head. Windows uses cargo-xwin with all test targets compiled.
-- Live check on a Windows 11 desktop: pending.
+- Live check on a Windows 11 guest: a classic Win32 probe window whose File > Dialog... opens a modal MessageBox, `win.menu.select(["File", "Dialog..."])` in the background. On `main` it threw `AxFailed: native menu command delivery failed or timed out and may already have taken effect` after 1533 ms while the dialog was open; with this PR it returned success after 1517 ms with the dialog open, and the user's window kept the foreground in both.
 
 ---
 
