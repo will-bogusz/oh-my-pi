@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 05:57Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 06:01Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 5 of 8 ready events used in the hour before the last plan, 3 left (plan of 2026-11-11 05:55Z on goliath; groups below are from it, states from the manifest)
@@ -10,7 +10,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
-| print-pref | fix(coding-agent,browser-relay): stop a page calling window.print() from hanging browser calls | browser | P1 | 1h | open (over #15508) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/print-pref) |
+| print-pref | fix(coding-agent,browser-relay): stop a page calling window.print() from hanging browser calls | browser | P1 | 2h | open (over #15508) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/print-pref) |
 
 ## Conflict-held (19)
 
