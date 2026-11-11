@@ -57888,7 +57888,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
+   "base": "b9b3cc4d69962e492197178155dd95216cd9c21b",
    "body": "bodies/iphone-mirror-pointer.md",
    "state": "open",
    "pr": 17756,
@@ -57896,7 +57896,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/iphone-mirror-pointer",
    "host": "MacBook-Pro",
    "added": "2026-10-30T21:35:47Z",
-   "updated": "2026-11-11T03:53:57Z",
+   "updated": "2026-11-11T14:01:53Z",
    "note": "",
    "built": [
     {
@@ -57967,7 +57967,7 @@
      "tree": "1c2e904f816765145387f519b84705329a98de9a"
     }
    ],
-   "advanced": "2026-11-11T03:53:57Z",
+   "advanced": "2026-11-11T14:01:53Z",
    "opened": "2026-11-02T03:27:34Z",
    "readied": "2026-11-02T03:27:55Z"
   },
