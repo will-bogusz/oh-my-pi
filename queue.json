@@ -71130,7 +71130,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-run-main-world",
    "host": "MacBook-Pro",
    "added": "2026-11-10T16:47:04Z",
-   "updated": "2026-11-11T00:21:48Z",
+   "updated": "2026-11-11T09:35:31Z",
    "note": "",
    "built": [
     {
@@ -71294,7 +71294,17 @@
     }
    ],
    "opened": "2026-11-10T17:23:39Z",
-   "advanced": "2026-11-11T00:21:48Z"
+   "advanced": "2026-11-11T00:21:48Z",
+   "design_checks": [
+    {
+     "pr": 18751,
+     "rounds": 9,
+     "at": "2026-11-11T09:35:30Z",
+     "verdict": "keep",
+     "note": "DesignChecks: lift stop for one push settling round 9; parity findings on waitForFunction get one-line answers; opens/merges before the settle series, which restacks on it",
+     "ref": "/Users/viathebrink/tmp/oh-my-pi/DesignChecks/DesignChecks.md"
+    }
+   ]
   },
   {
    "id": "browser-run-node-hint",
