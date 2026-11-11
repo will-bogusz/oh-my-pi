@@ -77043,9 +77043,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-minimised-windows",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:06:32Z",
-   "updated": "2026-11-11T09:40:06Z",
+   "updated": "2026-11-11T09:40:18Z",
    "note": "",
-   "hold": "WindowsMined, 2026-11-11: live Windows trial running; body gets the result"
+   "hold": "WindowsMined, 2026-11-11: live Windows trial pending; unhold when its body carries the result"
   },
   {
    "id": "win-target-layout",
