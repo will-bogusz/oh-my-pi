@@ -77775,7 +77775,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-setvalue-readback",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:34:38Z",
-   "updated": "2026-11-11T19:30:40Z",
+   "updated": "2026-11-11T20:59:48Z",
    "note": "",
    "built": [
     {
@@ -77990,7 +77990,17 @@
    ],
    "opened": "2026-11-11T16:16:49Z",
    "readied": "2026-11-11T16:17:17Z",
-   "advanced": "2026-11-11T19:30:40Z"
+   "advanced": "2026-11-11T19:30:40Z",
+   "design_checks": [
+    {
+     "pr": 18915,
+     "rounds": 6,
+     "at": "2026-11-11T20:59:48Z",
+     "verdict": "change",
+     "note": "head f9cb8ea252: rich edit and native password writes report AxFailed though the app holds the text (5/5 each); patch 18915-readback-holes (rich-edit line marks, password length) plus the two round-6 P2s in one push; next combo-route P1 means refusing native combos (Main)",
+     "ref": "/Users/viathebrink/.omp/agent/sessions/-codebases-trycua-omp/2026-09-08T17-46-29-496Z_01a08220-e6f8-77c4-8572-0e0ff13b3611/local/design-checks/18915.md"
+    }
+   ]
   },
   {
    "id": "win-posted-modifiers",
