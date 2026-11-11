@@ -81038,7 +81038,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-wait-selector-state",
    "host": "MacBook-Pro",
    "added": "2026-11-11T12:16:01Z",
-   "updated": "2026-11-11T16:45:33Z",
+   "updated": "2026-11-11T16:46:02Z",
    "note": "",
    "built": [
     {
@@ -81252,7 +81252,8 @@
      "tree": "6388dc54ea63d024bf535e8aba05ffe088172cd6"
     }
    ],
-   "opened": "2026-11-11T16:45:33Z"
+   "opened": "2026-11-11T16:45:33Z",
+   "readied": "2026-11-11T16:46:02Z"
   },
   {
    "id": "win-focus-report",
