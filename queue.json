@@ -83038,8 +83038,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-11T10:31:12.511959Z",
-  "host": "goliath",
+  "at": "2026-11-11T10:52:06.859824Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -83797,6 +83797,23 @@
     "created": "2026-11-03T08:39:53Z"
    },
    {
+    "id": "ax-ref-read-as",
+    "label": "ax-ref-read-as",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P0",
+    "title": "fix(natives): refuse macOS element actions once the ref's element reads as another control",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-11T10:51:34Z"
+   },
+   {
     "id": "atspi-text-first",
     "label": "atspi-text-first",
     "number": null,
@@ -83831,6 +83848,7 @@
      "conflicts with #18823 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18353 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #18013 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/libei.rs",
+     "conflicts with ax-ref-read-as in crates/pi-natives/src/desktop/ax.rs",
      "conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
@@ -83840,7 +83858,8 @@
      "#18783",
      "#18823",
      "#18353",
-     "#18013"
+     "#18013",
+     "ax-ref-read-as"
     ],
     "needs": [
      "atspi-unanswered-app"
@@ -83956,10 +83975,8 @@
     "area": "natives",
     "priority": "P1",
     "title": "fix(natives): press macOS key chords on the keys of the current keyboard layout",
-    "action": "held",
-    "reasons": [
-     "held: MacMined, 2026-11-11: 30-trial French fix run pending on a queued bench-mac lease; body cells update after"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -84397,7 +84414,7 @@
     "area": "natives",
     "priority": "P2",
     "title": "fix(natives): name the menu items on offer when a menu bar path misses",
-    "action": "open",
+    "action": "next-hour",
     "reasons": [],
     "note": "",
     "over": [],
@@ -84420,7 +84437,8 @@
      "conflicts with #18824 in crates/pi-natives/src/desktop/macos/input.rs",
      "conflicts with #17756 in crates/pi-natives/src/desktop/macos/input.rs",
      "conflicts with #18753 in docs/computer-use.md",
-     "conflicts with #17897 in crates/pi-natives/src/desktop/macos/input.rs"
+     "conflicts with #17897 in crates/pi-natives/src/desktop/macos/input.rs",
+     "conflicts with macos-layout-chords in crates/pi-natives/src/desktop/macos/input.rs"
     ],
     "note": "",
     "over": [],
@@ -84429,7 +84447,8 @@
      "#18824",
      "#17756",
      "#18753",
-     "#17897"
+     "#17897",
+     "macos-layout-chords"
     ],
     "needs": [
      "iphone-mirror-scroll-distance"
@@ -84601,12 +84620,15 @@
     "title": "fix(natives): expose Windows control state and stale-reference matches",
     "action": "held",
     "reasons": [
-     "held: WindowsMined, 2026-11-11: live Windows trial running; body gets the result"
+     "held: WindowsMined, 2026-11-11: live Windows trial running; body gets the result",
+     "conflicts with ax-ref-read-as in crates/pi-natives/src/desktop/mod.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "ax-ref-read-as"
+    ],
     "needs": [],
     "created": "2026-11-11T10:16:04Z"
    },
@@ -84618,7 +84640,7 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): confirm Windows menu commands that open modal dialogs",
-    "action": "open",
+    "action": "next-hour",
     "reasons": [],
     "note": "",
     "over": [],
@@ -84867,6 +84889,7 @@
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18865 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with ax-ref-read-as in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with macos-press-disabled in crates/pi-natives/src/desktop/macos/ax.rs, docs/tools/computer.md",
      "conflicts with win-posted-modifiers in docs/tools/computer.md",
      "conflicts with macos-ax-cancel-before-send in crates/pi-natives/src/desktop/macos/ax.rs",
@@ -84883,6 +84906,7 @@
      "#18353",
      "#18865",
      "#18222",
+     "ax-ref-read-as",
      "macos-press-disabled",
      "win-posted-modifiers",
      "macos-ax-cancel-before-send"
@@ -84903,13 +84927,15 @@
     "action": "wait",
     "reasons": [
      "needs agent-identity (queued)",
-     "conflicts with #18784 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md"
+     "conflicts with #18784 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
+     "conflicts with ax-ref-read-as in crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18784"
+     "#18784",
+     "ax-ref-read-as"
     ],
     "needs": [
      "agent-identity"
