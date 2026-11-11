@@ -54,7 +54,14 @@ static void CaptureNext(SCShareableContent *content, NSArray *requests, NSUInteg
 	} else {
 		for (SCDisplay *display in content.displays) {
 			if (display.displayID != identifier) continue;
-			filter = [[SCContentFilter alloc] initWithDisplay:display excludingWindows:@[]];
+			NSArray *names = request[@"excludeApplications"];
+			NSMutableArray<SCRunningApplication *> *excluded = [NSMutableArray array];
+			for (SCRunningApplication *application in names.count ? content.applications : @[]) {
+				if ([names containsObject:application.applicationName]) [excluded addObject:application];
+			}
+			filter = excluded.count
+				? [[SCContentFilter alloc] initWithDisplay:display excludingApplications:excluded exceptingWindows:@[]]
+				: [[SCContentFilter alloc] initWithDisplay:display excludingWindows:@[]];
 			bounds = display.frame;
 			break;
 		}
@@ -160,6 +167,10 @@ static void Request(NSDictionary *request, dispatch_block_t done) {
 		if ((![@"window" isEqual:kind] && ![@"display" isEqual:kind]) || number < 1 || number > UINT32_MAX || floor(number) != number) {
 			valid = NO; break;
 		}
+		id excluded = target[@"excludeApplications"];
+		if (excluded && (![excluded isKindOfClass:NSArray.class] || [excluded count] > 16)) { valid = NO; break; }
+		for (id name in excluded ?: @[]) if (![name isKindOfClass:NSString.class]) { valid = NO; break; }
+		if (!valid) break;
 	}
 	if (!valid) { Failure(@"InvalidTarget", @"Malformed native capture request"); done(); return; }
 	if (!CGPreflightScreenCaptureAccess()) {

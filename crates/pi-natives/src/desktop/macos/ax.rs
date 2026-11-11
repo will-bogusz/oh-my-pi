@@ -1252,6 +1252,10 @@ impl AxBackend for MacAx {
 	fn value_settable(&mut self, h: &AxHandle) -> Option<bool> {
 		attribute_settable_answer(mac_handle(h).ok()?, "AXValue")
 	}
+
+	fn bounds(&mut self, h: &AxHandle) -> Option<AxBounds> {
+		bounds(mac_handle(h).ok()?)
+	}
 }
 
 fn element_props(

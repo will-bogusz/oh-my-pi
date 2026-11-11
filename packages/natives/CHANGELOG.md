@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Added `setCursor` to desktop sessions: on macOS 14 and later it draws the agent's arrow and name where the session's input lands, and display captures leave out every omp process's cursor
+
 ### Fixed
 
 - Fixed a crash when parsing Markdown with very deeply nested lists or block quotes, such as a line of several hundred `- ` markers, which made editing such files kill the process ([#18707](https://github.com/can1357/oh-my-pi/issues/18707))

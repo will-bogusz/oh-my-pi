@@ -37,6 +37,13 @@ fn main() {
 			"14.0",
 		);
 		build_darwin_native_helper(
+			"src/desktop/macos/cursor/helper.m",
+			"omp-agent-cursor",
+			"OMP_CURSOR_DARWIN_HELPER",
+			&["AppKit", "QuartzCore"],
+			"14.0",
+		);
+		build_darwin_native_helper(
 			"src/desktop/macos/keymap-helper.m",
 			"omp-keymap-helper",
 			"OMP_KEYMAP_DARWIN_HELPER",

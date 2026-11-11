@@ -2,6 +2,7 @@ mod applications;
 mod ax;
 mod backend;
 mod control;
+mod cursor;
 mod error;
 mod frame;
 mod front_app;
@@ -36,6 +37,7 @@ use backend::{
 	KeyboardFocus, MouseButton, PointerEvent, is_raise_action,
 };
 use control::{CancellationSource, InputLease, OperationToken};
+use cursor::{AgentCursor, CursorKind};
 use error::{CoreResult, DesktopError, ErrorCode};
 use frame::{FrameGeometry, apply_capture_caps, encode_png};
 use keys::{parse_keys, parse_modifiers};
@@ -734,6 +736,8 @@ struct Worker {
 	/// getter can answer while an operation holds the worker.
 	capabilities:  Arc<Mutex<Option<DesktopCapabilities>>>,
 	display_awake: Arc<DisplayAwake>,
+	/// The agent cursor drawn where this session's input lands.
+	cursor:        Arc<AgentCursor>,
 	/// The user's own input into the apps this session reads and acts on.
 	#[cfg(target_os = "macos")]
 	listener:      control::intervention::Listener,
@@ -752,6 +756,7 @@ impl Worker {
 		selector: DisplaySelector,
 		capabilities: Arc<Mutex<Option<DesktopCapabilities>>>,
 		display_awake: Arc<DisplayAwake>,
+		cursor: Arc<AgentCursor>,
 	) -> Self {
 		let backend = create_backend(selector);
 		Self {
@@ -760,6 +765,7 @@ impl Worker {
 			frames: HashMap::new(),
 			capabilities,
 			display_awake,
+			cursor,
 			#[cfg(target_os = "macos")]
 			listener: control::intervention::Listener::default(),
 			#[cfg(target_os = "macos")]
@@ -1041,6 +1047,7 @@ impl Worker {
 			}
 		}
 		self.display_awake.release();
+		self.cursor.hide();
 	}
 
 	fn execute(&mut self, request: &Request, token: &OperationToken) -> CoreResult<Response> {
@@ -1322,6 +1329,7 @@ impl Worker {
 			},
 			Request::HoldKeys { target, keys, duration, takeover, .. } => {
 				self.validate_keyboard_target(target)?;
+				self.cursor.here(CursorKind::Key);
 				self
 					.backend()?
 					.hold_keys(target, keys, *duration, takeover.mode(), token)?;
@@ -1342,9 +1350,12 @@ impl Worker {
 					duration: *duration,
 				};
 				let mode = takeover.mode();
-				let backend = self.backend()?;
-				refuse_menu_press(backend.as_mut(), *refuse_menu, mode, target, &event)?;
-				backend.pointer(target, event, &frame, mode, token)?;
+				refuse_menu_press(self.backend()?.as_mut(), *refuse_menu, mode, target, &event)?;
+				// A hold lasts its duration, so the cursor goes there as it starts.
+				self.cursor.at(CursorKind::Click, x, y);
+				self
+					.backend()?
+					.pointer(target, event, &frame, mode, token)?;
 				Ok(Response::Input(control::take_focus_return()))
 			},
 			Request::CaptureRegion { target, region, caps, .. } => {
@@ -1409,6 +1420,7 @@ impl Worker {
 					&frame,
 					token,
 				)?;
+				self.cursor.at(CursorKind::Click, x, y);
 				Ok(Response::Input(control::take_focus_return()))
 			},
 			Request::MoveMouse { target, x, y, takeover, .. } => {
@@ -1420,6 +1432,7 @@ impl Worker {
 					takeover.mode(),
 					token,
 				)?;
+				self.cursor.at(CursorKind::Move, x, y);
 				Ok(Response::Input(control::take_focus_return()))
 			},
 			Request::Drag { target, path, options, .. } => {
@@ -1431,6 +1444,7 @@ impl Worker {
 					.iter()
 					.map(|(x, y)| frame.map_point(*x, *y, current.as_ref()))
 					.collect::<CoreResult<Vec<_>>>()?;
+				let end = mapped.last().copied();
 				let event = PointerEvent::Drag {
 					path:      mapped,
 					button:    options.button,
@@ -1444,11 +1458,17 @@ impl Worker {
 				// the menu preflight's probes block is not taken as their front
 				// app. A press on text opens no menu; any other drag still meets
 				// the preflight before it is posted.
-				if let Some(selection) = backend.drag_selection(target, &event, mode, token)? {
+				let selection = backend.drag_selection(target, &event, mode, token)?;
+				if selection.is_none() {
+					refuse_menu_press(backend.as_mut(), options.refuse_menu, mode, target, &event)?;
+					backend.pointer(target, event, &frame, mode, token)?;
+				}
+				if let Some((x, y)) = end {
+					self.cursor.at(CursorKind::Drag, x, y);
+				}
+				if let Some(selection) = selection {
 					return Ok(Response::TextSelection(selection));
 				}
-				refuse_menu_press(backend.as_mut(), options.refuse_menu, mode, target, &event)?;
-				backend.pointer(target, event, &frame, mode, token)?;
 				Ok(Response::Input(control::take_focus_return()))
 			},
 			Request::Scroll { target, x, y, dx, dy, takeover, .. } => {
@@ -1460,6 +1480,7 @@ impl Worker {
 					takeover.mode(),
 					token,
 				)?;
+				self.cursor.at(CursorKind::Scroll, x, y);
 				Ok(Response::Input(control::take_focus_return()))
 			},
 			Request::TypeText { target, text, takeover, .. } => {
@@ -1467,6 +1488,7 @@ impl Worker {
 				self
 					.backend()?
 					.type_text(target, text, takeover.mode(), token)?;
+				self.cursor.here(CursorKind::Type);
 				Ok(Response::Input(control::take_focus_return()))
 			},
 			Request::KeyChord { target, keys, takeover, .. } => {
@@ -1474,6 +1496,7 @@ impl Worker {
 				self
 					.backend()?
 					.key_chord(target, keys, takeover.mode(), token)?;
+				self.cursor.here(CursorKind::Key);
 				Ok(Response::Input(control::take_focus_return()))
 			},
 			Request::RaiseWindow { id, .. } => {
@@ -1583,21 +1606,30 @@ impl Worker {
 					Err(error) if error.code == ErrorCode::AxUnconfirmed => {
 						Err(self.name_unconfirmed_target(reference, &h, error))
 					},
-					performed => performed.map(|()| Response::Unit),
+					performed => {
+						if performed.is_ok() {
+							self.cursor_at_element(CursorKind::Click, &h);
+						}
+						performed.map(|()| Response::Unit)
+					},
 				}
 			},
 			Request::AxSetValue { reference, value, .. } => {
 				let h = self.registry.resolve(reference)?;
 				self.ax()?.set_value(&h, value)?;
+				self.cursor_at_element(CursorKind::Type, &h);
 				Ok(Response::Unit)
 			},
 			Request::AxSelectText { reference, request, .. } => {
 				let h = self.registry.resolve(reference)?;
-				Ok(Response::TextSelection(self.ax()?.select_text(&h, request)?))
+				let selection = self.ax()?.select_text(&h, request)?;
+				self.cursor_at_element(CursorKind::Move, &h);
+				Ok(Response::TextSelection(selection))
 			},
 			Request::AxFocus { reference, .. } => {
 				let h = self.registry.resolve(reference)?;
 				self.ax()?.focus(&h)?;
+				self.cursor_at_element(CursorKind::Move, &h);
 				Ok(Response::Unit)
 			},
 			Request::AxClick { reference, options, .. } => {
@@ -1605,7 +1637,7 @@ impl Worker {
 				let click = options.click_options();
 				// The backend reads the bounds, after the front app on macOS; the
 				// error names the ref here, where it is known.
-				self
+				let (x, y) = self
 					.backend()?
 					.element_click(&h, &click, token)
 					.map_err(|error| {
@@ -1615,13 +1647,22 @@ impl Worker {
 							error
 						}
 					})?;
+				self.cursor.at(CursorKind::Click, x, y);
 				Ok(Response::Input(control::take_focus_return()))
 			},
 			Request::AxInput { reference, input, takeover, .. } => {
 				let h = self.registry.resolve(reference)?;
 				let mode = takeover.mode();
 				match self.backend()?.element_input(&h, input, mode, token)? {
-					ElementDelivery::Delivered => Ok(Response::Input(control::take_focus_return())),
+					ElementDelivery::Delivered => {
+						let focus_return = control::take_focus_return();
+						let kind = match input {
+							ElementInput::Text(_) => CursorKind::Type,
+							ElementInput::Chord(_) => CursorKind::Key,
+						};
+						self.cursor_at_element(kind, &h);
+						Ok(Response::Input(focus_return))
+					},
 					ElementDelivery::Unfocused(focus) => {
 						Err(self.element_focus_refusal(reference, focus, mode))
 					},
@@ -1633,6 +1674,20 @@ impl Worker {
 }
 
 impl Worker {
+	/// Draws the agent cursor at the center of element `h`, which an action
+	/// just reached. Its bounds are read only while a cursor is drawn, after
+	/// the action, so the action never waits on them.
+	fn cursor_at_element(&mut self, kind: CursorKind, h: &ax::AxHandle) {
+		if !self.cursor.active() {
+			return;
+		}
+		if let Some(bounds) = self.ax().ok().and_then(|ax| ax.bounds(h)) {
+			self
+				.cursor
+				.at(kind, bounds.x + bounds.width / 2.0, bounds.y + bounds.height / 2.0);
+		}
+	}
+
 	/// `error`, an action on `reference` whose outcome is unconfirmed, naming
 	/// the window and app the element is in now, so the caller knows which one
 	/// to inspect. Only reads: nothing is sent again.
@@ -1756,6 +1811,7 @@ struct SessionCore {
 	lifecycle:         Mutex<Lifecycle>,
 	capabilities:      Arc<Mutex<Option<DesktopCapabilities>>>,
 	display_awake:     Arc<DisplayAwake>,
+	cursor:            Arc<AgentCursor>,
 	/// `call`s sent to the worker that have not returned yet.
 	in_flight:         AtomicUsize,
 	cancellation:      CancellationSource,
@@ -1787,6 +1843,7 @@ impl SessionCore {
 			}),
 			capabilities: Arc::default(),
 			display_awake: Arc::default(),
+			cursor: Arc::default(),
 			in_flight: AtomicUsize::new(0),
 			cancellation: CancellationSource::counting_escapes(escape_stops, agent),
 			operation_timeout,
@@ -1806,10 +1863,11 @@ impl SessionCore {
 		let selector = self.selector.clone();
 		let caps = Arc::clone(&self.capabilities);
 		let display_awake = Arc::clone(&self.display_awake);
+		let cursor = Arc::clone(&self.cursor);
 		let join = thread::Builder::new()
 			.name("omp-desktop-session".into())
 			.spawn(move || {
-				Worker::new(selector, caps, display_awake).serve(&rx, DISPLAY_AWAKE_GRACE);
+				Worker::new(selector, caps, display_awake, cursor).serve(&rx, DISPLAY_AWAKE_GRACE);
 				let _ = done_tx.send(());
 			})
 			.map_err(|e| {
@@ -2228,6 +2286,14 @@ impl DesktopSession {
 			.ok()
 			.and_then(|remaining| Instant::now().checked_add(remaining));
 		self.core.cancellation.set_deadline(deadline);
+	}
+
+	/// Draws `cursor`'s arrow and name where this session's input lands from
+	/// the next input on (macOS 14 and later; elsewhere nothing is drawn), or
+	/// with `null` stops drawing and removes it. Each run sets it.
+	#[napi]
+	pub fn set_cursor(&self, cursor: Option<DesktopCursor>) {
+		self.core.cursor.set(cursor);
 	}
 
 	#[napi]
@@ -3279,13 +3345,14 @@ mod capture_tests {
 			element: &AxHandle,
 			click: &ClickOptions,
 			token: &OperationToken,
-		) -> CoreResult<()> {
+		) -> CoreResult<(f64, f64)> {
 			self
 				.queries_at_input
 				.lock()
 				.push(*self.window_queries.lock());
-			let (target, event) = backend::locate_element_click(self, element, click)?;
-			click.send(self, &target, event, &FrameGeometry::identity_global(), token)
+			let (target, event, center) = backend::locate_element_click(self, element, click)?;
+			click.send(self, &target, event, &FrameGeometry::identity_global(), token)?;
+			Ok(center)
 		}
 
 		fn menu_items(
@@ -3355,6 +3422,7 @@ mod capture_tests {
 			frames: HashMap::new(),
 			capabilities: Arc::default(),
 			display_awake: Arc::default(),
+			cursor: Arc::default(),
 			#[cfg(target_os = "macos")]
 			listener: control::intervention::Listener::simulated(),
 			#[cfg(target_os = "macos")]
@@ -4227,6 +4295,106 @@ mod capture_tests {
 		};
 		assert_eq!(error.code, ErrorCode::AxFailed);
 		assert_eq!(error.message, format!("{reference} has no clickable bounds"));
+	}
+
+	/// Kind and point of each cursor event a test worker drew, in order.
+	type Drawn = Vec<(CursorKind, Option<(f64, f64)>)>;
+
+	thread_local! {
+		static DRAWN: std::cell::RefCell<Drawn> = const { std::cell::RefCell::new(Vec::new()) };
+	}
+
+	fn record_cursor(event: cursor::CursorEvent) {
+		DRAWN.with_borrow_mut(|drawn| drawn.push((event.kind, event.point)));
+	}
+
+	#[test]
+	fn agent_cursor_follows_mapped_pointer_input_typing_and_element_clicks() {
+		let mut worker = worker_with(FakeWaylandBackend::new());
+		worker.cursor = Arc::new(AgentCursor::with_sink(record_cursor));
+		let token = CancellationSource::default().token();
+		let target = Target::Window(WAYLAND_ID.to_string());
+		let (reply, _capture) = flume::bounded(1);
+		let caps = CaptureCaps { max_width: Some(32), max_height: None };
+		worker
+			.process(&Request::Capture { target: target.clone(), caps, reply }, &token)
+			.unwrap();
+		let (reply, _click) = flume::bounded(1);
+		let click = Request::Click {
+			target: target.clone(),
+			x: 16.0,
+			y: 12.0,
+			options: ParsedPointerOptions::parse(None).unwrap(),
+			reply,
+		};
+		worker.process(&click, &token).unwrap();
+		assert!(DRAWN.with_borrow(Vec::is_empty), "nothing is drawn until a cursor is set");
+
+		worker.cursor.set(Some(DesktopCursor {
+			id:    "Main".into(),
+			label: "Main".into(),
+			color: "#268bd2".into(),
+		}));
+		let (x, y, _) = worker.map_point(&target, 16.0, 12.0).unwrap();
+		assert_eq!((x, y), (32.0, 24.0), "the cursor point is the mapped global point");
+		worker.process(&click, &token).unwrap();
+		let (reply, _typed) = flume::bounded(1);
+		let typed =
+			Request::TypeText { target, text: "hi".into(), takeover: Takeover::default(), reply };
+		worker.process(&typed, &token).unwrap();
+		let inner: &mut Worker = &mut worker;
+		let (backend, registry) = (&mut inner.backend, &mut inner.registry);
+		let ax = backend
+			.as_mut()
+			.ok()
+			.and_then(|backend| backend.ax())
+			.unwrap();
+		let reference =
+			register_node(ax, registry, WAYLAND_ID, AxHandle::Test(1), &mut AppFocus::default())
+				.unwrap()
+				.ref_;
+		let (reply, _element) = flume::bounded(1);
+		let options = ParsedPointerOptions::parse(None).unwrap();
+		worker
+			.process(&Request::AxClick { reference, options, reply }, &token)
+			.unwrap();
+		worker.cursor.set(None);
+		assert_eq!(DRAWN.with_borrow(Clone::clone), [
+			(CursorKind::Click, Some((32.0, 24.0))),
+			(CursorKind::Type, Some((32.0, 24.0))),
+			// The element's 10,10 20x20 bounds, at their center.
+			(CursorKind::Click, Some((20.0, 20.0))),
+			(CursorKind::Hide, None),
+		]);
+	}
+
+	#[test]
+	fn element_actions_read_bounds_for_the_cursor_only_while_it_is_drawn() {
+		let (mut worker, tree) = read_buttons(&[(2, "OK")]);
+		let cursor = Arc::new(AgentCursor::with_sink(record_cursor));
+		worker.cursor = Arc::clone(&cursor);
+		let token = CancellationSource::default().token();
+		let mut press = || {
+			let (reply, _rx) = flume::bounded(1);
+			let request = Request::AxPerform {
+				reference: "e2".into(),
+				action: "press".into(),
+				menu: None,
+				reply,
+			};
+			let before = tree.lock().reads;
+			worker.process(&request, &token).unwrap();
+			tree.lock().reads - before
+		};
+		let off = press();
+		cursor.set(Some(DesktopCursor {
+			id:    "Main".into(),
+			label: "Main".into(),
+			color: "#268bd2".into(),
+		}));
+		let on = press();
+		assert_eq!(on, off + 1, "only a drawn cursor reads the element's bounds");
+		assert_eq!(DRAWN.with_borrow(Clone::clone), [(CursorKind::Click, Some((20.0, 20.0)))]);
 	}
 
 	#[test]

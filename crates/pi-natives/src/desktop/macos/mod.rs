@@ -1,5 +1,6 @@
 mod ax;
 mod capture;
+pub(super) mod cursor;
 mod date;
 mod input;
 mod key_reroute;
@@ -267,12 +268,12 @@ impl Backend for MacosBackend {
 		element: &AxHandle,
 		click: &ClickOptions,
 		token: &OperationToken,
-	) -> CoreResult<()> {
+	) -> CoreResult<(f64, f64)> {
 		token.check()?;
 		Self::require_input_permission()?;
 		// The element's bounds and window are read from its application, which
 		// blocks while it is busy; the user's front app is read before them.
-		let (entry_front, (target, event)) =
+		let (entry_front, (target, event, center)) =
 			EntryFront::before(skylight::front_pid, || locate_element_click(self, element, click))?;
 		if click.checks_menu_press() {
 			self.refuse_menu_press(&target, &event)?;
@@ -281,7 +282,8 @@ impl Backend for MacosBackend {
 			self
 				.input
 				.pointer(&target, event, click.menu, click.mode, entry_front, &self.capture)
-		})
+		})?;
+		Ok(center)
 	}
 
 	fn hold_keys(

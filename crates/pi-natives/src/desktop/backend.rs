@@ -3,7 +3,7 @@ use std::time::Duration;
 use image::RgbaImage;
 
 use super::{
-	ax::{AxHandle, AxProps, WalkBounds},
+	ax::{AxBounds, AxHandle, AxProps, WalkBounds},
 	control::OperationToken,
 	error::{CoreResult, DesktopError, ErrorCode},
 	frame::FrameGeometry,
@@ -234,13 +234,13 @@ pub fn refuses_menu_press(refuse: bool, mode: DeliveryMode) -> bool {
 /// worker names the element's ref in it.
 pub const NO_CLICKABLE_BOUNDS: &str = "the element has no clickable bounds";
 
-/// Where `click` goes on `element`: the window holding it, and the click at
-/// its center. Both are read from the element's application.
+/// Where `click` goes on `element`: the window holding it, the click at its
+/// center, and that center. All are read from the element's application.
 pub fn locate_element_click<B: Backend + ?Sized>(
 	backend: &mut B,
 	element: &AxHandle,
 	click: &ClickOptions,
-) -> CoreResult<(Target, PointerEvent)> {
+) -> CoreResult<(Target, PointerEvent, (f64, f64))> {
 	let ax = backend.ax().ok_or_else(DesktopError::ax_unsupported)?;
 	let bounds = ax
 		.props(element)?
@@ -251,7 +251,8 @@ pub fn locate_element_click<B: Backend + ?Sized>(
 	// window; only the live element can establish ownership.
 	let ax = backend.ax().ok_or_else(DesktopError::ax_unsupported)?;
 	let target = Target::Window(ax.window_id(element, &windows)?);
-	Ok((target, click.at(bounds.x + bounds.width / 2.0, bounds.y + bounds.height / 2.0)))
+	let center = (bounds.x + bounds.width / 2.0, bounds.y + bounds.height / 2.0);
+	Ok((target, click.at(center.0, center.1), center))
 }
 
 pub trait Backend: Send {
@@ -388,16 +389,18 @@ pub trait Backend: Send {
 		Ok(ElementDelivery::Delivered)
 	}
 	/// Clicks `element`, a live element, at its center in the window that
-	/// holds it ([`locate_element_click`]). The backend reads both from the
-	/// element's application itself, as for [`Self::element_input`].
+	/// holds it ([`locate_element_click`]), and returns that center. The
+	/// backend reads both from the element's application itself, as for
+	/// [`Self::element_input`].
 	fn element_click(
 		&mut self,
 		element: &AxHandle,
 		click: &ClickOptions,
 		token: &OperationToken,
-	) -> CoreResult<()> {
-		let (target, event) = locate_element_click(self, element, click)?;
-		click.send(self, &target, event, &FrameGeometry::identity_global(), token)
+	) -> CoreResult<(f64, f64)> {
+		let (target, event, center) = locate_element_click(self, element, click)?;
+		click.send(self, &target, event, &FrameGeometry::identity_global(), token)?;
+		Ok(center)
 	}
 	fn hold_keys(
 		&mut self,
@@ -493,5 +496,10 @@ pub trait AxBackend {
 	/// `None` when it gave no answer or the backend cannot ask.
 	fn value_settable(&mut self, _h: &AxHandle) -> Option<bool> {
 		None
+	}
+	/// The element's bounds in global top-left points, when it reports them;
+	/// backends override it to read only the bounds.
+	fn bounds(&mut self, h: &AxHandle) -> Option<AxBounds> {
+		self.props(h).ok()?.bounds
 	}
 }

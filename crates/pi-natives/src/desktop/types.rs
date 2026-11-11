@@ -162,6 +162,19 @@ pub struct DesktopSessionOptions {
 	pub agent_id:        Option<String>,
 }
 
+/// The agent a session's on-screen cursor stands for (`setCursor`): drawn on
+/// macOS where that session's input lands, never in a screenshot.
+#[napi(object)]
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DesktopCursor {
+	/// Registry id of the agent; one cursor is drawn per id.
+	pub id:    String,
+	/// Name on the cursor's badge.
+	pub label: String,
+	/// Fill colour as `#rrggbb`.
+	pub color: String,
+}
+
 #[napi(object)]
 #[derive(Debug, Clone, Default)]
 pub struct CaptureCaps {

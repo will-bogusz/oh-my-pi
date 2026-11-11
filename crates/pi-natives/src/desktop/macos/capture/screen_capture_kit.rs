@@ -25,7 +25,7 @@ use crate::desktop::{
 	control,
 	error::{CoreResult, DesktopError},
 	frame::MAX_COMPOSITE_PIXELS,
-	macos::permission,
+	macos::{cursor, permission},
 	native_helper::HelperDirectory,
 };
 
@@ -58,10 +58,25 @@ pub(super) enum CaptureTarget {
 #[derive(Clone, Copy, Serialize)]
 pub(super) struct CaptureRequest {
 	#[serde(flatten)]
-	pub target: CaptureTarget,
+	pub target:           CaptureTarget,
 	/// Quartz compatibility captures have no accompanying fresh geometry.
 	#[serde(skip)]
-	pub bounds: CGRect,
+	pub bounds:           CGRect,
+	/// Applications whose windows a display capture leaves out: every omp
+	/// process's agent cursor overlay, so no agent's screenshot shows any
+	/// agent's cursor. A window capture holds that window alone.
+	#[serde(rename = "excludeApplications", skip_serializing_if = "<[_]>::is_empty")]
+	exclude_applications: &'static [&'static str],
+}
+
+impl CaptureRequest {
+	pub(super) const fn new(target: CaptureTarget, bounds: CGRect) -> Self {
+		let exclude_applications: &'static [&'static str] = match target {
+			CaptureTarget::Display(_) => &[cursor::HELPER_NAME],
+			CaptureTarget::Window(_) => &[],
+		};
+		Self { target, bounds, exclude_applications }
+	}
 }
 
 pub(super) struct Captured {
@@ -453,7 +468,23 @@ fn unpremultiply(pixels: &mut [u8]) {
 
 #[cfg(test)]
 mod tests {
-	use super::{frame_bytes, pixel_dimensions, unpremultiply};
+	use objc2_core_foundation::CGRect;
+	use serde_json::json;
+
+	use super::{CaptureRequest, CaptureTarget, frame_bytes, pixel_dimensions, unpremultiply};
+
+	#[test]
+	fn display_captures_leave_out_every_agent_cursor_and_window_captures_ask_nothing() {
+		let display =
+			serde_json::to_value(CaptureRequest::new(CaptureTarget::Display(7), CGRect::ZERO));
+		assert_eq!(
+			display.unwrap(),
+			json!({ "kind": "display", "id": 7, "excludeApplications": ["omp-agent-cursor"] })
+		);
+		let window =
+			serde_json::to_value(CaptureRequest::new(CaptureTarget::Window(9), CGRect::ZERO));
+		assert_eq!(window.unwrap(), json!({ "kind": "window", "id": 9 }));
+	}
 
 	#[test]
 	fn rgba_preserves_opacity_and_unpremultiplies_transparent_edges() {

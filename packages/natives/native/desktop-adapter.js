@@ -5,6 +5,7 @@ const REQUIRED_METHODS = [
 	"cancel",
 	"retire",
 	"setRunDeadline",
+	"setCursor",
 	"observe",
 	"listApplications",
 	"openApplication",

@@ -88,9 +88,16 @@ export declare class DesktopSession {
   /**
    * Sets when the current run ends, `remaining_ms` from now; each run sets
    * it before its first call. Input waiting for the user to pause in its app
-   * (macOS) or for a Wayland permission prompt gives up shortly before it.
+   * (macOS), for a Wayland permission prompt or for another session's input
+   * lock gives up shortly before it.
    */
   setRunDeadline(remainingMs: number): void
+  /**
+   * Draws `cursor`'s arrow and name where this session's input lands from
+   * the next input on (macOS 14 and later; elsewhere nothing is drawn), or
+   * with `null` stops drawing and removes it. Each run sets it.
+   */
+  setCursor(cursor?: DesktopCursor | undefined | null): void
   capture(target: string, caps?: CaptureCaps | undefined | null): Promise<DesktopCapture>
   /**
    * Capture a fresh native-detail region without replacing the full input
@@ -1591,6 +1598,19 @@ export interface DesktopCapture {
 
 export interface DesktopControlState {
   active: boolean
+}
+
+/**
+ * The agent a session's on-screen cursor stands for (`setCursor`): drawn on
+ * macOS where that session's input lands, never in a screenshot.
+ */
+export interface DesktopCursor {
+  /** Registry id of the agent; one cursor is drawn per id. */
+  id: string
+  /** Name on the cursor's badge. */
+  label: string
+  /** Fill colour as `#rrggbb`. */
+  color: string
 }
 
 /**

@@ -28,7 +28,7 @@ use super::{
 		frame::{FrameGeometry, MAX_COMPOSITE_PIXELS, compose},
 		types::{DesktopDisplay, DesktopWindow, DisplaySelector, Target},
 	},
-	ax, permission,
+	ax, cursor, permission,
 };
 
 const MIN_WINDOW_EDGE: u32 = 16;
@@ -219,10 +219,10 @@ impl MacCapture {
 		let window_id = id
 			.parse::<u32>()
 			.map_err(|_| DesktopError::invalid_target(format!("invalid macOS window id '{id}'")))?;
-		let capture = screen_capture_kit::capture(vec![CaptureRequest {
-			target: CaptureTarget::Window(window_id),
-			bounds: capture_bounds(window.x, window.y, window.width, window.height),
-		}])?
+		let capture = screen_capture_kit::capture(vec![CaptureRequest::new(
+			CaptureTarget::Window(window_id),
+			capture_bounds(window.x, window.y, window.width, window.height),
+		)])?
 		.pop()
 		.ok_or_else(|| DesktopError::capture_failed("native window capture returned no image"))?;
 		(window.x, window.y, window.width, window.height) = logical_bounds(capture.bounds)?;
@@ -248,10 +248,10 @@ impl MacCapture {
 					.id
 					.parse::<u32>()
 					.map_err(|_| DesktopError::invalid_target("invalid macOS display id"))?;
-				Ok(CaptureRequest {
-					target: CaptureTarget::Display(id),
-					bounds: capture_bounds(display.x, display.y, display.width, display.height),
-				})
+				Ok(CaptureRequest::new(
+					CaptureTarget::Display(id),
+					capture_bounds(display.x, display.y, display.width, display.height),
+				))
 			})
 			.collect::<CoreResult<Vec<_>>>()?;
 		let captures = screen_capture_kit::capture(requests)?;
@@ -566,9 +566,7 @@ fn window_metadata(dictionary: &WindowDictionary) -> Option<(u32, DesktopWindow)
 		}
 		let title = window_string(dictionary, kCGWindowName);
 		let app = window_string(dictionary, kCGWindowOwnerName);
-		if (title.is_empty() && app.is_empty())
-			|| (title == "StatusIndicator" && app == "Window Server")
-		{
+		if hidden_window(&title, &app) {
 			return None;
 		}
 		let pid =
@@ -585,6 +583,15 @@ fn window_metadata(dictionary: &WindowDictionary) -> Option<(u32, DesktopWindow)
 			focused: false,
 		}))
 	}
+}
+
+/// Whether a listed window is one no agent sees or targets: the Window
+/// Server's status indicator, or an omp agent cursor overlay panel, which
+/// covers a whole display above the apps.
+fn hidden_window(title: &str, app: &str) -> bool {
+	(title.is_empty() && app.is_empty())
+		|| (title == "StatusIndicator" && app == "Window Server")
+		|| app == cursor::HELPER_NAME
 }
 
 fn scaled_edge(value: u32, scale: f64) -> u32 {
@@ -636,7 +643,15 @@ fn logical_bounds(bounds: CGRect) -> CoreResult<(i32, i32, u32, u32)> {
 
 #[cfg(test)]
 mod tests {
-	use super::key_window;
+	use super::{hidden_window, key_window};
+
+	#[test]
+	fn agent_cursor_overlays_are_left_out_of_window_listings() {
+		assert!(hidden_window("", "omp-agent-cursor"));
+		assert!(hidden_window("StatusIndicator", "Window Server"));
+		assert!(!hidden_window("", "Finder"));
+		assert!(!hidden_window("Untitled", "TextEdit"));
+	}
 
 	#[test]
 	fn key_window_is_the_accessibility_focused_window_not_the_frontmost() {
