@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 18:43Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 18:44Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-11 18:38Z on goliath; groups below are from it, states from the manifest)
@@ -43,7 +43,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | macos-ax-cancel-before-send | fix(natives): send no macOS AX action once its run is cancelled | natives | P2 | 8h | [#18898](https://github.com/can1357/oh-my-pi/pull/18898) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-ax-cancel-before-send) |
 | win-ax-states | fix(natives): expose Windows control state and stale-reference matches | computer | P2 | 8h | [#18892](https://github.com/can1357/oh-my-pi/pull/18892), [#18915](https://github.com/can1357/oh-my-pi/pull/18915) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-ax-states) |
 | x11-keysym-remap | fix(natives): type characters outside the X11 keymap through temporary keycodes | computer | P2 | 4h | [#18784](https://github.com/can1357/oh-my-pi/pull/18784), [#18825](https://github.com/can1357/oh-my-pi/pull/18825), [#18828](https://github.com/can1357/oh-my-pi/pull/18828) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-keysym-remap) |
-| macos-ax-linked-label | fix(natives): name a macOS control by the label its AXTitleUIElement links to | natives | P2 | 3h | [#18892](https://github.com/can1357/oh-my-pi/pull/18892) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-ax-linked-label) |
+| macos-ax-linked-label | fix(natives): name a macOS control by the label its AXTitleUIElement links to | natives | P2 | 4h | [#18892](https://github.com/can1357/oh-my-pi/pull/18892) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-ax-linked-label) |
 
 ## Stacked (29)
 
