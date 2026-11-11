@@ -81702,6 +81702,24 @@
    "added": "2026-11-11T18:49:11Z",
    "updated": "2026-11-11T18:49:11Z",
    "note": ""
+  },
+  {
+   "id": "browser-toggle-prefix",
+   "branch": "will/browser-toggle-prefix",
+   "title": "fix(coding-agent): rebuild the system prompt before readers see a browser toggle",
+   "area": "browser",
+   "priority": "P3",
+   "needs": [],
+   "base": "50da2d357039404a81d7c64622740ce13e4c54b4",
+   "body": null,
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": null,
+   "host": "MacBook-Pro",
+   "added": "2026-11-11T20:07:49Z",
+   "updated": "2026-11-11T20:07:49Z",
+   "note": ""
   }
  ],
  "watch": {
