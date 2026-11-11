@@ -263,7 +263,14 @@ pub fn send_paced<F: Field, E>(
 	mut send: impl FnMut(&str) -> Result<(), E>,
 	mut check: impl FnMut() -> Result<(), E>,
 ) -> Result<Option<String>, E> {
-	let mut pacer = Pacer::new(field.is_some(), waits.pace_budget(text.chars().count()));
+	let waits = &diag::waits(*waits);
+	let (keep_words, keep_lag) = diag::keepup();
+	let mut kept = 0u32;
+	let budget = std::env::var("WTB_BUDGET_MS")
+		.ok()
+		.and_then(|value| value.parse().ok())
+		.map_or_else(|| waits.pace_budget(text.chars().count()), Duration::from_millis);
+	let mut pacer = Pacer::new(field.is_some(), budget);
 	let start = clock.now();
 	let mut shown = field.map(|(_, before)| before.to_string());
 	let mut last = None;
@@ -280,11 +287,30 @@ pub fn send_paced<F: Field, E>(
 			if let (Some((field, _)), Some(before)) = (field, shown.as_mut())
 				&& pacer.pace != Pace::Off
 			{
+				let sent = clock.now();
+				let pace = pacer.pace;
 				let (progress, changed) = await_piece(field, clock, waits, piece, before, &mut check)?;
+				let lag = clock.now().saturating_sub(sent);
 				if progress.is_some() {
 					last = Some(before.clone());
 				}
 				pacer.after(progress, changed, rest.is_empty(), clock.now().saturating_sub(start));
+				if pace == Pace::Words && progress == Some(Progress::Shown) && lag <= keep_lag {
+					kept += 1;
+				} else {
+					kept = 0;
+				}
+				if keep_words > 0 && kept >= keep_words && pacer.pace == Pace::Words {
+					pacer.pace = Pace::Off;
+					diag::trace("keepup_off");
+				}
+				diag::trace(&format!(
+					"piece len={} at_us={} lag_us={} progress={progress:?} changed={changed} pace={:?}",
+					piece.chars().count(),
+					sent.saturating_sub(start).as_micros(),
+					lag.as_micros(),
+					pacer.pace
+				));
 			}
 		}
 	}
@@ -307,8 +333,15 @@ fn await_piece<E>(
 	let start = clock.now();
 	let mut changed = start;
 	let mut last: Option<String> = None;
+	let mut reads = 0u32;
+	let mut slowest = Duration::ZERO;
 	loop {
-		let Some(now) = field.read() else {
+		let read_at = clock.now();
+		let read = field.read();
+		reads += 1;
+		slowest = slowest.max(clock.now().saturating_sub(read_at));
+		let Some(now) = read else {
+			diag::trace(&format!("await reads={reads} slowest_us={} failed", slowest.as_micros()));
 			return Ok((None, false));
 		};
 		let progress = progress(piece, before, &now);
@@ -322,6 +355,7 @@ fn await_piece<E>(
 		{
 			let moved = now != *before;
 			*before = now;
+			diag::trace(&format!("await reads={reads} slowest_us={}", slowest.as_micros()));
 			return Ok((Some(progress), moved));
 		}
 		last = Some(now);
@@ -382,11 +416,22 @@ fn read_until_settled(
 	(clock, waits): (&impl Clock, &Waits),
 	mut cancelled: impl FnMut() -> bool,
 ) -> Verdict {
+	let waits = &diag::waits(*waits);
 	let start = clock.now();
 	let mut seen = last;
 	let mut changed = start;
+	let mut reads = 0u32;
 	loop {
-		let Some(now) = field.read() else {
+		reads += 1;
+		let read_at = clock.now();
+		let read = field.read();
+		diag::trace(&format!(
+			"check read={reads} us={} ok={} chars={}",
+			clock.now().saturating_sub(read_at).as_micros(),
+			read.is_some(),
+			read.as_ref().map_or(0, |text| text.chars().count())
+		));
+		let Some(now) = read else {
 			let last = seen.map(|seen| match verdict(typed, before, &seen, name) {
 				Verdict::Confirmed => "it showed the text".to_string(),
 				Verdict::Dropped { arrived } => dropped_message(typed, name, &arrived),
@@ -424,6 +469,45 @@ fn read_until_settled(
 			));
 		}
 		clock.sleep(waits.check_poll);
+	}
+}
+
+/// WinTypeBound diagnostics: env overrides and a trace file. Not for merge.
+pub mod diag {
+	use std::{io::Write as _, time::Duration};
+
+	pub fn trace(line: &str) {
+		if let Ok(path) = std::env::var("WTB_TRACE")
+			&& let Ok(mut file) = std::fs::OpenOptions::new().create(true).append(true).open(path)
+		{
+			let _ = writeln!(file, "{line}");
+		}
+	}
+
+	fn ms(key: &str) -> Option<Duration> {
+		std::env::var(key).ok()?.parse::<u64>().ok().map(Duration::from_millis)
+	}
+
+	pub fn waits(mut waits: super::Waits) -> super::Waits {
+		if let Some(value) = ms("WTB_CHECK_MS") {
+			waits.check = value;
+		}
+		if let Some(value) = ms("WTB_CHECK_STILL_MS") {
+			waits.check_still = value;
+		}
+		waits
+	}
+
+	/// `WTB_KEEPUP=K:LAG_US`: pacing stops after K words in a row shown
+	/// within LAG_US of being sent.
+	pub fn keepup() -> (u32, Duration) {
+		std::env::var("WTB_KEEPUP")
+			.ok()
+			.and_then(|value| {
+				let (words, lag) = value.split_once(':')?;
+				Some((words.parse().ok()?, Duration::from_micros(lag.parse().ok()?)))
+			})
+			.unwrap_or((0, Duration::ZERO))
 	}
 }
 

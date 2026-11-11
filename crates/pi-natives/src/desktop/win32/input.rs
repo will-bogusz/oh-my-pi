@@ -1774,13 +1774,33 @@ mod foreground {
 		if text.is_empty() {
 			return Ok(());
 		}
-		ForegroundGuard::activate(id, KEY_SETTLE)?.run(|target| {
+		let total = Instant::now();
+		let result = ForegroundGuard::activate(id, KEY_SETTLE)?.run(|target| {
 			focus(ax)?;
+			let at = Instant::now();
 			let field = watch(ax, target, Some(id));
+			let watch_us = at.elapsed().as_micros();
+			readback::diag::trace(&format!(
+				"call chars={} watch_us={watch_us} field={}",
+				text.chars().count(),
+				field.as_ref().map_or_else(|reason| format!("unreadable: {reason}"), |field| field.name.clone())
+			));
+			let at = Instant::now();
 			let last = send_text(Some(target), text, field.as_ref().ok())?;
+			let send_us = at.elapsed().as_micros();
+			let at = Instant::now();
 			let unread = drain(target, &format!("window {id}"));
-			confirm(field, text, last, unread)
-		})
+			let drain_us = at.elapsed().as_micros();
+			let at = Instant::now();
+			let result = confirm(field, text, last, unread);
+			readback::diag::trace(&format!(
+				"phases send_us={send_us} drain_us={drain_us} check_us={}",
+				at.elapsed().as_micros()
+			));
+			result
+		});
+		readback::diag::trace(&format!("total_us={}", total.elapsed().as_micros()));
+		result
 	}
 
 	#[cfg(test)]
