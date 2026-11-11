@@ -44680,7 +44680,7 @@
    "area": "catalog",
    "priority": "P2",
    "needs": [],
-   "base": "88a69582c755bd000e8dc0290981fc787a4f400c",
+   "base": "6364864c1102930ebd13092ff91fdb02553f3f73",
    "body": "bodies/read-audio-transcripts.md",
    "state": "open",
    "pr": 16611,
@@ -44688,7 +44688,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-audio-transcripts",
    "host": "MacBook-Pro",
    "added": "2026-10-21T03:04:56Z",
-   "updated": "2026-11-05T02:58:21Z",
+   "updated": "2026-11-11T14:10:55Z",
    "note": "",
    "built": [
     {
@@ -45163,7 +45163,7 @@
    ],
    "opened": "2026-10-21T06:07:04Z",
    "readied": "2026-10-21T06:08:01Z",
-   "advanced": "2026-11-05T02:58:21Z"
+   "advanced": "2026-11-11T14:10:55Z"
   },
   {
    "id": "read-heif-images",
