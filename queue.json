@@ -85730,6 +85730,11 @@
     "sha": "3060b6a815a4b9e6252fda344a9fe6a2af3b18ad",
     "at": "2026-11-11T13:09:14Z",
     "host": "goliath"
+   },
+   "macos": {
+    "sha": "3060b6a815a4b9e6252fda344a9fe6a2af3b18ad",
+    "at": "2026-11-11T13:15:14Z",
+    "host": "Wills-MacBook-Pro"
    }
   },
   "86c44c3bc45fa8afedda58e5e1e3eaa1ee760147": {
