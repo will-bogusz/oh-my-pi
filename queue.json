@@ -85633,6 +85633,11 @@
     "sha": "cd0f44437ae39699264f191ae3f78992ae24c79a",
     "at": "2026-11-11T13:01:35Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "cd0f44437ae39699264f191ae3f78992ae24c79a",
+    "at": "2026-11-11T13:02:06Z",
+    "host": "goliath"
    }
   },
   "d72e31b0f0b5c85e368136ce5b201b916b3c7612": {
