@@ -77753,7 +77753,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "679691a78141de0dd6ba1b7a5d5c1b1d7d967a63",
+   "base": "17e8c17e5d3e60acb2239bf504a43865b04b6a31",
    "body": "bodies/win-setvalue-readback.md",
    "state": "open",
    "pr": 18915,
@@ -77761,7 +77761,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-setvalue-readback",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:34:38Z",
-   "updated": "2026-11-11T16:17:17Z",
+   "updated": "2026-11-11T16:53:41Z",
    "note": "",
    "built": [
     {
