@@ -82145,7 +82145,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-11T22:43:08Z",
+  "checked": "2026-11-11T23:43:45Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -82194,7 +82194,6 @@
    18923,
    18924,
    18925,
-   18939,
    18947
   ],
   "post_merge": {
@@ -89475,7 +89474,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-11T23:13:20.196890Z",
+  "at": "2026-11-11T23:43:46.108361Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -90232,23 +90231,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T16:51:01Z"
-   },
-   {
-    "id": "wait-ladder-context",
-    "label": "#18939",
-    "number": 18939,
-    "state": "open",
-    "area": "coding-agent",
-    "priority": "P2",
-    "title": "feat(wait): reduce empty checks in large conversations",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-11T20:18:51Z"
    },
    {
     "id": "atspi-huge-children",
@@ -91531,7 +91513,6 @@
      "held: Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance",
      "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/turn-recovery.ts, packages/coding-agent/test/agent-session-retry-fallback.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with #18939 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in docs/advisor-watchdog.md, docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-advisors.ts, packages/coding-agent/src/session/turn-recovery.ts, packages/coding-agent/test/agent-session-retry-fallback.test.ts"
     ],
     "note": "",
@@ -91539,8 +91520,7 @@
     "paired": [],
     "blocked_by": [
      "#17610",
-     "#18786",
-     "#18939"
+     "#18786"
     ],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
@@ -91615,7 +91595,6 @@
      "held: Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance",
      "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #18786 in packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with #18939 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in docs/auth-broker-gateway.md, packages/ai/src/auth-broker/discover.ts, packages/ai/src/auth/types.ts, packages/ai/test/auth-storage-codex-selection.test.ts, packages/coding-agent/src/cli/usage-cli.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/claude-auto-reset.ts, packages/coding-agent/src/session/codex-auto-reset.ts, packages/coding-agent/test/claude-auto-reset-integration.test.ts, packages/coding-agent/test/claude-auto-reset.test.ts"
     ],
     "note": "",
@@ -91623,8 +91602,7 @@
     "paired": [],
     "blocked_by": [
      "#17610",
-     "#18786",
-     "#18939"
+     "#18786"
     ],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
@@ -91643,7 +91621,6 @@
      "conflicts with #18771 in packages/ai/src/providers/factory-droid.ts",
      "conflicts with #17610 in packages/ai/src/providers/factory-droid.ts",
      "conflicts with #18786 in packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with #18939 in packages/coding-agent/src/session/agent-session.ts",
      "its need token-count-policy conflicts with main in packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/session/session-stats.ts, packages/coding-agent/test/context-fits-model.test.ts",
      "its need wire-delta-count conflicts with main in packages/agent/src/tokenizer.ts, packages/ai/src/providers/factory-droid.ts, packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with main in packages/agent/src/agent.ts, packages/ai/src/providers/factory-droid/gemini.ts, packages/ai/src/providers/google-gemini-cli.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/context-view.ts, packages/coding-agent/test/modes/context-view.test.ts, packages/tui/src/status-line/context-usage.ts, packages/tui/test/context-usage.test.ts"
@@ -91654,8 +91631,7 @@
     "blocked_by": [
      "#18771",
      "#17610",
-     "#18786",
-     "#18939"
+     "#18786"
     ],
     "needs": [
      "token-count-policy",
@@ -91743,7 +91719,6 @@
      "needs reset-account-optout (queued)",
      "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #18786 in packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with #18939 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in packages/coding-agent/src/session/agent-session.ts"
     ],
     "note": "",
@@ -91751,8 +91726,7 @@
     "paired": [],
     "blocked_by": [
      "#17610",
-     "#18786",
-     "#18939"
+     "#18786"
     ],
     "needs": [
      "#15133"
@@ -91795,7 +91769,6 @@
     "reasons": [
      "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #18786 in packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with #18939 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/tui/src/chat/compaction-summary-message.ts"
     ],
     "note": "",
@@ -91803,8 +91776,7 @@
     "paired": [],
     "blocked_by": [
      "#17610",
-     "#18786",
-     "#18939"
+     "#18786"
     ],
     "needs": [],
     "created": "2026-10-20T23:41:41Z"
