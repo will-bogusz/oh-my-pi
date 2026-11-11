@@ -73668,6 +73668,24 @@
    "added": "2026-11-11T02:06:11Z",
    "updated": "2026-11-11T02:06:23Z",
    "note": "Merges clean with atspi-unanswered-app 8800f10666 both orders (merged tree 778e58b0: 85 desktop::linux tests pass on goliath), #18783, #18784, x11-mpx-qt, atspi-text-first, atspi-value-readback. Conflicts textually with queued atspi-walk-reads (377c5f38), which already reads Text uncached in its own text_value: walk-reads rebases onto this and keeps one text_value. Value proxy left lazy on purpose (only Set; keeps set_value identical to main for the unanswered-app merge)."
+  },
+  {
+   "id": "covered-fill",
+   "branch": "will/covered-fill",
+   "title": "fix(coding-agent): refuse browser keys aimed at a field a modal dialog covers",
+   "area": "browser",
+   "priority": "P1",
+   "needs": [],
+   "base": "55251e34c26eeb5a31a5c86cedf243acd7e2cb23",
+   "body": "bodies/covered-fill.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/covered-fill",
+   "host": "MacBook-Pro",
+   "added": "2026-11-11T02:11:47Z",
+   "updated": "2026-11-11T02:11:47Z",
+   "note": ""
   }
  ],
  "watch": {
