@@ -74825,7 +74825,7 @@
    "host": "MacBook-Pro",
    "added": "2026-11-10T21:06:23Z",
    "updated": "2026-11-11T10:21:43Z",
-   "note": "",
+   "note": "2026-11-11T10:39:00Z: --user-harm on UserIntervened the hand-back returned early when the EWMH active-window property lagged core focus, leaving the user's typing focused in the target (6 Codex finding rounds)",
    "built": [
     {
      "with": "#17757",
