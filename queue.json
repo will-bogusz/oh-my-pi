@@ -82142,7 +82142,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-11T22:12:30Z",
+  "checked": "2026-11-11T22:43:08Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -82207,12 +82207,6 @@
     "merged_at": "2026-11-11T13:55:07Z",
     "findings": []
    },
-   "17831": {
-    "title": "fix(coding-agent): let background relay and app.cdp_url tabs take omp's clicks and keys",
-    "merge_commit": "03fcac6f9900cab2b31ec9924e8cbe31d2bf5def",
-    "merged_at": "2026-11-09T22:18:38Z",
-    "findings": []
-   },
    "18632": {
     "title": "fix(coding-agent): resolve Chromium role selectors through Chrome's accessibility tree",
     "merge_commit": "0c740e39652b83516103538b63225385a945bf6c",
@@ -82235,18 +82229,6 @@
       "addressed_by": 18658
      }
     ]
-   },
-   "18643": {
-    "title": "fix(natives): find GTK4 app elements on X11 and stop marking them disabled",
-    "merge_commit": "4f36ff1285d28accedb7cad1277acd2e2149b195",
-    "merged_at": "2026-11-09T22:30:45Z",
-    "findings": []
-   },
-   "18649": {
-    "title": "test(natives): unset LIBEI_SOCKET under the env lock in the Wayland no-portal test",
-    "merge_commit": "2e1c411e317f19222478a593e86e8c874b83e38b",
-    "merged_at": "2026-11-09T22:16:09Z",
-    "findings": []
    },
    "18657": {
     "title": "fix(browser-relay): keep a shared child frame attached when one connection turns auto-attach off",
