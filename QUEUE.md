@@ -4,7 +4,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 
 **Opening:** not paused
 **Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-11 09:30Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 0, conflict-held 21, stacked 15, held 20, parked 2, open PRs 41, queued since the last plan 8; merged 275, closed 30
+**Counts:** openable now 0, conflict-held 21, stacked 15, held 21, parked 2, open PRs 41, queued since the last plan 7; merged 275, closed 30
 
 ## Openable now (0)
 
@@ -56,7 +56,7 @@ none
 | browser-cursor | feat(browser): draw the acting agent's cursor in OMP-driven tabs | browser | P2 | 10h | agent-identity | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-cursor) |
 | desktop-cursor | feat(coding-agent,natives): show each agent's cursor where its computer input lands on macOS | coding-agent | P2 | 9h | agent-identity | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/desktop-cursor) |
 
-## Held (20)
+## Held (21)
 
 | id | title | area | priority | age | hold | branch |
 |---|---|---|---|---|---|---|
@@ -80,6 +80,7 @@ none
 | win-screen-locked | fix(natives,coding-agent): report unavailable Windows desktop sessions | computer | P2 | 0h | WindowsMined, 2026-11-11: live Windows trial pending; unhold when its body carries the result | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-screen-locked) |
 | win-setvalue-readback | fix(natives): verify Windows value writes and notify combo selections | computer | P1 | 0h | WindowsMined, 2026-11-11: live Windows trial pending; unhold when its body carries the result | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-setvalue-readback) |
 | win-menu-modal | fix(natives): confirm Windows menu commands that open modal dialogs | computer | P2 | 0h | WindowsMined, 2026-11-11: live Windows trial running; body gets the result | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-menu-modal) |
+| macos-layout-chords | fix(natives): press macOS key chords on the keys of the current keyboard layout | natives | P1 | 0h | MacMined, 2026-11-11: 30-trial French fix run pending on a queued bench-mac lease; body cells update after | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-layout-chords) |
 
 ## Parked (2)
 
@@ -134,7 +135,7 @@ none
 | [#18828](https://github.com/can1357/oh-my-pi/pull/18828) | x11-mpx-key-confirm | fix(natives): confirm every X11 virtual-keyboard key release, in order | computer | P1 | 5h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-mpx-key-confirm) |
 | [#18838](https://github.com/can1357/oh-my-pi/pull/18838) | print-pref | fix(coding-agent): stop a page calling window.print() from hanging the browser omp launches | browser | P2 | 3h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/print-pref) |
 
-## Queued since the last plan (8)
+## Queued since the last plan (7)
 
 | id | title | area | priority | age | branch |
 |---|---|---|---|---|---|
@@ -145,4 +146,3 @@ none
 | browser-main-wait-navigation | fix(browser): rearm main-world waits after navigation | browser | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/main-world-wait-navigation) |
 | macos-menu-miss-items | fix(natives): name the menu items on offer when a menu bar path misses | natives | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-menu-miss-items) |
 | macos-ax-cancel-before-send | fix(natives): send no macOS AX action once its run is cancelled | natives | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-ax-cancel-before-send) |
-| macos-layout-chords | fix(natives): press macOS key chords on the keys of the current keyboard layout | natives | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-layout-chords) |
