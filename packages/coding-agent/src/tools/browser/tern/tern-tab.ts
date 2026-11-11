@@ -98,6 +98,7 @@ import {
 	screenshotScope,
 	screenshotThreshold,
 } from "../screenshot";
+import { normalizeSelectOptions, type SelectOptionInput } from "../select-options";
 import {
 	type AriaSnapshotBaseline,
 	type AriaSnapshotDiffResult,
@@ -1485,11 +1486,12 @@ export class TernTab implements InProcessRunTab {
 		await this.#kit("scrollIntoView", [spec]);
 	}
 
-	/** Select `<select>` options by value (then label). */
-	async select(selector: string | TernSelector, ...values: string[]): Promise<string[]> {
+	/** Select `<select>` options by value, label, or zero-based index. */
+	async select(selector: string | TernSelector, ...values: SelectOptionInput[]): Promise<string[]> {
+		const choices = normalizeSelectOptions(values);
 		const spec = this.#spec(selector);
 		await this.#target(`tab.select(${describe(selector)})`, spec, "point", null);
-		return await this.#kit<string[]>("select", [spec, values.map(String)]);
+		return await this.#kit<string[]>("select", [spec, choices]);
 	}
 
 	/**
@@ -2934,7 +2936,7 @@ export class TernElementHandle {
 	}
 
 	/** Select options. */
-	async select(...values: string[]): Promise<string[]> {
+	async select(...values: SelectOptionInput[]): Promise<string[]> {
 		return await this.#tab.select(this.#spec, ...values);
 	}
 
