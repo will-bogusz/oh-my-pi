@@ -36407,7 +36407,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/click-place-release",
    "host": "MacBook-Pro",
    "added": "2026-10-20T20:11:57Z",
-   "updated": "2026-11-11T06:41:19Z",
+   "updated": "2026-11-11T10:16:45Z",
    "note": "",
    "built": [
     {
@@ -36440,7 +36440,17 @@
    ],
    "opened": "2026-10-20T20:20:44Z",
    "readied": "2026-10-20T20:21:05Z",
-   "advanced": "2026-11-11T06:41:19Z"
+   "advanced": "2026-11-11T06:41:19Z",
+   "design_checks": [
+    {
+     "pr": 16553,
+     "rounds": 15,
+     "at": "2026-11-11T10:16:45Z",
+     "verdict": "replace",
+     "note": "DesignChecks: replace the placer/AX hit-test with event fields at main's annotated session tap (field 40 target pid, field 91 window owner on release, event timestamp); 16 of 18 findings impossible. Fields matched AX 67/67 on a macOS VM, 0.09-2.92 ms after the event; replacement is an unbuilt 20-line sketch with four open points (own-menu-bar drag, hardware-only filter vs remote tools, button-up counting, pre-start clicks). No more pushes on the placer; a fix lane builds the candidate and runs the scripted guard A/B first.",
+     "ref": "/Users/viathebrink/tmp/oh-my-pi/DesignChecks/report-16553.md"
+    }
+   ]
   },
   {
    "id": "eval-py-await-tool",
