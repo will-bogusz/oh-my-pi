@@ -88358,6 +88358,11 @@
     "sha": "70ee10aa89d827d2749437bb8564be6bd6fb48b4",
     "at": "2026-11-11T16:54:27Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "70ee10aa89d827d2749437bb8564be6bd6fb48b4",
+    "at": "2026-11-11T16:57:32Z",
+    "host": "goliath"
    }
   },
   "c1cda8f532e6f4839a27496056127d4e7a79dc0e": {
