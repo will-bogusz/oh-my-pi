@@ -212,6 +212,7 @@ impl Keymap {
 
 	pub(super) fn bind_text(&mut self, conn: Arc<RustConnection>, text: &str) -> CoreResult<TextMapping> {
 		let mut bindings = self.text_bindings(text, None)?;
+		bindings.clear();
 		let core = if !bindings.is_empty() && self.core_mapping && self.device.is_some() {
 			Some(Self::core(&conn)?)
 		} else {
