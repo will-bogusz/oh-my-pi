@@ -81723,7 +81723,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-11T19:39:00Z",
+  "checked": "2026-11-11T20:09:49Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -81758,6 +81758,7 @@
    18776,
    18783,
    18784,
+   18786,
    18789,
    18825,
    18828,
@@ -88917,8 +88918,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-11T19:43:42.903161Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-11T20:09:50.544912Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 1,
@@ -90464,7 +90465,7 @@
      "conflicts with #18751 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18924 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18776 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with #18786 in docs/tools/browser.md",
+     "conflicts with #18786 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts",
      "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts",
      "its need r2/page-waiting conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-detach.test.ts"
@@ -91024,6 +91025,25 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T10:13:40Z"
+   },
+   {
+    "id": "browser-toggle-prefix",
+    "label": "browser-toggle-prefix",
+    "number": null,
+    "state": "queued",
+    "area": "browser",
+    "priority": "P3",
+    "title": "fix(coding-agent): rebuild the system prompt before readers see a browser toggle",
+    "action": "wait",
+    "reasons": [
+     "conflicts with main in (branch missing on the fork)"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-11T20:07:49Z"
    },
    {
     "id": "encoded-prefix-count",
