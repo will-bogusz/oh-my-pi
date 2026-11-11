@@ -6,6 +6,8 @@
 
 use std::time::Duration;
 
+use super::delivery;
+
 /// Characters of field text a message quotes.
 const QUOTED_CHARS: usize = 120;
 
@@ -103,6 +105,67 @@ fn shows(typed: &str, before: &str, after: &str) -> bool {
 	after == typed || after.matches(typed).count() > before.matches(typed).count()
 }
 
+/// Pieces in a row after which the field's text did not change at all
+/// before pacing stops: the keys go somewhere else.
+const QUIET_PIECES: u8 = 2;
+
+/// Longest one UI Automation call reading a field back may take: the
+/// connection and transaction timeouts of the client typing reads through,
+/// so a provider that does not answer (a hung app, Settings while it digests
+/// a burst of keys) fails the read instead of holding the call. One read is
+/// one call for a `ValuePattern` and two for a `TextPattern`.
+pub const READ_TIMEOUT: Duration = Duration::from_millis(250);
+
+/// How long typing waits on the field it reads back.
+#[derive(Clone, Copy, Debug)]
+pub struct Waits {
+	/// Longest wait for a field to show one piece of typed text.
+	pub run:         Duration,
+	/// A field whose text has not changed for this long after a piece has
+	/// taken what it will of it.
+	pub run_still:   Duration,
+	/// Time between reads of a field that does not show a piece yet.
+	pub run_poll:    Duration,
+	/// Longest a typing call paces itself before sending the rest unpaced,
+	/// counted from its first key.
+	pub pace_budget: Duration,
+	/// Longest wait after the last key for the field to show the text.
+	pub check:       Duration,
+	/// The check ends once the field's text has not changed for this long.
+	pub check_still: Duration,
+	/// Time between reads of a field that does not show the text yet.
+	pub check_poll:  Duration,
+}
+
+impl Waits {
+	/// The waits of takeover typing. Windows 11 Notepad shows 2,000 paced
+	/// characters in about 8 s; a field that redraws more slowly than that
+	/// gets the rest unpaced.
+	pub const TYPING: Self = Self {
+		run:         Duration::from_secs(1),
+		run_still:   Duration::from_millis(60),
+		run_poll:    Duration::from_millis(2),
+		pace_budget: Duration::from_secs(30),
+		check:       Duration::from_secs(1),
+		check_still: Duration::from_millis(300),
+		check_poll:  Duration::from_millis(25),
+	};
+}
+
+/// A field typed text is read back from.
+pub trait Field {
+	/// Its text now; `None` when the read failed, which a provider that does
+	/// not answer within [`READ_TIMEOUT`] makes it.
+	fn read(&self) -> Option<String>;
+}
+
+/// The time typing waits by.
+pub trait Clock {
+	/// Time since a fixed start.
+	fn now(&self) -> Duration;
+	fn sleep(&self, duration: Duration);
+}
+
 /// How takeover typing paces itself by reading the field back.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Pace {
@@ -112,30 +175,22 @@ pub enum Pace {
 	/// the field came up short on a word. A word shown whole this way goes
 	/// back to [`Pace::Words`].
 	Characters,
-	/// No waits: no field to read, or one whose text stopped changing.
+	/// No waits: no field to read, one whose text stopped changing or could
+	/// not be read, or past the pacing budget.
 	Off,
 }
-
-/// Pieces in a row after which the field's text did not change at all
-/// before pacing stops: the keys go somewhere else.
-const QUIET_PIECES: u8 = 2;
-/// Longest a typing call waits on the field before sending the rest
-/// unpaced: a field that redraws slowly but keeps every key (Settings
-/// search took 100 s for 2,000 characters a word at a time) must not run
-/// the call into its time limit. Windows 11 Notepad shows 2,000 paced
-/// characters in about 8 s.
-pub const PACE_BUDGET: Duration = Duration::from_secs(30);
 
 /// The pace of one typing call.
 #[derive(Debug)]
 pub struct Pacer {
 	pub pace: Pace,
 	quiet:    u8,
+	budget:   Duration,
 }
 
 impl Pacer {
-	pub const fn new(readable: bool) -> Self {
-		Self { pace: if readable { Pace::Words } else { Pace::Off }, quiet: 0 }
+	pub const fn new(readable: bool, budget: Duration) -> Self {
+		Self { pace: if readable { Pace::Words } else { Pace::Off }, quiet: 0, budget }
 	}
 
 	/// Updates the pace after a piece went out: `progress` is how the field
@@ -143,8 +198,7 @@ impl Pacer {
 	/// the field's text changed at all while waiting for it, `run_end`
 	/// whether the piece ended its word. A field that reads some other way
 	/// (autocorrect, a suggestion) keeps its pace: the wait for it to stop
-	/// changing still paces it. Past [`PACE_BUDGET`] of `paced` time pacing
-	/// stops.
+	/// changing still paces it. Past the budget of `paced` time pacing stops.
 	pub fn after(
 		&mut self,
 		progress: Option<Progress>,
@@ -152,7 +206,7 @@ impl Pacer {
 		run_end: bool,
 		paced: Duration,
 	) {
-		let Some(progress) = progress.filter(|_| paced < PACE_BUDGET) else {
+		let Some(progress) = progress.filter(|_| paced < self.budget) else {
 			self.pace = Pace::Off;
 			return;
 		};
@@ -170,6 +224,152 @@ impl Pacer {
 			(Pace::Characters, Progress::Shown) if run_end => Pace::Words,
 			(pace, _) => pace,
 		};
+	}
+}
+
+/// Sends `text` one [`delivery::word_runs`] run per `send` call. With
+/// `field`, which read `before` when typing began, each piece waits for the
+/// field to show it before the next goes ([`Pacer`]). `check` runs between
+/// reads and its error stops typing. Returns the field's text when last
+/// read, if a read while pacing succeeded.
+///
+/// Pacing adds at most `waits.pace_budget` plus one read
+/// (2 × [`READ_TIMEOUT`]) to the call.
+pub fn send_paced<F: Field, E>(
+	text: &str,
+	field: Option<(&F, &str)>,
+	clock: &impl Clock,
+	waits: &Waits,
+	mut send: impl FnMut(&str) -> Result<(), E>,
+	mut check: impl FnMut() -> Result<(), E>,
+) -> Result<Option<String>, E> {
+	let mut pacer = Pacer::new(field.is_some(), waits.pace_budget);
+	let start = clock.now();
+	let mut shown = field.map(|(_, before)| before.to_string());
+	let mut last = None;
+	for run in delivery::word_runs(text) {
+		let mut rest = run;
+		while !rest.is_empty() {
+			let piece = if pacer.pace == Pace::Characters {
+				xutf::graphemes_str(rest).next().unwrap_or(rest)
+			} else {
+				rest
+			};
+			rest = &rest[piece.len()..];
+			send(piece)?;
+			if let (Some((field, _)), Some(before)) = (field, shown.as_mut())
+				&& pacer.pace != Pace::Off
+			{
+				let (progress, changed) = await_piece(field, clock, waits, piece, before, &mut check)?;
+				if progress.is_some() {
+					last = Some(before.clone());
+				}
+				pacer.after(progress, changed, rest.is_empty(), clock.now().saturating_sub(start));
+			}
+		}
+	}
+	Ok(last)
+}
+
+/// Waits until `field`, which read `before` when `piece` was sent, shows
+/// it, stops changing short of it, or `waits.run` passes; `before` becomes
+/// the last read. Returns how the field shows the piece (`None`: it could
+/// not be read) and whether its text changed. No read starts after
+/// `waits.run`, so the wait ends within it plus one read.
+fn await_piece<E>(
+	field: &impl Field,
+	clock: &impl Clock,
+	waits: &Waits,
+	piece: &str,
+	before: &mut String,
+	check: &mut impl FnMut() -> Result<(), E>,
+) -> Result<(Option<Progress>, bool), E> {
+	let start = clock.now();
+	let mut changed = start;
+	let mut last: Option<String> = None;
+	loop {
+		let Some(now) = field.read() else {
+			return Ok((None, false));
+		};
+		let progress = progress(piece, before, &now);
+		let still = last.as_deref() == Some(now.as_str());
+		if !still {
+			changed = clock.now();
+		}
+		if progress == Progress::Shown
+			|| (still && clock.now().saturating_sub(changed) >= waits.run_still)
+			|| clock.now().saturating_sub(start) >= waits.run
+		{
+			let moved = now != *before;
+			*before = now;
+			return Ok((Some(progress), moved));
+		}
+		last = Some(now);
+		check()?;
+		clock.sleep(waits.run_poll);
+	}
+}
+
+/// Checks that `field` (what messages call it), which read `before` when
+/// typing began and `last` when last read while pacing, gained `typed`.
+/// Reads until the field shows the text, its text stops changing for
+/// `waits.check_still`, `waits.check` passes, a read fails, or `cancelled`
+/// says so; no read starts after `waits.check`, so the check ends within it
+/// plus one read (2 × [`READ_TIMEOUT`]). The verdict is that of the last
+/// read, and a failed read leaves the call unconfirmed, saying what the
+/// field last read.
+pub fn check_typed(
+	field: &impl Field,
+	name: &str,
+	typed: &str,
+	before: &str,
+	last: Option<String>,
+	clock: &impl Clock,
+	waits: &Waits,
+	mut cancelled: impl FnMut() -> bool,
+) -> Verdict {
+	let start = clock.now();
+	let mut seen = last;
+	let mut changed = start;
+	loop {
+		let Some(now) = field.read() else {
+			let last = seen.map(|seen| match verdict(typed, before, &seen, name) {
+				Verdict::Confirmed => "it showed the text".to_string(),
+				Verdict::Dropped { arrived } => dropped_message(typed, name, &arrived),
+				Verdict::Unconfirmed(reason) => reason,
+			});
+			return Verdict::Unconfirmed(match last {
+				Some(last) => format!(
+					"reading {name} back failed or took longer than {} ms; when last read, {last}",
+					READ_TIMEOUT.as_millis()
+				),
+				None => format!(
+					"reading {name} back failed or took longer than {} ms",
+					READ_TIMEOUT.as_millis()
+				),
+			});
+		};
+		let result = verdict(typed, before, &now, name);
+		if result == Verdict::Confirmed {
+			return result;
+		}
+		if seen.as_deref() != Some(now.as_str()) {
+			changed = clock.now();
+			seen = Some(now);
+		}
+		let at = clock.now();
+		if at.saturating_sub(start) >= waits.check || at.saturating_sub(changed) >= waits.check_still
+		{
+			return result;
+		}
+		// The text is out, so a cancel ends the wait without failing the
+		// call.
+		if cancelled() {
+			return Verdict::Unconfirmed(format!(
+				"the call was cancelled before {name} showed the text"
+			));
+		}
+		clock.sleep(waits.check_poll);
 	}
 }
 
@@ -231,6 +431,11 @@ fn line_breaks(text: &str) -> String {
 
 #[cfg(test)]
 mod tests {
+	use std::{
+		cell::{Cell, RefCell},
+		fmt::Write as _,
+	};
+
 	use super::*;
 
 	const FIELD: &str = "the field";
@@ -329,7 +534,8 @@ mod tests {
 
 	#[test]
 	fn pacing_slows_on_a_short_word_and_stops_when_the_field_goes_quiet() {
-		let mut pacer = Pacer::new(true);
+		let budget = Waits::TYPING.pace_budget;
+		let mut pacer = Pacer::new(true, budget);
 		pacer.after(Some(Progress::Shown), true, true, Duration::ZERO);
 		assert_eq!(pacer.pace, Pace::Words);
 		// Autocorrect reads otherwise but the field changed: keep pacing.
@@ -347,13 +553,199 @@ mod tests {
 		pacer.after(Some(Progress::Short), false, false, Duration::ZERO);
 		assert_eq!(pacer.pace, Pace::Off);
 
-		let mut pacer = Pacer::new(true);
+		let mut pacer = Pacer::new(true, budget);
 		pacer.after(None, true, true, Duration::ZERO);
 		assert_eq!(pacer.pace, Pace::Off);
-		assert_eq!(Pacer::new(false).pace, Pace::Off);
+		assert_eq!(Pacer::new(false, budget).pace, Pace::Off);
 
-		let mut pacer = Pacer::new(true);
-		pacer.after(Some(Progress::Shown), true, true, PACE_BUDGET);
+		let mut pacer = Pacer::new(true, budget);
+		pacer.after(Some(Progress::Shown), true, true, budget);
 		assert_eq!(pacer.pace, Pace::Off);
+	}
+
+	/// Time that passes only when the code under test sleeps or a fake field
+	/// takes time to answer.
+	#[derive(Default)]
+	struct FakeClock(Cell<Duration>);
+
+	impl Clock for FakeClock {
+		fn now(&self) -> Duration {
+			self.0.get()
+		}
+
+		fn sleep(&self, duration: Duration) {
+			self.0.set(self.0.get() + duration);
+		}
+	}
+
+	/// A field whose provider answers after `cost` with `show` applied to the
+	/// text sent so far and the time, or not at all (`None`).
+	struct FakeField<'a> {
+		clock: &'a FakeClock,
+		sent:  RefCell<String>,
+		cost:  Duration,
+		show:  fn(&str, Duration) -> Option<String>,
+	}
+
+	impl<'a> FakeField<'a> {
+		fn new(
+			clock: &'a FakeClock,
+			cost: Duration,
+			show: fn(&str, Duration) -> Option<String>,
+		) -> Self {
+			Self { clock, sent: RefCell::default(), cost, show }
+		}
+
+		/// Types `typed` through [`send_paced`] and [`check_typed`]; returns
+		/// the verdict and the time both took.
+		fn type_text(&self, typed: &str) -> (Verdict, Duration) {
+			let start = self.clock.now();
+			let last = send_paced(
+				typed,
+				Some((self, "")),
+				self.clock,
+				&Waits::TYPING,
+				|piece| {
+					self.sent.borrow_mut().push_str(piece);
+					Ok::<_, ()>(())
+				},
+				|| Ok(()),
+			)
+			.unwrap();
+			let verdict =
+				check_typed(self, FIELD, typed, "", last, self.clock, &Waits::TYPING, || false);
+			(verdict, self.clock.now().saturating_sub(start))
+		}
+	}
+
+	impl Field for FakeField<'_> {
+		fn read(&self) -> Option<String> {
+			self.clock.sleep(self.cost);
+			(self.show)(&self.sent.borrow(), self.clock.now())
+		}
+	}
+
+	fn words(chars: usize) -> String {
+		let mut text = String::new();
+		for word in 0.. {
+			if text.len() >= chars {
+				break;
+			}
+			let _ = write!(text, "t{word:03}-ab ");
+		}
+		text.truncate(chars);
+		text
+	}
+
+	/// Longest one read of a `TextPattern` field can take: two calls.
+	const READ: Duration = Duration::from_millis(2 * READ_TIMEOUT.as_millis() as u64);
+
+	#[test]
+	fn a_provider_that_never_answers_ends_typing_within_two_reads() {
+		let clock = FakeClock::default();
+		let field = FakeField::new(&clock, READ, |_, _| None);
+		let (verdict, took) = field.type_text(&words(2000));
+		// One read stops pacing and one ends the check.
+		assert_eq!(took, 2 * READ);
+		let Verdict::Unconfirmed(reason) = verdict else {
+			panic!("expected unconfirmed: {verdict:?}");
+		};
+		assert_eq!(reason, "reading the field back failed or took longer than 250 ms");
+		assert_eq!(field.sent.borrow().as_str(), words(2000));
+	}
+
+	#[test]
+	fn a_provider_that_stops_answering_reports_what_it_last_read() {
+		let clock = FakeClock::default();
+		// Answers while it shows fewer than 100 characters, then hangs.
+		let field = FakeField::new(&clock, Duration::from_millis(1), |sent, _| {
+			(sent.len() < 100).then(|| sent.to_string())
+		});
+		let (verdict, took) = field.type_text(&words(240));
+		let Verdict::Unconfirmed(reason) = verdict else {
+			panic!("expected unconfirmed: {verdict:?}");
+		};
+		assert!(
+			reason.starts_with(
+				"reading the field back failed or took longer than 250 ms; when last read, the field \
+				 gained \"t000-ab"
+			),
+			"{reason}"
+		);
+		assert!(reason.contains("rather than the typed text (240 characters)"), "{reason}");
+		assert!(took < Duration::from_millis(500), "{took:?}");
+	}
+
+	#[test]
+	fn a_slow_provider_is_held_to_the_pacing_budget_and_the_check() {
+		let clock = FakeClock::default();
+		// Every read takes just under the limit, and the field shows one
+		// character per 20 ms: it keeps every key, too slowly to finish.
+		let field =
+			FakeField::new(&clock, READ.saturating_sub(Duration::from_millis(1)), |sent, now| {
+				Some(sent.chars().take((now.as_millis() / 20) as usize).collect())
+			});
+		let (verdict, took) = field.type_text(&words(2000));
+		assert!(matches!(verdict, Verdict::Unconfirmed(_)), "{verdict:?}");
+		let waits = Waits::TYPING;
+		// Pacing ran into its budget, and the check into its limit.
+		assert!(took >= waits.pace_budget + waits.check, "{took:?}");
+		assert!(took <= waits.pace_budget + waits.check + 2 * READ, "{took:?}");
+	}
+
+	#[test]
+	fn a_field_that_stops_advancing_ends_the_check_once_still() {
+		let clock = FakeClock::default();
+		// Keeps the first word and nothing after it.
+		let field = FakeField::new(&clock, Duration::from_millis(1), |sent, _| {
+			Some(sent.chars().take(8).collect())
+		});
+		let (verdict, took) = field.type_text(&words(240));
+		let Verdict::Unconfirmed(reason) = verdict else {
+			panic!("expected unconfirmed: {verdict:?}");
+		};
+		assert!(
+			reason.contains(
+				"gained \"t000-ab \" (8 characters) rather than the typed text (240 characters)"
+			),
+			"{reason}"
+		);
+		// Two quiet pieces stop pacing; the check ends once the text has been
+		// still for `check_still`.
+		assert!(took < Duration::from_millis(600), "{took:?}");
+	}
+
+	#[test]
+	fn a_field_that_trims_a_trailing_space_is_never_confirmed() {
+		let clock = FakeClock::default();
+		// Settings' search box drops a trailing space.
+		let field = FakeField::new(&clock, Duration::from_millis(1), |sent, _| {
+			Some(sent.trim_end().to_string())
+		});
+		let typed = words(240);
+		assert!(typed.ends_with(' '));
+		let (verdict, took) = field.type_text(&typed);
+		let Verdict::Unconfirmed(reason) = verdict else {
+			panic!("expected unconfirmed: {verdict:?}");
+		};
+		assert!(
+			reason.contains("(239 characters) rather than the typed text (240 characters)"),
+			"{reason}"
+		);
+		let waits = Waits::TYPING;
+		assert!(took <= waits.pace_budget + waits.check + 2 * READ, "{took:?}");
+	}
+
+	#[test]
+	fn a_field_that_keeps_up_is_confirmed_at_the_first_check() {
+		let clock = FakeClock::default();
+		let field =
+			FakeField::new(&clock, Duration::from_millis(1), |sent, _| Some(sent.to_string()));
+		let typed = words(240);
+		let (verdict, took) = field.type_text(&typed);
+		assert_eq!(verdict, Verdict::Confirmed);
+		// One read per word and one to check.
+		let reads = typed.split_inclusive(' ').count() as u32 + 1;
+		assert_eq!(took, reads * Duration::from_millis(1));
 	}
 }

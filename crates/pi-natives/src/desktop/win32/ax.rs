@@ -9,6 +9,13 @@ use uiautomation::{
 	types::{ControlType, ExpandCollapseState, Handle, Point, UIProperty},
 	variants::Value,
 };
+use windows::{
+	Win32::{
+		System::Com::{CLSCTX_INPROC_SERVER, COINIT_MULTITHREADED, CoCreateInstance, CoInitializeEx},
+		UI::Accessibility::{CUIAutomation8, IUIAutomation, IUIAutomation2},
+	},
+	core::Interface,
+};
 use windows_sys::Win32::{
 	Foundation::{HWND, POINT},
 	UI::WindowsAndMessaging::{GetDesktopWindow, IsWindow, WindowFromPoint},
@@ -21,6 +28,7 @@ use super::{
 		error::{CoreResult, DesktopError},
 		types::DesktopWindow,
 	},
+	readback::{self, Field as _},
 	window,
 };
 
@@ -169,20 +177,48 @@ impl Win32Ax {
 		Ok(false)
 	}
 
+	/// A UI Automation client whose calls fail with `UIA_E_TIMEOUT` instead
+	/// of waiting when a provider does not answer within
+	/// [`readback::READ_TIMEOUT`]; elements and patterns it returns keep the
+	/// limit. Only `IUIAutomation2` (`CUIAutomation8`) has the limits, which
+	/// otherwise are 2 s to connect and 20 s per call.
+	fn bounded_automation(&mut self) -> CoreResult<UIAutomation> {
+		if !self.automation_initialized {
+			// SAFETY: initializes COM for this thread as `UIAutomation::new`
+			// does for `automation`.
+			unsafe { CoInitializeEx(None, COINIT_MULTITHREADED) }
+				.ok()
+				.map_err(ax_error)?;
+			self.automation_initialized = true;
+		}
+		let limit = u32::try_from(readback::READ_TIMEOUT.as_millis()).unwrap_or(u32::MAX);
+		// SAFETY: COM is initialized on this thread; the result is checked.
+		let automation: IUIAutomation2 =
+			unsafe { CoCreateInstance(&CUIAutomation8, None, CLSCTX_INPROC_SERVER) }
+				.map_err(ax_error)?;
+		// SAFETY: plain property setters on a live interface.
+		unsafe {
+			automation.SetConnectionTimeout(limit).map_err(ax_error)?;
+			automation.SetTransactionTimeout(limit).map_err(ax_error)?;
+		}
+		Ok(UIAutomation::from(automation.cast::<IUIAutomation>().map_err(ax_error)?))
+	}
+
 	/// The element holding keyboard focus, to read typed text back from, named
 	/// `window {id}'s focused <control type>` when `id` gives the target
 	/// window, else `the focused <control type>`; with `process`, the element
 	/// must belong to it. `Err` says why its text cannot be read back: focus
 	/// in another process, not an editable edit or document, a password field,
-	/// no `ValuePattern` or `TextPattern`, or more text than is worth reading
-	/// twice.
+	/// no `ValuePattern` or `TextPattern`, more text than is worth reading
+	/// twice, or a provider that does not answer within
+	/// [`readback::READ_TIMEOUT`].
 	pub(super) fn typing_field(
 		&mut self,
 		id: Option<&str>,
 		process: Option<u32>,
 	) -> Result<TypingField, String> {
 		let element = self
-			.automation()
+			.bounded_automation()
 			.and_then(|automation| automation.get_focused_element().map_err(ax_error))
 			.map_err(|error| format!("no element reports keyboard focus ({})", error.message))?;
 		let kind = element
@@ -209,15 +245,24 @@ impl Win32Ax {
 			},
 			Err(_) => return Err(format!("{name} does not say whether it is a password field")),
 		}
-		if let Ok(pattern) = element.get_pattern::<UIValuePattern>()
-			&& pattern.is_readonly().unwrap_or(false)
-		{
-			return Err(format!("{name} is read-only"));
-		}
-		let mut field = TypingField { element, name, before: String::new() };
-		field.before = field
-			.read()
-			.ok_or_else(|| format!("{} does not expose its text to UI Automation", field.name))?;
+		let source = if let Ok(pattern) = element.get_pattern::<UIValuePattern>() {
+			if pattern.is_readonly().unwrap_or(false) {
+				return Err(format!("{name} is read-only"));
+			}
+			TextSource::Value(pattern)
+		} else if let Ok(pattern) = element.get_pattern::<UITextPattern>() {
+			TextSource::Document(pattern)
+		} else {
+			return Err(format!("{name} does not expose its text to UI Automation"));
+		};
+		let mut field = TypingField { source, name, before: String::new() };
+		field.before = field.read().ok_or_else(|| {
+			format!(
+				"{} did not give its text to UI Automation within {} ms",
+				field.name,
+				readback::READ_TIMEOUT.as_millis()
+			)
+		})?;
 		if field.before.len() > MAX_READBACK_BYTES {
 			return Err(format!("{} holds too much text to read back", field.name));
 		}
@@ -229,29 +274,32 @@ impl Win32Ax {
 /// across processes.
 const MAX_READBACK_BYTES: usize = 256 * 1024;
 
+/// Where a typing field's text is read: its `ValuePattern` (single-line
+/// fields, web inputs, Windows 11 Notepad) or else its `TextPattern`
+/// (multi-line `EDIT` and `RichEdit` controls offer only that).
+enum TextSource {
+	Value(UIValuePattern),
+	Document(UITextPattern),
+}
+
 /// A focused element whose text typing is checked against.
 pub(super) struct TypingField {
-	element:    UIElement,
+	source:     TextSource,
 	/// What messages call it.
 	pub name:   String,
 	/// Its text before typing.
 	pub before: String,
 }
 
-impl TypingField {
-	/// Its text now, from its `ValuePattern` (single-line fields, web inputs,
-	/// Windows 11 Notepad) or else its `TextPattern` (multi-line `EDIT` and
-	/// `RichEdit` controls offer only that); `None` when neither reads.
-	pub(super) fn read(&self) -> Option<String> {
-		if let Ok(pattern) = self.element.get_pattern::<UIValuePattern>() {
-			return pattern.get_value().ok();
+impl readback::Field for TypingField {
+	fn read(&self) -> Option<String> {
+		match &self.source {
+			TextSource::Value(pattern) => pattern.get_value().ok(),
+			TextSource::Document(pattern) => pattern
+				.get_document_range()
+				.and_then(|range| range.get_text(-1))
+				.ok(),
 		}
-		self
-			.element
-			.get_pattern::<UITextPattern>()
-			.and_then(|pattern| pattern.get_document_range())
-			.and_then(|range| range.get_text(-1))
-			.ok()
 	}
 }
 
