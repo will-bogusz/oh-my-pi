@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 12:58Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11 12:59Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-11-11 11:54Z on MacBook-Pro; groups below are from it, states from the manifest)
@@ -13,7 +13,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-11
 | win-menu-modal | fix(natives): confirm Windows menu commands that open modal dialogs | computer | P2 | 3h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-menu-modal) |
 | macos-press-disabled | fix(natives): refuse a macOS press on a disabled element | natives | P1 | 3h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-press-disabled) |
 | macos-menu-miss-items | fix(natives): name the menu items on offer when a menu bar path misses | natives | P2 | 3h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-menu-miss-items) |
-| macos-ax-cancel-before-send | fix(natives): send no macOS AX action once its run is cancelled | natives | P2 | 2h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-ax-cancel-before-send) |
+| macos-ax-cancel-before-send | fix(natives): send no macOS AX action once its run is cancelled | natives | P2 | 3h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-ax-cancel-before-send) |
 | wait-ladder-context | feat(wait): reduce empty checks in large conversations | coding-agent | P2 | 2h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wait-ladder-context) |
 | win-takeover-focus | fix(natives): hand the foreground back after Windows element takeover input | computer | P1 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-takeover-focus) |
 
