@@ -84067,12 +84067,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-11T10:52:06.859824Z",
+  "at": "2026-11-11T11:54:19.721826Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 2,
+   "left": 6
   },
   "rows": [
    {
@@ -84210,6 +84210,40 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T06:22:49Z"
+   },
+   {
+    "id": "browser-main-wait-globals",
+    "label": "#18883",
+    "number": 18883,
+    "state": "open",
+    "area": "browser",
+    "priority": "P0",
+    "title": "fix(browser): keep main-world waits from exposing query bindings",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-11T11:33:30Z"
+   },
+   {
+    "id": "browser-main-wait-navigation",
+    "label": "#18884",
+    "number": 18884,
+    "state": "open",
+    "area": "browser",
+    "priority": "P0",
+    "title": "fix(browser): rearm main-world waits after navigation",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-11T11:39:57Z"
    },
    {
     "id": "read-after-bash-revalidate",
@@ -84701,8 +84735,10 @@
     "area": "natives",
     "priority": "P2",
     "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in MODULE.bazel.lock"
+    ],
     "note": "accepted pair with #18353; accepted pair with #18783",
     "over": [],
     "paired": [
@@ -84812,7 +84848,8 @@
     "reasons": [
      "conflicts with #18823 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18353 in MODULE.bazel.lock, crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
-     "conflicts with #18013 in MODULE.bazel.lock"
+     "conflicts with #18013 in MODULE.bazel.lock",
+     "conflicts with main in MODULE.bazel.lock"
     ],
     "note": "",
     "over": [],
@@ -84878,6 +84915,7 @@
      "conflicts with #18353 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #18013 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/libei.rs",
      "conflicts with ax-ref-read-as in crates/pi-natives/src/desktop/ax.rs",
+     "its need atspi-unanswered-app conflicts with main in MODULE.bazel.lock",
      "conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
@@ -84894,6 +84932,27 @@
      "atspi-unanswered-app"
     ],
     "created": "2026-11-03T09:05:24Z"
+   },
+   {
+    "id": "ax-row-action",
+    "label": "ax-row-action",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): follow rebuilt macOS table rows without selecting a neighbour",
+    "action": "wait",
+    "reasons": [
+     "needs ax-ref-read-as (queued)"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [
+     "ax-ref-read-as"
+    ],
+    "created": "2026-11-11T11:44:46Z"
    },
    {
     "id": "browser-click-frame-removed",
@@ -84915,23 +84974,6 @@
     ],
     "needs": [],
     "created": "2026-11-11T00:14:54Z"
-   },
-   {
-    "id": "browser-main-wait-globals",
-    "label": "browser-main-wait-globals",
-    "number": null,
-    "state": "queued",
-    "area": "browser",
-    "priority": "P1",
-    "title": "fix(browser): keep main-world waits from exposing query bindings",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-11T09:58:00Z"
    },
    {
     "id": "computer-run-failure-output",
@@ -85088,6 +85130,23 @@
     "created": "2026-11-11T09:34:38Z"
    },
    {
+    "id": "win-takeover-focus",
+    "label": "win-takeover-focus",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): hand the foreground back after Windows element takeover input",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-11T11:46:35Z"
+   },
+   {
     "id": "win-target-layout",
     "label": "win-target-layout",
     "number": null,
@@ -85098,12 +85157,15 @@
     "action": "held",
     "reasons": [
      "held: WindowsMined, 2026-11-11: live Windows trial pending; unhold when its body carries the result",
-     "needs win-posted-modifiers (queued)"
+     "needs win-posted-modifiers (queued)",
+     "conflicts with win-takeover-focus in crates/pi-natives/src/desktop/win32/input.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "win-takeover-focus"
+    ],
     "needs": [
      "win-posted-modifiers"
     ],
@@ -85298,7 +85360,8 @@
     "reasons": [
      "held: Main, 2026-11-11: opens after atspi-unanswered-app (P0) so it does not block it",
      "needs atspi-unanswered-app (queued)",
-     "conflicts with #18823 in crates/pi-natives/src/desktop/linux/ax.rs"
+     "conflicts with #18823 in crates/pi-natives/src/desktop/linux/ax.rs",
+     "its need atspi-unanswered-app conflicts with main in MODULE.bazel.lock"
     ],
     "note": "",
     "over": [],
@@ -85310,23 +85373,6 @@
      "atspi-unanswered-app"
     ],
     "created": "2026-11-11T02:53:57Z"
-   },
-   {
-    "id": "browser-main-wait-navigation",
-    "label": "browser-main-wait-navigation",
-    "number": null,
-    "state": "queued",
-    "area": "browser",
-    "priority": "P2",
-    "title": "fix(browser): rearm main-world waits after navigation",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-11T09:58:14Z"
    },
    {
     "id": "browser-wait-text-regexp",
@@ -85426,7 +85472,7 @@
     "area": "natives",
     "priority": "P2",
     "title": "fix(natives): send no macOS AX action once its run is cancelled",
-    "action": "open",
+    "action": "next-hour",
     "reasons": [],
     "note": "",
     "over": [],
@@ -86131,6 +86177,7 @@
     "action": "held",
     "reasons": [
      "held: Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance",
+     "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #18786 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in docs/auth-broker-gateway.md, packages/ai/src/auth-broker/discover.ts, packages/ai/src/auth/types.ts, packages/ai/test/auth-storage-codex-selection.test.ts, packages/coding-agent/src/cli/usage-cli.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/claude-auto-reset.ts, packages/coding-agent/src/session/codex-auto-reset.ts, packages/coding-agent/test/claude-auto-reset-integration.test.ts, packages/coding-agent/test/claude-auto-reset.test.ts"
     ],
@@ -86138,6 +86185,7 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#17610",
      "#18786"
     ],
     "needs": [],
@@ -86172,6 +86220,7 @@
     "reasons": [
      "needs token-count-policy (queued), wire-delta-count (queued)",
      "conflicts with #18771 in packages/ai/src/providers/factory-droid.ts",
+     "conflicts with #17610 in packages/ai/src/providers/factory-droid.ts",
      "its need token-count-policy conflicts with main in packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/test/context-fits-model.test.ts",
      "its need wire-delta-count conflicts with main in packages/agent/src/tokenizer.ts, packages/ai/src/providers/factory-droid.ts, packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with main in packages/agent/src/agent.ts, packages/ai/src/providers/factory-droid/gemini.ts"
@@ -86180,7 +86229,8 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18771"
+     "#18771",
+     "#17610"
     ],
     "needs": [
      "token-count-policy",
@@ -86218,7 +86268,7 @@
     "action": "wait",
     "reasons": [
      "conflicts with #18771 in packages/ai/src/providers/factory-droid.ts",
-     "conflicts with #17610 in packages/ai/src/providers/transform-messages.ts",
+     "conflicts with #17610 in packages/ai/src/providers/factory-droid.ts, packages/ai/src/providers/transform-messages.ts",
      "conflicts with main in packages/agent/src/tokenizer.ts, packages/ai/src/providers/factory-droid.ts, packages/coding-agent/src/session/session-maintenance.ts"
     ],
     "note": "",
