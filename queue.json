@@ -64391,8 +64391,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-walk-reads",
    "host": "MacBook-Pro",
    "added": "2026-11-03T09:05:24Z",
-   "updated": "2026-11-03T09:05:24Z",
-   "note": ""
+   "updated": "2026-11-11T04:05:34Z",
+   "note": "",
+   "hold": "Main, 2026-11-11: opens after atspi-unanswered-app (P0) so it does not block it"
   },
   {
    "id": "atspi-setvalue-readback",
