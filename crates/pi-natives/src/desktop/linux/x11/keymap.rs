@@ -178,6 +178,9 @@ impl Keymap {
 				missing.push(symbol);
 			}
 		}
+		if missing.is_empty() {
+			return Ok(Vec::new());
+		}
 		let width = usize::from(self.keysyms_per_keycode);
 		let spare: Vec<_> = if width == 0 {
 			Vec::new()
@@ -208,8 +211,17 @@ impl Keymap {
 	}
 
 	pub(super) fn bind_text(&mut self, conn: Arc<RustConnection>, text: &str) -> CoreResult<TextMapping> {
-		let core = if self.core_mapping { Some(Self::core(&conn)?) } else { None };
-		let bindings = self.text_bindings(text, core.as_ref())?;
+		let mut bindings = self.text_bindings(text, None)?;
+		let core = if !bindings.is_empty() && self.core_mapping && self.device.is_some() {
+			Some(Self::core(&conn)?)
+		} else {
+			None
+		};
+		if let Some(core) = &core
+			&& bindings.iter().any(|&(code, _)| !core.empty_row(code))
+		{
+			bindings = self.text_bindings(text, Some(core))?;
+		}
 		let mut guard = TextMapping {
 			conn,
 			device: if self.core_mapping { None } else { self.device },
@@ -546,9 +558,11 @@ mod tests {
 		let mut map = keymap();
 		// A symbol on an otherwise unused level still occupies the row.
 		map.keysyms[(255 - 8) * 2 + 1] = Keysym::Escape.raw();
-		assert_eq!(map.text_bindings("é✓éa", None).unwrap(), vec![
-			(254, keysym_for_key(KeyName::Char('é'))),
-			(253, keysym_for_key(KeyName::Char('✓'))),
+		let mut core = keymap();
+		core.keysyms[(254 - 8) * 2] = Keysym::Escape.raw();
+		assert_eq!(map.text_bindings("é✓éa", Some(&core)).unwrap(), vec![
+			(253, keysym_for_key(KeyName::Char('é'))),
+			(252, keysym_for_key(KeyName::Char('✓'))),
 		]);
 	}
 
