@@ -58850,7 +58850,7 @@
    "area": "other",
    "priority": "P2",
    "needs": [],
-   "base": "7b42b1be6069b791c54e1c4c93d2070978d9e6bf",
+   "base": "b9b3cc4d69962e492197178155dd95216cd9c21b",
    "body": "bodies/claude-refusal-strip-retry.md",
    "state": "open",
    "pr": 17610,
@@ -58858,7 +58858,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/claude-refusal-strip-retry",
    "host": "MacBook-Pro",
    "added": "2026-10-31T21:44:06Z",
-   "updated": "2026-11-11T11:47:19Z",
+   "updated": "2026-11-11T14:05:09Z",
    "note": "",
    "built": [
     {
@@ -59035,7 +59035,7 @@
    ],
    "opened": "2026-10-31T21:57:20Z",
    "readied": "2026-10-31T21:57:58Z",
-   "advanced": "2026-11-11T11:47:19Z"
+   "advanced": "2026-11-11T14:05:09Z"
   },
   {
    "id": "date-reminder-journal",
