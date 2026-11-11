@@ -1,7 +1,14 @@
+use std::hash::{DefaultHasher, Hash, Hasher};
+
 use super::super::error::DesktopError;
 
-// UIA_E_ELEMENTNOTAVAILABLE is proof the provider no longer has the element.
+// UIA_E_ELEMENTNOTAVAILABLE also describes unrealized virtualized items.
 pub(super) const ELEMENT_NOT_AVAILABLE: i32 = -2_147_220_991;
+
+pub(super) const fn destroyed(property_error: Option<i32>, virtualized_pattern_error: Option<i32>) -> bool {
+	matches!(property_error, Some(ELEMENT_NOT_AVAILABLE))
+		&& matches!(virtualized_pattern_error, Some(ELEMENT_NOT_AVAILABLE))
+}
 
 pub(super) fn uia_error(code: i32, message: String) -> DesktopError {
 	if code == ELEMENT_NOT_AVAILABLE {
@@ -10,8 +17,6 @@ pub(super) fn uia_error(code: i32, message: String) -> DesktopError {
 		DesktopError::ax_failed(message)
 	}
 }
-
-use std::{collections::hash_map::DefaultHasher, hash::{Hash, Hasher}};
 
 pub(super) fn toggle_value(value: Option<String>, toggle: Option<i32>) -> Option<String> {
 	value.filter(|value| !value.is_empty()).or_else(|| match toggle {
@@ -52,6 +57,10 @@ mod tests {
 		use super::super::super::error::ErrorCode;
 		assert_eq!(uia_error(ELEMENT_NOT_AVAILABLE, "gone".into()).code, ErrorCode::StaleRef);
 		assert_eq!(uia_error(-1, "failed".into()).code, ErrorCode::AxFailed);
+		assert!(destroyed(Some(ELEMENT_NOT_AVAILABLE), Some(ELEMENT_NOT_AVAILABLE)));
+		assert!(!destroyed(Some(ELEMENT_NOT_AVAILABLE), None));
+		assert!(!destroyed(Some(ELEMENT_NOT_AVAILABLE), Some(-1)));
+		assert!(!destroyed(None, Some(ELEMENT_NOT_AVAILABLE)));
 	}
 	#[test]
 	fn checkbox_states_preserve_other_values() {

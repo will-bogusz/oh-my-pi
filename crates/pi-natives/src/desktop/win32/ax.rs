@@ -4,7 +4,7 @@ use uiautomation::{
 	UIAutomation, UIElement,
 	patterns::{
 		UIExpandCollapsePattern, UIInvokePattern, UILegacyIAccessiblePattern, UIScrollItemPattern,
-		UISelectionItemPattern, UITogglePattern, UIValuePattern,
+		UISelectionItemPattern, UITogglePattern, UIValuePattern, UIVirtualizedItemPattern,
 	},
 	types::{ControlType, ExpandCollapseState, Handle, Point, TreeScope, UIProperty},
 	variants::Value,
@@ -549,7 +549,12 @@ impl AxBackend for Win32Ax {
 
 	fn destroyed(&mut self, handle: &AxHandle) -> bool {
 		Self::element(handle).ok().is_some_and(|element| {
-			element.get_control_type().is_err_and(|error| error.code() == ax_states::ELEMENT_NOT_AVAILABLE)
+			let property_error = element.get_control_type().err().map(|error| error.code());
+			if property_error != Some(ax_states::ELEMENT_NOT_AVAILABLE) {
+				return false;
+			}
+			ax_states::destroyed(property_error,
+				element.get_pattern::<UIVirtualizedItemPattern>().err().map(|error| error.code()))
 		})
 	}
 
