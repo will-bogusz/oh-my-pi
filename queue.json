@@ -77287,7 +77287,7 @@
   {
    "id": "xproc-intervention",
    "branch": "will/xproc-intervention",
-   "title": "fix(natives): stop macOS processes from blocking each other\\x27s clicks",
+   "title": "fix(natives): stop macOS input refusals between omp processes",
    "area": "computer",
    "priority": "P1",
    "needs": [],
@@ -77299,8 +77299,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/xproc-intervention",
    "host": "MacBook-Pro",
    "added": "2026-11-11T10:07:38Z",
-   "updated": "2026-11-11T10:07:38Z",
-   "note": ""
+   "updated": "2026-11-11T10:08:00Z",
+   "note": "",
+   "kind": "fix"
   }
  ],
  "watch": {
