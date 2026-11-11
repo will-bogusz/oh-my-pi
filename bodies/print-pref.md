@@ -1,53 +1,85 @@
 ## What
 
-I turned printing off in the Chrome profiles omp seeds, because a page calling `window.print()` hung the next browser call and got the tab killed, and in browsers omp only attaches to I made that call fail fast and say a print preview is open.
+I turned printing off in the Chrome profiles omp seeds, because a page calling `window.print()` hung the next browser call and got the tab killed, and made held calls in attached browsers fail with an error naming the preview.
 
-In omp's own headed Chrome, a page that printed on a click stalled `tab.click` 9 s, `observe()` 19 s and the next run 41 s, then the tab was killed; with this PR nothing stalls. In a browser omp attaches to, the held call now fails in 1.3 s with an error naming the preview and how to clear it, and the tab keeps its page.
+In omp's headed Chrome, printing on a click stalled `tab.click` for 9 s, then recovery killed the tab; with this PR the page keeps working. In attached browsers the held call fails in 1.3 s without killing its tab.
 
-**omp's own Chrome** (headed), 5 runs per cell:
+**Linux, headed, 5 runs per cell:**
 
-| Page prints… | `main` | This PR |
+| Page prints… | `main` | This PR, seeded profile |
 |---|---|---|
-| on a click | click 9 s, `observe` 19 s, run 41 s, tab killed | no stall |
+| on a click | click 9 s, recovery kills tab | no stall |
 | on load | clicks refused | no stall |
-| in a same-origin iframe, on load | `open` times out (19.5 s) | no stall |
-| in a cross-site iframe, on load | clicks refused | no stall |
-| in an `open(url)` popup | screenshot 19 s, clicks refused | no stall |
-| in an `open('')` popup it writes | click 9 s, `observe` 19 s, `pages()` 21 s, tab killed | no stall |
-| on a back/forward-cache restore | `goBack` 41 s, tab killed | no stall |
-| 2 s after load, between calls | next click 9 s, run 41 s, tab killed | no stall |
+| same-origin iframe on load | `open` 19.5 s timeout | no stall |
+| cross-site iframe on load | clicks refused | no stall |
+| `open(url)` popup | screenshot 19 s, clicks refused | no stall |
+| `open('')` popup | click 9 s, `pages()` 21 s, tab killed | no stall |
+| back/forward-cache restore | `goBack` 41 s, tab killed | no stall |
+| between calls | next click 9 s, run 41 s, tab killed | no stall |
 
-**A browser omp attaches to** (relay, `app.cdp_url`): where `main` stalls above, the held call fails in 1.3 s (all 186 held calls, 1.30-1.31 s), and once the user cancels the preview, calls and `tab.pdf()` work. Prints on load, in iframes or in an `open(url)` popup behave as on `main`.
+**macOS 26.5.2 VM, headed CfT 150 / Chrome 154:** 5 runs per cell; fixed columns include a valid PDF in every run.
 
-This replaces holding `window.print` inside each page, one kind of document at a time. Supersedes #15508.
+| Context | `main`, CfT / Chrome | Fixed CfT | Fixed Chrome |
+|---|---|---|---|
+| click | 9 s click, 19 s observe, 41 s run, tab killed; 5/5 each | no print stall 5/5 | no print stall 5/5 |
+| load | not run | no print stall 5/5 | no print stall 5/5 |
+| same-origin iframe | not run | no print stall 5/5 | no print stall 5/5 |
+| cross-site iframe | clicks refused 5/5; PDF timeout 19 s, 4/5 each | no print stall 5/5 | no print stall 5/5 |
+| URL popup | not run | no print stall 5/5 | no print stall 5/5 |
+| written popup | not run | no print stall 5/5 | no print stall 5/5 |
+| back/forward-cache restore | 41 s, tab killed; 5/5 each | no print stall 5/5 | no print stall 5/5 |
+| between calls | CfT: 9 s input, 41 s run, tab killed 5/5; Chrome not run | no print stall 5/5 | no print stall 5/5 |
 
 ## Why
 
-Chrome's print preview holds the page's script until someone closes it, so the next call waits out its timeout, the recovery stalls on the same page, and the tab is killed. The pref sits beside the password-leak pref omp already seeds, and a profile an older omp seeded picks it up at next launch. In attached browsers only navigating away closes the preview from outside, so each run checks once a second whether a preview holds its page.
+Chrome's preview holds the page's script until somebody closes it. The profile pref covers documents that in-page hooks miss and applies to an existing profile on its next launch. Attached browsers keep their printing settings; pending calls check for a held page once a second. Supersedes #15508.
 
-**Decisions for the maintainer.**
-- **The agent no longer hears that a page asked to print** in omp's own Chrome, and nobody can print from it. A few lines of in-page reporting could restore the notice; a document they miss would lose only the notice, as the pref keeps the tab working.
-- **Report, not close, in attached browsers.** Pressing Cancel inside Chrome's preview page freed the call in 0.6-0.7 s (Chromium 156, seven contexts, one run each), but relies on that page's internal markup, and the relay cannot reach `chrome://` pages.
+**Decisions for the maintainer:**
+- **Printing is off, without a notice, in omp's own Chrome.** The agent no longer hears that a page asked to print. In-page reporting could restore the notice; a document it missed would lose only the notice, not hang the tab.
+- **Report, not close, in attached browsers.** Cancelling through Chrome's internal preview markup worked in the earlier Linux probe, but that markup is private and the relay cannot reach `chrome://` pages. A run on a held page also fails even if it only waits: a 2.5 s wait failed in 1.304 s, 5/5. That is deliberate here, not a claim that only blocked operations fail.
 
-**Not covered.** Prints on load in attached browsers; `browser.pages()` while a popup's preview is open still times out and the tab is killed, as on `main`. A shared Chrome an older omp started prints until it restarts. Edge, Brave and Electron were not measured. Tern and cmux tabs are unchanged. Windows was not run.
+**Limits:** prints on load in attached browsers still behave as on `main`; `browser.pages()` with a popup preview still times out and kills the tab. An older shared Chrome needs a restart. Edge, Brave, Electron and Windows were not run; Tern/cmux are unchanged.
 
 ## Testing
 
-Through omp's browser tool on Linux (Ubuntu 24.04, Chrome 157, Chrome for Testing 157 for the relay, Xvfb); macOS not run: `tab.pdf()` made a valid PDF in every run, code after `print()` ran, and no other PDF or print job appeared. Headless `main` stalled in no context.
+Real browser-tool runs on Linux/Xvfb and macOS: PDFKit parsed all 107 macOS PDFs; no print jobs or user-saved files appeared. Main-seeded profiles picked up the pref next launch, 5/5 each browser (print returned in 2–8 ms, no preview). Headless Linux `main` did not stall.
 
-`bun test test/tools/browser-relay-detach.test.ts test/tools/browser-relay-bridge.test.ts test/tools/browser-profile-cleanup.test.ts`: 139 pass; each new test fails with its piece reverted.
+**Relay cancellation, Chrome for Testing 157, Linux:** held calls failed in 1.304–1.309 s. After switching to the actual printing tab and cancelling:
 
-Review first: `print-preview.ts` (when a page counts as held), then the abort in `WorkerCore#run`.
+| Context | Page responds after Cancel | Valid `tab.pdf()` |
+|---|---|---|
+| click | 5/5 | 5/5 |
+| written popup | 5/5 | 5/5 |
+| back/forward-cache restore | 5/5 | 5/5 |
+| between calls | 5/5 | 5/5 |
 
-<details><summary>How "held" is decided, the error text, and what the tests cover</summary>
+`bun test test/tools/browser-relay-detach.test.ts test/tools/browser-relay-bridge.test.ts test/tools/browser-profile-cleanup.test.ts`: 139 pass; the new tests fail with their fixes reverted.
 
-Chrome lists an open preview as a `chrome://print/` page; through the relay the extension reports it from `chrome.debugger.getTargets()`. A held page still answers a plain evaluation but never settles a promise; a busy script answers neither and a slow page answers both. Each frame session is asked, so a cross-site iframe counts. Each check gives up after 1 s and asks again.
+<details><summary>Detection, cost and coverage</summary>
 
-> The page called window.print() and Chrome's print preview is holding it, so this call stalled: clicks, typing and most evaluations wait until the preview closes. Ask the user to switch to this tab in Chrome and press Cancel in its print preview, or navigate this tab to another URL, which closes the preview and loses the page's state. Input this call sent may land once the preview closes.
+Chrome lists an open preview as `chrome://print/`; the relay extension reads it through `chrome.debugger.getTargets()`. The check treats a frame as held when a plain evaluation answers but a promise does not; busy scripts answer neither, slow pages answer both. Checks are bounded and include child frames.
 
-Tests: a seeded profile has printing off; through the relay and over `app.cdp_url`, a call a real Chromium page holds (a page parked in the debugger stands in for the preview) fails with this error while a slow call beside it runs to its end, held keys are released, and a dropped first check is retried; a browser omp launched is never asked, before or after a recycle; the bridge answers for an extension that cannot report previews without asking it. Reverted, they fail with `tab.click` timing out at 8 s, the run timing out at 60 s, or a different payload.
+On macOS's cross-site load, ordinary evaluations still answered while the print script waited; `tab.pdf()` timed out in 4/5 on each main browser, never on the fix. CfT's iframe-fixture body clicks were refused even though code after `print()` ran; those are not successful clicks. The click fixture was rerun with 5/5 delivered prints.
 
-After the error, navigating away worked 5 of 5, with and without `tab.emulate` set. A print that lands after a run: the next `browser.open({ name })` without a URL returns at once as on `main`, and the next call fails with this error in 1.3 s.
+One first cold launch took 5.7 s; the table counts print stalls, not browser startup.
+
+Measured through the real tool on Linux: one target lookup per second while a call is pending, including idle waits. A 2.5 s unheld wait made two lookups and succeeded, 5/5. Lookups took 0.269–0.460 ms with 8–14 targets and returned 2.2–3.9 KB; this is a small-browser measurement, not a bound for many tabs.
+
+Five held idle waits each made one lookup and failed in 1.304 s. Restricting checks to tracked operations would miss raw `page.*` calls, so this PR keeps the broader run-level rule.
+
+The error asks the user to switch to the tab and press Cancel, or navigate away (losing page state), and warns that queued input may land after cancellation. Navigation after the error worked 5/5 with and without emulation.
+
+Tests cover relay and CDP attachment, a dropped check, a slow call beside a held page, held-input release, old-extension capability handling, and no probing in seeded browsers before/after recycle. Review `print-preview.ts` and `WorkerCore#run` first.
+
+To replay the basic hold, serve `<button id="p" onclick="print()">Print</button>` locally, then use omp's browser tool:
+
+```js
+const tab = await browser.open({ url: fixtureUrl, headed: true });
+await tab.click("#p");
+await tab.pdf();
+```
+
+For an attached browser use `app: { cdp_url: endpoint }` on an unseeded profile. After the named error, `await new Promise(r => setTimeout(r, 2500)); return 1` in another run demonstrates the held-idle tradeoff; cancelling the visible preview then frees the page.
 </details>
 
 ---
