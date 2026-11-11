@@ -79736,6 +79736,26 @@
    "added": "2026-11-11T12:16:01Z",
    "updated": "2026-11-11T12:16:01Z",
    "note": ""
+  },
+  {
+   "id": "win-focus-report",
+   "branch": "will/win-focus-report",
+   "title": "fix(natives): report where focus went after a Windows takeover",
+   "area": "computer",
+   "priority": "P2",
+   "needs": [
+    "win-takeover-focus"
+   ],
+   "base": "0d3ceaeb6911947de91ea282ed8b6a1c16b82138",
+   "body": "bodies/win-focus-report.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-focus-report",
+   "host": "MacBook-Pro",
+   "added": "2026-11-11T13:11:20Z",
+   "updated": "2026-11-11T13:11:20Z",
+   "note": ""
   }
  ],
  "watch": {
