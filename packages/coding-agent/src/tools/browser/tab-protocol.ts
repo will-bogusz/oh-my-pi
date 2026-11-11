@@ -130,15 +130,13 @@ export type WorkerInitPayload =
 			 * browser.
 			 */
 			userDriven?: boolean;
-			/** The browser is the omp relay: downloads arrive as page events, and the relay names where Chrome saved them. */
+			/** The omp relay: downloads arrive as page events; claim owned/borrowed tabs before adopting them. */
 			relay?: boolean;
 			/**
 			 * The browser draws its windows on the user's screen, so a call can raise native ones. Unset for a headless
 			 * browser, whose recycled tabs attach too.
 			 */
 			showsWindows?: boolean;
-			/** The browser is the omp relay: claim `owned`/`borrowed` tabs there before adopting them, or it never attaches them. */
-			relay?: boolean;
 	  };
 
 /** Result of one host tool requested by browser-run JavaScript. */
