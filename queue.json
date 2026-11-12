@@ -65051,8 +65051,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-walk-reads",
    "host": "MacBook-Pro",
    "added": "2026-11-03T09:05:24Z",
-   "updated": "2026-11-12T13:36:52Z",
-   "note": "Main-approved combined reader uses main cancellable/answered request bound, with ChildCount in round 1 before children in round 2. atspi-huge-children changes the same child read: P0 first, whichever opens second must be re-checked against the other. Branch push only; opening and body held pending requested current-main performance comparison.",
+   "updated": "2026-11-12T13:37:11Z",
+   "note": "Main-approved combined reader uses main cancellable/answered request bound, with ChildCount in round 1 before children in round 2. atspi-huge-children changes the same child read: P0 first, whichever opens second must be re-checked against the other. Current-main 9f728bd56e versus head35a9e15702d: eight interleaved pairs per Kate/Dolphin/Writer GTK3/KF5, gains53\u201362% with disjoint observed ranges and stable element/call counts. Body updated, measurement hold lifted; opener classifies conflicts.",
    "advanced": "2026-11-12T13:25:41Z",
    "line_loss_overrides": [
     {
