@@ -65042,7 +65042,8 @@
    "needs": [
     "atspi-action-names",
     "atspi-unanswered-app",
-    "gtk4-atspi-bounds"
+    "gtk4-atspi-bounds",
+    "atspi-huge-children"
    ],
    "base": "9f728bd56e170453c927d5b162cebe9b308e63ce",
    "body": "bodies/atspi-walk-reads.md",
@@ -65052,8 +65053,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-walk-reads",
    "host": "MacBook-Pro",
    "added": "2026-11-03T09:05:24Z",
-   "updated": "2026-11-12T13:37:11Z",
-   "note": "Main-approved combined reader uses main cancellable/answered request bound, with ChildCount in round 1 before children in round 2. atspi-huge-children changes the same child read: P0 first, whichever opens second must be re-checked against the other. Current-main 9f728bd56e versus head35a9e15702d: eight interleaved pairs per Kate/Dolphin/Writer GTK3/KF5, gains53\u201362% with disjoint observed ranges and stable element/call counts. Body updated, measurement hold lifted; opener classifies conflicts.",
+   "updated": "2026-11-12T16:11:23Z",
+   "note": "Main, 2026-11-12: needs #19036 (atspi-huge-children), not a pair: a PR opened now would diff against main's whole-children reader while its numbers come from the trial tree. Prepared head: trial 3f71f7f3588 (walk-reads merged onto #19036 68d568296ae: round two starts #19036's bounded index reads beside text/bounds/actions; walk passes remaining budget into read_node; round test expects GetChildAtIndex(0) for ChildCount=1; Linux 107 pass, desktop::ax 47; scratch queuefifteen/WalkRecheck). Re-measured on that trial vs #19036's head, same goliath guest, 8 alternating pairs after a warmup, ax::query limit 5000, dbus-monitor calls: Kate 1.545->0.660 s (57%), Dolphin 0.894->0.380 (57%), Writer GTK3 3.128->1.586 (49%), Writer KF5 3.881->1.943 (50%), disjoint ranges, calls/element unchanged (10.66->9.63, 10.52->9.19, 10.71->10.35, 11.88->11.55). When #19036 merges: rebase, re-run the four-app table against main, update body, open. Earlier: Main-approved combined reader uses main's cancellable/answered request bound, ChildCount in round 1 before children in round 2.",
    "advanced": "2026-11-12T13:25:41Z",
    "line_loss_overrides": [
     {
