@@ -85189,13 +85189,17 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-12T10:23:33Z",
+  "checked": "2026-11-12T10:53:55Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
    "x11-mpx-reattach": {
     "since": "2026-11-12T09:22:42Z",
     "title": "fix(natives): keep X11 background input out of your window after a screen lock or VT switch"
+   },
+   "atspi-text-first": {
+    "since": "2026-11-12T10:53:55Z",
+    "title": "fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility"
    },
    "win-target-layout": {
     "since": "2026-11-12T10:23:33Z",
@@ -88366,6 +88370,12 @@
     "id": "macos-press-click-hint",
     "title": "fix(natives): point a refused macOS press at the element's own click",
     "why": "plan: wait (conflicts with #18892 in crates/pi-natives/src/desktop/macos/ax.rs)"
+   },
+   {
+    "at": "2026-11-12T10:53:55Z",
+    "kind": "openable",
+    "id": "atspi-text-first",
+    "title": "fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility"
    }
   ]
  },
@@ -93577,7 +93587,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-12T10:23:34.500527Z",
+  "at": "2026-11-12T10:53:56.109377Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -94093,16 +94103,14 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility",
-    "action": "wait",
-    "reasons": [
-     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/wayland/mod.rs"
-    ],
-    "note": "",
+    "action": "open",
+    "reasons": [],
+    "note": "accepted pair with #18914: QueueThirteen, 2026-11-12 (Main's standing rule: use-list collisions are the opener's): only conflict is the use list in crates/pi-natives/src/desktop/linux/wayland/mod.rs; this entry adds TextRoute, #18914 adds self; neither removes a name the other calls. Combined form: linux::ax::{self, AtSpiAx, AtSpiWindow, TextRoute, resolve_focus}.",
     "over": [],
-    "paired": [],
-    "blocked_by": [
+    "paired": [
      "#18914"
     ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T02:21:41Z"
    },
@@ -94123,6 +94131,7 @@
      "conflicts with #18915 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/ax.rs",
      "conflicts with #18353 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #18013 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/libei.rs",
+     "conflicts with atspi-text-first in crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
@@ -94134,7 +94143,8 @@
      "#18914",
      "#18915",
      "#18353",
-     "#18013"
+     "#18013",
+     "atspi-text-first"
     ],
     "needs": [
      "atspi-unanswered-app"
@@ -94486,14 +94496,16 @@
     "reasons": [
      "needs #18914 (open)",
      "conflicts with #18892 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/ax/menus.rs"
+     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/ax/menus.rs",
+     "conflicts with atspi-text-first in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
      "#18892",
-     "#18914"
+     "#18914",
+     "atspi-text-first"
     ],
     "needs": [
      "atspi-unanswered-app"
@@ -94512,14 +94524,16 @@
     "reasons": [
      "needs #18914 (open)",
      "conflicts with #18892 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs"
+     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs",
+     "conflicts with atspi-text-first in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
      "#18892",
-     "#18914"
+     "#18914",
+     "atspi-text-first"
     ],
     "needs": [
      "atspi-unanswered-app"
@@ -94538,13 +94552,15 @@
     "reasons": [
      "needs #18914 (open)",
      "conflicts with #18892 in crates/pi-natives/src/desktop/linux/ax.rs",
+     "conflicts with atspi-text-first in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18892"
+     "#18892",
+     "atspi-text-first"
     ],
     "needs": [
      "atspi-unanswered-app"
@@ -94672,6 +94688,7 @@
      "conflicts with #18013 in docs/computer-use.md",
      "conflicts with #18222 in packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #18987 in docs/computer-use.md",
+     "conflicts with atspi-text-first in docs/computer-use.md",
      "conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md"
     ],
     "note": "",
@@ -94685,7 +94702,8 @@
      "#18353",
      "#18013",
      "#18222",
-     "#18987"
+     "#18987",
+     "atspi-text-first"
     ],
     "needs": [],
     "created": "2026-10-19T07:26:45Z"
@@ -94777,6 +94795,7 @@
      "conflicts with #17897 in crates/pi-natives/src/desktop/macos/input.rs",
      "conflicts with #18013 in docs/computer-use.md",
      "conflicts with #18987 in docs/computer-use.md",
+     "conflicts with atspi-text-first in docs/computer-use.md",
      "conflicts with main in docs/computer-use.md"
     ],
     "note": "",
@@ -94792,7 +94811,8 @@
      "#18353",
      "#17897",
      "#18013",
-     "#18987"
+     "#18987",
+     "atspi-text-first"
     ],
     "needs": [
      "iphone-mirror-scroll-distance"
@@ -95231,6 +95251,7 @@
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/tools/eval.ts",
      "conflicts with #18987 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/worker.ts",
+     "conflicts with atspi-text-first in docs/computer-use.md",
      "conflicts with masked-length-ok in docs/tools/computer.md",
      "conflicts with win-focus-report in docs/computer-use.md, packages/coding-agent/src/tools/computer/worker.ts",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
@@ -95251,6 +95272,7 @@
      "#18222",
      "#18786",
      "#18987",
+     "atspi-text-first",
      "masked-length-ok",
      "win-focus-report"
     ],
