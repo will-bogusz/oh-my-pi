@@ -89487,8 +89487,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-12T00:14:32.966150Z",
-  "host": "goliath",
+  "at": "2026-11-12T00:17:25.287688Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 0,
