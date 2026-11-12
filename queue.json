@@ -91200,7 +91200,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-12T03:33:16.677340Z",
+  "at": "2026-11-12T03:36:39.905378Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -92104,16 +92104,14 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): never quote the written text when a setValue read-back disagrees",
-    "action": "wait",
-    "reasons": [
-     "conflicts with #18915 in crates/pi-natives/src/desktop/ax.rs"
-    ],
-    "note": "",
+    "action": "open",
+    "reasons": [],
+    "note": "accepted pair with #18915: Main, 2026-11-12: accepted; adjacent doc/cfg lines on ax.rs text_readback; whichever lands second deletes the cfg_attr(..., allow(dead_code)) on masked",
     "over": [],
-    "paired": [],
-    "blocked_by": [
+    "paired": [
      "#18915"
     ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-12T02:37:51Z"
    },
@@ -92255,16 +92253,14 @@
     "area": "browser",
     "priority": "P1",
     "title": "fix(browser-relay): say what the relay hid in a driven tab",
-    "action": "wait",
-    "reasons": [
-     "conflicts with #18925 in packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts"
-    ],
-    "note": "",
+    "action": "open",
+    "reasons": [],
+    "note": "accepted pair with #18925: Main, 2026-11-12: accepted; one statement at tab-worker.ts WorkerCore.#run failure branch; combined form: #18925's enrichment of error (message and stack with native notices), then this.#sendResult({ id: msg.id, ok: false, error })",
     "over": [],
-    "paired": [],
-    "blocked_by": [
+    "paired": [
      "#18925"
     ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-12T02:04:21Z"
    },
@@ -92520,7 +92516,8 @@
      "needs #18914 (open)",
      "conflicts with #18921 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18892 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/ax/menus.rs"
+     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/ax/menus.rs",
+     "conflicts with ax-masked-readback in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
     "over": [],
@@ -92528,7 +92525,8 @@
     "blocked_by": [
      "#18921",
      "#18892",
-     "#18914"
+     "#18914",
+     "ax-masked-readback"
     ],
     "needs": [
      "atspi-unanswered-app"
@@ -92548,7 +92546,8 @@
      "needs #18914 (open)",
      "conflicts with #18921 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18892 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs"
+     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs",
+     "conflicts with ax-masked-readback in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
     "over": [],
@@ -92556,7 +92555,8 @@
     "blocked_by": [
      "#18921",
      "#18892",
-     "#18914"
+     "#18914",
+     "ax-masked-readback"
     ],
     "needs": [
      "atspi-unanswered-app"
@@ -92573,12 +92573,15 @@
     "title": "fix(natives): preserve the empty-field warning on Linux write timeouts",
     "action": "wait",
     "reasons": [
-     "needs #18914 (open)"
+     "needs #18914 (open)",
+     "conflicts with ax-masked-readback in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "ax-masked-readback"
+    ],
     "needs": [
      "atspi-unanswered-app"
     ],
@@ -92828,6 +92831,7 @@
      "conflicts with #18776 in docs/tools/browser.md",
      "conflicts with #18786 in docs/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md",
+     "conflicts with relay-hidden-frames-main in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts"
     ],
     "note": "",
@@ -92841,7 +92845,8 @@
      "#18924",
      "#18776",
      "#18786",
-     "#18789"
+     "#18789",
+     "relay-hidden-frames-main"
     ],
     "needs": [
      "r2/native-window-report"
@@ -92867,6 +92872,7 @@
      "conflicts with #18776 in docs/tools/browser.md",
      "conflicts with #18786 in docs/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md",
+     "conflicts with relay-hidden-frames-main in packages/browser-relay/extension/background.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts"
     ],
     "note": "",
@@ -92880,7 +92886,8 @@
      "#18924",
      "#18776",
      "#18786",
-     "#18789"
+     "#18789",
+     "relay-hidden-frames-main"
     ],
     "needs": [
      "r2/relay-own-only"
@@ -92907,6 +92914,7 @@
      "conflicts with #18776 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18786 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts",
      "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts",
+     "conflicts with relay-hidden-frames-main in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "conflicts with status-entered-text in packages/coding-agent/src/tools/browser.ts",
      "its need r2/relay-popup-owned conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts",
      "its need r2/page-waiting conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
@@ -92925,6 +92933,7 @@
      "#18776",
      "#18786",
      "#18789",
+     "relay-hidden-frames-main",
      "status-entered-text"
     ],
     "needs": [
@@ -92944,14 +92953,16 @@
     "action": "wait",
     "reasons": [
      "conflicts with #18737 in packages/coding-agent/src/tools/browser/tab-supervisor.ts",
-     "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts"
+     "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts",
+     "conflicts with relay-hidden-frames-main in packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
      "#18737",
-     "#18925"
+     "#18925",
+     "relay-hidden-frames-main"
     ],
     "needs": [],
     "created": "2026-11-11T07:04:56Z"
@@ -93170,6 +93181,7 @@
      "conflicts with #18737 in packages/coding-agent/src/tools/browser/tab-supervisor.ts",
      "conflicts with #18776 in packages/coding-agent/src/tools/browser/tern/tern-tab.ts",
      "conflicts with #18925 in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts",
+     "conflicts with relay-hidden-frames-main in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
     ],
     "note": "",
@@ -93178,7 +93190,8 @@
     "blocked_by": [
      "#18737",
      "#18776",
-     "#18925"
+     "#18925",
+     "relay-hidden-frames-main"
     ],
     "needs": [
      "agent-identity"
@@ -93285,6 +93298,7 @@
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/tools/eval.ts",
+     "conflicts with ax-masked-readback in docs/tools/computer.md",
      "conflicts with computer-secure-input in docs/tools/computer.md, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with status-entered-text in packages/coding-agent/src/tools/computer.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with agent-identity in docs/tools/computer.md, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
@@ -93307,6 +93321,7 @@
      "#18353",
      "#18222",
      "#18786",
+     "ax-masked-readback",
      "computer-secure-input",
      "status-entered-text",
      "agent-identity"
@@ -93339,6 +93354,7 @@
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with ax-masked-readback in docs/tools/computer.md",
      "conflicts with computer-secure-input in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with status-entered-text in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with agent-identity in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
@@ -93361,6 +93377,7 @@
      "#18353",
      "#18222",
      "#18925",
+     "ax-masked-readback",
      "computer-secure-input",
      "status-entered-text",
      "agent-identity"
@@ -93465,6 +93482,7 @@
      "conflicts with #18786 in packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18789 in packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18925 in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with relay-hidden-frames-main in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need act-look-prompt conflicts with main in packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
     ],
@@ -93480,7 +93498,8 @@
      "#18776",
      "#18786",
      "#18789",
-     "#18925"
+     "#18925",
+     "relay-hidden-frames-main"
     ],
     "needs": [
      "act-look-prompt"
@@ -93506,6 +93525,7 @@
      "conflicts with #18776 in docs/tools/browser.md",
      "conflicts with #18786 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
+     "conflicts with relay-hidden-frames-main in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts",
      "conflicts with main in packages/coding-agent/src/prompts/tools/browser.md"
     ],
@@ -93520,7 +93540,8 @@
      "#18924",
      "#18776",
      "#18786",
-     "#18789"
+     "#18789",
+     "relay-hidden-frames-main"
     ],
     "needs": [
      "r2/relay-own-only"
