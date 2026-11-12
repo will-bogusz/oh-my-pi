@@ -81666,8 +81666,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ax-ref-read-as",
    "host": "MacBook-Pro",
    "added": "2026-11-11T10:51:34Z",
-   "updated": "2026-11-12T01:55:10Z",
-   "note": "",
+   "updated": "2026-11-12T09:59:04Z",
+   "note": "QueueThirteen 2026-11-12 rebase onto #18898's choose_action: require_behind stays inside `perform`, as in the PR's original. `perform` runs at most once per perform_choosing call: choose_action takes an FnOnce closure and calls it once, open_menu::guard takes `run: impl FnOnce` and calls it once, and press_into_view has no retry (its optional scroll send comes after the check). So the check guards the single send exactly as before. The identity check (require_read_as / require_element_read_as) runs before choose_action, so before any raise.",
    "built": [
     {
      "with": "#17757",
