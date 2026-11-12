@@ -84578,7 +84578,7 @@
    "branch": "will/win-focus-report",
    "title": "fix(natives): report where focus went after a Windows takeover",
    "area": "computer",
-   "priority": "P2",
+   "priority": "P1",
    "needs": [
     "win-takeover-focus"
    ],
@@ -84590,7 +84590,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-focus-report",
    "host": "MacBook-Pro",
    "added": "2026-11-11T13:11:20Z",
-   "updated": "2026-11-12T18:04:42Z",
+   "updated": "2026-11-12T18:31:40Z",
    "note": "",
    "rebases_after": [
     18783,
@@ -85778,7 +85778,7 @@
    "branch": "will/macos-ax-linked-label",
    "title": "fix(natives): name a macOS control by the label its AXTitleUIElement links to",
    "area": "natives",
-   "priority": "P2",
+   "priority": "P1",
    "needs": [],
    "base": "9f728bd56e170453c927d5b162cebe9b308e63ce",
    "body": "bodies/macos-ax-linked-label.md",
@@ -85788,7 +85788,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-ax-linked-label",
    "host": "MacBook-Pro",
    "added": "2026-11-11T14:43:42Z",
-   "updated": "2026-11-12T17:45:39Z",
+   "updated": "2026-11-12T18:31:40Z",
    "note": "Main, 2026-11-12: approved linked-own-guard.diff. Naming-only: changed linked text alone is not an action guard. Five AxProps constructor sites migrated; adjacency with entries adding AxProps fields requires opener pair builds. Unbuilt design note: retain {own,linked} fingerprints independently and compare each only when answered at registration and action; closes a rerender moving an unnamed control ref onto its neighbour; measure that case before building.",
    "line_loss_overrides": [
     {
@@ -86460,7 +86460,7 @@
    "branch": "will/macos-press-click-hint",
    "title": "fix(natives): point a refused macOS press at the element's own click",
    "area": "computer",
-   "priority": "P2",
+   "priority": "P1",
    "needs": [],
    "base": "53dd4c6a3192d2934a195a4158c444ce2a6b1935",
    "body": "bodies/macos-press-click-hint.md",
@@ -86470,7 +86470,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-press-click-hint",
    "host": "MacBook-Pro",
    "added": "2026-11-11T18:49:11Z",
-   "updated": "2026-11-12T18:01:49Z",
+   "updated": "2026-11-12T18:31:40Z",
    "note": "",
    "line_loss_overrides": [
     {
