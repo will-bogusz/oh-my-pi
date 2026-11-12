@@ -84151,7 +84151,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-qt-menus",
    "host": "MacBook-Pro",
    "added": "2026-11-11T13:21:21Z",
-   "updated": "2026-11-12T13:06:27Z",
+   "updated": "2026-11-12T14:22:51Z",
    "note": "",
    "advanced": "2026-11-12T12:59:38Z",
    "line_loss_overrides": [
@@ -84173,7 +84173,13 @@
       ]
      }
     }
-   ]
+   ],
+   "rebases_after": [
+    19034
+   ],
+   "pair_reasons": {
+    "19034": "QueueFourteen, 2026-11-12 (Main's standing rule: test cases appended to the same block): only conflict is crates/pi-natives/src/desktop/linux/ax.rs tests, where this entry adds MenuNode + its Qt menu test and #19034 adds ComboLog/ComboElement + its tests at the same spot (base empty); nothing removed; combined form is both"
+   }
   },
   {
    "id": "atspi-combo-choice",
