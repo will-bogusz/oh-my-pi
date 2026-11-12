@@ -75874,7 +75874,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/agent-identity",
    "host": "MacBook-Pro",
    "added": "2026-11-10T23:39:10Z",
-   "updated": "2026-11-12T05:55:33Z",
+   "updated": "2026-11-12T05:55:59Z",
    "note": "Main 2026-11-12: Will decided colours resolve from the active theme; lane AgentColors owns that one push. No other worker, no rebase of #18987 until AgentColors reports the head.",
    "advanced": "2026-11-12T05:55:33Z",
    "built": [
