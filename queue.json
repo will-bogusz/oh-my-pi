@@ -85989,6 +85989,29 @@
        "\t\tassert!(read(null, null, add_date, &busy, Ok(Some(\"Mode\"))).partial);"
       ]
      }
+    },
+    {
+     "at": "2026-11-12T19:59:42Z",
+     "reason": "Main, 2026-11-12: test-helper migration to #19054 AxReadAs; the check-side override is unnecessary because read_as_values decodes own labels only, the held fingerprint carries the own-fields value",
+     "old": "56bc967e271646f680a283e02786642b7f08af5c",
+     "new": "5d78d9683a97e40eacbee83198879449490789aa",
+     "dropped": {
+      "crates/pi-natives/src/desktop/ax.rs": [
+       "\t\t\t== props",
+       "\t\t\t\t.read_as_fingerprint",
+       "\t\t\t\t.unwrap_or_else(|| fingerprint(props))"
+      ],
+      "crates/pi-natives/src/desktop/macos/ax.rs": [
+       "\t) -> crate::desktop::ax::AxProps {",
+       "\t\tsuper::labelled_props(&values, 0, super::WalkBounds::Skip, |_, attribute| {",
+       "\t\tafter: crate::desktop::ax::AxProps,",
+       "\t\tlet before = linked_field(Some(\"City\"), Ok(None));",
+       "\t\tlet after = linked_field(None, Err(AXError::CannotComplete));",
+       "\t\tlet before = linked_field(None, Ok(Some(\"City\")));",
+       "\t\tlet after = linked_field(None, Ok(Some(\"Street\")));",
+       "\t\tassert!(check_linked_field(&before, before.clone()).is_ok());"
+      ]
+     }
     }
    ],
    "advanced": "2026-11-12T19:29:42Z",
