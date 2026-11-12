@@ -75522,6 +75522,19 @@
      "note": "named window pixmaps (shape-clipped) whenever CompositeNameWindowPixmap succeeds; root crop only on BadMatch inside a server grab; +16bpp decode",
      "ref": "/Users/viathebrink/tmp/oh-my-pi/Design18783/18783.md"
     }
+   ],
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-12T10:09:22Z",
+     "reason": "Cargo.toml x11rb features: line rewritten as the union of this PR's features and main's xkb (#18825); none dropped",
+     "old": "f2c247a9657599f3f65e3798e5091a6824309886",
+     "new": "4b70032b94b3f9bc58a805cab24a8049408a389a",
+     "dropped": {
+      "crates/pi-natives/Cargo.toml": [
+       "x11rb = { version = \"=0.13.2\", features = [\"composite\", \"randr\", \"render\", \"shape\", \"xinput\", \"xtest\"] }"
+      ]
+     }
+    }
    ]
   },
   {
