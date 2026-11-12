@@ -89812,6 +89812,24 @@
    "note": "",
    "hold": "Main, 2026-11-12: proposal; opens only after entry A merges and Will has seen the body",
    "kind": "proposal"
+  },
+  {
+   "id": "win-masks-cfg",
+   "branch": "will/win-masks-cfg",
+   "title": "fix(natives): compile pi-natives for Windows again",
+   "area": "computer",
+   "priority": "P0",
+   "needs": [],
+   "base": "7c2ab113ec9716496b1d1b78b1f8c3ff8466c9ba",
+   "body": "bodies/win-masks-cfg.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-masks-cfg",
+   "host": "MacBook-Pro",
+   "added": "2026-11-12T19:44:42Z",
+   "updated": "2026-11-12T19:44:42Z",
+   "note": ""
   }
  ],
  "watch": {
