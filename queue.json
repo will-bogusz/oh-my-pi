@@ -83719,14 +83719,26 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-hidden-frames-main",
    "host": "MacBook-Pro",
    "added": "2026-11-12T02:04:21Z",
-   "updated": "2026-11-12T04:19:38Z",
+   "updated": "2026-11-12T04:49:47Z",
    "note": "HiddenOnMain: rebuilt on main without relay-frame-race, head 8b646ad6c2d (review HiddenOnMain.ReviewHiddenOnMain fixed; real 1Password: tab kept identical to main in all 8 cells, notice names 1Password once per hidden frame) | Main 2026-11-12: accepted pair with #18925 (record with set --pair once both open). Combined form at tab-worker.ts WorkerCore.#run after the finally: this branch's hinted take (if this.#unanswered === active && this.#hiddenFramesWaiting && this.#page) await this.#takeHiddenFrames(this.#page)) stays before the answered guard; in the failure branch #18925's enrichment of error (message and stack with the native notices), then this.#sendResult({ id: msg.id, ok: false, error }), so both native-window notices and the once-only hidden-frames notice ride the failure. Second to land adds one test that a failed run carries both.",
    "rebases_after": [
     18925
    ],
    "pair_reasons": {
     "18925": "Main, 2026-11-12: accepted (HiddenOnMain's combined form). tab-worker.ts WorkerCore.#run after the finally: this branch's hinted take (if this.#unanswered === active && this.#hiddenFramesWaiting && this.#page) await this.#takeHiddenFrames(this.#page)) stays before the answered guard; in the failure branch #18925's enrichment of error (message and stack with the native notices), then this.#sendResult({ id: msg.id, ok: false, error }), so both native-window notices and the once-only hidden-frames notice ride the failure. Second to land adds one test that a failed run carries both."
-   }
+   },
+   "built": [
+    {
+     "with": "#18772",
+     "code": "05bac1e29bed82e7c186cb28903cc871d4cb639c",
+     "with_code": "c8c9bcb06132230f7ec03e3d52b25e6a12b3d98b",
+     "tip": "8b646ad6c2d3e0131e4a47856f450c7d7e01aedf",
+     "with_tip": "d446ca2c5d13bea029a675a8ef3270ab224634f3",
+     "at": "2026-11-12T04:49:47Z",
+     "host": "MacBook-Pro",
+     "tree": "6bd63baa2b7c1fc9250a3e851ff2364b095290c8"
+    }
+   ]
   },
   {
    "id": "ax-masked-readback",
@@ -83988,8 +84000,70 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/autofill-rows",
    "host": "MacBook-Pro",
    "added": "2026-11-12T04:00:08Z",
-   "updated": "2026-11-12T04:00:08Z",
-   "note": ""
+   "updated": "2026-11-12T04:49:47Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#18898",
+     "code": "94ed060c8b04d06e250c052daefe618507257c36",
+     "with_code": "833c4effedd97d609b33f5bc2b34f836757ee462",
+     "tip": "5e7fb5495521be56da4ebb40a24048b7f3ecc675",
+     "with_tip": "b6a65a81b5cdb82dbcb8a259651e4ac89e36af20",
+     "at": "2026-11-12T04:49:47Z",
+     "host": "MacBook-Pro",
+     "tree": "6bd63baa2b7c1fc9250a3e851ff2364b095290c8"
+    },
+    {
+     "with": "#18743",
+     "code": "94ed060c8b04d06e250c052daefe618507257c36",
+     "with_code": "5682ab79b16d564c45890054227b32cf02f03ff1",
+     "tip": "5e7fb5495521be56da4ebb40a24048b7f3ecc675",
+     "with_tip": "c0c62cb0e7a1c49ca9c2c5c3f6ccabe1c8d305a1",
+     "at": "2026-11-12T04:49:47Z",
+     "host": "MacBook-Pro",
+     "tree": "6bd63baa2b7c1fc9250a3e851ff2364b095290c8"
+    },
+    {
+     "with": "#18825",
+     "code": "94ed060c8b04d06e250c052daefe618507257c36",
+     "with_code": "e1ed14532fc3243f54bf11715cdb314d2599f8f2",
+     "tip": "5e7fb5495521be56da4ebb40a24048b7f3ecc675",
+     "with_tip": "bae05113ad9c7577017065457e0236de477bc7f0",
+     "at": "2026-11-12T04:49:47Z",
+     "host": "MacBook-Pro",
+     "tree": "6bd63baa2b7c1fc9250a3e851ff2364b095290c8"
+    },
+    {
+     "with": "#18896",
+     "code": "94ed060c8b04d06e250c052daefe618507257c36",
+     "with_code": "65c65f92e8b25212b208bec00d4e8687e87fb926",
+     "tip": "5e7fb5495521be56da4ebb40a24048b7f3ecc675",
+     "with_tip": "e8a1ae3777704bde2cececdc560f8cc776708e58",
+     "at": "2026-11-12T04:49:47Z",
+     "host": "MacBook-Pro",
+     "tree": "6bd63baa2b7c1fc9250a3e851ff2364b095290c8"
+    },
+    {
+     "with": "#18915",
+     "code": "94ed060c8b04d06e250c052daefe618507257c36",
+     "with_code": "f37e9802b79be599122046924e298b4157766751",
+     "tip": "5e7fb5495521be56da4ebb40a24048b7f3ecc675",
+     "with_tip": "aead7d5ad2c29819d4ef0175f66b17694d0f63dd",
+     "at": "2026-11-12T04:49:47Z",
+     "host": "MacBook-Pro",
+     "tree": "6bd63baa2b7c1fc9250a3e851ff2364b095290c8"
+    },
+    {
+     "with": "#18353",
+     "code": "94ed060c8b04d06e250c052daefe618507257c36",
+     "with_code": "59c94cfca5a50b474ad2967de271802bc0c5b93a",
+     "tip": "5e7fb5495521be56da4ebb40a24048b7f3ecc675",
+     "with_tip": "34096c6831982028ae29b5d43c4f67517f23e2bb",
+     "at": "2026-11-12T04:49:47Z",
+     "host": "MacBook-Pro",
+     "tree": "6bd63baa2b7c1fc9250a3e851ff2364b095290c8"
+    }
+   ]
   },
   {
    "id": "masked-length-ok",
