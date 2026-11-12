@@ -89895,13 +89895,13 @@
    "needs": [],
    "base": "7c2ab113ec9716496b1d1b78b1f8c3ff8466c9ba",
    "body": "bodies/win-masks-cfg.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19078,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-masks-cfg",
    "host": "MacBook-Pro",
    "added": "2026-11-12T19:44:42Z",
-   "updated": "2026-11-12T20:19:59Z",
+   "updated": "2026-11-12T20:22:33Z",
    "note": "",
    "built": [
     {
@@ -90048,7 +90048,8 @@
      "at": "2026-11-12T20:19:54Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-12T20:22:33Z"
   }
  ],
  "watch": {
