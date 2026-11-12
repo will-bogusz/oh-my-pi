@@ -78246,7 +78246,7 @@
    "needs": [
     "atspi-unanswered-app"
    ],
-   "base": "8800f1066682315cd31a14938eaf3c04d27d7172",
+   "base": "bcd5b0b996e0f4a107f51cb398a6492ffb7d44b9",
    "body": "bodies/atspi-value-readback.md",
    "state": "queued",
    "pr": null,
@@ -78254,8 +78254,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-value-readback",
    "host": "MacBook-Pro",
    "added": "2026-11-11T02:53:57Z",
-   "updated": "2026-11-11T16:53:38Z",
-   "note": ""
+   "updated": "2026-11-12T12:16:20Z",
+   "note": "",
+   "advanced": "2026-11-12T12:16:20Z"
   },
   {
    "id": "x11-takeover-keyboard-grab",
