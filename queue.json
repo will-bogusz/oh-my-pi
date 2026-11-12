@@ -84530,13 +84530,13 @@
    ],
    "base": "bcd5b0b996e0f4a107f51cb398a6492ffb7d44b9",
    "body": "bodies/win-focus-report.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19062,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-focus-report",
    "host": "MacBook-Pro",
    "added": "2026-11-11T13:11:20Z",
-   "updated": "2026-11-12T17:48:52Z",
+   "updated": "2026-11-12T17:53:02Z",
    "note": "",
    "rebases_after": [
     18783,
@@ -84965,7 +84965,8 @@
      "at": "2026-11-12T17:48:49Z",
      "host": "goliath"
     }
-   ]
+   ],
+   "opened": "2026-11-12T17:53:02Z"
   },
   {
    "id": "atspi-press-actions",
