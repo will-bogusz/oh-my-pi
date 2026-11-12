@@ -82721,7 +82721,7 @@
   {
    "id": "ax-masked-readback",
    "branch": "will/ax-masked-readback",
-   "title": "fix(natives): never quote a setValue into a field that reads back masked",
+   "title": "fix(natives): never quote the written text when a setValue read-back disagrees",
    "area": "computer",
    "priority": "P1",
    "needs": [],
@@ -82733,8 +82733,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ax-masked-readback",
    "host": "MacBook-Pro",
    "added": "2026-11-12T02:37:51Z",
-   "updated": "2026-11-12T02:37:51Z",
-   "note": ""
+   "updated": "2026-11-12T03:04:30Z",
+   "note": "AuthFinish 2026-11-12: widened per Main (no written text in any failed read-back); delta reviewed (AuthFinish.ReviewReadbackDelta, fixed); overlaps queued atspi-value-readback in crates/pi-natives/src/desktop/linux/ax.rs"
   }
  ],
  "watch": {
