@@ -79026,7 +79026,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-click-stale-popup",
    "host": "MacBook-Pro",
    "added": "2026-11-11T03:06:32Z",
-   "updated": "2026-11-12T16:22:41Z",
+   "updated": "2026-11-12T16:24:44Z",
    "note": "Main-approved additive test resolution. Linux rust-check and 61 X11 tests pass on rebased head. The two MPX/uinput hotplug tests fail under Xvfb (no udev/libinput hotplug); each fails identically on origin/main 9f728bd56e1 in one baseline run.",
    "line_loss_overrides": [
     {
@@ -79233,15 +79233,6 @@
      "host": "goliath"
     },
     {
-     "with": "#16553",
-     "code": "39a07f3ae0566e73c2c298bc4daed5027df3cbbf",
-     "with_code": "375115bc2d9922bd24a7ea43c9ab95e46d97291d",
-     "tip": "2a57dae17943e098e8a24dacc93d7bc9442cf5c4",
-     "with_tip": "f4b57048b776541f97180caec8026f3942ca86ad",
-     "at": "2026-11-12T16:22:38Z",
-     "host": "goliath"
-    },
-    {
      "with": "#19036",
      "code": "39a07f3ae0566e73c2c298bc4daed5027df3cbbf",
      "with_code": "ae0818c2121d16433cd4d4f8484296b9dc2e1f62",
@@ -79278,21 +79269,84 @@
      "host": "goliath"
     },
     {
-     "with": "ax-row-action",
-     "code": "39a07f3ae0566e73c2c298bc4daed5027df3cbbf",
-     "with_code": "62dc4f77fbeae5cfa4323aaec2cd266e5e2f7a84",
-     "tip": "2a57dae17943e098e8a24dacc93d7bc9442cf5c4",
-     "with_tip": "81c51e505b3b2429de9cbc05ceb2ccfb9a18690f",
-     "at": "2026-11-12T16:22:40Z",
-     "host": "goliath"
-    },
-    {
      "with": "win-focus-report",
      "code": "39a07f3ae0566e73c2c298bc4daed5027df3cbbf",
      "with_code": "eeea17112c4476e129e1cb45a4fc5b9f7c5eac3b",
      "tip": "2a57dae17943e098e8a24dacc93d7bc9442cf5c4",
      "with_tip": "93a1726e2ddd6c6a508bb68d341bf5fa1010d09f",
      "at": "2026-11-12T16:22:40Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#16553",
+     "code": "39a07f3ae0566e73c2c298bc4daed5027df3cbbf",
+     "with_code": "375115bc2d9922bd24a7ea43c9ab95e46d97291d",
+     "tip": "2a57dae17943e098e8a24dacc93d7bc9442cf5c4",
+     "with_tip": "f4b57048b776541f97180caec8026f3942ca86ad",
+     "at": "2026-11-12T16:24:41Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#19037",
+     "code": "39a07f3ae0566e73c2c298bc4daed5027df3cbbf",
+     "with_code": "f71449ae4b8d60dadab639d0d0adb884af4bfb62",
+     "tip": "2a57dae17943e098e8a24dacc93d7bc9442cf5c4",
+     "with_tip": "450e66bd8af16ce6e03c3151135b8ff67982c8d3",
+     "at": "2026-11-12T16:24:43Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#18013",
+     "code": "39a07f3ae0566e73c2c298bc4daed5027df3cbbf",
+     "with_code": "c4d6b2ac1ad011c06167107c07a359eb739617ad",
+     "tip": "2a57dae17943e098e8a24dacc93d7bc9442cf5c4",
+     "with_tip": "fc2484d4c6650dd8ee2a8c6f44209d04e3812a7e",
+     "at": "2026-11-12T16:24:43Z",
+     "host": "goliath"
+    },
+    {
+     "with": "ax-row-action",
+     "code": "39a07f3ae0566e73c2c298bc4daed5027df3cbbf",
+     "with_code": "62dc4f77fbeae5cfa4323aaec2cd266e5e2f7a84",
+     "tip": "2a57dae17943e098e8a24dacc93d7bc9442cf5c4",
+     "with_tip": "81c51e505b3b2429de9cbc05ceb2ccfb9a18690f",
+     "at": "2026-11-12T16:24:43Z",
+     "host": "goliath"
+    },
+    {
+     "with": "atspi-qt-menus",
+     "code": "39a07f3ae0566e73c2c298bc4daed5027df3cbbf",
+     "with_code": "2b1264f00ef1cf9011053957331525f48f0e1ebe",
+     "tip": "2a57dae17943e098e8a24dacc93d7bc9442cf5c4",
+     "with_tip": "833651a13dce4efcfa05e1d93002837f0e4e2ae3",
+     "at": "2026-11-12T16:24:43Z",
+     "host": "goliath"
+    },
+    {
+     "with": "atspi-value-readback",
+     "code": "39a07f3ae0566e73c2c298bc4daed5027df3cbbf",
+     "with_code": "c0cb0581b82119a16dffcbd51eeefb287fe0dd7b",
+     "tip": "2a57dae17943e098e8a24dacc93d7bc9442cf5c4",
+     "with_tip": "c162e1c85805599f5c3ef9f671f200bd09edd3ef",
+     "at": "2026-11-12T16:24:43Z",
+     "host": "goliath"
+    },
+    {
+     "with": "atspi-write-timeout-warning",
+     "code": "39a07f3ae0566e73c2c298bc4daed5027df3cbbf",
+     "with_code": "7599a8dfa17b2a3b05768ff713bae8ce775b82dd",
+     "tip": "2a57dae17943e098e8a24dacc93d7bc9442cf5c4",
+     "with_tip": "be51509d8ab1f11e41bfe8bd319f89753b1a8361",
+     "at": "2026-11-12T16:24:43Z",
+     "host": "goliath"
+    },
+    {
+     "with": "ax-ref-read-as-followup",
+     "code": "39a07f3ae0566e73c2c298bc4daed5027df3cbbf",
+     "with_code": "9fe46b3786db428c67ecf74f778d333d8dc15407",
+     "tip": "2a57dae17943e098e8a24dacc93d7bc9442cf5c4",
+     "with_tip": "2fff0569b5d88b9c242baac0f77e416daa366beb",
+     "at": "2026-11-12T16:24:43Z",
      "host": "goliath"
     }
    ]
