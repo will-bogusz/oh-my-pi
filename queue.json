@@ -79013,6 +79013,41 @@
        "\t\t\t\tlet builder = atspi::proxy::text::TextProxy::builder(&*connection)"
       ]
      }
+    },
+    {
+     "at": "2026-11-12T17:04:23Z",
+     "reason": "Address roboomp nits: replace full range with crossed-bound text, remove the duplicated truncated Takes doc comment, and extend the numeric test with half-bounded controls.",
+     "old": "8d197d074722adef702dec40146e259a04965959",
+     "new": "9cc75f1f3ccc2c985e1dd56eba25bb1c680ef126",
+     "dropped": {
+      "crates/pi-natives/src/desktop/linux/ax.rs": [
+       "\t\t\t\t(Ok(min), Ok(max)) if value < min || value > max => {",
+       "\t\t\t\t\tformat!(\" (its range is {min} to {max})\")",
+       "\t\t/// (GTK, Qt), keeps its old value while answering (Qt), or takes it a",
+       "\t\t/// `org.a11y.atspi.Value` over the range 0 to 100, or one that cannot",
+       "\t\t/// say its range.",
+       "\t\t\tranged:  bool,",
+       "\t\t\t\t\tTakes::Clamped => *current = value.clamp(0.0, 100.0),",
+       "\t\t\t\tself.range(0.0)",
+       "\t\t\t\tself.range(100.0)",
+       "\t\t\tfn range(&self, bound: f64) -> atspi::zbus::fdo::Result<f64> {",
+       "\t\t\t\tif self.ranged {",
+       "\t\t\t\t\tOk(bound)",
+       "\t\t\t\t\tErr(atspi::zbus::fdo::Error::Failed(\"no range\".to_owned()))",
+       "\t\t// Path, what the control does, whether it says its range, the value",
+       "\t\t// written, and the error's text (`None`: the write succeeds).",
+       "\t\tlet cases: [(&str, Takes, bool, f64, Option<&str>); 6] = [",
+       "\t\t\t(\"/exact\", Takes::Exact, true, 37.25, None),",
+       "\t\t\t(\"/later\", Takes::Later, true, 37.0, None),",
+       "\t\t\t(\"/single\", Takes::Single, true, 0.3, None),",
+       "\t\t\t\ttrue,",
+       "\t\t\t\tSome(\"wrote 150; the control now reads 100 (its range is 0 to 100)\"),",
+       "\t\t\t(\"/ignored\", Takes::Ignored, true, 37.0, Some(\"wrote 37; the control now reads 20.\")),",
+       "\t\t\t(\"/unranged\", Takes::Clamped, false, 150.0, Some(\"wrote 150; the control now reads 100.\")),",
+       "\t\t\tfor &(path, takes, ranged, ..) in &cases {",
+       "\t\t\t\tlet control = Value { current, pending: Mutex::new(None), takes, ranged };"
+      ]
+     }
     }
    ],
    "rebases_after": [
