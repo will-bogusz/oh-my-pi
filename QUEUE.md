@@ -4,7 +4,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12
 
 **Opening:** not paused
 **Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-12 19:32Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 2, conflict-held 20, stacked 15, held 11, parked 2, open PRs 25; merged 334, closed 34
+**Counts:** openable now 2, conflict-held 20, stacked 15, held 11, parked 2, open PRs 25, queued since the last plan 1; merged 334, closed 34
 
 ## Openable now (2)
 
@@ -110,3 +110,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12
 | [#19061](https://github.com/can1357/oh-my-pi/pull/19061) | macos-ax-linked-label | fix(natives): name a macOS control by the label its AXTitleUIElement links to | natives | P1 | 1h | rebase; accepted pair with #19036: Main, 2026-11-12: #19036 adds 'unread_children: 0,' to the AxProps literal in macos/ax.rs and a field to the AxProps struct in desktop/ax.rs; this entry returns that literal inside a tuple (AxProps{...}, has_own_label) and adds its own struct field (rustfmt realignment only). Combined form: this entry's tuple with 'unread_children: 0,' inside its AxProps literal; struct with both fields; accepted pair with #19048: QueueFifteen, 2026-11-12 (Main's standing rule: a field added beside a line the other side reshapes without changing a value): only conflict is the Registered struct in crates/pi-natives/src/desktop/ax.rs: #19048 adds 'row: Option<RowProof>,' where this entry rewrites the doc comment of 'held'; #19048 reads neither held nor fingerprint. Combined form: #19048's row field, then this entry's doc comment and 'held: Option<u64>'. | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-ax-linked-label) |
 | [#19063](https://github.com/can1357/oh-my-pi/pull/19063) | macos-press-click-hint | fix(natives): point a refused macOS press at the element's own click | computer | P1 | 1h | requeue | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-press-click-hint) |
 | [#19001](https://github.com/can1357/oh-my-pi/pull/19001) | relay-hidden-frames-main | fix(browser-relay): say what the relay hid in a driven tab | browser | P2 | 14h | keep; accepted pair with #18925: Main, 2026-11-12: accepted (HiddenOnMain's combined form). tab-worker.ts WorkerCore.#run after the finally: this branch's hinted take (if this.#unanswered === active && this.#hiddenFramesWaiting && this.#page) await this.#takeHiddenFrames(this.#page)) stays before the answered guard; in the failure branch #18925's enrichment of error (message and stack with the native notices), then this.#sendResult({ id: msg.id, ok: false, error }), so both native-window notices and the once-only hidden-frames notice ride the failure. Second to land adds one test that a failed run carries both. | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-hidden-frames-main) |
+
+## Queued since the last plan (1)
+
+| id | title | area | priority | age | branch |
+|---|---|---|---|---|---|
+| win-masks-cfg | fix(natives): compile pi-natives for Windows again | computer | P0 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-masks-cfg) |
