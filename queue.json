@@ -83240,7 +83240,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ax-row-action",
    "host": "MacBook-Pro",
    "added": "2026-11-11T11:44:46Z",
-   "updated": "2026-11-12T13:22:58Z",
+   "updated": "2026-11-12T16:22:33Z",
    "note": "Main, 2026-11-12: approved combined row-two-functions.diff. No reusable row read plus failing second walk is covered by read_whole whole-read requirement, not a dedicated test.",
    "line_loss_overrides": [
     {
@@ -83264,7 +83264,144 @@
    ],
    "pair_reasons": {
     "16553": "QueueFourteen, 2026-11-12 (Main's standing rule: use-list collision, opener records): only conflict is the use list in crates/pi-natives/src/desktop/macos/mod.rs: #16553 adds 'pub(super) use clicks::ClickJournal;', this entry adds is_standard_window and window_titles to the ax/capture use lines; nothing removed; combined form is both"
-   }
+   },
+   "built": [
+    {
+     "with": "#19027",
+     "code": "62dc4f77fbeae5cfa4323aaec2cd266e5e2f7a84",
+     "with_code": "fd10d827b17dedf8139c8cb92ef2189ee85df00b",
+     "tip": "81c51e505b3b2429de9cbc05ceb2ccfb9a18690f",
+     "with_tip": "db558a444009203107f7b6df51057ac2c46055f6",
+     "at": "2026-11-12T16:22:31Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#16553",
+     "code": "62dc4f77fbeae5cfa4323aaec2cd266e5e2f7a84",
+     "with_code": "375115bc2d9922bd24a7ea43c9ab95e46d97291d",
+     "tip": "81c51e505b3b2429de9cbc05ceb2ccfb9a18690f",
+     "with_tip": "f4b57048b776541f97180caec8026f3942ca86ad",
+     "at": "2026-11-12T16:22:32Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#17756",
+     "code": "62dc4f77fbeae5cfa4323aaec2cd266e5e2f7a84",
+     "with_code": "00b33a7b015bc7730a8a6926657f2a3f49039187",
+     "tip": "81c51e505b3b2429de9cbc05ceb2ccfb9a18690f",
+     "with_tip": "0a62ea55002a950aef2237c96a8eb62ebeaf28e0",
+     "at": "2026-11-12T16:22:32Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#19023",
+     "code": "62dc4f77fbeae5cfa4323aaec2cd266e5e2f7a84",
+     "with_code": "140692117630964f61463414899f6c2f051fe3eb",
+     "tip": "81c51e505b3b2429de9cbc05ceb2ccfb9a18690f",
+     "with_tip": "c347d81c30599b9b17f75e9e94c7b6c66a661bd3",
+     "at": "2026-11-12T16:22:32Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#19025",
+     "code": "62dc4f77fbeae5cfa4323aaec2cd266e5e2f7a84",
+     "with_code": "5db66d992b8472a4603b55e2969f1345d8d2fde5",
+     "tip": "81c51e505b3b2429de9cbc05ceb2ccfb9a18690f",
+     "with_tip": "f434a94b537426a1707ff706b25550d5c3fa4d72",
+     "at": "2026-11-12T16:22:32Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#19026",
+     "code": "62dc4f77fbeae5cfa4323aaec2cd266e5e2f7a84",
+     "with_code": "8ae975d64a9d7bc86ef8767bdb875641f2d2798b",
+     "tip": "81c51e505b3b2429de9cbc05ceb2ccfb9a18690f",
+     "with_tip": "0430659225aaad7e5e66d22e22ae2f187b39b20c",
+     "at": "2026-11-12T16:22:32Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#19036",
+     "code": "62dc4f77fbeae5cfa4323aaec2cd266e5e2f7a84",
+     "with_code": "ae0818c2121d16433cd4d4f8484296b9dc2e1f62",
+     "tip": "81c51e505b3b2429de9cbc05ceb2ccfb9a18690f",
+     "with_tip": "68d568296ae6fcbc3fe6850f9c43a885b8e02250",
+     "at": "2026-11-12T16:22:32Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#18353",
+     "code": "62dc4f77fbeae5cfa4323aaec2cd266e5e2f7a84",
+     "with_code": "f0586af0647e4e206ee9154d7917dd7de31879c6",
+     "tip": "81c51e505b3b2429de9cbc05ceb2ccfb9a18690f",
+     "with_tip": "4bbf3b4dc92dca19fa35a07a0d97d574998431c4",
+     "at": "2026-11-12T16:22:33Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#19034",
+     "code": "62dc4f77fbeae5cfa4323aaec2cd266e5e2f7a84",
+     "with_code": "da9d02017c240e0d16c85668e84466516ae5c50a",
+     "tip": "81c51e505b3b2429de9cbc05ceb2ccfb9a18690f",
+     "with_tip": "300596a1841441c506f0a8c525668bbd128e561e",
+     "at": "2026-11-12T16:22:33Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#19035",
+     "code": "62dc4f77fbeae5cfa4323aaec2cd266e5e2f7a84",
+     "with_code": "6985961b013c7864e5437d4020188e1966f37ce2",
+     "tip": "81c51e505b3b2429de9cbc05ceb2ccfb9a18690f",
+     "with_tip": "e7ca98273595a4f4a3d92dcc288e2efd31339e83",
+     "at": "2026-11-12T16:22:33Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#17897",
+     "code": "62dc4f77fbeae5cfa4323aaec2cd266e5e2f7a84",
+     "with_code": "2bbb547591ae156ccac7af195b43202e415d1bd2",
+     "tip": "81c51e505b3b2429de9cbc05ceb2ccfb9a18690f",
+     "with_tip": "54c11638043f0ab42d61c95025a325e37eb871b9",
+     "at": "2026-11-12T16:22:33Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#18925",
+     "code": "62dc4f77fbeae5cfa4323aaec2cd266e5e2f7a84",
+     "with_code": "744d68aa21c23ce354aaeba502ee86a1a72f67a8",
+     "tip": "81c51e505b3b2429de9cbc05ceb2ccfb9a18690f",
+     "with_tip": "e6573751f0afc28c86640d971320825d99936d52",
+     "at": "2026-11-12T16:22:33Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#18987",
+     "code": "62dc4f77fbeae5cfa4323aaec2cd266e5e2f7a84",
+     "with_code": "0b6ec1c5314a357dc69bd2a73c0eb77ad714e467",
+     "tip": "81c51e505b3b2429de9cbc05ceb2ccfb9a18690f",
+     "with_tip": "f031b644006be87fd8efa090e979bad4fb502020",
+     "at": "2026-11-12T16:22:33Z",
+     "host": "goliath"
+    },
+    {
+     "with": "x11-click-stale-popup",
+     "code": "62dc4f77fbeae5cfa4323aaec2cd266e5e2f7a84",
+     "with_code": "39a07f3ae0566e73c2c298bc4daed5027df3cbbf",
+     "tip": "81c51e505b3b2429de9cbc05ceb2ccfb9a18690f",
+     "with_tip": "2a57dae17943e098e8a24dacc93d7bc9442cf5c4",
+     "at": "2026-11-12T16:22:33Z",
+     "host": "goliath"
+    },
+    {
+     "with": "win-focus-report",
+     "code": "62dc4f77fbeae5cfa4323aaec2cd266e5e2f7a84",
+     "with_code": "eeea17112c4476e129e1cb45a4fc5b9f7c5eac3b",
+     "tip": "81c51e505b3b2429de9cbc05ceb2ccfb9a18690f",
+     "with_tip": "93a1726e2ddd6c6a508bb68d341bf5fa1010d09f",
+     "at": "2026-11-12T16:22:33Z",
+     "host": "goliath"
+    }
+   ]
   },
   {
    "id": "win-takeover-focus",
