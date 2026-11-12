@@ -75874,7 +75874,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/agent-identity",
    "host": "MacBook-Pro",
    "added": "2026-11-10T23:39:10Z",
-   "updated": "2026-11-12T04:03:07Z",
+   "updated": "2026-11-12T04:03:49Z",
    "note": "",
    "advanced": "2026-11-12T02:36:27Z",
    "built": [
@@ -76284,7 +76284,8 @@
      "tree": "fec27e3b44e81d5421752517b6b9750a9427276e"
     }
    ],
-   "opened": "2026-11-12T04:03:07Z"
+   "opened": "2026-11-12T04:03:07Z",
+   "readied": "2026-11-12T04:03:48Z"
   },
   {
    "id": "browser-cursor",
