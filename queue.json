@@ -76783,13 +76783,13 @@
    "needs": [],
    "base": "c308970263ae13744ea15ab67302e3dac840e266",
    "body": "bodies/computer-run-failure-output.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19100,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-run-failure-output",
    "host": "MacBook-Pro",
    "added": "2026-11-11T00:07:07Z",
-   "updated": "2026-11-12T23:49:59Z",
+   "updated": "2026-11-12T23:56:36Z",
    "note": "",
    "advanced": "2026-11-12T23:22:55Z",
    "built": [
@@ -76883,7 +76883,8 @@
      "at": "2026-11-12T23:49:53Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-12T23:56:36Z"
   },
   {
    "id": "browser-select-readback",
