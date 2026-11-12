@@ -96589,5 +96589,11 @@
     "wake": ""
    }
   ]
+ },
+ "opening": {
+  "id": "win-type-drain",
+  "token": "3c8cbeb0be1a4aaca425a0ffc3b992b3",
+  "host": "MacBook-Pro",
+  "at": "2026-11-12T11:53:10Z"
  }
 }
