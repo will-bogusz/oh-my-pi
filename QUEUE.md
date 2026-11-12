@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12 16:48Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12 16:50Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-12 16:00Z on MacBook-Pro; groups below are from it, states from the manifest)
@@ -44,7 +44,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12
 | win-ax-states | fix(natives): expose Windows control state and stale-reference matches | computer | P2 | 1d | [#19026](https://github.com/can1357/oh-my-pi/pull/19026), [#19036](https://github.com/can1357/oh-my-pi/pull/19036), [#19037](https://github.com/can1357/oh-my-pi/pull/19037), [#18925](https://github.com/can1357/oh-my-pi/pull/18925), ax-row-action, ax-ref-read-as-followup, main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-ax-states) |
 | x11-keysym-remap | fix(natives): type characters outside the X11 keymap through temporary keycodes | computer | P2 | 1d | [#19023](https://github.com/can1357/oh-my-pi/pull/19023), x11-click-stale-popup, main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-keysym-remap) |
 | macos-ax-linked-label | fix(natives): name a macOS control by the label its AXTitleUIElement links to | natives | P2 | 1d | ax-row-action, ax-ref-read-as-followup | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-ax-linked-label) |
-| macos-press-click-hint | fix(natives): point a refused macOS press at the element's own click | computer | P2 | 21h | ax-ref-read-as-followup | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-press-click-hint) |
+| macos-press-click-hint | fix(natives): point a refused macOS press at the element's own click | computer | P2 | 22h | ax-ref-read-as-followup | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-press-click-hint) |
 
 ## Stacked (14)
 
