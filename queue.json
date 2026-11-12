@@ -89196,37 +89196,21 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-12T15:59:54Z",
+  "checked": "2026-11-12T17:31:18Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "ax-row-action": {
-    "since": "2026-11-12T13:27:30Z",
-    "title": "fix(natives): follow rebuilt macOS table rows without selecting a neighbour"
+   "x11-takeover-keyboard-grab": {
+    "since": "2026-11-12T17:31:18Z",
+    "title": "fix(natives): refuse X11 XTest keys while another client grabs the keyboard"
    },
-   "x11-click-stale-popup": {
-    "since": "2026-11-12T13:27:30Z",
-    "title": "fix(natives): refuse X11 presses outside an open popup of the app"
+   "macos-ax-linked-label": {
+    "since": "2026-11-12T17:31:18Z",
+    "title": "fix(natives): name a macOS control by the label its AXTitleUIElement links to"
    },
-   "observe-settle": {
-    "since": "2026-11-12T12:26:00Z",
-    "title": "feat(browser): let observe() settle the effects of the preceding action"
-   },
-   "atspi-qt-menus": {
-    "since": "2026-11-12T14:58:26Z",
-    "title": "fix(natives): let Linux menu.select walk into Qt apps' menus"
-   },
-   "atspi-value-readback": {
-    "since": "2026-11-12T14:58:26Z",
-    "title": "fix(natives): read back AT-SPI numeric setValue before reporting success"
-   },
-   "atspi-write-timeout-warning": {
-    "since": "2026-11-12T13:57:47Z",
-    "title": "fix(natives): preserve the empty-field warning on Linux write timeouts"
-   },
-   "ax-ref-read-as-followup": {
-    "since": "2026-11-12T14:58:26Z",
-    "title": "fix(natives): skip unused ref-check reads and recover display refs"
+   "macos-press-click-hint": {
+    "since": "2026-11-12T17:31:18Z",
+    "title": "fix(natives): point a refused macOS press at the element's own click"
    },
    "win-focus-report": {
     "since": "2026-11-12T14:58:26Z",
@@ -89442,7 +89426,14 @@
    19034,
    19035,
    19036,
-   19037
+   19037,
+   19044,
+   19045,
+   19046,
+   19047,
+   19048,
+   19050,
+   19054
   ],
   "post_merge": {
    "16274": {
@@ -92650,6 +92641,73 @@
     "id": "macos-press-click-hint",
     "title": "fix(natives): point a refused macOS press at the element's own click",
     "why": "plan: wait (conflicts with ax-ref-read-as-followup in crates/pi-natives/src/desktop/macos/ax.rs)"
+   },
+   {
+    "at": "2026-11-12T17:31:18Z",
+    "kind": "openable",
+    "id": "x11-takeover-keyboard-grab",
+    "title": "fix(natives): refuse X11 XTest keys while another client grabs the keyboard"
+   },
+   {
+    "at": "2026-11-12T17:31:18Z",
+    "kind": "openable",
+    "id": "macos-ax-linked-label",
+    "title": "fix(natives): name a macOS control by the label its AXTitleUIElement links to"
+   },
+   {
+    "at": "2026-11-12T17:31:18Z",
+    "kind": "openable",
+    "id": "macos-press-click-hint",
+    "title": "fix(natives): point a refused macOS press at the element's own click"
+   },
+   {
+    "at": "2026-11-12T17:31:18Z",
+    "kind": "unopenable",
+    "id": "ax-row-action",
+    "title": "fix(natives): follow rebuilt macOS table rows without selecting a neighbour",
+    "why": "opened as #19048"
+   },
+   {
+    "at": "2026-11-12T17:31:18Z",
+    "kind": "unopenable",
+    "id": "x11-click-stale-popup",
+    "title": "fix(natives): refuse X11 presses outside an open popup of the app",
+    "why": "opened as #19044"
+   },
+   {
+    "at": "2026-11-12T17:31:18Z",
+    "kind": "unopenable",
+    "id": "observe-settle",
+    "title": "feat(browser): let observe() settle the effects of the preceding action",
+    "why": "opened as #19045"
+   },
+   {
+    "at": "2026-11-12T17:31:18Z",
+    "kind": "unopenable",
+    "id": "atspi-qt-menus",
+    "title": "fix(natives): let Linux menu.select walk into Qt apps' menus",
+    "why": "opened as #19046"
+   },
+   {
+    "at": "2026-11-12T17:31:18Z",
+    "kind": "unopenable",
+    "id": "atspi-value-readback",
+    "title": "fix(natives): read back AT-SPI numeric setValue before reporting success",
+    "why": "opened as #19047"
+   },
+   {
+    "at": "2026-11-12T17:31:18Z",
+    "kind": "unopenable",
+    "id": "atspi-write-timeout-warning",
+    "title": "fix(natives): preserve the empty-field warning on Linux write timeouts",
+    "why": "opened as #19050"
+   },
+   {
+    "at": "2026-11-12T17:31:18Z",
+    "kind": "unopenable",
+    "id": "ax-ref-read-as-followup",
+    "title": "fix(natives): skip unused ref-check reads and recover display refs",
+    "why": "opened as #19054"
    }
   ]
  },
