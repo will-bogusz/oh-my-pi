@@ -84698,7 +84698,7 @@
    "needs": [
     "win-takeover-focus"
    ],
-   "base": "ee6912f7dc531a48793cfc6afd832b020b708d0a",
+   "base": "238878f131787ada2b5d35409b4ee759cc535419",
    "body": "bodies/win-type-drain.md",
    "state": "queued",
    "pr": null,
@@ -84706,8 +84706,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-type-drain",
    "host": "MacBook-Pro",
    "added": "2026-11-12T04:40:03Z",
-   "updated": "2026-11-12T05:30:05Z",
-   "note": "QueueTwelve, 2026-11-12: local head ce216ae356443bcf8a2e54a5ff4b4d99269c29c6; unpushed until #18919 merges. Named advance waits on the open need; these local-ahead commits ride its post-merge push. Return regression green/red on Windows; rust-check macOS/Linux/Windows recorded."
+   "updated": "2026-11-12T09:39:25Z",
+   "note": "QueueTwelve, 2026-11-12: local head ce216ae356443bcf8a2e54a5ff4b4d99269c29c6; unpushed until #18919 merges. Named advance waits on the open need; these local-ahead commits ride its post-merge push. Return regression green/red on Windows; rust-check macOS/Linux/Windows recorded.",
+   "advanced": "2026-11-12T09:39:25Z"
   },
   {
    "id": "win-type-insert",
