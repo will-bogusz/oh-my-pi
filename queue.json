@@ -78815,6 +78815,21 @@
        "\t\t\tclear_group_latch,"
       ]
      }
+    },
+    {
+     "at": "2026-11-12T20:41:30Z",
+     "reason": "QueueSixteen, 2026-11-12: roboomp should-fix 4555999266, xtest_steps takes keys and the two xtest_steps body lines that used text/duration",
+     "old": "47ac0190ede2c128882ea9e74b48a223baa6df73",
+     "new": "adf8ef5f36556967b4d3aea7ff8ef2859b0808f7",
+     "dropped": {
+      "crates/pi-natives/src/desktop/linux/x11/input.rs": [
+       "\t\t\tthis.xtest_steps(&steps, keys.duration(), matches!(keys, Keys::Text(_)))",
+       "\t\t\t\tself.xtest_steps(&steps, keys.duration(), matches!(keys, Keys::Text(_)))",
+       "\tfn xtest_steps(&self, steps: &[KeyStep], duration: Duration, text: bool) -> CoreResult<()> {",
+       "\t\tlet neutral = (text && self.xkb)",
+       "\t\tlet sent = keymap::run_steps_with_hold(steps, duration, |step| {"
+      ]
+     }
     }
    ],
    "rebases_after": [
