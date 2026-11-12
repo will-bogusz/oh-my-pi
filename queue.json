@@ -76352,8 +76352,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-cursor",
    "host": "MacBook-Pro",
    "added": "2026-11-10T23:39:37Z",
-   "updated": "2026-11-12T00:14:02Z",
-   "note": "",
+   "updated": "2026-11-12T05:37:09Z",
+   "note": "Main 2026-11-12: Will chose theme-resolved agent colours for #18987 (lane AgentColors, one push); after it lands, restack this entry onto #18987's new colour API (small) before it can open.",
    "hold": "Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check"
   },
   {
