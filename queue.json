@@ -78208,7 +78208,28 @@
    "added": "2026-11-11T02:32:01Z",
    "updated": "2026-11-12T13:19:54Z",
    "note": "",
-   "advanced": "2026-11-12T13:19:54Z"
+   "advanced": "2026-11-12T13:19:54Z",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-12T13:27:06Z",
+     "reason": "Keep main activity import and typing-user tests beside neutral keyboard tests; pass explicit display; clear group latch by subtracting observed additive latch",
+     "old": "2b8e7c7a3aad1ac26f6f43d459c4acae2e7a24a7",
+     "new": "8745c5bd9c21f2c06c956d85e5057d8a8ebef29b",
+     "dropped": {
+      "crates/pi-natives/src/desktop/linux/x11/input.rs": [
+       "\t\tlet mut input = X11Input::new(Arc::new(input_conn), root).unwrap();"
+      ],
+      "crates/pi-natives/src/desktop/linux/x11/keyboard_state.rs": [
+       "\t\t\tbefore.latched_group != 0,",
+       "\t\tlatch_lock(self.conn, locks, locks, group, before.locked_group, 0, false)",
+       "/// `group` when `lock_group`, and clears the latches in `clear_latches` and,",
+       "/// with `clear_group_latch`, the group latch.",
+       "\tclear_group_latch: bool,",
+       "\t\t\tclear_group_latch,"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "x11-mpx-key-confirm",
