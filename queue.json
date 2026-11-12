@@ -82921,7 +82921,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/status-entered-text",
    "host": "MacBook-Pro",
    "added": "2026-11-12T01:30:11Z",
-   "updated": "2026-11-12T03:43:46Z",
+   "updated": "2026-11-12T03:44:15Z",
    "note": "QueueTwelve 2026-11-12: P1 per Main (stops typed secrets being written to session files)",
    "advanced": "2026-11-12T02:18:32Z",
    "built": [
@@ -83166,7 +83166,8 @@
      "tree": "259ac3fd384bc19c614e71176fe014992ab61f09"
     }
    ],
-   "opened": "2026-11-12T03:43:46Z"
+   "opened": "2026-11-12T03:43:46Z",
+   "readied": "2026-11-12T03:44:15Z"
   },
   {
    "id": "credential-fill-proposal",
