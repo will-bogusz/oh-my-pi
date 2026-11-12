@@ -83960,6 +83960,26 @@
    "added": "2026-11-12T04:00:44Z",
    "updated": "2026-11-12T04:00:44Z",
    "note": ""
+  },
+  {
+   "id": "takeover-attached-hint",
+   "branch": "will/takeover-attached-hint",
+   "title": "fix(natives): name the background route when takeover refuses a macOS suggestion list",
+   "area": "computer",
+   "priority": "P2",
+   "needs": [
+    "autofill-rows"
+   ],
+   "base": "5e7fb5495521be56da4ebb40a24048b7f3ecc675",
+   "body": "bodies/takeover-attached-hint.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/takeover-attached-hint",
+   "host": "MacBook-Pro",
+   "added": "2026-11-12T04:03:51Z",
+   "updated": "2026-11-12T04:03:51Z",
+   "note": ""
   }
  ],
  "watch": {
