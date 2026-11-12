@@ -83713,13 +83713,13 @@
    "needs": [],
    "base": "6e9204c9ee454fe6972985aa792d47706c9315f9",
    "body": "bodies/relay-hidden-frames-main.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19001,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-hidden-frames-main",
    "host": "MacBook-Pro",
    "added": "2026-11-12T02:04:21Z",
-   "updated": "2026-11-12T05:10:34Z",
+   "updated": "2026-11-12T05:27:03Z",
    "note": "HiddenOnMain: rebuilt on main without relay-frame-race, head 8b646ad6c2d (review HiddenOnMain.ReviewHiddenOnMain fixed; real 1Password: tab kept identical to main in all 8 cells, notice names 1Password once per hidden frame) | Main 2026-11-12: accepted pair with #18925 (record with set --pair once both open). Combined form at tab-worker.ts WorkerCore.#run after the finally: this branch's hinted take (if this.#unanswered === active && this.#hiddenFramesWaiting && this.#page) await this.#takeHiddenFrames(this.#page)) stays before the answered guard; in the failure branch #18925's enrichment of error (message and stack with the native notices), then this.#sendResult({ id: msg.id, ok: false, error }), so both native-window notices and the once-only hidden-frames notice ride the failure. Second to land adds one test that a failed run carries both.",
    "rebases_after": [
     18925
@@ -83968,7 +83968,8 @@
      "host": "MacBook-Pro",
      "tree": "1752fe11469176b04b614c5d02efd07b47c20b83"
     }
-   ]
+   ],
+   "opened": "2026-11-12T05:27:03Z"
   },
   {
    "id": "ax-masked-readback",
