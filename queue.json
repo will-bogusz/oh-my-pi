@@ -82468,14 +82468,14 @@
    ],
    "base": "4350f38c5fc4a1178c2b46bebfd2794cea74bdf3",
    "body": "bodies/click-snapshot-first.md",
-   "state": "queued",
+   "state": "closed",
    "pr": null,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/click-routed",
    "host": "MacBook-Pro",
    "added": "2026-11-11T18:13:37Z",
-   "updated": "2026-11-11T18:13:37Z",
-   "note": ""
+   "updated": "2026-11-12T00:53:52Z",
+   "note": "Dropped by Main, 2026-11-12, on Design16553b's measurement: its order is worse than the PR's on the same gap (20/40 picks sent back and 20/40 targets left in front, against 4/120 and 0). Do not requeue. A different follow-up exists as a patch, not queued: ~/tmp/oh-my-pi/Design16553b/follow-up.patch (tap as only writer; needs a VM A/B first; only after #16553 merges)."
   },
   {
    "id": "macos-press-click-hint",
