@@ -94746,6 +94746,11 @@
     "sha": "080ecdfade9cdbc2a22d88678d8f8d3725e84209",
     "at": "2026-11-12T12:21:06Z",
     "host": "goliath"
+   },
+   "macos": {
+    "sha": "080ecdfade9cdbc2a22d88678d8f8d3725e84209",
+    "at": "2026-11-12T12:29:38Z",
+    "host": "Wills-MacBook-Pro"
    }
   },
   "f8e9cf8898373b91a8af44469b64c2d7b39aa893": {
