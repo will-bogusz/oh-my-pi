@@ -99533,6 +99533,11 @@
     "sha": "25a9cc19d1da470270a76bc863769cb3637f54ff",
     "at": "2026-11-12T23:05:56Z",
     "host": "goliath"
+   },
+   "macos": {
+    "sha": "88f1594f719749579f8ecd152c6441909e20c6aa",
+    "at": "2026-11-12T23:06:49Z",
+    "host": "Wills-MacBook-Pro"
    }
   },
   "0a0250160e574d86022ce5b5ea2f902655cebf2c": {
