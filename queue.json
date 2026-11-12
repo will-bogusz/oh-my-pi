@@ -72475,6 +72475,33 @@
      "note": "Guide must leave cell output: 5 of 13 Codex findings plus the computer lane's 768-column cut are stages of the cell-output path; head fails 9/28 scripted cells. Replacement: hidden typed custom message from the session's aside provider after the tool batch (or with a background job result), delivered-state read from typed transcript messages; removes tags/regexes, preserveEvalGuides, Agent.messagesRevision, per-advisor Eval session. 28/28; blind Haiku 6/6 vs 6/6, tokens 0.93 [0.73,1.21].",
      "ref": "/Users/viathebrink/tmp/oh-my-pi/queuepilot/design/18786.md"
     }
+   ],
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-12T02:07:19Z",
+     "reason": "Release port preserves first-use behavior; app.target becomes top-level target, relay:false becomes app:auto, main browser-neutral header and fenced signature table retain own signatures, identifier regression reads that table; exact replacements and tests in queuetwelve/port/rows.md",
+     "old": "43590a6800fd09657b6fd433eaf3f71e80899403",
+     "new": "949cbb7a35f41b269297c8816407ddc633bf59bd",
+     "dropped": {
+      "packages/coding-agent/src/prompts/system/browser-user-session.md": [
+       "- `app.target` borrows the user's own tab or Tern block: NEVER navigate it (`url`, `goto`) without authorization."
+      ],
+      "packages/coding-agent/src/prompts/tools/browser-core.md": [
+       "  `await browser.targets({app?})` lists pages `app.target` can adopt;"
+      ],
+      "packages/coding-agent/src/prompts/tools/browser.md": [
+       "Drive real Chromium tabs from JavaScript or Python Eval with the global `browser` object; start with `const tab = await browser.open({ name, url })`.",
+       "  - Interaction: `click`, `dblclick`, `hover`, `focus`, `check`, `uncheck`, `type(selector, text)`, `fill(selector, text)`, `press(key, {selector?})`, `keyDown`, `keyUp`, `mouseMove`, `mouseDown`, `mouseUp`, `clickAt(x, y)`, `wheel`, `scroll(dx, dy)`, `drag(from, to)` (selectors or `{x, y}` points), `highlight`, `scrollIntoView`, `select(selector, \u2026values)`, `uploadFile(selector, \u2026paths)`. `click(selector, {button?, count?})` presses another mouse button (`\"right\"` opens a context menu) or clicks more than once.",
+       "  - Page execution: `evaluate(fnOrExpression)`. `tab.evaluate(string)` evaluates the string as a page-global expression; top-level `return` is invalid. Pass a function or invoke an IIFE string to use `return`."
+      ],
+      "packages/coding-agent/test/tools/browser-prelude-documentation.test.ts": [
+       "\tfor (const [, span] of markdown.matchAll(/`([^`\\n]+)`/g)) {"
+      ],
+      "packages/coding-agent/test/tools/browser-relay-kind.test.ts": [
+       "\t\t\texpect(guidance?.includes(\"`app: { relay: false }` for a throwaway managed browser\") ?? false).toBe(onRelay);"
+      ]
+     }
+    }
    ]
   },
   {
