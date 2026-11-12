@@ -76789,7 +76789,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-run-failure-output",
    "host": "MacBook-Pro",
    "added": "2026-11-11T00:07:07Z",
-   "updated": "2026-11-12T23:56:36Z",
+   "updated": "2026-11-12T23:57:07Z",
    "note": "",
    "advanced": "2026-11-12T23:22:55Z",
    "built": [
@@ -76884,7 +76884,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-11-12T23:56:36Z"
+   "opened": "2026-11-12T23:56:36Z",
+   "readied": "2026-11-12T23:57:07Z"
   },
   {
    "id": "browser-select-readback",
