@@ -99409,8 +99409,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-12T22:34:59.499277Z",
-  "host": "goliath",
+  "at": "2026-11-12T23:02:29.038096Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -99643,8 +99643,10 @@
     "area": "other",
     "priority": "P2",
     "title": "fix(ai,coding-agent): carry other models' reasoning to Claude and retry its refusal without it",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in packages/ai/src/providers/pi-native-server.ts"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -99677,8 +99679,10 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in MODULE.bazel.lock"
+    ],
     "note": "accepted pair with #18013; accepted pair with #19035",
     "over": [],
     "paired": [
@@ -99788,8 +99792,10 @@
     "area": "natives",
     "priority": "P2",
     "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in MODULE.bazel.lock"
+    ],
     "note": "accepted pair with #18353",
     "over": [],
     "paired": [
@@ -100455,7 +100461,6 @@
     "title": "fix(natives): expose Windows control state and stale-reference matches",
     "action": "wait",
     "reasons": [
-     "conflicts with #19078 in crates/pi-natives/src/desktop/ax.rs",
      "conflicts with #19036 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs",
      "conflicts with #19048 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19061 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs",
@@ -100468,7 +100473,6 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#19078",
      "#19036",
      "#19048",
      "#19061",
