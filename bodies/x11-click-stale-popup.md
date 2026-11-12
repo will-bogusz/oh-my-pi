@@ -18,6 +18,8 @@ Not changed: macOS and Windows. From the code, neither checks for a menu the tar
 
 ## Testing
 
+The measurements below were collected before the current main rebase; activation and admission timing has since changed.
+
 Two `X11Input` sessions against one app: A opens its Menu popup and ends; B clicks the app's Bump button (outside the popup) or the popup's middle (inside), in the background, and a refused click is rerun in takeover as `backgroundFallback: takeover` does.
 
 | | GTK 3 `main` | GTK 3 this PR | Qt 6 check off | Qt 6 this PR |
@@ -33,7 +35,7 @@ KVM guest, Ubuntu 24.04, GNOME (Mutter) on Xorg 21.1.12, GTK 3.24.41, Qt 6.10.1 
 </details>
 
 - `a_press_outside_an_open_popup_is_refused` (`#[ignore]`, own Xvfb; `cargo test -p pi-natives --lib -- --ignored open_popup`): refused outside the popup in the background and in takeover with nothing reaching the window; delivered inside the popup, inside a submenu over it, and with no popup; a plain move passes. Fails on `main` 30 of 30 runs, passes here 30 of 30 (Xvfb 21.1.12).
-- `scripts/rust-check` on Linux.
+- Re-run on current main (`bcd5b0b996e`): Linux `scripts/rust-check` passed; `cargo test -p pi-natives --lib desktop::linux::x11 -- --include-ignored --test-threads=1` under Xvfb passed 61 tests, including the regression, typing-user admission and named-change tests. Two MPX hotplug tests require an Xorg server with udev/libinput and fail under Xvfb.
 
 ---
 
