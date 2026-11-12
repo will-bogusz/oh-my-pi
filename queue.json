@@ -82581,6 +82581,24 @@
    "note": "",
    "hold": "SecretFill-2 for Main, 2026-11-12: proposal written, not built; needs a maintainer decision (own secret resolution in core or document the recipe) before any code",
    "kind": "proposal"
+  },
+  {
+   "id": "computer-secure-input",
+   "branch": "will/computer-secure-input",
+   "title": "fix(natives,coding-agent): report macOS secure input and stop claiming globalEscape under it",
+   "area": "computer",
+   "priority": "P1",
+   "needs": [],
+   "base": "d5ac02ce8678cf50f643d3f65361714c92d5d450",
+   "body": "bodies/computer-secure-input.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-secure-input",
+   "host": "MacBook-Pro",
+   "added": "2026-11-12T01:37:10Z",
+   "updated": "2026-11-12T01:37:10Z",
+   "note": ""
   }
  ],
  "watch": {
