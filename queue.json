@@ -83866,6 +83866,24 @@
      "host": "MacBook-Pro"
     }
    ]
+  },
+  {
+   "id": "autofill-rows",
+   "branch": "will/autofill-rows",
+   "title": "fix(natives): own macOS suggestion-list elements by the window that lists them",
+   "area": "computer",
+   "priority": "P2",
+   "needs": [],
+   "base": "04cd1a7549a02d62ad1d24826198d52507595683",
+   "body": "bodies/autofill-rows.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/autofill-rows",
+   "host": "MacBook-Pro",
+   "added": "2026-11-12T04:00:08Z",
+   "updated": "2026-11-12T04:00:08Z",
+   "note": ""
   }
  ],
  "watch": {
