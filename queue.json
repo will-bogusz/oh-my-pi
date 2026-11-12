@@ -86318,7 +86318,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-12T13:27:30Z",
+  "checked": "2026-11-12T13:57:47Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -86349,6 +86349,10 @@
    "observe-settle": {
     "since": "2026-11-12T12:26:00Z",
     "title": "feat(browser): let observe() settle the effects of the preceding action"
+   },
+   "atspi-write-timeout-warning": {
+    "since": "2026-11-12T13:57:47Z",
+    "title": "fix(natives): preserve the empty-field warning on Linux write timeouts"
    },
    "macos-press-click-hint": {
     "since": "2026-11-12T13:27:30Z",
@@ -89846,6 +89850,12 @@
     "id": "ax-ref-read-as-followup",
     "title": "fix(natives): skip unused ref-check reads and recover display refs",
     "why": "plan: wait (conflicts with atspi-huge-children in crates/pi-natives/src/desktop/macos/ax.rs)"
+   },
+   {
+    "at": "2026-11-12T13:57:47Z",
+    "kind": "openable",
+    "id": "atspi-write-timeout-warning",
+    "title": "fix(natives): preserve the empty-field warning on Linux write timeouts"
    }
   ]
  },
@@ -95265,7 +95275,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-12T13:27:31.001395Z",
+  "at": "2026-11-12T13:57:48.713543Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -95673,9 +95683,8 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): read each AT-SPI element in two concurrent rounds",
-    "action": "held",
+    "action": "wait",
     "reasons": [
-     "held: Main, 2026-11-12: pending interleaved current-main/head performance remeasurement; body unchanged until results",
      "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
@@ -96030,16 +96039,14 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): preserve the empty-field warning on Linux write timeouts",
-    "action": "wait",
-    "reasons": [
-     "conflicts with #19026 in crates/pi-natives/src/desktop/linux/ax.rs"
-    ],
-    "note": "",
+    "action": "open",
+    "reasons": [],
+    "note": "accepted pair with #19026: Main, 2026-11-12: only conflict is crates/pi-natives/src/desktop/linux/ax.rs outside function bodies: this entry adds fn text_write_error above the Linux masks that #19026 deletes for the shared desktop::ax::masks import (same arguments and meaning). Combined form: keep text_write_error, drop the local masks. Trial merge be51509d8ab + 0430659225a built on goliath; linux::ax 26 (incl. interrupted/ignored-write) and desktop::ax 46 pass",
     "over": [],
-    "paired": [],
-    "blocked_by": [
+    "paired": [
      "#19026"
     ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T21:44:32Z"
    },
@@ -96236,7 +96243,7 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): point a refused macOS press at the element's own click",
-    "action": "open",
+    "action": "next-hour",
     "reasons": [],
     "note": "",
     "over": [],
