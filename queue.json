@@ -99391,6 +99391,11 @@
     "sha": "61e64ef715127ff6544e4217e5af0f42dfe9fc2b",
     "at": "2026-11-12T19:41:52Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "25a9cc19d1da470270a76bc863769cb3637f54ff",
+    "at": "2026-11-12T23:05:56Z",
+    "host": "goliath"
    }
   },
   "0a0250160e574d86022ce5b5ea2f902655cebf2c": {
