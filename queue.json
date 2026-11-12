@@ -85860,14 +85860,16 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-type-drain",
    "host": "MacBook-Pro",
    "added": "2026-11-12T04:40:03Z",
-   "updated": "2026-11-12T10:08:57Z",
+   "updated": "2026-11-12T11:53:07Z",
    "note": "QueueTwelve, 2026-11-12: local head ce216ae356443bcf8a2e54a5ff4b4d99269c29c6; unpushed until #18919 merges. Named advance waits on the open need; these local-ahead commits ride its post-merge push. Return regression green/red on Windows; rust-check macOS/Linux/Windows recorded.",
    "advanced": "2026-11-12T09:39:25Z",
    "rebases_after": [
-    18783
+    18783,
+    19025
    ],
    "pair_reasons": {
-    "18783": "QueueThirteen, 2026-11-12 (Main: docs pairs are the opener's): docs-only collision in docs/computer-use.md, adjacent: #18783 adds two X11 covered-window screenshot paragraphs right before the 'Window input defaults to background routes' paragraph that this entry edits. Combined form: #18783's two paragraphs, blank line, then this entry's wording of the 'Window input defaults' paragraph. No code overlap."
+    "18783": "QueueThirteen, 2026-11-12 (Main: docs pairs are the opener's): docs-only collision in docs/computer-use.md, adjacent: #18783 adds two X11 covered-window screenshot paragraphs right before the 'Window input defaults to background routes' paragraph that this entry edits. Combined form: #18783's two paragraphs, blank line, then this entry's wording of the 'Window input defaults' paragraph. No code overlap.",
+    "19025": "Main, 2026-11-12 (via QueueThirteen): only conflict is the use list in crates/pi-natives/src/desktop/win32/input.rs: this entry adds GetKeyState, #19025 (win-target-layout) replaces MapVirtualKeyW with MapVirtualKeyExW; this entry adds no MapVirtualKeyW call. Combined form: one use list with GetKeyState and MapVirtualKeyExW."
    }
   },
   {
