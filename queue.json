@@ -83199,13 +83199,13 @@
    "needs": [],
    "base": "b437322d9a3900206228e17077415c87ce67c8ca",
    "body": "bodies/computer-secure-input.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18982,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-secure-input",
    "host": "MacBook-Pro",
    "added": "2026-11-12T01:37:10Z",
-   "updated": "2026-11-12T03:37:34Z",
+   "updated": "2026-11-12T03:50:14Z",
    "note": "",
    "advanced": "2026-11-12T02:18:39Z",
    "built": [
@@ -83629,7 +83629,8 @@
      "host": "MacBook-Pro",
      "tree": "fec27e3b44e81d5421752517b6b9750a9427276e"
     }
-   ]
+   ],
+   "opened": "2026-11-12T03:50:14Z"
   },
   {
    "id": "relay-frame-race",
