@@ -83412,7 +83412,7 @@
    "needs": [
     "ax-ref-read-as"
    ],
-   "base": "8f4926af621992f46bd5d61d4abef83d43e9e1a2",
+   "base": "bcd5b0b996e0f4a107f51cb398a6492ffb7d44b9",
    "body": "bodies/ax-ref-read-as-followup.md",
    "state": "queued",
    "pr": null,
@@ -83420,9 +83420,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ax-ref-read-as-followup",
    "host": "MacBook-Pro",
    "added": "2026-11-11T15:44:29Z",
-   "updated": "2026-11-12T12:20:57Z",
+   "updated": "2026-11-12T12:21:21Z",
    "note": "",
-   "advanced": "2026-11-12T12:16:06Z"
+   "advanced": "2026-11-12T12:21:21Z"
   },
   {
    "id": "x11-mpx-reattach",
