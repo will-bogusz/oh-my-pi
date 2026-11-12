@@ -8,17 +8,17 @@ One session opening a GTK 3 app's menu and ending, then a second session clickin
 
 A GTK or Qt popup menu grabs the pointer while it is open: a press outside it goes to the menu, which closes and drops it. The pointer routes only confirm the press reached the server, so the call returned success and the agent went on from a click that never happened.
 
-`X11Input::popup_outside` looks for a mapped override-redirect popup of the target window's process (`Wm::grab_popups_of`, the test background keys already refuse on) and refuses a press, hold, drag or scroll outside every such popup before sending anything: `BackgroundUnavailable` in the background, as background keys do, and `InputFailed` in takeover, so the default takeover rerun cannot report the same lost click. The error names the popup and says to target its window to press inside it, or to close it first. Plain moves, presses inside the popup or a submenu, and apps with no popup open are unchanged.
+`X11Input::popup_outside` looks for a mapped override-redirect popup of the target window's process (`Wm::grab_popups_of`, which background keys already refuse on) and refuses a press, hold, drag or scroll outside every such popup before sending anything: `BackgroundUnavailable` in the background and `InputFailed` in takeover, so the takeover rerun cannot report the same lost click. The error names the popup and says to target its window to press inside it, or to close it first. Plain moves, presses inside the popup or a submenu, and apps with no popup open are unchanged.
 
-Risk: any mapped override-redirect window of the app other than a tooltip, notification or drag icon counts, such as an open combo dropdown. Those grab the pointer too, so a click outside them should be lost on `main` as well (not run here).
+Risk: any mapped override-redirect window of the app other than a tooltip, notification or drag icon counts, such as an open combo dropdown; those grab the pointer too, so a click outside them is likely lost on `main` as well (not run).
 
-Open question: should a session also close its open popups with Escape when it ends? I recommend against: it fixes only the left-behind case, not a menu the user or app opened, and sends a key into the desktop after the agent is gone. It would be a hook in session teardown.
+Open question: should a session close its open popups with Escape when it ends? I recommend against: it fixes only the left-behind case, not a menu the user or app opened, and sends a key into the desktop after the agent is gone.
 
 ## Testing
 
 Measured before the rebase onto current main, whose takeover activation and admission timing changed since.
 
-Two `X11Input` sessions against one app: A opens its Menu popup and ends; B clicks the app's Bump button (outside the popup) or the popup's middle (inside), in the background, and a refused click is rerun in takeover as `backgroundFallback: takeover` does.
+Two `X11Input` sessions, one app: A opens its Menu popup and ends; B clicks Bump (outside) or the popup's middle (inside) in the background, rerunning a refused click in takeover as `backgroundFallback: takeover` does.
 
 | | GTK 3 `main` | GTK 3 this PR | Qt 6 check off | Qt 6 this PR |
 |---|---|---|---|---|
