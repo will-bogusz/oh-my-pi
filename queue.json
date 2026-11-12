@@ -84286,7 +84286,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-focus-report",
    "host": "MacBook-Pro",
    "added": "2026-11-11T13:11:20Z",
-   "updated": "2026-11-12T16:43:06Z",
+   "updated": "2026-11-12T16:48:05Z",
    "note": "",
    "rebases_after": [
     18783,
@@ -84545,15 +84545,6 @@
      "host": "goliath"
     },
     {
-     "with": "#19035",
-     "code": "eeea17112c4476e129e1cb45a4fc5b9f7c5eac3b",
-     "with_code": "6985961b013c7864e5437d4020188e1966f37ce2",
-     "tip": "93a1726e2ddd6c6a508bb68d341bf5fa1010d09f",
-     "with_tip": "e7ca98273595a4f4a3d92dcc288e2efd31339e83",
-     "at": "2026-11-12T16:33:15Z",
-     "host": "goliath"
-    },
-    {
      "with": "observe-settle",
      "code": "eeea17112c4476e129e1cb45a4fc5b9f7c5eac3b",
      "with_code": "36b2065463c91106f29adfd1df76b4a051127cb1",
@@ -84581,47 +84572,11 @@
      "host": "goliath"
     },
     {
-     "with": "#19025",
-     "code": "eeea17112c4476e129e1cb45a4fc5b9f7c5eac3b",
-     "with_code": "5db66d992b8472a4603b55e2969f1345d8d2fde5",
-     "tip": "93a1726e2ddd6c6a508bb68d341bf5fa1010d09f",
-     "with_tip": "f434a94b537426a1707ff706b25550d5c3fa4d72",
-     "at": "2026-11-12T16:43:04Z",
-     "host": "goliath"
-    },
-    {
      "with": "#19036",
      "code": "eeea17112c4476e129e1cb45a4fc5b9f7c5eac3b",
      "with_code": "ae0818c2121d16433cd4d4f8484296b9dc2e1f62",
      "tip": "93a1726e2ddd6c6a508bb68d341bf5fa1010d09f",
      "with_tip": "68d568296ae6fcbc3fe6850f9c43a885b8e02250",
-     "at": "2026-11-12T16:43:06Z",
-     "host": "goliath"
-    },
-    {
-     "with": "#18353",
-     "code": "eeea17112c4476e129e1cb45a4fc5b9f7c5eac3b",
-     "with_code": "f0586af0647e4e206ee9154d7917dd7de31879c6",
-     "tip": "93a1726e2ddd6c6a508bb68d341bf5fa1010d09f",
-     "with_tip": "4bbf3b4dc92dca19fa35a07a0d97d574998431c4",
-     "at": "2026-11-12T16:43:06Z",
-     "host": "goliath"
-    },
-    {
-     "with": "#19034",
-     "code": "eeea17112c4476e129e1cb45a4fc5b9f7c5eac3b",
-     "with_code": "da9d02017c240e0d16c85668e84466516ae5c50a",
-     "tip": "93a1726e2ddd6c6a508bb68d341bf5fa1010d09f",
-     "with_tip": "300596a1841441c506f0a8c525668bbd128e561e",
-     "at": "2026-11-12T16:43:06Z",
-     "host": "goliath"
-    },
-    {
-     "with": "#18925",
-     "code": "eeea17112c4476e129e1cb45a4fc5b9f7c5eac3b",
-     "with_code": "744d68aa21c23ce354aaeba502ee86a1a72f67a8",
-     "tip": "93a1726e2ddd6c6a508bb68d341bf5fa1010d09f",
-     "with_tip": "e6573751f0afc28c86640d971320825d99936d52",
      "at": "2026-11-12T16:43:06Z",
      "host": "goliath"
     },
@@ -84635,12 +84590,66 @@
      "host": "goliath"
     },
     {
+     "with": "#19025",
+     "code": "eeea17112c4476e129e1cb45a4fc5b9f7c5eac3b",
+     "with_code": "5db66d992b8472a4603b55e2969f1345d8d2fde5",
+     "tip": "93a1726e2ddd6c6a508bb68d341bf5fa1010d09f",
+     "with_tip": "f434a94b537426a1707ff706b25550d5c3fa4d72",
+     "at": "2026-11-12T16:48:03Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#18353",
+     "code": "eeea17112c4476e129e1cb45a4fc5b9f7c5eac3b",
+     "with_code": "f0586af0647e4e206ee9154d7917dd7de31879c6",
+     "tip": "93a1726e2ddd6c6a508bb68d341bf5fa1010d09f",
+     "with_tip": "4bbf3b4dc92dca19fa35a07a0d97d574998431c4",
+     "at": "2026-11-12T16:48:05Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#19034",
+     "code": "eeea17112c4476e129e1cb45a4fc5b9f7c5eac3b",
+     "with_code": "da9d02017c240e0d16c85668e84466516ae5c50a",
+     "tip": "93a1726e2ddd6c6a508bb68d341bf5fa1010d09f",
+     "with_tip": "300596a1841441c506f0a8c525668bbd128e561e",
+     "at": "2026-11-12T16:48:05Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#19035",
+     "code": "eeea17112c4476e129e1cb45a4fc5b9f7c5eac3b",
+     "with_code": "6985961b013c7864e5437d4020188e1966f37ce2",
+     "tip": "93a1726e2ddd6c6a508bb68d341bf5fa1010d09f",
+     "with_tip": "e7ca98273595a4f4a3d92dcc288e2efd31339e83",
+     "at": "2026-11-12T16:48:05Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#18925",
+     "code": "eeea17112c4476e129e1cb45a4fc5b9f7c5eac3b",
+     "with_code": "744d68aa21c23ce354aaeba502ee86a1a72f67a8",
+     "tip": "93a1726e2ddd6c6a508bb68d341bf5fa1010d09f",
+     "with_tip": "e6573751f0afc28c86640d971320825d99936d52",
+     "at": "2026-11-12T16:48:05Z",
+     "host": "goliath"
+    },
+    {
      "with": "atspi-write-timeout-warning",
      "code": "eeea17112c4476e129e1cb45a4fc5b9f7c5eac3b",
      "with_code": "7599a8dfa17b2a3b05768ff713bae8ce775b82dd",
      "tip": "93a1726e2ddd6c6a508bb68d341bf5fa1010d09f",
      "with_tip": "be51509d8ab1f11e41bfe8bd319f89753b1a8361",
-     "at": "2026-11-12T16:43:06Z",
+     "at": "2026-11-12T16:48:05Z",
+     "host": "goliath"
+    },
+    {
+     "with": "ax-ref-read-as-followup",
+     "code": "eeea17112c4476e129e1cb45a4fc5b9f7c5eac3b",
+     "with_code": "9fe46b3786db428c67ecf74f778d333d8dc15407",
+     "tip": "93a1726e2ddd6c6a508bb68d341bf5fa1010d09f",
+     "with_tip": "2fff0569b5d88b9c242baac0f77e416daa366beb",
+     "at": "2026-11-12T16:48:05Z",
      "host": "goliath"
     }
    ]
