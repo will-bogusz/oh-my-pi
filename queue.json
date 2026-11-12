@@ -85203,7 +85203,20 @@
     }
    ],
    "opened": "2026-11-12T17:53:02Z",
-   "readied": "2026-11-12T17:53:31Z"
+   "readied": "2026-11-12T17:53:31Z",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-12T20:10:11Z",
+     "reason": "Rebase16Win, 2026-11-12: docs paragraph takes the recorded combined form with merged #19037: delivered-or-only-sent Windows typing plus macOS-or-Windows focus reporting; no wording intent removed",
+     "old": "705b0aa2d3238345850baca20be5d66d68770d4d",
+     "new": "a705acf4698aeb8cdaa86c7e51fa7f21f195b4e7",
+     "dropped": {
+      "docs/computer-use.md": [
+       "Window input defaults to background routes that do not move the user's pointer or deliberately activate the target. When a call's background route is unavailable, `computer.backgroundFallback` decides what happens. With `takeover` (the default) the tool reruns that one call in takeover, hands focus back to the app the user was in, and adds a line to the run output naming the reason, saying the input was delivered, and saying where focus ended, such as `click ran in takeover because window 42 (Python) uses the Tk toolkit, \u2026; the input was delivered, and focus returned to Notes`. Where focus ended is the front process macOS or Windows reports once the takeover finished; where that is unknown (Linux, or an unreadable front process) the line says focus was not confirmed. On macOS focus returns even if the user kept typing during the takeover (X11 and Windows run the rerun as plain takeover, which yields to user activity); only a third app (neither the user's app nor the target) that became active during the action keeps focus, and the output says so. With `refuse` the call throws `BackgroundUnavailable` with the reason and says the user's setting keeps the agent in the background, so no takeover happened. `refuse` also beats the model: `takeover: true`, `raise()`, an AX `raise` action, `apps.open(\u2026, { activate: true })` or `{ reveal: true }`, `control.acquire` (a grant acquired earlier is released), input to the desktop or a display target and, off macOS, `el.focus()` throw `BackgroundUnavailable` before anything is sent, naming the background route where there is one. Under `takeover`, a call that passes `takeover` itself is never rerun: `takeover: true` takes over at once and restores focus only if the user did not act during it, and `takeover: false` stays background. Takeover temporarily activates the exact target and posts real input, then restores focus and pointer position. OS activation restrictions can still refuse takeover. Desktop-root pointer helpers (`computer.click`, \u2026) always drive the user's real pointer."
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "atspi-press-actions",
