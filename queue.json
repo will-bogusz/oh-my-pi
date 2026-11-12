@@ -89828,8 +89828,46 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-masks-cfg",
    "host": "MacBook-Pro",
    "added": "2026-11-12T19:44:42Z",
-   "updated": "2026-11-12T19:44:42Z",
-   "note": ""
+   "updated": "2026-11-12T19:54:25Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#19036",
+     "code": "276fdd4711f90af14a6353bdba5636e2ce3a3efb",
+     "with_code": "6f132c34421de5c96f52d6eca790850c3d6c7ad2",
+     "tip": "b1cb370bb27c4826688e561050a1c79830b42eaa",
+     "with_tip": "ff7450ee3f0b7bbf839f31c9d14349d106128c8a",
+     "at": "2026-11-12T19:54:20Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#18987",
+     "code": "276fdd4711f90af14a6353bdba5636e2ce3a3efb",
+     "with_code": "209edd585214e95ffb3eaac2231729649258d23e",
+     "tip": "b1cb370bb27c4826688e561050a1c79830b42eaa",
+     "with_tip": "8252cf99c33538934470688fdfcb58a8ba39e72c",
+     "at": "2026-11-12T19:54:25Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#18925",
+     "code": "276fdd4711f90af14a6353bdba5636e2ce3a3efb",
+     "with_code": "744d68aa21c23ce354aaeba502ee86a1a72f67a8",
+     "tip": "b1cb370bb27c4826688e561050a1c79830b42eaa",
+     "with_tip": "4e4adf8d29a70c38584613920cc0147e5112e18d",
+     "at": "2026-11-12T19:54:25Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#18353",
+     "code": "276fdd4711f90af14a6353bdba5636e2ce3a3efb",
+     "with_code": "f0586af0647e4e206ee9154d7917dd7de31879c6",
+     "tip": "b1cb370bb27c4826688e561050a1c79830b42eaa",
+     "with_tip": "bd72545e5a99d2fd55ed918b949f147d04641a02",
+     "at": "2026-11-12T19:54:25Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   }
  ],
  "watch": {
