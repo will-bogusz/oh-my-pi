@@ -82315,7 +82315,7 @@
    "needs": [
     "ax-ref-read-as"
    ],
-   "base": "5adf609d41b643689eebd4a5e0d91187f06df3e1",
+   "base": "53dd4c6a3192d2934a195a4158c444ce2a6b1935",
    "body": "bodies/ax-row-action.md",
    "state": "queued",
    "pr": null,
@@ -82323,7 +82323,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ax-row-action",
    "host": "MacBook-Pro",
    "added": "2026-11-11T11:44:46Z",
-   "updated": "2026-11-12T12:43:19Z",
+   "updated": "2026-11-12T12:43:52Z",
    "note": "Main, 2026-11-12: approved combined row-two-functions.diff. No reusable row read plus failing second walk is covered by read_whole whole-read requirement, not a dedicated test.",
    "line_loss_overrides": [
     {
@@ -82340,7 +82340,8 @@
       ]
      }
     }
-   ]
+   ],
+   "advanced": "2026-11-12T12:43:52Z"
   },
   {
    "id": "win-takeover-focus",
