@@ -78787,13 +78787,13 @@
    "needs": [],
    "base": "7c2ab113ec9716496b1d1b78b1f8c3ff8466c9ba",
    "body": "bodies/x11-takeover-keyboard-state.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19080,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-takeover-keyboard-state",
    "host": "MacBook-Pro",
    "added": "2026-11-11T02:32:01Z",
-   "updated": "2026-11-12T20:27:57Z",
+   "updated": "2026-11-12T20:30:24Z",
    "note": "Main-authorized bounded latch repair: ten red/green Xvfb runs, ten latched-Control sibling checks, locked-group restoration green. Linux rust-check recorded; 62 X11 tests pass excluding two MPX/uinput hotplug tests that fail identically on main 9f728bd56e1 under Xvfb without udev/libinput hotplug.",
    "advanced": "2026-11-12T19:21:45Z",
    "line_loss_overrides": [
@@ -78970,7 +78970,8 @@
      "at": "2026-11-12T20:27:56Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-12T20:30:24Z"
   },
   {
    "id": "x11-mpx-key-confirm",
