@@ -78053,6 +78053,18 @@
        "\tlinux::ax::{AtSpiAx, AtSpiWindow, TextRoute, resolve_focus},"
       ]
      }
+    },
+    {
+     "at": "2026-11-12T13:02:07Z",
+     "reason": "main's #18914 made AtSpiAx.connection a zbus Connection (no .connection()); type_text now borrows it and runs under request() like element_focus",
+     "old": "4b7a485bd188a36b212753e9fa61457c66496347",
+     "new": "912b3c9b867787a30b0e4870a4c4b1a3f724ff63",
+     "dropped": {
+      "crates/pi-natives/src/desktop/linux/ax.rs": [
+       "\t\tself.rt.block_on(async {",
+       "\t\t\tlet connection = self.connection.connection();"
+      ]
+     }
     }
    ]
   },
