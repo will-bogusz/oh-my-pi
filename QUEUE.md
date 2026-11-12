@@ -3,14 +3,14 @@
 Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12 04:51Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 5 of 8 ready events used in the hour before the last plan, 3 left (plan of 2026-11-12 04:19Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 2, conflict-held 27, stacked 28, held 11, parked 2, open PRs 47, queued since the last plan 1; merged 291, closed 34
+**Ready budget:** 4 of 8 ready events used in the hour before the last plan, 4 left (plan of 2026-11-12 04:49Z on goliath; groups below are from it, states from the manifest)
+**Counts:** openable now 2, conflict-held 27, stacked 29, held 11, parked 2, open PRs 47; merged 291, closed 34
 
 ## Openable now (2)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
-| relay-hidden-frames-main | fix(browser-relay): say what the relay hid in a driven tab | browser | P1 | 2h | open; accepted pair with #18925: Main, 2026-11-12: accepted; one statement at tab-worker.ts WorkerCore.#run failure branch; combined form: #18925's enrichment of error (message and stack with native notices), then this.#sendResult({ id: msg.id, ok: false, error }) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-hidden-frames-main) |
+| relay-hidden-frames-main | fix(browser-relay): say what the relay hid in a driven tab | browser | P1 | 2h | open; accepted pair with #18925: Main, 2026-11-12: accepted (HiddenOnMain's combined form). tab-worker.ts WorkerCore.#run after the finally: this branch's hinted take (if this.#unanswered === active && this.#hiddenFramesWaiting && this.#page) await this.#takeHiddenFrames(this.#page)) stays before the answered guard; in the failure branch #18925's enrichment of error (message and stack with the native notices), then this.#sendResult({ id: msg.id, ok: false, error }), so both native-window notices and the once-only hidden-frames notice ride the failure. Second to land adds one test that a failed run carries both. | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-hidden-frames-main) |
 | autofill-rows | fix(natives): own macOS suggestion-list elements by the window that lists them | computer | P2 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/autofill-rows) |
 
 ## Conflict-held (27)
@@ -45,7 +45,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12
 | macos-ax-linked-label | fix(natives): name a macOS control by the label its AXTitleUIElement links to | natives | P2 | 14h | [#18892](https://github.com/can1357/oh-my-pi/pull/18892) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-ax-linked-label) |
 | macos-press-click-hint | fix(natives): point a refused macOS press at the element's own click | computer | P2 | 10h | [#18892](https://github.com/can1357/oh-my-pi/pull/18892) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-press-click-hint) |
 
-## Stacked (28)
+## Stacked (29)
 
 | id | title | area | priority | age | needs | branch |
 |---|---|---|---|---|---|---|
@@ -77,6 +77,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12
 | atspi-write-timeout-warning | fix(natives): preserve the empty-field warning on Linux write timeouts | computer | P2 | 7h | atspi-unanswered-app ([#18914](https://github.com/can1357/oh-my-pi/pull/18914)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-write-timeout-warning) |
 | masked-length-ok | fix(natives): report a setValue that reads back as a same-length mask as done, not failed | computer | P2 | 0h | ax-masked-readback ([#18989](https://github.com/can1357/oh-my-pi/pull/18989)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/masked-length-ok) |
 | takeover-attached-hint | fix(natives): name the background route when takeover refuses a macOS suggestion list | computer | P2 | 0h | autofill-rows | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/takeover-attached-hint) |
+| win-type-drain | fix(natives,coding-agent): stop Windows takeover typing from losing text the app had not read yet | computer | P1 | 0h | win-takeover-focus ([#18919](https://github.com/can1357/oh-my-pi/pull/18919)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-type-drain) |
 
 ## Held (11)
 
@@ -152,9 +153,3 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12
 | [#18981](https://github.com/can1357/oh-my-pi/pull/18981) | status-entered-text | fix(coding-agent): keep text a cell enters out of browser and computer status lines | browser | P1 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/status-entered-text) |
 | [#18982](https://github.com/can1357/oh-my-pi/pull/18982) | computer-secure-input | fix(natives,coding-agent): report macOS secure input and stop claiming globalEscape under it | computer | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-secure-input) |
 | [#18989](https://github.com/can1357/oh-my-pi/pull/18989) | ax-masked-readback | fix(natives): never quote the written text when a setValue read-back disagrees | computer | P3 | 0h | keep; accepted pair with #18915: Main, 2026-11-12: accepted; adjacent doc/cfg lines on ax.rs text_readback; whichever lands second deletes the cfg_attr(..., allow(dead_code)) on masked | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-masked-readback) |
-
-## Queued since the last plan (1)
-
-| id | title | area | priority | age | branch |
-|---|---|---|---|---|---|
-| win-type-drain | fix(natives,coding-agent): stop Windows takeover typing from losing text the app had not read yet | computer | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-type-drain) |

@@ -84149,25 +84149,17 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-12T03:17:22Z",
+  "checked": "2026-11-12T04:49:02Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "computer-secure-input": {
-    "since": "2026-11-12T02:47:15Z",
-    "title": "fix(natives,coding-agent): report macOS secure input and stop claiming globalEscape under it"
+   "relay-hidden-frames-main": {
+    "since": "2026-11-12T04:49:02Z",
+    "title": "fix(browser-relay): say what the relay hid in a driven tab"
    },
-   "status-entered-text": {
-    "since": "2026-11-12T02:47:15Z",
-    "title": "fix(coding-agent): keep text a cell enters out of browser and computer status lines"
-   },
-   "tern-kit-password-mask": {
-    "since": "2026-11-12T01:45:57Z",
-    "title": "fix(browser): mask password values in Tern kit observations"
-   },
-   "agent-identity": {
-    "since": "2026-11-12T02:47:15Z",
-    "title": "feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy"
+   "autofill-rows": {
+    "since": "2026-11-12T04:49:02Z",
+    "title": "fix(natives): own macOS suggestion-list elements by the window that lists them"
    }
   },
   "conflicts": {
@@ -84223,7 +84215,12 @@
    18923,
    18924,
    18925,
-   18947
+   18947,
+   18981,
+   18982,
+   18983,
+   18987,
+   18989
   ],
   "post_merge": {
    "16274": {
@@ -86672,6 +86669,46 @@
     "id": "relay-frame-race",
     "title": "fix(browser-relay): keep a driven tab when a password manager's frame drops omp from it",
     "why": "plan: held (held: Main, 2026-11-12: regression against a signed-in real 1Password (VaultSignedIn, VM, Chrome 154, 1Password 8.12.44.33): autofocus cell tab kept 4/10 on the fix, 10/10 on main; after the first sweep 1Password puts back a frame the sweep finds but cannot empty and Chrome refuses every attach)"
+   },
+   {
+    "at": "2026-11-12T04:49:02Z",
+    "kind": "openable",
+    "id": "relay-hidden-frames-main",
+    "title": "fix(browser-relay): say what the relay hid in a driven tab"
+   },
+   {
+    "at": "2026-11-12T04:49:02Z",
+    "kind": "openable",
+    "id": "autofill-rows",
+    "title": "fix(natives): own macOS suggestion-list elements by the window that lists them"
+   },
+   {
+    "at": "2026-11-12T04:49:02Z",
+    "kind": "unopenable",
+    "id": "computer-secure-input",
+    "title": "fix(natives,coding-agent): report macOS secure input and stop claiming globalEscape under it",
+    "why": "opened as #18982"
+   },
+   {
+    "at": "2026-11-12T04:49:02Z",
+    "kind": "unopenable",
+    "id": "status-entered-text",
+    "title": "fix(coding-agent): keep text a cell enters out of browser and computer status lines",
+    "why": "opened as #18981"
+   },
+   {
+    "at": "2026-11-12T04:49:02Z",
+    "kind": "unopenable",
+    "id": "tern-kit-password-mask",
+    "title": "fix(browser): mask password values in Tern kit observations",
+    "why": "opened as #18983"
+   },
+   {
+    "at": "2026-11-12T04:49:02Z",
+    "kind": "unopenable",
+    "id": "agent-identity",
+    "title": "feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy",
+    "why": "opened as #18987"
    }
   ]
  },
@@ -91731,12 +91768,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-12T04:19:40.958176Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-12T04:49:03.104522Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 5,
-   "left": 3
+   "used": 4,
+   "left": 4
   },
   "rows": [
    {
@@ -92846,7 +92883,7 @@
     "title": "fix(browser-relay): say what the relay hid in a driven tab",
     "action": "open",
     "reasons": [],
-    "note": "accepted pair with #18925: Main, 2026-11-12: accepted; one statement at tab-worker.ts WorkerCore.#run failure branch; combined form: #18925's enrichment of error (message and stack with native notices), then this.#sendResult({ id: msg.id, ok: false, error })",
+    "note": "accepted pair with #18925: Main, 2026-11-12: accepted (HiddenOnMain's combined form). tab-worker.ts WorkerCore.#run after the finally: this branch's hinted take (if this.#unanswered === active && this.#hiddenFramesWaiting && this.#page) await this.#takeHiddenFrames(this.#page)) stays before the answered guard; in the failure branch #18925's enrichment of error (message and stack with the native notices), then this.#sendResult({ id: msg.id, ok: false, error }), so both native-window notices and the once-only hidden-frames notice ride the failure. Second to land adds one test that a failed run carries both.",
     "over": [],
     "paired": [
      "#18925"
@@ -92900,6 +92937,30 @@
      "win-posted-modifiers"
     ],
     "created": "2026-11-11T09:13:32Z"
+   },
+   {
+    "id": "win-type-drain",
+    "label": "win-type-drain",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives,coding-agent): stop Windows takeover typing from losing text the app had not read yet",
+    "action": "wait",
+    "reasons": [
+     "needs #18919 (open)",
+     "conflicts with #18783 in docs/computer-use.md"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "#18783"
+    ],
+    "needs": [
+     "win-takeover-focus"
+    ],
+    "created": "2026-11-12T04:40:03Z"
    },
    {
     "id": "x11-click-stale-popup",
@@ -93416,7 +93477,8 @@
      "needs #18989 (open)",
      "conflicts with #18892 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with #18915 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/win32/ax.rs"
+     "conflicts with #18915 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/win32/ax.rs",
+     "conflicts with main in crates/pi-natives/src/desktop/ax.rs, docs/tools/computer.md"
     ],
     "note": "",
     "over": [],
@@ -93860,7 +93922,6 @@
      "conflicts with #18981 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18222 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/prompts/tools/eval.md, packages/coding-agent/src/tools/eval.ts",
-     "conflicts with #18987 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with main in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/sdk-computer-prelude-toggle.test.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
@@ -93872,8 +93933,7 @@
      "#18947",
      "#18981",
      "#18222",
-     "#18786",
-     "#18987"
+     "#18786"
     ],
     "needs": [
      "browser-core-first-use"
@@ -93906,7 +93966,7 @@
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/tools/eval.ts",
-     "conflicts with #18987 in docs/tools/computer.md, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with #18987 in docs/tools/computer.md, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #18989 in docs/tools/computer.md",
      "its need computer-ui-quiet conflicts with main in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/computer/worker.ts"
@@ -93962,7 +94022,7 @@
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
-     "conflicts with #18987 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with #18987 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
      "conflicts with #18989 in docs/tools/computer.md",
      "conflicts with autofill-rows in crates/pi-natives/src/desktop/macos/ax.rs",
      "its need computer-ui-quiet conflicts with main in packages/coding-agent/src/prompts/tools/computer.md",
@@ -94181,6 +94241,28 @@
     ],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
+   },
+   {
+    "id": "win-type-insert",
+    "label": "win-type-insert",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P2",
+    "title": "feat(natives): insert typed text into a focused Windows multi-line edit control",
+    "action": "held",
+    "reasons": [
+     "held: Main, 2026-11-12: proposal; opens only after entry A merges and Will has seen the body",
+     "needs win-type-drain (queued)"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [
+     "win-type-drain"
+    ],
+    "created": "2026-11-12T04:40:13Z"
    },
    {
     "id": "encoded-prefix-count",
