@@ -84459,7 +84459,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-ax-linked-label",
    "host": "MacBook-Pro",
    "added": "2026-11-11T14:43:42Z",
-   "updated": "2026-11-12T13:05:51Z",
+   "updated": "2026-11-12T14:36:52Z",
    "note": "Main, 2026-11-12: approved linked-own-guard.diff. Naming-only: changed linked text alone is not an action guard. Five AxProps constructor sites migrated; adjacency with entries adding AxProps fields requires opener pair builds. Unbuilt design note: retain {own,linked} fingerprints independently and compare each only when answered at registration and action; closes a rerender moving an unnamed control ref onto its neighbour; measure that case before building.",
    "line_loss_overrides": [
     {
@@ -84490,7 +84490,13 @@
      }
     }
    ],
-   "advanced": "2026-11-12T12:59:11Z"
+   "advanced": "2026-11-12T12:59:11Z",
+   "rebases_after": [
+    19036
+   ],
+   "pair_reasons": {
+    "19036": "Main, 2026-11-12: #19036 adds 'unread_children: 0,' to the AxProps literal in macos/ax.rs and a field to the AxProps struct in desktop/ax.rs; this entry returns that literal inside a tuple (AxProps{...}, has_own_label) and adds its own struct field (rustfmt realignment only). Combined form: this entry's tuple with 'unread_children: 0,' inside its AxProps literal; struct with both fields"
+   }
   },
   {
    "id": "ax-ref-read-as-followup",
