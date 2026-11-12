@@ -78303,7 +78303,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "6dd7ddf5feab54da3c82b460ee390a7d09aeabaa",
+   "base": "9f728bd56e170453c927d5b162cebe9b308e63ce",
    "body": "bodies/x11-takeover-keyboard-grab.md",
    "state": "queued",
    "pr": null,
@@ -78311,7 +78311,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-takeover-keyboard-grab",
    "host": "MacBook-Pro",
    "added": "2026-11-11T02:55:11Z",
-   "updated": "2026-11-11T02:55:11Z",
+   "updated": "2026-11-12T13:08:50Z",
    "note": "",
    "line_loss_overrides": [
     {
@@ -78325,7 +78325,8 @@
       ]
      }
     }
-   ]
+   ],
+   "advanced": "2026-11-12T13:08:50Z"
   },
   {
    "id": "x11-click-stale-popup",
