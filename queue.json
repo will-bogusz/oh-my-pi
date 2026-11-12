@@ -85593,6 +85593,20 @@
        "On macOS, `setValue(text)` on a native text field, text area or combo box replaces its whole value the way `win.type` inserts text, so the app handles the edit as typed input: a search field searches, and a field with suggestions may offer them. An unfocused field is focused first only when its app is not the frontmost one, where focusing it would move the user's caret; such a field, a secure text field, and an element without a settable selection are written through `AXValue` instead, which some apps show without storing. A background field focused for the write keeps its app's focus afterwards, since some apps drop an edit whose field loses focus before it is committed. Either way the field is read back, and a value other than `text` throws `AxFailed` giving how many characters were written and what the field reads now. The written text is never quoted, and neither is what a secure field reads; a field that reads back as mask characters is described as masked. A field that reads back as a mask exactly as long as `text` (a password field, whatever role it reports) counts as a successful write; a mask of another length still fails. Web content, terminals and the fields of Chromium-based apps (Chrome, Edge, Brave, Electron apps; use `el.type(text)` there) are refused before anything is written."
       ]
      }
+    },
+    {
+     "at": "2026-11-12T12:31:05Z",
+     "reason": "roboomp should-fix 4550153454: the inline same-length-mask closure is replaced by the shared masks() predicate; branch replayed as one commit of its net change because the first commit's superseded form conflicted with merged #18892/#18914/#18915",
+     "old": "4822a607d465ee996421a8f5136720e41786aaac",
+     "new": "0430659225aaad7e5e66d22e22ae2f187b39b20c",
+     "dropped": {
+      "crates/pi-natives/src/desktop/ax.rs": [
+       "\tif actual.is_some_and(|actual| {",
+       "\t\tmasked(actual)",
+       "\t\t\t&& (shown == expected.chars().count() || shown == expected.encode_utf16().count())",
+       "\t}) {"
+      ]
+     }
     }
    ],
    "advanced": "2026-11-12T09:40:37Z",
