@@ -4,7 +4,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-12 01:15Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 1, conflict-held 27, stacked 27, held 9, parked 2, open PRs 42, queued since the last plan 3; merged 290, closed 33
+**Counts:** openable now 1, conflict-held 27, stacked 27, held 10, parked 2, open PRs 42, queued since the last plan 2; merged 290, closed 33
 
 ## Openable now (1)
 
@@ -76,7 +76,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12
 | x11-mpx-reattach | fix(natives): keep X11 background input out of your window after a screen lock or VT switch | computer | P0 | 7h | [#18825](https://github.com/can1357/oh-my-pi/pull/18825) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-mpx-reattach) |
 | atspi-write-timeout-warning | fix(natives): preserve the empty-field warning on Linux write timeouts | computer | P2 | 3h | atspi-unanswered-app ([#18914](https://github.com/can1357/oh-my-pi/pull/18914)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-write-timeout-warning) |
 
-## Held (9)
+## Held (10)
 
 | id | title | area | priority | age | hold | branch |
 |---|---|---|---|---|---|---|
@@ -89,6 +89,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12
 | computer-guide-first-use | feat(coding-agent): send the computer guide with the first computer call | computer | P2 | 1d | Main, 2026-11-11: stays held until #18786 merges with the typed-message guide channel (design check replace); then one property on the computer prelude, drop the wrap variant, re-run its blind legs | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-guide-first-use) |
 | browser-cursor | feat(browser): draw the acting agent's cursor in OMP-driven tabs | browser | P2 | 1d | Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-cursor) |
 | desktop-cursor | feat(coding-agent,natives): show each agent's cursor where its computer input lands on macOS | coding-agent | P2 | 1d | Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/desktop-cursor) |
+| credential-fill-proposal | feat(browser,computer): fill a field from a secret reference without the value reaching the session | browser | P2 | 0h | SecretFill-2 for Main, 2026-11-12: proposal written, not built; needs a maintainer decision (own secret resolution in core or document the recipe) before any code | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/credential-fill-proposal) |
 
 ## Parked (2)
 
@@ -144,10 +145,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12
 | [#18924](https://github.com/can1357/oh-my-pi/pull/18924) | browser-wait-selector-state | fix(browser): honor selector wait states and reject unknown options | browser | P1 | 8h | rebase | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-wait-selector-state) |
 | [#18921](https://github.com/can1357/oh-my-pi/pull/18921) | atspi-press-actions | fix(natives): press Chromium menu items, options and tabs on Linux | computer | P0 | 9h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-press-actions) |
 
-## Queued since the last plan (3)
+## Queued since the last plan (2)
 
 | id | title | area | priority | age | branch |
 |---|---|---|---|---|---|
 | tern-kit-password-mask | fix(browser): mask password values in Tern kit observations | browser |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/tern-kit-password-mask) |
 | status-entered-text | fix(coding-agent): keep text a cell enters out of browser and computer status lines | browser | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/status-entered-text) |
-| credential-fill-proposal | feat(browser,computer): fill a field from a secret reference without the value reaching the session | browser | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/credential-fill-proposal) |
