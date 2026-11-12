@@ -78793,7 +78793,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-takeover-keyboard-state",
    "host": "MacBook-Pro",
    "added": "2026-11-11T02:32:01Z",
-   "updated": "2026-11-12T18:58:07Z",
+   "updated": "2026-11-12T18:58:20Z",
    "note": "Main-authorized bounded latch repair: ten red/green Xvfb runs, ten latched-Control sibling checks, locked-group restoration green. Linux rust-check recorded; 62 X11 tests pass excluding two MPX/uinput hotplug tests that fail identically on main 9f728bd56e1 under Xvfb without udev/libinput hotplug.",
    "advanced": "2026-11-12T13:27:11Z",
    "line_loss_overrides": [
@@ -78823,7 +78823,7 @@
    ],
    "pair_reasons": {
     "19044": "QueueFifteen, 2026-11-12 (Main's standing rule: test cases appended to the same block): only conflict is crates/pi-natives/src/desktop/linux/x11/input.rs tests, where each side appends its own test at the same spot (base empty); combined form is both tests.",
-    "19066": "Main, 2026-11-12: only conflict is the with_foreground call sites in crates/pi-natives/src/desktop/linux/x11/input.rs, where each side wraps text delivery; the combined form is trial merge 2a04e89911c (both wraps kept), which built and passed both X11 suites (63 tests, excluding two MPX/uinput hotplug tests that fail identically on main under Xvfb)."
+    "19066": "Main, 2026-11-12: only code conflict is the two with_foreground closures in crates/pi-natives/src/desktop/linux/x11/input.rs, where #19066 adds this.check_keyboard_grab(window)? before xtest_steps and this entry passes matches!(keys, Keys::Text(_)) to xtest_steps; the combined form keeps both lines (trial merge 2a04e89911c), which built and passed both X11 suites (63 tests, excluding two MPX/uinput hotplug tests that fail identically on main under Xvfb)."
    }
   },
   {
