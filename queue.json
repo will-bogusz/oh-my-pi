@@ -84186,13 +84186,13 @@
    ],
    "base": "bcd5b0b996e0f4a107f51cb398a6492ffb7d44b9",
    "body": "bodies/atspi-combo-choice.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19034,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-combo-choice",
    "host": "MacBook-Pro",
    "added": "2026-11-11T13:30:39Z",
-   "updated": "2026-11-12T14:14:19Z",
+   "updated": "2026-11-12T14:22:09Z",
    "note": "",
    "advanced": "2026-11-12T12:19:58Z",
    "line_loss_overrides": [
@@ -84405,7 +84405,8 @@
      "at": "2026-11-12T14:14:18Z",
      "host": "goliath"
     }
-   ]
+   ],
+   "opened": "2026-11-12T14:22:09Z"
   },
   {
    "id": "x11-keysym-remap",
