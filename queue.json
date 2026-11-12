@@ -76332,6 +76332,77 @@
        "\t\tfor (let index = 0; index < 200; index++) colors.add(agentIdentity(`Main.Agent${index}`).color);"
       ]
      }
+    },
+    {
+     "at": "2026-11-12T05:55:28Z",
+     "reason": "AgentColors for Will, 2026-11-12: colours now resolve from the active theme (option D); the fixed palette, FNV hash and the tests pinning them are removed on purpose",
+     "old": "b00f68e65a5a9d8f1efdf9651d099cce846002ff",
+     "new": "d3de4f60fe0b517af7452eb4f83ebadc307bf3e8",
+     "dropped": {
+      "packages/coding-agent/test/agent-hub-ordering.test.ts": [
+       "import { agentColored } from \"@oh-my-pi/pi-tui/overlays/agent-identity\";",
+       "\t\t\texpect(renderedRosterHeaderLineRaw(hub, other, 120)).toContain(theme.bold(agentColored(other, other)));"
+      ],
+      "packages/tui/src/overlays/agent-hub.ts": [
+       "\t\tconst styledId = theme.bold(selected ? theme.fg(\"accent\", id) : agentColored(ref.id, id));"
+      ],
+      "packages/tui/src/overlays/agent-identity.ts": [
+       "import { FG_RESET } from \"../theme/color\";",
+       "import { getSessionAccentAnsi } from \"../theme/session-color\";",
+       "/** Tern's tab colour names minus red, which Tern keeps for \"needs you\". */",
+       "export type AgentColor = \"blue\" | \"orange\" | \"yellow\" | \"green\" | \"teal\" | \"purple\" | \"pink\";",
+       "/** One hex per colour, each at least 3:1 against both white and `#1e1e1e`. */",
+       "export const AGENT_COLOR_HEX: Readonly<Record<AgentColor, string>> = {",
+       "\tblue: \"#268bd2\",",
+       "\torange: \"#d9620f\",",
+       "\tyellow: \"#b58900\",",
+       "\tgreen: \"#4c9a2a\",",
+       "\tteal: \"#2aa198\",",
+       "\tpurple: \"#8b6fd6\",",
+       "\tpink: \"#d33682\",",
+       "/** Colours subagents hash into; blue is the main agent's alone. */",
+       "const SUBAGENT_COLORS: readonly AgentColor[] = [\"orange\", \"yellow\", \"green\", \"teal\", \"purple\", \"pink\"];",
+       "const utf8 = new TextEncoder();",
+       "/** FNV-1a, 32-bit, over the UTF-8 bytes of `text`. */",
+       "function fnv1a(text: string): number {",
+       "\tlet hash = 0x811c9dc5;",
+       "\tfor (const byte of utf8.encode(text)) {",
+       "\t\thash = Math.imul(hash ^ byte, 0x01000193) >>> 0;",
+       "\treturn hash;",
+       "/** Main is blue; every other registry id hashes to a stable non-red colour. */",
+       "export function agentColor(agentId: string): AgentColor {",
+       "\treturn agentId === MAIN_AGENT_ID ? \"blue\" : SUBAGENT_COLORS[fnv1a(agentId) % SUBAGENT_COLORS.length]!;",
+       "/** `text` in the foreground colour of `agentId`'s identity. */",
+       "export function agentColored(agentId: string, text: string): string {",
+       "\tconst ansi = getSessionAccentAnsi(AGENT_COLOR_HEX[agentColor(agentId)]);"
+      ],
+      "packages/tui/src/tools/agent-tree.ts": [
+       "\t\tconst name = agentColored(identity, descriptionShown || !task ? theme.bold(id) : id);"
+      ],
+      "packages/tui/src/tools/task.ts": [
+       "\tconst name = agentColored(result.id, description ? theme.bold(displayId) : displayId);"
+      ],
+      "packages/tui/test/agent-identity.test.ts": [
+       "import { AGENT_COLOR_HEX, agentColor } from \"../src/overlays/agent-identity\";",
+       "describe(\"agentColor\", () => {",
+       "\tit(\"gives Main blue and every other agent a stable colour from the other six\", () => {",
+       "\t\texpect(agentColor(\"Main\")).toBe(\"blue\");",
+       "\t\t// FNV-1a of the full id pins these, so another surface hashing the same id draws the same colour.",
+       "\t\texpect(agentColor(\"CursorChecks.Scout\")).toBe(\"purple\");",
+       "\t\texpect(agentColor(\"Scout\")).toBe(\"teal\");",
+       "\t\tconst colors = new Set<string>();",
+       "\t\tfor (let index = 0; index < 200; index++) colors.add(agentColor(`Main.Agent${index}`));",
+       "\t\texpect([...colors].sort()).toEqual(",
+       "\t\t\tObject.keys(AGENT_COLOR_HEX)",
+       "\t\t\t\t.filter(color => color !== \"blue\")",
+       "\t\t\t\t.sort(),"
+      ],
+      "packages/tui/test/task-progress-render.test.ts": [
+       "\t\t\t`${agentColored(\"DonePkg\", theme.bold(\"DonePkg\"))}${theme.fg(\"text\", \":\")} ${theme.fg(\"text\", \"List workspace packages\")}`,",
+       "\t\t\t`${agentColored(\"DonePkg\", theme.bold(\"DonePkg\"))}${theme.fg(\"text\", \": List workspace packages\")}`,",
+       "\t\texpect(row).not.toContain(agentColored(\"KeySettingsHotPaths\", \"KeySettingsHotPaths\"));"
+      ]
+     }
     }
    ]
   },
