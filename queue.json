@@ -78412,7 +78412,20 @@
    "added": "2026-11-11T02:11:47Z",
    "updated": "2026-11-12T23:20:40Z",
    "note": "",
-   "advanced": "2026-11-12T23:20:40Z"
+   "advanced": "2026-11-12T23:20:40Z",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-12T23:22:02Z",
+     "reason": "QueueSeventeen, 2026-11-12: import-list union with main's withLiveElement (v18.20.0); focusKeyTarget kept, line reformatted by oxfmt",
+     "old": "31388311e9120bb41c2cca870ea5a7cad2cad505",
+     "new": "6a348d0d3cd46a558b0d95b752b6af1cc1afe5ca",
+     "dropped": {
+      "packages/coding-agent/src/tools/browser/frames.ts": [
+       "import { clickElement, fillViaHandle, focusKeyTarget, pressKey, typeIntoElement } from \"./interactions\";"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "atspi-text-first",
