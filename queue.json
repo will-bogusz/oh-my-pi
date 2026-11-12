@@ -87621,29 +87621,13 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-12T13:57:47Z",
+  "checked": "2026-11-12T14:58:26Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "atspi-huge-children": {
-    "since": "2026-11-12T13:27:30Z",
-    "title": "fix(natives): stop Linux accessibility reads from freezing apps that show long tables"
-   },
-   "atspi-combo-choice": {
-    "since": "2026-11-12T12:26:00Z",
-    "title": "fix(natives): choose Linux combo box options without opening their keyboard-grabbing list"
-   },
-   "atspi-text-first": {
-    "since": "2026-11-12T10:53:55Z",
-    "title": "fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility"
-   },
    "ax-row-action": {
     "since": "2026-11-12T13:27:30Z",
     "title": "fix(natives): follow rebuilt macOS table rows without selecting a neighbour"
-   },
-   "win-type-drain": {
-    "since": "2026-11-12T12:26:00Z",
-    "title": "fix(natives,coding-agent): stop Windows takeover typing from losing text the app had not read yet"
    },
    "x11-click-stale-popup": {
     "since": "2026-11-12T13:27:30Z",
@@ -87653,13 +87637,25 @@
     "since": "2026-11-12T12:26:00Z",
     "title": "feat(browser): let observe() settle the effects of the preceding action"
    },
+   "atspi-qt-menus": {
+    "since": "2026-11-12T14:58:26Z",
+    "title": "fix(natives): let Linux menu.select walk into Qt apps' menus"
+   },
+   "atspi-value-readback": {
+    "since": "2026-11-12T14:58:26Z",
+    "title": "fix(natives): read back AT-SPI numeric setValue before reporting success"
+   },
    "atspi-write-timeout-warning": {
     "since": "2026-11-12T13:57:47Z",
     "title": "fix(natives): preserve the empty-field warning on Linux write timeouts"
    },
-   "macos-press-click-hint": {
-    "since": "2026-11-12T13:27:30Z",
-    "title": "fix(natives): point a refused macOS press at the element's own click"
+   "ax-ref-read-as-followup": {
+    "since": "2026-11-12T14:58:26Z",
+    "title": "fix(natives): skip unused ref-check reads and recover display refs"
+   },
+   "win-focus-report": {
+    "since": "2026-11-12T14:58:26Z",
+    "title": "fix(natives): report where focus went after a Windows takeover"
    },
    "factory-droid-171-models": {
     "since": "2026-11-12T12:26:00Z",
@@ -87889,7 +87885,11 @@
    19023,
    19025,
    19026,
-   19027
+   19027,
+   19034,
+   19035,
+   19036,
+   19037
   ],
   "post_merge": {
    "16274": {
@@ -88277,127 +88277,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-05T14:32:39Z",
-    "kind": "merged",
-    "number": 18166,
-    "title": "fix(coding-agent,tui): name the command in background job notices",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-05T14:32:39Z",
-    "kind": "merged",
-    "number": 18163,
-    "title": "fix(shell): pass a scheme followed by words to external commands as written",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-05T14:32:39Z",
-    "kind": "merged",
-    "number": 18162,
-    "title": "fix(coding-agent): fetch Read the Docs raw source only from the page's own Edit link",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-05T14:32:39Z",
-    "kind": "merged",
-    "number": 18161,
-    "title": "fix(find): return the hits verified before find's deadline",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-05T14:32:39Z",
-    "kind": "merged",
-    "number": 18160,
-    "title": "fix(coding-agent): apply the open viewport on attached and visible browsers",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-05T14:32:39Z",
-    "kind": "merged",
-    "number": 18158,
-    "title": "fix(coding-agent): say the computer screenshot path holds the scaled frame",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-05T14:32:39Z",
-    "kind": "merged",
-    "number": 18156,
-    "title": "fix(tui-debug): run file entries with bun under the compiled omp binary",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-05T14:32:39Z",
-    "kind": "merged",
-    "number": 18155,
-    "title": "fix(coding-agent): show browser agents how to wait for a download they start",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-05T14:32:39Z",
-    "kind": "merged",
-    "number": 18154,
-    "title": "fix(coding-agent): create new ssh:// files from bounded read output",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-05T14:32:39Z",
-    "kind": "merged",
-    "number": 18153,
-    "title": "fix(lsp): sync open documents edited outside OMP before cross-file queries",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-05T14:32:39Z",
-    "kind": "merged",
-    "number": 18150,
-    "title": "fix(coding-agent): read SEC EDGAR filing documents instead of the company profile",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-05T14:32:39Z",
-    "kind": "merged",
-    "number": 18148,
-    "title": "fix(pi-shell): list binary and line-less files in minimized diff summaries",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-05T14:32:39Z",
-    "kind": "merged",
-    "number": 18147,
-    "title": "fix(pi-shell): count files, not diff locations, in minimized rustfmt --check output",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-05T14:32:39Z",
-    "kind": "merged",
-    "number": 18124,
-    "title": "feat(coding-agent): record failed web search providers in tool details",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-05T14:32:39Z",
-    "kind": "conflict",
-    "label": "#16611",
-    "title": "feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio",
-    "files": [
-     "packages/ai/src/providers/openai-shared.ts"
-    ]
-   },
    {
     "at": "2026-11-05T19:06:08Z",
     "kind": "openable",
@@ -91159,6 +91038,65 @@
     "kind": "openable",
     "id": "atspi-write-timeout-warning",
     "title": "fix(natives): preserve the empty-field warning on Linux write timeouts"
+   },
+   {
+    "at": "2026-11-12T14:58:26Z",
+    "kind": "openable",
+    "id": "atspi-qt-menus",
+    "title": "fix(natives): let Linux menu.select walk into Qt apps' menus"
+   },
+   {
+    "at": "2026-11-12T14:58:26Z",
+    "kind": "openable",
+    "id": "atspi-value-readback",
+    "title": "fix(natives): read back AT-SPI numeric setValue before reporting success"
+   },
+   {
+    "at": "2026-11-12T14:58:26Z",
+    "kind": "openable",
+    "id": "ax-ref-read-as-followup",
+    "title": "fix(natives): skip unused ref-check reads and recover display refs"
+   },
+   {
+    "at": "2026-11-12T14:58:26Z",
+    "kind": "openable",
+    "id": "win-focus-report",
+    "title": "fix(natives): report where focus went after a Windows takeover"
+   },
+   {
+    "at": "2026-11-12T14:58:26Z",
+    "kind": "unopenable",
+    "id": "atspi-huge-children",
+    "title": "fix(natives): stop Linux accessibility reads from freezing apps that show long tables",
+    "why": "opened as #19036"
+   },
+   {
+    "at": "2026-11-12T14:58:26Z",
+    "kind": "unopenable",
+    "id": "atspi-combo-choice",
+    "title": "fix(natives): choose Linux combo box options without opening their keyboard-grabbing list",
+    "why": "opened as #19034"
+   },
+   {
+    "at": "2026-11-12T14:58:26Z",
+    "kind": "unopenable",
+    "id": "atspi-text-first",
+    "title": "fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility",
+    "why": "opened as #19035"
+   },
+   {
+    "at": "2026-11-12T14:58:26Z",
+    "kind": "unopenable",
+    "id": "win-type-drain",
+    "title": "fix(natives,coding-agent): stop Windows takeover typing from losing text the app had not read yet",
+    "why": "opened as #19037"
+   },
+   {
+    "at": "2026-11-12T14:58:26Z",
+    "kind": "unopenable",
+    "id": "macos-press-click-hint",
+    "title": "fix(natives): point a refused macOS press at the element's own click",
+    "why": "plan: wait (conflicts with ax-ref-read-as-followup in crates/pi-natives/src/desktop/macos/ax.rs)"
    }
   ]
  },
@@ -96614,12 +96552,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-12T13:57:48.713543Z",
+  "at": "2026-11-12T14:58:27.233537Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 4,
+   "left": 4
   },
   "rows": [
    {
@@ -96719,9 +96657,11 @@
     "title": "fix(natives): map Windows keys on the receiving keyboard layout",
     "action": "keep",
     "reasons": [],
-    "note": "",
+    "note": "accepted pair with #19037: Main, 2026-11-12 (via QueueThirteen): only conflict is the use list in crates/pi-natives/src/desktop/win32/input.rs: this entry adds GetKeyState, #19025 (win-target-layout) replaces MapVirtualKeyW with MapVirtualKeyExW; this entry adds no MapVirtualKeyW call. Combined form: one use list with GetKeyState and MapVirtualKeyExW.",
     "over": [],
-    "paired": [],
+    "paired": [
+     "#19037"
+    ],
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-12T11:52:28Z"
@@ -96742,6 +96682,42 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-12T11:59:44Z"
+   },
+   {
+    "id": "atspi-huge-children",
+    "label": "#19036",
+    "number": 19036,
+    "state": "open",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): stop Linux accessibility reads from freezing apps that show long tables",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-12T14:35:51Z"
+   },
+   {
+    "id": "win-type-drain",
+    "label": "#19037",
+    "number": 19037,
+    "state": "open",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives,coding-agent): stop Windows takeover typing from losing text the app had not read yet",
+    "action": "keep",
+    "reasons": [],
+    "note": "accepted pair with #19025: Main, 2026-11-12 (via QueueThirteen): only conflict is the use list in crates/pi-natives/src/desktop/win32/input.rs: this entry adds GetKeyState, #19025 (win-target-layout) replaces MapVirtualKeyW with MapVirtualKeyExW; this entry adds no MapVirtualKeyW call. Combined form: one use list with GetKeyState and MapVirtualKeyExW.",
+    "over": [],
+    "paired": [
+     "#19025"
+    ],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-12T14:39:56Z"
    },
    {
     "id": "claude-refusal-strip-retry",
@@ -96789,10 +96765,11 @@
     "reasons": [
      "conflicts with main in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs"
     ],
-    "note": "accepted pair with #18013",
+    "note": "accepted pair with #18013; accepted pair with #19035",
     "over": [],
     "paired": [
-     "#18013"
+     "#18013",
+     "#19035"
     ],
     "blocked_by": [],
     "needs": [],
@@ -96816,6 +96793,42 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-12T05:27:02Z"
+   },
+   {
+    "id": "atspi-combo-choice",
+    "label": "#19034",
+    "number": 19034,
+    "state": "open",
+    "area": "computer",
+    "priority": "P2",
+    "title": "fix(natives): choose Linux combo box options without opening their keyboard-grabbing list",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-12T14:22:04Z"
+   },
+   {
+    "id": "atspi-text-first",
+    "label": "#19035",
+    "number": 19035,
+    "state": "open",
+    "area": "computer",
+    "priority": "P2",
+    "title": "fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility",
+    "action": "keep",
+    "reasons": [],
+    "note": "accepted pair with #18353",
+    "over": [],
+    "paired": [
+     "#18353"
+    ],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-12T14:32:13Z"
    },
    {
     "id": "iphone-mirror-key-gap",
@@ -96962,59 +96975,6 @@
     "created": "2026-11-12T04:03:05Z"
    },
    {
-    "id": "atspi-huge-children",
-    "label": "atspi-huge-children",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P0",
-    "title": "fix(natives): stop Linux accessibility reads from freezing apps that show long tables",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-11T01:54:02Z"
-   },
-   {
-    "id": "atspi-combo-choice",
-    "label": "atspi-combo-choice",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives): choose Linux combo box options without opening their keyboard-grabbing list",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-11T13:30:39Z"
-   },
-   {
-    "id": "atspi-text-first",
-    "label": "atspi-text-first",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [
-     "#18353"
-    ],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-11T02:21:41Z"
-   },
-   {
     "id": "atspi-walk-reads",
     "label": "atspi-walk-reads",
     "number": null,
@@ -97024,13 +96984,13 @@
     "title": "fix(natives): read each AT-SPI element in two concurrent rounds",
     "action": "wait",
     "reasons": [
-     "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/linux/ax.rs"
+     "conflicts with #19036 in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "atspi-huge-children"
+     "#19036"
     ],
     "needs": [],
     "created": "2026-11-03T09:05:24Z"
@@ -97083,6 +97043,7 @@
     "title": "fix(computer): retain output and screenshots when a run fails",
     "action": "wait",
     "reasons": [
+     "conflicts with #19037 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18987 in packages/coding-agent/src/tools/computer.ts",
      "conflicts with main in packages/coding-agent/src/tools/computer.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -97090,6 +97051,7 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#19037",
      "#18987"
     ],
     "needs": [],
@@ -97155,25 +97117,6 @@
      "#18624"
     ],
     "created": "2026-11-09T18:20:14Z"
-   },
-   {
-    "id": "win-type-drain",
-    "label": "win-type-drain",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives,coding-agent): stop Windows takeover typing from losing text the app had not read yet",
-    "action": "open",
-    "reasons": [],
-    "note": "accepted pair with #19025: Main, 2026-11-12 (via QueueThirteen): only conflict is the use list in crates/pi-natives/src/desktop/win32/input.rs: this entry adds GetKeyState, #19025 (win-target-layout) replaces MapVirtualKeyW with MapVirtualKeyExW; this entry adds no MapVirtualKeyW call. Combined form: one use list with GetKeyState and MapVirtualKeyExW.",
-    "over": [],
-    "paired": [
-     "#19025"
-    ],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-12T04:40:03Z"
    },
    {
     "id": "x11-click-stale-popup",
@@ -97336,16 +97279,14 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): let Linux menu.select walk into Qt apps' menus",
-    "action": "wait",
-    "reasons": [
-     "conflicts with atspi-combo-choice in crates/pi-natives/src/desktop/linux/ax.rs"
-    ],
-    "note": "",
+    "action": "open",
+    "reasons": [],
+    "note": "accepted pair with #19034: QueueFourteen, 2026-11-12 (Main's standing rule: test cases appended to the same block): only conflict is crates/pi-natives/src/desktop/linux/ax.rs tests, where this entry adds MenuNode + its Qt menu test and #19034 adds ComboLog/ComboElement + its tests at the same spot (base empty); nothing removed; combined form is both",
     "over": [],
-    "paired": [],
-    "blocked_by": [
-     "atspi-combo-choice"
+    "paired": [
+     "#19034"
     ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T13:21:21Z"
    },
@@ -97357,16 +97298,14 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): read back AT-SPI numeric setValue before reporting success",
-    "action": "wait",
-    "reasons": [
-     "conflicts with atspi-text-first in crates/pi-natives/src/desktop/linux/ax.rs"
-    ],
-    "note": "",
+    "action": "next-hour",
+    "reasons": [],
+    "note": "accepted pair with #19035: QueueFourteen, 2026-11-12 (Main's standing rule: test cases appended to the same block): only conflict is crates/pi-natives/src/desktop/linux/ax.rs tests: this entry adds a_numeric_write_the_app_clamps_or_ignores_fails and #19035 adds typed_text_goes_in_where_typing_would_put_it_or_not_at_all at the same spot (base empty); nothing removed; combined form is both",
     "over": [],
-    "paired": [],
-    "blocked_by": [
-     "atspi-text-first"
+    "paired": [
+     "#19035"
     ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T02:53:57Z"
    },
@@ -97378,7 +97317,7 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): preserve the empty-field warning on Linux write timeouts",
-    "action": "open",
+    "action": "next-hour",
     "reasons": [],
     "note": "accepted pair with #19026: Main, 2026-11-12: only conflict is crates/pi-natives/src/desktop/linux/ax.rs outside function bodies: this entry adds fn text_write_error above the Linux masks that #19026 deletes for the shared desktop::ax::masks import (same arguments and meaning). Combined form: keep text_write_error, drop the local masks. Trial merge be51509d8ab + 0430659225a built on goliath; linux::ax 26 (incl. interrupted/ignored-write) and desktop::ax 46 pass",
     "over": [],
@@ -97397,16 +97336,14 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): skip unused ref-check reads and recover display refs",
-    "action": "wait",
-    "reasons": [
-     "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/macos/ax.rs"
-    ],
-    "note": "",
+    "action": "next-hour",
+    "reasons": [],
+    "note": "accepted pair with #19036: Main, 2026-11-12: only conflict is the AxProps literal in crates/pi-natives/src/desktop/macos/ax.rs: #19036 adds 'unread_children: 0,', this entry rewrites 'role_name: role_name.map(str::to_owned),' to 'role_name,' (already owned). Combined form: 'role_name,' then 'unread_children: 0,'",
     "over": [],
-    "paired": [],
-    "blocked_by": [
-     "atspi-huge-children"
+    "paired": [
+     "#19036"
     ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T15:44:29Z"
    },
@@ -97475,16 +97412,16 @@
     "title": "fix(computer): say window and element filters take text when given a RegExp",
     "action": "wait",
     "reasons": [
+     "conflicts with #19037 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #18987 in packages/coding-agent/src/tools/computer/worker.ts",
-     "conflicts with win-type-drain in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18987",
-     "win-type-drain"
+     "#19037",
+     "#18987"
     ],
     "needs": [],
     "created": "2026-11-11T01:40:14Z"
@@ -97499,28 +97436,28 @@
     "title": "fix(computer): wait for the app to finish reacting before the next read or input",
     "action": "wait",
     "reasons": [
+     "conflicts with #19037 in docs/computer-use.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #18353 in docs/computer-use.md",
+     "conflicts with #19034 in docs/computer-use.md",
+     "conflicts with #19035 in docs/computer-use.md",
      "conflicts with #18013 in docs/computer-use.md",
      "conflicts with #18222 in packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #18987 in docs/computer-use.md",
-     "conflicts with atspi-combo-choice in docs/computer-use.md",
-     "conflicts with atspi-text-first in docs/computer-use.md",
      "conflicts with ax-row-action in docs/computer-use.md",
-     "conflicts with win-type-drain in docs/computer-use.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#19037",
      "#18353",
+     "#19034",
+     "#19035",
      "#18013",
      "#18222",
      "#18987",
-     "atspi-combo-choice",
-     "atspi-text-first",
-     "ax-row-action",
-     "win-type-drain"
+     "ax-row-action"
     ],
     "needs": [],
     "created": "2026-10-19T07:26:45Z"
@@ -97536,8 +97473,9 @@
     "action": "wait",
     "reasons": [
      "conflicts with #19027 in crates/pi-natives/src/desktop/macos/ax.rs",
-     "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/macos/ax.rs",
+     "conflicts with #19036 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with ax-row-action in crates/pi-natives/src/desktop/macos/ax.rs",
+     "conflicts with ax-ref-read-as-followup in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with main in crates/pi-natives/src/desktop/macos/ax.rs"
     ],
     "note": "",
@@ -97545,8 +97483,9 @@
     "paired": [],
     "blocked_by": [
      "#19027",
-     "atspi-huge-children",
-     "ax-row-action"
+     "#19036",
+     "ax-row-action",
+     "ax-ref-read-as-followup"
     ],
     "needs": [],
     "created": "2026-11-11T09:59:13Z"
@@ -97561,15 +97500,17 @@
     "title": "fix(natives): name a macOS control by the label its AXTitleUIElement links to",
     "action": "wait",
     "reasons": [
-     "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs",
-     "conflicts with ax-row-action in crates/pi-natives/src/desktop/ax.rs"
+     "conflicts with ax-row-action in crates/pi-natives/src/desktop/ax.rs",
+     "conflicts with ax-ref-read-as-followup in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs"
     ],
-    "note": "",
+    "note": "accepted pair with #19036: Main, 2026-11-12: #19036 adds 'unread_children: 0,' to the AxProps literal in macos/ax.rs and a field to the AxProps struct in desktop/ax.rs; this entry returns that literal inside a tuple (AxProps{...}, has_own_label) and adds its own struct field (rustfmt realignment only). Combined form: this entry's tuple with 'unread_children: 0,' inside its AxProps literal; struct with both fields",
     "over": [],
-    "paired": [],
+    "paired": [
+     "#19036"
+    ],
     "blocked_by": [
-     "atspi-huge-children",
-     "ax-row-action"
+     "ax-row-action",
+     "ax-ref-read-as-followup"
     ],
     "needs": [],
     "created": "2026-11-11T14:43:42Z"
@@ -97582,12 +97523,16 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): point a refused macOS press at the element's own click",
-    "action": "next-hour",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with ax-ref-read-as-followup in crates/pi-natives/src/desktop/macos/ax.rs"
+    ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "ax-ref-read-as-followup"
+    ],
     "needs": [],
     "created": "2026-11-11T18:49:11Z"
    },
@@ -97605,14 +97550,14 @@
      "conflicts with #19027 in crates/pi-natives/src/desktop/macos/input.rs",
      "conflicts with #16553 in crates/pi-natives/src/desktop/macos/input.rs",
      "conflicts with #17756 in crates/pi-natives/src/desktop/macos/input.rs",
+     "conflicts with #19037 in docs/computer-use.md",
      "conflicts with #18353 in docs/computer-use.md",
+     "conflicts with #19034 in docs/computer-use.md",
+     "conflicts with #19035 in docs/computer-use.md",
      "conflicts with #17897 in crates/pi-natives/src/desktop/macos/input.rs",
      "conflicts with #18013 in docs/computer-use.md",
      "conflicts with #18987 in docs/computer-use.md",
-     "conflicts with atspi-combo-choice in docs/computer-use.md",
-     "conflicts with atspi-text-first in docs/computer-use.md",
      "conflicts with ax-row-action in crates/pi-natives/src/desktop/macos/input.rs, docs/computer-use.md",
-     "conflicts with win-type-drain in docs/computer-use.md",
      "conflicts with main in docs/computer-use.md"
     ],
     "note": "",
@@ -97622,14 +97567,14 @@
      "#19027",
      "#16553",
      "#17756",
+     "#19037",
      "#18353",
+     "#19034",
+     "#19035",
      "#17897",
      "#18013",
      "#18987",
-     "atspi-combo-choice",
-     "atspi-text-first",
-     "ax-row-action",
-     "win-type-drain"
+     "ax-row-action"
     ],
     "needs": [
      "iphone-mirror-scroll-distance"
@@ -97767,10 +97712,10 @@
     "action": "wait",
     "reasons": [
      "conflicts with #19026 in crates/pi-natives/src/desktop/ax.rs",
-     "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs",
+     "conflicts with #19036 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs",
+     "conflicts with #19037 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with ax-row-action in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/mod.rs",
-     "conflicts with win-type-drain in crates/pi-natives/src/desktop/mod.rs",
-     "conflicts with macos-press-click-hint in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with ax-ref-read-as-followup in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs"
     ],
     "note": "",
@@ -97778,10 +97723,10 @@
     "paired": [],
     "blocked_by": [
      "#19026",
-     "atspi-huge-children",
+     "#19036",
+     "#19037",
      "ax-row-action",
-     "win-type-drain",
-     "macos-press-click-hint"
+     "ax-ref-read-as-followup"
     ],
     "needs": [],
     "created": "2026-11-11T10:16:04Z"
@@ -97794,16 +97739,14 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): report where focus went after a Windows takeover",
-    "action": "wait",
-    "reasons": [
-     "conflicts with win-type-drain in crates/pi-natives/src/desktop/win32/mod.rs, docs/computer-use.md"
-    ],
-    "note": "",
+    "action": "next-hour",
+    "reasons": [],
+    "note": "accepted pair with #19037: QueueFourteen, 2026-11-12 (recorded combined form; use list + docs): conflicts are the test-module use list in crates/pi-natives/src/desktop/win32/mod.rs (#19037: control::{self, CancellationSource}; this entry adds types::DesktopFocusReturn) and the docs/computer-use.md 'Window input defaults' paragraph (#19037: 'delivered (or only sent, when Windows takeover typing was not seen read)'; this entry: 'macOS or Windows reports \u2026 (Linux, \u2026)'). Combined: use crate::desktop::{control::{self, CancellationSource}, types::DesktopFocusReturn}; paragraph carries both edits",
     "over": [],
-    "paired": [],
-    "blocked_by": [
-     "win-type-drain"
+    "paired": [
+     "#19037"
     ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T13:11:20Z"
    },
@@ -97818,8 +97761,9 @@
     "action": "wait",
     "reasons": [
      "conflicts with #19025 in crates/pi-natives/src/desktop/win32/mod.rs",
+     "conflicts with #19037 in crates/pi-natives/src/desktop/win32/mod.rs",
      "conflicts with #18222 in packages/coding-agent/src/prompts/tools/computer.md",
-     "conflicts with win-type-drain in crates/pi-natives/src/desktop/win32/mod.rs",
+     "conflicts with win-focus-report in crates/pi-natives/src/desktop/win32/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/win32/mod.rs, packages/coding-agent/src/prompts/tools/computer.md"
     ],
     "note": "",
@@ -97827,8 +97771,9 @@
     "paired": [],
     "blocked_by": [
      "#19025",
+     "#19037",
      "#18222",
-     "win-type-drain"
+     "win-focus-report"
     ],
     "needs": [],
     "created": "2026-11-11T09:06:32Z"
@@ -97983,18 +97928,18 @@
     "reasons": [
      "held: Main, 2026-11-11: stays held until #18786 merges with the typed-message guide channel (design check replace); then one property on the computer prelude, drop the wrap variant, re-run its blind legs",
      "needs #18786 (open)",
+     "conflicts with #19037 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18222 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/prompts/tools/eval.md, packages/coding-agent/src/tools/eval.ts",
-     "conflicts with win-type-drain in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with main in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/sdk-computer-prelude-toggle.test.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#19037",
      "#18222",
-     "#18786",
-     "win-type-drain"
+     "#18786"
     ],
     "needs": [
      "browser-core-first-use"
@@ -98014,15 +97959,16 @@
      "held: Main for InputDiffFix, 2026-11-12: held; the fix round failed two Opus acceptance lines fixed beforehand (Finder steps 1.47x, Automator tokens 1.26x vs main); code branch stays local and unpushed; see note",
      "needs computer-ui-quiet (queued)",
      "conflicts with #19026 in docs/tools/computer.md",
+     "conflicts with #19037 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18353 in docs/computer-use.md, docs/tools/computer.md",
+     "conflicts with #19034 in docs/computer-use.md",
+     "conflicts with #19035 in docs/computer-use.md",
      "conflicts with #18013 in docs/computer-use.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/tools/eval.ts",
      "conflicts with #18987 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/worker.ts",
-     "conflicts with atspi-combo-choice in docs/computer-use.md",
-     "conflicts with atspi-text-first in docs/computer-use.md",
      "conflicts with ax-row-action in docs/computer-use.md",
-     "conflicts with win-type-drain in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with win-focus-report in docs/computer-use.md, packages/coding-agent/src/tools/computer/worker.ts",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -98031,15 +97977,16 @@
     "paired": [],
     "blocked_by": [
      "#19026",
+     "#19037",
      "#18353",
+     "#19034",
+     "#19035",
      "#18013",
      "#18222",
      "#18786",
      "#18987",
-     "atspi-combo-choice",
-     "atspi-text-first",
      "ax-row-action",
-     "win-type-drain"
+     "win-focus-report"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -98059,14 +98006,14 @@
      "needs computer-ui-quiet (queued)",
      "conflicts with #19027 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with #19026 in docs/tools/computer.md",
+     "conflicts with #19036 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with #19037 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18987 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
-     "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with ax-row-action in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
-     "conflicts with win-type-drain in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with macos-press-click-hint in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with ax-ref-read-as-followup in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs"
     ],
@@ -98076,14 +98023,14 @@
     "blocked_by": [
      "#19027",
      "#19026",
+     "#19036",
+     "#19037",
      "#18353",
      "#18222",
      "#18925",
      "#18987",
-     "atspi-huge-children",
      "ax-row-action",
-     "win-type-drain",
-     "macos-press-click-hint"
+     "ax-ref-read-as-followup"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -98104,11 +98051,11 @@
      "needs #18987 (open)",
      "conflicts with #16553 in crates/pi-natives/src/desktop/macos/mod.rs",
      "conflicts with #19026 in docs/tools/computer.md",
+     "conflicts with #19036 in crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with #19037 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
      "conflicts with #18925 in crates/pi-natives/src/desktop/macos/capture.rs",
-     "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with ax-row-action in crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs",
-     "conflicts with win-type-drain in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
-     "conflicts with macos-press-click-hint in crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with ax-ref-read-as-followup in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
@@ -98117,11 +98064,11 @@
     "blocked_by": [
      "#16553",
      "#19026",
+     "#19036",
+     "#19037",
      "#18925",
-     "atspi-huge-children",
      "ax-row-action",
-     "win-type-drain",
-     "macos-press-click-hint"
+     "ax-ref-read-as-followup"
     ],
     "needs": [
      "agent-identity"
@@ -98272,9 +98219,10 @@
     "action": "held",
     "reasons": [
      "held: Main, 2026-11-12: proposal; opens only after entry A merges and Will has seen the body",
-     "needs win-type-drain (queued)",
+     "needs #19037 (open)",
      "conflicts with #19025 in crates/pi-natives/src/desktop/win32/input.rs, crates/pi-natives/src/desktop/win32/mod.rs",
-     "conflicts with win-type-drain in crates/pi-natives/src/desktop/win32/input.rs, crates/pi-natives/src/desktop/win32/mod.rs, docs/tools/computer.md",
+     "conflicts with #19037 in crates/pi-natives/src/desktop/win32/input.rs, crates/pi-natives/src/desktop/win32/mod.rs, docs/tools/computer.md",
+     "conflicts with win-focus-report in crates/pi-natives/src/desktop/win32/input.rs, crates/pi-natives/src/desktop/win32/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/win32/mod.rs"
     ],
     "note": "",
@@ -98282,7 +98230,8 @@
     "paired": [],
     "blocked_by": [
      "#19025",
-     "win-type-drain"
+     "#19037",
+     "win-focus-report"
     ],
     "needs": [
      "win-type-drain"
