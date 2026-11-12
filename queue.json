@@ -83694,7 +83694,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ax-masked-readback",
    "host": "MacBook-Pro",
    "added": "2026-11-12T02:37:51Z",
-   "updated": "2026-11-12T03:57:35Z",
+   "updated": "2026-11-12T04:03:41Z",
    "note": "AuthFinish 2026-11-12: widened per Main (no written text in any failed read-back); delta reviewed (AuthFinish.ReviewReadbackDelta, fixed); overlaps queued atspi-value-readback in crates/pi-natives/src/desktop/linux/ax.rs\nMain 2026-11-12: whichever of ax-masked-readback / #18915 lands second deletes the cfg_attr(..., allow(dead_code)) on ax.rs `masked` in its rebase (stale after #18915, not wrong); combined doc = ax-masked-readback\u2019s wording, no cfg on text_readback.\nMain 2026-11-12: mechanical move, no behaviour change, existing review stamp stands.",
    "advanced": "2026-11-12T03:32:58Z",
    "rebases_after": [
@@ -83864,6 +83864,60 @@
      "tip": "d4c6fa013176db90c568d902d83a963c018ebe07",
      "with_tip": "de85f0b1913843933a7bae010c159e88ba6ab96f",
      "at": "2026-11-12T03:57:34Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#18743",
+     "code": "5d6d6f9b4e0f559e4fbca78df2656fac68c1f2fb",
+     "with_code": "5682ab79b16d564c45890054227b32cf02f03ff1",
+     "tip": "d4c6fa013176db90c568d902d83a963c018ebe07",
+     "with_tip": "c0c62cb0e7a1c49ca9c2c5c3f6ccabe1c8d305a1",
+     "at": "2026-11-12T04:03:34Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#18825",
+     "code": "5d6d6f9b4e0f559e4fbca78df2656fac68c1f2fb",
+     "with_code": "e1ed14532fc3243f54bf11715cdb314d2599f8f2",
+     "tip": "d4c6fa013176db90c568d902d83a963c018ebe07",
+     "with_tip": "bae05113ad9c7577017065457e0236de477bc7f0",
+     "at": "2026-11-12T04:03:40Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#18892",
+     "code": "5d6d6f9b4e0f559e4fbca78df2656fac68c1f2fb",
+     "with_code": "d362fdfe026e3c3bd2f14eb3172b25379c69b5a4",
+     "tip": "d4c6fa013176db90c568d902d83a963c018ebe07",
+     "with_tip": "42ba4e4afdceacd7bb08c101750b14005019dfeb",
+     "at": "2026-11-12T04:03:40Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#18896",
+     "code": "5d6d6f9b4e0f559e4fbca78df2656fac68c1f2fb",
+     "with_code": "65c65f92e8b25212b208bec00d4e8687e87fb926",
+     "tip": "d4c6fa013176db90c568d902d83a963c018ebe07",
+     "with_tip": "e8a1ae3777704bde2cececdc560f8cc776708e58",
+     "at": "2026-11-12T04:03:40Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#18353",
+     "code": "5d6d6f9b4e0f559e4fbca78df2656fac68c1f2fb",
+     "with_code": "59c94cfca5a50b474ad2967de271802bc0c5b93a",
+     "tip": "d4c6fa013176db90c568d902d83a963c018ebe07",
+     "with_tip": "34096c6831982028ae29b5d43c4f67517f23e2bb",
+     "at": "2026-11-12T04:03:41Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#18013",
+     "code": "5d6d6f9b4e0f559e4fbca78df2656fac68c1f2fb",
+     "with_code": "9ace13a43591de228fd3d9f8f1d6d0d7d535ecd5",
+     "tip": "d4c6fa013176db90c568d902d83a963c018ebe07",
+     "with_tip": "6a9c583114243114f9e7ce85bd7d97c0f3aa544c",
+     "at": "2026-11-12T04:03:41Z",
      "host": "MacBook-Pro"
     }
    ]
