@@ -36885,6 +36885,20 @@
    "rebases_after": [
     18743,
     18896
+   ],
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-12T10:00:18Z",
+     "reason": "control/macos.rs: Main-approved combination with merged #18896: the event-field tuple now also reads point, and foreign(tag, source, own) is main's foreign_input(tag, source, own, kind, point); the PR's window field and button_record kept",
+     "old": "a6955c00f134c9442cd86507ac4f571913ca35dc",
+     "new": "9339b475bc3073bd54811b51a565980add9fe018",
+     "dropped": {
+      "crates/pi-natives/src/desktop/control/macos.rs": [
+       "\t\tlet (tag, source, target, window) = unsafe {",
+       "\t\tif foreign(tag, source, own)"
+      ]
+     }
+    }
    ]
   },
   {
