@@ -1,19 +1,21 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12 02:25Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12 02:26Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-12 02:09Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 2, conflict-held 29, stacked 27, held 10, parked 2, open PRs 42, queued since the last plan 1; merged 291, closed 33
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-12 02:19Z on MacBook-Pro; groups below are from it, states from the manifest)
+**Counts:** openable now 4, conflict-held 27, stacked 27, held 10, parked 2, open PRs 42, queued since the last plan 1; merged 291, closed 33
 
-## Openable now (2)
+## Openable now (4)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
 | tern-kit-password-mask | fix(browser): mask password values in Tern kit observations | browser | P2 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/tern-kit-password-mask) |
+| status-entered-text | fix(coding-agent): keep text a cell enters out of browser and computer status lines | browser | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/status-entered-text) |
+| computer-secure-input | fix(natives,coding-agent): report macOS secure input and stop claiming globalEscape under it | computer | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-secure-input) |
 | relay-frame-race | fix(browser-relay): keep a driven tab when a password manager's frame drops omp from it | browser | P0 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-frame-race) |
 
-## Conflict-held (29)
+## Conflict-held (27)
 
 | id | title | area | priority | age | blocked by | branch |
 |---|---|---|---|---|---|---|
@@ -44,8 +46,6 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12
 | x11-keysym-remap | fix(natives): type characters outside the X11 keymap through temporary keycodes | computer | P2 | 12h | [#18784](https://github.com/can1357/oh-my-pi/pull/18784), [#18825](https://github.com/can1357/oh-my-pi/pull/18825), [#18828](https://github.com/can1357/oh-my-pi/pull/18828) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-keysym-remap) |
 | macos-ax-linked-label | fix(natives): name a macOS control by the label its AXTitleUIElement links to | natives | P2 | 11h | [#18892](https://github.com/can1357/oh-my-pi/pull/18892) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-ax-linked-label) |
 | macos-press-click-hint | fix(natives): point a refused macOS press at the element's own click | computer | P2 | 7h | [#18892](https://github.com/can1357/oh-my-pi/pull/18892) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-press-click-hint) |
-| status-entered-text | fix(coding-agent): keep text a cell enters out of browser and computer status lines | browser | P1 | 0h | [#18772](https://github.com/can1357/oh-my-pi/pull/18772) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/status-entered-text) |
-| computer-secure-input | fix(natives,coding-agent): report macOS secure input and stop claiming globalEscape under it | computer | P1 | 0h | [#18784](https://github.com/can1357/oh-my-pi/pull/18784), [#18353](https://github.com/can1357/oh-my-pi/pull/18353) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-secure-input) |
 
 ## Stacked (27)
 

@@ -90147,7 +90147,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-12T02:09:24.851767Z",
+  "at": "2026-11-12T02:19:02.544711Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -91136,18 +91136,12 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives,coding-agent): report macOS secure input and stop claiming globalEscape under it",
-    "action": "wait",
-    "reasons": [
-     "conflicts with #18784 in docs/computer-use.md",
-     "conflicts with #18353 in crates/pi-natives/src/desktop/linux/wayland/mod.rs"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#18784",
-     "#18353"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-12T01:37:10Z"
    },
@@ -91229,16 +91223,12 @@
     "area": "browser",
     "priority": "P1",
     "title": "fix(coding-agent): keep text a cell enters out of browser and computer status lines",
-    "action": "wait",
-    "reasons": [
-     "conflicts with #18772 in packages/coding-agent/test/eval/browser-prelude-facade.test.ts"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#18772"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-12T01:30:11Z"
    },
@@ -91867,6 +91857,7 @@
      "conflicts with #18786 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts",
      "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts",
      "conflicts with relay-frame-race in packages/coding-agent/src/tools/browser/tab-supervisor.ts",
+     "conflicts with status-entered-text in packages/coding-agent/src/tools/browser.ts",
      "its need r2/relay-popup-owned conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts",
      "its need r2/page-waiting conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-detach.test.ts"
@@ -91884,7 +91875,8 @@
      "#18776",
      "#18786",
      "#18789",
-     "relay-frame-race"
+     "relay-frame-race",
+     "status-entered-text"
     ],
     "needs": [
      "r2/relay-popup-owned",
@@ -92202,6 +92194,8 @@
      "conflicts with #18947 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18222 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/prompts/tools/eval.md, packages/coding-agent/src/tools/eval.ts",
+     "conflicts with computer-secure-input in packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with status-entered-text in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with main in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/sdk-computer-prelude-toggle.test.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
@@ -92211,7 +92205,9 @@
      "#18753",
      "#18947",
      "#18222",
-     "#18786"
+     "#18786",
+     "computer-secure-input",
+     "status-entered-text"
     ],
     "needs": [
      "browser-core-first-use"
@@ -92241,6 +92237,8 @@
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/tools/eval.ts",
+     "conflicts with computer-secure-input in docs/tools/computer.md, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with status-entered-text in packages/coding-agent/src/tools/computer.ts, packages/coding-agent/test/tools/computer.test.ts",
      "its need computer-ui-quiet conflicts with main in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/computer/worker.ts"
     ],
@@ -92259,7 +92257,9 @@
      "#18947",
      "#18353",
      "#18222",
-     "#18786"
+     "#18786",
+     "computer-secure-input",
+     "status-entered-text"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -92289,6 +92289,8 @@
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with computer-secure-input in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with status-entered-text in packages/coding-agent/test/tools/computer.test.ts",
      "its need computer-ui-quiet conflicts with main in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/tools/computer/worker.ts"
     ],
@@ -92307,7 +92309,9 @@
      "#18947",
      "#18353",
      "#18222",
-     "#18925"
+     "#18925",
+     "computer-secure-input",
+     "status-entered-text"
     ],
     "needs": [
      "computer-ui-quiet"
