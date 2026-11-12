@@ -70857,13 +70857,13 @@
    "needs": [],
    "base": "ced5efc0c2750f43dfdb7d223c7d22cb6c5f1f44",
    "body": "bodies/computer-strict-options.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18753,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-strict-options",
    "host": "MacBook-Pro",
    "added": "2026-11-10T05:41:26Z",
-   "updated": "2026-11-12T01:45:18Z",
+   "updated": "2026-11-12T09:22:38Z",
    "note": "",
    "built": [
     {
@@ -71089,7 +71089,8 @@
      "note": "DesignChecks: lift stop; ordinary polish",
      "ref": "/Users/viathebrink/tmp/oh-my-pi/DesignChecks/DesignChecks.md"
     }
-   ]
+   ],
+   "merged_by": "pr"
   },
   {
    "id": "browser-console-shape",
@@ -71100,13 +71101,13 @@
    "needs": [],
    "base": "b437322d9a3900206228e17077415c87ce67c8ca",
    "body": "bodies/browser-console-shape.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18738,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-console-shape",
    "host": "MacBook-Pro",
    "added": "2026-11-10T05:49:27Z",
-   "updated": "2026-11-12T01:55:02Z",
+   "updated": "2026-11-12T09:22:38Z",
    "note": "",
    "advanced": "2026-11-12T01:55:02Z",
    "built": [
@@ -71262,7 +71263,8 @@
     }
    ],
    "opened": "2026-11-10T16:38:10Z",
-   "readied": "2026-11-10T16:38:31Z"
+   "readied": "2026-11-10T16:38:31Z",
+   "merged_by": "pr"
   },
   {
    "id": "browser-wait-predicate",
@@ -71559,13 +71561,13 @@
    "needs": [],
    "base": "ced5efc0c2750f43dfdb7d223c7d22cb6c5f1f44",
    "body": "bodies/browser-hover-actionable.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18750,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-hover-actionable",
    "host": "MacBook-Pro",
    "added": "2026-11-10T16:34:24Z",
-   "updated": "2026-11-12T01:45:38Z",
+   "updated": "2026-11-12T09:22:38Z",
    "note": "",
    "built": [
     {
@@ -71749,7 +71751,8 @@
      "note": "Applied in d05e70ab0ba: hover waits only for a layout box (and retries Puppeteer's no-box error as off-viewport), then calls Puppeteer's own hover(); recentring, hold-still gate, post-move hit test and hand-made move removed. Of 11 findings, 5 impossible (R2, R3 4529245338, R4 x2, R5 4530172890), 6 back to main's behaviour (R1, R3 4529245351, R5 4530172863, R6 x3), 0 open.",
      "ref": "/Users/viathebrink/tmp/oh-my-pi/DesignChecks/DesignChecks.md"
     }
-   ]
+   ],
+   "merged_by": "pr"
   },
   {
    "id": "browser-wait-text-regexp",
@@ -74181,13 +74184,13 @@
    "needs": [],
    "base": "7b42b1be6069b791c54e1c4c93d2070978d9e6bf",
    "body": "bodies/eval-error-frames.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18775,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/eval-error-frames",
    "host": "MacBook-Pro",
    "added": "2026-11-10T19:06:45Z",
-   "updated": "2026-11-11T11:44:20Z",
+   "updated": "2026-11-12T09:22:38Z",
    "note": "",
    "advanced": "2026-11-11T11:44:20Z",
    "built": [
@@ -74409,7 +74412,8 @@
      "note": "DesignChecks: lift stop; decline 'stack prints unfiltered' findings (intended fallback); fix ones losing message text or the missing-await hint (4532193397 open, real)",
      "ref": "/Users/viathebrink/tmp/oh-my-pi/DesignChecks/DesignChecks.md"
     }
-   ]
+   ],
+   "merged_by": "pr"
   },
   {
    "id": "factory-droid-argon-promo",
@@ -74780,13 +74784,13 @@
    "needs": [],
    "base": "ced5efc0c2750f43dfdb7d223c7d22cb6c5f1f44",
    "body": "bodies/observe-print.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18772,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/observe-print",
    "host": "MacBook-Pro",
    "added": "2026-11-10T19:33:45Z",
-   "updated": "2026-11-12T01:45:09Z",
+   "updated": "2026-11-12T09:22:38Z",
    "note": "",
    "built": [
     {
@@ -75005,7 +75009,8 @@
    ],
    "rebases_after": [
     18751
-   ]
+   ],
+   "merged_by": "pr"
   },
   {
    "id": "factory-droid-171-pin",
@@ -75113,13 +75118,13 @@
    "needs": [],
    "base": "ced5efc0c2750f43dfdb7d223c7d22cb6c5f1f44",
    "body": "bodies/screenshot-result-line.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18776,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/screenshot-result-line",
    "host": "MacBook-Pro",
    "added": "2026-11-10T19:42:48Z",
-   "updated": "2026-11-12T01:53:52Z",
+   "updated": "2026-11-12T09:22:38Z",
    "note": "",
    "built": [
     {
@@ -75331,7 +75336,8 @@
    ],
    "advanced": "2026-11-12T01:53:52Z",
    "opened": "2026-11-10T20:37:05Z",
-   "readied": "2026-11-10T20:37:32Z"
+   "readied": "2026-11-10T20:37:32Z",
+   "merged_by": "pr"
   },
   {
    "id": "computer-guide-first-use",
@@ -75663,13 +75669,13 @@
    "needs": [],
    "base": "0ef8a9e7c2fd9870cead2c12839a665ee15fe852",
    "body": "bodies/x11-mpx-qt.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18825,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-mpx-qt",
    "host": "MacBook-Pro",
    "added": "2026-11-10T22:23:32Z",
-   "updated": "2026-11-11T17:37:26Z",
+   "updated": "2026-11-12T09:22:38Z",
    "note": "",
    "advanced": "2026-11-11T17:37:26Z",
    "built": [
@@ -75806,7 +75812,8 @@
    "rebases_after": [
     18013,
     18783
-   ]
+   ],
+   "merged_by": "pr"
   },
   {
    "id": "devin-retire-swe-1-6-fast",
@@ -77859,13 +77866,13 @@
    "needs": [],
    "base": "b9b3cc4d69962e492197178155dd95216cd9c21b",
    "body": "bodies/x11-mpx-key-confirm.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18828,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-mpx-key-confirm",
    "host": "MacBook-Pro",
    "added": "2026-11-11T02:32:46Z",
-   "updated": "2026-11-11T14:03:03Z",
+   "updated": "2026-11-12T09:22:38Z",
    "note": "",
    "built": [
     {
@@ -77998,7 +78005,8 @@
     }
    ],
    "advanced": "2026-11-11T14:03:03Z",
-   "opened": "2026-11-11T04:50:24Z"
+   "opened": "2026-11-11T04:50:24Z",
+   "merged_by": "pr"
   },
   {
    "id": "atspi-value-readback",
@@ -78387,13 +78395,13 @@
    "needs": [],
    "base": "b437322d9a3900206228e17077415c87ce67c8ca",
    "body": "bodies/win-screen-locked.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18947,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-screen-locked",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:31:29Z",
-   "updated": "2026-11-12T01:57:06Z",
+   "updated": "2026-11-12T09:22:38Z",
    "note": "",
    "advanced": "2026-11-12T01:57:06Z",
    "built": [
@@ -78771,7 +78779,8 @@
    "readied": "2026-11-11T22:00:41Z",
    "rebases_after": [
     18915
-   ]
+   ],
+   "merged_by": "pr"
   },
   {
    "id": "win-setvalue-readback",
@@ -79024,13 +79033,13 @@
    "needs": [],
    "base": "b9b3cc4d69962e492197178155dd95216cd9c21b",
    "body": "bodies/win-posted-modifiers.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18895,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-posted-modifiers",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:39:32Z",
-   "updated": "2026-11-11T14:03:11Z",
+   "updated": "2026-11-12T09:22:38Z",
    "note": "",
    "built": [
     {
@@ -79216,7 +79225,8 @@
    ],
    "opened": "2026-11-11T12:45:03Z",
    "readied": "2026-11-11T12:45:40Z",
-   "advanced": "2026-11-11T14:03:11Z"
+   "advanced": "2026-11-11T14:03:11Z",
+   "merged_by": "pr"
   },
   {
    "id": "win-menu-modal",
@@ -79227,13 +79237,13 @@
    "needs": [],
    "base": "73d7521269a1212fc2b2790a2e8c08424496c953",
    "body": "bodies/win-menu-modal.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18922,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-menu-modal",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:48:16Z",
-   "updated": "2026-11-11T17:09:16Z",
+   "updated": "2026-11-12T09:22:38Z",
    "note": "",
    "built": [
     {
@@ -79532,7 +79542,8 @@
    ],
    "opened": "2026-11-11T16:34:00Z",
    "readied": "2026-11-11T16:34:28Z",
-   "advanced": "2026-11-11T17:09:16Z"
+   "advanced": "2026-11-11T17:09:16Z",
+   "merged_by": "pr"
   },
   {
    "id": "browser-main-wait-globals",
@@ -79543,13 +79554,13 @@
    "needs": [],
    "base": "ced5efc0c2750f43dfdb7d223c7d22cb6c5f1f44",
    "body": "bodies/browser-main-wait-globals.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18883,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/main-world-wait",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:58:00Z",
-   "updated": "2026-11-12T01:44:23Z",
+   "updated": "2026-11-12T09:22:38Z",
    "note": "",
    "built": [
     {
@@ -79825,7 +79836,8 @@
    ],
    "opened": "2026-11-11T11:33:31Z",
    "readied": "2026-11-11T11:33:56Z",
-   "advanced": "2026-11-12T01:44:23Z"
+   "advanced": "2026-11-12T01:44:23Z",
+   "merged_by": "pr"
   },
   {
    "id": "macos-press-disabled",
@@ -79836,13 +79848,13 @@
    "needs": [],
    "base": "b9b3cc4d69962e492197178155dd95216cd9c21b",
    "body": "bodies/macos-press-disabled.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18898,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-press-disabled",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:58:05Z",
-   "updated": "2026-11-11T14:03:29Z",
+   "updated": "2026-11-12T09:22:38Z",
    "note": "",
    "built": [
     {
@@ -80028,7 +80040,8 @@
    ],
    "opened": "2026-11-11T13:04:22Z",
    "readied": "2026-11-11T13:04:50Z",
-   "advanced": "2026-11-11T14:03:29Z"
+   "advanced": "2026-11-11T14:03:29Z",
+   "merged_by": "pr"
   },
   {
    "id": "browser-main-wait-navigation",
@@ -80039,13 +80052,13 @@
    "needs": [],
    "base": "ced5efc0c2750f43dfdb7d223c7d22cb6c5f1f44",
    "body": "bodies/browser-main-wait-navigation.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18884,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/main-world-wait-navigation",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:58:14Z",
-   "updated": "2026-11-12T01:44:32Z",
+   "updated": "2026-11-12T09:22:38Z",
    "note": "",
    "advanced": "2026-11-12T01:44:32Z",
    "built": [
@@ -80321,7 +80334,8 @@
     }
    ],
    "opened": "2026-11-11T11:39:58Z",
-   "readied": "2026-11-11T11:40:28Z"
+   "readied": "2026-11-11T11:40:28Z",
+   "merged_by": "pr"
   },
   {
    "id": "macos-menu-miss-items",
@@ -80332,13 +80346,13 @@
    "needs": [],
    "base": "0ef8a9e7c2fd9870cead2c12839a665ee15fe852",
    "body": "bodies/macos-menu-miss-items.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18923,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-menu-miss-items",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:58:16Z",
-   "updated": "2026-11-11T17:31:35Z",
+   "updated": "2026-11-12T09:22:38Z",
    "note": "",
    "built": [
     {
@@ -80637,7 +80651,8 @@
    ],
    "opened": "2026-11-11T16:39:42Z",
    "readied": "2026-11-11T16:40:10Z",
-   "advanced": "2026-11-11T17:31:35Z"
+   "advanced": "2026-11-11T17:31:35Z",
+   "merged_by": "pr"
   },
   {
    "id": "macos-ax-cancel-before-send",
@@ -80848,13 +80863,13 @@
    "needs": [],
    "base": "9369103e4a06d099f3060aea95dae2fb7782cd9b",
    "body": "bodies/macos-layout-chords.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18897,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-layout-chords",
    "host": "MacBook-Pro",
    "added": "2026-11-11T10:01:18Z",
-   "updated": "2026-11-11T17:17:12Z",
+   "updated": "2026-11-12T09:22:38Z",
    "note": "",
    "built": [
     {
@@ -81040,7 +81055,8 @@
    ],
    "opened": "2026-11-11T12:58:05Z",
    "readied": "2026-11-11T12:58:35Z",
-   "advanced": "2026-11-11T14:18:47Z"
+   "advanced": "2026-11-11T14:18:47Z",
+   "merged_by": "pr"
   },
   {
    "id": "xproc-intervention",
@@ -81051,13 +81067,13 @@
    "needs": [],
    "base": "b9b3cc4d69962e492197178155dd95216cd9c21b",
    "body": "bodies/xproc-intervention.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18896,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/xproc-intervention",
    "host": "MacBook-Pro",
    "added": "2026-11-11T10:07:38Z",
-   "updated": "2026-11-11T14:03:21Z",
+   "updated": "2026-11-12T09:22:38Z",
    "note": "",
    "kind": "fix",
    "built": [
@@ -81253,7 +81269,8 @@
    ],
    "opened": "2026-11-11T12:51:12Z",
    "readied": "2026-11-11T12:51:38Z",
-   "advanced": "2026-11-11T14:03:21Z"
+   "advanced": "2026-11-11T14:03:21Z",
+   "merged_by": "pr"
   },
   {
    "id": "wait-ladder-context",
@@ -81855,13 +81872,13 @@
    "needs": [],
    "base": "73d7521269a1212fc2b2790a2e8c08424496c953",
    "body": "bodies/win-takeover-focus.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18919,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-takeover-focus",
    "host": "MacBook-Pro",
    "added": "2026-11-11T11:46:35Z",
-   "updated": "2026-11-11T17:15:37Z",
+   "updated": "2026-11-12T09:22:38Z",
    "note": "",
    "built": [
     {
@@ -82076,7 +82093,8 @@
    ],
    "opened": "2026-11-11T16:22:35Z",
    "readied": "2026-11-11T16:23:02Z",
-   "advanced": "2026-11-11T17:15:37Z"
+   "advanced": "2026-11-11T17:15:37Z",
+   "merged_by": "pr"
   },
   {
    "id": "browser-wait-selector-state",
@@ -82087,13 +82105,13 @@
    "needs": [],
    "base": "b437322d9a3900206228e17077415c87ce67c8ca",
    "body": "bodies/browser-wait-selector-state.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18924,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-wait-selector-state",
    "host": "MacBook-Pro",
    "added": "2026-11-11T12:16:01Z",
-   "updated": "2026-11-12T01:54:51Z",
+   "updated": "2026-11-12T09:22:38Z",
    "note": "Proposal only, not queued: add Tern and cmux state/unknown-option support separately, each exercised on its real backend; Tern requires Will\u2019s Tern. Chromium-only scope chosen by Design18924.",
    "built": [
     {
@@ -82319,7 +82337,8 @@
      "note": "NARROW: cmux-tab.ts, tern-tab.ts and their tests back to main; docs+CHANGELOG scoped to Chromium-backed tabs/frames. 7 of 12 Codex findings sat on lines the measured defect never needed (cmux built a visibility wait checked only on a mocked socket; Tern only on a fake daemon). Patch: 41 pass/1 skip, types clean, cells 5/5.",
      "ref": "/Users/viathebrink/tmp/oh-my-pi/queuepilot/design/18924.md"
     }
-   ]
+   ],
+   "merged_by": "pr"
   },
   {
    "id": "win-focus-report",
@@ -82350,13 +82369,13 @@
    "needs": [],
    "base": "73d7521269a1212fc2b2790a2e8c08424496c953",
    "body": "bodies/atspi-press-actions.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18921,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-press-actions",
    "host": "MacBook-Pro",
    "added": "2026-11-11T13:13:42Z",
-   "updated": "2026-11-11T17:07:00Z",
+   "updated": "2026-11-12T09:22:38Z",
    "note": "",
    "built": [
     {
@@ -82571,7 +82590,8 @@
    ],
    "opened": "2026-11-11T16:28:14Z",
    "readied": "2026-11-11T16:28:42Z",
-   "advanced": "2026-11-11T17:00:08Z"
+   "advanced": "2026-11-11T17:00:08Z",
+   "merged_by": "pr"
   },
   {
    "id": "atspi-qt-menus",
@@ -82781,13 +82801,13 @@
    "needs": [],
    "base": "b437322d9a3900206228e17077415c87ce67c8ca",
    "body": "bodies/tern-kit-password-mask.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18983,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/tern-kit-password-mask",
    "host": "MacBook-Pro",
    "added": "2026-11-12T01:22:04Z",
-   "updated": "2026-11-12T04:48:59Z",
+   "updated": "2026-11-12T09:22:38Z",
    "note": "",
    "advanced": "2026-11-12T02:18:49Z",
    "built": [
@@ -83033,7 +83053,8 @@
     }
    ],
    "opened": "2026-11-12T03:56:51Z",
-   "readied": "2026-11-12T03:57:21Z"
+   "readied": "2026-11-12T03:57:21Z",
+   "merged_by": "pr"
   },
   {
    "id": "status-entered-text",
@@ -83044,13 +83065,13 @@
    "needs": [],
    "base": "b437322d9a3900206228e17077415c87ce67c8ca",
    "body": "bodies/status-entered-text.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18981,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/status-entered-text",
    "host": "MacBook-Pro",
    "added": "2026-11-12T01:30:11Z",
-   "updated": "2026-11-12T03:44:15Z",
+   "updated": "2026-11-12T09:22:38Z",
    "note": "QueueTwelve 2026-11-12: P1 per Main (stops typed secrets being written to session files)",
    "advanced": "2026-11-12T02:18:32Z",
    "built": [
@@ -83296,7 +83317,8 @@
     }
    ],
    "opened": "2026-11-12T03:43:46Z",
-   "readied": "2026-11-12T03:44:15Z"
+   "readied": "2026-11-12T03:44:15Z",
+   "merged_by": "pr"
   },
   {
    "id": "credential-fill-proposal",
@@ -83328,13 +83350,13 @@
    "needs": [],
    "base": "b437322d9a3900206228e17077415c87ce67c8ca",
    "body": "bodies/computer-secure-input.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18982,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-secure-input",
    "host": "MacBook-Pro",
    "added": "2026-11-12T01:37:10Z",
-   "updated": "2026-11-12T04:48:59Z",
+   "updated": "2026-11-12T09:22:38Z",
    "note": "",
    "advanced": "2026-11-12T02:18:39Z",
    "built": [
@@ -83760,7 +83782,8 @@
     }
    ],
    "opened": "2026-11-12T03:50:14Z",
-   "readied": "2026-11-12T03:50:45Z"
+   "readied": "2026-11-12T03:50:45Z",
+   "merged_by": "pr"
   },
   {
    "id": "relay-frame-race",
@@ -84104,13 +84127,13 @@
    "needs": [],
    "base": "04cd1a7549a02d62ad1d24826198d52507595683",
    "body": "bodies/ax-masked-readback.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18989,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ax-masked-readback",
    "host": "MacBook-Pro",
    "added": "2026-11-12T02:37:51Z",
-   "updated": "2026-11-12T04:48:59Z",
+   "updated": "2026-11-12T09:22:38Z",
    "note": "AuthFinish 2026-11-12: widened per Main (no written text in any failed read-back); delta reviewed (AuthFinish.ReviewReadbackDelta, fixed); overlaps queued atspi-value-readback in crates/pi-natives/src/desktop/linux/ax.rs\nMain 2026-11-12: whichever of ax-masked-readback / #18915 lands second deletes the cfg_attr(..., allow(dead_code)) on ax.rs `masked` in its rebase (stale after #18915, not wrong); combined doc = ax-masked-readback\u2019s wording, no cfg on text_readback.\nMain 2026-11-12: mechanical move, no behaviour change, existing review stamp stands.",
    "advanced": "2026-11-12T03:32:58Z",
    "rebases_after": [
@@ -84338,7 +84361,8 @@
     }
    ],
    "opened": "2026-11-12T04:18:12Z",
-   "readied": "2026-11-12T04:18:41Z"
+   "readied": "2026-11-12T04:18:41Z",
+   "merged_by": "pr"
   },
   {
    "id": "autofill-rows",
@@ -84349,13 +84373,13 @@
    "needs": [],
    "base": "04cd1a7549a02d62ad1d24826198d52507595683",
    "body": "bodies/autofill-rows.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19004,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/autofill-rows",
    "host": "MacBook-Pro",
    "added": "2026-11-12T04:00:08Z",
-   "updated": "2026-11-12T05:49:46Z",
+   "updated": "2026-11-12T09:22:38Z",
    "note": "",
    "built": [
     {
@@ -84620,7 +84644,8 @@
     }
    ],
    "opened": "2026-11-12T05:44:44Z",
-   "readied": "2026-11-12T05:45:15Z"
+   "readied": "2026-11-12T05:45:15Z",
+   "merged_by": "pr"
   },
   {
    "id": "masked-length-ok",
