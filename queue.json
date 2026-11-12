@@ -82915,13 +82915,13 @@
    "needs": [],
    "base": "b437322d9a3900206228e17077415c87ce67c8ca",
    "body": "bodies/status-entered-text.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18981,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/status-entered-text",
    "host": "MacBook-Pro",
    "added": "2026-11-12T01:30:11Z",
-   "updated": "2026-11-12T03:32:40Z",
+   "updated": "2026-11-12T03:43:46Z",
    "note": "QueueTwelve 2026-11-12: P1 per Main (stops typed secrets being written to session files)",
    "advanced": "2026-11-12T02:18:32Z",
    "built": [
@@ -83165,7 +83165,8 @@
      "host": "MacBook-Pro",
      "tree": "259ac3fd384bc19c614e71176fe014992ab61f09"
     }
-   ]
+   ],
+   "opened": "2026-11-12T03:43:46Z"
   },
   {
    "id": "credential-fill-proposal",
