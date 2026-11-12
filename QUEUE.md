@@ -4,7 +4,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-12 03:36Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 3, conflict-held 27, stacked 26, held 10, parked 2, open PRs 45, queued since the last plan 1; merged 291, closed 34
+**Counts:** openable now 3, conflict-held 27, stacked 26, held 10, parked 2, open PRs 45, queued since the last plan 2; merged 291, closed 34
 
 ## Openable now (3)
 
@@ -149,8 +149,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12
 | [#18981](https://github.com/can1357/oh-my-pi/pull/18981) | status-entered-text | fix(coding-agent): keep text a cell enters out of browser and computer status lines | browser | P1 | 2h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/status-entered-text) |
 | [#18982](https://github.com/can1357/oh-my-pi/pull/18982) | computer-secure-input | fix(natives,coding-agent): report macOS secure input and stop claiming globalEscape under it | computer | P1 | 2h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-secure-input) |
 
-## Queued since the last plan (1)
+## Queued since the last plan (2)
 
 | id | title | area | priority | age | branch |
 |---|---|---|---|---|---|
 | autofill-rows | fix(natives): own macOS suggestion-list elements by the window that lists them | computer | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/autofill-rows) |
+| masked-length-ok | fix(natives): report a setValue that reads back as a same-length mask as done, not failed | computer | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/masked-length-ok) |
