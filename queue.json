@@ -100567,5 +100567,11 @@
     "wake": ""
    }
   ]
+ },
+ "opening": {
+  "id": "win-focus-report",
+  "token": "82f6eba090a246bebc6aeb9deb5cf28c",
+  "host": "MacBook-Pro",
+  "at": "2026-11-12T17:49:09Z"
  }
 }
