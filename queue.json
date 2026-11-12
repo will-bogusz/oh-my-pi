@@ -85673,13 +85673,13 @@
    ],
    "base": "238878f131787ada2b5d35409b4ee759cc535419",
    "body": "bodies/takeover-attached-hint.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19027,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/takeover-attached-hint",
    "host": "MacBook-Pro",
    "added": "2026-11-12T04:03:51Z",
-   "updated": "2026-11-12T11:03:13Z",
+   "updated": "2026-11-12T12:03:26Z",
    "note": "",
    "advanced": "2026-11-12T09:38:03Z",
    "built": [
@@ -85843,7 +85843,8 @@
      "host": "MacBook-Pro",
      "tree": "7515ffe584acfd8a36ae1f830433f698c9b4b80a"
     }
-   ]
+   ],
+   "opened": "2026-11-12T12:03:26Z"
   },
   {
    "id": "win-type-drain",
