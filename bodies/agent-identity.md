@@ -43,3 +43,9 @@ Review colour selection in `tui/src/overlays/agent-identity.ts`, then row render
 - `cargo test -p pi-natives --lib desktop::control`: `input_refused_by_another_sessions_control_names_its_agent` covers in-process refusal and lock-file naming; `independent_kernel_handles_contend_and_release` covers absent, stale and cleared records.
 
 </details>
+
+---
+
+- [ ] `bun check` passes
+- [ ] Tested locally
+- [ ] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
