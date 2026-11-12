@@ -85668,7 +85668,7 @@
    "needs": [
     "atspi-unanswered-app"
    ],
-   "base": "aece16f78fad7e9e777b4aeaa1ca583544a17723",
+   "base": "7c2ab113ec9716496b1d1b78b1f8c3ff8466c9ba",
    "body": "bodies/atspi-combo-choice.md",
    "state": "open",
    "pr": 19034,
@@ -85676,9 +85676,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-combo-choice",
    "host": "MacBook-Pro",
    "added": "2026-11-11T13:30:39Z",
-   "updated": "2026-11-12T14:58:23Z",
+   "updated": "2026-11-12T19:59:59Z",
    "note": "",
-   "advanced": "2026-11-12T14:48:37Z",
+   "advanced": "2026-11-12T19:59:59Z",
    "line_loss_overrides": [
     {
      "at": "2026-11-12T12:19:53Z",
