@@ -82660,7 +82660,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/tern-kit-password-mask",
    "host": "MacBook-Pro",
    "added": "2026-11-12T01:22:04Z",
-   "updated": "2026-11-12T03:56:51Z",
+   "updated": "2026-11-12T03:57:21Z",
    "note": "",
    "advanced": "2026-11-12T02:18:49Z",
    "built": [
@@ -82905,7 +82905,8 @@
      "tree": "259ac3fd384bc19c614e71176fe014992ab61f09"
     }
    ],
-   "opened": "2026-11-12T03:56:51Z"
+   "opened": "2026-11-12T03:56:51Z",
+   "readied": "2026-11-12T03:57:21Z"
   },
   {
    "id": "status-entered-text",
