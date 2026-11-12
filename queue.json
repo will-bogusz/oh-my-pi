@@ -98683,6 +98683,11 @@
     "sha": "bad8d49c101692f4f3f670bb570ced86dc6c7936",
     "at": "2026-11-12T17:58:40Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "bad8d49c101692f4f3f670bb570ced86dc6c7936",
+    "at": "2026-11-12T18:00:06Z",
+    "host": "goliath"
    }
   }
  },
