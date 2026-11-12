@@ -90151,6 +90151,11 @@
     "sha": "f5e6c8d78f700d5b4ee670499fefc727866ccc30",
     "at": "2026-11-12T01:56:04Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "f5e6c8d78f700d5b4ee670499fefc727866ccc30",
+    "at": "2026-11-12T01:57:42Z",
+    "host": "goliath"
    }
   }
  },
