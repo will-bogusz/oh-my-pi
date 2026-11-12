@@ -21,6 +21,8 @@ Decisions:
 
 Non-goal: a frame the page tears down asynchronously after the press (a timer, a `postMessage` to the parent) can still slip between the read and the release.
 
+Unchanged from `main`: a child frame the page removes before the press makes `main`'s detached-element check (`watch.evaluate`) reject, so that click fails with Puppeteer's own detached-frame error, as it does on `main` today; this change adds no handling for it.
+
 ## Testing
 
 - Against `main` with headless Chrome: an iframe button that removes its frame on `pointerdown` was reported clicked while its click handler never ran, 5 of 5.
