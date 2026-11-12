@@ -84509,7 +84509,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ax-ref-read-as-followup",
    "host": "MacBook-Pro",
    "added": "2026-11-11T15:44:29Z",
-   "updated": "2026-11-12T12:31:08Z",
+   "updated": "2026-11-12T14:36:46Z",
    "note": "",
    "advanced": "2026-11-12T12:22:19Z",
    "line_loss_overrides": [
@@ -84527,7 +84527,13 @@
       ]
      }
     }
-   ]
+   ],
+   "rebases_after": [
+    19036
+   ],
+   "pair_reasons": {
+    "19036": "Main, 2026-11-12: only conflict is the AxProps literal in crates/pi-natives/src/desktop/macos/ax.rs: #19036 adds 'unread_children: 0,', this entry rewrites 'role_name: role_name.map(str::to_owned),' to 'role_name,' (already owned). Combined form: 'role_name,' then 'unread_children: 0,'"
+   }
   },
   {
    "id": "x11-mpx-reattach",
