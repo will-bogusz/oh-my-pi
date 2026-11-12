@@ -22,6 +22,8 @@ Non-goals: `desktop` targets keep `main`'s behaviour (they name no window, so ke
 
 ## Testing
 
+The measurements below were collected before the current main rebase; activation and admission timing has since changed.
+
 goliath, Ubuntu 24.04, Xvfb 21.1.12 + openbox 3.6.1, GTK 3.24.41, a GTK 3 entry focused, takeover through omp's own `X11Input`, 30 trials each:
 
 | | `main` | This PR |
@@ -34,7 +36,7 @@ goliath, Ubuntu 24.04, Xvfb 21.1.12 + openbox 3.6.1, GTK 3.24.41, a GTK 3 entry 
 The refusal's time is the 500 ms wait plus activation: median 690 ms (menu) and 653 ms (locker), against 150 ms for a run with no grab on both. Not measured: a real screen locker or a real Xorg session.
 
 - `xtest_keys_refuse_another_clients_keyboard_grab` (`#[ignore]`, starts its own Xvfb): takeover refused under another process's grab and the grabber gets nothing; desktop keys go to the grab; a grabbing popup of the target's own process gets the key; the focused window gets it once the grab ends. It fails on `main` at the refusal.
-- `scripts/rust-check` on Linux.
+- Re-run on current main (`bcd5b0b996e`): Linux `scripts/rust-check` passed; `cargo test -p pi-natives --lib desktop::linux::x11 -- --include-ignored --test-threads=1` under Xvfb passed 61 tests, including the regression, typing-user admission and named-change tests. Two MPX hotplug tests require an Xorg server with udev/libinput and fail under Xvfb.
 
 ---
 
