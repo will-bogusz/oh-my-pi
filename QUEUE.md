@@ -3,16 +3,17 @@
 Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12 01:47Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-12 01:15Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 1, conflict-held 27, stacked 27, held 10, parked 2, open PRs 42, queued since the last plan 2; merged 291, closed 33
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-12 01:40Z on MacBook-Pro; groups below are from it, states from the manifest)
+**Counts:** openable now 2, conflict-held 28, stacked 27, held 10, parked 2, open PRs 42; merged 291, closed 33
 
-## Openable now (1)
+## Openable now (2)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
 | agent-identity | feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy | tui | P2 | 1d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/agent-identity) |
+| tern-kit-password-mask | fix(browser): mask password values in Tern kit observations | browser | P2 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/tern-kit-password-mask) |
 
-## Conflict-held (27)
+## Conflict-held (28)
 
 | id | title | area | priority | age | blocked by | branch |
 |---|---|---|---|---|---|---|
@@ -43,6 +44,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12
 | x11-keysym-remap | fix(natives): type characters outside the X11 keymap through temporary keycodes | computer | P2 | 11h | [#18784](https://github.com/can1357/oh-my-pi/pull/18784), [#18825](https://github.com/can1357/oh-my-pi/pull/18825), [#18828](https://github.com/can1357/oh-my-pi/pull/18828) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-keysym-remap) |
 | macos-ax-linked-label | fix(natives): name a macOS control by the label its AXTitleUIElement links to | natives | P2 | 11h | [#18892](https://github.com/can1357/oh-my-pi/pull/18892) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-ax-linked-label) |
 | macos-press-click-hint | fix(natives): point a refused macOS press at the element's own click | computer | P2 | 6h | [#18892](https://github.com/can1357/oh-my-pi/pull/18892) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-press-click-hint) |
+| status-entered-text | fix(coding-agent): keep text a cell enters out of browser and computer status lines | browser | P1 | 0h | [#18772](https://github.com/can1357/oh-my-pi/pull/18772), [#18776](https://github.com/can1357/oh-my-pi/pull/18776), [#18786](https://github.com/can1357/oh-my-pi/pull/18786), [#18789](https://github.com/can1357/oh-my-pi/pull/18789) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/status-entered-text) |
 
 ## Stacked (27)
 
@@ -109,9 +111,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12
 | [#17897](https://github.com/can1357/oh-my-pi/pull/17897) | iphone-mirror-key-gap | perf(natives): type on iPhone Mirroring twice as fast | computer | P2 | 8d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-key-gap) |
 | [#17756](https://github.com/can1357/oh-my-pi/pull/17756) | iphone-mirror-pointer | fix(natives): keep background iPhone Mirroring taps reaching the phone after a takeover tap | computer | P1 | 9d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-pointer) |
 | [#17610](https://github.com/can1357/oh-my-pi/pull/17610) | claude-refusal-strip-retry | fix(ai,coding-agent): carry other models' reasoning to Claude and retry its refusal without it | other | P2 | 11d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/claude-refusal-strip-retry) |
-| [#18353](https://github.com/can1357/oh-my-pi/pull/18353) | wayland-pipewire-dlopen | fix(natives): load libpipewire at runtime so released addons capture on Wayland | computer | P2 | 5d | keep; accepted pair with #18013; accepted pair with #18914 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-pipewire-dlopen) |
-| [#18013](https://github.com/can1357/oh-my-pi/pull/18013) | wayland-ei-text | feat(natives): type text the wayland layout lacks through libei text | natives | P2 | 8d | keep; accepted pair with #18353; accepted pair with #18914; accepted pair with #18783; accepted pair with #18825 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-ei-text) |
-| [#18914](https://github.com/can1357/oh-my-pi/pull/18914) | atspi-unanswered-app | fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool | computer | P1 | 9h | keep; accepted pair with #18353; accepted pair with #18013 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-unanswered-app) |
+| [#18353](https://github.com/can1357/oh-my-pi/pull/18353) | wayland-pipewire-dlopen | fix(natives): load libpipewire at runtime so released addons capture on Wayland | computer | P2 | 5d | rebase; accepted pair with #18013; accepted pair with #18914 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-pipewire-dlopen) |
+| [#18013](https://github.com/can1357/oh-my-pi/pull/18013) | wayland-ei-text | feat(natives): type text the wayland layout lacks through libei text | natives | P2 | 8d | rebase; accepted pair with #18353; accepted pair with #18914; accepted pair with #18783; accepted pair with #18825 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-ei-text) |
+| [#18914](https://github.com/can1357/oh-my-pi/pull/18914) | atspi-unanswered-app | fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool | computer | P1 | 9h | rebase; accepted pair with #18353; accepted pair with #18013 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-unanswered-app) |
 | [#18125](https://github.com/can1357/oh-my-pi/pull/18125) | anthropic-web-search | fix(ai,coding-agent): keep Anthropic web search queries intact, always search, and report refusals | other | P2 | 7d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/anthropic-web-search) |
 | [#18624](https://github.com/can1357/oh-my-pi/pull/18624) | upload-stall-error | fix(ai): say whether an Anthropic request body finished uploading when its connection drops | other | P1 | 2d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/upload-stall-error) |
 | [#18737](https://github.com/can1357/oh-my-pi/pull/18737) | browser-call-timeout | fix(browser): give browser calls without a timeout the Eval cell's timeout | browser | P1 | 1d | rebase | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-call-timeout) |
@@ -144,10 +146,3 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12
 | [#18919](https://github.com/can1357/oh-my-pi/pull/18919) | win-takeover-focus | fix(natives): hand the foreground back after Windows element takeover input | computer | P0 | 9h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-takeover-focus) |
 | [#18924](https://github.com/can1357/oh-my-pi/pull/18924) | browser-wait-selector-state | fix(browser): honor selector wait states and reject unknown options | browser | P1 | 9h | rebase | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-wait-selector-state) |
 | [#18921](https://github.com/can1357/oh-my-pi/pull/18921) | atspi-press-actions | fix(natives): press Chromium menu items, options and tabs on Linux | computer | P0 | 9h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-press-actions) |
-
-## Queued since the last plan (2)
-
-| id | title | area | priority | age | branch |
-|---|---|---|---|---|---|
-| tern-kit-password-mask | fix(browser): mask password values in Tern kit observations | browser | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/tern-kit-password-mask) |
-| status-entered-text | fix(coding-agent): keep text a cell enters out of browser and computer status lines | browser | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/status-entered-text) |
