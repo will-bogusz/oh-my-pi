@@ -14,11 +14,9 @@ Risk: any mapped override-redirect window of the app other than a tooltip, notif
 
 Open question: should a session also close its open popups with Escape when it ends? I recommend against: it fixes only the left-behind case, not a menu the user or app opened, and sends a key into the desktop after the agent is gone. It would be a hook in session teardown.
 
-Not changed: macOS and Windows. From the code, neither checks for a menu the target app already has open before a background click (macOS `ax::open_menu::guard` handles only a menu the press opened), so both may have the same hole; not run here.
-
 ## Testing
 
-The measurements below were collected before the current main rebase; activation and admission timing has since changed.
+Measured before the rebase onto current main, whose takeover activation and admission timing changed since.
 
 Two `X11Input` sessions against one app: A opens its Menu popup and ends; B clicks the app's Bump button (outside the popup) or the popup's middle (inside), in the background, and a refused click is rerun in takeover as `backgroundFallback: takeover` does.
 
@@ -28,14 +26,16 @@ Two `X11Input` sessions against one app: A opens its Menu popup and ends; B clic
 | B clicks inside the menu | item activated 10/10 | item activated 30/30 | not run | item activated 30/30 |
 | No menu, B clicks Bump | Bump 1, 10/10 | Bump 1, 30/30 | Bump 1, 10/10 | Bump 1, 30/30 |
 
-<details><summary>Rig and versions</summary>
+<details><summary>Rig, versions and other platforms</summary>
 
 KVM guest, Ubuntu 24.04, GNOME (Mutter) on Xorg 21.1.12, GTK 3.24.41, Qt 6.10.1 (PyQt6), XInput2 MPX route. Qt 6 ran on a branch with the queued Qt 6 MPX pair fix, since on `main` session A's end closes the Qt 6 app; its left column is that build with this check switched off by a measurement-only flag.
+
+Not changed: macOS and Windows. From the code, neither checks for a menu the target app already has open before a background click (macOS `ax::open_menu::guard` handles only a menu the press opened), so both may have the same hole; not run here.
 
 </details>
 
 - `a_press_outside_an_open_popup_is_refused` (`#[ignore]`, own Xvfb; `cargo test -p pi-natives --lib -- --ignored open_popup`): refused outside the popup in the background and in takeover with nothing reaching the window; delivered inside the popup, inside a submenu over it, and with no popup; a plain move passes. Fails on `main` 30 of 30 runs, passes here 30 of 30 (Xvfb 21.1.12).
-- Re-run on current main (`9f728bd56e1`): Linux `scripts/rust-check` passed; `cargo test -p pi-natives --lib desktop::linux::x11 -- --include-ignored --test-threads=1` under Xvfb passed 61 tests, including the regression, typing-user admission and named-change tests. Two MPX hotplug tests require Xorg udev/libinput; both fail identically on main under Xvfb. With those two excluded, all 61 tests pass.
+- Re-run on main `9f728bd56e1`: Linux `scripts/rust-check` passed; `cargo test -p pi-natives --lib desktop::linux::x11 -- --include-ignored --test-threads=1` under Xvfb: 61 passed, including the regression, typing-user admission and named-change tests; two MPX hotplug tests need Xorg udev/libinput and fail identically on main.
 
 ---
 
