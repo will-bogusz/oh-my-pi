@@ -91162,6 +91162,11 @@
     "sha": "d4c6fa013176db90c568d902d83a963c018ebe07",
     "at": "2026-11-12T03:33:44Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "d4c6fa013176db90c568d902d83a963c018ebe07",
+    "at": "2026-11-12T03:34:39Z",
+    "host": "goliath"
    }
   }
  },
