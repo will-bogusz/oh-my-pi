@@ -83652,6 +83652,38 @@
        "\t\t\t\t.flatten()"
       ]
      }
+    },
+    {
+     "at": "2026-11-12T17:07:44Z",
+     "reason": "Replace the two-parent row limit and once-only takeover guard with bounded full ancestry and per-target-press checks; exclude offscreen primers and secondary-click preflight from target-press accounting.",
+     "old": "65592ba1a763ecfb62d71d2ad44f84f6b5e33092",
+     "new": "bfaa5e049e7a08e0a229eb0471889738a800e86d",
+     "dropped": {
+      "crates/pi-natives/src/desktop/macos/ax.rs": [
+       "/// How far above a clicked element its table row can sit: a cell's text,",
+       "/// the cell, the row.",
+       "const ROW_DEPTH: usize = 2;",
+       "/// The table row a click on `element` aims at: the element itself or its",
+       "/// parent within [`ROW_DEPTH`], with the row's process. `None` for an",
+       "/// element outside a row; `StaleRef` once the app destroyed the element.",
+       "\tfor _ in 0..=ROW_DEPTH {",
+       "\t\tlet role = copy_held_attribute(&current, \"AXRole\")?",
+       "\t\tif role.is_some_and(|role| role.to_string() == \"AXRow\") {",
+       "\t\t\tlet pid = element_pid(&current)?;",
+       "\t\t\treturn Ok(Some((current, pid)));",
+       "\t\tlet Some(parent) = copy_held_attribute(&current, \"AXParent\")?"
+      ],
+      "crates/pi-natives/src/desktop/macos/input.rs": [
+       "fn aimed_row_check(event: &PointerEvent) -> impl Fn() -> CoreResult<()> + use<> {",
+       "\t\tlet Some((x, y)) = point else {",
+       "\t\tlet later = pressed.replace(true);",
+       "\t\tlet lands = AIMED.with_borrow(|aimed| {",
+       "\t\trows()",
+       "\t\t\t\t\t(event, None) => {",
+       "\t\t\t\t\t\taimed_row_check(&event)()?;",
+       "\t\t\t\t\t\tglobal_pointer(source, event)"
+      ]
+     }
     }
    ],
    "advanced": "2026-11-12T17:03:06Z",
