@@ -89914,10 +89914,14 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-12T19:32:37Z",
+  "checked": "2026-11-12T20:03:07Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
+   "win-masks-cfg": {
+    "since": "2026-11-12T20:03:07Z",
+    "title": "fix(natives): compile pi-natives for Windows again"
+   },
    "x11-takeover-keyboard-state": {
     "since": "2026-11-12T19:02:34Z",
     "title": "fix(natives): type X11 XTest text through a neutral keyboard state"
@@ -89935,21 +89939,6 @@
      "packages/coding-agent/src/prompts/tools/read.md"
     ]
    },
-   "#19035": {
-    "since": "2026-11-12T19:32:37Z",
-    "title": "fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility",
-    "files": [
-     "crates/pi-natives/src/desktop/linux/ax.rs"
-    ]
-   },
-   "#19066": {
-    "since": "2026-11-12T19:32:37Z",
-    "title": "fix(natives): refuse X11 XTest keys while another client grabs the keyboard",
-    "files": [
-     "crates/pi-natives/src/desktop/linux/x11/input.rs",
-     "crates/pi-natives/src/desktop/linux/x11/wm.rs"
-    ]
-   },
    "#19025": {
     "since": "2026-11-12T19:32:37Z",
     "title": "fix(natives): map Windows keys on the receiving keyboard layout",
@@ -89964,28 +89953,6 @@
     "files": [
      "crates/pi-natives/src/desktop/win32/mod.rs",
      "docs/computer-use.md"
-    ]
-   },
-   "#19034": {
-    "since": "2026-11-12T19:32:37Z",
-    "title": "fix(natives): choose Linux combo box options without opening their keyboard-grabbing list",
-    "files": [
-     "crates/pi-natives/src/desktop/linux/ax.rs"
-    ]
-   },
-   "#19061": {
-    "since": "2026-11-12T19:32:37Z",
-    "title": "fix(natives): name a macOS control by the label its AXTitleUIElement links to",
-    "files": [
-     "crates/pi-natives/src/desktop/ax.rs",
-     "crates/pi-natives/src/desktop/macos/ax.rs"
-    ]
-   },
-   "#19063": {
-    "since": "2026-11-12T19:32:37Z",
-    "title": "fix(natives): point a refused macOS press at the element's own click",
-    "files": [
-     "crates/pi-natives/src/desktop/macos/ax.rs"
     ]
    }
   },
@@ -93716,6 +93683,12 @@
     "files": [
      "crates/pi-natives/src/desktop/macos/ax.rs"
     ]
+   },
+   {
+    "at": "2026-11-12T20:03:07Z",
+    "kind": "openable",
+    "id": "win-masks-cfg",
+    "title": "fix(natives): compile pi-natives for Windows again"
    }
   ]
  },
@@ -99359,12 +99332,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-12T19:48:21.385307Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-12T20:03:08.037865Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 1,
-   "left": 7
+   "used": 0,
+   "left": 8
   },
   "rows": [
    {
@@ -99486,10 +99459,8 @@
     "area": "natives",
     "priority": "P1",
     "title": "fix(natives): name a macOS control by the label its AXTitleUIElement links to",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "accepted pair with #19036: Main, 2026-11-12: #19036 adds 'unread_children: 0,' to the AxProps literal in macos/ax.rs and a field to the AxProps struct in desktop/ax.rs; this entry returns that literal inside a tuple (AxProps{...}, has_own_label) and adds its own struct field (rustfmt realignment only). Combined form: this entry's tuple with 'unread_children: 0,' inside its AxProps literal; struct with both fields; accepted pair with #19048: QueueFifteen, 2026-11-12 (Main's standing rule: a field added beside a line the other side reshapes without changing a value): only conflict is the Registered struct in crates/pi-natives/src/desktop/ax.rs: #19048 adds 'row: Option<RowProof>,' where this entry rewrites the doc comment of 'held'; #19048 reads neither held nor fingerprint. Combined form: #19048's row field, then this entry's doc comment and 'held: Option<u64>'.",
     "over": [],
     "paired": [
@@ -99508,14 +99479,19 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): report where focus went after a Windows takeover",
-    "action": "rebase",
+    "action": "requeue",
     "reasons": [
+     "conflicts with #19048 in docs/computer-use.md",
+     "conflicts with #19061 in docs/computer-use.md",
      "conflicts with main in crates/pi-natives/src/desktop/win32/mod.rs, docs/computer-use.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#19048",
+     "#19061"
+    ],
     "needs": [],
     "created": "2026-11-12T17:53:01Z"
    },
@@ -99527,17 +99503,12 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): point a refused macOS press at the element's own click",
-    "action": "requeue",
-    "reasons": [
-     "conflicts with #19036 in crates/pi-natives/src/desktop/macos/ax.rs",
-     "conflicts with main in crates/pi-natives/src/desktop/macos/ax.rs"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#19036"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-12T18:01:18Z"
    },
@@ -99549,10 +99520,8 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): refuse X11 XTest keys while another client grabs the keyboard",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in crates/pi-natives/src/desktop/linux/x11/input.rs, crates/pi-natives/src/desktop/linux/x11/wm.rs"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -99602,19 +99571,15 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
-    "action": "requeue",
-    "reasons": [
-     "conflicts with #19062 in docs/computer-use.md"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "accepted pair with #18013; accepted pair with #19035",
     "over": [],
     "paired": [
      "#18013",
      "#19035"
     ],
-    "blocked_by": [
-     "#19062"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-06T23:14:30Z"
    },
@@ -99645,17 +99610,12 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): choose Linux combo box options without opening their keyboard-grabbing list",
-    "action": "requeue",
-    "reasons": [
-     "conflicts with #19036 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#19036"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-12T14:22:04Z"
    },
@@ -99667,19 +99627,14 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility",
-    "action": "requeue",
-    "reasons": [
-     "conflicts with #19036 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "accepted pair with #18353",
     "over": [],
     "paired": [
      "#18353"
     ],
-    "blocked_by": [
-     "#19036"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-12T14:32:13Z"
    },
@@ -99817,16 +99772,12 @@
     "area": "tui",
     "priority": "P2",
     "title": "feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy",
-    "action": "requeue",
-    "reasons": [
-     "conflicts with #19062 in docs/computer-use.md"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#19062"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-12T04:03:05Z"
    },
@@ -99857,16 +99808,12 @@
     "area": "computer",
     "priority": "P0",
     "title": "fix(natives): compile pi-natives for Windows again",
-    "action": "wait",
-    "reasons": [
-     "conflicts with #19061 in crates/pi-natives/src/desktop/ax.rs"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#19061"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-12T19:44:42Z"
    },
@@ -99927,13 +99874,15 @@
     "action": "wait",
     "reasons": [
      "conflicts with #18222 in packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with #18987 in packages/coding-agent/src/tools/computer.ts",
      "conflicts with main in packages/coding-agent/src/tools/computer.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18222"
+     "#18222",
+     "#18987"
     ],
     "needs": [],
     "created": "2026-11-11T00:07:07Z"
@@ -100177,16 +100126,16 @@
     "title": "fix(computer): say window and element filters take text when given a RegExp",
     "action": "wait",
     "reasons": [
-     "conflicts with #19062 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #18222 in packages/coding-agent/src/tools/computer/worker.ts",
+     "conflicts with #18987 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#19062",
-     "#18222"
+     "#18222",
+     "#18987"
     ],
     "needs": [],
     "created": "2026-11-11T01:40:14Z"
@@ -100203,9 +100152,12 @@
     "reasons": [
      "conflicts with #19048 in docs/computer-use.md",
      "conflicts with #19061 in docs/computer-use.md",
-     "conflicts with #19062 in docs/computer-use.md, packages/coding-agent/src/tools/computer/worker.ts",
+     "conflicts with #18353 in docs/computer-use.md",
+     "conflicts with #19034 in docs/computer-use.md",
+     "conflicts with #19035 in docs/computer-use.md",
      "conflicts with #18013 in docs/computer-use.md",
      "conflicts with #18222 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
+     "conflicts with #18987 in docs/computer-use.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
@@ -100214,9 +100166,12 @@
     "blocked_by": [
      "#19048",
      "#19061",
-     "#19062",
+     "#18353",
+     "#19034",
+     "#19035",
      "#18013",
-     "#18222"
+     "#18222",
+     "#18987"
     ],
     "needs": [],
     "created": "2026-10-19T07:26:45Z"
@@ -100234,6 +100189,7 @@
      "conflicts with #19036 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with #19048 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with #19061 in crates/pi-natives/src/desktop/macos/ax.rs",
+     "conflicts with #19063 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with main in crates/pi-natives/src/desktop/macos/ax.rs"
     ],
     "note": "",
@@ -100242,7 +100198,8 @@
     "blocked_by": [
      "#19036",
      "#19048",
-     "#19061"
+     "#19061",
+     "#19063"
     ],
     "needs": [],
     "created": "2026-11-11T09:59:13Z"
@@ -100262,10 +100219,13 @@
      "conflicts with #17756 in crates/pi-natives/src/desktop/macos/input.rs",
      "conflicts with #19048 in crates/pi-natives/src/desktop/macos/input.rs, docs/computer-use.md",
      "conflicts with #19061 in docs/computer-use.md",
-     "conflicts with #19062 in docs/computer-use.md",
+     "conflicts with #18353 in docs/computer-use.md",
+     "conflicts with #19034 in docs/computer-use.md",
+     "conflicts with #19035 in docs/computer-use.md",
      "conflicts with #17897 in crates/pi-natives/src/desktop/macos/input.rs",
      "conflicts with #18013 in docs/computer-use.md",
      "conflicts with #18222 in docs/computer-use.md",
+     "conflicts with #18987 in docs/computer-use.md",
      "conflicts with main in docs/computer-use.md"
     ],
     "note": "",
@@ -100276,10 +100236,13 @@
      "#17756",
      "#19048",
      "#19061",
-     "#19062",
+     "#18353",
+     "#19034",
+     "#19035",
      "#17897",
      "#18013",
-     "#18222"
+     "#18222",
+     "#18987"
     ],
     "needs": [
      "iphone-mirror-scroll-distance"
@@ -100417,9 +100380,12 @@
     "action": "wait",
     "reasons": [
      "conflicts with #19036 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs",
-     "conflicts with #19048 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with #19048 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19061 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs",
+     "conflicts with #19063 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with #18987 in crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with win-masks-cfg in crates/pi-natives/src/desktop/ax.rs",
      "conflicts with main in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs"
     ],
     "note": "",
@@ -100429,7 +100395,10 @@
      "#19036",
      "#19048",
      "#19061",
-     "#18925"
+     "#19063",
+     "#18925",
+     "#18987",
+     "win-masks-cfg"
     ],
     "needs": [],
     "created": "2026-11-11T10:16:04Z"
@@ -100445,7 +100414,6 @@
     "action": "wait",
     "reasons": [
      "conflicts with #19025 in crates/pi-natives/src/desktop/win32/mod.rs",
-     "conflicts with #19062 in crates/pi-natives/src/desktop/win32/capture.rs, crates/pi-natives/src/desktop/win32/mod.rs",
      "conflicts with #18222 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/win32/mod.rs, packages/coding-agent/src/prompts/tools/computer.md"
     ],
@@ -100454,7 +100422,6 @@
     "paired": [],
     "blocked_by": [
      "#19025",
-     "#19062",
      "#18222"
     ],
     "needs": [],
@@ -100640,10 +100607,13 @@
      "needs computer-ui-quiet (queued)",
      "conflicts with #19048 in docs/computer-use.md",
      "conflicts with #19061 in docs/computer-use.md",
-     "conflicts with #19062 in docs/computer-use.md, packages/coding-agent/src/tools/computer/worker.ts",
+     "conflicts with #18353 in docs/computer-use.md, docs/tools/computer.md",
+     "conflicts with #19034 in docs/computer-use.md",
+     "conflicts with #19035 in docs/computer-use.md",
      "conflicts with #18013 in docs/computer-use.md",
      "conflicts with #18222 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/tools/eval.ts",
+     "conflicts with #18987 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/worker.ts",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -100653,10 +100623,13 @@
     "blocked_by": [
      "#19048",
      "#19061",
-     "#19062",
+     "#18353",
+     "#19034",
+     "#19035",
      "#18013",
      "#18222",
-     "#18786"
+     "#18786",
+     "#18987"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -100677,8 +100650,11 @@
      "conflicts with #19036 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19048 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19061 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with #19063 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with #18987 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs"
     ],
@@ -100689,8 +100665,11 @@
      "#19036",
      "#19048",
      "#19061",
+     "#19063",
+     "#18353",
      "#18222",
-     "#18925"
+     "#18925",
+     "#18987"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -100713,6 +100692,8 @@
      "conflicts with #19036 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19048 in crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19061 in crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with #19063 in crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md",
      "conflicts with #18925 in crates/pi-natives/src/desktop/macos/capture.rs, crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/test/tools/computer.test.ts"
@@ -100725,6 +100706,8 @@
      "#19036",
      "#19048",
      "#19061",
+     "#19063",
+     "#18353",
      "#18222",
      "#18925"
     ],
@@ -100878,7 +100861,8 @@
     "reasons": [
      "held: Main, 2026-11-12: proposal; opens only after entry A merges and Will has seen the body",
      "conflicts with #19025 in crates/pi-natives/src/desktop/win32/input.rs, crates/pi-natives/src/desktop/win32/mod.rs",
-     "conflicts with #19062 in crates/pi-natives/src/desktop/win32/input.rs, crates/pi-natives/src/desktop/win32/mod.rs",
+     "conflicts with #18353 in docs/tools/computer.md",
+     "conflicts with #18987 in docs/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/win32/input.rs, crates/pi-natives/src/desktop/win32/mod.rs"
     ],
     "note": "",
@@ -100886,7 +100870,8 @@
     "paired": [],
     "blocked_by": [
      "#19025",
-     "#19062"
+     "#18353",
+     "#18987"
     ],
     "needs": [],
     "created": "2026-11-12T04:40:13Z"
