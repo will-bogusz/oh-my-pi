@@ -78817,7 +78817,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "238878f131787ada2b5d35409b4ee759cc535419",
+   "base": "cfd8d04ef37acee404bd341661b052c00c6acc9c",
    "body": "bodies/win-setvalue-readback.md",
    "state": "open",
    "pr": 18915,
@@ -78825,7 +78825,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-setvalue-readback",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:34:38Z",
-   "updated": "2026-11-12T09:38:32Z",
+   "updated": "2026-11-12T10:01:31Z",
    "note": "Main 2026-11-12: whichever of ax-masked-readback / #18915 lands second deletes the cfg_attr(..., allow(dead_code)) on ax.rs `masked` in its rebase (stale after #18915, not wrong); combined doc = ax-masked-readback\u2019s wording, no cfg on text_readback.",
    "built": [
     {
@@ -79040,7 +79040,7 @@
    ],
    "opened": "2026-11-11T16:16:49Z",
    "readied": "2026-11-11T16:17:17Z",
-   "advanced": "2026-11-12T09:38:32Z",
+   "advanced": "2026-11-12T10:01:31Z",
    "design_checks": [
     {
      "pr": 18915,
