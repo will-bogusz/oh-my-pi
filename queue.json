@@ -82624,7 +82624,7 @@
    "area": "browser",
    "priority": "P1",
    "needs": [],
-   "base": "d5ac02ce8678cf50f643d3f65361714c92d5d450",
+   "base": "b437322d9a3900206228e17077415c87ce67c8ca",
    "body": "bodies/status-entered-text.md",
    "state": "queued",
    "pr": null,
@@ -82632,8 +82632,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/status-entered-text",
    "host": "MacBook-Pro",
    "added": "2026-11-12T01:30:11Z",
-   "updated": "2026-11-12T01:42:03Z",
-   "note": "QueueTwelve 2026-11-12: P1 per Main (stops typed secrets being written to session files)"
+   "updated": "2026-11-12T02:18:32Z",
+   "note": "QueueTwelve 2026-11-12: P1 per Main (stops typed secrets being written to session files)",
+   "advanced": "2026-11-12T02:18:32Z"
   },
   {
    "id": "credential-fill-proposal",
