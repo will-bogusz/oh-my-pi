@@ -83709,7 +83709,7 @@
    "branch": "will/relay-hidden-frames-main",
    "title": "fix(browser-relay): say what the relay hid in a driven tab",
    "area": "browser",
-   "priority": "P1",
+   "priority": "P2",
    "needs": [],
    "base": "4ad629ea51d96c18bbdfcc2252fd13b301f57f9f",
    "body": "bodies/relay-hidden-frames-main.md",
@@ -83719,7 +83719,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-hidden-frames-main",
    "host": "MacBook-Pro",
    "added": "2026-11-12T02:04:21Z",
-   "updated": "2026-11-12T05:44:09Z",
+   "updated": "2026-11-12T05:49:46Z",
    "note": "HiddenOnMain: rebuilt on main without relay-frame-race, head 8b646ad6c2d (review HiddenOnMain.ReviewHiddenOnMain fixed; real 1Password: tab kept identical to main in all 8 cells, notice names 1Password once per hidden frame) | Main 2026-11-12: accepted pair with #18925 (record with set --pair once both open). Combined form at tab-worker.ts WorkerCore.#run after the finally: this branch's hinted take (if this.#unanswered === active && this.#hiddenFramesWaiting && this.#page) await this.#takeHiddenFrames(this.#page)) stays before the answered guard; in the failure branch #18925's enrichment of error (message and stack with the native notices), then this.#sendResult({ id: msg.id, ok: false, error }), so both native-window notices and the once-only hidden-frames notice ride the failure. Second to land adds one test that a failed run carries both.",
    "rebases_after": [
     18925
@@ -84268,7 +84268,7 @@
    "branch": "will/autofill-rows",
    "title": "fix(natives): own macOS suggestion-list elements by the window that lists them",
    "area": "computer",
-   "priority": "P2",
+   "priority": "P0",
    "needs": [],
    "base": "04cd1a7549a02d62ad1d24826198d52507595683",
    "body": "bodies/autofill-rows.md",
@@ -84278,7 +84278,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/autofill-rows",
    "host": "MacBook-Pro",
    "added": "2026-11-12T04:00:08Z",
-   "updated": "2026-11-12T05:45:16Z",
+   "updated": "2026-11-12T05:49:46Z",
    "note": "",
    "built": [
     {
