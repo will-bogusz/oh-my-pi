@@ -82561,6 +82561,24 @@
    "added": "2026-11-12T01:30:11Z",
    "updated": "2026-11-12T01:30:11Z",
    "note": ""
+  },
+  {
+   "id": "credential-fill-proposal",
+   "branch": "will/credential-fill-proposal",
+   "title": "feat(browser,computer): fill a field from a secret reference without the value reaching the session",
+   "area": "browser",
+   "priority": "P2",
+   "needs": [],
+   "base": "d5ac02ce8678cf50f643d3f65361714c92d5d450",
+   "body": "bodies/credential-fill-proposal.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": null,
+   "host": "MacBook-Pro",
+   "added": "2026-11-12T01:34:53Z",
+   "updated": "2026-11-12T01:34:53Z",
+   "note": ""
   }
  ],
  "watch": {
