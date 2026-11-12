@@ -86470,7 +86470,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-press-click-hint",
    "host": "MacBook-Pro",
    "added": "2026-11-11T18:49:11Z",
-   "updated": "2026-11-12T18:01:19Z",
+   "updated": "2026-11-12T18:01:49Z",
    "note": "",
    "line_loss_overrides": [
     {
@@ -86810,7 +86810,8 @@
    "pair_reasons": {
     "19054": "QueueFifteen, 2026-11-12 (Main's standing rule: use/import list): only conflict is the use list in crates/pi-natives/src/desktop/macos/ax.rs: this entry imports performable_name, #19054 imports AxReadAs; neither removes a name the other calls. Combined form: both names."
    },
-   "opened": "2026-11-12T18:01:19Z"
+   "opened": "2026-11-12T18:01:19Z",
+   "readied": "2026-11-12T18:01:49Z"
   },
   {
    "id": "browser-toggle-prefix",
