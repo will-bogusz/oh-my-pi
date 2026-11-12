@@ -82357,8 +82357,14 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-focus-report",
    "host": "MacBook-Pro",
    "added": "2026-11-11T13:11:20Z",
-   "updated": "2026-11-11T13:11:20Z",
-   "note": ""
+   "updated": "2026-11-12T09:40:48Z",
+   "note": "",
+   "rebases_after": [
+    18783
+   ],
+   "pair_reasons": {
+    "18783": "QueueThirteen, 2026-11-12 (Main: docs pairs are the opener's): docs-only collision in docs/computer-use.md, adjacent: #18783 adds two X11 covered-window screenshot paragraphs right before the 'Window input defaults to background routes' paragraph that this entry edits. Combined form: #18783's two paragraphs, blank line, then this entry's wording of the 'Window input defaults' paragraph. No code overlap."
+   }
   },
   {
    "id": "atspi-press-actions",
