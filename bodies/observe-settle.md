@@ -18,7 +18,7 @@ A measured alternative, available if the maintainer prefers it, stops waiting fo
 
 ## Testing
 
-`bun test packages/coding-agent/test/tools/browser-observe.test.ts packages/coding-agent/test/tools/browser-tern-tab.test.ts packages/coding-agent/test/tools/browser-network.test.ts`: 42 pass on the tested head. A request started in the action's clock tick is still awaited; selecting requests by timestamp makes that regression fail. Delayed-header and delayed-body click probes: main 20/20 stale each, this policy 0/20 each. Coding-agent `check:types` passes; root `check:ts` is blocked by unrelated main formatting in `agent-session-async-delivery.test.ts`.
+`bun test packages/coding-agent/test/tools/browser-observe.test.ts packages/coding-agent/test/tools/browser-tern-tab.test.ts packages/coding-agent/test/tools/browser-network.test.ts`: 31 pass, 0 fail on current main bcd5b0b996e (Linux; main-built native addon 18.18.8, checkout 18.19.0). A request started in the action's clock tick is still awaited; selecting requests by timestamp makes that regression fail. Delayed-header and delayed-body click probes: main 20/20 stale each, this policy 0/20 each. Root `bun run check:ts` reaches typechecking and reports only main's two TS2322 errors in `bench-auth-fallback.test.ts`.
 
 <details>
 <summary>First-navigation cost: model-free headless Chromium, five loads per page</summary>
