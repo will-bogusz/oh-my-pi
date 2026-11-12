@@ -82158,10 +82158,15 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-11T23:43:45Z",
+  "checked": "2026-11-12T00:44:35Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {},
+  "openable": {
+   "agent-identity": {
+    "since": "2026-11-12T00:44:35Z",
+    "title": "feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy"
+   }
+  },
   "conflicts": {},
   "merged_through": "2026-11-11T13:55:07Z",
   "unreleased": {},
@@ -82391,48 +82396,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-05T00:16:49Z",
-    "kind": "openable",
-    "id": "sec-edgar-document-urls",
-    "title": "fix(coding-agent): read SEC EDGAR filing documents instead of the company profile"
-   },
-   {
-    "at": "2026-11-05T00:16:49Z",
-    "kind": "openable",
-    "id": "async-job-notice",
-    "title": "fix(coding-agent,tui): name the command in background job notices"
-   },
-   {
-    "at": "2026-11-05T00:16:49Z",
-    "kind": "openable",
-    "id": "lsp-references-stale-open",
-    "title": "fix(lsp): sync open documents edited outside OMP before cross-file queries"
-   },
-   {
-    "at": "2026-11-05T00:16:49Z",
-    "kind": "openable",
-    "id": "ssh-write-new-projection",
-    "title": "fix(coding-agent): create new ssh:// files from bounded read output"
-   },
-   {
-    "at": "2026-11-05T00:16:49Z",
-    "kind": "openable",
-    "id": "tui-file-bun-be-bun",
-    "title": "fix(tui-debug): run file entries with bun under the compiled omp binary"
-   },
-   {
-    "at": "2026-11-05T00:16:49Z",
-    "kind": "openable",
-    "id": "computer-screenshot-saved-frame",
-    "title": "fix(coding-agent): say the computer screenshot path holds the scaled frame"
-   },
-   {
-    "at": "2026-11-05T00:16:49Z",
-    "kind": "openable",
-    "id": "readthedocs-page-source",
-    "title": "fix(coding-agent): fetch Read the Docs raw source only from the page's own Edit link"
-   },
    {
     "at": "2026-11-05T00:47:46Z",
     "kind": "openable",
@@ -84655,6 +84618,12 @@
     "id": "win-screen-locked",
     "title": "fix(natives,coding-agent): report unavailable Windows desktop sessions",
     "why": "opened as #18947"
+   },
+   {
+    "at": "2026-11-12T00:44:35Z",
+    "kind": "openable",
+    "id": "agent-identity",
+    "title": "feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy"
    }
   ]
  },
