@@ -84666,7 +84666,20 @@
    "host": "MacBook-Pro",
    "added": "2026-11-12T04:00:44Z",
    "updated": "2026-11-12T06:02:11Z",
-   "note": "MaskedReshape, 2026-11-12: head 6d9511488c03b415a44bfb8e035321a0e47c3adb; verdict-only same-length mask success, no set_value note channel. #18915 comment/cfg adjacency only; four other counterpart entries clean. Prerequisite #18989 vs atspi-write-timeout-warning test guard remains statement-level, accepted on the timeout entry by Main; combined form not run. Keep queued; needs ax-masked-readback."
+   "note": "MaskedReshape, 2026-11-12: head 6d9511488c03b415a44bfb8e035321a0e47c3adb; verdict-only same-length mask success, no set_value note channel. #18915 comment/cfg adjacency only; four other counterpart entries clean. Prerequisite #18989 vs atspi-write-timeout-warning test guard remains statement-level, accepted on the timeout entry by Main; combined form not run. Keep queued; needs ax-masked-readback.",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-12T09:40:09Z",
+     "reason": "docs/tools/computer.md paragraph combines main's read-back redaction wording with the same-length-mask sentence; entry text kept word for word",
+     "old": "6d9511488c03b415a44bfb8e035321a0e47c3adb",
+     "new": "34cffd344dd661289a29866eec98767d4c3cef2f",
+     "dropped": {
+      "docs/tools/computer.md": [
+       "On macOS, `setValue(text)` on a native text field, text area or combo box replaces its whole value the way `win.type` inserts text, so the app handles the edit as typed input: a search field searches, and a field with suggestions may offer them. An unfocused field is focused first only when its app is not the frontmost one, where focusing it would move the user's caret; such a field, a secure text field, and an element without a settable selection are written through `AXValue` instead, which some apps show without storing. A background field focused for the write keeps its app's focus afterwards, since some apps drop an edit whose field loses focus before it is committed. Either way the field is read back, and a value other than `text` throws `AxFailed` giving how many characters were written and what the field reads now. The written text is never quoted, and neither is what a secure field reads; a field that reads back as mask characters is described as masked. A field that reads back as a mask exactly as long as `text` (a password field, whatever role it reports) counts as a successful write; a mask of another length still fails. Web content, terminals and the fields of Chromium-based apps (Chrome, Edge, Brave, Electron apps; use `el.type(text)` there) are refused before anything is written."
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "takeover-attached-hint",

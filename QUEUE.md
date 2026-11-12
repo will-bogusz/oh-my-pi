@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12 09:39Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12 09:40Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-12 09:22Z on goliath; groups below are from it, states from the manifest)
@@ -10,7 +10,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
-| x11-mpx-reattach | fix(natives): keep X11 background input out of your window after a screen lock or VT switch | computer | P0 | 15h | open; advance first | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-mpx-reattach) |
+| x11-mpx-reattach | fix(natives): keep X11 background input out of your window after a screen lock or VT switch | computer | P0 | 16h | open; advance first | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-mpx-reattach) |
 | takeover-attached-hint | fix(natives): name the background route when takeover refuses a macOS suggestion list | computer | P2 | 5h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/takeover-attached-hint) |
 
 ## Conflict-held (31)
@@ -47,7 +47,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12
 | macos-ax-linked-label | fix(natives): name a macOS control by the label its AXTitleUIElement links to | natives | P2 | 18h | [#18892](https://github.com/can1357/oh-my-pi/pull/18892) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-ax-linked-label) |
 | macos-press-click-hint | fix(natives): point a refused macOS press at the element's own click | computer | P2 | 14h | [#18892](https://github.com/can1357/oh-my-pi/pull/18892) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-press-click-hint) |
 | masked-length-ok | fix(natives): report a setValue that reads back as a same-length mask as done, not failed | computer | P2 | 5h | [#18915](https://github.com/can1357/oh-my-pi/pull/18915), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/masked-length-ok) |
-| win-type-drain | fix(natives,coding-agent): stop Windows takeover typing from losing text the app had not read yet | computer | P1 | 4h | [#18783](https://github.com/can1357/oh-my-pi/pull/18783) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-type-drain) |
+| win-type-drain | fix(natives,coding-agent): stop Windows takeover typing from losing text the app had not read yet | computer | P1 | 5h | [#18783](https://github.com/can1357/oh-my-pi/pull/18783) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-type-drain) |
 
 ## Stacked (23)
 
