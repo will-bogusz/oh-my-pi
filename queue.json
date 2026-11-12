@@ -84536,7 +84536,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-focus-report",
    "host": "MacBook-Pro",
    "added": "2026-11-11T13:11:20Z",
-   "updated": "2026-11-12T17:26:40Z",
+   "updated": "2026-11-12T17:36:24Z",
    "note": "",
    "rebases_after": [
     18783,
@@ -84912,15 +84912,6 @@
      "host": "goliath"
     },
     {
-     "with": "#19047",
-     "code": "eeea17112c4476e129e1cb45a4fc5b9f7c5eac3b",
-     "with_code": "f68d53cf67550bd93eb588b9c4d53feb848081d3",
-     "tip": "93a1726e2ddd6c6a508bb68d341bf5fa1010d09f",
-     "with_tip": "9cc75f1f3ccc2c985e1dd56eba25bb1c680ef126",
-     "at": "2026-11-12T17:26:38Z",
-     "host": "goliath"
-    },
-    {
      "with": "#19048",
      "code": "eeea17112c4476e129e1cb45a4fc5b9f7c5eac3b",
      "with_code": "3a6e5e168a4b689f044865e6dd66590973fef2f3",
@@ -84930,12 +84921,39 @@
      "host": "goliath"
     },
     {
+     "with": "#19047",
+     "code": "eeea17112c4476e129e1cb45a4fc5b9f7c5eac3b",
+     "with_code": "f68d53cf67550bd93eb588b9c4d53feb848081d3",
+     "tip": "93a1726e2ddd6c6a508bb68d341bf5fa1010d09f",
+     "with_tip": "9cc75f1f3ccc2c985e1dd56eba25bb1c680ef126",
+     "at": "2026-11-12T17:36:21Z",
+     "host": "goliath"
+    },
+    {
      "with": "x11-takeover-keyboard-grab",
      "code": "eeea17112c4476e129e1cb45a4fc5b9f7c5eac3b",
      "with_code": "1698a87e5b87cdd19166e2e318aab569684b6947",
      "tip": "93a1726e2ddd6c6a508bb68d341bf5fa1010d09f",
      "with_tip": "24e19ebf5a9bd5ca86d5e3560ad938bb032cf962",
-     "at": "2026-11-12T17:26:40Z",
+     "at": "2026-11-12T17:36:23Z",
+     "host": "goliath"
+    },
+    {
+     "with": "macos-ax-linked-label",
+     "code": "eeea17112c4476e129e1cb45a4fc5b9f7c5eac3b",
+     "with_code": "8c7f3669696ec5ac6110c3bc8c0ba8defa3ed32c",
+     "tip": "93a1726e2ddd6c6a508bb68d341bf5fa1010d09f",
+     "with_tip": "0ba0ea6bd84a2f493fa001bad3ceeaf5956bdf70",
+     "at": "2026-11-12T17:36:23Z",
+     "host": "goliath"
+    },
+    {
+     "with": "macos-press-click-hint",
+     "code": "eeea17112c4476e129e1cb45a4fc5b9f7c5eac3b",
+     "with_code": "52ec0e7c205573e87870e67e75850901a9f2c835",
+     "tip": "93a1726e2ddd6c6a508bb68d341bf5fa1010d09f",
+     "with_tip": "3ca41a9795156f00a3f57133a94781c609ca8956",
+     "at": "2026-11-12T17:36:23Z",
      "host": "goliath"
     }
    ]
