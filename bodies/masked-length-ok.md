@@ -15,7 +15,7 @@ KeePassXC's Qt password field reports a plain text role and reads back bullets. 
 
 These counts were measured on the earlier version that also returned a note, with the verdict arm unchanged. This revision returns plain success; the note channel is removed.
 
-## Verification
+## Testing
 
 `cargo test -p pi-natives --lib -- a_same_length_mask a_different_length_mask an_unreadable_value`: the same-length regression fails on c0363292c8a and passes here. The other-length and unreadable-value guards pass on both. The tests assert failure codes and absence of the written text, not message wording. `rust-check --base c0363292c8a` passed for macOS and Linux; `rust-check --base c0363292c8a --windows` passed for Windows. No TypeScript remains in the diff.
 
