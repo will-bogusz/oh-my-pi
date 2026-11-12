@@ -78365,7 +78365,20 @@
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:13:32Z",
    "updated": "2026-11-11T13:03:17Z",
-   "note": ""
+   "note": "",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-12T09:41:00Z",
+     "reason": "win32/input.rs: the entry's one-line run(|target| with_keys(Some(target), keys, held)) expanded to keep main's focus()? callback (#18919) before it; operation unchanged",
+     "old": "c748b31260b79a370ab5b619298dd8af248a15c0",
+     "new": "0557ccfcd7035247f198ae35cfa8ffc8f69698e8",
+     "dropped": {
+      "crates/pi-natives/src/desktop/win32/input.rs": [
+       "\t\tForegroundGuard::activate(id, KEY_SETTLE)?.run(|target| with_keys(Some(target), keys, held))"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "browser-select-objects",
