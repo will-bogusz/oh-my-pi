@@ -38,9 +38,9 @@ No element needed pixels. Of the 14 clicks whose selection did not read back, 9 
 
 The no-capture wording was chosen by that replay from four candidates (1 of 12, then 13, 17 and 22 of 48 to the element click).
 
-Unit tests `an_element_without_a_press_action_is_pointed_at_click` (macOS) and `zoom_rejects_missing_invalid_and_stale_frames_before_capture` fail with the code reverted and pass with it; `cargo test -p pi-natives --lib -- desktop::` passes on macOS (554).
+Unit tests `an_element_without_a_press_action_is_pointed_at_click` (macOS) and `zoom_rejects_missing_invalid_and_stale_frames_before_capture` failed with the code reverted and passed with it before rebasing. Re-run on current main `bcd5b0b996e` on bench-mac: `cargo test -p pi-natives --lib desktop::macos` passed 352 tests; `cargo test -p pi-natives --lib desktop::` passed 598, including the merged read-as refusal coverage. macOS `rust-check` passed clippy and rustfmt. Refusals for a ref that reads as another control retain main's general wording; this click guidance only follows an unsupported action.
 
-Not run: GPT-6.1 Sol.
+Live probes and model replays above are historical and were not repeated after rebasing. Not run: GPT-6.1 Sol.
 
 ---
 
