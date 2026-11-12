@@ -148,6 +148,6 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12
 
 | id | title | area | priority | age | branch |
 |---|---|---|---|---|---|
-| tern-kit-password-mask | fix(browser): mask password values in Tern kit observations | browser |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/tern-kit-password-mask) |
+| tern-kit-password-mask | fix(browser): mask password values in Tern kit observations | browser | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/tern-kit-password-mask) |
 | status-entered-text | fix(coding-agent): keep text a cell enters out of browser and computer status lines | browser | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/status-entered-text) |
 | computer-secure-input | fix(natives,coding-agent): report macOS secure input and stop claiming globalEscape under it | computer | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-secure-input) |
