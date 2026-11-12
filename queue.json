@@ -84192,7 +84192,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-combo-choice",
    "host": "MacBook-Pro",
    "added": "2026-11-11T13:30:39Z",
-   "updated": "2026-11-12T14:22:09Z",
+   "updated": "2026-11-12T14:22:37Z",
    "note": "",
    "advanced": "2026-11-12T12:19:58Z",
    "line_loss_overrides": [
@@ -84406,7 +84406,8 @@
      "host": "goliath"
     }
    ],
-   "opened": "2026-11-12T14:22:09Z"
+   "opened": "2026-11-12T14:22:09Z",
+   "readied": "2026-11-12T14:22:37Z"
   },
   {
    "id": "x11-keysym-remap",
