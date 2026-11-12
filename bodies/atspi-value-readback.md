@@ -19,7 +19,7 @@ Elements with `EditableText` (GTK 3 spin buttons) still take numbers through the
 
 - `a_numeric_write_the_app_clamps_or_ignores_fails` serves `org.a11y.atspi.Value` over a peer-to-peer D-Bus connection with controls that take the write, take it from the second read on, store it as `float`, clamp it to 0–100, ignore it, or clamp without reporting a range. With the read-back removed (the parent's behaviour) it fails at the clamped control, whose write returns `Ok(())`.
 - What toolkits do with the write (goliath KVM guest, Ubuntu 24.04; `CurrentValue` set from `pyatspi` on a 0–100 slider, step 1, read back at once and again 0.5 s later, same both times): a GTK 3 `Gtk.Scale` read 150 back as 100, -5 as 0, and kept 37 and 37.5; a Qt 5 `QSlider` read 150 back as 100, -5 as 0, 37.5 as 38, and kept 37. Each of those writes was answered without an error, which is all `main` checks.
-- `cargo test -p pi-natives --lib desktop::linux::ax`; `scripts/rust-check` on Linux and macOS.
+- `cargo test -p pi-natives --lib desktop::linux` on current main bcd5b0b996e (goliath): 100 passed, 30 ignored, including `a_numeric_write_the_app_clamps_or_ignores_fails`; `scripts/rust-check --base bcd5b0b996e` passed on Linux.
 
 ---
 
