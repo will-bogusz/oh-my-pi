@@ -78793,7 +78793,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-takeover-keyboard-state",
    "host": "MacBook-Pro",
    "added": "2026-11-11T02:32:01Z",
-   "updated": "2026-11-12T20:08:14Z",
+   "updated": "2026-11-12T20:12:00Z",
    "note": "Main-authorized bounded latch repair: ten red/green Xvfb runs, ten latched-Control sibling checks, locked-group restoration green. Linux rust-check recorded; 62 X11 tests pass excluding two MPX/uinput hotplug tests that fail identically on main 9f728bd56e1 under Xvfb without udev/libinput hotplug.",
    "advanced": "2026-11-12T19:21:45Z",
    "line_loss_overrides": [
@@ -78834,16 +78834,6 @@
      "with_tip": "705b0aa2d3238345850baca20be5d66d68770d4d",
      "at": "2026-11-12T19:02:11Z",
      "host": "goliath"
-    },
-    {
-     "with": "#19061",
-     "code": "0d35c99ad12b57fea255c9d2d060941c50c0a5fc",
-     "with_code": "8c7f3669696ec5ac6110c3bc8c0ba8defa3ed32c",
-     "tip": "8745c5bd9c21f2c06c956d85e5057d8a8ebef29b",
-     "with_tip": "56bc967e271646f680a283e02786642b7f08af5c",
-     "at": "2026-11-12T19:09:08Z",
-     "host": "goliath",
-     "tree": "888625ee3d7f2a2b0215e5290afb7b60cd42299b"
     },
     {
      "with": "#19025",
@@ -78960,6 +78950,15 @@
      "tip": "305bf7ea0d0e93ccd10a986f90b2d967a3789407",
      "with_tip": "5c9694960b5aa736b622d62e2a85f5e8e1432a13",
      "at": "2026-11-12T20:08:13Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19061",
+     "code": "9ebe851f80ba1a027769053d360efecb26370fda",
+     "with_code": "11bcf21534ec11dd5ee5a195f17422c279c34173",
+     "tip": "305bf7ea0d0e93ccd10a986f90b2d967a3789407",
+     "with_tip": "5d78d9683a97e40eacbee83198879449490789aa",
+     "at": "2026-11-12T20:11:55Z",
      "host": "MacBook-Pro"
     }
    ]
