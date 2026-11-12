@@ -78330,7 +78330,20 @@
    "host": "MacBook-Pro",
    "added": "2026-11-11T03:06:32Z",
    "updated": "2026-11-11T03:06:32Z",
-   "note": ""
+   "note": "",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-12T13:08:33Z",
+     "reason": "Keep main typing-user test and popup regression together; migrate X11Input constructor to explicit display",
+     "old": "0556260681aca96c95c5121917575073464fc9b2",
+     "new": "2a57dae17943e098e8a24dacc93d7bc9442cf5c4",
+     "dropped": {
+      "crates/pi-natives/src/desktop/linux/x11/input.rs": [
+       "\t\tlet mut input = X11Input::new(Arc::new(input_conn), root).unwrap();"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "print-pref",
