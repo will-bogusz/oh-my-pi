@@ -93225,7 +93225,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-12T09:47:51.196792Z",
+  "at": "2026-11-12T10:12:04.128595Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -93241,10 +93241,8 @@
     "area": "natives-macos",
     "priority": "P1",
     "title": "fix(natives): place macOS clicks for the focus guard where WindowServer routed them",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in crates/pi-natives/src/desktop/control/macos.rs"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "accepted pair with #18743",
     "over": [],
     "paired": [
@@ -93349,10 +93347,8 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): capture a covered X11 window from its own pixels, or say it is covered",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in crates/pi-natives/Cargo.toml"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "accepted pair with #18013",
     "over": [],
     "paired": [
@@ -93387,17 +93383,12 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): refuse macOS element actions once the ref's element reads as another control",
-    "action": "requeue",
-    "reasons": [
-     "conflicts with #18743 in crates/pi-natives/src/desktop/macos/ax.rs",
-     "conflicts with main in crates/pi-natives/src/desktop/macos/ax.rs"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#18743"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T12:38:46Z"
    },
@@ -93411,7 +93402,7 @@
     "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool",
     "action": "requeue",
     "reasons": [
-     "conflicts with #18783 in crates/pi-natives/Cargo.toml"
+     "conflicts with #18783 in MODULE.bazel.lock"
     ],
     "note": "accepted pair with #18353; accepted pair with #18013",
     "over": [],
@@ -93433,10 +93424,8 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): verify Windows value writes and notify combo selections",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/win32/mod.rs"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -93505,8 +93494,7 @@
     "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
     "action": "requeue",
     "reasons": [
-     "conflicts with #18783 in crates/pi-natives/Cargo.toml",
-     "conflicts with #18915 in crates/pi-natives/Cargo.toml"
+     "conflicts with #18783 in MODULE.bazel.lock"
     ],
     "note": "accepted pair with #18013; accepted pair with #18914",
     "over": [],
@@ -93515,8 +93503,7 @@
      "#18914"
     ],
     "blocked_by": [
-     "#18783",
-     "#18915"
+     "#18783"
     ],
     "needs": [],
     "created": "2026-11-06T23:14:30Z"
@@ -93584,10 +93571,8 @@
     "area": "natives",
     "priority": "P2",
     "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in crates/pi-natives/Cargo.toml"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "accepted pair with #18353; accepted pair with #18914; accepted pair with #18783",
     "over": [],
     "paired": [
@@ -93694,12 +93679,16 @@
     "area": "computer",
     "priority": "P0",
     "title": "fix(natives): stop Linux accessibility reads from freezing apps that show long tables",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with #18892 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/mod.rs"
+    ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#18892"
+    ],
     "needs": [],
     "created": "2026-11-11T01:54:02Z"
    },
@@ -93731,13 +93720,13 @@
     "action": "wait",
     "reasons": [
      "needs #18914 (open)",
-     "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/linux/ax.rs"
+     "conflicts with #18892 in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "atspi-huge-children"
+     "#18892"
     ],
     "needs": [
      "atspi-unanswered-app"
@@ -93773,9 +93762,9 @@
     "reasons": [
      "needs #18914 (open)",
      "conflicts with #18783 in crates/pi-natives/Cargo.toml",
+     "conflicts with #18892 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18915 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/ax.rs",
      "conflicts with #18013 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/libei.rs",
-     "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with atspi-text-first in crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
@@ -93784,9 +93773,9 @@
     "paired": [],
     "blocked_by": [
      "#18783",
+     "#18892",
      "#18915",
      "#18013",
-     "atspi-huge-children",
      "atspi-text-first"
     ],
     "needs": [
@@ -93805,15 +93794,14 @@
     "action": "wait",
     "reasons": [
      "needs #18892 (open)",
-     "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/mod.rs",
-     "its need #18892 conflicts with main in crates/pi-natives/src/desktop/macos/ax.rs",
+     "conflicts with #18892 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "atspi-huge-children"
+     "#18892"
     ],
     "needs": [
      "ax-ref-read-as"
@@ -93930,16 +93918,12 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): map Windows keys on the receiving keyboard layout",
-    "action": "wait",
-    "reasons": [
-     "conflicts with #18915 in crates/pi-natives/src/desktop/win32/mod.rs"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#18915"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T09:13:32Z"
    },
@@ -93953,7 +93937,7 @@
     "title": "fix(natives,coding-agent): stop Windows takeover typing from losing text the app had not read yet",
     "action": "wait",
     "reasons": [
-     "conflicts with #18915 in crates/pi-natives/src/desktop/win32/mod.rs"
+     "conflicts with win-target-layout in crates/pi-natives/src/desktop/win32/input.rs"
     ],
     "note": "accepted pair with #18783: QueueThirteen, 2026-11-12 (Main: docs pairs are the opener's): docs-only collision in docs/computer-use.md, adjacent: #18783 adds two X11 covered-window screenshot paragraphs right before the 'Window input defaults to background routes' paragraph that this entry edits. Combined form: #18783's two paragraphs, blank line, then this entry's wording of the 'Window input defaults' paragraph. No code overlap.",
     "over": [],
@@ -93961,7 +93945,7 @@
      "#18783"
     ],
     "blocked_by": [
-     "#18915"
+     "win-target-layout"
     ],
     "needs": [],
     "created": "2026-11-12T04:40:03Z"
@@ -94143,13 +94127,13 @@
     "action": "wait",
     "reasons": [
      "needs #18914 (open)",
-     "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/linux/ax.rs"
+     "conflicts with #18892 in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "atspi-huge-children"
+     "#18892"
     ],
     "needs": [
      "atspi-unanswered-app"
@@ -94167,14 +94151,14 @@
     "action": "wait",
     "reasons": [
      "needs #18914 (open)",
-     "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/linux/ax.rs",
+     "conflicts with #18892 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with atspi-text-first in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "atspi-huge-children",
+     "#18892",
      "atspi-text-first"
     ],
     "needs": [
@@ -94193,14 +94177,14 @@
     "action": "wait",
     "reasons": [
      "needs #18914 (open)",
-     "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/linux/ax.rs",
+     "conflicts with #18892 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "atspi-huge-children"
+     "#18892"
     ],
     "needs": [
      "atspi-unanswered-app"
@@ -94218,16 +94202,13 @@
     "action": "wait",
     "reasons": [
      "needs #18892 (open)",
-     "conflicts with #18743 in crates/pi-natives/src/desktop/macos/ax.rs",
-     "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
-     "its need #18892 conflicts with main in crates/pi-natives/src/desktop/macos/ax.rs"
+     "conflicts with #18743 in crates/pi-natives/src/desktop/macos/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18743",
-     "atspi-huge-children"
+     "#18743"
     ],
     "needs": [
      "ax-ref-read-as"
@@ -94299,6 +94280,7 @@
     "title": "fix(computer): say window and element filters take text when given a RegExp",
     "action": "wait",
     "reasons": [
+     "conflicts with #18783 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #18987 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/computer/worker.ts"
     ],
@@ -94306,6 +94288,7 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#18783",
      "#18987"
     ],
     "needs": [],
@@ -94322,8 +94305,10 @@
     "action": "wait",
     "reasons": [
      "conflicts with #18743 in docs/computer-use.md",
-     "conflicts with #18783 in packages/coding-agent/src/tools/computer/worker.ts",
-     "conflicts with #18784 in packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with #18783 in docs/computer-use.md, packages/coding-agent/src/tools/computer/worker.ts",
+     "conflicts with #18784 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with #18892 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with #18013 in docs/computer-use.md",
      "conflicts with #18222 in packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #18987 in docs/computer-use.md",
      "conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md"
@@ -94335,6 +94320,8 @@
      "#18743",
      "#18783",
      "#18784",
+     "#18892",
+     "#18013",
      "#18222",
      "#18987"
     ],
@@ -94352,13 +94339,15 @@
     "action": "wait",
     "reasons": [
      "conflicts with #18743 in crates/pi-natives/src/desktop/macos/ax.rs",
+     "conflicts with #18892 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with main in crates/pi-natives/src/desktop/macos/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18743"
+     "#18743",
+     "#18892"
     ],
     "needs": [],
     "created": "2026-11-11T09:59:13Z"
@@ -94371,12 +94360,16 @@
     "area": "natives",
     "priority": "P2",
     "title": "fix(natives): name a macOS control by the label its AXTitleUIElement links to",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with #18892 in crates/pi-natives/src/desktop/macos/ax.rs"
+    ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#18892"
+    ],
     "needs": [],
     "created": "2026-11-11T14:43:42Z"
    },
@@ -94388,12 +94381,16 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): point a refused macOS press at the element's own click",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with #18892 in crates/pi-natives/src/desktop/macos/ax.rs"
+    ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#18892"
+    ],
     "needs": [],
     "created": "2026-11-11T18:49:11Z"
    },
@@ -94411,7 +94408,11 @@
      "conflicts with #16553 in crates/pi-natives/src/desktop/macos/input.rs",
      "conflicts with #17756 in crates/pi-natives/src/desktop/macos/input.rs",
      "conflicts with #18743 in docs/computer-use.md",
+     "conflicts with #18783 in docs/computer-use.md",
+     "conflicts with #18784 in docs/computer-use.md",
+     "conflicts with #18892 in crates/pi-natives/src/desktop/macos/input.rs, docs/computer-use.md",
      "conflicts with #17897 in crates/pi-natives/src/desktop/macos/input.rs",
+     "conflicts with #18013 in docs/computer-use.md",
      "conflicts with #18987 in docs/computer-use.md",
      "conflicts with main in docs/computer-use.md"
     ],
@@ -94422,7 +94423,11 @@
      "#16553",
      "#17756",
      "#18743",
+     "#18783",
+     "#18784",
+     "#18892",
      "#17897",
+     "#18013",
      "#18987"
     ],
     "needs": [
@@ -94438,16 +94443,12 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): report a setValue that reads back as a same-length mask as done, not failed",
-    "action": "wait",
-    "reasons": [
-     "conflicts with #18915 in crates/pi-natives/src/desktop/ax.rs"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#18915"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-12T04:00:44Z"
    },
@@ -94605,15 +94606,15 @@
     "title": "fix(natives): expose Windows control state and stale-reference matches",
     "action": "wait",
     "reasons": [
-     "conflicts with #18915 in crates/pi-natives/src/desktop/win32/ax.rs",
-     "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/win32/ax.rs"
+     "conflicts with #18892 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs",
+     "conflicts with #18915 in crates/pi-natives/src/desktop/win32/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18915",
-     "atspi-huge-children"
+     "#18892",
+     "#18915"
     ],
     "needs": [],
     "created": "2026-11-11T10:16:04Z"
@@ -94626,18 +94627,14 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): report where focus went after a Windows takeover",
-    "action": "wait",
-    "reasons": [
-     "conflicts with #18915 in crates/pi-natives/src/desktop/win32/mod.rs"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "accepted pair with #18783: QueueThirteen, 2026-11-12 (Main: docs pairs are the opener's): docs-only collision in docs/computer-use.md, adjacent: #18783 adds two X11 covered-window screenshot paragraphs right before the 'Window input defaults to background routes' paragraph that this entry edits. Combined form: #18783's two paragraphs, blank line, then this entry's wording of the 'Window input defaults' paragraph. No code overlap.",
     "over": [],
     "paired": [
      "#18783"
     ],
-    "blocked_by": [
-     "#18915"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T13:11:20Z"
    },
@@ -94652,8 +94649,11 @@
     "action": "wait",
     "reasons": [
      "conflicts with #18784 in packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with #18892 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18915 in crates/pi-natives/src/desktop/win32/mod.rs",
      "conflicts with #18222 in packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with win-target-layout in crates/pi-natives/src/desktop/win32/mod.rs",
+     "conflicts with win-focus-report in crates/pi-natives/src/desktop/win32/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/win32/mod.rs, packages/coding-agent/src/prompts/tools/computer.md"
     ],
     "note": "",
@@ -94661,8 +94661,11 @@
     "paired": [],
     "blocked_by": [
      "#18784",
+     "#18892",
      "#18915",
-     "#18222"
+     "#18222",
+     "win-target-layout",
+     "win-focus-report"
     ],
     "needs": [],
     "created": "2026-11-11T09:06:32Z"
@@ -94825,7 +94828,6 @@
     "reasons": [
      "held: Main, 2026-11-11: stays held until #18786 merges with the typed-message guide channel (design check replace); then one property on the computer prelude, drop the wrap variant, re-run its blind legs",
      "needs #18786 (open)",
-     "conflicts with #18783 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18222 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/prompts/tools/eval.md, packages/coding-agent/src/tools/eval.ts",
      "conflicts with main in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/sdk-computer-prelude-toggle.test.ts, packages/coding-agent/test/tools/computer.test.ts"
@@ -94834,7 +94836,6 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18783",
      "#18222",
      "#18786"
     ],
@@ -94857,12 +94858,16 @@
      "needs computer-ui-quiet (queued)",
      "conflicts with #18737 in packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts",
      "conflicts with #18743 in docs/computer-use.md",
-     "conflicts with #18783 in packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with #18784 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with #18783 in docs/computer-use.md, packages/coding-agent/src/tools/computer/worker.ts",
+     "conflicts with #18784 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with #18892 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18915 in docs/tools/computer.md",
+     "conflicts with #18013 in docs/computer-use.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/tools/eval.ts",
      "conflicts with #18987 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/worker.ts",
+     "conflicts with masked-length-ok in docs/tools/computer.md",
+     "conflicts with win-focus-report in docs/computer-use.md, packages/coding-agent/src/tools/computer/worker.ts",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -94874,10 +94879,14 @@
      "#18743",
      "#18783",
      "#18784",
+     "#18892",
      "#18915",
+     "#18013",
      "#18222",
      "#18786",
-     "#18987"
+     "#18987",
+     "masked-length-ok",
+     "win-focus-report"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -94896,15 +94905,13 @@
     "reasons": [
      "needs computer-ui-quiet (queued)",
      "conflicts with #18743 in crates/pi-natives/src/desktop/macos/ax.rs",
-     "conflicts with #18783 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18784 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with #18892 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18915 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18987 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
-     "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
-     "conflicts with macos-ax-linked-label in crates/pi-natives/src/desktop/macos/ax.rs",
-     "conflicts with macos-press-click-hint in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with masked-length-ok in docs/tools/computer.md",
      "conflicts with takeover-attached-hint in crates/pi-natives/src/desktop/macos/ax.rs",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/tools/computer/worker.ts"
@@ -94914,15 +94921,13 @@
     "paired": [],
     "blocked_by": [
      "#18743",
-     "#18783",
      "#18784",
+     "#18892",
      "#18915",
      "#18222",
      "#18925",
      "#18987",
-     "atspi-huge-children",
-     "macos-ax-linked-label",
-     "macos-press-click-hint",
+     "masked-length-ok",
      "takeover-attached-hint"
     ],
     "needs": [
@@ -94944,6 +94949,7 @@
      "needs #18987 (open)",
      "conflicts with #16553 in crates/pi-natives/src/desktop/macos/mod.rs",
      "conflicts with #18784 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
+     "conflicts with #18892 in crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18925 in crates/pi-natives/src/desktop/macos/capture.rs",
      "conflicts with main in packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -94953,6 +94959,7 @@
     "blocked_by": [
      "#16553",
      "#18784",
+     "#18892",
      "#18925"
     ],
     "needs": [
@@ -95109,12 +95116,17 @@
     "reasons": [
      "held: Main, 2026-11-12: proposal; opens only after entry A merges and Will has seen the body",
      "needs win-type-drain (queued)",
+     "conflicts with win-target-layout in crates/pi-natives/src/desktop/win32/input.rs",
+     "conflicts with win-focus-report in crates/pi-natives/src/desktop/win32/input.rs, crates/pi-natives/src/desktop/win32/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/win32/mod.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "win-target-layout",
+     "win-focus-report"
+    ],
     "needs": [
      "win-type-drain"
     ],
