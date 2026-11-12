@@ -78574,13 +78574,13 @@
    ],
    "base": "238878f131787ada2b5d35409b4ee759cc535419",
    "body": "bodies/win-target-layout.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19025,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-target-layout",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:13:32Z",
-   "updated": "2026-11-12T11:03:13Z",
+   "updated": "2026-11-12T11:52:30Z",
    "note": "",
    "line_loss_overrides": [
     {
@@ -78757,7 +78757,8 @@
      "host": "MacBook-Pro",
      "tree": "7515ffe584acfd8a36ae1f830433f698c9b4b80a"
     }
-   ]
+   ],
+   "opened": "2026-11-12T11:52:30Z"
   },
   {
    "id": "browser-select-objects",
