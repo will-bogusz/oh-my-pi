@@ -75812,8 +75812,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-cursor",
    "host": "MacBook-Pro",
    "added": "2026-11-10T23:39:37Z",
-   "updated": "2026-11-10T23:39:37Z",
-   "note": ""
+   "updated": "2026-11-12T00:14:02Z",
+   "note": "",
+   "hold": "Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check"
   },
   {
    "id": "computer-run-failure-output",
