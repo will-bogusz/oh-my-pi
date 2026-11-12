@@ -84775,13 +84775,29 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-12T09:22:42Z",
+  "checked": "2026-11-12T09:52:44Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
+   "atspi-huge-children": {
+    "since": "2026-11-12T09:52:44Z",
+    "title": "fix(natives): stop Linux accessibility reads from freezing apps that show long tables"
+   },
    "x11-mpx-reattach": {
     "since": "2026-11-12T09:22:42Z",
     "title": "fix(natives): keep X11 background input out of your window after a screen lock or VT switch"
+   },
+   "atspi-text-first": {
+    "since": "2026-11-12T09:52:44Z",
+    "title": "fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility"
+   },
+   "macos-ax-linked-label": {
+    "since": "2026-11-12T09:52:44Z",
+    "title": "fix(natives): name a macOS control by the label its AXTitleUIElement links to"
+   },
+   "macos-press-click-hint": {
+    "since": "2026-11-12T09:52:44Z",
+    "title": "fix(natives): point a refused macOS press at the element's own click"
    },
    "takeover-attached-hint": {
     "since": "2026-11-12T09:22:42Z",
@@ -84808,13 +84824,6 @@
     "title": "feat(natives): type text the wayland layout lacks through libei text",
     "files": [
      "crates/pi-natives/Cargo.toml"
-    ]
-   },
-   "#18751": {
-    "since": "2026-11-12T09:22:42Z",
-    "title": "fix(browser): run tab.run page evaluations in the page's main world",
-    "files": [
-     "docs/tools/browser.md"
     ]
    },
    "#18783": {
@@ -87914,6 +87923,30 @@
     "files": [
      "crates/pi-natives/src/desktop/macos/ax.rs"
     ]
+   },
+   {
+    "at": "2026-11-12T09:52:44Z",
+    "kind": "openable",
+    "id": "atspi-huge-children",
+    "title": "fix(natives): stop Linux accessibility reads from freezing apps that show long tables"
+   },
+   {
+    "at": "2026-11-12T09:52:44Z",
+    "kind": "openable",
+    "id": "atspi-text-first",
+    "title": "fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility"
+   },
+   {
+    "at": "2026-11-12T09:52:44Z",
+    "kind": "openable",
+    "id": "macos-ax-linked-label",
+    "title": "fix(natives): name a macOS control by the label its AXTitleUIElement links to"
+   },
+   {
+    "at": "2026-11-12T09:52:44Z",
+    "kind": "openable",
+    "id": "macos-press-click-hint",
+    "title": "fix(natives): point a refused macOS press at the element's own click"
    }
   ]
  },
