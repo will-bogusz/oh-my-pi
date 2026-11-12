@@ -64482,7 +64482,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-unanswered-app",
    "host": "MacBook-Pro",
    "added": "2026-11-03T08:39:53Z",
-   "updated": "2026-11-12T09:33:18Z",
+   "updated": "2026-11-12T10:16:21Z",
    "note": "",
    "advanced": "2026-11-12T09:33:18Z",
    "built": [
@@ -64733,7 +64733,13 @@
      "note": "head 4988c32c9a safe to merge as is; gate counter says 5 finding rounds, not 6; no further push; owed slip (#6 set_value timeout drops write_text warning) -> NFY + queued follow-up entry needing #18914; bus-service waits G1/G2 follow-up for next opener; drain-only fallback ~/tmp/oh-my-pi/Design18914/drain-only.patch",
      "ref": "/Users/viathebrink/.omp/agent/sessions/-codebases-trycua-omp/2026-09-08T17-46-29-496Z_01a08220-e6f8-77c4-8572-0e0ff13b3611/local/design-checks/18914.md"
     }
-   ]
+   ],
+   "rebases_after": [
+    18783
+   ],
+   "pair_reasons": {
+    "18783": "Main, 2026-11-12 (via QueueThirteen): generated MODULE.bazel.lock only: the FILE:@@//crates/pi-natives/Cargo.toml hash line differs because each PR changes Cargo.toml; whichever merges second reruns gen-bazel-lock (--check). No code overlap."
+   }
   },
   {
    "id": "atspi-action-names",
