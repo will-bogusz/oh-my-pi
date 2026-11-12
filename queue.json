@@ -82605,10 +82605,14 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-12T01:15:20Z",
+  "checked": "2026-11-12T01:45:57Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
+   "tern-kit-password-mask": {
+    "since": "2026-11-12T01:45:57Z",
+    "title": "fix(browser): mask password values in Tern kit observations"
+   },
    "agent-identity": {
     "since": "2026-11-12T00:44:35Z",
     "title": "feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy"
@@ -82634,6 +82638,20 @@
     "title": "feat(coding-agent): find nested menu commands in one read",
     "files": [
      "packages/coding-agent/src/prompts/tools/computer.md"
+    ]
+   },
+   "#18353": {
+    "since": "2026-11-12T01:45:57Z",
+    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
+    "files": [
+     "MODULE.bazel.lock"
+    ]
+   },
+   "#18013": {
+    "since": "2026-11-12T01:45:57Z",
+    "title": "feat(natives): type text the wayland layout lacks through libei text",
+    "files": [
+     "MODULE.bazel.lock"
     ]
    },
    "#18737": {
@@ -85228,6 +85246,30 @@
     "title": "fix(browser): honor selector wait states and reject unknown options",
     "files": [
      "docs/tools/browser.md"
+    ]
+   },
+   {
+    "at": "2026-11-12T01:45:57Z",
+    "kind": "openable",
+    "id": "tern-kit-password-mask",
+    "title": "fix(browser): mask password values in Tern kit observations"
+   },
+   {
+    "at": "2026-11-12T01:45:57Z",
+    "kind": "conflict",
+    "label": "#18353",
+    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
+    "files": [
+     "MODULE.bazel.lock"
+    ]
+   },
+   {
+    "at": "2026-11-12T01:45:57Z",
+    "kind": "conflict",
+    "label": "#18013",
+    "title": "feat(natives): type text the wayland layout lacks through libei text",
+    "files": [
+     "MODULE.bazel.lock"
     ]
    }
   ]
@@ -90100,8 +90142,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-12T01:40:55.678368Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-12T01:45:58.050214Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -90553,10 +90595,8 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in MODULE.bazel.lock"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "accepted pair with #18353; accepted pair with #18013",
     "over": [],
     "paired": [
@@ -90628,14 +90668,19 @@
     "area": "browser",
     "priority": "P1",
     "title": "fix(browser): honor selector wait states and reject unknown options",
-    "action": "rebase",
+    "action": "requeue",
     "reasons": [
+     "conflicts with #18751 in docs/tools/browser.md",
+     "conflicts with #18772 in docs/tools/browser.md",
      "conflicts with main in docs/tools/browser.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#18751",
+     "#18772"
+    ],
     "needs": [],
     "created": "2026-11-11T16:45:32Z"
    },
@@ -90858,14 +90903,19 @@
     "area": "browser",
     "priority": "P2",
     "title": "feat(coding-agent): keep subagents' browser tabs out of the user's Chrome and Tern pane unless asked",
-    "action": "rebase",
+    "action": "requeue",
     "reasons": [
+     "conflicts with #18751 in docs/tools/browser.md",
+     "conflicts with #18772 in docs/tools/browser.md",
      "conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser.ts, packages/coding-agent/src/tools/browser/settings.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#18751",
+     "#18772"
+    ],
     "needs": [],
     "created": "2026-11-10T22:28:45Z"
    },
@@ -90945,8 +90995,7 @@
      "needs #18914 (open)",
      "conflicts with #18921 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18892 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "its need #18914 conflicts with main in MODULE.bazel.lock"
+     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
     "over": [],
@@ -91003,7 +91052,6 @@
      "conflicts with #18947 in crates/pi-natives/Cargo.toml",
      "conflicts with #18353 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #18013 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/libei.rs",
-     "its need #18914 conflicts with main in MODULE.bazel.lock",
      "conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
@@ -91130,15 +91178,12 @@
     "title": "fix(coding-agent): refuse browser keys aimed at a field a modal dialog covers",
     "action": "wait",
     "reasons": [
-     "conflicts with #18924 in packages/coding-agent/src/tools/browser/frames.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/frames.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#18924"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T02:11:47Z"
    },
@@ -91162,6 +91207,31 @@
     ],
     "needs": [],
     "created": "2026-10-30T21:35:55Z"
+   },
+   {
+    "id": "status-entered-text",
+    "label": "status-entered-text",
+    "number": null,
+    "state": "queued",
+    "area": "browser",
+    "priority": "P1",
+    "title": "fix(coding-agent): keep text a cell enters out of browser and computer status lines",
+    "action": "wait",
+    "reasons": [
+     "conflicts with #18772 in packages/coding-agent/test/eval/browser-prelude-facade.test.ts",
+     "conflicts with #18776 in packages/coding-agent/src/tools/browser.ts",
+     "conflicts with #18786 in packages/coding-agent/src/tools/browser.ts"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "#18772",
+     "#18776",
+     "#18786"
+    ],
+    "needs": [],
+    "created": "2026-11-12T01:30:11Z"
    },
    {
     "id": "upload-stall-error-all-providers",
@@ -91309,7 +91379,6 @@
     "title": "feat(browser): add waitForFunction to tabs and frames",
     "action": "wait",
     "reasons": [
-     "conflicts with #18924 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18786 in packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with main in packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts"
     ],
@@ -91317,7 +91386,6 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18924",
      "#18786"
     ],
     "needs": [],
@@ -91361,7 +91429,6 @@
     "reasons": [
      "needs observe-settle (queued)",
      "conflicts with #18772 in docs/tools/browser.md",
-     "conflicts with #18924 in packages/coding-agent/src/tools/browser/frames.ts",
      "conflicts with #18925 in packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
@@ -91369,7 +91436,6 @@
     "paired": [],
     "blocked_by": [
      "#18772",
-     "#18924",
      "#18925"
     ],
     "needs": [
@@ -91390,8 +91456,7 @@
      "needs #18914 (open)",
      "conflicts with #18921 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18892 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/ax/menus.rs",
-     "its need #18914 conflicts with main in MODULE.bazel.lock"
+     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/ax/menus.rs"
     ],
     "note": "",
     "over": [],
@@ -91419,8 +91484,7 @@
      "needs #18914 (open)",
      "conflicts with #18921 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18892 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "its need #18914 conflicts with main in MODULE.bazel.lock"
+     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
     "over": [],
@@ -91445,8 +91509,7 @@
     "title": "fix(natives): preserve the empty-field warning on Linux write timeouts",
     "action": "wait",
     "reasons": [
-     "needs #18914 (open)",
-     "its need #18914 conflicts with main in MODULE.bazel.lock"
+     "needs #18914 (open)"
     ],
     "note": "",
     "over": [],
@@ -91493,16 +91556,13 @@
     "action": "wait",
     "reasons": [
      "needs browser-wait-predicate (queued)",
-     "conflicts with #18924 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need browser-wait-predicate conflicts with main in packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#18924"
-    ],
+    "blocked_by": [],
     "needs": [
      "browser-wait-predicate"
     ],
@@ -91519,15 +91579,12 @@
     "action": "wait",
     "reasons": [
      "needs browser-wait-text-regexp (queued)",
-     "conflicts with #18924 in docs/tools/browser.md",
      "its need browser-wait-text-regexp conflicts with main in packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#18924"
-    ],
+    "blocked_by": [],
     "needs": [
      "browser-wait-text-regexp"
     ],
@@ -91690,13 +91747,18 @@
     "action": "wait",
     "reasons": [
      "needs #18925 (open)",
+     "conflicts with #18751 in docs/tools/browser.md",
+     "conflicts with #18772 in docs/tools/browser.md",
      "its need #18925 conflicts with main in packages/coding-agent/src/tools/browser/tab-protocol.ts",
      "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#18751",
+     "#18772"
+    ],
     "needs": [
      "r2/native-window-report"
     ],
@@ -91713,12 +91775,17 @@
     "action": "wait",
     "reasons": [
      "needs r2/relay-own-only (queued)",
+     "conflicts with #18751 in docs/tools/browser.md",
+     "conflicts with #18772 in docs/tools/browser.md",
      "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#18751",
+     "#18772"
+    ],
     "needs": [
      "r2/relay-own-only"
     ],
@@ -91740,10 +91807,8 @@
      "conflicts with #18750 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18751 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18772 in docs/tools/browser.md",
-     "conflicts with #18924 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18776 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18786 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts",
-     "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts",
      "its need r2/relay-popup-owned conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts",
      "its need r2/page-waiting conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-detach.test.ts"
@@ -91757,10 +91822,8 @@
      "#18750",
      "#18751",
      "#18772",
-     "#18924",
      "#18776",
-     "#18786",
-     "#18789"
+     "#18786"
     ],
     "needs": [
      "r2/relay-popup-owned",
@@ -91792,31 +91855,21 @@
     "created": "2026-11-11T07:04:56Z"
    },
    {
-    "id": "status-entered-text",
-    "label": "status-entered-text",
+    "id": "tern-kit-password-mask",
+    "label": "tern-kit-password-mask",
     "number": null,
     "state": "queued",
     "area": "browser",
     "priority": "P2",
-    "title": "fix(coding-agent): keep text a cell enters out of browser and computer status lines",
-    "action": "wait",
-    "reasons": [
-     "conflicts with #18772 in packages/coding-agent/test/eval/browser-prelude-facade.test.ts",
-     "conflicts with #18776 in packages/coding-agent/src/tools/browser.ts",
-     "conflicts with #18786 in packages/coding-agent/src/tools/browser.ts",
-     "conflicts with #18789 in packages/coding-agent/src/tools/browser.ts"
-    ],
+    "title": "fix(browser): mask password values in Tern kit observations",
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#18772",
-     "#18776",
-     "#18786",
-     "#18789"
-    ],
+    "blocked_by": [],
     "needs": [],
-    "created": "2026-11-12T01:30:11Z"
+    "created": "2026-11-12T01:22:04Z"
    },
    {
     "id": "win-ax-states",
@@ -91968,7 +92021,6 @@
     "title": "feat(browser): print what each browser action did to the page",
     "action": "wait",
     "reasons": [
-     "conflicts with #18924 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts",
      "conflicts with #18786 in packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with main in packages/coding-agent/src/prompts/tools/browser.md"
     ],
@@ -91976,7 +92028,6 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18924",
      "#18786"
     ],
     "needs": [],
@@ -92018,14 +92069,16 @@
     "title": "feat(browser): accept explicit dropdown option selectors",
     "action": "wait",
     "reasons": [
-     "conflicts with #18924 in docs/tools/browser.md",
+     "conflicts with #18751 in docs/tools/browser.md",
+     "conflicts with #18772 in docs/tools/browser.md",
      "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18924"
+     "#18751",
+     "#18772"
     ],
     "needs": [],
     "created": "2026-11-11T09:27:26Z"
@@ -92254,7 +92307,6 @@
      "conflicts with #18737 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18750 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18772 in docs/tools/browser.md",
-     "conflicts with #18924 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18925 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need act-look-prompt conflicts with main in packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
@@ -92266,7 +92318,6 @@
      "#18737",
      "#18750",
      "#18772",
-     "#18924",
      "#18925"
     ],
     "needs": [
@@ -92358,23 +92409,6 @@
      "wire-delta-count"
     ],
     "created": "2026-11-03T01:54:17Z"
-   },
-   {
-    "id": "tern-kit-password-mask",
-    "label": "tern-kit-password-mask",
-    "number": null,
-    "state": "queued",
-    "area": "browser",
-    "priority": null,
-    "title": "fix(browser): mask password values in Tern kit observations",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-12T01:22:04Z"
    },
    {
     "id": "text-reader-usage-shift",
