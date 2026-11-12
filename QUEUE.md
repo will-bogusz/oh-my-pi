@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12 12:34Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12 12:41Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 4 of 8 ready events used in the hour before the last plan, 4 left (plan of 2026-11-12 12:26Z on goliath; groups below are from it, states from the manifest)
@@ -15,7 +15,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12
 | atspi-text-first | fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility | computer | P1 | 1d | open (over #18353) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-text-first) |
 | atspi-combo-choice | fix(natives): choose Linux combo box options without opening their keyboard-grabbing list | computer | P1 | 23h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-combo-choice) |
 | ax-ref-read-as-followup | fix(natives): skip unused ref-check reads and recover display refs | computer | P2 | 20h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-ref-read-as-followup) |
-| win-type-drain | fix(natives,coding-agent): stop Windows takeover typing from losing text the app had not read yet | computer | P1 | 7h | open; accepted pair with #19025: Main, 2026-11-12 (via QueueThirteen): only conflict is the use list in crates/pi-natives/src/desktop/win32/input.rs: this entry adds GetKeyState, #19025 (win-target-layout) replaces MapVirtualKeyW with MapVirtualKeyExW; this entry adds no MapVirtualKeyW call. Combined form: one use list with GetKeyState and MapVirtualKeyExW. | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-type-drain) |
+| win-type-drain | fix(natives,coding-agent): stop Windows takeover typing from losing text the app had not read yet | computer | P1 | 8h | open; accepted pair with #19025: Main, 2026-11-12 (via QueueThirteen): only conflict is the use list in crates/pi-natives/src/desktop/win32/input.rs: this entry adds GetKeyState, #19025 (win-target-layout) replaces MapVirtualKeyW with MapVirtualKeyExW; this entry adds no MapVirtualKeyW call. Combined form: one use list with GetKeyState and MapVirtualKeyExW. | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-type-drain) |
 
 ## Conflict-held (32)
 
@@ -87,7 +87,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12
 | computer-guide-first-use | feat(coding-agent): send the computer guide with the first computer call | computer | P2 | 1d | Main, 2026-11-11: stays held until #18786 merges with the typed-message guide channel (design check replace); then one property on the computer prelude, drop the wrap variant, re-run its blind legs | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-guide-first-use) |
 | browser-cursor | feat(browser): draw the acting agent's cursor in OMP-driven tabs | browser | P2 | 1d | Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-cursor) |
 | desktop-cursor | feat(coding-agent,natives): show each agent's cursor where its computer input lands on macOS | coding-agent | P2 | 1d | Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check \| Main 2026-11-12: before it opens, the waiting-key-chord case with the cursor actually drawn (20 trials at a 20 s deadline; CursorDemo's cursor-on arm never drew one, and an early run on the combined tree returned 'Cancelled, input may be partial' 11/11, unexplained), on the polished branch will/desktop-cursor-polish. | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/desktop-cursor) |
-| win-type-insert | feat(natives): insert typed text into a focused Windows multi-line edit control | computer | P2 | 7h | Main, 2026-11-12: proposal; opens only after entry A merges and Will has seen the body | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-type-insert) |
+| win-type-insert | feat(natives): insert typed text into a focused Windows multi-line edit control | computer | P2 | 8h | Main, 2026-11-12: proposal; opens only after entry A merges and Will has seen the body | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-type-insert) |
 
 ## Parked (2)
 
