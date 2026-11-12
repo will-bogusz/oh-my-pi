@@ -64480,13 +64480,13 @@
    ],
    "base": "5a63464ef67509fecd97a43687b8234a7f042fc2",
    "body": "bodies/atspi-unanswered-app.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18914,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-unanswered-app",
    "host": "MacBook-Pro",
    "added": "2026-11-03T08:39:53Z",
-   "updated": "2026-11-12T10:16:21Z",
+   "updated": "2026-11-12T11:41:38Z",
    "note": "",
    "advanced": "2026-11-12T09:33:18Z",
    "built": [
@@ -64743,7 +64743,8 @@
    ],
    "pair_reasons": {
     "18783": "Main, 2026-11-12 (via QueueThirteen): generated MODULE.bazel.lock only: the FILE:@@//crates/pi-natives/Cargo.toml hash line differs because each PR changes Cargo.toml; whichever merges second reruns gen-bazel-lock (--check). No code overlap."
-   }
+   },
+   "merged_by": "pr"
   },
   {
    "id": "atspi-action-names",
@@ -70537,13 +70538,13 @@
    "needs": [],
    "base": "6e9204c9ee454fe6972985aa792d47706c9315f9",
    "body": "bodies/browser-call-timeout.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18737,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-call-timeout",
    "host": "MacBook-Pro",
    "added": "2026-11-10T05:34:29Z",
-   "updated": "2026-11-12T02:55:20Z",
+   "updated": "2026-11-12T11:41:38Z",
    "note": "",
    "advanced": "2026-11-12T02:55:20Z",
    "built": [
@@ -70709,7 +70710,8 @@
      "note": "DesignChecks: lift stop; body correction: head raises Puppeteer protocol timeout to 301 s for tab workers",
      "ref": "/Users/viathebrink/tmp/oh-my-pi/DesignChecks/DesignChecks.md"
     }
-   ]
+   ],
+   "merged_by": "pr"
   },
   {
    "id": "browser-dead-tab-hint",
@@ -71465,13 +71467,13 @@
    "needs": [],
    "base": "5a63464ef67509fecd97a43687b8234a7f042fc2",
    "body": "bodies/computer-open-window.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18743,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-open-window",
    "host": "MacBook-Pro",
    "added": "2026-11-10T15:55:51Z",
-   "updated": "2026-11-12T09:33:41Z",
+   "updated": "2026-11-12T11:41:38Z",
    "note": "",
    "built": [
     {
@@ -71587,7 +71589,8 @@
    ],
    "opened": "2026-11-10T16:42:23Z",
    "readied": "2026-11-10T16:42:46Z",
-   "advanced": "2026-11-12T09:33:41Z"
+   "advanced": "2026-11-12T09:33:41Z",
+   "merged_by": "pr"
   },
   {
    "id": "browser-hover-actionable",
@@ -71820,13 +71823,13 @@
    "needs": [],
    "base": "5a63464ef67509fecd97a43687b8234a7f042fc2",
    "body": "bodies/browser-run-main-world.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18751,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-run-main-world",
    "host": "MacBook-Pro",
    "added": "2026-11-10T16:47:04Z",
-   "updated": "2026-11-12T09:34:58Z",
+   "updated": "2026-11-12T11:41:38Z",
    "note": "",
    "built": [
     {
@@ -72000,7 +72003,8 @@
      "note": "DesignChecks: lift stop for one push settling round 9; parity findings on waitForFunction get one-line answers; opens/merges before the settle series, which restacks on it",
      "ref": "/Users/viathebrink/tmp/oh-my-pi/DesignChecks/DesignChecks.md"
     }
-   ]
+   ],
+   "merged_by": "pr"
   },
   {
    "id": "browser-run-node-hint",
@@ -75058,13 +75062,13 @@
    "needs": [],
    "base": "50da2d357039404a81d7c64622740ce13e4c54b4",
    "body": "bodies/factory-droid-171-pin.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18771,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-171-pin",
    "host": "MacBook-Pro",
    "added": "2026-11-10T19:38:06Z",
-   "updated": "2026-11-11T18:21:38Z",
+   "updated": "2026-11-12T11:41:38Z",
    "note": "",
    "built": [
     {
@@ -75124,7 +75128,8 @@
    ],
    "opened": "2026-11-10T19:52:48Z",
    "readied": "2026-11-10T19:53:12Z",
-   "advanced": "2026-11-11T18:21:38Z"
+   "advanced": "2026-11-11T18:21:38Z",
+   "merged_by": "pr"
   },
   {
    "id": "factory-droid-171-models",
@@ -75406,13 +75411,13 @@
    "needs": [],
    "base": "cfd8d04ef37acee404bd341661b052c00c6acc9c",
    "body": "bodies/x11-covered-capture.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18783,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-covered-capture",
    "host": "MacBook-Pro",
    "added": "2026-11-10T20:41:59Z",
-   "updated": "2026-11-12T10:09:28Z",
+   "updated": "2026-11-12T11:41:38Z",
    "note": "",
    "built": [
     {
@@ -75558,7 +75563,8 @@
       ]
      }
     }
-   ]
+   ],
+   "merged_by": "pr"
   },
   {
    "id": "x11-takeover-user",
@@ -75569,13 +75575,13 @@
    "needs": [],
    "base": "cfd8d04ef37acee404bd341661b052c00c6acc9c",
    "body": "bodies/x11-takeover-user.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18784,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-takeover-user",
    "host": "MacBook-Pro",
    "added": "2026-11-10T21:06:23Z",
-   "updated": "2026-11-12T10:08:04Z",
+   "updated": "2026-11-12T11:41:38Z",
    "note": "2026-11-11T10:39:00Z: --user-harm on UserIntervened the hand-back returned early when the EWMH active-window property lagged core focus, leaving the user's typing focused in the target (6 Codex finding rounds)",
    "built": [
     {
@@ -75708,7 +75714,8 @@
      "note": "Keep the listener + server-state mechanism. One last push: (1) restore_activation decides and waits by core focus and always asks the WM, Wm::activate's restoring rechecks kept in core-focus form; (2) R7: user check right before the client message/SetInputFocus in Wm::activate, and the same before ax.focus in the element-keys body; (3) no pointer warp once the user pressed or holds a button; (4) delete the dead KEY_REPEAT arm and the doc/body sentences about repeats. Body states the floor and what counts as the user stepping in. Later 'press between check and act' findings: decline.",
      "ref": "/Users/viathebrink/tmp/oh-my-pi/Design18784/18784.md"
     }
-   ]
+   ],
+   "merged_by": "pr"
   },
   {
    "id": "x11-mpx-qt",
@@ -79176,13 +79183,13 @@
    "needs": [],
    "base": "cfd8d04ef37acee404bd341661b052c00c6acc9c",
    "body": "bodies/win-setvalue-readback.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18915,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-setvalue-readback",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:34:38Z",
-   "updated": "2026-11-12T10:01:31Z",
+   "updated": "2026-11-12T11:41:38Z",
    "note": "Main 2026-11-12: whichever of ax-masked-readback / #18915 lands second deletes the cfg_attr(..., allow(dead_code)) on ax.rs `masked` in its rebase (stale after #18915, not wrong); combined doc = ax-masked-readback\u2019s wording, no cfg on text_readback.",
    "built": [
     {
@@ -79420,7 +79427,8 @@
       ]
      }
     }
-   ]
+   ],
+   "merged_by": "pr"
   },
   {
    "id": "win-posted-modifiers",
@@ -82044,13 +82052,13 @@
    "needs": [],
    "base": "cfd8d04ef37acee404bd341661b052c00c6acc9c",
    "body": "bodies/ax-ref-read-as.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18892,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ax-ref-read-as",
    "host": "MacBook-Pro",
    "added": "2026-11-11T10:51:34Z",
-   "updated": "2026-11-12T09:59:45Z",
+   "updated": "2026-11-12T11:41:38Z",
    "note": "QueueThirteen 2026-11-12 rebase onto #18898's choose_action: require_behind stays inside `perform`, as in the PR's original. `perform` runs at most once per perform_choosing call: choose_action takes an FnOnce closure and calls it once, open_menu::guard takes `run: impl FnOnce` and calls it once, and press_into_view has no retry (its optional scroll send comes after the check). So the check guards the single send exactly as before. The identity check (require_read_as / require_element_read_as) runs before choose_action, so before any raise.",
    "built": [
     {
@@ -82253,7 +82261,8 @@
       ]
      }
     }
-   ]
+   ],
+   "merged_by": "pr"
   },
   {
    "id": "ax-row-action",
