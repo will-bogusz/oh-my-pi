@@ -99333,6 +99333,11 @@
     "sha": "967e9e8bd63bc16b3c2918b7ec45abdf605b125d",
     "at": "2026-11-12T20:05:21Z",
     "host": "Wills-MacBook-Pro"
+   },
+   "windows": {
+    "sha": "231a54e6c140515e73fa70baaa2e30f3aa6fdee6",
+    "at": "2026-11-12T23:09:51Z",
+    "host": "goliath"
    }
   },
   "b598a7a2a968172bd0ae66b587167829ec4abd7b": {
