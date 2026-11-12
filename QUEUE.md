@@ -12,7 +12,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12
 |---|---|---|---|---|---|---|
 | factory-droid-171-models | feat(catalog): add the Factory Droid models droid 1.7.1 serves | factory-droid |  | 1d | next-hour; advance first | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-171-models) |
 | atspi-value-readback | fix(natives): read back AT-SPI numeric setValue before reporting success | computer | P2 | 1d | open; advance first | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-value-readback) |
-| atspi-qt-menus | fix(natives): let Linux menu.select walk into Qt apps' menus | computer | P2 | 22h | open; advance first | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-qt-menus) |
+| atspi-qt-menus | fix(natives): let Linux menu.select walk into Qt apps' menus | computer | P2 | 23h | open; advance first | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-qt-menus) |
 | atspi-combo-choice | fix(natives): choose Linux combo box options without opening their keyboard-grabbing list | computer | P1 | 22h | open; advance first | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-combo-choice) |
 | ax-ref-read-as-followup | fix(natives): skip unused ref-check reads and recover display refs | computer | P2 | 20h | open; advance first | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-ref-read-as-followup) |
 
