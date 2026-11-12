@@ -83970,7 +83970,52 @@
     }
    ],
    "opened": "2026-11-12T05:27:03Z",
-   "readied": "2026-11-12T05:27:40Z"
+   "readied": "2026-11-12T05:27:40Z",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-12T05:44:05Z",
+     "reason": "roboomp fixes on #19001: notice moved to a prompt file, cast replaced by typed protocol command + isHiddenFrame; the dropped lines are the replaced code",
+     "old": "bb1130f6023b6e56b2eed9e345136d10a65afb59",
+     "new": "79379ee29a8fd2e68fd3d4857d7418e3e203f9c1",
+     "dropped": {
+      "packages/browser-relay/README.md": [
+       "- Chrome refuses the debugger in a tab while another extension's frame, such as a password manager's inline menu, is in it. In a tab omp drives, the extension empties and hides that frame so omp can continue; your other tabs keep theirs. The call that ran into the frame, or a later one on that tab, names the extension and the frame's page, so the agent can tell you what was hidden; nothing is saved through a hidden frame."
+      ],
+      "packages/browser-relay/extension/foreign-frames.ts": [
+       "\t\t\t\targs: [srcs, PROBE_TIMEOUT_MS],",
+       "\t\t\t\tfunc: async (urls: string[], timeoutMs: number) =>",
+       "\t\t\t\t\t\t\t\tconst title = /<title[^>]*>([^<]*)<\\/title>/i.exec(await response.text())?.[1]?.trim();"
+      ],
+      "packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt": [
+       "    args: [srcs, PROBE_TIMEOUT_MS],",
+       "    func: async (urls, timeoutMs) => await Promise.all(urls.map(async (url) => {",
+       "        const title = /<title[^>]*>([^<]*)<\\/title>/i.exec(await response.text())?.[1]?.trim();"
+      ],
+      "packages/coding-agent/src/tools/browser/tab-supervisor.ts": [
+       "\tconst hidden = new Set<string>();",
+       "\t\t// The title is the other extension's own text, so it is labelled as such rather than as a name Chrome vouches for.",
+       "\t\tconst extension = title",
+       "\t\t\t? `the extension whose page calls itself ${JSON.stringify(title)} (${extensionId})`",
+       "\t\t\t: `the extension ${extensionId}`;",
+       "\t\thidden.add(`the frame ${JSON.stringify(path)} of ${extension}`);",
+       "\tconst named = [...hidden].slice(0, MAX_HIDDEN_FRAMES_NAMED);",
+       "\tif (hidden.size > named.length) named.push(`${hidden.size - named.length} more`);",
+       "\treturn `Nothing was saved: omp emptied and hid ${named.join(\", and \")} in this tab, for the user as well, because Chrome lets omp do nothing in a tab while another extension's frame is open in it. If that frame offered to save a login, the login was not saved and the prompt is gone; never tell the user a login was saved or that the prompt is still there. In your final reply, tell the user that nothing was saved and what omp hid.`;"
+      ],
+      "packages/coding-agent/src/tools/browser/tab-worker.ts": [
+       "import type { HiddenFrame } from \"./relay/protocol\";",
+       "\t\t// Puppeteer's protocol map cannot express the relay-private method; the send signature is otherwise identical.",
+       "\t\tconst session = page.mainFrame().client as unknown as { send(method: string): Promise<unknown> };",
+       "\t\t// A relay of an older omp forwards the unknown method to Chrome, which rejects it.",
+       "\t\tconst reply = await session.send(\"OMP.takeHiddenFrames\").catch(() => undefined);",
+       "\t\tif (isRecord(reply) && Array.isArray(reply.frames)) this.#hiddenFrames.push(...(reply.frames as HiddenFrame[]));"
+      ],
+      "packages/coding-agent/test/tools/browser-relay-foreign-frames.test.ts": [
+       "import type { HiddenFrame } from \"@oh-my-pi/pi-coding-agent/tools/browser/relay/protocol\";"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "ax-masked-readback",
