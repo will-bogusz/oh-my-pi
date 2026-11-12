@@ -89492,7 +89492,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-12T00:17:25.287688Z",
+  "at": "2026-11-12T00:25:02.125641Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -91265,16 +91265,12 @@
     "area": "tui",
     "priority": "P2",
     "title": "feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy",
-    "action": "wait",
-    "reasons": [
-     "conflicts with #18784 in docs/tools/computer.md"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#18784"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-10T23:39:10Z"
    },
@@ -91364,6 +91360,7 @@
      "conflicts with #18947 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18222 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/prompts/tools/eval.md, packages/coding-agent/src/tools/eval.ts",
+     "conflicts with agent-identity in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with main in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/sdk-computer-prelude-toggle.test.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
@@ -91373,7 +91370,8 @@
      "#18753",
      "#18947",
      "#18222",
-     "#18786"
+     "#18786",
+     "agent-identity"
     ],
     "needs": [
      "browser-core-first-use"
@@ -91403,6 +91401,7 @@
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/tools/eval.ts",
+     "conflicts with agent-identity in docs/tools/computer.md, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
@@ -91420,7 +91419,8 @@
      "#18947",
      "#18353",
      "#18222",
-     "#18786"
+     "#18786",
+     "agent-identity"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -91450,6 +91450,7 @@
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with agent-identity in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
@@ -91467,7 +91468,8 @@
      "#18947",
      "#18353",
      "#18222",
-     "#18925"
+     "#18925",
+     "agent-identity"
     ],
     "needs": [
      "computer-ui-quiet"
