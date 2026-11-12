@@ -82738,7 +82738,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-12T02:47:15Z",
+  "checked": "2026-11-12T03:17:22Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -82996,41 +82996,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-05T02:49:26Z",
-    "kind": "unopenable",
-    "id": "open-viewport-attach",
-    "title": "fix(coding-agent): apply the open viewport on attached and visible browsers",
-    "why": "opened as #18160"
-   },
-   {
-    "at": "2026-11-05T02:49:26Z",
-    "kind": "unopenable",
-    "id": "computer-screenshot-saved-frame",
-    "title": "fix(coding-agent): say the computer screenshot path holds the scaled frame",
-    "why": "opened as #18158"
-   },
-   {
-    "at": "2026-11-05T02:49:26Z",
-    "kind": "unopenable",
-    "id": "find-partial-deadline",
-    "title": "fix(find): return the hits verified before find's deadline",
-    "why": "opened as #18161"
-   },
-   {
-    "at": "2026-11-05T02:49:26Z",
-    "kind": "unopenable",
-    "id": "readthedocs-page-source",
-    "title": "fix(coding-agent): fetch Read the Docs raw source only from the page's own Edit link",
-    "why": "opened as #18162"
-   },
-   {
-    "at": "2026-11-05T02:49:26Z",
-    "kind": "unopenable",
-    "id": "shell-url-text-args",
-    "title": "fix(shell): pass a scheme followed by words to external commands as written",
-    "why": "opened as #18163"
-   },
    {
     "at": "2026-11-05T14:32:39Z",
     "kind": "merged",
@@ -90244,7 +90209,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-12T02:47:16.821968Z",
+  "at": "2026-11-12T03:17:23.645294Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -91028,25 +90993,6 @@
     "created": "2026-11-11T01:54:02Z"
    },
    {
-    "id": "relay-frame-race",
-    "label": "relay-frame-race",
-    "number": null,
-    "state": "queued",
-    "area": "browser",
-    "priority": "P0",
-    "title": "fix(browser-relay): keep a driven tab when a password manager's frame drops omp from it",
-    "action": "held",
-    "reasons": [
-     "held: Main, 2026-11-12: regression against a signed-in real 1Password (VaultSignedIn, VM, Chrome 154, 1Password 8.12.44.33): autofocus cell tab kept 4/10 on the fix, 10/10 on main; after the first sweep 1Password puts back a frame the sweep finds but cannot empty and Chrome refuses every attach"
-    ],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-12T01:59:31Z"
-   },
-   {
     "id": "x11-mpx-reattach",
     "label": "x11-mpx-reattach",
     "number": null,
@@ -91166,7 +91112,7 @@
     "state": "queued",
     "area": "computer",
     "priority": "P1",
-    "title": "fix(natives): never quote a setValue into a field that reads back masked",
+    "title": "fix(natives): never quote the written text when a setValue read-back disagrees",
     "action": "wait",
     "reasons": [
      "conflicts with #18915 in crates/pi-natives/src/desktop/ax.rs"
@@ -91320,9 +91266,10 @@
     "title": "fix(browser-relay): say what the relay hid in a driven tab",
     "action": "held",
     "reasons": [
-     "held: Main, 2026-11-12: held behind relay-frame-race (regression hold)",
-     "needs relay-frame-race (queued)",
-     "conflicts with #18925 in packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts"
+     "held: Main: being rebuilt on main without relay-frame-race by agent://HiddenOnMain; its head and needs will change",
+     "needs relay-frame-race (closed)",
+     "conflicts with #18925 in packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with main in packages/browser-relay/README.md, packages/browser-relay/extension/background.ts, packages/browser-relay/extension/foreign-frames.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/test/tools/browser-relay-foreign-frames.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
     ],
     "note": "",
     "over": [],
@@ -92336,8 +92283,9 @@
     "area": "computer",
     "priority": "P2",
     "title": "feat(computer): report what input changed as a diff once the app goes quiet",
-    "action": "wait",
+    "action": "held",
     "reasons": [
+     "held: QueueTwelve for InputDiffRun, 2026-11-12: held until the Finder inline-rename-editor fix rides in this entry (report prints the rename field as new window \"N\" Finder \"\"; title '' lookup matches every Finder window, 3 errors/9 runs on Opus). Fix (a) inline editor of parent window or (b) title \"\" matches only untitled windows; see local://deep-levers/InputDiffLeg.md \u00a75-6 and STATE.md InputDiffRun 03:30Z",
      "needs computer-ui-quiet (queued)",
      "conflicts with #18898 in docs/computer-use.md, docs/tools/computer.md",
      "conflicts with #18737 in packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts",
