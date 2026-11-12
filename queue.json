@@ -85770,7 +85770,7 @@
    "needs": [
     "autofill-rows"
    ],
-   "base": "238878f131787ada2b5d35409b4ee759cc535419",
+   "base": "bcd5b0b996e0f4a107f51cb398a6492ffb7d44b9",
    "body": "bodies/takeover-attached-hint.md",
    "state": "open",
    "pr": 19027,
@@ -85778,9 +85778,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/takeover-attached-hint",
    "host": "MacBook-Pro",
    "added": "2026-11-12T04:03:51Z",
-   "updated": "2026-11-12T12:09:41Z",
+   "updated": "2026-11-12T12:24:50Z",
    "note": "",
-   "advanced": "2026-11-12T09:38:03Z",
+   "advanced": "2026-11-12T12:24:50Z",
    "built": [
     {
      "with": "#18743",
