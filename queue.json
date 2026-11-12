@@ -86107,7 +86107,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-12T12:26:00Z",
+  "checked": "2026-11-12T12:56:37Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -86155,7 +86155,6 @@
     "since": "2026-11-12T11:24:23Z",
     "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
     "files": [
-     "MODULE.bazel.lock",
      "crates/pi-natives/Cargo.toml",
      "crates/pi-natives/src/desktop/linux/wayland/mod.rs"
     ]
@@ -86164,7 +86163,6 @@
     "since": "2026-11-12T11:24:23Z",
     "title": "feat(natives): type text the wayland layout lacks through libei text",
     "files": [
-     "MODULE.bazel.lock",
      "crates/pi-natives/Cargo.toml"
     ]
    }
@@ -94907,12 +94905,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-12T12:26:00.895957Z",
+  "at": "2026-11-12T12:56:38.200916Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 4,
-   "left": 4
+   "used": 2,
+   "left": 6
   },
   "rows": [
    {
@@ -95080,7 +95078,7 @@
     "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
     "action": "rebase",
     "reasons": [
-     "conflicts with main in MODULE.bazel.lock, crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs"
+     "conflicts with main in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs"
     ],
     "note": "accepted pair with #18013",
     "over": [],
@@ -95156,7 +95154,7 @@
     "title": "feat(natives): type text the wayland layout lacks through libei text",
     "action": "rebase",
     "reasons": [
-     "conflicts with main in MODULE.bazel.lock, crates/pi-natives/Cargo.toml"
+     "conflicts with main in crates/pi-natives/Cargo.toml"
     ],
     "note": "accepted pair with #18353",
     "over": [],
@@ -95264,12 +95262,15 @@
     "title": "fix(natives): stop Linux accessibility reads from freezing apps that show long tables",
     "action": "wait",
     "reasons": [
+     "conflicts with #19026 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with main in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/mod.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#19026"
+    ],
     "needs": [],
     "created": "2026-11-11T01:54:02Z"
    },
@@ -95319,7 +95320,7 @@
     "title": "fix(natives): read each AT-SPI element in two concurrent rounds",
     "action": "wait",
     "reasons": [
-     "conflicts with #19026 in crates/pi-natives/src/desktop/ax.rs",
+     "conflicts with #19026 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18353 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #18013 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/libei.rs",
      "conflicts with atspi-combo-choice in crates/pi-natives/src/desktop/linux/ax.rs",
@@ -95349,14 +95350,13 @@
     "title": "fix(natives): follow rebuilt macOS table rows without selecting a neighbour",
     "action": "wait",
     "reasons": [
-     "conflicts with #19027 in crates/pi-natives/src/desktop/macos/ax.rs",
-     "conflicts with main in crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs"
+     "conflicts with #16553 in crates/pi-natives/src/desktop/macos/mod.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#19027"
+     "#16553"
     ],
     "needs": [],
     "created": "2026-11-11T11:44:46Z"
@@ -95686,6 +95686,7 @@
     "title": "fix(natives): preserve the empty-field warning on Linux write timeouts",
     "action": "wait",
     "reasons": [
+     "conflicts with #19026 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with atspi-combo-choice in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with atspi-text-first in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
@@ -95694,6 +95695,7 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#19026",
      "atspi-combo-choice",
      "atspi-text-first"
     ],
@@ -95708,7 +95710,7 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): skip unused ref-check reads and recover display refs",
-    "action": "next-hour",
+    "action": "open",
     "reasons": [],
     "note": "",
     "over": [],
@@ -95864,15 +95866,12 @@
     "title": "fix(natives): name a macOS control by the label its AXTitleUIElement links to",
     "action": "wait",
     "reasons": [
-     "conflicts with #19027 in crates/pi-natives/src/desktop/macos/ax.rs",
-     "conflicts with ax-ref-read-as-followup in crates/pi-natives/src/desktop/macos/ax.rs",
-     "conflicts with main in crates/pi-natives/src/desktop/macos/ax.rs"
+     "conflicts with ax-ref-read-as-followup in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#19027",
      "ax-ref-read-as-followup"
     ],
     "needs": [],
@@ -95888,15 +95887,12 @@
     "title": "fix(natives): point a refused macOS press at the element's own click",
     "action": "wait",
     "reasons": [
-     "conflicts with #19027 in crates/pi-natives/src/desktop/macos/ax.rs",
-     "conflicts with ax-ref-read-as-followup in crates/pi-natives/src/desktop/macos/ax.rs",
-     "conflicts with main in crates/pi-natives/src/desktop/macos/ax.rs"
+     "conflicts with ax-ref-read-as-followup in crates/pi-natives/src/desktop/macos/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#19027",
      "ax-ref-read-as-followup"
     ],
     "needs": [],
@@ -96075,6 +96071,7 @@
     "title": "fix(natives): expose Windows control state and stale-reference matches",
     "action": "wait",
     "reasons": [
+     "conflicts with #19026 in crates/pi-natives/src/desktop/ax.rs",
      "conflicts with win-type-drain in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with ax-ref-read-as-followup in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs"
@@ -96083,6 +96080,7 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#19026",
      "win-type-drain",
      "ax-ref-read-as-followup"
     ],
@@ -96398,6 +96396,7 @@
      "held: Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check | Main 2026-11-12: before it opens, the waiting-key-chord case with the cursor actually drawn (20 trials at a 20 s deadline; CursorDemo's cursor-on arm never drew one, and an early run on the combined tree returned 'Cancelled, input may be partial' 11/11, unexplained), on the polished branch will/desktop-cursor-polish.",
      "needs #18987 (open)",
      "conflicts with #16553 in crates/pi-natives/src/desktop/macos/mod.rs",
+     "conflicts with #19026 in docs/tools/computer.md",
      "conflicts with #18925 in crates/pi-natives/src/desktop/macos/capture.rs",
      "conflicts with win-type-drain in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
      "conflicts with ax-ref-read-as-followup in crates/pi-natives/src/desktop/mod.rs",
@@ -96408,6 +96407,7 @@
     "paired": [],
     "blocked_by": [
      "#16553",
+     "#19026",
      "#18925",
      "win-type-drain",
      "ax-ref-read-as-followup"
@@ -96776,7 +96776,7 @@
     "area": "factory-droid",
     "priority": null,
     "title": "feat(catalog): add the Factory Droid models droid 1.7.1 serves",
-    "action": "next-hour",
+    "action": "open",
     "reasons": [],
     "note": "advance first",
     "over": [],
