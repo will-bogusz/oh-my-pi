@@ -73079,7 +73079,52 @@
     }
    ],
    "opened": "2026-11-10T22:28:46Z",
-   "readied": "2026-11-10T22:29:15Z"
+   "readied": "2026-11-10T22:29:15Z",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-12T02:07:41Z",
+     "reason": "Main approved string-app port and WebKit own-browser fallback claim migration; old app object syntax and Chromium-only fallbacks replaced by main equivalents, all automatic subagent surface gates preserved; tests and exact text migrations in queuetwelve/port/rows.md",
+     "old": "9cd82865b4e5b0456e8123d9ecc442417cc9c89f",
+     "new": "6c777a58244bbd0927234ece82e024974a53a1ae",
+     "dropped": {
+      "docs/tools/browser.md": [
+       "Automatic Tern and cmux belong to the interactive omp drawn in that terminal. At startup it sets `PI_TERMINAL_OWNER_PID` to its pid, and every command it runs inherits that, so an omp started from those commands (`omp -p` from the bash tool, a script an eval cell runs) sees a pane owned by another process and does not pick Tern or cmux from it; its open without `app` ends at managed Chromium unless a relay or `browser.cdpUrl` it is configured for comes first. `app.tern: true`, `app.target`, `PI_BROWSER_TERN=1` and `PI_BROWSER_CMUX=1` still select them.",
+       "The user's own surfaces are the defaults of the session they talk to. A subagent (a `task` child or an eval `agent()`) skips the relay, Tern and cmux for an open without `app`, even with `browser.relay` on or `PI_BROWSER_RELAY=1`/`PI_BROWSER_TERN=1`/`PI_BROWSER_CMUX=1` set, and goes on to `browser.cdpUrl` or managed Chromium. To use the user's Chrome it needs `app.relay: true`; to adopt an existing Chrome tab, pass `app: { relay: true, target: \"<CDP target id>\" }`. `app.tern: true` explicitly selects Tern, and `app.target` alone opts into adopting a Tern browser block, not a Chrome tab (configured CDP still takes precedence over target-only Tern selection). A `/tan` clone carries its parent's system prompt, which describes the parent's defaults, and keeps them; an advisor shares its owner's browser and defaults. A subagent reopening a relay tab name its parent opened needs `app.relay: true` too; without it the open fails on the browser kind mismatch."
+      ],
+      "packages/browser-relay/README.md": [
+       "   - **As the default** \u2014 `omp config set browser.relay true` makes the relay the default for **every top-level session using this profile, in every project** (project-level settings, `PI_BROWSER_RELAY`, and an explicit `app` choice still take precedence). Any such session's ordinary `browser.open(...)` call will then drive your real browser, including `omp -p` runs and other background sessions you aren't watching; without `app.target` such a call opens its own background tab in your logged-in profile. Subagents skip the default (and `PI_BROWSER_RELAY=1`) and reach the relay only with `app: { relay: true }`."
+      ],
+      "packages/coding-agent/src/prompts/tools/browser.md": [
+       "- Omit `app` \u2192 settings pick the browser: the user's Chrome through the relay when `browser.relay` is on (`PI_BROWSER_RELAY=1` turns it on even with the setting off, `=0` off), else `browser.cdpUrl`, else Tern inside a Tern pane, else cmux, else managed Chromium (installs on first use). Tern and cmux are skipped when another omp session drawn in that terminal started this one (for example `omp -p` from its bash tool). A subagent skips the relay, Tern and cmux: pass `app.relay: true` or `app.tern: true` when the task needs the user's browser or pane.",
+       "- `app.tern: false` skips Tern only: with the relay on it still opens the user's Chrome, so pass `app: { tern: false, relay: false }` to skip both (e.g. parallel scraping, where PiPs would pile up over one pane); a configured `browser.cdpUrl` or cmux still comes before managed Chromium. `app.tern: true` requires Tern; `headed` never chooses between Tern and Chromium. When no Tern window can host a PiP, the open falls back to Chromium and says so."
+      ],
+      "packages/coding-agent/src/tools/browser.ts": [
+       " * Chromium. Tern and cmux are automatic only while no other omp owns the terminal,",
+       " * and none of the user's own surfaces (relay, Tern, cmux) is automatic for a subagent.",
+       "\t// app options win. The relay setting and PI_BROWSER_RELAY=1 speak for the",
+       "\t// session the user talks to: a subagent's open without `app` would put its",
+       "\t// tab in the user's own Chrome, signed in as them, so only `app.relay: true`",
+       "\t// takes a subagent there. A `/tan` clone (task depth 0) carries its parent's",
+       "\t// system prompt, which describes the parent's defaults, and keeps them.",
+       "\tif (app?.relay !== false && !subagent) {",
+       "\tif (app?.tern !== false && (!subagent || app?.target !== undefined)) {",
+       "\t\tconst cmuxKind = resolveCmuxKind(",
+       "\t\t\t\tsettingEnabled: ownsPane && cfgBrowserCmux.get(session.settings),"
+      ],
+      "packages/coding-agent/src/tools/browser/settings.ts": [
+       "\t\t\t\"Drive your own Chrome tabs through the omp browser relay. Install the extension once (`omp browser-relay install`); the relay server auto-starts when the browser prelude needs it. Takes precedence over Browser CDP URL; set PI_BROWSER_RELAY=0 or PI_BROWSER_RELAY=1 to override. Subagents skip it unless an open passes app.relay:true.\",",
+       "\t\t\t\"Inside a Tern pane, open browser tabs as picture-in-pictures over omp's pane (native web view) instead of headless Chromium; falls back to Chromium when no Tern window can host them. Subagents skip it unless an open passes app.tern:true. Explicit app options, the relay and Browser CDP URL take precedence; app.tern:false opts one open out. Set PI_BROWSER_TERN=0 or PI_BROWSER_TERN=1 to override.\","
+      ],
+      "packages/coding-agent/test/tools/browser-relay-kind.test.ts": [
+       "\tconst pane = { TERN_PANE_SOCKET: \"/tmp/tern.sock\", TERN_PANE: \"1\", CMUX_SOCKET_PATH: \"/tmp/cmux.sock\" };",
+       "\t\texpect(resolveBrowserKind({ action: \"open\", app: { relay: true } }, session, pane).kind).toBe(\"relay\");",
+       "\t\texpect(resolveBrowserKind({ action: \"open\", app: { tern: true } }, session, pane).kind).toBe(\"tern\");",
+       "\t\texpect(resolveBrowserKind({ action: \"open\", app: { target: \"docs\" } }, session, pane).kind).toBe(\"tern\");",
+       "\t\t\tresolveBrowserKind({ action: \"open\", app: { relay: true } }, session, { ...pane, PI_BROWSER_RELAY: \"0\" }).kind,"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "devin-pin-31243",
