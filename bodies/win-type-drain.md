@@ -48,6 +48,8 @@ Windows 11 (build 26200) VM, fresh builds: `main` at ced5efc0c2 with PR 18919 (a
 
 The VM's takeover tests (`cargo test -p pi-natives -- --ignored desktop::win32::tests`, foreground lock timeout at 0 so the test process may take the foreground): `takeover_typing_hands_the_foreground_back_once_a_busy_target_read_the_text` (the target sleeps 1.5 s at the first key) passes, and with `drain` removed fails with the target still empty when focus went back; `takeover_typing_into_a_hung_target_says_the_text_is_unconfirmed` (8 s) passes, and without `drain` reports nothing; `element_takeover_hands_the_foreground_back_to_the_users_window` still passes.
 
+`takeover_typing_does_not_report_foreground_moved_by_its_closing_return` passes on the Windows desktop; removing only the Return exemption fails with an unconfirmed report.
+
 The desktop tests ran with the guest's foreground lock timeout at 0: at the default, a Terminal window in front refused the foreground after the first try.
 
 `bun test packages/coding-agent/test/tools/computer.test.ts`: 145 pass; the new case fails with the worker change reverted.
