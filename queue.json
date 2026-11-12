@@ -74704,7 +74704,7 @@
    "area": "browser",
    "priority": "P1",
    "needs": [],
-   "base": "f39a8853b81b3980997518f78d1594cc448d6e87",
+   "base": "ced5efc0c2750f43dfdb7d223c7d22cb6c5f1f44",
    "body": "bodies/observe-print.md",
    "state": "open",
    "pr": 18772,
@@ -74712,7 +74712,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/observe-print",
    "host": "MacBook-Pro",
    "added": "2026-11-10T19:33:45Z",
-   "updated": "2026-11-12T00:02:15Z",
+   "updated": "2026-11-12T01:45:09Z",
    "note": "",
    "built": [
     {
@@ -74918,7 +74918,7 @@
    ],
    "opened": "2026-11-10T20:05:45Z",
    "readied": "2026-11-10T20:06:10Z",
-   "advanced": "2026-11-12T00:02:15Z",
+   "advanced": "2026-11-12T01:45:09Z",
    "design_checks": [
     {
      "pr": 18772,
