@@ -82638,8 +82638,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-hidden-frames",
    "host": "MacBook-Pro",
    "added": "2026-11-12T02:04:21Z",
-   "updated": "2026-11-12T02:04:21Z",
-   "note": ""
+   "updated": "2026-11-12T02:06:32Z",
+   "note": "",
+   "hold": "Main, 2026-11-12: adds Chrome's management permission; waiting on whether a no-permission form exists"
   }
  ],
  "watch": {
