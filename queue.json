@@ -87595,7 +87595,43 @@
     }
    ],
    "opened": "2026-11-12T14:39:57Z",
-   "readied": "2026-11-12T14:40:23Z"
+   "readied": "2026-11-12T14:40:23Z",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-12T15:51:33Z",
+     "reason": "Bot fixes intentionally replace any-Return detection and its docs with trailing-Return detection; extract the closing-Return fixture for the mid-text regression while retaining its assertions; replace duplicated typing capture/report code with shared sendType.",
+     "old": "78dc9f1cc7c345a4a57002fda3f72293d600ccd0",
+     "new": "450e66bd8af16ce6e03c3151135b8ff67982c8d3",
+     "dropped": {
+      "crates/pi-natives/src/desktop/win32/input.rs": [
+       "\t/// the text held a Return (`enter`), that Return is taken to have moved",
+       "\t/// it (it opened or closed a window) and nothing is reported; without",
+       "\t/// one, the end of the text may have gone to the new window. Returns why",
+       "\t/// the target was not seen reading the text: it could not be waited for,",
+       "\tfn drain(root: HWND, name: &str, enter: bool) -> Option<String> {",
+       "\t\t\t(!enter).then(|| {",
+       "\t\t\tlet enter = text_units(text).any(|unit| matches!(unit, TextUnit::Enter));",
+       "\t\t\tif let Some(reason) = drain(target, &format!(\"window {id}\"), enter) {"
+      ],
+      "crates/pi-natives/src/desktop/win32/mod.rs": [
+       "\t/// The target's closing Return moves the foreground to `wParam`.",
+       "\t\t\t\t\"submitted\\n\",",
+       "\t\tassert_eq!(control::take_text_unconfirmed(), None);"
+      ],
+      "packages/coding-agent/src/tools/computer/worker.ts": [
+       " * Says that typed text went out but the target was not seen reading it, so",
+       " * the call's success covers sending only.",
+       "function reportUnconfirmed(context: ComputerRunContext, reason: string | undefined): void {",
+       "\tif (!reason) return;",
+       "\tcontext.output.push({ type: \"text\", text: `type sent the text but could not confirm it arrived: ${reason}` });",
+       "\t\t\t\tconst result = await this.#session.axType(this.ref, text, { ...native, ...fallback });",
+       "\t\t\tundefined,",
+       "\t\treportUnconfirmed(context, unconfirmed);",
+       "\t\t\t\tconst result = await this.#session.typeText(this.id, text, { ...native, ...fallback });"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "win-type-insert",
