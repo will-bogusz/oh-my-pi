@@ -95056,12 +95056,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-12T13:00:39.612915Z",
+  "at": "2026-11-12T13:12:15.769516Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 1,
-   "left": 7
+   "used": 0,
+   "left": 8
   },
   "rows": [
    {
@@ -95411,17 +95411,12 @@
     "area": "computer",
     "priority": "P0",
     "title": "fix(natives): stop Linux accessibility reads from freezing apps that show long tables",
-    "action": "wait",
-    "reasons": [
-     "conflicts with #19026 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with main in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/mod.rs"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#19026"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T01:54:02Z"
    },
@@ -95474,6 +95469,7 @@
      "conflicts with #19026 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18353 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #18013 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/libei.rs",
+     "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with atspi-combo-choice in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with atspi-text-first in crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
@@ -95485,6 +95481,7 @@
      "#19026",
      "#18353",
      "#18013",
+     "atspi-huge-children",
      "atspi-combo-choice",
      "atspi-text-first"
     ],
@@ -95641,10 +95638,8 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): refuse X11 presses outside an open popup of the app",
-    "action": "wait",
-    "reasons": [
-     "conflicts with main in crates/pi-natives/src/desktop/linux/x11/input.rs"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -95662,12 +95657,14 @@
     "title": "fix(natives): refuse X11 XTest keys while another client grabs the keyboard",
     "action": "wait",
     "reasons": [
-     "conflicts with main in crates/pi-natives/src/desktop/linux/x11/input.rs"
+     "conflicts with x11-click-stale-popup in crates/pi-natives/src/desktop/linux/x11/input.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "x11-click-stale-popup"
+    ],
     "needs": [],
     "created": "2026-11-11T02:55:11Z"
    },
@@ -95682,13 +95679,15 @@
     "action": "wait",
     "reasons": [
      "conflicts with #18013 in crates/pi-natives/Cargo.toml",
+     "conflicts with x11-click-stale-popup in crates/pi-natives/src/desktop/linux/x11/input.rs",
      "conflicts with main in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/x11/input.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18013"
+     "#18013",
+     "x11-click-stale-popup"
     ],
     "needs": [],
     "created": "2026-11-11T02:32:01Z"
@@ -95704,13 +95703,15 @@
     "action": "wait",
     "reasons": [
      "conflicts with #18222 in docs/computer-use.md, docs/tools/computer.md",
+     "conflicts with x11-click-stale-popup in crates/pi-natives/src/desktop/linux/x11/input.rs",
      "conflicts with main in crates/pi-natives/src/desktop/linux/x11/input.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18222"
+     "#18222",
+     "x11-click-stale-popup"
     ],
     "needs": [],
     "created": "2026-11-11T02:31:05Z"
@@ -95838,6 +95839,7 @@
     "action": "wait",
     "reasons": [
      "conflicts with #19026 in crates/pi-natives/src/desktop/linux/ax.rs",
+     "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with atspi-combo-choice in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with atspi-text-first in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
@@ -95847,6 +95849,7 @@
     "paired": [],
     "blocked_by": [
      "#19026",
+     "atspi-huge-children",
      "atspi-combo-choice",
      "atspi-text-first"
     ],
@@ -95861,12 +95864,16 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): skip unused ref-check reads and recover display refs",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/macos/ax.rs"
+    ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "atspi-huge-children"
+    ],
     "needs": [],
     "created": "2026-11-11T15:44:29Z"
    },
@@ -95994,7 +96001,7 @@
     "action": "wait",
     "reasons": [
      "conflicts with #19027 in crates/pi-natives/src/desktop/macos/ax.rs",
-     "conflicts with ax-ref-read-as-followup in crates/pi-natives/src/desktop/macos/ax.rs",
+     "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with main in crates/pi-natives/src/desktop/macos/ax.rs"
     ],
     "note": "",
@@ -96002,7 +96009,7 @@
     "paired": [],
     "blocked_by": [
      "#19027",
-     "ax-ref-read-as-followup"
+     "atspi-huge-children"
     ],
     "needs": [],
     "created": "2026-11-11T09:59:13Z"
@@ -96017,13 +96024,13 @@
     "title": "fix(natives): name a macOS control by the label its AXTitleUIElement links to",
     "action": "wait",
     "reasons": [
-     "conflicts with ax-ref-read-as-followup in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs"
+     "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "ax-ref-read-as-followup"
+     "atspi-huge-children"
     ],
     "needs": [],
     "created": "2026-11-11T14:43:42Z"
@@ -96036,16 +96043,12 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): point a refused macOS press at the element's own click",
-    "action": "wait",
-    "reasons": [
-     "conflicts with ax-ref-read-as-followup in crates/pi-natives/src/desktop/macos/ax.rs"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "ax-ref-read-as-followup"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T18:49:11Z"
    },
@@ -96223,8 +96226,9 @@
     "action": "wait",
     "reasons": [
      "conflicts with #19026 in crates/pi-natives/src/desktop/ax.rs",
+     "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs",
      "conflicts with win-type-drain in crates/pi-natives/src/desktop/mod.rs",
-     "conflicts with ax-ref-read-as-followup in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with macos-press-click-hint in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs"
     ],
     "note": "",
@@ -96232,8 +96236,9 @@
     "paired": [],
     "blocked_by": [
      "#19026",
+     "atspi-huge-children",
      "win-type-drain",
-     "ax-ref-read-as-followup"
+     "macos-press-click-hint"
     ],
     "needs": [],
     "created": "2026-11-11T10:16:04Z"
@@ -96296,13 +96301,15 @@
     "action": "wait",
     "reasons": [
      "conflicts with #19023 in crates/pi-natives/src/desktop/linux/x11/mpx.rs",
+     "conflicts with x11-click-stale-popup in crates/pi-natives/src/desktop/linux/x11/input.rs",
      "conflicts with main in crates/pi-natives/src/desktop/linux/x11/input.rs, crates/pi-natives/src/desktop/linux/x11/mpx.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#19023"
+     "#19023",
+     "x11-click-stale-popup"
     ],
     "needs": [],
     "created": "2026-11-11T13:55:21Z"
@@ -96511,8 +96518,9 @@
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18987 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
+     "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with win-type-drain in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with ax-ref-read-as-followup in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with macos-press-click-hint in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs"
     ],
@@ -96526,8 +96534,9 @@
      "#18222",
      "#18925",
      "#18987",
+     "atspi-huge-children",
      "win-type-drain",
-     "ax-ref-read-as-followup"
+     "macos-press-click-hint"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -96549,8 +96558,9 @@
      "conflicts with #16553 in crates/pi-natives/src/desktop/macos/mod.rs",
      "conflicts with #19026 in docs/tools/computer.md",
      "conflicts with #18925 in crates/pi-natives/src/desktop/macos/capture.rs",
+     "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with win-type-drain in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
-     "conflicts with ax-ref-read-as-followup in crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with macos-press-click-hint in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
@@ -96560,8 +96570,9 @@
      "#16553",
      "#19026",
      "#18925",
+     "atspi-huge-children",
      "win-type-drain",
-     "ax-ref-read-as-followup"
+     "macos-press-click-hint"
     ],
     "needs": [
      "agent-identity"
@@ -96713,7 +96724,7 @@
     "reasons": [
      "held: Main, 2026-11-12: proposal; opens only after entry A merges and Will has seen the body",
      "needs win-type-drain (queued)",
-     "conflicts with #19025 in crates/pi-natives/src/desktop/win32/input.rs",
+     "conflicts with #19025 in crates/pi-natives/src/desktop/win32/input.rs, crates/pi-natives/src/desktop/win32/mod.rs",
      "conflicts with win-type-drain in crates/pi-natives/src/desktop/win32/input.rs, crates/pi-natives/src/desktop/win32/mod.rs, docs/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/win32/mod.rs"
     ],
