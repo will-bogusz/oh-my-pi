@@ -27,7 +27,11 @@ Visible effect: the Caps Lock LED and a panel's layout indicator flip off and ba
 
 The GTK measurements below predate the current-main rebase. The latched-group regression had not passed before this rerun; it exposed and now covers an additive XKB group-latch request.
 
+<details><summary>Primary measurement rig</summary>
+
 goliath, Xvfb + openbox, a GTK 3 entry focused, takeover `type("AbC1x")` through omp's own `X11Input`; every `main` row returned success:
+
+</details>
 
 | keyboard state | `main` | This PR |
 |---|---|---|
@@ -38,9 +42,17 @@ goliath, Xvfb + openbox, a GTK 3 entry focused, takeover `type("AbC1x")` through
 | `us,ru` group 2 and Caps Lock | `фИс1Ч` 2 / 2 | `AbC1x` 2 / 2 |
 | DE layout, Caps Lock | `aBc1X` 2 / 2 | `AbC1x` 2 / 2 |
 
+<details><summary>Second-rig measurement</summary>
+
 Rerun on a second rig (Ubuntu 22.04 arm64, Xvfb + openbox, GTK 3 and Qt 5 fixtures, Caps Lock on, n=10 each): `main` typed inverted case and reported success 20/20; this PR typed the exact text 20/20.
 
+</details>
+
+<details><summary>State read-back after typing</summary>
+
 After each run the user's state read back as before it (Caps Lock and group 2 still locked); a latched Control was used up, as the user's next key would have used it.
+
+</details>
 
 - `xtest_text_types_through_a_neutral_keyboard_state` (`#[ignore]`, starts its own Xvfb): with Caps Lock and Control locked and group 2 locked, no key event carries Lock, Control or a group and the user's locks and group are back afterwards; a latched group is cleared and stays used up; a `CapsLock` chord still turns Caps Lock off.
 - Re-run on current main (`9f728bd56e1`), Xvfb 21.1.12: the latched-group test failed 10/10 before subtracting the observed group latch and passed 10/10 after; locked-group restoration passed in the same runs. A libX11-injected latched Control also cleared correctly in 10/10 runs.
