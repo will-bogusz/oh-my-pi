@@ -84518,7 +84518,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-focus-report",
    "host": "MacBook-Pro",
    "added": "2026-11-11T13:11:20Z",
-   "updated": "2026-11-12T16:52:55Z",
+   "updated": "2026-11-12T17:26:40Z",
    "note": "",
    "rebases_after": [
     18783,
@@ -84891,6 +84891,33 @@
      "tip": "93a1726e2ddd6c6a508bb68d341bf5fa1010d09f",
      "with_tip": "2fff0569b5d88b9c242baac0f77e416daa366beb",
      "at": "2026-11-12T16:52:55Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#19047",
+     "code": "eeea17112c4476e129e1cb45a4fc5b9f7c5eac3b",
+     "with_code": "f68d53cf67550bd93eb588b9c4d53feb848081d3",
+     "tip": "93a1726e2ddd6c6a508bb68d341bf5fa1010d09f",
+     "with_tip": "9cc75f1f3ccc2c985e1dd56eba25bb1c680ef126",
+     "at": "2026-11-12T17:26:38Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#19048",
+     "code": "eeea17112c4476e129e1cb45a4fc5b9f7c5eac3b",
+     "with_code": "3a6e5e168a4b689f044865e6dd66590973fef2f3",
+     "tip": "93a1726e2ddd6c6a508bb68d341bf5fa1010d09f",
+     "with_tip": "bfaa5e049e7a08e0a229eb0471889738a800e86d",
+     "at": "2026-11-12T17:26:40Z",
+     "host": "goliath"
+    },
+    {
+     "with": "x11-takeover-keyboard-grab",
+     "code": "eeea17112c4476e129e1cb45a4fc5b9f7c5eac3b",
+     "with_code": "1698a87e5b87cdd19166e2e318aab569684b6947",
+     "tip": "93a1726e2ddd6c6a508bb68d341bf5fa1010d09f",
+     "with_tip": "24e19ebf5a9bd5ca86d5e3560ad938bb032cf962",
+     "at": "2026-11-12T17:26:40Z",
      "host": "goliath"
     }
    ]
