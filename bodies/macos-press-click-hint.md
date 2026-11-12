@@ -27,7 +27,11 @@ Text, not behaviour: making `press()` click such elements would change what `pre
 
 No element needed pixels. Of the 14 clicks whose selection did not read back, 9 are Mail's, whose window had a sheet open, and 5 are Finder and Font Book rows (not diagnosed). The listed `showdefaultui`/`showalternateui` change nothing visible, and `showmenu` closes again in the background.
 
+<details><summary>Haiku 5.5 medium replay setup</summary>
+
 **Next step after the refusal, Haiku 5.5 medium.** 52 recorded Haiku sessions (Notes to Reminders, Reminders, Contacts tasks) were cut at their `press()` or no-capture refusal and continued with `main`'s text and with this PR's: omp from this branch with the computer tool on, recorded messages put back by an extension, every tool call blocked, the next turn classified by regex.
+
+</details>
 
 | cut at | text | element `click()` | window click at coordinates | screenshot | other |
 |---|---|---|---|---|---|
