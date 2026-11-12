@@ -100677,11 +100677,5 @@
     "wake": ""
    }
   ]
- },
- "opening": {
-  "id": "x11-takeover-keyboard-grab",
-  "token": "59cc56de495e4e13a11b9ed6096e0765",
-  "host": "MacBook-Pro",
-  "at": "2026-11-12T17:53:38Z"
  }
 }
