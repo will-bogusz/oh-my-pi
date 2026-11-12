@@ -99245,6 +99245,11 @@
     "sha": "b1cb370bb27c4826688e561050a1c79830b42eaa",
     "at": "2026-11-12T19:38:10Z",
     "host": "Wills-MacBook-Pro"
+   },
+   "windows": {
+    "sha": "b1cb370bb27c4826688e561050a1c79830b42eaa",
+    "at": "2026-11-12T19:48:14Z",
+    "host": "goliath"
    }
   },
   "c9220e9ff493aa10247ba20be4442d86514abf13": {
