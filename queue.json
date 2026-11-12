@@ -78122,7 +78122,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "6dd7ddf5feab54da3c82b460ee390a7d09aeabaa",
+   "base": "9f728bd56e170453c927d5b162cebe9b308e63ce",
    "body": "bodies/x11-takeover-keyboard-state.md",
    "state": "queued",
    "pr": null,
@@ -78130,8 +78130,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-takeover-keyboard-state",
    "host": "MacBook-Pro",
    "added": "2026-11-11T02:32:01Z",
-   "updated": "2026-11-11T12:44:59Z",
-   "note": ""
+   "updated": "2026-11-12T13:19:54Z",
+   "note": "",
+   "advanced": "2026-11-12T13:19:54Z"
   },
   {
    "id": "x11-mpx-key-confirm",
