@@ -77288,7 +77288,7 @@
    "area": "browser",
    "priority": "P1",
    "needs": [],
-   "base": "6dd7ddf5feab54da3c82b460ee390a7d09aeabaa",
+   "base": "c308970263ae13744ea15ab67302e3dac840e266",
    "body": "bodies/browser-click-frame-removed.md",
    "state": "queued",
    "pr": null,
@@ -77296,8 +77296,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-click-frame-removed",
    "host": "MacBook-Pro",
    "added": "2026-11-11T00:14:54Z",
-   "updated": "2026-11-11T14:02:44Z",
-   "note": ""
+   "updated": "2026-11-12T23:23:57Z",
+   "note": "",
+   "advanced": "2026-11-12T23:23:57Z"
   },
   {
    "id": "desktop-cursor",
