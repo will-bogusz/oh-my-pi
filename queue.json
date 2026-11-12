@@ -89921,14 +89921,14 @@
    "needs": [],
    "base": "7c2ab113ec9716496b1d1b78b1f8c3ff8466c9ba",
    "body": "bodies/win-masks-cfg.md",
-   "state": "open",
+   "state": "closed",
    "pr": 19078,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-masks-cfg",
    "host": "MacBook-Pro",
    "added": "2026-11-12T19:44:42Z",
-   "updated": "2026-11-12T20:22:57Z",
-   "note": "",
+   "updated": "2026-11-12T23:04:02Z",
+   "note": "QueueSeventeen, 2026-11-12: superseded by Brit's 0a970623abf on main (identical one-line cfg removal, same blob dc5dd45f53e; in v18.20.0); main c8fe41d6b15 Windows lib check and rust-check --windows pass on goliath; PR closed without a comment.",
    "built": [
     {
      "with": "#19036",
