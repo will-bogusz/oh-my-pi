@@ -82543,6 +82543,24 @@
    "added": "2026-11-12T01:22:04Z",
    "updated": "2026-11-12T01:22:04Z",
    "note": ""
+  },
+  {
+   "id": "status-entered-text",
+   "branch": "will/status-entered-text",
+   "title": "fix(coding-agent): keep text a cell enters out of browser and computer status lines",
+   "area": "browser",
+   "priority": "P2",
+   "needs": [],
+   "base": "d5ac02ce8678cf50f643d3f65361714c92d5d450",
+   "body": "bodies/status-entered-text.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/status-entered-text",
+   "host": "MacBook-Pro",
+   "added": "2026-11-12T01:30:11Z",
+   "updated": "2026-11-12T01:30:11Z",
+   "note": ""
   }
  ],
  "watch": {
