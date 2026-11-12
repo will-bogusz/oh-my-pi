@@ -85723,7 +85723,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-ax-linked-label",
    "host": "MacBook-Pro",
    "added": "2026-11-11T14:43:42Z",
-   "updated": "2026-11-12T17:04:12Z",
+   "updated": "2026-11-12T17:36:32Z",
    "note": "Main, 2026-11-12: approved linked-own-guard.diff. Naming-only: changed linked text alone is not an action guard. Five AxProps constructor sites migrated; adjacency with entries adding AxProps fields requires opener pair builds. Unbuilt design note: retain {own,linked} fingerprints independently and compare each only when answered at registration and action; closes a rerender moving an unnamed control ref onto its neighbour; measure that case before building.",
    "line_loss_overrides": [
     {
@@ -85764,7 +85764,144 @@
     "19036": "Main, 2026-11-12: #19036 adds 'unread_children: 0,' to the AxProps literal in macos/ax.rs and a field to the AxProps struct in desktop/ax.rs; this entry returns that literal inside a tuple (AxProps{...}, has_own_label) and adds its own struct field (rustfmt realignment only). Combined form: this entry's tuple with 'unread_children: 0,' inside its AxProps literal; struct with both fields",
     "19048": "QueueFifteen, 2026-11-12 (Main's standing rule: a field added beside a line the other side reshapes without changing a value): only conflict is the Registered struct in crates/pi-natives/src/desktop/ax.rs: #19048 adds 'row: Option<RowProof>,' where this entry rewrites the doc comment of 'held'; #19048 reads neither held nor fingerprint. Combined form: #19048's row field, then this entry's doc comment and 'held: Option<u64>'.",
     "19054": "Main, 2026-11-12: function bodies in desktop/ax.rs require_read_as/check_read_as and macos/ax.rs. Combined form (trial 4ceba366e76, bench-mac desktop:: 603 pass, goliath desktop::ax 45): the read-as check compares this entry's read_as_fingerprint override when present, else #19054's label_fingerprint(role, trimmed label); public fingerprint wrapper kept; macos/ax.rs keeps #19054's label-only decoder beside this entry's enrichment/own-label tracking; both sides' regressions kept. #19054's AxReadAs decoder replaces the label_complete filter in check_read_as, so the second to land re-runs an_own_label_disappearing_is_refused_even_when_the_link_is_unread on the merged code."
-   }
+   },
+   "built": [
+    {
+     "with": "#19027",
+     "code": "8c7f3669696ec5ac6110c3bc8c0ba8defa3ed32c",
+     "with_code": "fd10d827b17dedf8139c8cb92ef2189ee85df00b",
+     "tip": "0ba0ea6bd84a2f493fa001bad3ceeaf5956bdf70",
+     "with_tip": "db558a444009203107f7b6df51057ac2c46055f6",
+     "at": "2026-11-12T17:36:29Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#19046",
+     "code": "8c7f3669696ec5ac6110c3bc8c0ba8defa3ed32c",
+     "with_code": "2b1264f00ef1cf9011053957331525f48f0e1ebe",
+     "tip": "0ba0ea6bd84a2f493fa001bad3ceeaf5956bdf70",
+     "with_tip": "f432781f00cb349f7cf22a50e5ac19caf1a41e92",
+     "at": "2026-11-12T17:36:30Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#19050",
+     "code": "8c7f3669696ec5ac6110c3bc8c0ba8defa3ed32c",
+     "with_code": "7599a8dfa17b2a3b05768ff713bae8ce775b82dd",
+     "tip": "0ba0ea6bd84a2f493fa001bad3ceeaf5956bdf70",
+     "with_tip": "7f01554ccfb93c2157e1f760a4810f352df8a79f",
+     "at": "2026-11-12T17:36:30Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#16553",
+     "code": "8c7f3669696ec5ac6110c3bc8c0ba8defa3ed32c",
+     "with_code": "375115bc2d9922bd24a7ea43c9ab95e46d97291d",
+     "tip": "0ba0ea6bd84a2f493fa001bad3ceeaf5956bdf70",
+     "with_tip": "f4b57048b776541f97180caec8026f3942ca86ad",
+     "at": "2026-11-12T17:36:30Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#17756",
+     "code": "8c7f3669696ec5ac6110c3bc8c0ba8defa3ed32c",
+     "with_code": "00b33a7b015bc7730a8a6926657f2a3f49039187",
+     "tip": "0ba0ea6bd84a2f493fa001bad3ceeaf5956bdf70",
+     "with_tip": "0a62ea55002a950aef2237c96a8eb62ebeaf28e0",
+     "at": "2026-11-12T17:36:30Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#19023",
+     "code": "8c7f3669696ec5ac6110c3bc8c0ba8defa3ed32c",
+     "with_code": "140692117630964f61463414899f6c2f051fe3eb",
+     "tip": "0ba0ea6bd84a2f493fa001bad3ceeaf5956bdf70",
+     "with_tip": "c347d81c30599b9b17f75e9e94c7b6c66a661bd3",
+     "at": "2026-11-12T17:36:30Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#19025",
+     "code": "8c7f3669696ec5ac6110c3bc8c0ba8defa3ed32c",
+     "with_code": "5db66d992b8472a4603b55e2969f1345d8d2fde5",
+     "tip": "0ba0ea6bd84a2f493fa001bad3ceeaf5956bdf70",
+     "with_tip": "f434a94b537426a1707ff706b25550d5c3fa4d72",
+     "at": "2026-11-12T17:36:31Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#19047",
+     "code": "8c7f3669696ec5ac6110c3bc8c0ba8defa3ed32c",
+     "with_code": "f68d53cf67550bd93eb588b9c4d53feb848081d3",
+     "tip": "0ba0ea6bd84a2f493fa001bad3ceeaf5956bdf70",
+     "with_tip": "9cc75f1f3ccc2c985e1dd56eba25bb1c680ef126",
+     "at": "2026-11-12T17:36:31Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#18353",
+     "code": "8c7f3669696ec5ac6110c3bc8c0ba8defa3ed32c",
+     "with_code": "f0586af0647e4e206ee9154d7917dd7de31879c6",
+     "tip": "0ba0ea6bd84a2f493fa001bad3ceeaf5956bdf70",
+     "with_tip": "4bbf3b4dc92dca19fa35a07a0d97d574998431c4",
+     "at": "2026-11-12T17:36:31Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#17897",
+     "code": "8c7f3669696ec5ac6110c3bc8c0ba8defa3ed32c",
+     "with_code": "2bbb547591ae156ccac7af195b43202e415d1bd2",
+     "tip": "0ba0ea6bd84a2f493fa001bad3ceeaf5956bdf70",
+     "with_tip": "54c11638043f0ab42d61c95025a325e37eb871b9",
+     "at": "2026-11-12T17:36:31Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#18925",
+     "code": "8c7f3669696ec5ac6110c3bc8c0ba8defa3ed32c",
+     "with_code": "744d68aa21c23ce354aaeba502ee86a1a72f67a8",
+     "tip": "0ba0ea6bd84a2f493fa001bad3ceeaf5956bdf70",
+     "with_tip": "e6573751f0afc28c86640d971320825d99936d52",
+     "at": "2026-11-12T17:36:31Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#18987",
+     "code": "8c7f3669696ec5ac6110c3bc8c0ba8defa3ed32c",
+     "with_code": "0b6ec1c5314a357dc69bd2a73c0eb77ad714e467",
+     "tip": "0ba0ea6bd84a2f493fa001bad3ceeaf5956bdf70",
+     "with_tip": "f031b644006be87fd8efa090e979bad4fb502020",
+     "at": "2026-11-12T17:36:31Z",
+     "host": "goliath"
+    },
+    {
+     "with": "x11-takeover-keyboard-grab",
+     "code": "8c7f3669696ec5ac6110c3bc8c0ba8defa3ed32c",
+     "with_code": "1698a87e5b87cdd19166e2e318aab569684b6947",
+     "tip": "0ba0ea6bd84a2f493fa001bad3ceeaf5956bdf70",
+     "with_tip": "24e19ebf5a9bd5ca86d5e3560ad938bb032cf962",
+     "at": "2026-11-12T17:36:31Z",
+     "host": "goliath"
+    },
+    {
+     "with": "macos-press-click-hint",
+     "code": "8c7f3669696ec5ac6110c3bc8c0ba8defa3ed32c",
+     "with_code": "52ec0e7c205573e87870e67e75850901a9f2c835",
+     "tip": "0ba0ea6bd84a2f493fa001bad3ceeaf5956bdf70",
+     "with_tip": "3ca41a9795156f00a3f57133a94781c609ca8956",
+     "at": "2026-11-12T17:36:31Z",
+     "host": "goliath"
+    },
+    {
+     "with": "win-focus-report",
+     "code": "8c7f3669696ec5ac6110c3bc8c0ba8defa3ed32c",
+     "with_code": "eeea17112c4476e129e1cb45a4fc5b9f7c5eac3b",
+     "tip": "0ba0ea6bd84a2f493fa001bad3ceeaf5956bdf70",
+     "with_tip": "93a1726e2ddd6c6a508bb68d341bf5fa1010d09f",
+     "at": "2026-11-12T17:36:31Z",
+     "host": "goliath"
+    }
+   ]
   },
   {
    "id": "ax-ref-read-as-followup",
