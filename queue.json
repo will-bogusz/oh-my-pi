@@ -73306,7 +73306,7 @@
    "branch": "will/browser-observe-settle",
    "title": "feat(browser): let observe() settle the effects of the preceding action",
    "area": "browser",
-   "priority": "P1",
+   "priority": "P2",
    "needs": [
     "#18751"
    ],
@@ -73318,7 +73318,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-observe-settle",
    "host": "MacBook-Pro",
    "added": "2026-11-10T18:56:46Z",
-   "updated": "2026-11-12T16:50:41Z",
+   "updated": "2026-11-12T17:09:34Z",
    "note": "",
    "advanced": "2026-11-12T16:50:41Z",
    "kind": "proposal",
@@ -78980,7 +78980,7 @@
    "branch": "will/atspi-value-readback",
    "title": "fix(natives): read back AT-SPI numeric setValue before reporting success",
    "area": "computer",
-   "priority": "P2",
+   "priority": "P1",
    "needs": [
     "atspi-unanswered-app"
    ],
@@ -78992,7 +78992,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-value-readback",
    "host": "MacBook-Pro",
    "added": "2026-11-11T02:53:57Z",
-   "updated": "2026-11-12T17:04:29Z",
+   "updated": "2026-11-12T17:09:34Z",
    "note": "",
    "advanced": "2026-11-12T17:04:29Z",
    "line_loss_overrides": [
@@ -79284,7 +79284,7 @@
    "branch": "will/x11-click-stale-popup",
    "title": "fix(natives): refuse X11 presses outside an open popup of the app",
    "area": "computer",
-   "priority": "P1",
+   "priority": "P0",
    "needs": [],
    "base": "9f728bd56e170453c927d5b162cebe9b308e63ce",
    "body": "bodies/x11-click-stale-popup.md",
@@ -79294,7 +79294,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-click-stale-popup",
    "host": "MacBook-Pro",
    "added": "2026-11-11T03:06:32Z",
-   "updated": "2026-11-12T16:36:14Z",
+   "updated": "2026-11-12T17:09:34Z",
    "note": "Main-approved additive test resolution. Linux rust-check and 61 X11 tests pass on rebased head. The two MPX/uinput hotplug tests fail under Xvfb (no udev/libinput hotplug); each fails identically on origin/main 9f728bd56e1 in one baseline run.",
    "line_loss_overrides": [
     {
@@ -84996,7 +84996,7 @@
    "branch": "will/atspi-qt-menus",
    "title": "fix(natives): let Linux menu.select walk into Qt apps' menus",
    "area": "computer",
-   "priority": "P2",
+   "priority": "P0",
    "needs": [
     "atspi-unanswered-app"
    ],
@@ -85008,7 +85008,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-qt-menus",
    "host": "MacBook-Pro",
    "added": "2026-11-11T13:21:21Z",
-   "updated": "2026-11-12T16:44:03Z",
+   "updated": "2026-11-12T17:09:34Z",
    "note": "",
    "advanced": "2026-11-12T12:59:38Z",
    "line_loss_overrides": [
@@ -85571,7 +85571,7 @@
    "branch": "will/ax-ref-read-as-followup",
    "title": "fix(natives): skip unused ref-check reads and recover display refs",
    "area": "computer",
-   "priority": "P2",
+   "priority": "P0",
    "needs": [
     "ax-ref-read-as"
    ],
@@ -85583,7 +85583,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ax-ref-read-as-followup",
    "host": "MacBook-Pro",
    "added": "2026-11-11T15:44:29Z",
-   "updated": "2026-11-12T17:03:23Z",
+   "updated": "2026-11-12T17:09:34Z",
    "note": "",
    "advanced": "2026-11-12T17:03:23Z",
    "line_loss_overrides": [
@@ -86251,7 +86251,7 @@
    "branch": "will/atspi-write-timeout-warning",
    "title": "fix(natives): preserve the empty-field warning on Linux write timeouts",
    "area": "computer",
-   "priority": "P2",
+   "priority": "P0",
    "needs": [
     "atspi-unanswered-app"
    ],
@@ -86263,7 +86263,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-write-timeout-warning",
    "host": "MacBook-Pro",
    "added": "2026-11-11T21:44:32Z",
-   "updated": "2026-11-12T16:55:09Z",
+   "updated": "2026-11-12T17:09:34Z",
    "note": "Main-approved #18989 combined pair form. interrupted_masked_text_write_warns_if_the_field_may_be_empty asserts post-timeout/cancellation warnings contain neither old secret nor new secret (linux/ax.rs assertions for both); current-main Goliath Linux 100 tests plus AX 45 tests passed.",
    "rebases_after": [
     18989,
