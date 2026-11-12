@@ -85475,13 +85475,13 @@
    ],
    "base": "238878f131787ada2b5d35409b4ee759cc535419",
    "body": "bodies/masked-length-ok.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19026,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/masked-length-ok",
    "host": "MacBook-Pro",
    "added": "2026-11-12T04:00:44Z",
-   "updated": "2026-11-12T11:03:13Z",
+   "updated": "2026-11-12T11:59:46Z",
    "note": "MaskedReshape, 2026-11-12: head 6d9511488c03b415a44bfb8e035321a0e47c3adb; verdict-only same-length mask success, no set_value note channel. #18915 comment/cfg adjacency only; four other counterpart entries clean. Prerequisite #18989 vs atspi-write-timeout-warning test guard remains statement-level, accepted on the timeout entry by Main; combined form not run. Keep queued; needs ax-masked-readback.",
    "line_loss_overrides": [
     {
@@ -85658,7 +85658,8 @@
      "host": "MacBook-Pro",
      "tree": "7515ffe584acfd8a36ae1f830433f698c9b4b80a"
     }
-   ]
+   ],
+   "opened": "2026-11-12T11:59:46Z"
   },
   {
    "id": "takeover-attached-hint",

@@ -1,18 +1,17 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12 11:56Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12 11:59Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-12 11:24Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 4, conflict-held 27, stacked 23, held 11, parked 2, open PRs 17; merged 325, closed 34
+**Counts:** openable now 3, conflict-held 27, stacked 23, held 11, parked 2, open PRs 18; merged 325, closed 34
 
-## Openable now (4)
+## Openable now (3)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
 | atspi-text-first | fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility | computer | P1 | 1d | open; accepted pair with #18914: QueueThirteen, 2026-11-12 (Main's standing rule: use-list collisions are the opener's): only conflict is the use list in crates/pi-natives/src/desktop/linux/wayland/mod.rs; this entry adds TextRoute, #18914 adds self; neither removes a name the other calls. Combined form: linux::ax::{self, AtSpiAx, AtSpiWindow, TextRoute, resolve_focus}. | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-text-first) |
 | win-focus-report | fix(natives): report where focus went after a Windows takeover | computer | P2 | 22h | open; accepted pair with #18783: QueueThirteen, 2026-11-12 (Main: docs pairs are the opener's): docs-only collision in docs/computer-use.md, adjacent: #18783 adds two X11 covered-window screenshot paragraphs right before the 'Window input defaults to background routes' paragraph that this entry edits. Combined form: #18783's two paragraphs, blank line, then this entry's wording of the 'Window input defaults' paragraph. No code overlap. | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-focus-report) |
-| masked-length-ok | fix(natives): report a setValue that reads back as a same-length mask as done, not failed | computer | P2 | 7h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/masked-length-ok) |
 | takeover-attached-hint | fix(natives): name the background route when takeover refuses a macOS suggestion list | computer | P2 | 7h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/takeover-attached-hint) |
 
 ## Conflict-held (27)
@@ -98,7 +97,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12
 | [#15128](https://github.com/can1357/oh-my-pi/pull/15128) | reset-restore-longest-wait | feat(coding-agent): restore the blocked account whose reset buys the most time | broker | P2 | 1d | Will, 2026-11-02: account broker redesign, on hold since 2026-11-02 | not checked or kept fresh | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-restore-longest-wait) |
 | [#15130](https://github.com/can1357/oh-my-pi/pull/15130) | reset-before-reserve | feat(coding-agent): opt in to spending a blocked account's saved reset before a reserve-only backup | broker | P2 | 1d | Will, 2026-11-02: account broker redesign, on hold since 2026-11-02 | not checked or kept fresh | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-before-reserve) |
 
-## Open PRs (17)
+## Open PRs (18)
 
 | PR | id | title | area | rank | open | plan | branch |
 |---|---|---|---|---|---|---|---|
@@ -119,3 +118,4 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12
 | [#19025](https://github.com/can1357/oh-my-pi/pull/19025) | win-target-layout | fix(natives): map Windows keys on the receiving keyboard layout | computer | P1 | 1d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-target-layout) |
 | [#19023](https://github.com/can1357/oh-my-pi/pull/19023) | x11-mpx-reattach | fix(natives): keep X11 background input out of your window after a screen lock or VT switch | computer | P0 | 18h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-mpx-reattach) |
 | [#19001](https://github.com/can1357/oh-my-pi/pull/19001) | relay-hidden-frames-main | fix(browser-relay): say what the relay hid in a driven tab | browser | P2 | 6h | keep; accepted pair with #18925: Main, 2026-11-12: accepted (HiddenOnMain's combined form). tab-worker.ts WorkerCore.#run after the finally: this branch's hinted take (if this.#unanswered === active && this.#hiddenFramesWaiting && this.#page) await this.#takeHiddenFrames(this.#page)) stays before the answered guard; in the failure branch #18925's enrichment of error (message and stack with the native notices), then this.#sendResult({ id: msg.id, ok: false, error }), so both native-window notices and the once-only hidden-frames notice ride the failure. Second to land adds one test that a failed run carries both. | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-hidden-frames-main) |
+| [#19026](https://github.com/can1357/oh-my-pi/pull/19026) | masked-length-ok | fix(natives): report a setValue that reads back as a same-length mask as done, not failed | computer | P2 | 7h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/masked-length-ok) |
