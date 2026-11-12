@@ -78793,7 +78793,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-takeover-keyboard-state",
    "host": "MacBook-Pro",
    "added": "2026-11-11T02:32:01Z",
-   "updated": "2026-11-12T19:09:08Z",
+   "updated": "2026-11-12T19:20:27Z",
    "note": "Main-authorized bounded latch repair: ten red/green Xvfb runs, ten latched-Control sibling checks, locked-group restoration green. Linux rust-check recorded; 62 X11 tests pass excluding two MPX/uinput hotplug tests that fail identically on main 9f728bd56e1 under Xvfb without udev/libinput hotplug.",
    "advanced": "2026-11-12T13:27:11Z",
    "line_loss_overrides": [
@@ -78844,6 +78844,123 @@
      "at": "2026-11-12T19:09:08Z",
      "host": "goliath",
      "tree": "888625ee3d7f2a2b0215e5290afb7b60cd42299b"
+    },
+    {
+     "with": "#16553",
+     "code": "0d35c99ad12b57fea255c9d2d060941c50c0a5fc",
+     "with_code": "375115bc2d9922bd24a7ea43c9ab95e46d97291d",
+     "tip": "8745c5bd9c21f2c06c956d85e5057d8a8ebef29b",
+     "with_tip": "f4b57048b776541f97180caec8026f3942ca86ad",
+     "at": "2026-11-12T19:20:21Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#17756",
+     "code": "0d35c99ad12b57fea255c9d2d060941c50c0a5fc",
+     "with_code": "00b33a7b015bc7730a8a6926657f2a3f49039187",
+     "tip": "8745c5bd9c21f2c06c956d85e5057d8a8ebef29b",
+     "with_tip": "0a62ea55002a950aef2237c96a8eb62ebeaf28e0",
+     "at": "2026-11-12T19:20:23Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#17897",
+     "code": "0d35c99ad12b57fea255c9d2d060941c50c0a5fc",
+     "with_code": "2bbb547591ae156ccac7af195b43202e415d1bd2",
+     "tip": "8745c5bd9c21f2c06c956d85e5057d8a8ebef29b",
+     "with_tip": "54c11638043f0ab42d61c95025a325e37eb871b9",
+     "at": "2026-11-12T19:20:23Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#18013",
+     "code": "0d35c99ad12b57fea255c9d2d060941c50c0a5fc",
+     "with_code": "c4d6b2ac1ad011c06167107c07a359eb739617ad",
+     "tip": "8745c5bd9c21f2c06c956d85e5057d8a8ebef29b",
+     "with_tip": "fc2484d4c6650dd8ee2a8c6f44209d04e3812a7e",
+     "at": "2026-11-12T19:20:24Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#18353",
+     "code": "0d35c99ad12b57fea255c9d2d060941c50c0a5fc",
+     "with_code": "f0586af0647e4e206ee9154d7917dd7de31879c6",
+     "tip": "8745c5bd9c21f2c06c956d85e5057d8a8ebef29b",
+     "with_tip": "4bbf3b4dc92dca19fa35a07a0d97d574998431c4",
+     "at": "2026-11-12T19:20:24Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#18925",
+     "code": "0d35c99ad12b57fea255c9d2d060941c50c0a5fc",
+     "with_code": "744d68aa21c23ce354aaeba502ee86a1a72f67a8",
+     "tip": "8745c5bd9c21f2c06c956d85e5057d8a8ebef29b",
+     "with_tip": "e6573751f0afc28c86640d971320825d99936d52",
+     "at": "2026-11-12T19:20:24Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#18987",
+     "code": "0d35c99ad12b57fea255c9d2d060941c50c0a5fc",
+     "with_code": "0b6ec1c5314a357dc69bd2a73c0eb77ad714e467",
+     "tip": "8745c5bd9c21f2c06c956d85e5057d8a8ebef29b",
+     "with_tip": "f031b644006be87fd8efa090e979bad4fb502020",
+     "at": "2026-11-12T19:20:24Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#19025",
+     "code": "0d35c99ad12b57fea255c9d2d060941c50c0a5fc",
+     "with_code": "5db66d992b8472a4603b55e2969f1345d8d2fde5",
+     "tip": "8745c5bd9c21f2c06c956d85e5057d8a8ebef29b",
+     "with_tip": "f434a94b537426a1707ff706b25550d5c3fa4d72",
+     "at": "2026-11-12T19:20:24Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#19034",
+     "code": "0d35c99ad12b57fea255c9d2d060941c50c0a5fc",
+     "with_code": "da9d02017c240e0d16c85668e84466516ae5c50a",
+     "tip": "8745c5bd9c21f2c06c956d85e5057d8a8ebef29b",
+     "with_tip": "300596a1841441c506f0a8c525668bbd128e561e",
+     "at": "2026-11-12T19:20:25Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#19035",
+     "code": "0d35c99ad12b57fea255c9d2d060941c50c0a5fc",
+     "with_code": "6985961b013c7864e5437d4020188e1966f37ce2",
+     "tip": "8745c5bd9c21f2c06c956d85e5057d8a8ebef29b",
+     "with_tip": "e7ca98273595a4f4a3d92dcc288e2efd31339e83",
+     "at": "2026-11-12T19:20:26Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#19036",
+     "code": "0d35c99ad12b57fea255c9d2d060941c50c0a5fc",
+     "with_code": "ae0818c2121d16433cd4d4f8484296b9dc2e1f62",
+     "tip": "8745c5bd9c21f2c06c956d85e5057d8a8ebef29b",
+     "with_tip": "68d568296ae6fcbc3fe6850f9c43a885b8e02250",
+     "at": "2026-11-12T19:20:26Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#19048",
+     "code": "0d35c99ad12b57fea255c9d2d060941c50c0a5fc",
+     "with_code": "3a6e5e168a4b689f044865e6dd66590973fef2f3",
+     "tip": "8745c5bd9c21f2c06c956d85e5057d8a8ebef29b",
+     "with_tip": "bfaa5e049e7a08e0a229eb0471889738a800e86d",
+     "at": "2026-11-12T19:20:26Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#19063",
+     "code": "0d35c99ad12b57fea255c9d2d060941c50c0a5fc",
+     "with_code": "3deac3fb6d867250967c5fe33d865a8eb1e63477",
+     "tip": "8745c5bd9c21f2c06c956d85e5057d8a8ebef29b",
+     "with_tip": "7f205daf2d7838a2817d529ddd7e0ff2e12a26b2",
+     "at": "2026-11-12T19:20:27Z",
+     "host": "goliath"
     }
    ]
   },
