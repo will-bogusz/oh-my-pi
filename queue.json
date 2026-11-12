@@ -83676,9 +83676,15 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ax-masked-readback",
    "host": "MacBook-Pro",
    "added": "2026-11-12T02:37:51Z",
-   "updated": "2026-11-12T03:32:58Z",
+   "updated": "2026-11-12T03:36:32Z",
    "note": "AuthFinish 2026-11-12: widened per Main (no written text in any failed read-back); delta reviewed (AuthFinish.ReviewReadbackDelta, fixed); overlaps queued atspi-value-readback in crates/pi-natives/src/desktop/linux/ax.rs\nMain 2026-11-12: whichever of ax-masked-readback / #18915 lands second deletes the cfg_attr(..., allow(dead_code)) on ax.rs `masked` in its rebase (stale after #18915, not wrong); combined doc = ax-masked-readback\u2019s wording, no cfg on text_readback.\nMain 2026-11-12: mechanical move, no behaviour change, existing review stamp stands.",
-   "advanced": "2026-11-12T03:32:58Z"
+   "advanced": "2026-11-12T03:32:58Z",
+   "rebases_after": [
+    18915
+   ],
+   "pair_reasons": {
+    "18915": "Main, 2026-11-12: accepted; adjacent doc/cfg lines on ax.rs text_readback; whichever lands second deletes the cfg_attr(..., allow(dead_code)) on masked"
+   }
   }
  ],
  "watch": {
