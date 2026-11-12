@@ -83834,7 +83834,7 @@
    "needs": [
     "atspi-unanswered-app"
    ],
-   "base": "4988c32c9a9fd59f2497bd05d3c9c40b72036089",
+   "base": "9f728bd56e170453c927d5b162cebe9b308e63ce",
    "body": "bodies/atspi-write-timeout-warning.md",
    "state": "queued",
    "pr": null,
@@ -83842,14 +83842,15 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-write-timeout-warning",
    "host": "MacBook-Pro",
    "added": "2026-11-11T21:44:32Z",
-   "updated": "2026-11-12T05:55:55Z",
+   "updated": "2026-11-12T13:19:43Z",
    "note": "",
    "rebases_after": [
     18989
    ],
    "pair_reasons": {
     "18989": "Main, 2026-11-12: prerequisite-owned test-guard overlap, not a masked-length-ok conflict. Combined form: apply #18989 removal of the contains(\"secure\") condition and the timeout entry added !contains(\"emptied\") condition; keep both exclusions of the written and old text. Shared masked-helper removal and text_write_error insertion are independently composable adjacency. Combined form not run."
-   }
+   },
+   "advanced": "2026-11-12T13:19:43Z"
   },
   {
    "id": "tern-kit-password-mask",
