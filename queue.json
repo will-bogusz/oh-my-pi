@@ -4265,8 +4265,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/r2-relay-popup-owned",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-11-12T02:52:12Z",
-   "note": "Main 2026-11-12: acceptance now includes RelayFrameRace's popup-adoption cell (stand-in vault, adopt ok 7/10 on main and on relay-frame-race, failures 'Selected tab is not ready'; probe ~/tmp/oh-my-pi/RelayFrameRace/): 10/10 after the restack onto relay-frame-race, or explained. | Main 2026-11-12: with real signed-in 1Password on main, adopting a page-opened popup succeeds 4/10 ('Selected tab is not ready'); the restack is checked against VaultSignedIn's popup cell, not only the stand-in."
+   "updated": "2026-11-12T03:37:30Z",
+   "note": "Main 2026-11-12: acceptance now includes RelayFrameRace's popup-adoption cell (stand-in vault, adopt ok 7/10 on main and on relay-frame-race, failures 'Selected tab is not ready'; probe ~/tmp/oh-my-pi/RelayFrameRace/): 10/10 after the restack onto relay-frame-race, or explained. | Main 2026-11-12: with real signed-in 1Password on main, adopting a page-opened popup succeeds 4/10 ('Selected tab is not ready'); the restack is checked against VaultSignedIn's popup cell, not only the stand-in. | Main 2026-11-12: against real signed-in 1Password on Chrome 157, head 7cfd98ac978 adopted the popup 10/10 with a frame drawn every time, where main failed all 6 frame-drawn tries (HiddenOnMain's block, run on the entry's own base). This is the measured reason #18925, which the chain waits on, belongs on the ask list."
   },
   {
    "id": "browser-text-page",
