@@ -26,7 +26,7 @@ In those historical runs, all three were bare in 14 of 14 reads on main and name
 
 `a_control_without_a_label_of_its_own_is_named_by_its_linked_label` covers the label read (value, title fallback, an unanswered read, no link); `a_field_without_a_label_is_named_by_its_placeholder` now also shows an own description beating a link and an unanswered link leaving no identity. Both need this branch's `linked_label`, so main's failure is the live table above rather than a test.
 
-Re-run on current main `53dd4c6a319` on bench-mac: `cargo test -p pi-natives --lib desktop::macos` passed 356 tests; `cargo test -p pi-natives --lib desktop::` passed 602. macOS `rust-check` passed clippy and rustfmt. The naming tests and three action-guard tests pin an own label disappearing while a link is unread (refused), only the linked label changing (accepted), and an unchanged linked-labelled control (accepted).
+Re-run on current main `9f728bd56e1` on bench-mac: `cargo test -p pi-natives --lib desktop::macos` passed 356 tests; `cargo test -p pi-natives --lib desktop::` passed 602. `rust-check` passed clippy and rustfmt on macOS (bench-mac), Linux and Windows (goliath). The naming tests and three action-guard tests pin an own label disappearing while a link is unread (refused), only the linked label changing (accepted), and an unchanged linked-labelled control (accepted).
 
 ---
 
