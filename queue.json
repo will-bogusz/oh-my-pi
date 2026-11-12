@@ -94954,5 +94954,11 @@
     "wake": ""
    }
   ]
+ },
+ "opening": {
+  "id": "relay-hidden-frames-main",
+  "token": "9d3d4fd9598f4dda864a8bf195cf9ba8",
+  "host": "MacBook-Pro",
+  "at": "2026-11-12T05:20:50Z"
  }
 }
