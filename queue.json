@@ -82654,13 +82654,13 @@
    "needs": [],
    "base": "b437322d9a3900206228e17077415c87ce67c8ca",
    "body": "bodies/tern-kit-password-mask.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18983,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/tern-kit-password-mask",
    "host": "MacBook-Pro",
    "added": "2026-11-12T01:22:04Z",
-   "updated": "2026-11-12T03:32:40Z",
+   "updated": "2026-11-12T03:56:51Z",
    "note": "",
    "advanced": "2026-11-12T02:18:49Z",
    "built": [
@@ -82904,7 +82904,8 @@
      "host": "MacBook-Pro",
      "tree": "259ac3fd384bc19c614e71176fe014992ab61f09"
     }
-   ]
+   ],
+   "opened": "2026-11-12T03:56:51Z"
   },
   {
    "id": "status-entered-text",
