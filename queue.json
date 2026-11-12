@@ -92378,7 +92378,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-12T05:49:50.129504Z",
+  "at": "2026-11-12T06:20:27.272227Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -93837,15 +93837,14 @@
     "title": "fix(natives): preserve the empty-field warning on Linux write timeouts",
     "action": "wait",
     "reasons": [
-     "needs #18914 (open)",
-     "conflicts with #18989 in crates/pi-natives/src/desktop/linux/ax.rs"
+     "needs #18914 (open)"
     ],
-    "note": "",
+    "note": "accepted pair with #18989: Main, 2026-11-12: prerequisite-owned test-guard overlap, not a masked-length-ok conflict. Combined form: apply #18989 removal of the contains(\"secure\") condition and the timeout entry added !contains(\"emptied\") condition; keep both exclusions of the written and old text. Shared masked-helper removal and text_write_error insertion are independently composable adjacency. Combined form not run.",
     "over": [],
-    "paired": [],
-    "blocked_by": [
+    "paired": [
      "#18989"
     ],
+    "blocked_by": [],
     "needs": [
      "atspi-unanswered-app"
     ],
@@ -94087,17 +94086,13 @@
     "action": "wait",
     "reasons": [
      "needs #18989 (open)",
-     "conflicts with #18892 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
-     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with #18915 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/win32/ax.rs",
-     "conflicts with main in crates/pi-natives/src/desktop/ax.rs, docs/tools/computer.md"
+     "conflicts with #18915 in crates/pi-natives/src/desktop/ax.rs",
+     "conflicts with main in docs/tools/computer.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18892",
-     "#18914",
      "#18915"
     ],
     "needs": [
