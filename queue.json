@@ -85944,7 +85944,39 @@
     }
    ],
    "opened": "2026-11-12T12:03:26Z",
-   "readied": "2026-11-12T12:03:51Z"
+   "readied": "2026-11-12T12:03:51Z",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-12T12:24:43Z",
+     "reason": "Bot fixes intentionally replace listed_window_at with the first retained hit element and scope attached-window pointer hints by ForegroundInput; all lost lines are superseded by these implementations.",
+     "old": "e55a8015fbf1b594b425a903064322154196738f",
+     "new": "db558a444009203107f7b6df51057ac2c46055f6",
+     "dropped": {
+      "crates/pi-natives/src/desktop/macos/ax.rs": [
+       "\tSome(PointOwner { pid, window: window.as_deref().and_then(window_id) })",
+       "/// For a refusal only: the window listing the surface at `(x, y)` among its",
+       "/// application's `AXWindows` ([`listed_window_id`]), such as a suggestion",
+       "/// list, which [`point_owner`] finds no window for.",
+       "pub(super) fn listed_window_at(x: f64, y: f64) -> Option<u32> {",
+       "\tlisted_window_id(pid, &element)"
+      ],
+      "crates/pi-natives/src/desktop/macos/input.rs": [
+       "\t\t\t\t\tax::listed_window_at(x, y),"
+      ],
+      "crates/pi-natives/src/desktop/macos/skylight.rs": [
+       "\t\tawait_window_focused(spi, previous_pid, previous_key, previous.psn, |_| None)?;",
+       "\t\t.and_then(|()| await_window_focused(spi, pid, wid, target, window_parent));",
+       "\t\t\treturn Err(DesktopError::input_failed(unconfirmed_key_window(wid, &seen, parent_of)));",
+       "\tlet attached = match seen {",
+       "\t\tKeyWindowSeen::Focused(Some(ax::WindowLabel { id: Some(focused), .. })) => {",
+       "\t\t\tsuper::input::attached_under(wid, parent_of, |parent| parent == *focused)",
+       "\t\tlet refusal = |wid, seen| unconfirmed_key_window(wid, &seen, |_| None);",
+       "\t\t\tunconfirmed_key_window(62, &seen, parents),",
+       "\t\tassert!(!unconfirmed_key_window(70, &seen, |_| Some(50)).contains(\"without takeover\"));"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "win-type-drain",
