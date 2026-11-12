@@ -71096,7 +71096,7 @@
    "area": "browser",
    "priority": "P1",
    "needs": [],
-   "base": "f39a8853b81b3980997518f78d1594cc448d6e87",
+   "base": "ced5efc0c2750f43dfdb7d223c7d22cb6c5f1f44",
    "body": "bodies/browser-console-shape.md",
    "state": "open",
    "pr": 18738,
@@ -71104,9 +71104,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-console-shape",
    "host": "MacBook-Pro",
    "added": "2026-11-10T05:49:27Z",
-   "updated": "2026-11-12T00:01:29Z",
+   "updated": "2026-11-12T01:48:31Z",
    "note": "",
-   "advanced": "2026-11-12T00:01:29Z",
+   "advanced": "2026-11-12T01:48:31Z",
    "built": [
     {
      "with": "#18658",
