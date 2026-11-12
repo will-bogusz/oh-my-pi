@@ -76357,8 +76357,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/desktop-cursor",
    "host": "MacBook-Pro",
    "added": "2026-11-11T00:21:12Z",
-   "updated": "2026-11-11T09:03:14Z",
-   "note": ""
+   "updated": "2026-11-12T00:14:05Z",
+   "note": "",
+   "hold": "Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check"
   },
   {
    "id": "computer-filter-types",
