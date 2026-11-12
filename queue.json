@@ -83418,7 +83418,36 @@
    "host": "MacBook-Pro",
    "added": "2026-11-11T14:43:42Z",
    "updated": "2026-11-12T12:45:34Z",
-   "note": "Main, 2026-11-12: approved linked-own-guard.diff. Naming-only: changed linked text alone is not an action guard. Five AxProps constructor sites migrated; adjacency with entries adding AxProps fields requires opener pair builds. Unbuilt design note: retain {own,linked} fingerprints independently and compare each only when answered at registration and action; closes a rerender moving an unnamed control ref onto its neighbour; measure that case before building."
+   "note": "Main, 2026-11-12: approved linked-own-guard.diff. Naming-only: changed linked text alone is not an action guard. Five AxProps constructor sites migrated; adjacency with entries adding AxProps fields requires opener pair builds. Unbuilt design note: retain {own,linked} fingerprints independently and compare each only when answered at registration and action; closes a rerender moving an unnamed control ref onto its neighbour; measure that case before building.",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-12T12:45:41Z",
+     "reason": "Main-approved naming-only split preserves own-label read-as guard via optional own fingerprint; linked label changes display and registration only, obsolete element arg removed, own_props extraction and 16-attribute tests replace old construction",
+     "old": "3e59605b691f7bb8c4722876b48ede0c9ed2cf4e",
+     "new": "c48bc7bac8277c36e3c4dc7a665b37e928d9cf5e",
+     "dropped": {
+      "crates/pi-natives/src/desktop/macos/ax.rs": [
+       "\tlabelled_props(element, values, child_count, read_bounds, copy_attribute_result)",
+       "\tlet own_description = nonempty(string(DESCRIPTION));",
+       "\t// A control with neither a title nor a description of its own is named by",
+       "\t// the text its `AXTitleUIElement` links to, as a SwiftUI toggle in a",
+       "\t// grouped `Form` is by the label beside it. A label read the app did not",
+       "\t// answer leaves the element unnamed and without an identity.",
+       "\tlet (title, label_answered) = match nonempty(string(TITLE)) {",
+       "\t\tSome(title) => (Some(title), true),",
+       "\t\tNone if own_description.is_some() => (None, true),",
+       "\t\tNone => match linked_label(read(TITLE_ELEMENT).as_deref(), read_label) {",
+       "\t\t\tOk(label) => (label, true),",
+       "\t\t\tErr(_) => (None, false),",
+       "\t\town_description.or_else(|| nonempty(string(PLACEHOLDER)).filter(|_| title.is_none()));",
+       "\tlet identity = read_identity(values, &native_role, [&title, &value, &description])",
+       "\t\t.filter(|_| label_answered);",
+       "\t\t\tlabelled_props(&create_system_wide(), &values, 0, WalkBounds::Skip, |_, attribute| {",
+       "\t\tassert!(read(null, null, add_date, &busy, Ok(Some(\"Mode\"))).partial);"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "ax-ref-read-as-followup",
