@@ -83689,13 +83689,13 @@
    "needs": [],
    "base": "04cd1a7549a02d62ad1d24826198d52507595683",
    "body": "bodies/ax-masked-readback.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18989,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ax-masked-readback",
    "host": "MacBook-Pro",
    "added": "2026-11-12T02:37:51Z",
-   "updated": "2026-11-12T04:11:59Z",
+   "updated": "2026-11-12T04:18:12Z",
    "note": "AuthFinish 2026-11-12: widened per Main (no written text in any failed read-back); delta reviewed (AuthFinish.ReviewReadbackDelta, fixed); overlaps queued atspi-value-readback in crates/pi-natives/src/desktop/linux/ax.rs\nMain 2026-11-12: whichever of ax-masked-readback / #18915 lands second deletes the cfg_attr(..., allow(dead_code)) on ax.rs `masked` in its rebase (stale after #18915, not wrong); combined doc = ax-masked-readback\u2019s wording, no cfg on text_readback.\nMain 2026-11-12: mechanical move, no behaviour change, existing review stamp stands.",
    "advanced": "2026-11-12T03:32:58Z",
    "rebases_after": [
@@ -83921,7 +83921,8 @@
      "at": "2026-11-12T04:11:52Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-12T04:18:12Z"
   },
   {
    "id": "autofill-rows",
