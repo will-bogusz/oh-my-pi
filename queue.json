@@ -99268,8 +99268,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-12T19:32:38.381504Z",
-  "host": "goliath",
+  "at": "2026-11-12T19:48:21.385307Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 1,
@@ -99726,12 +99726,16 @@
     "area": "tui",
     "priority": "P2",
     "title": "feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy",
-    "action": "keep",
-    "reasons": [],
+    "action": "requeue",
+    "reasons": [
+     "conflicts with #19062 in docs/computer-use.md"
+    ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#19062"
+    ],
     "needs": [],
     "created": "2026-11-12T04:03:05Z"
    },
@@ -99753,6 +99757,27 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-12T16:39:36Z"
+   },
+   {
+    "id": "win-masks-cfg",
+    "label": "win-masks-cfg",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P0",
+    "title": "fix(natives): compile pi-natives for Windows again",
+    "action": "wait",
+    "reasons": [
+     "conflicts with #19061 in crates/pi-natives/src/desktop/ax.rs"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "#19061"
+    ],
+    "needs": [],
+    "created": "2026-11-12T19:44:42Z"
    },
    {
     "id": "atspi-walk-reads",
@@ -99811,15 +99836,13 @@
     "action": "wait",
     "reasons": [
      "conflicts with #18222 in packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with #18987 in packages/coding-agent/src/tools/computer.ts",
      "conflicts with main in packages/coding-agent/src/tools/computer.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18222",
-     "#18987"
+     "#18222"
     ],
     "needs": [],
     "created": "2026-11-11T00:07:07Z"
@@ -100065,7 +100088,6 @@
     "reasons": [
      "conflicts with #19062 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #18222 in packages/coding-agent/src/tools/computer/worker.ts",
-     "conflicts with #18987 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
@@ -100073,8 +100095,7 @@
     "paired": [],
     "blocked_by": [
      "#19062",
-     "#18222",
-     "#18987"
+     "#18222"
     ],
     "needs": [],
     "created": "2026-11-11T01:40:14Z"
@@ -100094,7 +100115,6 @@
      "conflicts with #19062 in docs/computer-use.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #18013 in docs/computer-use.md",
      "conflicts with #18222 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
-     "conflicts with #18987 in docs/computer-use.md",
      "conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
@@ -100105,8 +100125,7 @@
      "#19061",
      "#19062",
      "#18013",
-     "#18222",
-     "#18987"
+     "#18222"
     ],
     "needs": [],
     "created": "2026-10-19T07:26:45Z"
@@ -100156,7 +100175,6 @@
      "conflicts with #17897 in crates/pi-natives/src/desktop/macos/input.rs",
      "conflicts with #18013 in docs/computer-use.md",
      "conflicts with #18222 in docs/computer-use.md",
-     "conflicts with #18987 in docs/computer-use.md",
      "conflicts with main in docs/computer-use.md"
     ],
     "note": "",
@@ -100170,8 +100188,7 @@
      "#19062",
      "#17897",
      "#18013",
-     "#18222",
-     "#18987"
+     "#18222"
     ],
     "needs": [
      "iphone-mirror-scroll-distance"
@@ -100536,7 +100553,6 @@
      "conflicts with #18013 in docs/computer-use.md",
      "conflicts with #18222 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/tools/eval.ts",
-     "conflicts with #18987 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/worker.ts",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -100549,8 +100565,7 @@
      "#19062",
      "#18013",
      "#18222",
-     "#18786",
-     "#18987"
+     "#18786"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -100573,7 +100588,6 @@
      "conflicts with #19061 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
-     "conflicts with #18987 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs"
     ],
@@ -100585,8 +100599,7 @@
      "#19048",
      "#19061",
      "#18222",
-     "#18925",
-     "#18987"
+     "#18925"
     ],
     "needs": [
      "computer-ui-quiet"
