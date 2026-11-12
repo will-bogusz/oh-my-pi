@@ -78580,7 +78580,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-target-layout",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:13:32Z",
-   "updated": "2026-11-12T11:52:30Z",
+   "updated": "2026-11-12T11:52:55Z",
    "note": "",
    "line_loss_overrides": [
     {
@@ -78758,7 +78758,8 @@
      "tree": "7515ffe584acfd8a36ae1f830433f698c9b4b80a"
     }
    ],
-   "opened": "2026-11-12T11:52:30Z"
+   "opened": "2026-11-12T11:52:30Z",
+   "readied": "2026-11-12T11:52:54Z"
   },
   {
    "id": "browser-select-objects",
