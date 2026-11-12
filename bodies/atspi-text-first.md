@@ -42,7 +42,7 @@ Text replaces the selection or enters at the caret; unfocused GTK entries are re
 
 Real OMP runs on Ubuntu 24.04 X11 and KDE Plasma Wayland, with QEMU keys typing elsewhere throughout and no-agent controls (0 characters lost). A false success triggered 30 runs per arm.
 
-- On goliath on current main 9f728bd56e, `cargo test -p pi-natives --lib -- desktop::`: 308 passed, 30 ignored; `cargo test -p pi-natives --lib desktop::linux`: 104 passed, 30 ignored. Linux `scripts/rust-check --base 9f728bd56e` passed. The insert test in `linux/ax.rs` fails without the Qt decline (a Qt line edit holding "12" takes "AB"), without the toolkit check, and with unfocused GTK entries left on their caret.
+- On current main 9f728bd56e (goliath): `cargo test -p pi-natives --lib desktop::` 308 passed (`desktop::linux` 104), 30 ignored; Linux `scripts/rust-check` passed. The insert test in `linux/ax.rs` fails without the Qt decline (a Qt line edit holding "12" takes "AB"), without the toolkit check, and with unfocused GTK entries left on their caret.
 - Not run: GNOME Wayland, Qt 5 on Wayland.
 
 <details><summary>Field semantics per widget: route on every field vs this PR (n=5 per input; n=30 where the route broke something)</summary>
