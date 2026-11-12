@@ -73240,7 +73240,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-observe-settle",
    "host": "MacBook-Pro",
    "added": "2026-11-10T18:56:46Z",
-   "updated": "2026-11-12T12:15:56Z",
+   "updated": "2026-11-12T12:18:46Z",
    "note": "",
    "advanced": "2026-11-12T12:15:56Z",
    "kind": "proposal",
@@ -73470,7 +73470,13 @@
      "at": "2026-11-11T09:25:34Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "rebases_after": [
+    18925
+   ],
+   "pair_reasons": {
+    "18925": "Main, 2026-11-12: only conflict is adjacent class fields in packages/coding-agent/src/tools/browser/tab-worker.ts: #18925 adds #nativeWindows?, this entry adds #actionRequestSeq? and #settling? at the same spot; nothing removed; combined form is both declarations"
+   }
   },
   {
    "id": "settle-reads",
