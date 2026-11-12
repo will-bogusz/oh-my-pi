@@ -1,19 +1,18 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12 11:41Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12 11:45Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-12 11:24Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 6, conflict-held 27, stacked 23, held 11, parked 2, open PRs 15; merged 325, closed 34
+**Counts:** openable now 5, conflict-held 27, stacked 23, held 11, parked 2, open PRs 16; merged 325, closed 34
 
-## Openable now (6)
+## Openable now (5)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
 | atspi-text-first | fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility | computer | P1 | 1d | open; accepted pair with #18914: QueueThirteen, 2026-11-12 (Main's standing rule: use-list collisions are the opener's): only conflict is the use list in crates/pi-natives/src/desktop/linux/wayland/mod.rs; this entry adds TextRoute, #18914 adds self; neither removes a name the other calls. Combined form: linux::ax::{self, AtSpiAx, AtSpiWindow, TextRoute, resolve_focus}. | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-text-first) |
 | win-target-layout | fix(natives): map Windows keys on the receiving keyboard layout | computer | P1 | 1d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-target-layout) |
 | win-focus-report | fix(natives): report where focus went after a Windows takeover | computer | P2 | 22h | open; accepted pair with #18783: QueueThirteen, 2026-11-12 (Main: docs pairs are the opener's): docs-only collision in docs/computer-use.md, adjacent: #18783 adds two X11 covered-window screenshot paragraphs right before the 'Window input defaults to background routes' paragraph that this entry edits. Combined form: #18783's two paragraphs, blank line, then this entry's wording of the 'Window input defaults' paragraph. No code overlap. | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-focus-report) |
-| x11-mpx-reattach | fix(natives): keep X11 background input out of your window after a screen lock or VT switch | computer | P0 | 18h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-mpx-reattach) |
 | masked-length-ok | fix(natives): report a setValue that reads back as a same-length mask as done, not failed | computer | P2 | 7h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/masked-length-ok) |
 | takeover-attached-hint | fix(natives): name the background route when takeover refuses a macOS suggestion list | computer | P2 | 7h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/takeover-attached-hint) |
 
@@ -45,7 +44,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12
 | macos-ax-cancel-before-send | fix(natives): send no macOS AX action once its run is cancelled | natives | P2 | 1d | [#18743](https://github.com/can1357/oh-my-pi/pull/18743), [#18892](https://github.com/can1357/oh-my-pi/pull/18892), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-ax-cancel-before-send) |
 | win-ax-states | fix(natives): expose Windows control state and stale-reference matches | computer | P2 | 1d | [#18892](https://github.com/can1357/oh-my-pi/pull/18892), [#18915](https://github.com/can1357/oh-my-pi/pull/18915) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-ax-states) |
 | x11-keysym-remap | fix(natives): type characters outside the X11 keymap through temporary keycodes | computer | P2 | 21h | [#18784](https://github.com/can1357/oh-my-pi/pull/18784), x11-mpx-reattach, main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-keysym-remap) |
-| macos-ax-linked-label | fix(natives): name a macOS control by the label its AXTitleUIElement links to | natives | P2 | 20h | [#18892](https://github.com/can1357/oh-my-pi/pull/18892) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-ax-linked-label) |
+| macos-ax-linked-label | fix(natives): name a macOS control by the label its AXTitleUIElement links to | natives | P2 | 21h | [#18892](https://github.com/can1357/oh-my-pi/pull/18892) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-ax-linked-label) |
 | macos-press-click-hint | fix(natives): point a refused macOS press at the element's own click | computer | P2 | 16h | [#18892](https://github.com/can1357/oh-my-pi/pull/18892) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-press-click-hint) |
 | win-type-drain | fix(natives,coding-agent): stop Windows takeover typing from losing text the app had not read yet | computer | P1 | 7h | win-target-layout | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-type-drain) |
 
@@ -71,11 +70,11 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12
 | observe-stable-ids | feat(browser): keep observe() ids stable across observations | browser | P2 | 1d | act-look-prompt | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-observe-stable-ids) |
 | factory-droid-171-models | feat(catalog): add the Factory Droid models droid 1.7.1 serves | factory-droid |  | 1d | factory-droid-171-pin ([#18771](https://github.com/can1357/oh-my-pi/pull/18771)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-171-models) |
 | atspi-value-readback | fix(natives): read back AT-SPI numeric setValue before reporting success | computer | P2 | 1d | atspi-unanswered-app ([#18914](https://github.com/can1357/oh-my-pi/pull/18914)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-value-readback) |
-| ax-row-action | fix(natives): follow rebuilt macOS table rows without selecting a neighbour | computer | P1 | 23h | ax-ref-read-as ([#18892](https://github.com/can1357/oh-my-pi/pull/18892)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-row-action) |
+| ax-row-action | fix(natives): follow rebuilt macOS table rows without selecting a neighbour | computer | P1 | 1d | ax-ref-read-as ([#18892](https://github.com/can1357/oh-my-pi/pull/18892)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-row-action) |
 | atspi-qt-menus | fix(natives): let Linux menu.select walk into Qt apps' menus | computer | P2 | 22h | atspi-unanswered-app ([#18914](https://github.com/can1357/oh-my-pi/pull/18914)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-qt-menus) |
 | atspi-combo-choice | fix(natives): choose Linux combo box options without opening their keyboard-grabbing list | computer | P1 | 22h | atspi-unanswered-app ([#18914](https://github.com/can1357/oh-my-pi/pull/18914)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-combo-choice) |
-| ax-ref-read-as-followup | fix(natives): skip unused ref-check reads and recover display refs | computer | P2 | 19h | ax-ref-read-as ([#18892](https://github.com/can1357/oh-my-pi/pull/18892)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-ref-read-as-followup) |
-| atspi-write-timeout-warning | fix(natives): preserve the empty-field warning on Linux write timeouts | computer | P2 | 13h | atspi-unanswered-app ([#18914](https://github.com/can1357/oh-my-pi/pull/18914)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-write-timeout-warning) |
+| ax-ref-read-as-followup | fix(natives): skip unused ref-check reads and recover display refs | computer | P2 | 20h | ax-ref-read-as ([#18892](https://github.com/can1357/oh-my-pi/pull/18892)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-ref-read-as-followup) |
+| atspi-write-timeout-warning | fix(natives): preserve the empty-field warning on Linux write timeouts | computer | P2 | 14h | atspi-unanswered-app ([#18914](https://github.com/can1357/oh-my-pi/pull/18914)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-write-timeout-warning) |
 
 ## Held (11)
 
@@ -100,7 +99,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12
 | [#15128](https://github.com/can1357/oh-my-pi/pull/15128) | reset-restore-longest-wait | feat(coding-agent): restore the blocked account whose reset buys the most time | broker | P2 | 1d | Will, 2026-11-02: account broker redesign, on hold since 2026-11-02 | not checked or kept fresh | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-restore-longest-wait) |
 | [#15130](https://github.com/can1357/oh-my-pi/pull/15130) | reset-before-reserve | feat(coding-agent): opt in to spending a blocked account's saved reset before a reserve-only backup | broker | P2 | 1d | Will, 2026-11-02: account broker redesign, on hold since 2026-11-02 | not checked or kept fresh | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-before-reserve) |
 
-## Open PRs (15)
+## Open PRs (16)
 
 | PR | id | title | area | rank | open | plan | branch |
 |---|---|---|---|---|---|---|---|
@@ -118,4 +117,5 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12
 | [#18786](https://github.com/can1357/oh-my-pi/pull/18786) | browser-core-first-use | feat(agent,coding-agent): send a short browser guide with the first browser call | browser | P2 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-core-first-use) |
 | [#18789](https://github.com/can1357/oh-my-pi/pull/18789) | subagent-browser-relay | feat(coding-agent): keep subagents' browser tabs out of the user's Chrome and Tern pane unless asked | browser | P2 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/subagent-browser-relay) |
 | [#18987](https://github.com/can1357/oh-my-pi/pull/18987) | agent-identity | feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy | tui | P2 | 7h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/agent-identity) |
+| [#19023](https://github.com/can1357/oh-my-pi/pull/19023) | x11-mpx-reattach | fix(natives): keep X11 background input out of your window after a screen lock or VT switch | computer | P0 | 18h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-mpx-reattach) |
 | [#19001](https://github.com/can1357/oh-my-pi/pull/19001) | relay-hidden-frames-main | fix(browser-relay): say what the relay hid in a driven tab | browser | P2 | 6h | keep; accepted pair with #18925: Main, 2026-11-12: accepted (HiddenOnMain's combined form). tab-worker.ts WorkerCore.#run after the finally: this branch's hinted take (if this.#unanswered === active && this.#hiddenFramesWaiting && this.#page) await this.#takeHiddenFrames(this.#page)) stays before the answered guard; in the failure branch #18925's enrichment of error (message and stack with the native notices), then this.#sendResult({ id: msg.id, ok: false, error }), so both native-window notices and the once-only hidden-frames notice ride the failure. Second to land adds one test that a failed run carries both. | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-hidden-frames-main) |
