@@ -33,7 +33,7 @@ Capability-matrix cells, Ubuntu 22.04 arm64 microVM (Xvfb, openbox, GTK 3, Qt 5,
 
 
 - `a_combo_box_option_is_chosen_without_opening_its_list` serves GTK 3-, Chromium- and Qt-shaped combo boxes over a peer-to-peer D-Bus connection: setValue and `press({ menu })` perform only the matching option's action and confirm it, an unknown title lists the options, a press is refused without performing the combo box's own action, Qt performs nothing, and an app that ignores the action ends `AxUnconfirmed`. It fails with the setValue branch removed (the parent's "no writable value interface") and with the press refusal removed.
-- `cargo test -p pi-natives --lib -- desktop::linux::ax` on Linux: 22 passed. `scripts/rust-check` on Linux.
+- `cargo test -p pi-natives --lib -- desktop::linux::ax` on Linux on current main bcd5b0b996e: 28 passed. `scripts/rust-check` on Linux.
 
 ---
 
