@@ -83350,13 +83350,13 @@
    ],
    "base": "238878f131787ada2b5d35409b4ee759cc535419",
    "body": "bodies/x11-mpx-reattach.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19023,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-mpx-reattach",
    "host": "MacBook-Pro",
    "added": "2026-11-11T17:39:36Z",
-   "updated": "2026-11-12T11:03:13Z",
+   "updated": "2026-11-12T11:45:07Z",
    "note": "X11SlaveReattach 2026-11-11: merged with #18828 (x11-mpx-key-confirm), #18828's xvfb-only ignored tests typing_loss_fails_and_inhibits_the_next_call and typing_deadline_bounds_busy_events_and_rejects_late_releases fail at run time (its typing_fixture names its keyboard slave after the core master, so begin() refuses it as gone); whichever lands second adds a #[cfg(test)] seam in Mpx::routes() returning [None, None] when release_events is set. Compiles either way. P0 on LightDM lock with real password unlock 10/10 (main) vs 0/10 (fix); suspend not measurable in the guest.",
    "advanced": "2026-11-12T09:38:55Z",
    "built": [
@@ -83520,7 +83520,8 @@
      "host": "MacBook-Pro",
      "tree": "7515ffe584acfd8a36ae1f830433f698c9b4b80a"
     }
-   ]
+   ],
+   "opened": "2026-11-12T11:45:07Z"
   },
   {
    "id": "click-snapshot-first",
