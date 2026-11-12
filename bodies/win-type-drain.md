@@ -44,6 +44,10 @@ The takeover guard handed the foreground back 40 ms after the last key, so keys 
 
 ## Testing
 
+Linux `cargo test -p pi-natives --lib`: 656 passed. Windows tests cross-build with `cargo xwin test -p pi-natives --lib --target x86_64-pc-windows-msvc --no-run`; clippy and rustfmt pass on Linux, Windows and macOS.
+
+<details><summary>Windows desktop test setup and negative controls</summary>
+
 Windows 11 (build 26200) VM, fresh builds: `main` at ced5efc0c2 with PR 18919 (addon sha256 `3ee87f97…81f2`) and this branch on it (`e702a753…61e0`). Each cell types a unique text and counts only when its setup (Explorer in front, field empty) was confirmed. The field is read by another route until two reads agree, so late text counts. One Chrome cell per arm at 240 stopped with `InputFailed` when Chrome took the foreground mid-send.
 
 The VM's takeover tests (`cargo test -p pi-natives -- --ignored desktop::win32::tests`, foreground lock timeout at 0 so the test process may take the foreground): `takeover_typing_hands_the_foreground_back_once_a_busy_target_read_the_text` (the target sleeps 1.5 s at the first key) passes, and with `drain` removed fails with the target still empty when focus went back; `takeover_typing_into_a_hung_target_says_the_text_is_unconfirmed` (8 s) passes, and without `drain` reports nothing; `element_takeover_hands_the_foreground_back_to_the_users_window` still passes.
@@ -52,7 +56,9 @@ The VM's takeover tests (`cargo test -p pi-natives -- --ignored desktop::win32::
 
 The desktop tests ran with the guest's foreground lock timeout at 0: at the default, a Terminal window in front refused the foreground after the first try.
 
-`bun test packages/coding-agent/test/tools/computer.test.ts`: 145 pass; the new case fails with the worker change reverted.
+</details>
+
+`bun test packages/coding-agent/test/tools/computer.test.ts`: 151 pass; the new case fails with the worker change reverted.
 
 ---
 
