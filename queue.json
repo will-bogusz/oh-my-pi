@@ -82591,7 +82591,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "d5ac02ce8678cf50f643d3f65361714c92d5d450",
+   "base": "b437322d9a3900206228e17077415c87ce67c8ca",
    "body": "bodies/computer-secure-input.md",
    "state": "queued",
    "pr": null,
@@ -82599,9 +82599,10 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-secure-input",
    "host": "MacBook-Pro",
    "added": "2026-11-12T01:37:10Z",
-   "updated": "2026-11-12T01:54:40Z",
+   "updated": "2026-11-12T01:54:58Z",
    "note": "",
-   "hold": "QueueTwelve for Main, 2026-11-12: code collision with open #18947 (screenStateNotice, read_screen_state); Main decides"
+   "hold": "QueueTwelve for Main, 2026-11-12: code collision with open #18947 (screenStateNotice, read_screen_state); Main decides",
+   "advanced": "2026-11-12T01:54:58Z"
   }
  ],
  "watch": {
