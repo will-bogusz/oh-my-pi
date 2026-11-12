@@ -81462,7 +81462,7 @@
    "area": "browser",
    "priority": "P1",
    "needs": [],
-   "base": "3eb59310c945a1d0475645f79ffeff48f8a7528b",
+   "base": "f39a8853b81b3980997518f78d1594cc448d6e87",
    "body": "bodies/browser-wait-selector-state.md",
    "state": "open",
    "pr": 18924,
@@ -81470,7 +81470,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-wait-selector-state",
    "host": "MacBook-Pro",
    "added": "2026-11-11T12:16:01Z",
-   "updated": "2026-11-11T20:19:59Z",
+   "updated": "2026-11-12T00:02:50Z",
    "note": "Proposal only, not queued: add Tern and cmux state/unknown-option support separately, each exercised on its real backend; Tern requires Will\u2019s Tern. Chromium-only scope chosen by Design18924.",
    "built": [
     {
@@ -81686,7 +81686,7 @@
    ],
    "opened": "2026-11-11T16:45:33Z",
    "readied": "2026-11-11T16:46:02Z",
-   "advanced": "2026-11-11T20:19:59Z",
+   "advanced": "2026-11-12T00:02:50Z",
    "design_checks": [
     {
      "pr": 18924,
