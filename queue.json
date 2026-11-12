@@ -91199,8 +91199,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-12T03:17:23.645294Z",
-  "host": "goliath",
+  "at": "2026-11-12T03:33:16.677340Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -92247,19 +92247,16 @@
     "created": "2026-10-30T21:35:55Z"
    },
    {
-    "id": "relay-hidden-frames",
-    "label": "relay-hidden-frames",
+    "id": "relay-hidden-frames-main",
+    "label": "relay-hidden-frames-main",
     "number": null,
     "state": "queued",
     "area": "browser",
     "priority": "P1",
     "title": "fix(browser-relay): say what the relay hid in a driven tab",
-    "action": "held",
+    "action": "wait",
     "reasons": [
-     "held: Main: being rebuilt on main without relay-frame-race by agent://HiddenOnMain; its head and needs will change",
-     "needs relay-frame-race (closed)",
-     "conflicts with #18925 in packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with main in packages/browser-relay/README.md, packages/browser-relay/extension/background.ts, packages/browser-relay/extension/foreign-frames.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/test/tools/browser-relay-foreign-frames.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
+     "conflicts with #18925 in packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
     "over": [],
@@ -92267,9 +92264,7 @@
     "blocked_by": [
      "#18925"
     ],
-    "needs": [
-     "relay-frame-race"
-    ],
+    "needs": [],
     "created": "2026-11-12T02:04:21Z"
    },
    {
