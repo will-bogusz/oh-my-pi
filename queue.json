@@ -83268,7 +83268,7 @@
    "needs": [
     "atspi-unanswered-app"
    ],
-   "base": "c49b777b23e050bd1aadf6fcaa93c6b0e53f484c",
+   "base": "bcd5b0b996e0f4a107f51cb398a6492ffb7d44b9",
    "body": "bodies/atspi-qt-menus.md",
    "state": "queued",
    "pr": null,
@@ -83276,8 +83276,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-qt-menus",
    "host": "MacBook-Pro",
    "added": "2026-11-11T13:21:21Z",
-   "updated": "2026-11-11T13:21:21Z",
-   "note": ""
+   "updated": "2026-11-12T12:16:26Z",
+   "note": "",
+   "advanced": "2026-11-12T12:16:26Z"
   },
   {
    "id": "atspi-combo-choice",
