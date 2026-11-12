@@ -4,7 +4,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12
 
 **Opening:** not paused
 **Ready budget:** 5 of 8 ready events used in the hour before the last plan, 3 left (plan of 2026-11-12 04:19Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 2, conflict-held 27, stacked 28, held 10, parked 2, open PRs 47, queued since the last plan 2; merged 291, closed 34
+**Counts:** openable now 2, conflict-held 27, stacked 28, held 11, parked 2, open PRs 47, queued since the last plan 1; merged 291, closed 34
 
 ## Openable now (2)
 
@@ -78,7 +78,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12
 | masked-length-ok | fix(natives): report a setValue that reads back as a same-length mask as done, not failed | computer | P2 | 0h | ax-masked-readback ([#18989](https://github.com/can1357/oh-my-pi/pull/18989)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/masked-length-ok) |
 | takeover-attached-hint | fix(natives): name the background route when takeover refuses a macOS suggestion list | computer | P2 | 0h | autofill-rows | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/takeover-attached-hint) |
 
-## Held (10)
+## Held (11)
 
 | id | title | area | priority | age | hold | branch |
 |---|---|---|---|---|---|---|
@@ -92,6 +92,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12
 | computer-guide-first-use | feat(coding-agent): send the computer guide with the first computer call | computer | P2 | 1d | Main, 2026-11-11: stays held until #18786 merges with the typed-message guide channel (design check replace); then one property on the computer prelude, drop the wrap variant, re-run its blind legs | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-guide-first-use) |
 | browser-cursor | feat(browser): draw the acting agent's cursor in OMP-driven tabs | browser | P2 | 1d | Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-cursor) |
 | desktop-cursor | feat(coding-agent,natives): show each agent's cursor where its computer input lands on macOS | coding-agent | P2 | 1d | Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check \| Main 2026-11-12: before it opens, the waiting-key-chord case with the cursor actually drawn (20 trials at a 20 s deadline; CursorDemo's cursor-on arm never drew one, and an early run on the combined tree returned 'Cancelled, input may be partial' 11/11, unexplained), on the polished branch will/desktop-cursor-polish. | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/desktop-cursor) |
+| win-type-insert | feat(natives): insert typed text into a focused Windows multi-line edit control | computer | P2 | 0h | Main, 2026-11-12: proposal; opens only after entry A merges and Will has seen the body | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-type-insert) |
 
 ## Parked (2)
 
@@ -152,9 +153,8 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12
 | [#18982](https://github.com/can1357/oh-my-pi/pull/18982) | computer-secure-input | fix(natives,coding-agent): report macOS secure input and stop claiming globalEscape under it | computer | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-secure-input) |
 | [#18989](https://github.com/can1357/oh-my-pi/pull/18989) | ax-masked-readback | fix(natives): never quote the written text when a setValue read-back disagrees | computer | P3 | 0h | keep; accepted pair with #18915: Main, 2026-11-12: accepted; adjacent doc/cfg lines on ax.rs text_readback; whichever lands second deletes the cfg_attr(..., allow(dead_code)) on masked | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-masked-readback) |
 
-## Queued since the last plan (2)
+## Queued since the last plan (1)
 
 | id | title | area | priority | age | branch |
 |---|---|---|---|---|---|
 | win-type-drain | fix(natives,coding-agent): stop Windows takeover typing from losing text the app had not read yet | computer | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-type-drain) |
-| win-type-insert | feat(natives): insert typed text into a focused Windows multi-line edit control | computer | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-type-insert) |
