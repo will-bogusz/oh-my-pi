@@ -78402,7 +78402,7 @@
    "area": "browser",
    "priority": "P1",
    "needs": [],
-   "base": "55251e34c26eeb5a31a5c86cedf243acd7e2cb23",
+   "base": "c8fe41d6b15724611a6bc7ec693e788a3f0c6c95",
    "body": "bodies/covered-fill.md",
    "state": "queued",
    "pr": null,
@@ -78410,8 +78410,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/covered-fill",
    "host": "MacBook-Pro",
    "added": "2026-11-11T02:11:47Z",
-   "updated": "2026-11-11T14:02:23Z",
-   "note": ""
+   "updated": "2026-11-12T23:20:40Z",
+   "note": "",
+   "advanced": "2026-11-12T23:20:40Z"
   },
   {
    "id": "atspi-text-first",
