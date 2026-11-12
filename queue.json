@@ -86319,10 +86319,14 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-12T12:56:37Z",
+  "checked": "2026-11-12T13:27:30Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
+   "atspi-huge-children": {
+    "since": "2026-11-12T13:27:30Z",
+    "title": "fix(natives): stop Linux accessibility reads from freezing apps that show long tables"
+   },
    "atspi-combo-choice": {
     "since": "2026-11-12T12:26:00Z",
     "title": "fix(natives): choose Linux combo box options without opening their keyboard-grabbing list"
@@ -86331,17 +86335,25 @@
     "since": "2026-11-12T10:53:55Z",
     "title": "fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility"
    },
+   "ax-row-action": {
+    "since": "2026-11-12T13:27:30Z",
+    "title": "fix(natives): follow rebuilt macOS table rows without selecting a neighbour"
+   },
    "win-type-drain": {
     "since": "2026-11-12T12:26:00Z",
     "title": "fix(natives,coding-agent): stop Windows takeover typing from losing text the app had not read yet"
+   },
+   "x11-click-stale-popup": {
+    "since": "2026-11-12T13:27:30Z",
+    "title": "fix(natives): refuse X11 presses outside an open popup of the app"
    },
    "observe-settle": {
     "since": "2026-11-12T12:26:00Z",
     "title": "feat(browser): let observe() settle the effects of the preceding action"
    },
-   "ax-ref-read-as-followup": {
-    "since": "2026-11-12T12:26:00Z",
-    "title": "fix(natives): skip unused ref-check reads and recover display refs"
+   "macos-press-click-hint": {
+    "since": "2026-11-12T13:27:30Z",
+    "title": "fix(natives): point a refused macOS press at the element's own click"
    },
    "factory-droid-171-models": {
     "since": "2026-11-12T12:26:00Z",
@@ -89804,6 +89816,37 @@
     "files": [
      "crates/pi-natives/src/desktop/macos/mod.rs"
     ]
+   },
+   {
+    "at": "2026-11-12T13:27:30Z",
+    "kind": "openable",
+    "id": "atspi-huge-children",
+    "title": "fix(natives): stop Linux accessibility reads from freezing apps that show long tables"
+   },
+   {
+    "at": "2026-11-12T13:27:30Z",
+    "kind": "openable",
+    "id": "ax-row-action",
+    "title": "fix(natives): follow rebuilt macOS table rows without selecting a neighbour"
+   },
+   {
+    "at": "2026-11-12T13:27:30Z",
+    "kind": "openable",
+    "id": "x11-click-stale-popup",
+    "title": "fix(natives): refuse X11 presses outside an open popup of the app"
+   },
+   {
+    "at": "2026-11-12T13:27:30Z",
+    "kind": "openable",
+    "id": "macos-press-click-hint",
+    "title": "fix(natives): point a refused macOS press at the element's own click"
+   },
+   {
+    "at": "2026-11-12T13:27:30Z",
+    "kind": "unopenable",
+    "id": "ax-ref-read-as-followup",
+    "title": "fix(natives): skip unused ref-check reads and recover display refs",
+    "why": "plan: wait (conflicts with atspi-huge-children in crates/pi-natives/src/desktop/macos/ax.rs)"
    }
   ]
  },
@@ -95209,8 +95252,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-12T13:12:15.769516Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-12T13:27:31.001395Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -95617,26 +95660,16 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): read each AT-SPI element in two concurrent rounds",
-    "action": "wait",
+    "action": "held",
     "reasons": [
-     "conflicts with #19026 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with #18353 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
-     "conflicts with #18013 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/libei.rs",
-     "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with atspi-combo-choice in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with atspi-text-first in crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
-     "conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
+     "held: Main, 2026-11-12: pending interleaved current-main/head performance remeasurement; body unchanged until results",
+     "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#19026",
-     "#18353",
-     "#18013",
-     "atspi-huge-children",
-     "atspi-combo-choice",
-     "atspi-text-first"
+     "atspi-huge-children"
     ],
     "needs": [],
     "created": "2026-11-03T09:05:24Z"
@@ -95649,16 +95682,14 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): follow rebuilt macOS table rows without selecting a neighbour",
-    "action": "wait",
-    "reasons": [
-     "conflicts with #16553 in crates/pi-natives/src/desktop/macos/mod.rs"
-    ],
-    "note": "",
+    "action": "open",
+    "reasons": [],
+    "note": "accepted pair with #16553: QueueFourteen, 2026-11-12 (Main's standing rule: use-list collision, opener records): only conflict is the use list in crates/pi-natives/src/desktop/macos/mod.rs: #16553 adds 'pub(super) use clicks::ClickJournal;', this entry adds is_standard_window and window_titles to the ax/capture use lines; nothing removed; combined form is both",
     "over": [],
-    "paired": [],
-    "blocked_by": [
+    "paired": [
      "#16553"
     ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T11:44:46Z"
    },
@@ -95831,15 +95862,12 @@
     "title": "fix(natives): type X11 XTest text through a neutral keyboard state",
     "action": "wait",
     "reasons": [
-     "conflicts with #18013 in crates/pi-natives/Cargo.toml",
-     "conflicts with x11-click-stale-popup in crates/pi-natives/src/desktop/linux/x11/input.rs",
-     "conflicts with main in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/x11/input.rs"
+     "conflicts with x11-click-stale-popup in crates/pi-natives/src/desktop/linux/x11/input.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18013",
      "x11-click-stale-popup"
     ],
     "needs": [],
@@ -95991,20 +96019,13 @@
     "title": "fix(natives): preserve the empty-field warning on Linux write timeouts",
     "action": "wait",
     "reasons": [
-     "conflicts with #19026 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with atspi-combo-choice in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with atspi-text-first in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
+     "conflicts with #19026 in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#19026",
-     "atspi-huge-children",
-     "atspi-combo-choice",
-     "atspi-text-first"
+     "#19026"
     ],
     "needs": [],
     "created": "2026-11-11T21:44:32Z"
@@ -96125,6 +96146,7 @@
      "conflicts with #18987 in docs/computer-use.md",
      "conflicts with atspi-combo-choice in docs/computer-use.md",
      "conflicts with atspi-text-first in docs/computer-use.md",
+     "conflicts with ax-row-action in docs/computer-use.md",
      "conflicts with win-type-drain in docs/computer-use.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts"
     ],
@@ -96138,6 +96160,7 @@
      "#18987",
      "atspi-combo-choice",
      "atspi-text-first",
+     "ax-row-action",
      "win-type-drain"
     ],
     "needs": [],
@@ -96155,6 +96178,7 @@
     "reasons": [
      "conflicts with #19027 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/macos/ax.rs",
+     "conflicts with ax-row-action in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with main in crates/pi-natives/src/desktop/macos/ax.rs"
     ],
     "note": "",
@@ -96162,7 +96186,8 @@
     "paired": [],
     "blocked_by": [
      "#19027",
-     "atspi-huge-children"
+     "atspi-huge-children",
+     "ax-row-action"
     ],
     "needs": [],
     "created": "2026-11-11T09:59:13Z"
@@ -96177,13 +96202,15 @@
     "title": "fix(natives): name a macOS control by the label its AXTitleUIElement links to",
     "action": "wait",
     "reasons": [
-     "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs"
+     "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs",
+     "conflicts with ax-row-action in crates/pi-natives/src/desktop/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "atspi-huge-children"
+     "atspi-huge-children",
+     "ax-row-action"
     ],
     "needs": [],
     "created": "2026-11-11T14:43:42Z"
@@ -96225,6 +96252,7 @@
      "conflicts with #18987 in docs/computer-use.md",
      "conflicts with atspi-combo-choice in docs/computer-use.md",
      "conflicts with atspi-text-first in docs/computer-use.md",
+     "conflicts with ax-row-action in crates/pi-natives/src/desktop/macos/input.rs, docs/computer-use.md",
      "conflicts with win-type-drain in docs/computer-use.md",
      "conflicts with main in docs/computer-use.md"
     ],
@@ -96241,6 +96269,7 @@
      "#18987",
      "atspi-combo-choice",
      "atspi-text-first",
+     "ax-row-action",
      "win-type-drain"
     ],
     "needs": [
@@ -96380,6 +96409,7 @@
     "reasons": [
      "conflicts with #19026 in crates/pi-natives/src/desktop/ax.rs",
      "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs",
+     "conflicts with ax-row-action in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with win-type-drain in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with macos-press-click-hint in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs"
@@ -96390,6 +96420,7 @@
     "blocked_by": [
      "#19026",
      "atspi-huge-children",
+     "ax-row-action",
      "win-type-drain",
      "macos-press-click-hint"
     ],
@@ -96631,6 +96662,7 @@
      "conflicts with #18987 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with atspi-combo-choice in docs/computer-use.md",
      "conflicts with atspi-text-first in docs/computer-use.md",
+     "conflicts with ax-row-action in docs/computer-use.md",
      "conflicts with win-type-drain in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/test/tools/computer.test.ts"
@@ -96647,6 +96679,7 @@
      "#18987",
      "atspi-combo-choice",
      "atspi-text-first",
+     "ax-row-action",
      "win-type-drain"
     ],
     "needs": [
@@ -96672,6 +96705,7 @@
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18987 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
      "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with ax-row-action in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with win-type-drain in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with macos-press-click-hint in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
@@ -96688,6 +96722,7 @@
      "#18925",
      "#18987",
      "atspi-huge-children",
+     "ax-row-action",
      "win-type-drain",
      "macos-press-click-hint"
     ],
@@ -96712,6 +96747,7 @@
      "conflicts with #19026 in docs/tools/computer.md",
      "conflicts with #18925 in crates/pi-natives/src/desktop/macos/capture.rs",
      "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with ax-row-action in crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with win-type-drain in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
      "conflicts with macos-press-click-hint in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/test/tools/computer.test.ts"
@@ -96724,6 +96760,7 @@
      "#19026",
      "#18925",
      "atspi-huge-children",
+     "ax-row-action",
      "win-type-drain",
      "macos-press-click-hint"
     ],
@@ -97091,7 +97128,7 @@
     "area": "factory-droid",
     "priority": null,
     "title": "feat(catalog): add the Factory Droid models droid 1.7.1 serves",
-    "action": "open",
+    "action": "next-hour",
     "reasons": [],
     "note": "advance first",
     "over": [],
