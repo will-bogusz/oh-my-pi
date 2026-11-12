@@ -83346,7 +83346,7 @@
    "branch": "will/x11-mpx-reattach",
    "title": "fix(natives): keep X11 background input out of your window after a screen lock or VT switch",
    "area": "computer",
-   "priority": "P0",
+   "priority": "P1",
    "needs": [
     "#18825"
    ],
@@ -83358,7 +83358,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-mpx-reattach",
    "host": "MacBook-Pro",
    "added": "2026-11-11T17:39:36Z",
-   "updated": "2026-11-12T12:07:17Z",
+   "updated": "2026-11-12T12:09:41Z",
    "note": "X11SlaveReattach 2026-11-11: merged with #18828 (x11-mpx-key-confirm), #18828's xvfb-only ignored tests typing_loss_fails_and_inhibits_the_next_call and typing_deadline_bounds_busy_events_and_rejects_late_releases fail at run time (its typing_fixture names its keyboard slave after the core master, so begin() refuses it as gone); whichever lands second adds a #[cfg(test)] seam in Mpx::routes() returning [None, None] when release_events is set. Compiles either way. P0 on LightDM lock with real password unlock 10/10 (main) vs 0/10 (fix); suspend not measurable in the guest.",
    "advanced": "2026-11-12T12:07:17Z",
    "built": [
@@ -85469,7 +85469,7 @@
    "branch": "will/masked-length-ok",
    "title": "fix(natives): report a setValue that reads back as a same-length mask as done, not failed",
    "area": "computer",
-   "priority": "P2",
+   "priority": "P1",
    "needs": [
     "ax-masked-readback"
    ],
@@ -85481,7 +85481,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/masked-length-ok",
    "host": "MacBook-Pro",
    "added": "2026-11-12T04:00:44Z",
-   "updated": "2026-11-12T12:00:11Z",
+   "updated": "2026-11-12T12:09:41Z",
    "note": "MaskedReshape, 2026-11-12: head 6d9511488c03b415a44bfb8e035321a0e47c3adb; verdict-only same-length mask success, no set_value note channel. #18915 comment/cfg adjacency only; four other counterpart entries clean. Prerequisite #18989 vs atspi-write-timeout-warning test guard remains statement-level, accepted on the timeout entry by Main; combined form not run. Keep queued; needs ax-masked-readback.",
    "line_loss_overrides": [
     {
@@ -85667,7 +85667,7 @@
    "branch": "will/takeover-attached-hint",
    "title": "fix(natives): name the background route when takeover refuses a macOS suggestion list",
    "area": "computer",
-   "priority": "P2",
+   "priority": "P0",
    "needs": [
     "autofill-rows"
    ],
@@ -85679,7 +85679,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/takeover-attached-hint",
    "host": "MacBook-Pro",
    "added": "2026-11-12T04:03:51Z",
-   "updated": "2026-11-12T12:03:51Z",
+   "updated": "2026-11-12T12:09:41Z",
    "note": "",
    "advanced": "2026-11-12T09:38:03Z",
    "built": [
