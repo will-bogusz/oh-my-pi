@@ -16,9 +16,9 @@ Review first: `crates/pi-natives/src/desktop/linux/ax.rs`, `set_value` and `writ
 
 `cargo test -p pi-natives --lib desktop::linux` exercises a peer-to-peer AT-SPI app that stops answering before the clear, during the clear, or during the rewrite, for both deadline expiry and cancellation. The regression checks that only the confirmed-clear case warns; the existing ignored-write case also rejects a false empty-field warning.
 
-Negative control: `interrupted_masked_text_write_warns_if_the_field_may_be_empty` fails on 4988c32c9a with the test added (88 passed, 1 failed), because the rewrite timeout lacks the warning. With the fix, all 89 Linux tests pass, including cancellation after the clear.
+Negative control: `interrupted_masked_text_write_warns_if_the_field_may_be_empty` fails on 4988c32c9a with the test added (88 passed, 1 failed), because the rewrite timeout lacks the warning. That negative control predates this rebase. Re-run on current main (`9f728bd56e`) on goliath: `cargo test -p pi-natives --lib desktop::linux` passed 100 tests (30 unrelated display-dependent tests ignored), including cancellation after the clear and the merged masked-readback assertions; `cargo test -p pi-natives --lib desktop::ax` passed 45 tests.
 
-Linux `scripts/rust-check --base 4988c32c9a` passed clippy and rustfmt on the final head. Windows and macOS are not affected: the diff changes only Linux Rust code and the natives changelog.
+Linux `scripts/rust-check` passed clippy and rustfmt on the rebased head. Windows and macOS are not affected: the diff changes only Linux Rust code and the natives changelog.
 
 - [ ] `bun check` passes
 - [x] Tested locally
