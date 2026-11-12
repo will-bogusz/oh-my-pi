@@ -83695,7 +83695,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ax-masked-readback",
    "host": "MacBook-Pro",
    "added": "2026-11-12T02:37:51Z",
-   "updated": "2026-11-12T04:03:41Z",
+   "updated": "2026-11-12T04:11:59Z",
    "note": "AuthFinish 2026-11-12: widened per Main (no written text in any failed read-back); delta reviewed (AuthFinish.ReviewReadbackDelta, fixed); overlaps queued atspi-value-readback in crates/pi-natives/src/desktop/linux/ax.rs\nMain 2026-11-12: whichever of ax-masked-readback / #18915 lands second deletes the cfg_attr(..., allow(dead_code)) on ax.rs `masked` in its rebase (stale after #18915, not wrong); combined doc = ax-masked-readback\u2019s wording, no cfg on text_readback.\nMain 2026-11-12: mechanical move, no behaviour change, existing review stamp stands.",
    "advanced": "2026-11-12T03:32:58Z",
    "rebases_after": [
@@ -83850,15 +83850,6 @@
      "host": "MacBook-Pro"
     },
     {
-     "with": "#18982",
-     "code": "5d6d6f9b4e0f559e4fbca78df2656fac68c1f2fb",
-     "with_code": "1b244cc395450ef6b9404ea40764bb540ecfd460",
-     "tip": "d4c6fa013176db90c568d902d83a963c018ebe07",
-     "with_tip": "fe85dfc49eb684ca3fa1e346646fbd5bca7abfd3",
-     "at": "2026-11-12T03:57:34Z",
-     "host": "MacBook-Pro"
-    },
-    {
      "with": "agent-identity",
      "code": "5d6d6f9b4e0f559e4fbca78df2656fac68c1f2fb",
      "with_code": "45cd6bebce3dde6136e342e569befa1d0a909925",
@@ -83919,6 +83910,15 @@
      "tip": "d4c6fa013176db90c568d902d83a963c018ebe07",
      "with_tip": "6a9c583114243114f9e7ce85bd7d97c0f3aa544c",
      "at": "2026-11-12T04:03:41Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#18982",
+     "code": "5d6d6f9b4e0f559e4fbca78df2656fac68c1f2fb",
+     "with_code": "033f7b7336403cd02a574a042409d8376f7db133",
+     "tip": "d4c6fa013176db90c568d902d83a963c018ebe07",
+     "with_tip": "e7ea5d038f14b81e4de445ac152cb50116b0c2a7",
+     "at": "2026-11-12T04:11:52Z",
      "host": "MacBook-Pro"
     }
    ]
