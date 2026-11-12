@@ -78312,7 +78312,20 @@
    "host": "MacBook-Pro",
    "added": "2026-11-11T02:55:11Z",
    "updated": "2026-11-11T02:55:11Z",
-   "note": ""
+   "note": "",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-12T13:08:46Z",
+     "reason": "Keep main typing-user test and keyboard-grab regression together; migrate X11Input constructor to explicit display",
+     "old": "6723f352d3d72dbdb6f47a37a5ab7cfa6078d1b9",
+     "new": "24e19ebf5a9bd5ca86d5e3560ad938bb032cf962",
+     "dropped": {
+      "crates/pi-natives/src/desktop/linux/x11/input.rs": [
+       "\t\tlet mut input = X11Input::new(Arc::new(input_conn), root).unwrap();"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "x11-click-stale-popup",
