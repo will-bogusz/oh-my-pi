@@ -2,26 +2,30 @@
 
 I made the relay tell the agent when it hides a password manager's frame, so the agent can tell the user their "Save login?" card is gone and nothing was saved.
 
-Against a signed-in 1Password, every call that ran into a hidden frame now says so and names 1Password, and the tab is kept exactly as often as on `main`:
+On head `8b646ad6c2d` against `main` `6e9204c9ee4`, a signed-in Web Store 1Password kept all 60 tabs on each build. The head named all 37 emptied frames "1Password" once, with no missing or repeated frame names; main and the no-login control emitted none.
 
-| 10 tries each, Chrome 157, 1Password 8.12.44.33 | tab kept, `main` / this PR | next call ok, `main` / this PR | this PR: names "1Password" |
-|---|---|---|---|
-| fill and submit, "Save login?" card | 10 / 10 | 10 / 10 | 10: the card on the failing submit, the sign-in frame on the open |
-| Log in button opens the login page, field focused | 10 / 10 | 10 / 10 | 9 (9 tries drew a frame), on the failing click |
-| open a login page, field focused on load | 10 / 10 | 10 / 10 | 8 (8 drew), on the open |
-| type username, then password | 10 / 10 | 10 / 10 | 10, on the open |
-| click the username field and type | 10 / 10 | 10 / 10 | 10, on the open |
-| refocus the fields 3 times | 10 / 10 | 10 / 10 | 10, on the open |
-| adopt a login popup | 10 / 10 | 4 / 8 | 0 |
-| page without a login field | 10 / 10 | 10 / 10 | 0 |
+Chrome stable **157.0.8103.79**, 1Password **8.12.44.33**; 10 tries per row. Pairs below are main / head. Both the inline login card and "Save login?" card were visually confirmed before the runs.
 
-Each hidden frame is named once. Popup adoption failed only in tries where 1Password drew a frame (6 on `main`, 2 here), as on `main`.
+| Cell | tab kept | key call ok | next call ok | tries drawing the relevant frame | head: named frames, call |
+|---|---|---|---|---|---|
+| autofocus | 10 / 10 | 10 / 10 | 8 / 10 | 9 / 6 | 6 inline, open |
+| Log in button loads focused field | 10 / 10 | 0 / 0 | 10 / 10 | 7 / 5 | 5 inline, failing click |
+| type username then password | 10 / 10 | 9 / 10 | 10 / 10 | 9 / 7 | 7 inline, open |
+| fill and submit | 10 / 10 | 0 / 0 | 10 / 10 | 9 / 9 save cards | 10 inline on open; 9 save cards on failing submit |
+| adopt login popup | 10 / 10 | 8 / 6 | 8 / 6 | 2 / 4 | 0; no frame emptied |
+| no login field | 10 / 10 | 10 / 10 | 10 / 10 | 0 / 0 | 0 |
 
-The notice leads with "Nothing was saved", then names the frame's page, the extension's id and the page's own title, labelled as the page's words ("the extension whose page calls itself "1Password""), and says the frame is hidden for the user too.
+Popup adoption/next succeeded in 0/2 vs 0/4 frame-drawn tries, and 8/8 vs 6/6 without a frame.
 
-- **Reporting only.** `main`'s sweep and retry are unchanged; the identity check runs beside them. Holding the reattach behind the emptying is what loses the tab against 1Password.
-- **Unforgeable, no new permission.** A frame `src` is page-written, so the extension fetches each emptied URL from the tab's own frame, in its isolated world, and reports only pages that load: an installed extension's page exposed to the site. Id and path come from the loaded URL; paths are cut to 100 characters, titles to 60, both quoted.
-- **Told once.** The bridge holds what was hidden on the tab. The worker driving it takes it when it adopts the tab, or with the result of the run it was told during; a worker Chrome detached takes nothing, so the one that re-adopts the tab does.
+Main's two failed autofocus next calls were `target_closed` detaches while 1Password's inline frame loaded: logs cannot distinguish another frame from the same one finishing. Both later reads worked; no tab was lost.
+
+Unlocked at each build's start and before tries 0 and 5 in every cell; other tries' starting lock state was not measured. Two later reads checked delayed/duplicate reports without repeating cells; no notice needed them.
+
+The notice says "Nothing was saved", identifies the hidden frame and extension, and labels the title as the page's words, not Chrome's name for the extension.
+
+- **Reporting only:** identity probes do not hold main's sweep or retry.
+- **No new permission:** fetch each emptied URL from its own frame in the isolated world; report only exposed extension pages that load. Loaded URLs supply ids/paths; paths and titles are quoted and bounded.
+- **Told once:** the driving worker consumes reports; a detached worker leaves them for its replacement.
 
 ## Why
 
@@ -35,11 +39,11 @@ Blind Claude Haiku 5.5 runs with a stand-in vault whose card page is titled `1Pa
 | says nothing was saved | 0/5 | 1/5 |
 | claims a login was saved | 0/5 | 0/5 |
 
-**Optional add for the maintainer:** the `management` permission would give Chrome's name for the extension instead of the page's title. A new install would then warn "Manage your apps, extensions, and themes".
+**Alternative:** `management` would supply Chrome's extension name, but adds the install warning "Manage your apps, extensions, and themes".
 
 ## Testing
 
-`bun test packages/coding-agent/test/tools/browser-relay`, in order and with `--randomize` seeds 1 to 10: all pass. A stand-in vault's save card is named once with its title; frames the page plants (an uninstalled id, a page the vault does not expose, a `/../` path carrying page text, the relay's own page) are emptied and never named. Unit tests fail if the probe holds the retry, if one gone frame drops the others' report, or if the bridge hands what was hidden to the worker Chrome detached instead of the one that re-adopts the tab. The fixture now awaits each `browser.installExtension`; Puppeteer's `enableExtensions` list is not awaited.
+`bun test packages/coding-agent/test/tools/browser-relay`, in order and with `--randomize` seeds 1 to 10: all pass. A stand-in save card is named once; uninstalled, unexposed, `/../` and relay-own pages are never named. Tests cover nonblocking probes, partial probe failure and replacement-worker delivery; extension installation is awaited.
 
 Not covered: frames held for a tab nobody adopts again are told to the next omp that adopts it; a report that lands after the last call on a tab is never shown; the identity fetch runs in the driven tab, so it may appear in that tab's captured network requests.
 
