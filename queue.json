@@ -93202,6 +93202,11 @@
     "sha": "0557ccfcd7035247f198ae35cfa8ffc8f69698e8",
     "at": "2026-11-12T10:12:25Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "0557ccfcd7035247f198ae35cfa8ffc8f69698e8",
+    "at": "2026-11-12T10:13:25Z",
+    "host": "goliath"
    }
   },
   "e6c1d681a9e7b2e8cb77cbed5510246135aa82f2": {
