@@ -82405,7 +82405,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ax-row-action",
    "host": "MacBook-Pro",
    "added": "2026-11-11T11:44:46Z",
-   "updated": "2026-11-12T12:49:56Z",
+   "updated": "2026-11-12T13:22:58Z",
    "note": "Main, 2026-11-12: approved combined row-two-functions.diff. No reusable row read plus failing second walk is covered by read_whole whole-read requirement, not a dedicated test.",
    "line_loss_overrides": [
     {
@@ -82423,7 +82423,13 @@
      }
     }
    ],
-   "advanced": "2026-11-12T12:43:52Z"
+   "advanced": "2026-11-12T12:43:52Z",
+   "rebases_after": [
+    16553
+   ],
+   "pair_reasons": {
+    "16553": "QueueFourteen, 2026-11-12 (Main's standing rule: use-list collision, opener records): only conflict is the use list in crates/pi-natives/src/desktop/macos/mod.rs: #16553 adds 'pub(super) use clicks::ClickJournal;', this entry adds is_standard_window and window_titles to the ax/capture use lines; nothing removed; combined form is both"
+   }
   },
   {
    "id": "win-takeover-focus",
