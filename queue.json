@@ -84562,8 +84562,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/masked-length-ok",
    "host": "MacBook-Pro",
    "added": "2026-11-12T04:00:44Z",
-   "updated": "2026-11-12T04:00:44Z",
-   "note": ""
+   "updated": "2026-11-12T05:48:55Z",
+   "note": "Main 2026-11-12: RESHAPE by AutofillRows: set_value note channel comes out (verdict only; same-length mask is plain success); do NOT open head ff7b62a3a84; AutofillRows updates the entry and reports remaining collisions to Main."
   },
   {
    "id": "takeover-attached-hint",
