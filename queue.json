@@ -77925,6 +77925,55 @@
        "\t\t\t\tAtSpiAx::find_focused(client, table, 0).await"
       ]
      }
+    },
+    {
+     "at": "2026-11-12T15:56:36Z",
+     "reason": "Replace the unsafe small-list GetChildren branch with budget-limited indexed reads, check focused state before ChildCount, render unknown unread counts without a number, and migrate D-Bus test fixtures to indexed traversal.",
+     "old": "f1591823b370667dec681756748576f37508a454",
+     "new": "68d568296ae6fcbc3fe6850f9c43a885b8e02250",
+     "dropped": {
+      "crates/pi-natives/src/desktop/ax.rs": [
+       "\t/// Children the backend left unread because the element has too many to",
+       "\t/// read whole, such as a table with a million rows.",
+       "\t\tif state.unread > 0 {"
+      ],
+      "crates/pi-natives/src/desktop/linux/ax.rs": [
+       "/// The most children OMP asks an element for in one `GetChildren`. Qt answers",
+       "/// that call by building, and keeping, an accessible object for every child,",
+       "/// and a reply for a long table can outgrow the bus's message limit, which",
+       "/// cuts the app off the accessibility bus; at-spi2-atk refuses lists over",
+       "/// 65,536.",
+       "/// `proxy`'s children, given it reports `count` of them, and how many were",
+       "/// left unread: one `GetChildren` for at most [`MAX_CHILDREN`], else the first",
+       "/// `limit` asked for one at a time. An unreadable count leaves the children",
+       "/// unread, without asking the application to construct an unbounded list.",
+       "/// Failed indices count as unread; if none answers, the first error is",
+       "/// returned.",
+       "\t\treturn Ok((Vec::new(), 1));",
+       "\tif count <= MAX_CHILDREN {",
+       "\t\tlet children = proxy.get_children().await?;",
+       "\t\treturn Ok((",
+       "\t\t\tchildren",
+       "\t\t\t\t.filter(|child| !child.is_null())",
+       "\tlet replies: Vec<_> = futures::stream::iter(0..read)",
+       "\t\t.buffered(256)",
+       "\tlet mut children = Vec::with_capacity(replies.len());",
+       "\tfor reply in replies {",
+       "\t\tlet (state, count) = futures::try_join!(",
+       "\t\t\tanswered(\"the application\", reply_timeout, proxy.get_state()),",
+       "\t\t\tanswered(\"the application\", reply_timeout, proxy.child_count()),",
+       "\t\t)?;",
+       "\t\tlet count = count.ok().map(|count| count.max(0) as u32);",
+       "\t/// `h`'s children, at most `limit` of them once it has more than",
+       "\t/// [`MAX_CHILDREN`], with the number left unread. `count` is its",
+       "\t/// `ChildCount` when already read.",
+       "\t\t\t\tunread_children: u32::from(child_count.is_err()),",
+       "\t\t\tstate: Vec<u32>,",
+       "\t\t\t\t\t.serve_at(\"/cell\", Cell { state: vec![0, 0] })",
+       "\t\t\t\t\t.serve_at(\"/focus\", Cell { state: vec![focused as u32, (focused >> 32) as u32] })",
+       "\t\t\tassert!(unread > 0);"
+      ]
+     }
     }
    ],
    "advanced": "2026-11-12T15:28:43Z",
