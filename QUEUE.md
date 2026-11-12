@@ -4,7 +4,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-12 02:37Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 4, conflict-held 27, stacked 28, held 10, parked 2, open PRs 42, queued since the last plan 1; merged 291, closed 33
+**Counts:** openable now 4, conflict-held 27, stacked 27, held 11, parked 2, open PRs 42, queued since the last plan 1; merged 291, closed 33
 
 ## Openable now (4)
 
@@ -47,7 +47,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12
 | macos-ax-linked-label | fix(natives): name a macOS control by the label its AXTitleUIElement links to | natives | P2 | 12h | [#18892](https://github.com/can1357/oh-my-pi/pull/18892) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-ax-linked-label) |
 | macos-press-click-hint | fix(natives): point a refused macOS press at the element's own click | computer | P2 | 7h | [#18892](https://github.com/can1357/oh-my-pi/pull/18892) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-press-click-hint) |
 
-## Stacked (28)
+## Stacked (27)
 
 | id | title | area | priority | age | needs | branch |
 |---|---|---|---|---|---|---|
@@ -78,9 +78,8 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12
 | ax-ref-read-as-followup | fix(natives): skip unused ref-check reads and recover display refs | computer | P2 | 11h | ax-ref-read-as ([#18892](https://github.com/can1357/oh-my-pi/pull/18892)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-ref-read-as-followup) |
 | x11-mpx-reattach | fix(natives): keep X11 background input out of your window after a screen lock or VT switch | computer | P0 | 9h | [#18825](https://github.com/can1357/oh-my-pi/pull/18825) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-mpx-reattach) |
 | atspi-write-timeout-warning | fix(natives): preserve the empty-field warning on Linux write timeouts | computer | P2 | 5h | atspi-unanswered-app ([#18914](https://github.com/can1357/oh-my-pi/pull/18914)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-write-timeout-warning) |
-| relay-hidden-frames | fix(browser-relay): say what the relay hid in a driven tab | browser | P1 | 0h | relay-frame-race | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-hidden-frames) |
 
-## Held (10)
+## Held (11)
 
 | id | title | area | priority | age | hold | branch |
 |---|---|---|---|---|---|---|
@@ -94,6 +93,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12
 | browser-cursor | feat(browser): draw the acting agent's cursor in OMP-driven tabs | browser | P2 | 1d | Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-cursor) |
 | desktop-cursor | feat(coding-agent,natives): show each agent's cursor where its computer input lands on macOS | coding-agent | P2 | 1d | Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check \| Main 2026-11-12: before it opens, the waiting-key-chord case with the cursor actually drawn (20 trials at a 20 s deadline; CursorDemo's cursor-on arm never drew one, and an early run on the combined tree returned 'Cancelled, input may be partial' 11/11, unexplained), on the polished branch will/desktop-cursor-polish. | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/desktop-cursor) |
 | relay-frame-race | fix(browser-relay): keep a driven tab when a password manager's frame drops omp from it | browser | P0 | 0h | Main, 2026-11-12: regression against a signed-in real 1Password (VaultSignedIn, VM, Chrome 154, 1Password 8.12.44.33): autofocus cell tab kept 4/10 on the fix, 10/10 on main; after the first sweep 1Password puts back a frame the sweep finds but cannot empty and Chrome refuses every attach | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-frame-race) |
+| relay-hidden-frames | fix(browser-relay): say what the relay hid in a driven tab | browser | P1 | 0h | Main, 2026-11-12: held behind relay-frame-race (regression hold) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-hidden-frames) |
 
 ## Parked (2)
 
