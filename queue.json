@@ -94517,6 +94517,11 @@
     "sha": "6402545ac0b8aa55ee06973df7ab9507c4c57f4b",
     "at": "2026-11-12T12:22:14Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "6402545ac0b8aa55ee06973df7ab9507c4c57f4b",
+    "at": "2026-11-12T12:25:00Z",
+    "host": "goliath"
    }
   }
  },
