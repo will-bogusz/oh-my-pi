@@ -84893,7 +84893,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-qt-menus",
    "host": "MacBook-Pro",
    "added": "2026-11-11T13:21:21Z",
-   "updated": "2026-11-12T16:43:36Z",
+   "updated": "2026-11-12T16:44:03Z",
    "note": "",
    "advanced": "2026-11-12T12:59:38Z",
    "line_loss_overrides": [
@@ -85104,7 +85104,8 @@
      "host": "goliath"
     }
    ],
-   "opened": "2026-11-12T16:43:36Z"
+   "opened": "2026-11-12T16:43:36Z",
+   "readied": "2026-11-12T16:44:02Z"
   },
   {
    "id": "atspi-combo-choice",
