@@ -73691,7 +73691,33 @@
     "18925": "Main, 2026-11-12: only conflict is adjacent class fields in packages/coding-agent/src/tools/browser/tab-worker.ts: #18925 adds #nativeWindows?, this entry adds #actionRequestSeq? and #settling? at the same spot; nothing removed; combined form is both declarations"
    },
    "opened": "2026-11-12T16:39:37Z",
-   "readied": "2026-11-12T16:40:12Z"
+   "readied": "2026-11-12T16:40:12Z",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-12T16:50:31Z",
+     "reason": "Bot fixes intentionally replace log-based pending scans with independent in-flight tracking, keep one shared settle across intervening actions, evaluate quiet DOM in child frames, and update the corresponding documentation sentence.",
+     "old": "858e304452a3621be59e60da04ecaeb733c78408",
+     "new": "279e4d221e5d65e0641fbc08c664fd73dc8afce8",
+     "dropped": {
+      "docs/tools/browser.md": [
+       "On Chromium tabs, the first `observe()` or `ariaSnapshot()` after an input helper or navigation waits for what the actions since the last look started: the main-frame document, fetch and XHR requests begun since the first of them, then 150 ms without DOM changes. The wait is bounded at 3 seconds, or half the call's own budget when that is shorter, and the page is read as it is after that. A look with no action before it does not wait, a request already open before the action is not waited for, and looks issued together share one wait. The first look after `browser.open` or `goto` counts the requests the page load started."
+      ],
+      "packages/coding-agent/src/tools/browser/network.ts": [
+       "\t\tconst mainFrame = this.#page.mainFrame();",
+       "\t\treturn this.#records.some(",
+       "\t\t\trecord =>",
+       "\t\t\t\trecord.seq >= since &&",
+       "\t\t\t\trecord.durationMs === undefined &&",
+       "\t\t\t\t(record.resourceType !== \"document\" || record.request.frame() === mainFrame),"
+      ],
+      "packages/coding-agent/src/tools/browser/tab-worker.ts": [
+       "\t\tif (since !== undefined) {",
+       "\t\t\t\tpage.evaluate(waitForQuietDom, SETTLE_QUIET_MS, remaining),",
+       "\t\t\tif (quiet && !network.hasPendingRequests(since)) return;"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "settle-reads",
