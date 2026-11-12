@@ -82549,7 +82549,7 @@
    "branch": "will/status-entered-text",
    "title": "fix(coding-agent): keep text a cell enters out of browser and computer status lines",
    "area": "browser",
-   "priority": "P2",
+   "priority": "P1",
    "needs": [],
    "base": "d5ac02ce8678cf50f643d3f65361714c92d5d450",
    "body": "bodies/status-entered-text.md",
@@ -82559,8 +82559,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/status-entered-text",
    "host": "MacBook-Pro",
    "added": "2026-11-12T01:30:11Z",
-   "updated": "2026-11-12T01:30:11Z",
-   "note": ""
+   "updated": "2026-11-12T01:42:03Z",
+   "note": "QueueTwelve 2026-11-12: P1 per Main (stops typed secrets being written to session files)"
   },
   {
    "id": "credential-fill-proposal",
