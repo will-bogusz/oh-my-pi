@@ -82685,14 +82685,14 @@
    "needs": [],
    "base": "b437322d9a3900206228e17077415c87ce67c8ca",
    "body": "bodies/relay-frame-race.md",
-   "state": "queued",
+   "state": "closed",
    "pr": null,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-frame-race",
    "host": "MacBook-Pro",
    "added": "2026-11-12T01:59:31Z",
-   "updated": "2026-11-12T02:47:03Z",
-   "note": "",
+   "updated": "2026-11-12T02:52:06Z",
+   "note": "Main 2026-11-12: closed, never requeue. Against signed-in real 1Password (VaultSignedIn, 90 tries on origin/main b437322d9a3) main loses the tab 0 times (fails the call in flight and reattaches); the entry's extra sweeping loses the tab 3-6 in 10 in five of seven cells. The stand-in vault rebuilds its frame in a way the real extension does not.",
    "hold": "Main, 2026-11-12: regression against a signed-in real 1Password (VaultSignedIn, VM, Chrome 154, 1Password 8.12.44.33): autofocus cell tab kept 4/10 on the fix, 10/10 on main; after the first sweep 1Password puts back a frame the sweep finds but cannot empty and Chrome refuses every attach"
   },
   {
