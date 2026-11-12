@@ -85679,7 +85679,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/takeover-attached-hint",
    "host": "MacBook-Pro",
    "added": "2026-11-12T04:03:51Z",
-   "updated": "2026-11-12T12:03:26Z",
+   "updated": "2026-11-12T12:03:51Z",
    "note": "",
    "advanced": "2026-11-12T09:38:03Z",
    "built": [
@@ -85844,7 +85844,8 @@
      "tree": "7515ffe584acfd8a36ae1f830433f698c9b4b80a"
     }
    ],
-   "opened": "2026-11-12T12:03:26Z"
+   "opened": "2026-11-12T12:03:26Z",
+   "readied": "2026-11-12T12:03:51Z"
   },
   {
    "id": "win-type-drain",
