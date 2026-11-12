@@ -90099,8 +90099,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-12T01:15:21.329712Z",
-  "host": "goliath",
+  "at": "2026-11-12T01:40:55.678368Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -90552,8 +90552,10 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in MODULE.bazel.lock"
+    ],
     "note": "accepted pair with #18353; accepted pair with #18013",
     "over": [],
     "paired": [
@@ -90716,8 +90718,10 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in MODULE.bazel.lock"
+    ],
     "note": "accepted pair with #18013; accepted pair with #18914",
     "over": [],
     "paired": [
@@ -90772,8 +90776,10 @@
     "area": "natives",
     "priority": "P2",
     "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in MODULE.bazel.lock"
+    ],
     "note": "accepted pair with #18353; accepted pair with #18914; accepted pair with #18783; accepted pair with #18825",
     "over": [],
     "paired": [
@@ -90938,7 +90944,8 @@
      "needs #18914 (open)",
      "conflicts with #18921 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18892 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs"
+     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs",
+     "its need #18914 conflicts with main in MODULE.bazel.lock"
     ],
     "note": "",
     "over": [],
@@ -90995,6 +91002,7 @@
      "conflicts with #18947 in crates/pi-natives/Cargo.toml",
      "conflicts with #18353 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #18013 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/libei.rs",
+     "its need #18914 conflicts with main in MODULE.bazel.lock",
      "conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
@@ -91085,6 +91093,31 @@
     ],
     "needs": [],
     "created": "2026-11-11T00:07:07Z"
+   },
+   {
+    "id": "computer-secure-input",
+    "label": "computer-secure-input",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives,coding-agent): report macOS secure input and stop claiming globalEscape under it",
+    "action": "wait",
+    "reasons": [
+     "conflicts with #18784 in docs/computer-use.md",
+     "conflicts with #18947 in crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/types.rs, crates/pi-natives/src/desktop/win32/mod.rs, docs/tools/computer.md, packages/coding-agent/src/tools/computer/protocol.ts, packages/natives/native/index.d.ts",
+     "conflicts with #18925 in packages/natives/native/index.d.ts"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "#18784",
+     "#18947",
+     "#18925"
+    ],
+    "needs": [],
+    "created": "2026-11-12T01:37:10Z"
    },
    {
     "id": "covered-fill",
@@ -91356,7 +91389,8 @@
      "needs #18914 (open)",
      "conflicts with #18921 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18892 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/ax/menus.rs"
+     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/ax/menus.rs",
+     "its need #18914 conflicts with main in MODULE.bazel.lock"
     ],
     "note": "",
     "over": [],
@@ -91384,7 +91418,8 @@
      "needs #18914 (open)",
      "conflicts with #18921 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18892 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs"
+     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs",
+     "its need #18914 conflicts with main in MODULE.bazel.lock"
     ],
     "note": "",
     "over": [],
@@ -91409,7 +91444,8 @@
     "title": "fix(natives): preserve the empty-field warning on Linux write timeouts",
     "action": "wait",
     "reasons": [
-     "needs #18914 (open)"
+     "needs #18914 (open)",
+     "its need #18914 conflicts with main in MODULE.bazel.lock"
     ],
     "note": "",
     "over": [],
@@ -91753,6 +91789,33 @@
     ],
     "needs": [],
     "created": "2026-11-11T07:04:56Z"
+   },
+   {
+    "id": "status-entered-text",
+    "label": "status-entered-text",
+    "number": null,
+    "state": "queued",
+    "area": "browser",
+    "priority": "P2",
+    "title": "fix(coding-agent): keep text a cell enters out of browser and computer status lines",
+    "action": "wait",
+    "reasons": [
+     "conflicts with #18772 in packages/coding-agent/test/eval/browser-prelude-facade.test.ts",
+     "conflicts with #18776 in packages/coding-agent/src/tools/browser.ts",
+     "conflicts with #18786 in packages/coding-agent/src/tools/browser.ts",
+     "conflicts with #18789 in packages/coding-agent/src/tools/browser.ts"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "#18772",
+     "#18776",
+     "#18786",
+     "#18789"
+    ],
+    "needs": [],
+    "created": "2026-11-12T01:30:11Z"
    },
    {
     "id": "win-ax-states",
@@ -92221,7 +92284,8 @@
     "action": "wait",
     "reasons": [
      "needs r2/relay-own-only (queued)",
-     "conflicts with #18751 in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #18751 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #18772 in docs/tools/browser.md",
      "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts",
      "conflicts with main in packages/coding-agent/src/prompts/tools/browser.md"
     ],
@@ -92229,7 +92293,8 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18751"
+     "#18751",
+     "#18772"
     ],
     "needs": [
      "r2/relay-own-only"
@@ -92292,6 +92357,23 @@
      "wire-delta-count"
     ],
     "created": "2026-11-03T01:54:17Z"
+   },
+   {
+    "id": "tern-kit-password-mask",
+    "label": "tern-kit-password-mask",
+    "number": null,
+    "state": "queued",
+    "area": "browser",
+    "priority": null,
+    "title": "fix(browser): mask password values in Tern kit observations",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-12T01:22:04Z"
    },
    {
     "id": "text-reader-usage-shift",
