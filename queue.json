@@ -65054,7 +65054,82 @@
    "updated": "2026-11-12T13:25:26Z",
    "note": "Main-approved combined reader uses main cancellable/answered request bound, with ChildCount in round 1 before children in round 2. atspi-huge-children changes the same child read: P0 first, whichever opens second must be re-checked against the other. Branch push only; opening and body held pending requested current-main performance comparison.",
    "advanced": "2026-11-12T13:18:19Z",
-   "hold": "Main, 2026-11-12: pending interleaved current-main/head performance remeasurement; body unchanged until results"
+   "hold": "Main, 2026-11-12: pending interleaved current-main/head performance remeasurement; body unchanged until results",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-12T13:25:34Z",
+     "reason": "Main-approved combined reader preserves current-main cancellation/deadline, cache-free text helper and hit-test budgets; ChildCount precedes children and duplicate merged prerequisite replay is omitted",
+     "old": "377c5f38b7332f992bb8b58df6a07db8ba00802c",
+     "new": "35a9e15702d2003cd7be9a331728f1e72c0dfb88",
+     "dropped": {
+      "crates/pi-natives/src/desktop/ax.rs": [
+       "\t\tunanswering:  HashSet<u64>,",
+       "\t\tcancelled:    HashSet<u64>,"
+      ],
+      "crates/pi-natives/src/desktop/linux/ax.rs": [
+       "\tzbus::{self, Connection, proxy::CacheProperties},",
+       "\tax::{AxBounds, AxHandle, AxProps, WalkBounds, normalize_role_atspi},",
+       "\t/// and its children when `children` asks: [`Self::request`] with the",
+       "\t/// frame cache borrowed mutably.",
+       "\t\tlet Self { rt, connection, reply_timeout, native, frames } = self;",
+       "\t\tlet read = Self::read_element(",
+       "\t\trt.block_on(cancellable(answered(\"the application\", *reply_timeout, read)))??",
+       "\t/// [`Self::read_node`] on `bus`. Every request waits a round trip on the",
+       "\t/// app, so they go out together in two rounds: the element's own fields and",
+       "\t/// the interfaces it implements, then only the interfaces it has.",
+       "\t\tlet (title, description, role_name, state, interfaces, child_refs, child_count) = futures::join!(",
+       "\t\t\t\t\tSome(proxy.get_children().await)",
+       "\t\t\t\t\tproxy.child_count().await.ok()",
+       "\t\tlet (value, bounds, actions) = futures::join!(",
+       "\t\tlet child_refs = match child_refs {",
+       "\t\t\tSome(refs) => {",
+       "\t\t\t\trefs.map_err(|err| DesktopError::ax_failed(format!(\"AT-SPI children: {err}\")))?",
+       "\t\t\tNone => Vec::new(),",
+       "\t\tlet child_count = child_count.map_or(child_refs.len(), |count| count.max(0) as usize) as u32;",
+       "/// The text of an element with the `Text` interface, up to 16,384 characters,",
+       "/// read without zbus's property cache, whose `GetAll` Qt refuses.",
+       "async fn text_value(connection: &zbus::Connection, object: &ObjectRefOwned) -> Option<String> {",
+       "\tlet count = text.character_count().await.ok()?.min(16_384);",
+       "\t\t\t\t\t\tatspi::proxy::editable_text::EditableTextProxy::builder(&self.connection)",
+       "\t\tlet Self { rt, connection, reply_timeout, native, frames: cache } = self;",
+       "\t\tlet reply_timeout = *reply_timeout;",
+       "\t\t\t\t// An application that does not answer may own the point, so no",
+       "\t\t\t\t// other application's frame is known to be on top.",
+       "\t\t\t\tlet claimed = answered(\"an application\", reply_timeout, async {",
+       "\t\t\t\t\tlet mut claimed = Vec::new();",
+       "\t\t\t\t\t\tif let Some(placement) = cache",
+       "\t\t\t\t\t\t\t.claim(connection, native.as_deref(), &frame, x, y)",
+       "\t\t\t\t\t\t\tclaimed.push((frame, placement));",
+       "\t\t\t\t\tCoreResult::Ok(claimed)",
+       "\t\t\t\t.await??;",
+       "\t\t\t\tfor (frame, placement) in claimed {",
+       "\t\t\t\tSelf::descend(connection, root, placement, x, y),",
+       "\t\t\tfirst(\"/text\", \"GetChildren\"),",
+       "\t\t\tround(\"/text\", &[\"Get CharacterCount\"]),",
+       "\t\t\tfirst(\"/button\", \"GetChildren\"),",
+       "\t\t\tfirst(\"/legacy\", \"GetChildren\"),",
+       "\t\t\tround(\"/legacy\", &[\"Get CharacterCount\", \"Get NActions\", \"GetExtents\"]),",
+       "\t\t\tlet ax =",
+       "\t\t\t\tAtSpiAx { rt, connection, reply_timeout, native: None, frames: FrameCache::default() };"
+      ],
+      "crates/pi-natives/src/desktop/linux/wayland/mod.rs": [
+       "\tlinux::ax::{self, AtSpiAx, AtSpiWindow},",
+       "\tdisplay:    DisplaySelector,",
+       "\tax:         Option<AtSpiAx>,",
+       "\tax_error:   Option<DesktopError>,",
+       "\tinput:      Option<libei::Libei>,",
+       "\tdisplays:   Vec<DesktopDisplay>,",
+       "\tunanswered: Vec<String>,",
+       "\t\tSelf { display, ax, ax_error, input: None, displays: Vec::new(), unanswered: Vec::new() }",
+       "\t\t\tdisplay:    DisplaySelector::All,",
+       "\t\t\tax:         None,",
+       "\t\t\tax_error:   None,",
+       "\t\t\tinput:      None,",
+       "\t\t\tdisplays:   Vec::new(),"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "atspi-setvalue-readback",
