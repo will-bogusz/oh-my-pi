@@ -98414,5 +98414,11 @@
     "wake": ""
    }
   ]
+ },
+ "opening": {
+  "id": "atspi-huge-children",
+  "token": "2cd42e39192c45568e7927d4bba94e96",
+  "host": "MacBook-Pro",
+  "at": "2026-11-12T14:15:54Z"
  }
 }
