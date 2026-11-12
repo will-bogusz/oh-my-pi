@@ -90080,7 +90080,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-12T21:04:56Z",
+  "checked": "2026-11-12T22:04:31Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -90381,34 +90381,10 @@
      }
     ]
    },
-   "18657": {
-    "title": "fix(browser-relay): keep a shared child frame attached when one connection turns auto-attach off",
-    "merge_commit": "990816641c5c34989dd6fe909bc09adc46c14a2e",
-    "merged_at": "2026-11-10T22:02:28Z",
-    "findings": []
-   },
-   "18658": {
-    "title": "fix(coding-agent): preserve role selectors across locales and document waits",
-    "merge_commit": "03614503e84b381ebddc40ca537685f59c3f4cc6",
-    "merged_at": "2026-11-10T22:02:28Z",
-    "findings": []
-   },
-   "18675": {
-    "title": "fix(natives): send macOS keys for a window to the sheet focused on it",
-    "merge_commit": "0bd53d7fbb6224cc1482ce289ab1234459269e80",
-    "merged_at": "2026-11-10T22:02:27Z",
-    "findings": []
-   },
    "18676": {
     "title": "fix(coding-agent): look a click's selector up again when the page replaces its element",
     "merge_commit": "ee8160ffb86af8fb882a437ab26a2ca7360a5d6b",
     "merged_at": "2026-11-11T13:55:07Z",
-    "findings": []
-   },
-   "18680": {
-    "title": "fix(natives): restore Finder with its desktop focus after macOS background input",
-    "merge_commit": "2ff8afcd5ff31c41845b344f6d63577e1dfaa862",
-    "merged_at": "2026-11-10T22:02:28Z",
     "findings": []
    },
    "18737": {
@@ -90423,34 +90399,10 @@
     "merged_at": "2026-11-12T09:21:50Z",
     "findings": []
    },
-   "18739": {
-    "title": "fix(browser): point calls on a tab that is not open at browser.open()",
-    "merge_commit": "1fe8469b25abbbec5a17733b5d144669186af0f8",
-    "merged_at": "2026-11-10T22:02:27Z",
-    "findings": []
-   },
    "18743": {
     "title": "fix(natives): return the window showing a page from macOS apps.open in a browser",
     "merge_commit": "48b61f3516b274d1654a347fa1a107dac31fcb1b",
     "merged_at": "2026-11-12T11:39:16Z",
-    "findings": []
-   },
-   "18744": {
-    "title": "fix(coding-agent): prefer exact app names when selecting windows",
-    "merge_commit": "c28aafca99731e80c6258e7437d5af12433abf9e",
-    "merged_at": "2026-11-10T22:02:27Z",
-    "findings": []
-   },
-   "18745": {
-    "title": "fix(natives): accept aliases in computer role searches",
-    "merge_commit": "2683884786f2a81e4fbf00696c6722a8739df165",
-    "merged_at": "2026-11-10T22:02:27Z",
-    "findings": []
-   },
-   "18746": {
-    "title": "fix(natives): wait for another session's input lock before failing InputBusy",
-    "merge_commit": "0198fc0ac2ffde96712fa23d5e5b64ab24dbcccd",
-    "merged_at": "2026-11-10T22:02:27Z",
     "findings": []
    },
    "18750": {
@@ -90471,28 +90423,10 @@
     "merged_at": "2026-11-12T09:21:49Z",
     "findings": []
    },
-   "18761": {
-    "title": "fix(browser): have agents report a step the page cannot do instead of faking it",
-    "merge_commit": "67669e6d06d45ddb3ea9189d3f1371b60e369ead",
-    "merged_at": "2026-11-10T22:02:27Z",
-    "findings": []
-   },
    "18766": {
     "title": "fix(catalog): identify Devin requests as CLI 3000.12.43",
     "merge_commit": "b5e40952057622e12281f37533d22deed645aa1b",
     "merged_at": "2026-11-11T13:55:07Z",
-    "findings": []
-   },
-   "18767": {
-    "title": "fix(catalog): show Factory Droid's Gemini 4 Argon credit promotion",
-    "merge_commit": "c8bc4c707a95c4dd4cd76a701dcc8efd940744f3",
-    "merged_at": "2026-11-10T22:02:27Z",
-    "findings": []
-   },
-   "18768": {
-    "title": "fix(catalog): show list prices for Factory Droid Fable 5.1, GLM 5.2 Fast and Muse Spark Open",
-    "merge_commit": "1e60ff458b5a3b9fe50981d30bb79be276121385",
-    "merged_at": "2026-11-10T22:02:27Z",
     "findings": []
    },
    "18771": {
@@ -90505,12 +90439,6 @@
     "title": "fix(browser): print every observed element, one line each, instead of cutting at 100",
     "merge_commit": "3e30ec5806aa9dd6c597045ef8043331df889d6a",
     "merged_at": "2026-11-12T09:21:50Z",
-    "findings": []
-   },
-   "18773": {
-    "title": "fix(coding-agent): keep a child omp's browser tabs out of its parent's Tern pane and cmux workspace",
-    "merge_commit": "827d50cac3718d9e2b82326f024b1d28e68d219e",
-    "merged_at": "2026-11-10T22:02:27Z",
     "findings": []
    },
    "18775": {
