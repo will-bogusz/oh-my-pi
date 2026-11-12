@@ -99481,12 +99481,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-12T20:31:09.651826Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-12T21:34:11.361140Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 2,
-   "left": 6
+   "used": 0,
+   "left": 8
   },
   "rows": [
    {
