@@ -77888,7 +77888,7 @@
    "branch": "will/atspi-huge-children",
    "title": "fix(natives): stop Linux accessibility reads from freezing apps that show long tables",
    "area": "computer",
-   "priority": "P0",
+   "priority": "P1",
    "needs": [],
    "base": "9f728bd56e170453c927d5b162cebe9b308e63ce",
    "body": "bodies/atspi-huge-children.md",
@@ -77898,7 +77898,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-huge-children",
    "host": "MacBook-Pro",
    "added": "2026-11-11T01:54:02Z",
-   "updated": "2026-11-12T14:36:19Z",
+   "updated": "2026-11-12T14:58:23Z",
    "note": "Overlaps (same functions, textual conflicts): atspi-unanswered-app (P0; read_props/walk_node/find_focused/children get request()/timeouts), atspi-walk-reads (reads GetChildren in round 1 beside the element's fields and drops ChildCount: on rebase, read ChildCount in round 1 and GetChildren/by-index after it), computer-rich-text (linux/ax.rs, ax.rs, backend.rs). Rust records linux/macos/windows at 8a6acdf497.",
    "line_loss_overrides": [
     {
@@ -78286,7 +78286,7 @@
    "branch": "will/atspi-text-first",
    "title": "fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility",
    "area": "computer",
-   "priority": "P1",
+   "priority": "P2",
    "needs": [],
    "base": "aece16f78fad7e9e777b4aeaa1ca583544a17723",
    "body": "bodies/atspi-text-first.md",
@@ -78296,7 +78296,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-text-first",
    "host": "MacBook-Pro",
    "added": "2026-11-11T02:21:41Z",
-   "updated": "2026-11-12T14:48:43Z",
+   "updated": "2026-11-12T14:58:23Z",
    "note": "LinuxTextFinish 2026-11-11: overlaps (no needs): code conflict with queued atspi-unanswered-app (linux/wayland/mod.rs) and atspi-walk-reads (linux/ax.rs); same files as open #18013 (merges clean) and #18784 (CHANGELOG-only conflict); reuses #18220's merged text_readback; merges clean with qt5-getall-crash (same ax.rs). Linux-only Rust diff: rust-check linux recorded at 82bde80f19; review stamped needs-changes at eb0a087bcd, findings fixed.",
    "advanced": "2026-11-12T14:48:43Z",
    "rebases_after": [
@@ -84229,7 +84229,7 @@
    "branch": "will/atspi-combo-choice",
    "title": "fix(natives): choose Linux combo box options without opening their keyboard-grabbing list",
    "area": "computer",
-   "priority": "P1",
+   "priority": "P2",
    "needs": [
     "atspi-unanswered-app"
    ],
@@ -84241,7 +84241,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-combo-choice",
    "host": "MacBook-Pro",
    "added": "2026-11-11T13:30:39Z",
-   "updated": "2026-11-12T14:48:37Z",
+   "updated": "2026-11-12T14:58:23Z",
    "note": "",
    "advanced": "2026-11-12T14:48:37Z",
    "line_loss_overrides": [
