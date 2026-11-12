@@ -22,7 +22,7 @@ Capability-matrix cell `menu.select(["File", "Mark"])`, Ubuntu 22.04 arm64 micro
 
 
 - `a_qt_menu_bar_item_opens_its_popup_menu` serves Qt's shape over a peer-to-peer D-Bus connection: `menu.items([])` reads `File` as a submenu and `menu.items(["File"])` lists `File > Mark` and `File > Other`. With `PopupMenu` taken out of `submenu_role` it fails at the first read.
-- `cargo test -p pi-natives --lib -- desktop::linux::ax` on Linux: 20 passed. `scripts/rust-check` on Linux.
+- `cargo test -p pi-natives --lib -- desktop::linux::ax` on current main 9f728bd56e (Linux): 26 passed. `scripts/rust-check` on Linux.
 
 ---
 
