@@ -75868,13 +75868,13 @@
    "needs": [],
    "base": "b437322d9a3900206228e17077415c87ce67c8ca",
    "body": "bodies/agent-identity.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 18987,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/agent-identity",
    "host": "MacBook-Pro",
    "added": "2026-11-10T23:39:10Z",
-   "updated": "2026-11-12T03:37:34Z",
+   "updated": "2026-11-12T04:03:07Z",
    "note": "",
    "advanced": "2026-11-12T02:36:27Z",
    "built": [
@@ -76283,7 +76283,8 @@
      "host": "MacBook-Pro",
      "tree": "fec27e3b44e81d5421752517b6b9750a9427276e"
     }
-   ]
+   ],
+   "opened": "2026-11-12T04:03:07Z"
   },
   {
    "id": "browser-cursor",
