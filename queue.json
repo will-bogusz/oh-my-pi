@@ -84859,78 +84859,37 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-12T09:52:44Z",
+  "checked": "2026-11-12T10:23:33Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "atspi-huge-children": {
-    "since": "2026-11-12T09:52:44Z",
-    "title": "fix(natives): stop Linux accessibility reads from freezing apps that show long tables"
-   },
    "x11-mpx-reattach": {
     "since": "2026-11-12T09:22:42Z",
     "title": "fix(natives): keep X11 background input out of your window after a screen lock or VT switch"
    },
-   "atspi-text-first": {
-    "since": "2026-11-12T09:52:44Z",
-    "title": "fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility"
+   "win-target-layout": {
+    "since": "2026-11-12T10:23:33Z",
+    "title": "fix(natives): map Windows keys on the receiving keyboard layout"
    },
-   "macos-ax-linked-label": {
-    "since": "2026-11-12T09:52:44Z",
-    "title": "fix(natives): name a macOS control by the label its AXTitleUIElement links to"
-   },
-   "macos-press-click-hint": {
-    "since": "2026-11-12T09:52:44Z",
-    "title": "fix(natives): point a refused macOS press at the element's own click"
+   "masked-length-ok": {
+    "since": "2026-11-12T10:23:33Z",
+    "title": "fix(natives): report a setValue that reads back as a same-length mask as done, not failed"
    },
    "takeover-attached-hint": {
     "since": "2026-11-12T09:22:42Z",
     "title": "fix(natives): name the background route when takeover refuses a macOS suggestion list"
+   },
+   "win-focus-report": {
+    "since": "2026-11-12T10:23:33Z",
+    "title": "fix(natives): report where focus went after a Windows takeover"
    }
   },
   "conflicts": {
-   "#16553": {
-    "since": "2026-11-12T09:22:42Z",
-    "title": "fix(natives): place macOS clicks for the focus guard where WindowServer routed them",
-    "files": [
-     "crates/pi-natives/src/desktop/control/macos.rs"
-    ]
-   },
    "#16611": {
     "since": "2026-11-12T01:15:20Z",
     "title": "feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio",
     "files": [
      "packages/coding-agent/src/prompts/tools/read.md"
-    ]
-   },
-   "#18013": {
-    "since": "2026-11-12T09:22:42Z",
-    "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "files": [
-     "crates/pi-natives/Cargo.toml"
-    ]
-   },
-   "#18783": {
-    "since": "2026-11-12T09:22:42Z",
-    "title": "fix(natives): capture a covered X11 window from its own pixels, or say it is covered",
-    "files": [
-     "crates/pi-natives/Cargo.toml"
-    ]
-   },
-   "#18915": {
-    "since": "2026-11-12T09:22:42Z",
-    "title": "fix(natives): verify Windows value writes and notify combo selections",
-    "files": [
-     "crates/pi-natives/Cargo.toml",
-     "crates/pi-natives/src/desktop/ax.rs",
-     "crates/pi-natives/src/desktop/win32/mod.rs"
-    ]
-   },
-   "#18892": {
-    "since": "2026-11-12T09:22:42Z",
-    "title": "fix(natives): refuse macOS element actions once the ref's element reads as another control",
-    "files": [
-     "crates/pi-natives/src/desktop/macos/ax.rs"
     ]
    }
   },
@@ -88031,6 +87990,52 @@
     "kind": "openable",
     "id": "macos-press-click-hint",
     "title": "fix(natives): point a refused macOS press at the element's own click"
+   },
+   {
+    "at": "2026-11-12T10:23:33Z",
+    "kind": "openable",
+    "id": "win-target-layout",
+    "title": "fix(natives): map Windows keys on the receiving keyboard layout"
+   },
+   {
+    "at": "2026-11-12T10:23:33Z",
+    "kind": "openable",
+    "id": "masked-length-ok",
+    "title": "fix(natives): report a setValue that reads back as a same-length mask as done, not failed"
+   },
+   {
+    "at": "2026-11-12T10:23:33Z",
+    "kind": "openable",
+    "id": "win-focus-report",
+    "title": "fix(natives): report where focus went after a Windows takeover"
+   },
+   {
+    "at": "2026-11-12T10:23:33Z",
+    "kind": "unopenable",
+    "id": "atspi-huge-children",
+    "title": "fix(natives): stop Linux accessibility reads from freezing apps that show long tables",
+    "why": "plan: wait (conflicts with #18892 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/mod.rs; conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs)"
+   },
+   {
+    "at": "2026-11-12T10:23:33Z",
+    "kind": "unopenable",
+    "id": "atspi-text-first",
+    "title": "fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility",
+    "why": "plan: wait (conflicts with #18914 in crates/pi-natives/src/desktop/linux/wayland/mod.rs)"
+   },
+   {
+    "at": "2026-11-12T10:23:33Z",
+    "kind": "unopenable",
+    "id": "macos-ax-linked-label",
+    "title": "fix(natives): name a macOS control by the label its AXTitleUIElement links to",
+    "why": "plan: wait (conflicts with #18892 in crates/pi-natives/src/desktop/macos/ax.rs)"
+   },
+   {
+    "at": "2026-11-12T10:23:33Z",
+    "kind": "unopenable",
+    "id": "macos-press-click-hint",
+    "title": "fix(natives): point a refused macOS press at the element's own click",
+    "why": "plan: wait (conflicts with #18892 in crates/pi-natives/src/desktop/macos/ax.rs)"
    }
   ]
  },
@@ -93242,8 +93247,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-12T10:20:26.020828Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-12T10:23:34.500527Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 0,
