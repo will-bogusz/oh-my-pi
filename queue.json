@@ -65043,7 +65043,7 @@
     "atspi-unanswered-app",
     "gtk4-atspi-bounds"
    ],
-   "base": "9f7d5e5653e3cb4caf7d9afc2302c5cfcdb9287d",
+   "base": "9f728bd56e170453c927d5b162cebe9b308e63ce",
    "body": "bodies/atspi-walk-reads.md",
    "state": "queued",
    "pr": null,
@@ -65051,8 +65051,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-walk-reads",
    "host": "MacBook-Pro",
    "added": "2026-11-03T09:05:24Z",
-   "updated": "2026-11-11T16:53:35Z",
-   "note": ""
+   "updated": "2026-11-12T13:18:19Z",
+   "note": "",
+   "advanced": "2026-11-12T13:18:19Z"
   },
   {
    "id": "atspi-setvalue-readback",
