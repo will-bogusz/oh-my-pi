@@ -83422,7 +83422,23 @@
    "added": "2026-11-11T15:44:29Z",
    "updated": "2026-11-12T12:21:37Z",
    "note": "",
-   "advanced": "2026-11-12T12:21:21Z"
+   "advanced": "2026-11-12T12:21:21Z",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-12T12:22:13Z",
+     "reason": "both lines came from ax-ref-read-as (#18892) pre-merge heads (dd617bff9d8 etc.), not this entry's two commits; main's merged #18892 port rewrote them",
+     "old": "6c9a51f8113ee71b80efcab37f8351e6cdc3cf0b",
+     "new": "2fff0569b5d88b9c242baac0f77e416daa366beb",
+     "dropped": {
+      "crates/pi-natives/src/desktop/macos/ax.rs": [
+       "\t\tpress_into_view(&native, scroll, |action| send_action(element, action))"
+      ],
+      "packages/coding-agent/src/prompts/tools/computer.md": [
+       "- An element keeps its `[ref=eN]` across `.ax()`/`find()` reads until its role or label changes; a ref whose element is missing from the window's last two `.ax()` snapshots throws `StaleRef`. Re-snapshot; NEVER guess. On macOS, an element action also refuses with `StaleRef`, sending nothing, if its element now reads with another role or label; the error gives that element a new ref (`eN now reads as textfield \"Street\" [ref=eM]`). A destroyed-element refusal may name the one candidate with the original role, labels and value, only after whole-window reads. A relabelled-element refusal may instead name the one other candidate this read of the window found with the original role and label, even if the read was cut short by `maxDepth` or a node limit; unseen matches may exist. Equal fields do not prove a candidate is the same control: check it before acting on it."
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "x11-mpx-reattach",
