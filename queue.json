@@ -82602,6 +82602,24 @@
    "updated": "2026-11-12T01:58:30Z",
    "note": "",
    "advanced": "2026-11-12T01:54:58Z"
+  },
+  {
+   "id": "relay-frame-race",
+   "branch": "will/relay-frame-race",
+   "title": "fix(browser-relay): keep a driven tab when a password manager's frame drops omp from it",
+   "area": "browser",
+   "priority": "P0",
+   "needs": [],
+   "base": "b437322d9a3900206228e17077415c87ce67c8ca",
+   "body": "bodies/relay-frame-race.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-frame-race",
+   "host": "MacBook-Pro",
+   "added": "2026-11-12T01:59:31Z",
+   "updated": "2026-11-12T01:59:31Z",
+   "note": ""
   }
  ],
  "watch": {
