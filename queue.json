@@ -82324,7 +82324,23 @@
    "host": "MacBook-Pro",
    "added": "2026-11-11T11:44:46Z",
    "updated": "2026-11-12T12:43:19Z",
-   "note": "Main, 2026-11-12: approved combined row-two-functions.diff. No reusable row read plus failing second walk is covered by read_whole whole-read requirement, not a dedicated test."
+   "note": "Main, 2026-11-12: approved combined row-two-functions.diff. No reusable row read plus failing second walk is covered by read_whole whole-read requirement, not a dedicated test.",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-12T12:43:46Z",
+     "reason": "Main-approved combined form uses ax::require_element_read_as(mac) before locate/aim and retains main relabelled candidate branch while destroyed refind_in reuses whole row read; old require_read_as closure and proven flatten are superseded",
+     "old": "2feb8cb60a4e835e5ba4fe97d808ad1ff6150d4d",
+     "new": "81c51e505b3b2429de9cbc05ceb2ccfb9a18690f",
+     "dropped": {
+      "crates/pi-natives/src/desktop/macos/mod.rs": [
+       "\t\t\trequire_read_as(|| ax::read_as(mac))?;"
+      ],
+      "crates/pi-natives/src/desktop/mod.rs": [
+       "\t\t\t\t.flatten()"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "win-takeover-focus",
