@@ -63204,7 +63204,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-pipewire-dlopen",
    "host": "MacBook-Pro",
    "added": "2026-11-03T05:43:31Z",
-   "updated": "2026-11-12T09:34:04Z",
+   "updated": "2026-11-12T10:16:24Z",
    "note": "",
    "advanced": "2026-11-12T09:34:04Z",
    "built": [
@@ -63271,8 +63271,12 @@
    "opened": "2026-11-06T23:14:31Z",
    "readied": "2026-11-06T23:14:51Z",
    "rebases_after": [
-    18914
-   ]
+    18914,
+    18783
+   ],
+   "pair_reasons": {
+    "18783": "Main, 2026-11-12 (via QueueThirteen): generated MODULE.bazel.lock only: the FILE:@@//crates/pi-natives/Cargo.toml hash line differs because each PR changes Cargo.toml; whichever merges second reruns gen-bazel-lock (--check). No code overlap."
+   }
   },
   {
    "id": "gtk4-atspi-bounds",
