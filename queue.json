@@ -71781,7 +71781,7 @@
    "area": "browser",
    "priority": "P1",
    "needs": [],
-   "base": "ced5efc0c2750f43dfdb7d223c7d22cb6c5f1f44",
+   "base": "5a63464ef67509fecd97a43687b8234a7f042fc2",
    "body": "bodies/browser-run-main-world.md",
    "state": "open",
    "pr": 18751,
@@ -71789,7 +71789,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-run-main-world",
    "host": "MacBook-Pro",
    "added": "2026-11-10T16:47:04Z",
-   "updated": "2026-11-12T01:45:28Z",
+   "updated": "2026-11-12T09:34:58Z",
    "note": "",
    "built": [
     {
@@ -71953,7 +71953,7 @@
     }
    ],
    "opened": "2026-11-10T17:23:39Z",
-   "advanced": "2026-11-12T01:45:28Z",
+   "advanced": "2026-11-12T09:34:58Z",
    "design_checks": [
     {
      "pr": 18751,
