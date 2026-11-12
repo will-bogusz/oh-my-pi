@@ -79050,6 +79050,19 @@
      "note": "head f9cb8ea252: rich edit and native password writes report AxFailed though the app holds the text (5/5 each); patch 18915-readback-holes (rich-edit line marks, password length) plus the two round-6 P2s in one push; next combo-route P1 means refusing native combos (Main)",
      "ref": "/Users/viathebrink/.omp/agent/sessions/-codebases-trycua-omp/2026-09-08T17-46-29-496Z_01a08220-e6f8-77c4-8572-0e0ff13b3611/local/design-checks/18915.md"
     }
+   ],
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-12T10:01:26Z",
+     "reason": "Cargo.toml windows-sys features: one line rewritten as the exact union of main's and this PR's feature lists; no feature dropped",
+     "old": "aead7d5ad2c29819d4ef0175f66b17694d0f63dd",
+     "new": "317c4d4710b2448f9fc315434a55fd26b91ed283",
+     "dropped": {
+      "crates/pi-natives/Cargo.toml": [
+       "windows-sys = { workspace = true, features = [\"Wdk_Foundation\", \"Wdk_Storage_FileSystem\", \"Win32_Foundation\", \"Win32_Graphics_Gdi\", \"Win32_Security\", \"Win32_Security_Authorization\", \"Win32_Storage_Packaging_Appx\", \"Win32_System_Diagnostics_ToolHelp\", \"Win32_System_Environment\", \"Win32_System_Pipes\", \"Win32_System_Power\", \"Win32_System_Registry\", \"Win32_System_Threading\", \"Win32_UI_Controls\", \"Win32_UI_HiDpi\", \"Win32_UI_Input_KeyboardAndMouse\", \"Win32_UI_Shell\", \"Win32_UI_WindowsAndMessaging\"] }"
+      ]
+     }
+    }
    ]
   },
   {
