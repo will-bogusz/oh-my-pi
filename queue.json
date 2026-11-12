@@ -92352,6 +92352,11 @@
     "sha": "f3bca36fe844752f4eb11e880dc3c940d5010179",
     "at": "2026-11-12T05:56:46Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "f3bca36fe844752f4eb11e880dc3c940d5010179",
+    "at": "2026-11-12T05:58:09Z",
+    "host": "goliath"
    }
   }
  },
