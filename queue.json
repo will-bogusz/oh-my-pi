@@ -86508,6 +86508,25 @@
        "\t\t\ttext_readback, truncate_chars,"
       ]
      }
+    },
+    {
+     "at": "2026-11-12T19:03:29Z",
+     "reason": "QueueSixteen, 2026-11-12: roboomp nit 4554341285, both dedup loops replaced by the shared performable_names helper; performable_name now private to desktop/ax.rs",
+     "old": "870da66c8b9c04543435e0b6ae627543828f4539",
+     "new": "7f205daf2d7838a2817d529ddd7e0ff2e12a26b2",
+     "dropped": {
+      "crates/pi-natives/src/desktop/ax.rs": [
+       "pub(crate) fn performable_name(action: &str) -> Option<String> {",
+       "\t\t.filter_map(|action| performable_name(action))"
+      ],
+      "crates/pi-natives/src/desktop/macos/ax.rs": [
+       "\t\t\tperformable_name, require_read_as, text_readback, truncate_chars,",
+       "\tlet mut offered: Vec<String> = Vec::new();",
+       "\tfor name in actions.iter().filter_map(|action| performable_name(action)) {",
+       "\t\tif !offered.contains(&name) {",
+       "\t\t\toffered.push(name);"
+      ]
+     }
     }
    ],
    "advanced": "2026-11-12T12:44:14Z",
