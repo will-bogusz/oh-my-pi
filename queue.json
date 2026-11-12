@@ -82698,7 +82698,7 @@
   {
    "id": "relay-hidden-frames",
    "branch": "will/relay-hidden-frames",
-   "title": "fix(browser-relay): name the frame the relay hid in a driven tab",
+   "title": "fix(browser-relay): say what the relay hid in a driven tab",
    "area": "browser",
    "priority": "P1",
    "needs": [
@@ -82712,8 +82712,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-hidden-frames",
    "host": "MacBook-Pro",
    "added": "2026-11-12T02:04:21Z",
-   "updated": "2026-11-12T02:06:32Z",
-   "note": "",
+   "updated": "2026-11-12T02:22:46Z",
+   "note": "RelayFrameRace: no-permission head e63a1bc60a6 (in-page fetch probe; notice leads with nothing saved); delta review RelayFrameRace.ReviewNoPermission fixed",
    "hold": "Main, 2026-11-12: adds Chrome's management permission; waiting on whether a no-permission form exists"
   }
  ],
