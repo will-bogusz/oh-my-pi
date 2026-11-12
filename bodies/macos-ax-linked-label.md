@@ -6,7 +6,7 @@ In a grouped SwiftUI `Form` (System Settings style), a toggle's label is drawn a
 
 `AXTitleUIElement` now rides in the batched node read (it sits with the identity-only attributes, so a batch that fails as a whole costs no extra lone read), and an element with neither an `AXTitle` nor an `AXDescription` of its own takes the linked element's `AXValue`, else its `AXTitle`, as its title. That costs one more AX message only for such an element that does link a label; an element's own title or description still wins, and the link is then not read. A label read the app does not answer leaves the element unnamed and without an identity, as an unanswered placeholder already does, so a `StaleRef` never names a control by a label it could not read.
 
-The action guard still compares only the element's own fields, exactly as main does: a changed linked label alone is not refused. A linked title supplies the displayed/ref-registration name, not a new action-safety guarantee. One optional fingerprint field carries this distinction; five `AxProps` constructor sites initialize its absent value. Entries adding `AxProps` fields meet these constructor edits by adjacency and need the opener's pair build.
+The action guard still compares only the element's own fields, exactly as main does: a changed linked label alone is not refused. A linked title supplies the displayed/ref-registration name, not a new action-safety guarantee. One optional fingerprint field carries this distinction; five `AxProps` constructor sites initialize its absent value.
 
 ## Why
 
@@ -14,7 +14,11 @@ Settings-style SwiftUI apps put every switch in this shape, so an agent asked to
 
 ## Testing
 
+<details><summary>Historical SwiftUI fixture and rig</summary>
+
 Before the current-main rebase, a SwiftUI fixture in a macOS 26.5.2 VM (`Toggle(isOn:) { Text("Launch at login") }`, `Toggle("Sync drafts", isOn:)`, and `LabeledContent("Mode") { Toggle("", isOn:).labelsHidden() }` in a grouped `Form`), addon swapped into `@oh-my-pi/pi-coding-agent`, `win.ax()`:
+
+</details>
 
 | | main | this branch |
 |---|---|---|
@@ -24,7 +28,11 @@ Before the current-main rebase, a SwiftUI fixture in a macOS 26.5.2 VM (`Toggle(
 
 In those historical runs, all three were bare in 14 of 14 reads on main and named in 5 of 5 on the measured branch. Two back-to-back `ax()` reads kept every ref on both builds in the SwiftUI form, Finder and Chrome (13, 148 and 33 refs; 10 pairs each, and two reads of different windows shared none). Two `ax()` reads of a window took a median of 207, 284 and 243 ms against 225, 289 and 228 ms on main in those three windows (builds alternated, 9 reads each). Live measurements were not repeated after rebasing.
 
+<details><summary>Label regression coverage</summary>
+
 `a_control_without_a_label_of_its_own_is_named_by_its_linked_label` covers the label read (value, title fallback, an unanswered read, no link); `a_field_without_a_label_is_named_by_its_placeholder` now also shows an own description beating a link and an unanswered link leaving no identity. Both need this branch's `linked_label`, so main's failure is the live table above rather than a test.
+
+</details>
 
 Re-run on current main `9f728bd56e1` on bench-mac: `cargo test -p pi-natives --lib desktop::macos` passed 356 tests; `cargo test -p pi-natives --lib desktop::` passed 602. `rust-check` passed clippy and rustfmt on macOS (bench-mac), Linux and Windows (goliath). The naming tests and three action-guard tests pin an own label disappearing while a link is unread (refused), only the linked label changing (accepted), and an unchanged linked-labelled control (accepted).
 
