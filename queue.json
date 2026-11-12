@@ -96567,6 +96567,11 @@
     "sha": "c7f7db4e3605c664a8ae228441efe00d31b138fd",
     "at": "2026-11-12T15:42:48Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "c7f7db4e3605c664a8ae228441efe00d31b138fd",
+    "at": "2026-11-12T15:43:51Z",
+    "host": "goliath"
    }
   },
   "a9bcc1dbc5198bc35172056b83be6cd8c55dc853": {
