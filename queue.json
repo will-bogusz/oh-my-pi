@@ -82772,7 +82772,7 @@
    "needs": [
     "win-takeover-focus"
    ],
-   "base": "238878f131787ada2b5d35409b4ee759cc535419",
+   "base": "bcd5b0b996e0f4a107f51cb398a6492ffb7d44b9",
    "body": "bodies/win-focus-report.md",
    "state": "queued",
    "pr": null,
@@ -82780,7 +82780,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-focus-report",
    "host": "MacBook-Pro",
    "added": "2026-11-11T13:11:20Z",
-   "updated": "2026-11-12T11:39:15Z",
+   "updated": "2026-11-12T12:14:32Z",
    "note": "",
    "rebases_after": [
     18783
@@ -82788,7 +82788,7 @@
    "pair_reasons": {
     "18783": "QueueThirteen, 2026-11-12 (Main: docs pairs are the opener's): docs-only collision in docs/computer-use.md, adjacent: #18783 adds two X11 covered-window screenshot paragraphs right before the 'Window input defaults to background routes' paragraph that this entry edits. Combined form: #18783's two paragraphs, blank line, then this entry's wording of the 'Window input defaults' paragraph. No code overlap."
    },
-   "advanced": "2026-11-12T09:40:56Z",
+   "advanced": "2026-11-12T12:14:32Z",
    "built": [
     {
      "with": "#17756",
