@@ -84629,19 +84629,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-12T04:49:02Z",
+  "checked": "2026-11-12T05:49:49Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {
-   "relay-hidden-frames-main": {
-    "since": "2026-11-12T04:49:02Z",
-    "title": "fix(browser-relay): say what the relay hid in a driven tab"
-   },
-   "autofill-rows": {
-    "since": "2026-11-12T04:49:02Z",
-    "title": "fix(natives): own macOS suggestion-list elements by the window that lists them"
-   }
-  },
+  "openable": {},
   "conflicts": {
    "#16611": {
     "since": "2026-11-12T01:15:20Z",
@@ -84700,7 +84691,9 @@
    18982,
    18983,
    18987,
-   18989
+   18989,
+   19001,
+   19004
   ],
   "post_merge": {
    "16274": {
@@ -87189,6 +87182,20 @@
     "id": "agent-identity",
     "title": "feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy",
     "why": "opened as #18987"
+   },
+   {
+    "at": "2026-11-12T05:49:49Z",
+    "kind": "unopenable",
+    "id": "relay-hidden-frames-main",
+    "title": "fix(browser-relay): say what the relay hid in a driven tab",
+    "why": "opened as #19001"
+   },
+   {
+    "at": "2026-11-12T05:49:49Z",
+    "kind": "unopenable",
+    "id": "autofill-rows",
+    "title": "fix(natives): own macOS suggestion-list elements by the window that lists them",
+    "why": "opened as #19004"
    }
   ]
  },
@@ -92265,12 +92272,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-12T05:19:13.006113Z",
+  "at": "2026-11-12T05:49:50.129504Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 2,
+   "left": 6
   },
   "rows": [
    {
@@ -92393,6 +92400,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-12T03:56:50Z"
+   },
+   {
+    "id": "autofill-rows",
+    "label": "#19004",
+    "number": 19004,
+    "state": "open",
+    "area": "computer",
+    "priority": "P0",
+    "title": "fix(natives): own macOS suggestion-list elements by the window that lists them",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-12T05:44:43Z"
    },
    {
     "id": "click-place-release",
@@ -92935,6 +92959,25 @@
     "created": "2026-11-06T23:14:30Z"
    },
    {
+    "id": "relay-hidden-frames-main",
+    "label": "#19001",
+    "number": 19001,
+    "state": "open",
+    "area": "browser",
+    "priority": "P2",
+    "title": "fix(browser-relay): say what the relay hid in a driven tab",
+    "action": "keep",
+    "reasons": [],
+    "note": "accepted pair with #18925: Main, 2026-11-12: accepted (HiddenOnMain's combined form). tab-worker.ts WorkerCore.#run after the finally: this branch's hinted take (if this.#unanswered === active && this.#hiddenFramesWaiting && this.#page) await this.#takeHiddenFrames(this.#page)) stays before the answered guard; in the failure branch #18925's enrichment of error (message and stack with the native notices), then this.#sendResult({ id: msg.id, ok: false, error }), so both native-window notices and the once-only hidden-frames notice ride the failure. Second to land adds one test that a failed run carries both.",
+    "over": [],
+    "paired": [
+     "#18925"
+    ],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-12T05:27:02Z"
+   },
+   {
     "id": "iphone-mirror-key-gap",
     "label": "#17897",
     "number": 17897,
@@ -93070,9 +93113,11 @@
     "title": "feat(coding-agent): name the native windows a browser call raised on macOS",
     "action": "keep",
     "reasons": [],
-    "note": "",
+    "note": "accepted pair with #19001: Main, 2026-11-12: accepted (HiddenOnMain's combined form). tab-worker.ts WorkerCore.#run after the finally: this branch's hinted take (if this.#unanswered === active && this.#hiddenFramesWaiting && this.#page) await this.#takeHiddenFrames(this.#page)) stays before the answered guard; in the failure branch #18925's enrichment of error (message and stack with the native notices), then this.#sendResult({ id: msg.id, ok: false, error }), so both native-window notices and the once-only hidden-frames notice ride the failure. Second to land adds one test that a failed run carries both.",
     "over": [],
-    "paired": [],
+    "paired": [
+     "#19001"
+    ],
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T16:51:01Z"
@@ -93369,25 +93414,6 @@
     ],
     "needs": [],
     "created": "2026-10-30T21:35:55Z"
-   },
-   {
-    "id": "relay-hidden-frames-main",
-    "label": "relay-hidden-frames-main",
-    "number": null,
-    "state": "queued",
-    "area": "browser",
-    "priority": "P1",
-    "title": "fix(browser-relay): say what the relay hid in a driven tab",
-    "action": "open",
-    "reasons": [],
-    "note": "accepted pair with #18925: Main, 2026-11-12: accepted (HiddenOnMain's combined form). tab-worker.ts WorkerCore.#run after the finally: this branch's hinted take (if this.#unanswered === active && this.#hiddenFramesWaiting && this.#page) await this.#takeHiddenFrames(this.#page)) stays before the answered guard; in the failure branch #18925's enrichment of error (message and stack with the native notices), then this.#sendResult({ id: msg.id, ok: false, error }), so both native-window notices and the once-only hidden-frames notice ride the failure. Second to land adds one test that a failed run carries both.",
-    "over": [],
-    "paired": [
-     "#18925"
-    ],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-12T02:04:21Z"
    },
    {
     "id": "upload-stall-error-all-providers",
@@ -93720,23 +93746,6 @@
     "created": "2026-11-11T21:44:32Z"
    },
    {
-    "id": "autofill-rows",
-    "label": "autofill-rows",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P2",
-    "title": "fix(natives): own macOS suggestion-list elements by the window that lists them",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-12T04:00:08Z"
-   },
-   {
     "id": "ax-ref-read-as-followup",
     "label": "ax-ref-read-as-followup",
     "number": null,
@@ -94006,10 +94015,10 @@
      "conflicts with #18751 in docs/tools/browser.md",
      "conflicts with #18772 in docs/tools/browser.md",
      "conflicts with #18924 in docs/tools/browser.md",
+     "conflicts with #19001 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "conflicts with #18776 in docs/tools/browser.md",
      "conflicts with #18786 in docs/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md",
-     "conflicts with relay-hidden-frames-main in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts"
     ],
     "note": "",
@@ -94021,10 +94030,10 @@
      "#18751",
      "#18772",
      "#18924",
+     "#19001",
      "#18776",
      "#18786",
-     "#18789",
-     "relay-hidden-frames-main"
+     "#18789"
     ],
     "needs": [
      "r2/native-window-report"
@@ -94047,10 +94056,10 @@
      "conflicts with #18751 in docs/tools/browser.md",
      "conflicts with #18772 in docs/tools/browser.md",
      "conflicts with #18924 in docs/tools/browser.md",
+     "conflicts with #19001 in packages/browser-relay/extension/background.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "conflicts with #18776 in docs/tools/browser.md",
      "conflicts with #18786 in docs/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md",
-     "conflicts with relay-hidden-frames-main in packages/browser-relay/extension/background.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts"
     ],
     "note": "",
@@ -94062,10 +94071,10 @@
      "#18751",
      "#18772",
      "#18924",
+     "#19001",
      "#18776",
      "#18786",
-     "#18789",
-     "relay-hidden-frames-main"
+     "#18789"
     ],
     "needs": [
      "r2/relay-own-only"
@@ -94090,10 +94099,10 @@
      "conflicts with #18772 in docs/tools/browser.md",
      "conflicts with #18924 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18981 in packages/coding-agent/src/tools/browser.ts",
+     "conflicts with #19001 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "conflicts with #18776 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18786 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts",
      "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts",
-     "conflicts with relay-hidden-frames-main in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "its need r2/relay-popup-owned conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts",
      "its need r2/page-waiting conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-detach.test.ts"
@@ -94109,10 +94118,10 @@
      "#18772",
      "#18924",
      "#18981",
+     "#19001",
      "#18776",
      "#18786",
-     "#18789",
-     "relay-hidden-frames-main"
+     "#18789"
     ],
     "needs": [
      "r2/relay-popup-owned",
@@ -94131,16 +94140,16 @@
     "action": "wait",
     "reasons": [
      "conflicts with #18737 in packages/coding-agent/src/tools/browser/tab-supervisor.ts",
-     "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts",
-     "conflicts with relay-hidden-frames-main in packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts"
+     "conflicts with #19001 in packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
+     "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
      "#18737",
-     "#18925",
-     "relay-hidden-frames-main"
+     "#19001",
+     "#18925"
     ],
     "needs": [],
     "created": "2026-11-11T07:04:56Z"
@@ -94155,7 +94164,7 @@
     "title": "fix(natives): name the background route when takeover refuses a macOS suggestion list",
     "action": "wait",
     "reasons": [
-     "needs autofill-rows (queued)"
+     "needs #19004 (open)"
     ],
     "note": "",
     "over": [],
@@ -94344,9 +94353,9 @@
      "held: Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check",
      "needs #18987 (open)",
      "conflicts with #18737 in packages/coding-agent/src/tools/browser/tab-supervisor.ts",
+     "conflicts with #19001 in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18776 in packages/coding-agent/src/tools/browser/tern/tern-tab.ts",
      "conflicts with #18925 in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts",
-     "conflicts with relay-hidden-frames-main in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
     ],
     "note": "",
@@ -94354,9 +94363,9 @@
     "paired": [],
     "blocked_by": [
      "#18737",
+     "#19001",
      "#18776",
-     "#18925",
-     "relay-hidden-frames-main"
+     "#18925"
     ],
     "needs": [
      "agent-identity"
@@ -94507,6 +94516,7 @@
      "needs computer-ui-quiet (queued)",
      "conflicts with #18898 in crates/pi-natives/src/desktop/macos/ax.rs, docs/tools/computer.md",
      "conflicts with #18982 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with #19004 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with #18743 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with #18753 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18784 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md",
@@ -94521,7 +94531,6 @@
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18987 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
      "conflicts with #18989 in docs/tools/computer.md",
-     "conflicts with autofill-rows in crates/pi-natives/src/desktop/macos/ax.rs",
      "its need computer-ui-quiet conflicts with main in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/tools/computer/worker.ts"
     ],
@@ -94531,6 +94540,7 @@
     "blocked_by": [
      "#18898",
      "#18982",
+     "#19004",
      "#18743",
      "#18753",
      "#18784",
@@ -94544,8 +94554,7 @@
      "#18222",
      "#18925",
      "#18987",
-     "#18989",
-     "autofill-rows"
+     "#18989"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -94644,11 +94653,11 @@
      "conflicts with #18750 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18772 in docs/tools/browser.md",
      "conflicts with #18924 in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #19001 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18776 in packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts",
      "conflicts with #18786 in packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18789 in packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18925 in packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with relay-hidden-frames-main in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need act-look-prompt conflicts with main in packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
     ],
@@ -94661,11 +94670,11 @@
      "#18750",
      "#18772",
      "#18924",
+     "#19001",
      "#18776",
      "#18786",
      "#18789",
-     "#18925",
-     "relay-hidden-frames-main"
+     "#18925"
     ],
     "needs": [
      "act-look-prompt"
@@ -94688,10 +94697,10 @@
      "conflicts with #18751 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18772 in docs/tools/browser.md",
      "conflicts with #18924 in docs/tools/browser.md",
+     "conflicts with #19001 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18776 in docs/tools/browser.md",
      "conflicts with #18786 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
-     "conflicts with relay-hidden-frames-main in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts",
      "conflicts with main in packages/coding-agent/src/prompts/tools/browser.md"
     ],
@@ -94704,10 +94713,10 @@
      "#18751",
      "#18772",
      "#18924",
+     "#19001",
      "#18776",
      "#18786",
-     "#18789",
-     "relay-hidden-frames-main"
+     "#18789"
     ],
     "needs": [
      "r2/relay-own-only"
