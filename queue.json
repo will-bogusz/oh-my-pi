@@ -83841,7 +83841,7 @@
    "needs": [
     "atspi-unanswered-app"
    ],
-   "base": "9f728bd56e170453c927d5b162cebe9b308e63ce",
+   "base": "4988c32c9a9fd59f2497bd05d3c9c40b72036089",
    "body": "bodies/atspi-write-timeout-warning.md",
    "state": "queued",
    "pr": null,
@@ -83849,7 +83849,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-write-timeout-warning",
    "host": "MacBook-Pro",
    "added": "2026-11-11T21:44:32Z",
-   "updated": "2026-11-12T13:23:31Z",
+   "updated": "2026-11-12T13:24:25Z",
    "note": "Main-approved #18989 combined pair form. interrupted_masked_text_write_warns_if_the_field_may_be_empty asserts post-timeout/cancellation warnings contain neither old secret nor new secret (linux/ax.rs assertions for both); current-main Goliath Linux 100 tests plus AX 45 tests passed.",
    "rebases_after": [
     18989
