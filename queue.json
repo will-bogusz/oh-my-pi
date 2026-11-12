@@ -96635,6 +96635,11 @@
     "sha": "4bbf3b4dc92dca19fa35a07a0d97d574998431c4",
     "at": "2026-11-12T15:53:50Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "4bbf3b4dc92dca19fa35a07a0d97d574998431c4",
+    "at": "2026-11-12T15:55:11Z",
+    "host": "goliath"
    }
   },
   "1bd42fcd9dbbca744f03db154ae0147915fab705": {
