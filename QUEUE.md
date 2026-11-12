@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12 03:51Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12 03:53Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-12 03:36Z on MacBook-Pro; groups below are from it, states from the manifest)
@@ -141,7 +141,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12
 | [#18884](https://github.com/can1357/oh-my-pi/pull/18884) | browser-main-wait-navigation | fix(browser): rearm main-world waits after navigation | browser | P0 | 16h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/main-world-wait-navigation) |
 | [#18923](https://github.com/can1357/oh-my-pi/pull/18923) | macos-menu-miss-items | fix(natives): name the menu items on offer when a menu bar path misses | natives | P1 | 11h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-menu-miss-items) |
 | [#18897](https://github.com/can1357/oh-my-pi/pull/18897) | macos-layout-chords | fix(natives): press macOS key chords on the keys of the current keyboard layout | natives | P1 | 14h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-layout-chords) |
-| [#18896](https://github.com/can1357/oh-my-pi/pull/18896) | xproc-intervention | fix(natives): stop macOS input refusals between omp processes | computer | P1 | 14h | keep; accepted pair with #16553 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/xproc-intervention) |
+| [#18896](https://github.com/can1357/oh-my-pi/pull/18896) | xproc-intervention | fix(natives): stop macOS input refusals between omp processes | computer | P1 | 15h | keep; accepted pair with #16553 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/xproc-intervention) |
 | [#18892](https://github.com/can1357/oh-my-pi/pull/18892) | ax-ref-read-as | fix(natives): refuse macOS element actions once the ref's element reads as another control | computer | P1 | 15h | keep; accepted pair with #18898 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-ref-read-as) |
 | [#18919](https://github.com/can1357/oh-my-pi/pull/18919) | win-takeover-focus | fix(natives): hand the foreground back after Windows element takeover input | computer | P0 | 11h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-takeover-focus) |
 | [#18924](https://github.com/can1357/oh-my-pi/pull/18924) | browser-wait-selector-state | fix(browser): honor selector wait states and reject unknown options | browser | P1 | 11h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-wait-selector-state) |
