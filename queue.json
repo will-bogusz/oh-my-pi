@@ -85723,7 +85723,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-ax-linked-label",
    "host": "MacBook-Pro",
    "added": "2026-11-11T14:43:42Z",
-   "updated": "2026-11-12T17:36:32Z",
+   "updated": "2026-11-12T17:41:10Z",
    "note": "Main, 2026-11-12: approved linked-own-guard.diff. Naming-only: changed linked text alone is not an action guard. Five AxProps constructor sites migrated; adjacency with entries adding AxProps fields requires opener pair builds. Unbuilt design note: retain {own,linked} fingerprints independently and compare each only when answered at registration and action; closes a rerender moving an unnamed control ref onto its neighbour; measure that case before building.",
    "line_loss_overrides": [
     {
@@ -85899,6 +85899,60 @@
      "tip": "0ba0ea6bd84a2f493fa001bad3ceeaf5956bdf70",
      "with_tip": "93a1726e2ddd6c6a508bb68d341bf5fa1010d09f",
      "at": "2026-11-12T17:36:31Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#19044",
+     "code": "8c7f3669696ec5ac6110c3bc8c0ba8defa3ed32c",
+     "with_code": "39a07f3ae0566e73c2c298bc4daed5027df3cbbf",
+     "tip": "0ba0ea6bd84a2f493fa001bad3ceeaf5956bdf70",
+     "with_tip": "b79321552a87845e0dd29ddd4f802587209ff3bb",
+     "at": "2026-11-12T17:41:08Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#19026",
+     "code": "8c7f3669696ec5ac6110c3bc8c0ba8defa3ed32c",
+     "with_code": "8ae975d64a9d7bc86ef8767bdb875641f2d2798b",
+     "tip": "0ba0ea6bd84a2f493fa001bad3ceeaf5956bdf70",
+     "with_tip": "0430659225aaad7e5e66d22e22ae2f187b39b20c",
+     "at": "2026-11-12T17:41:10Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#19037",
+     "code": "8c7f3669696ec5ac6110c3bc8c0ba8defa3ed32c",
+     "with_code": "f71449ae4b8d60dadab639d0d0adb884af4bfb62",
+     "tip": "0ba0ea6bd84a2f493fa001bad3ceeaf5956bdf70",
+     "with_tip": "450e66bd8af16ce6e03c3151135b8ff67982c8d3",
+     "at": "2026-11-12T17:41:10Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#19034",
+     "code": "8c7f3669696ec5ac6110c3bc8c0ba8defa3ed32c",
+     "with_code": "da9d02017c240e0d16c85668e84466516ae5c50a",
+     "tip": "0ba0ea6bd84a2f493fa001bad3ceeaf5956bdf70",
+     "with_tip": "300596a1841441c506f0a8c525668bbd128e561e",
+     "at": "2026-11-12T17:41:10Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#19035",
+     "code": "8c7f3669696ec5ac6110c3bc8c0ba8defa3ed32c",
+     "with_code": "6985961b013c7864e5437d4020188e1966f37ce2",
+     "tip": "0ba0ea6bd84a2f493fa001bad3ceeaf5956bdf70",
+     "with_tip": "e7ca98273595a4f4a3d92dcc288e2efd31339e83",
+     "at": "2026-11-12T17:41:10Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#18013",
+     "code": "8c7f3669696ec5ac6110c3bc8c0ba8defa3ed32c",
+     "with_code": "c4d6b2ac1ad011c06167107c07a359eb739617ad",
+     "tip": "0ba0ea6bd84a2f493fa001bad3ceeaf5956bdf70",
+     "with_tip": "fc2484d4c6650dd8ee2a8c6f44209d04e3812a7e",
+     "at": "2026-11-12T17:41:10Z",
      "host": "goliath"
     }
    ]
