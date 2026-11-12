@@ -98464,5 +98464,11 @@
     "wake": ""
    }
   ]
+ },
+ "opening": {
+  "id": "x11-click-stale-popup",
+  "token": "b79e8fc528084dd4ac38f801a08546fe",
+  "host": "MacBook-Pro",
+  "at": "2026-11-12T14:40:39Z"
  }
 }
