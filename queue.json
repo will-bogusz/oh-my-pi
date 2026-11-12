@@ -79292,6 +79292,24 @@
        "\t\tlet mut input = X11Input::new(Arc::new(input_conn), root).unwrap();"
       ]
      }
+    },
+    {
+     "at": "2026-11-12T19:18:37Z",
+     "reason": "QueueSixteen.Bots19066, 2026-11-12: reviewed all eight input.rs losses; replace three misleading popup-contract doc lines and grab_popup_of authorization with the topmost helper, and replace Reaped declaration/Drop/spawn plus local display formatting with shared start_server returning Server and display",
+     "old": "a68b03f6aea03ac8cbe3512076870cde8d07c856",
+     "new": "986a137dbed59c342c1b5503bcb7d515c0244972",
+     "dropped": {
+      "crates/pi-natives/src/desktop/linux/x11/input.rs": [
+       "\t/// owner, so a viewable popup of `target`'s process stands for its own",
+       "\t/// grab (an open menu of the target), which the keys are meant for; that",
+       "\t/// heuristic only withholds this refusal, it authorises nothing.",
+       "\t\t\t\t\t\t.and_then(|pid| wm.grab_popup_of(pid))",
+       "\t\tstruct Reaped(Child);",
+       "\t\timpl Drop for Reaped {",
+       "\t\tlet mut server = Reaped(",
+       "\t\tlet display = format!(\":{}\", number.trim());"
+      ]
+     }
     }
    ],
    "advanced": "2026-11-12T13:08:50Z",
