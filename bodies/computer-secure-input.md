@@ -10,7 +10,7 @@ While a password field has the keyboard, macOS hides every key from event taps, 
 | secure text field (AppKit) | 0/10 | 0/10 | `true` | `false`, `secureInput: true`, `secureInputApp: "Fixture"`, run note |
 | SecurityAgent admin prompt | 0/10 | 0/10 | `true` | `false`, `secureInputApp: "SecurityAgent"`, run note |
 
-`capabilities()` and the `screenState` getter now report `secureInput` and the holding app (`secureInputApp`, from the session's `kCGSSessionSecureInputPID`), `globalEscape` is false while it holds, and a run that ends with it on starts with a `Note:` naming the holder. What input is sent does not change. Off macOS both fields read `false`/unset.
+`capabilities()` now reports `secureInput` and the holding app (`secureInputApp`, from the session's `kCGSSessionSecureInputPID`), `globalEscape` is false while it holds, and a run that ends with it on starts with a `Note:` naming the holder, added beside the lock and sleep note rather than inside it. What input is sent does not change. Off macOS both fields read `false`/unset.
 
 ## Why
 
@@ -19,8 +19,8 @@ The Escape stop is the user's way out of takeover input, and the agent is told i
 ## Testing
 
 - macOS VM (bench clone, macOS 26.5.2), keys sent through the VM's VNC server so the guest sees hardware input: the table above, on `main` and on this branch.
-- `bun test test/tools/computer.test.ts`: the new test fails with `protocol.ts` reverted (no note) and passes with it; it also checks the note stays out while the screen is locked, where the lock note already says keys fail.
-- `cargo test -p pi-natives --lib`: `secure_input_turns_the_escape_stop_off` and the existing capture lock/sleep tests pass; `rust-check` on macOS, Linux and Windows.
+- `bun test test/tools/computer.test.ts`: the new test fails with the note's call in `computer.ts` reverted and passes with it; it also checks the note stays out while the screen is locked, where the lock note already says keys fail.
+- `rust-check` on macOS, Linux and Windows.
 
 Like the lock note, the secure-input note comes with each `computer` call, so an Eval cell that makes three calls while it holds shows it three times.
 
