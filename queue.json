@@ -84278,7 +84278,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/autofill-rows",
    "host": "MacBook-Pro",
    "added": "2026-11-12T04:00:08Z",
-   "updated": "2026-11-12T05:44:44Z",
+   "updated": "2026-11-12T05:45:16Z",
    "note": "",
    "built": [
     {
@@ -84542,7 +84542,8 @@
      "tree": "9cd0d6e5ad110039a0b03d0927caf1d1b354a8da"
     }
    ],
-   "opened": "2026-11-12T05:44:44Z"
+   "opened": "2026-11-12T05:44:44Z",
+   "readied": "2026-11-12T05:45:15Z"
   },
   {
    "id": "masked-length-ok",
