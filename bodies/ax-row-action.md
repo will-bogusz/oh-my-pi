@@ -28,7 +28,7 @@ The table comes from live no-model VM runs: filter Activity Monitor to Dock, cal
 
 The three retained B tests fail with row following and the row verdict disabled. Four tests that still passed that control were deleted rather than claimed as regression coverage.
 
-Re-run on current main `bcd5b0b996e` on bench-mac: `cargo test -p pi-natives --lib desktop::macos` passed 353 tests; `cargo test -p pi-natives --lib desktop::` passed 601, including the merged read-as refusal coverage and row-following tests. `rust-check` passed clippy and rustfmt on macOS (bench-mac), Linux and Windows (goliath).
+Re-run on current main `53dd4c6a319` on bench-mac: `cargo test -p pi-natives --lib desktop::macos` passed 353 tests; `cargo test -p pi-natives --lib desktop::` passed 601, including the merged read-as refusal coverage and row-following tests. `rust-check` passed clippy and rustfmt on macOS (bench-mac), Linux and Windows (goliath).
 `bun check` was not run: this is native Rust work. Live measurements above are historical and were not repeated after rebasing.
 
 ---
