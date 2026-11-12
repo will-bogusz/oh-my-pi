@@ -17,7 +17,7 @@ Non-window recovery now uses the element's owning window, as desktop refs alread
 
 ## Testing
 
-- macOS `cargo test -p pi-natives --lib -- desktop::`: 565 passed.
+- macOS (bench-mac) `cargo test -p pi-natives --lib desktop::` on current main bcd5b0b996e: 599 passed.
 - With only the production fixes reverted, both regressions fail: the value fixture counts two child attribute requests instead of zero, and the display-target refusal omits the recovery names. Restoring the fixes passes both; the display case also checks that no action was sent.
 - `rust-check` passes on macOS, Linux and Windows.
 
