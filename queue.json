@@ -98723,6 +98723,11 @@
     "sha": "6e303569e2a58f1bdd2e53b2c2b7e03fdfdd1d88",
     "at": "2026-11-12T18:53:33Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "6e303569e2a58f1bdd2e53b2c2b7e03fdfdd1d88",
+    "at": "2026-11-12T18:55:21Z",
+    "host": "goliath"
    }
   }
  },
