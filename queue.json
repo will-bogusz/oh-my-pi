@@ -79256,7 +79256,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-takeover-keyboard-grab",
    "host": "MacBook-Pro",
    "added": "2026-11-11T02:55:11Z",
-   "updated": "2026-11-12T17:36:08Z",
+   "updated": "2026-11-12T17:54:47Z",
    "note": "Main-approved additive test resolution. Linux rust-check and 61 X11 tests pass on rebased head. The two MPX/uinput hotplug tests fail under Xvfb (no udev/libinput hotplug); each fails identically on origin/main 9f728bd56e1 in one baseline run.",
    "line_loss_overrides": [
     {
@@ -79285,15 +79285,6 @@
      "with_code": "9fe46b3786db428c67ecf74f778d333d8dc15407",
      "tip": "24e19ebf5a9bd5ca86d5e3560ad938bb032cf962",
      "with_tip": "751fc569c5b31addc27379649f242a81418a5cbc",
-     "at": "2026-11-12T17:26:32Z",
-     "host": "goliath"
-    },
-    {
-     "with": "#19048",
-     "code": "1698a87e5b87cdd19166e2e318aab569684b6947",
-     "with_code": "3a6e5e168a4b689f044865e6dd66590973fef2f3",
-     "tip": "24e19ebf5a9bd5ca86d5e3560ad938bb032cf962",
-     "with_tip": "bfaa5e049e7a08e0a229eb0471889738a800e86d",
      "at": "2026-11-12T17:26:32Z",
      "host": "goliath"
     },
@@ -79397,29 +79388,11 @@
      "host": "goliath"
     },
     {
-     "with": "#18987",
-     "code": "1698a87e5b87cdd19166e2e318aab569684b6947",
-     "with_code": "0b6ec1c5314a357dc69bd2a73c0eb77ad714e467",
-     "tip": "24e19ebf5a9bd5ca86d5e3560ad938bb032cf962",
-     "with_tip": "f031b644006be87fd8efa090e979bad4fb502020",
-     "at": "2026-11-12T17:36:07Z",
-     "host": "goliath"
-    },
-    {
      "with": "macos-ax-linked-label",
      "code": "1698a87e5b87cdd19166e2e318aab569684b6947",
      "with_code": "8c7f3669696ec5ac6110c3bc8c0ba8defa3ed32c",
      "tip": "24e19ebf5a9bd5ca86d5e3560ad938bb032cf962",
      "with_tip": "0ba0ea6bd84a2f493fa001bad3ceeaf5956bdf70",
-     "at": "2026-11-12T17:36:07Z",
-     "host": "goliath"
-    },
-    {
-     "with": "macos-press-click-hint",
-     "code": "1698a87e5b87cdd19166e2e318aab569684b6947",
-     "with_code": "52ec0e7c205573e87870e67e75850901a9f2c835",
-     "tip": "24e19ebf5a9bd5ca86d5e3560ad938bb032cf962",
-     "with_tip": "3ca41a9795156f00a3f57133a94781c609ca8956",
      "at": "2026-11-12T17:36:07Z",
      "host": "goliath"
     },
@@ -79430,6 +79403,87 @@
      "tip": "24e19ebf5a9bd5ca86d5e3560ad938bb032cf962",
      "with_tip": "93a1726e2ddd6c6a508bb68d341bf5fa1010d09f",
      "at": "2026-11-12T17:36:07Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#19026",
+     "code": "1698a87e5b87cdd19166e2e318aab569684b6947",
+     "with_code": "8ae975d64a9d7bc86ef8767bdb875641f2d2798b",
+     "tip": "24e19ebf5a9bd5ca86d5e3560ad938bb032cf962",
+     "with_tip": "0430659225aaad7e5e66d22e22ae2f187b39b20c",
+     "at": "2026-11-12T17:54:45Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#19036",
+     "code": "1698a87e5b87cdd19166e2e318aab569684b6947",
+     "with_code": "ae0818c2121d16433cd4d4f8484296b9dc2e1f62",
+     "tip": "24e19ebf5a9bd5ca86d5e3560ad938bb032cf962",
+     "with_tip": "68d568296ae6fcbc3fe6850f9c43a885b8e02250",
+     "at": "2026-11-12T17:54:47Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#19037",
+     "code": "1698a87e5b87cdd19166e2e318aab569684b6947",
+     "with_code": "f71449ae4b8d60dadab639d0d0adb884af4bfb62",
+     "tip": "24e19ebf5a9bd5ca86d5e3560ad938bb032cf962",
+     "with_tip": "450e66bd8af16ce6e03c3151135b8ff67982c8d3",
+     "at": "2026-11-12T17:54:47Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#19048",
+     "code": "1698a87e5b87cdd19166e2e318aab569684b6947",
+     "with_code": "3a6e5e168a4b689f044865e6dd66590973fef2f3",
+     "tip": "24e19ebf5a9bd5ca86d5e3560ad938bb032cf962",
+     "with_tip": "bfaa5e049e7a08e0a229eb0471889738a800e86d",
+     "at": "2026-11-12T17:54:47Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#19034",
+     "code": "1698a87e5b87cdd19166e2e318aab569684b6947",
+     "with_code": "da9d02017c240e0d16c85668e84466516ae5c50a",
+     "tip": "24e19ebf5a9bd5ca86d5e3560ad938bb032cf962",
+     "with_tip": "300596a1841441c506f0a8c525668bbd128e561e",
+     "at": "2026-11-12T17:54:47Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#19035",
+     "code": "1698a87e5b87cdd19166e2e318aab569684b6947",
+     "with_code": "6985961b013c7864e5437d4020188e1966f37ce2",
+     "tip": "24e19ebf5a9bd5ca86d5e3560ad938bb032cf962",
+     "with_tip": "e7ca98273595a4f4a3d92dcc288e2efd31339e83",
+     "at": "2026-11-12T17:54:47Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#18013",
+     "code": "1698a87e5b87cdd19166e2e318aab569684b6947",
+     "with_code": "c4d6b2ac1ad011c06167107c07a359eb739617ad",
+     "tip": "24e19ebf5a9bd5ca86d5e3560ad938bb032cf962",
+     "with_tip": "fc2484d4c6650dd8ee2a8c6f44209d04e3812a7e",
+     "at": "2026-11-12T17:54:47Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#18987",
+     "code": "1698a87e5b87cdd19166e2e318aab569684b6947",
+     "with_code": "0b6ec1c5314a357dc69bd2a73c0eb77ad714e467",
+     "tip": "24e19ebf5a9bd5ca86d5e3560ad938bb032cf962",
+     "with_tip": "f031b644006be87fd8efa090e979bad4fb502020",
+     "at": "2026-11-12T17:54:47Z",
+     "host": "goliath"
+    },
+    {
+     "with": "macos-press-click-hint",
+     "code": "1698a87e5b87cdd19166e2e318aab569684b6947",
+     "with_code": "52ec0e7c205573e87870e67e75850901a9f2c835",
+     "tip": "24e19ebf5a9bd5ca86d5e3560ad938bb032cf962",
+     "with_tip": "3ca41a9795156f00a3f57133a94781c609ca8956",
+     "at": "2026-11-12T17:54:47Z",
      "host": "goliath"
     }
    ]
