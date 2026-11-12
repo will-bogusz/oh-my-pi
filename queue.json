@@ -84536,7 +84536,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-focus-report",
    "host": "MacBook-Pro",
    "added": "2026-11-11T13:11:20Z",
-   "updated": "2026-11-12T17:53:02Z",
+   "updated": "2026-11-12T17:53:32Z",
    "note": "",
    "rebases_after": [
     18783,
@@ -84966,7 +84966,8 @@
      "host": "goliath"
     }
    ],
-   "opened": "2026-11-12T17:53:02Z"
+   "opened": "2026-11-12T17:53:02Z",
+   "readied": "2026-11-12T17:53:31Z"
   },
   {
    "id": "atspi-press-actions",
