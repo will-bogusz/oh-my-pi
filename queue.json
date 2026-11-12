@@ -84232,6 +84232,40 @@
        "\t\t\t\tlet builder = atspi::proxy::text::TextProxy::builder(&*connection)"
       ]
      }
+    },
+    {
+     "at": "2026-11-12T14:48:29Z",
+     "reason": "roboomp nits replace the positional Shape tuple with named fields and case-only action predicates with folds_to; bounded option reads replace the serial loop",
+     "old": "d321bfa6ae1cd27c88bcd66e79f6a17e4178d405",
+     "new": "300596a1841441c506f0a8c525668bbd128e561e",
+     "dropped": {
+      "crates/pi-natives/src/desktop/linux/ax.rs": [
+       "\t\t\ttype Shape = (bool, bool, &'static [&'static str], &'static [&'static str], bool, bool);",
+       "\t\t\tlet (combo_selection, list_selection, combo_actions, names, applies, enabled): Shape =",
+       "\t\t\t\t\tToolkit::Gtk => (true, false, &[\"press\"], &[\"click\"], true, true),",
+       "\t\t\t\t\tToolkit::Chromium => (",
+       "\t\t\t\t\t\tfalse,",
+       "\t\t\t\t\t\ttrue,",
+       "\t\t\t\t\t\t&[\"open\", \"showContextMenu\"],",
+       "\t\t\t\t\t\t&[\"select\", \"showContextMenu\"],",
+       "\t\t\t\t\tToolkit::Qt => (false, false, &[\"ShowMenu\", \"Press\"], &[\"Toggle\"], true, true),",
+       "\t\t\t\t\tToolkit::Ignoring => (true, false, &[\"press\"], &[\"click\"], false, true),",
+       "\t\t\t\t\tToolkit::Disabled => (true, false, &[\"press\"], &[\"click\"], true, false),",
+       "\t\t\tfor action in [\"press\", \"ShowMenu\"] {"
+      ],
+      "crates/pi-natives/src/desktop/linux/ax/combo.rs": [
+       "pub(super) const fn opens_grabbing_list(name: &str) -> bool {",
+       "\tname.eq_ignore_ascii_case(\"press\") || name.eq_ignore_ascii_case(\"showmenu\")",
+       "\tnames.position(|name| {",
+       "\t\tCHOOSE_ACTIONS",
+       "\t\t\t.any(|choose| name.eq_ignore_ascii_case(choose))",
+       "\t\t\tfor object in pending {",
+       "\t\t\t\tif object.is_null() {",
+       "\t\t\t\t\toptions.push(ComboOption { object, title });",
+       "\t\t\t\tif chosen.is_none() && has_interface(&proxy, atspi::Interface::Selection).await? {",
+       "\t\t\t\t\tchosen = Some(object.clone());"
+      ]
+     }
     }
    ],
    "built": [
