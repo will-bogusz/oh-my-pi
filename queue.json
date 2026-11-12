@@ -80337,6 +80337,33 @@
        "\t\t\tbackground::virtual_key(key, layout)?;"
       ]
      }
+    },
+    {
+     "at": "2026-11-12T20:10:28Z",
+     "reason": "Main, 2026-11-12: recorded use-list combination and approved layout-editor mode port onto main threaded HANG/RETURN_TO harness; old single-thread host removed; red39vs63,green217/217,baseline214/214",
+     "old": "f434a94b537426a1707ff706b25550d5c3fa4d72",
+     "new": "88f1594f719749579f8ecd152c6441909e20c6aa",
+     "dropped": {
+      "crates/pi-natives/src/desktop/win32/input.rs": [
+       "\t\t\t\tMOUSEEVENTF_VIRTUALDESK, MOUSEEVENTF_WHEEL, MOUSEINPUT, MapVirtualKeyExW, SendInput,"
+      ],
+      "crates/pi-natives/src/desktop/win32/mod.rs": [
+       "\t/// Layout checks add an embedded control in a separate host process, whose",
+       "\t/// input layout can remain independent from the frame's.",
+       "\t\tlet parent = std::env::var(\"OMP_TAKEOVER_EDITOR_PARENT\")",
+       "\t\t\t.ok()",
+       "\t\t\t.map(|parent| parent.parse::<usize>().unwrap());",
+       "\t\tlet (user, target) = parent",
+       "\t\t\t.map_or_else(|| (create(USER), create(TARGET)), |parent| (parent as HWND, parent as HWND));",
+       "\t\t\t// SAFETY: the layout identifier is NUL-terminated.",
+       "\t\t\tunsafe { ActivateKeyboardLayout(LoadKeyboardLayoutW(wide(\"00000409\").as_ptr(), 0), 0) };",
+       "\t\t\tif parent.is_none() {",
+       "\t\t\t\t// SAFETY: the host owns the frame and the callback lives until",
+       "\t\t\t\t// exit.",
+       "\t\t\t\t\tuse windows_sys::Win32::UI::WindowsAndMessaging::{GWLP_WNDPROC, SetWindowLongPtrW};",
+       "\t\t\t\tprintln!(\"windows {} {} 0\", user as usize, target as usize);"
+      ]
+     }
     }
    ],
    "advanced": "2026-11-12T19:39:21Z",
