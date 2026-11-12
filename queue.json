@@ -76285,7 +76285,55 @@
     }
    ],
    "opened": "2026-11-12T04:03:07Z",
-   "readied": "2026-11-12T04:03:48Z"
+   "readied": "2026-11-12T04:03:48Z",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-12T04:23:49Z",
+     "reason": "roboomp r4546152424 and r4546152443 explicitly request deleting unused AgentIdentity/label and passthrough test/hook; r4546152450 replaces the holder buffer bound to preserve 64 Unicode-character suffixes",
+     "old": "6dba41dc883e9b64b8dda58bc61478524ad2895c",
+     "new": "b00f68e65a5a9d8f1efdf9651d099cce846002ff",
+     "dropped": {
+      "crates/pi-natives/src/desktop/control.rs": [
+       "\t\tlet mut buffer = [0u8; 256];"
+      ],
+      "packages/coding-agent/test/tools/computer.test.ts": [
+       "function workerPrelude(session: ToolSession, native: NativeDesktopSession, created?: unknown[]): EvalPreludeDefinition {",
+       "\t\tcreated?.push(options);",
+       "\tit(\"creates the native session under the agent's id, which another session's InputBusy names\", async () => {",
+       "\t\tconst session: ToolSession = { ...toolSession(), getAgentId: () => \"CursorChecks.Scout\" };",
+       "\t\tconst created: unknown[] = [];",
+       "\t\tconst prelude = workerPrelude(session, new FakeNativeSession(), created);",
+       "\t\t\t{ action: \"run\", code: \"await desktop.windows()\", read_only: true },",
+       "\t\t\t{ session, toolCallId: \"agent-id\" },",
+       "\t\texpect(created).toEqual([expect.objectContaining({ agentId: \"CursorChecks.Scout\" })]);"
+      ],
+      "packages/tui/src/overlays/agent-identity.ts": [
+       "/** How omp shows an agent: its registry id, the name it goes by, and a colour it cannot choose. */",
+       "export interface AgentIdentity {",
+       "\tid: string;",
+       "\t/** Last dotted segment of `id` (`CursorChecks.Scout` \u2192 `Scout`). */",
+       "\tlabel: string;",
+       "\tcolor: AgentColor;",
+       "/** Identity of a registry agent id: Main is blue, every other id hashes to a stable non-red colour. */",
+       "export function agentIdentity(agentId: string): AgentIdentity {",
+       "\tconst color = agentId === MAIN_AGENT_ID ? \"blue\" : SUBAGENT_COLORS[fnv1a(agentId) % SUBAGENT_COLORS.length]!;",
+       "\treturn { id: agentId, label: agentId.slice(agentId.lastIndexOf(\".\") + 1), color };",
+       "\tconst ansi = getSessionAccentAnsi(AGENT_COLOR_HEX[agentIdentity(agentId).color]);"
+      ],
+      "packages/tui/test/agent-identity.test.ts": [
+       "import { AGENT_COLOR_HEX, agentIdentity } from \"../src/overlays/agent-identity\";",
+       "describe(\"agentIdentity\", () => {",
+       "\t\texpect(agentIdentity(\"Main\")).toEqual({ id: \"Main\", label: \"Main\", color: \"blue\" });",
+       "\t\texpect(agentIdentity(\"CursorChecks.Scout\")).toEqual({",
+       "\t\t\tid: \"CursorChecks.Scout\",",
+       "\t\t\tlabel: \"Scout\",",
+       "\t\t\tcolor: \"purple\",",
+       "\t\texpect(agentIdentity(\"Scout\")).toEqual({ id: \"Scout\", label: \"Scout\", color: \"teal\" });",
+       "\t\tfor (let index = 0; index < 200; index++) colors.add(agentIdentity(`Main.Agent${index}`).color);"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "browser-cursor",
