@@ -81855,6 +81855,20 @@
    "advanced": "2026-11-12T01:55:10Z",
    "rebases_after": [
     18898
+   ],
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-12T09:59:39Z",
+     "reason": "ax.rs port into #18898's choose_action closure: require_behind call reflowed by rustfmt (lazy window_id closure on its own lines) and press_into_view takes `native` (already a &String in the closure) instead of `&native`; same statements, Main-approved hunk",
+     "old": "42ba4e4afdceacd7bb08c101750b14005019dfeb",
+     "new": "b28323ab7bd8e11f885aaaa5b99fa2a73f609bff",
+     "dropped": {
+      "crates/pi-natives/src/desktop/macos/ax.rs": [
+       "\t\t\t.require_behind(skylight::front_pid, pid, || window_id(element).unwrap_or_default())?;",
+       "\t\tpress_into_view(&native, scroll, |action| send_action(element, action))"
+      ]
+     }
+    }
    ]
   },
   {
