@@ -78858,7 +78858,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-value-readback",
    "host": "MacBook-Pro",
    "added": "2026-11-11T02:53:57Z",
-   "updated": "2026-11-12T12:52:39Z",
+   "updated": "2026-11-12T14:32:53Z",
    "note": "",
    "advanced": "2026-11-12T12:20:18Z",
    "line_loss_overrides": [
@@ -78880,7 +78880,13 @@
       ]
      }
     }
-   ]
+   ],
+   "rebases_after": [
+    19035
+   ],
+   "pair_reasons": {
+    "19035": "QueueFourteen, 2026-11-12 (Main's standing rule: test cases appended to the same block): only conflict is crates/pi-natives/src/desktop/linux/ax.rs tests: this entry adds a_numeric_write_the_app_clamps_or_ignores_fails and #19035 adds typed_text_goes_in_where_typing_would_put_it_or_not_at_all at the same spot (base empty); nothing removed; combined form is both"
+   }
   },
   {
    "id": "x11-takeover-keyboard-grab",
