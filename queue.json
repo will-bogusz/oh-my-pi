@@ -78629,6 +78629,36 @@
        "\t\t\tlet connection = self.connection.connection();"
       ]
      }
+    },
+    {
+     "at": "2026-11-12T14:48:32Z",
+     "reason": "Bot fixes intentionally remove unconditional GTK select-all inference and the declined-route setValue recommendation that bypasses validation; selection-preservation regression fails on the pushed implementation and the new Linux head passes desktop tests and rust-check.",
+     "old": "9925438a601757456660a593ebe0b721311fe215",
+     "new": "e7ca98273595a4f4a3d92dcc288e2efd31339e83",
+     "dropped": {
+      "crates/pi-natives/src/desktop/linux/ax.rs": [
+       "/// the element's selection, or goes in at its caret, or replaces the whole",
+       "/// text of a GTK entry that does not hold the keyboard focus (focusing one",
+       "/// selects its text), and the caret ends after it.",
+       "/// ([`QT_LINE_EDIT_SETS_TEXT`]). Text the write changed to anything other",
+       "/// than what typing would give is an error, after which nothing more is sent.",
+       "\t// Focusing a GTK single-line entry selects its whole text",
+       "\t// (`gtk-entry-select-on-focus`, on by default), so focusing one that does",
+       "\t// not hold the keyboard focus and typing replaces that text. A focused",
+       "\t// entry, a text view or a Qt edit keeps its caret and selection.",
+       "\tlet selects_all = !qt && !states.contains(State::Focused) && !states.contains(State::MultiLine);",
+       "\tlet (start, end) = if selects_all {",
+       "\t\tlet Ok(all) = i32::try_from(length) else {",
+       "\t\t(0, all)",
+       "\t\tmatch reader.get_n_selections().await {",
+       "\t\t\t// Focusing an entry selects its text, so typing replaces it.",
+       "\t\t\t\t..field(\"/unfocused_entry\", \"hello\", 0, Outcome::Taken(\"AB\", 2), 2)",
+       "\t\t\t\t\tassert!(reason.contains(\"validator\"), \"{}: {reason}\", case.path);"
+      ],
+      "crates/pi-natives/src/desktop/linux/wayland/mod.rs": [
+       "\t\t\t desktop input; setValue replaces its whole text the same way\""
+      ]
+     }
     }
    ],
    "opened": "2026-11-12T14:32:14Z",
