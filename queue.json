@@ -78035,6 +78035,19 @@
      "host": "MacBook-Pro",
      "tree": "d6832129d7eeb6128f133c72507ccff2a0d1b440"
     }
+   ],
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-12T12:15:04Z",
+     "reason": "use-list combined with main's #18914 import: linux::ax::{self, AtSpiAx, AtSpiWindow, TextRoute, resolve_focus}; TextRoute kept",
+     "old": "af72509bab17de5d31c3287e44e238a86fc1e862",
+     "new": "4b7a485bd188a36b212753e9fa61457c66496347",
+     "dropped": {
+      "crates/pi-natives/src/desktop/linux/wayland/mod.rs": [
+       "\tlinux::ax::{AtSpiAx, AtSpiWindow, TextRoute, resolve_focus},"
+      ]
+     }
+    }
    ]
   },
   {
