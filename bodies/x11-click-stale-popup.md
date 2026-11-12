@@ -8,7 +8,7 @@ One session opening a GTK 3 app's menu and ending, then a second session clickin
 
 A GTK or Qt popup menu grabs the pointer while it is open: a press outside it goes to the menu, which closes and drops it. The pointer routes only confirm the press reached the server, so the call returned success and the agent went on from a click that never happened.
 
-`X11Input::popup_outside` looks for a mapped override-redirect popup of the target window's process (`Wm::grab_popups_of`, which background keys already refuse on) and refuses a press, hold, drag or scroll outside every such popup before sending anything: `BackgroundUnavailable` in the background and `InputFailed` in takeover, so the takeover rerun cannot report the same lost click. The error names the popup and says to target its window to press inside it, or to close it first. Plain moves, presses inside the popup or a submenu, and apps with no popup open are unchanged.
+`X11Input::popup_outside` looks for a mapped override-redirect popup of the target window's process (`Wm::grab_popups_of`, which background keys already refuse on) and refuses a press, hold, drag or scroll outside every such popup before sending anything: `BackgroundUnavailable` in the background and `InputFailed` in takeover, so the takeover rerun cannot report the same lost click. The error names the popup and says to press inside it or close it first. Plain moves, presses inside the popup or a submenu, and apps with no popup open are unchanged.
 
 Risk: any mapped override-redirect window of the app other than a tooltip, notification or drag icon counts, such as an open combo dropdown; those grab the pointer too, so a click outside them is likely lost on `main` as well (not run).
 
@@ -16,7 +16,7 @@ Open question: should a session close its open popups with Escape when it ends? 
 
 ## Testing
 
-Measured before the rebase onto current main, whose takeover activation and admission timing changed since.
+Measured before the rebase onto current main, whose takeover timing changed since.
 
 Two `X11Input` sessions, one app: A opens its Menu popup and ends; B clicks Bump (outside) or the popup's middle (inside) in the background, rerunning a refused click in takeover as `backgroundFallback: takeover` does.
 
