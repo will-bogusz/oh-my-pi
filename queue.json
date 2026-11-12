@@ -63277,7 +63277,21 @@
    ],
    "pair_reasons": {
     "18783": "Main, 2026-11-12 (via QueueThirteen): generated MODULE.bazel.lock only: the FILE:@@//crates/pi-natives/Cargo.toml hash line differs because each PR changes Cargo.toml; whichever merges second reruns gen-bazel-lock (--check). No code overlap."
-   }
+   },
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-12T23:17:08Z",
+     "reason": "Main yes, 2026-11-12: regenerated lock: main's Windows-form MODULE.bazel.lock + this branch's crate delta; bun scripts/gen-bazel-lock.ts --check passes on the result (bench-mac), nothing outside MODULE.bazel.lock changed, Rust diff id unchanged",
+     "old": "bd72545e5a99d2fd55ed918b949f147d04641a02",
+     "new": "2e9a28764cf53220e860d4246b5ba05b1379caca",
+     "dropped": {
+      "MODULE.bazel.lock": [
+       "          \"FILE:@@//Cargo.lock 8fc83b8ce8f915ffe096ec4ed460c4580052ec3b1e42838b44d19b01f0bbc9cc\",",
+       "          \"FILE:@@//crates/pi-natives/Cargo.toml 24af881fc308cb70797c3b7054588ebbb259a0101fb57b367dc4f9ca66da0da3\","
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "gtk4-atspi-bounds",
