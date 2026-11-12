@@ -93236,7 +93236,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-12T10:12:04.128595Z",
+  "at": "2026-11-12T10:20:26.020828Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -93360,10 +93360,12 @@
     "title": "fix(natives): capture a covered X11 window from its own pixels, or say it is covered",
     "action": "keep",
     "reasons": [],
-    "note": "accepted pair with #18013",
+    "note": "accepted pair with #18353: Main, 2026-11-12 (via QueueThirteen): generated MODULE.bazel.lock only: the FILE:@@//crates/pi-natives/Cargo.toml hash line differs because each PR changes Cargo.toml; whichever merges second reruns gen-bazel-lock (--check). No code overlap.; accepted pair with #18013; accepted pair with #18914: Main, 2026-11-12 (via QueueThirteen): generated MODULE.bazel.lock only: the FILE:@@//crates/pi-natives/Cargo.toml hash line differs because each PR changes Cargo.toml; whichever merges second reruns gen-bazel-lock (--check). No code overlap.",
     "over": [],
     "paired": [
-     "#18013"
+     "#18353",
+     "#18013",
+     "#18914"
     ],
     "blocked_by": [],
     "needs": [],
@@ -93411,19 +93413,16 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool",
-    "action": "requeue",
-    "reasons": [
-     "conflicts with #18783 in MODULE.bazel.lock"
-    ],
-    "note": "accepted pair with #18353; accepted pair with #18013",
+    "action": "keep",
+    "reasons": [],
+    "note": "accepted pair with #18353; accepted pair with #18013; accepted pair with #18783: Main, 2026-11-12 (via QueueThirteen): generated MODULE.bazel.lock only: the FILE:@@//crates/pi-natives/Cargo.toml hash line differs because each PR changes Cargo.toml; whichever merges second reruns gen-bazel-lock (--check). No code overlap.",
     "over": [],
     "paired": [
      "#18353",
-     "#18013"
-    ],
-    "blocked_by": [
+     "#18013",
      "#18783"
     ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T16:11:06Z"
    },
@@ -93503,19 +93502,16 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
-    "action": "requeue",
-    "reasons": [
-     "conflicts with #18783 in MODULE.bazel.lock"
-    ],
-    "note": "accepted pair with #18013; accepted pair with #18914",
+    "action": "keep",
+    "reasons": [],
+    "note": "accepted pair with #18013; accepted pair with #18914; accepted pair with #18783: Main, 2026-11-12 (via QueueThirteen): generated MODULE.bazel.lock only: the FILE:@@//crates/pi-natives/Cargo.toml hash line differs because each PR changes Cargo.toml; whichever merges second reruns gen-bazel-lock (--check). No code overlap.",
     "over": [],
     "paired": [
      "#18013",
-     "#18914"
-    ],
-    "blocked_by": [
+     "#18914",
      "#18783"
     ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-06T23:14:30Z"
    },
@@ -93692,13 +93688,15 @@
     "title": "fix(natives): stop Linux accessibility reads from freezing apps that show long tables",
     "action": "wait",
     "reasons": [
-     "conflicts with #18892 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/mod.rs"
+     "conflicts with #18892 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18892"
+     "#18892",
+     "#18914"
     ],
     "needs": [],
     "created": "2026-11-11T01:54:02Z"
@@ -93731,13 +93729,15 @@
     "action": "wait",
     "reasons": [
      "needs #18914 (open)",
-     "conflicts with #18892 in crates/pi-natives/src/desktop/linux/ax.rs"
+     "conflicts with #18892 in crates/pi-natives/src/desktop/linux/ax.rs",
+     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18892"
+     "#18892",
+     "#18914"
     ],
     "needs": [
      "atspi-unanswered-app"
@@ -93752,12 +93752,16 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/wayland/mod.rs"
+    ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#18914"
+    ],
     "needs": [],
     "created": "2026-11-11T02:21:41Z"
    },
@@ -93774,9 +93778,10 @@
      "needs #18914 (open)",
      "conflicts with #18783 in crates/pi-natives/Cargo.toml",
      "conflicts with #18892 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs",
+     "conflicts with #18914 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/wayland/libei.rs, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #18915 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/ax.rs",
+     "conflicts with #18353 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #18013 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/libei.rs",
-     "conflicts with atspi-text-first in crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
@@ -93785,9 +93790,10 @@
     "blocked_by": [
      "#18783",
      "#18892",
+     "#18914",
      "#18915",
-     "#18013",
-     "atspi-text-first"
+     "#18353",
+     "#18013"
     ],
     "needs": [
      "atspi-unanswered-app"
@@ -94138,13 +94144,15 @@
     "action": "wait",
     "reasons": [
      "needs #18914 (open)",
-     "conflicts with #18892 in crates/pi-natives/src/desktop/linux/ax.rs"
+     "conflicts with #18892 in crates/pi-natives/src/desktop/linux/ax.rs",
+     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/ax/menus.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18892"
+     "#18892",
+     "#18914"
     ],
     "needs": [
      "atspi-unanswered-app"
@@ -94163,14 +94171,14 @@
     "reasons": [
      "needs #18914 (open)",
      "conflicts with #18892 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with atspi-text-first in crates/pi-natives/src/desktop/linux/ax.rs"
+     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
      "#18892",
-     "atspi-text-first"
+     "#18914"
     ],
     "needs": [
      "atspi-unanswered-app"
@@ -94319,6 +94327,7 @@
      "conflicts with #18783 in docs/computer-use.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #18784 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18892 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with #18353 in docs/computer-use.md",
      "conflicts with #18013 in docs/computer-use.md",
      "conflicts with #18222 in packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #18987 in docs/computer-use.md",
@@ -94332,6 +94341,7 @@
      "#18783",
      "#18784",
      "#18892",
+     "#18353",
      "#18013",
      "#18222",
      "#18987"
@@ -94422,6 +94432,7 @@
      "conflicts with #18783 in docs/computer-use.md",
      "conflicts with #18784 in docs/computer-use.md",
      "conflicts with #18892 in crates/pi-natives/src/desktop/macos/input.rs, docs/computer-use.md",
+     "conflicts with #18353 in docs/computer-use.md",
      "conflicts with #17897 in crates/pi-natives/src/desktop/macos/input.rs",
      "conflicts with #18013 in docs/computer-use.md",
      "conflicts with #18987 in docs/computer-use.md",
@@ -94437,6 +94448,7 @@
      "#18783",
      "#18784",
      "#18892",
+     "#18353",
      "#17897",
      "#18013",
      "#18987"
@@ -94873,6 +94885,7 @@
      "conflicts with #18784 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18892 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18915 in docs/tools/computer.md",
+     "conflicts with #18353 in docs/computer-use.md, docs/tools/computer.md",
      "conflicts with #18013 in docs/computer-use.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/tools/eval.ts",
@@ -94892,6 +94905,7 @@
      "#18784",
      "#18892",
      "#18915",
+     "#18353",
      "#18013",
      "#18222",
      "#18786",
@@ -94918,7 +94932,9 @@
      "conflicts with #18743 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with #18784 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18892 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with #18914 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18915 in docs/tools/computer.md",
+     "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18987 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
@@ -94934,7 +94950,9 @@
      "#18743",
      "#18784",
      "#18892",
+     "#18914",
      "#18915",
+     "#18353",
      "#18222",
      "#18925",
      "#18987",
