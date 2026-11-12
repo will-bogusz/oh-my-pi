@@ -63760,7 +63760,7 @@
    "area": "natives",
    "priority": "P2",
    "needs": [],
-   "base": "cfd8d04ef37acee404bd341661b052c00c6acc9c",
+   "base": "aece16f78fad7e9e777b4aeaa1ca583544a17723",
    "body": "bodies/wayland-ei-text.md",
    "state": "open",
    "pr": 18013,
@@ -63768,9 +63768,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-ei-text",
    "host": "MacBook-Pro",
    "added": "2026-11-03T06:23:33Z",
-   "updated": "2026-11-12T10:10:48Z",
+   "updated": "2026-11-12T15:29:32Z",
    "note": "Main, 2026-11-11: accepted pair with #18783 (one-line adjacent Cargo.toml dependency edit: #18783's x11rb render feature next to this PR's reis line); not requeued; whichever merges second takes the one-line rebase.",
-   "advanced": "2026-11-12T10:10:48Z",
+   "advanced": "2026-11-12T15:29:32Z",
    "built": [
     {
      "with": "#17757",
