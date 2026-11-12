@@ -25,6 +25,8 @@ Visible effect: the Caps Lock LED and a panel's layout indicator flip off and ba
 
 ## Testing
 
+The GTK measurements below predate the current-main rebase. The latched-group regression had not passed before this rerun; it exposed and now covers an additive XKB group-latch request.
+
 goliath, Xvfb + openbox, a GTK 3 entry focused, takeover `type("AbC1x")` through omp's own `X11Input`; every `main` row returned success:
 
 | keyboard state | `main` | This PR |
@@ -40,8 +42,9 @@ Rerun on a second rig (Ubuntu 22.04 arm64, Xvfb + openbox, GTK 3 and Qt 5 fixtur
 
 After each run the user's state read back as before it (Caps Lock and group 2 still locked); a latched Control was used up, as the user's next key would have used it.
 
-- `xtest_text_types_through_a_neutral_keyboard_state` (`#[ignore]`, starts its own Xvfb): with Caps Lock and Control locked and group 2 locked, no key event carries Lock, Control or a group and the user's locks and group are back afterwards; a latched group is cleared and stays used up; a `CapsLock` chord still turns Caps Lock off. It fails on `main` at the first key's state.
-- `scripts/rust-check` on Linux.
+- `xtest_text_types_through_a_neutral_keyboard_state` (`#[ignore]`, starts its own Xvfb): with Caps Lock and Control locked and group 2 locked, no key event carries Lock, Control or a group and the user's locks and group are back afterwards; a latched group is cleared and stays used up; a `CapsLock` chord still turns Caps Lock off.
+- Re-run on current main (`9f728bd56e1`), Xvfb 21.1.12: the latched-group test failed 10/10 before subtracting the observed group latch and passed 10/10 after; locked-group restoration passed in the same runs. A libX11-injected latched Control also cleared correctly in 10/10 runs.
+- Linux `scripts/rust-check` passed; `cargo test -p pi-natives --lib desktop::linux::x11 -- --include-ignored --test-threads=1` passed 62 tests when excluding the two MPX/uinput hotplug tests that fail identically on main under Xvfb (no udev/libinput hotplug).
 
 ---
 
