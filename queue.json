@@ -83678,7 +83678,21 @@
    "host": "MacBook-Pro",
    "added": "2026-11-11T18:49:11Z",
    "updated": "2026-11-12T12:43:24Z",
-   "note": ""
+   "note": "",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-12T12:44:09Z",
+     "reason": "Import-only union retains main confirm_read_as and require_read_as together with entry performable_name; lines reordered rather than names removed",
+     "old": "9ab1d9c3efa8ac678884f66f4522156680c00d67",
+     "new": "3ca41a9795156f00a3f57133a94781c609ca8956",
+     "dropped": {
+      "crates/pi-natives/src/desktop/macos/ax.rs": [
+       "\t\t\tAxBounds, AxHandle, AxProps, WalkBounds, normalize_role_macos, performable_name,",
+       "\t\t\ttext_readback, truncate_chars,"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "browser-toggle-prefix",
