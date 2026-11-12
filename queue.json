@@ -79148,13 +79148,13 @@
    "needs": [],
    "base": "9f728bd56e170453c927d5b162cebe9b308e63ce",
    "body": "bodies/x11-click-stale-popup.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19044,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-click-stale-popup",
    "host": "MacBook-Pro",
    "added": "2026-11-11T03:06:32Z",
-   "updated": "2026-11-12T16:32:49Z",
+   "updated": "2026-11-12T16:35:50Z",
    "note": "Main-approved additive test resolution. Linux rust-check and 61 X11 tests pass on rebased head. The two MPX/uinput hotplug tests fail under Xvfb (no udev/libinput hotplug); each fails identically on origin/main 9f728bd56e1 in one baseline run.",
    "line_loss_overrides": [
     {
@@ -79477,7 +79477,8 @@
      "at": "2026-11-12T16:24:43Z",
      "host": "goliath"
     }
-   ]
+   ],
+   "opened": "2026-11-12T16:35:50Z"
   },
   {
    "id": "print-pref",
