@@ -96552,12 +96552,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-12T14:58:27.233537Z",
+  "at": "2026-11-12T15:28:57.045547Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 4,
-   "left": 4
+   "used": 3,
+   "left": 5
   },
   "rows": [
    {
@@ -97298,7 +97298,7 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): read back AT-SPI numeric setValue before reporting success",
-    "action": "next-hour",
+    "action": "open",
     "reasons": [],
     "note": "accepted pair with #19035: QueueFourteen, 2026-11-12 (Main's standing rule: test cases appended to the same block): only conflict is crates/pi-natives/src/desktop/linux/ax.rs tests: this entry adds a_numeric_write_the_app_clamps_or_ignores_fails and #19035 adds typed_text_goes_in_where_typing_would_put_it_or_not_at_all at the same spot (base empty); nothing removed; combined form is both",
     "over": [],
