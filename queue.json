@@ -93047,8 +93047,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-12T09:22:43.077415Z",
-  "host": "goliath",
+  "at": "2026-11-12T09:47:51.196792Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -93154,10 +93154,8 @@
     "area": "browser",
     "priority": "P1",
     "title": "fix(browser): run tab.run page evaluations in the page's main world",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in docs/tools/browser.md"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -93211,14 +93209,17 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): refuse macOS element actions once the ref's element reads as another control",
-    "action": "rebase",
+    "action": "requeue",
     "reasons": [
+     "conflicts with #18743 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with main in crates/pi-natives/src/desktop/macos/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#18743"
+    ],
     "needs": [],
     "created": "2026-11-11T12:38:46Z"
    },
@@ -93230,15 +93231,19 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool",
-    "action": "keep",
-    "reasons": [],
+    "action": "requeue",
+    "reasons": [
+     "conflicts with #18783 in crates/pi-natives/Cargo.toml"
+    ],
     "note": "accepted pair with #18353; accepted pair with #18013",
     "over": [],
     "paired": [
      "#18353",
      "#18013"
     ],
-    "blocked_by": [],
+    "blocked_by": [
+     "#18783"
+    ],
     "needs": [],
     "created": "2026-11-11T16:11:06Z"
    },
@@ -93320,15 +93325,21 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
-    "action": "keep",
-    "reasons": [],
+    "action": "requeue",
+    "reasons": [
+     "conflicts with #18783 in crates/pi-natives/Cargo.toml",
+     "conflicts with #18915 in crates/pi-natives/Cargo.toml"
+    ],
     "note": "accepted pair with #18013; accepted pair with #18914",
     "over": [],
     "paired": [
      "#18013",
      "#18914"
     ],
-    "blocked_by": [],
+    "blocked_by": [
+     "#18783",
+     "#18915"
+    ],
     "needs": [],
     "created": "2026-11-06T23:14:30Z"
    },
@@ -93505,18 +93516,12 @@
     "area": "computer",
     "priority": "P0",
     "title": "fix(natives): stop Linux accessibility reads from freezing apps that show long tables",
-    "action": "wait",
-    "reasons": [
-     "conflicts with #18892 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/mod.rs",
-     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#18892",
-     "#18914"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T01:54:02Z"
    },
@@ -93530,7 +93535,7 @@
     "title": "fix(natives): keep X11 background input out of your window after a screen lock or VT switch",
     "action": "open",
     "reasons": [],
-    "note": "advance first",
+    "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [],
@@ -93548,15 +93553,13 @@
     "action": "wait",
     "reasons": [
      "needs #18914 (open)",
-     "conflicts with #18892 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs"
+     "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18892",
-     "#18914"
+     "atspi-huge-children"
     ],
     "needs": [
      "atspi-unanswered-app"
@@ -93571,16 +93574,12 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility",
-    "action": "wait",
-    "reasons": [
-     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/wayland/mod.rs"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#18914"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T02:21:41Z"
    },
@@ -93596,11 +93595,10 @@
     "reasons": [
      "needs #18914 (open)",
      "conflicts with #18783 in crates/pi-natives/Cargo.toml",
-     "conflicts with #18892 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with #18914 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/wayland/libei.rs, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #18915 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/ax.rs",
-     "conflicts with #18353 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #18013 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/libei.rs",
+     "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs",
+     "conflicts with atspi-text-first in crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
@@ -93608,11 +93606,10 @@
     "paired": [],
     "blocked_by": [
      "#18783",
-     "#18892",
-     "#18914",
      "#18915",
-     "#18353",
-     "#18013"
+     "#18013",
+     "atspi-huge-children",
+     "atspi-text-first"
     ],
     "needs": [
      "atspi-unanswered-app"
@@ -93630,7 +93627,7 @@
     "action": "wait",
     "reasons": [
      "needs #18892 (open)",
-     "conflicts with #18892 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/mod.rs",
      "its need #18892 conflicts with main in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with main in crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs"
     ],
@@ -93638,7 +93635,7 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18892"
+     "atspi-huge-children"
     ],
     "needs": [
      "ax-ref-read-as"
@@ -93674,12 +93671,15 @@
     "title": "fix(computer): retain output and screenshots when a run fails",
     "action": "wait",
     "reasons": [
+     "conflicts with #18987 in packages/coding-agent/src/tools/computer.ts",
      "conflicts with main in packages/coding-agent/src/tools/computer.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#18987"
+    ],
     "needs": [],
     "created": "2026-11-11T00:07:07Z"
    },
@@ -93754,12 +93754,14 @@
     "title": "fix(natives): map Windows keys on the receiving keyboard layout",
     "action": "wait",
     "reasons": [
-     "conflicts with main in crates/pi-natives/src/desktop/win32/input.rs"
+     "conflicts with #18915 in crates/pi-natives/src/desktop/win32/mod.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#18915"
+    ],
     "needs": [],
     "created": "2026-11-11T09:13:32Z"
    },
@@ -93773,13 +93775,15 @@
     "title": "fix(natives,coding-agent): stop Windows takeover typing from losing text the app had not read yet",
     "action": "wait",
     "reasons": [
-     "conflicts with #18783 in docs/computer-use.md"
+     "conflicts with #18915 in crates/pi-natives/src/desktop/win32/mod.rs"
     ],
-    "note": "",
+    "note": "accepted pair with #18783: QueueThirteen, 2026-11-12 (Main: docs pairs are the opener's): docs-only collision in docs/computer-use.md, adjacent: #18783 adds two X11 covered-window screenshot paragraphs right before the 'Window input defaults to background routes' paragraph that this entry edits. Combined form: #18783's two paragraphs, blank line, then this entry's wording of the 'Window input defaults' paragraph. No code overlap.",
     "over": [],
-    "paired": [],
-    "blocked_by": [
+    "paired": [
      "#18783"
+    ],
+    "blocked_by": [
+     "#18915"
     ],
     "needs": [],
     "created": "2026-11-12T04:40:03Z"
@@ -93881,8 +93885,10 @@
     "action": "wait",
     "reasons": [
      "conflicts with #18737 in packages/coding-agent/src/prompts/tools/browser.md",
+     "conflicts with #18751 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18786 in packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18789 in packages/coding-agent/src/prompts/tools/browser.md",
+     "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
@@ -93890,8 +93896,10 @@
     "paired": [],
     "blocked_by": [
      "#18737",
+     "#18751",
      "#18786",
-     "#18789"
+     "#18789",
+     "#18925"
     ],
     "needs": [],
     "created": "2026-11-10T15:45:44Z"
@@ -93907,8 +93915,7 @@
     "action": "wait",
     "reasons": [
      "needs #18751 (open)",
-     "conflicts with #18925 in packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "its need #18751 conflicts with main in docs/tools/browser.md"
+     "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
     "over": [],
@@ -93932,7 +93939,7 @@
     "action": "wait",
     "reasons": [
      "needs observe-settle (queued)",
-     "conflicts with #18925 in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need observe-settle conflicts with main in docs/tools/browser.md",
      "conflicts with main in packages/coding-agent/src/tools/browser/frames.ts"
     ],
@@ -93958,15 +93965,13 @@
     "action": "wait",
     "reasons": [
      "needs #18914 (open)",
-     "conflicts with #18892 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/ax/menus.rs"
+     "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18892",
-     "#18914"
+     "atspi-huge-children"
     ],
     "needs": [
      "atspi-unanswered-app"
@@ -93984,15 +93989,15 @@
     "action": "wait",
     "reasons": [
      "needs #18914 (open)",
-     "conflicts with #18892 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs"
+     "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/linux/ax.rs",
+     "conflicts with atspi-text-first in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18892",
-     "#18914"
+     "atspi-huge-children",
+     "atspi-text-first"
     ],
     "needs": [
      "atspi-unanswered-app"
@@ -94010,12 +94015,15 @@
     "action": "wait",
     "reasons": [
      "needs #18914 (open)",
+     "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "atspi-huge-children"
+    ],
     "needs": [
      "atspi-unanswered-app"
     ],
@@ -94032,12 +94040,17 @@
     "action": "wait",
     "reasons": [
      "needs #18892 (open)",
+     "conflicts with #18743 in crates/pi-natives/src/desktop/macos/ax.rs",
+     "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "its need #18892 conflicts with main in crates/pi-natives/src/desktop/macos/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#18743",
+     "atspi-huge-children"
+    ],
     "needs": [
      "ax-ref-read-as"
     ],
@@ -94054,13 +94067,18 @@
     "action": "wait",
     "reasons": [
      "needs browser-wait-predicate (queued)",
+     "conflicts with #18751 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need browser-wait-predicate conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#18751",
+     "#18925"
+    ],
     "needs": [
      "browser-wait-predicate"
     ],
@@ -94077,12 +94095,17 @@
     "action": "wait",
     "reasons": [
      "needs browser-wait-text-regexp (queued)",
+     "conflicts with #18751 in docs/tools/browser.md",
+     "conflicts with #18925 in docs/tools/browser.md",
      "its need browser-wait-text-regexp conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#18751",
+     "#18925"
+    ],
     "needs": [
      "browser-wait-text-regexp"
     ],
@@ -94098,12 +94121,15 @@
     "title": "fix(computer): say window and element filters take text when given a RegExp",
     "action": "wait",
     "reasons": [
+     "conflicts with #18987 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#18987"
+    ],
     "needs": [],
     "created": "2026-11-11T01:40:14Z"
    },
@@ -94117,20 +94143,22 @@
     "title": "fix(computer): wait for the app to finish reacting before the next read or input",
     "action": "wait",
     "reasons": [
+     "conflicts with #18743 in docs/computer-use.md",
      "conflicts with #18783 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #18784 in packages/coding-agent/src/prompts/tools/computer.md",
-     "conflicts with #18892 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18222 in packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
+     "conflicts with #18987 in docs/computer-use.md",
      "conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#18743",
      "#18783",
      "#18784",
-     "#18892",
-     "#18222"
+     "#18222",
+     "#18987"
     ],
     "needs": [],
     "created": "2026-10-19T07:26:45Z"
@@ -94145,12 +94173,15 @@
     "title": "fix(natives): send no macOS AX action once its run is cancelled",
     "action": "wait",
     "reasons": [
+     "conflicts with #18743 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with main in crates/pi-natives/src/desktop/macos/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#18743"
+    ],
     "needs": [],
     "created": "2026-11-11T09:59:13Z"
    },
@@ -94162,16 +94193,12 @@
     "area": "natives",
     "priority": "P2",
     "title": "fix(natives): name a macOS control by the label its AXTitleUIElement links to",
-    "action": "wait",
-    "reasons": [
-     "conflicts with #18892 in crates/pi-natives/src/desktop/macos/ax.rs"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#18892"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T14:43:42Z"
    },
@@ -94183,16 +94210,12 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): point a refused macOS press at the element's own click",
-    "action": "wait",
-    "reasons": [
-     "conflicts with #18892 in crates/pi-natives/src/desktop/macos/ax.rs"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#18892"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T18:49:11Z"
    },
@@ -94209,8 +94232,9 @@
      "needs iphone-mirror-scroll-distance (queued)",
      "conflicts with #16553 in crates/pi-natives/src/desktop/macos/input.rs",
      "conflicts with #17756 in crates/pi-natives/src/desktop/macos/input.rs",
-     "conflicts with #18892 in crates/pi-natives/src/desktop/macos/input.rs",
+     "conflicts with #18743 in docs/computer-use.md",
      "conflicts with #17897 in crates/pi-natives/src/desktop/macos/input.rs",
+     "conflicts with #18987 in docs/computer-use.md",
      "conflicts with main in docs/computer-use.md"
     ],
     "note": "",
@@ -94219,8 +94243,9 @@
     "blocked_by": [
      "#16553",
      "#17756",
-     "#18892",
-     "#17897"
+     "#18743",
+     "#17897",
+     "#18987"
     ],
     "needs": [
      "iphone-mirror-scroll-distance"
@@ -94237,8 +94262,7 @@
     "title": "fix(natives): report a setValue that reads back as a same-length mask as done, not failed",
     "action": "wait",
     "reasons": [
-     "conflicts with #18915 in crates/pi-natives/src/desktop/ax.rs",
-     "conflicts with main in docs/tools/computer.md"
+     "conflicts with #18915 in crates/pi-natives/src/desktop/ax.rs"
     ],
     "note": "",
     "over": [],
@@ -94403,15 +94427,15 @@
     "title": "fix(natives): expose Windows control state and stale-reference matches",
     "action": "wait",
     "reasons": [
-     "conflicts with #18892 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs",
-     "conflicts with #18915 in crates/pi-natives/src/desktop/win32/ax.rs"
+     "conflicts with #18915 in crates/pi-natives/src/desktop/win32/ax.rs",
+     "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/win32/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18892",
-     "#18915"
+     "#18915",
+     "atspi-huge-children"
     ],
     "needs": [],
     "created": "2026-11-11T10:16:04Z"
@@ -94426,13 +94450,15 @@
     "title": "fix(natives): report where focus went after a Windows takeover",
     "action": "wait",
     "reasons": [
-     "conflicts with #18783 in docs/computer-use.md"
+     "conflicts with #18915 in crates/pi-natives/src/desktop/win32/mod.rs"
     ],
-    "note": "",
+    "note": "accepted pair with #18783: QueueThirteen, 2026-11-12 (Main: docs pairs are the opener's): docs-only collision in docs/computer-use.md, adjacent: #18783 adds two X11 covered-window screenshot paragraphs right before the 'Window input defaults to background routes' paragraph that this entry edits. Combined form: #18783's two paragraphs, blank line, then this entry's wording of the 'Window input defaults' paragraph. No code overlap.",
     "over": [],
-    "paired": [],
-    "blocked_by": [
+    "paired": [
      "#18783"
+    ],
+    "blocked_by": [
+     "#18915"
     ],
     "needs": [],
     "created": "2026-11-11T13:11:20Z"
@@ -94448,7 +94474,6 @@
     "action": "wait",
     "reasons": [
      "conflicts with #18784 in packages/coding-agent/src/prompts/tools/computer.md",
-     "conflicts with #18892 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18915 in crates/pi-natives/src/desktop/win32/mod.rs",
      "conflicts with #18222 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/win32/mod.rs, packages/coding-agent/src/prompts/tools/computer.md"
@@ -94458,7 +94483,6 @@
     "paired": [],
     "blocked_by": [
      "#18784",
-     "#18892",
      "#18915",
      "#18222"
     ],
@@ -94503,6 +94527,7 @@
      "conflicts with #18737 in packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18786 in packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18789 in packages/coding-agent/src/prompts/tools/browser.md",
+     "conflicts with #18925 in docs/tools/browser.md",
      "its need settle-reads conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts",
      "conflicts with main in packages/coding-agent/src/prompts/tools/browser.md"
     ],
@@ -94512,7 +94537,8 @@
     "blocked_by": [
      "#18737",
      "#18786",
-     "#18789"
+     "#18789",
+     "#18925"
     ],
     "needs": [
      "settle-reads"
@@ -94530,8 +94556,10 @@
     "action": "wait",
     "reasons": [
      "conflicts with #18737 in packages/coding-agent/src/prompts/tools/browser.md",
+     "conflicts with #18751 in docs/tools/browser.md",
      "conflicts with #18786 in packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18789 in packages/coding-agent/src/prompts/tools/browser.md",
+     "conflicts with #18925 in docs/tools/browser.md",
      "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts"
     ],
     "note": "",
@@ -94539,8 +94567,10 @@
     "paired": [],
     "blocked_by": [
      "#18737",
+     "#18751",
      "#18786",
-     "#18789"
+     "#18789",
+     "#18925"
     ],
     "needs": [],
     "created": "2026-11-10T19:19:48Z"
@@ -94648,14 +94678,13 @@
      "held: Main for InputDiffFix, 2026-11-12: held; the fix round failed two Opus acceptance lines fixed beforehand (Finder steps 1.47x, Automator tokens 1.26x vs main); code branch stays local and unpushed; see note",
      "needs computer-ui-quiet (queued)",
      "conflicts with #18737 in packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts",
+     "conflicts with #18743 in docs/computer-use.md",
      "conflicts with #18783 in packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18784 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md",
-     "conflicts with #18892 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18915 in docs/tools/computer.md",
-     "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/tools/eval.ts",
-     "conflicts with #18987 in docs/tools/computer.md, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/worker.ts",
+     "conflicts with #18987 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/worker.ts",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -94664,11 +94693,10 @@
     "paired": [],
     "blocked_by": [
      "#18737",
+     "#18743",
      "#18783",
      "#18784",
-     "#18892",
      "#18915",
-     "#18353",
      "#18222",
      "#18786",
      "#18987"
@@ -94692,13 +94720,13 @@
      "conflicts with #18743 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with #18783 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18784 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md",
-     "conflicts with #18892 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/prompts/tools/computer.md",
-     "conflicts with #18914 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18915 in docs/tools/computer.md",
-     "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18987 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
+     "conflicts with atspi-huge-children in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with macos-ax-linked-label in crates/pi-natives/src/desktop/macos/ax.rs",
+     "conflicts with macos-press-click-hint in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with takeover-attached-hint in crates/pi-natives/src/desktop/macos/ax.rs",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/tools/computer/worker.ts"
@@ -94710,13 +94738,13 @@
      "#18743",
      "#18783",
      "#18784",
-     "#18892",
-     "#18914",
      "#18915",
-     "#18353",
      "#18222",
      "#18925",
      "#18987",
+     "atspi-huge-children",
+     "macos-ax-linked-label",
+     "macos-press-click-hint",
      "takeover-attached-hint"
     ],
     "needs": [
@@ -94738,7 +94766,6 @@
      "needs #18987 (open)",
      "conflicts with #16553 in crates/pi-natives/src/desktop/macos/mod.rs",
      "conflicts with #18784 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
-     "conflicts with #18892 in crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18925 in crates/pi-natives/src/desktop/macos/capture.rs",
      "conflicts with main in packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -94748,7 +94775,6 @@
     "blocked_by": [
      "#16553",
      "#18784",
-     "#18892",
      "#18925"
     ],
     "needs": [
@@ -94815,7 +94841,7 @@
      "conflicts with #19001 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18786 in packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18789 in packages/coding-agent/src/prompts/tools/browser.md",
-     "conflicts with #18925 in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need act-look-prompt conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
     ],
@@ -94904,7 +94930,8 @@
     "action": "held",
     "reasons": [
      "held: Main, 2026-11-12: proposal; opens only after entry A merges and Will has seen the body",
-     "needs win-type-drain (queued)"
+     "needs win-type-drain (queued)",
+     "conflicts with main in crates/pi-natives/src/desktop/win32/mod.rs"
     ],
     "note": "",
     "over": [],
