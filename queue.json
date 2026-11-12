@@ -36820,7 +36820,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/click-place-release",
    "host": "MacBook-Pro",
    "added": "2026-10-20T20:11:57Z",
-   "updated": "2026-11-12T00:53:49Z",
+   "updated": "2026-11-12T00:54:15Z",
    "note": "",
    "built": [
     {
@@ -36874,17 +36874,9 @@
     {
      "pr": 16553,
      "rounds": 19,
-     "at": "2026-11-12T00:53:30Z",
-     "verdict": "keep",
-     "note": "Design16553b second check at 19 rounds: join of HID counters and tap is where findings land (5 of 7); no single-source form removes the open three without losing the stand-down rule; head 2e70e356a6 right at ordinary tap lag; no code push; two Limits lines to add; drop click-snapshot-first; tap-as-only-writer queued as follow-up",
-     "ref": "/Users/viathebrink/tmp/oh-my-pi/queue-restructure-20261102/design-checks/16553-second.md"
-    },
-    {
-     "pr": 16553,
-     "rounds": 19,
      "at": "2026-11-12T00:53:49Z",
      "verdict": "keep",
-     "note": "Design16553b, 2026-11-12: second check at 19 finding rounds. The counters-plus-tap join is why findings land (5 of 7 since the swap), but no single-source design removes the class without losing measured wins; remaining orderings need a stalled tap or rare tool pairs (0 misreads in 1,900 runs at ordinary tap lag). Head 2e70e356a6 safe to merge; no code push. Two limits to add to the body by edit.",
+     "note": "Design16553b, 2026-11-12: second check at 19 finding rounds. The counters-plus-tap join is why findings land (5 of 7 since the swap), but no single-source design removes the class without losing measured wins; remaining orderings need a stalled tap or rare tool pairs (0 misreads in 1,900 runs at ordinary tap lag). Head 2e70e356a6 safe to merge; no code push. Two limits to add to the body by edit. (one check; QueueEleven's duplicate record of it merged here, 2026-11-12)",
      "ref": "/Users/viathebrink/.omp/agent/sessions/-codebases-trycua-omp/2026-09-08T17-46-29-496Z_01a08220-e6f8-77c4-8572-0e0ff13b3611/local/design-checks/16553-second.md"
     }
    ],
