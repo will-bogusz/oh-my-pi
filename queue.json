@@ -87337,13 +87337,13 @@
    ],
    "base": "bcd5b0b996e0f4a107f51cb398a6492ffb7d44b9",
    "body": "bodies/win-type-drain.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19037,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-type-drain",
    "host": "MacBook-Pro",
    "added": "2026-11-12T04:40:03Z",
-   "updated": "2026-11-12T14:14:12Z",
+   "updated": "2026-11-12T14:39:57Z",
    "note": "QueueTwelve, 2026-11-12: local head ce216ae356443bcf8a2e54a5ff4b4d99269c29c6; unpushed until #18919 merges. Named advance waits on the open need; these local-ahead commits ride its post-merge push. Return regression green/red on Windows; rust-check macOS/Linux/Windows recorded.",
    "advanced": "2026-11-12T12:14:12Z",
    "rebases_after": [
@@ -87527,7 +87527,8 @@
      "at": "2026-11-12T14:14:11Z",
      "host": "goliath"
     }
-   ]
+   ],
+   "opened": "2026-11-12T14:39:57Z"
   },
   {
    "id": "win-type-insert",
