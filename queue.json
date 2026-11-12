@@ -89487,7 +89487,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-11T23:43:46.108361Z",
+  "at": "2026-11-12T00:14:32.966150Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -91304,8 +91304,9 @@
     "area": "browser",
     "priority": "P2",
     "title": "feat(browser): draw the acting agent's cursor in OMP-driven tabs",
-    "action": "wait",
+    "action": "held",
     "reasons": [
+     "held: Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check",
      "needs agent-identity (queued)",
      "conflicts with #18925 in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-protocol.ts"
@@ -91354,7 +91355,9 @@
     "reasons": [
      "held: Main, 2026-11-11: stays held until #18786 merges with the typed-message guide channel (design check replace); then one property on the computer prelude, drop the wrap variant, re-run its blind legs",
      "needs #18786 (open)",
+     "conflicts with #18753 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18947 in packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with #18222 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/prompts/tools/eval.md, packages/coding-agent/src/tools/eval.ts",
      "conflicts with main in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/sdk-computer-prelude-toggle.test.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -91362,7 +91365,9 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#18753",
      "#18947",
+     "#18222",
      "#18786"
     ],
     "needs": [
@@ -91472,8 +91477,9 @@
     "area": "coding-agent",
     "priority": "P2",
     "title": "feat(coding-agent,natives): show each agent's cursor where its computer input lands on macOS",
-    "action": "wait",
+    "action": "held",
     "reasons": [
+     "held: Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check",
      "needs agent-identity (queued)",
      "conflicts with #16553 in crates/pi-natives/src/desktop/macos/mod.rs",
      "conflicts with #18784 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
