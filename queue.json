@@ -99882,5 +99882,11 @@
     "wake": ""
    }
   ]
+ },
+ "opening": {
+  "id": "atspi-write-timeout-warning",
+  "token": "053ca3b5fa9e4ca28f154558f3df256e",
+  "host": "MacBook-Pro",
+  "at": "2026-11-12T16:51:33Z"
  }
 }
