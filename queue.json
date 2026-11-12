@@ -85723,7 +85723,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-ax-linked-label",
    "host": "MacBook-Pro",
    "added": "2026-11-11T14:43:42Z",
-   "updated": "2026-11-12T17:45:10Z",
+   "updated": "2026-11-12T17:45:39Z",
    "note": "Main, 2026-11-12: approved linked-own-guard.diff. Naming-only: changed linked text alone is not an action guard. Five AxProps constructor sites migrated; adjacency with entries adding AxProps fields requires opener pair builds. Unbuilt design note: retain {own,linked} fingerprints independently and compare each only when answered at registration and action; closes a rerender moving an unnamed control ref onto its neighbour; measure that case before building.",
    "line_loss_overrides": [
     {
@@ -85956,7 +85956,8 @@
      "host": "goliath"
     }
    ],
-   "opened": "2026-11-12T17:45:10Z"
+   "opened": "2026-11-12T17:45:10Z",
+   "readied": "2026-11-12T17:45:38Z"
   },
   {
    "id": "ax-ref-read-as-followup",
