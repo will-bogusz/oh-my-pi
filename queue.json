@@ -63204,7 +63204,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-pipewire-dlopen",
    "host": "MacBook-Pro",
    "added": "2026-11-03T05:43:31Z",
-   "updated": "2026-11-12T10:16:24Z",
+   "updated": "2026-11-12T14:32:14Z",
    "note": "",
    "advanced": "2026-11-12T09:34:04Z",
    "built": [
@@ -63272,7 +63272,8 @@
    "readied": "2026-11-06T23:14:51Z",
    "rebases_after": [
     18914,
-    18783
+    18783,
+    19035
    ],
    "pair_reasons": {
     "18783": "Main, 2026-11-12 (via QueueThirteen): generated MODULE.bazel.lock only: the FILE:@@//crates/pi-natives/Cargo.toml hash line differs because each PR changes Cargo.toml; whichever merges second reruns gen-bazel-lock (--check). No code overlap."
@@ -78287,13 +78288,13 @@
    "needs": [],
    "base": "9f728bd56e170453c927d5b162cebe9b308e63ce",
    "body": "bodies/atspi-text-first.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19035,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-text-first",
    "host": "MacBook-Pro",
    "added": "2026-11-11T02:21:41Z",
-   "updated": "2026-11-12T14:29:12Z",
+   "updated": "2026-11-12T14:32:14Z",
    "note": "LinuxTextFinish 2026-11-11: overlaps (no needs): code conflict with queued atspi-unanswered-app (linux/wayland/mod.rs) and atspi-walk-reads (linux/ax.rs); same files as open #18013 (merges clean) and #18784 (CHANGELOG-only conflict); reuses #18220's merged text_readback; merges clean with qt5-getall-crash (same ax.rs). Linux-only Rust diff: rust-check linux recorded at 82bde80f19; review stamped needs-changes at eb0a087bcd, findings fixed.",
    "advanced": "2026-11-12T13:45:11Z",
    "rebases_after": [
@@ -78627,7 +78628,8 @@
       ]
      }
     }
-   ]
+   ],
+   "opened": "2026-11-12T14:32:14Z"
   },
   {
    "id": "x11-xtest-release",
