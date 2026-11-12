@@ -84706,7 +84706,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-12T05:49:49Z",
+  "checked": "2026-11-12T06:51:05Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {},
@@ -92378,12 +92378,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-12T06:20:27.272227Z",
+  "at": "2026-11-12T06:51:06.410460Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 2,
-   "left": 6
+   "used": 0,
+   "left": 8
   },
   "rows": [
    {
@@ -94557,7 +94557,7 @@
     "title": "feat(computer): report what input changed as a diff once the app goes quiet",
     "action": "held",
     "reasons": [
-     "held: QueueTwelve for InputDiffRun, 2026-11-12: held until the Finder inline-rename-editor fix rides in this entry (report prints the rename field as new window \"N\" Finder \"\"; title '' lookup matches every Finder window, 3 errors/9 runs on Opus). Fix (a) inline editor of parent window or (b) title \"\" matches only untitled windows; see local://deep-levers/InputDiffLeg.md \u00a75-6 and STATE.md InputDiffRun 03:30Z",
+     "held: Main for InputDiffFix, 2026-11-12: held; the fix round failed two Opus acceptance lines fixed beforehand (Finder steps 1.47x, Automator tokens 1.26x vs main); code branch stays local and unpushed; see note",
      "needs computer-ui-quiet (queued)",
      "conflicts with #18898 in docs/computer-use.md, docs/tools/computer.md",
      "conflicts with #18982 in docs/tools/computer.md, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/test/tools/computer.test.ts",
