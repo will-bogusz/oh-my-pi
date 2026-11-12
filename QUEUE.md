@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12 02:36Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12 02:37Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-12 02:19Z on MacBook-Pro; groups below are from it, states from the manifest)
@@ -12,7 +12,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12
 |---|---|---|---|---|---|---|
 | tern-kit-password-mask | fix(browser): mask password values in Tern kit observations | browser | P2 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/tern-kit-password-mask) |
 | status-entered-text | fix(coding-agent): keep text a cell enters out of browser and computer status lines | browser | P1 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/status-entered-text) |
-| computer-secure-input | fix(natives,coding-agent): report macOS secure input and stop claiming globalEscape under it | computer | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-secure-input) |
+| computer-secure-input | fix(natives,coding-agent): report macOS secure input and stop claiming globalEscape under it | computer | P1 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-secure-input) |
 | relay-frame-race | fix(browser-relay): keep a driven tab when a password manager's frame drops omp from it | browser | P0 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-frame-race) |
 
 ## Conflict-held (27)
