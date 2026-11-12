@@ -78673,6 +78673,18 @@
        "\t\tForegroundGuard::activate(id, KEY_SETTLE)?.run(|target| with_keys(Some(target), keys, held))"
       ]
      }
+    },
+    {
+     "at": "2026-11-12T13:09:27Z",
+     "reason": "Replace the incorrect frame-layout preflight with focused-recipient mapping after focus; with_keys still maps every key before holding sends any input.",
+     "old": "1ec16868987ebc85e1e30a4561586e5bf1e3ac7a",
+     "new": "f434a94b537426a1707ff706b25550d5c3fa4d72",
+     "dropped": {
+      "crates/pi-natives/src/desktop/win32/input.rs": [
+       "\t\tlet layout = super::keyboard_layout(Some(background::hwnd(id)?));",
+       "\t\t\tbackground::virtual_key(key, layout)?;"
+      ]
+     }
     }
    ],
    "advanced": "2026-11-12T09:41:06Z",
