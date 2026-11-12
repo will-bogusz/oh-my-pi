@@ -89618,25 +89618,13 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-12T17:31:18Z",
+  "checked": "2026-11-12T18:31:43Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
    "x11-takeover-keyboard-grab": {
     "since": "2026-11-12T17:31:18Z",
     "title": "fix(natives): refuse X11 XTest keys while another client grabs the keyboard"
-   },
-   "macos-ax-linked-label": {
-    "since": "2026-11-12T17:31:18Z",
-    "title": "fix(natives): name a macOS control by the label its AXTitleUIElement links to"
-   },
-   "macos-press-click-hint": {
-    "since": "2026-11-12T17:31:18Z",
-    "title": "fix(natives): point a refused macOS press at the element's own click"
-   },
-   "win-focus-report": {
-    "since": "2026-11-12T14:58:26Z",
-    "title": "fix(natives): report where focus went after a Windows takeover"
    },
    "factory-droid-171-models": {
     "since": "2026-11-12T12:26:00Z",
@@ -89855,7 +89843,10 @@
    19047,
    19048,
    19050,
-   19054
+   19054,
+   19061,
+   19062,
+   19063
   ],
   "post_merge": {
    "16274": {
@@ -93130,6 +93121,27 @@
     "id": "ax-ref-read-as-followup",
     "title": "fix(natives): skip unused ref-check reads and recover display refs",
     "why": "opened as #19054"
+   },
+   {
+    "at": "2026-11-12T18:31:43Z",
+    "kind": "unopenable",
+    "id": "macos-ax-linked-label",
+    "title": "fix(natives): name a macOS control by the label its AXTitleUIElement links to",
+    "why": "opened as #19061"
+   },
+   {
+    "at": "2026-11-12T18:31:43Z",
+    "kind": "unopenable",
+    "id": "macos-press-click-hint",
+    "title": "fix(natives): point a refused macOS press at the element's own click",
+    "why": "opened as #19063"
+   },
+   {
+    "at": "2026-11-12T18:31:43Z",
+    "kind": "unopenable",
+    "id": "win-focus-report",
+    "title": "fix(natives): report where focus went after a Windows takeover",
+    "why": "opened as #19062"
    }
   ]
  },
@@ -98694,12 +98706,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-12T17:09:38.017405Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-12T18:31:44.651375Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 7,
-   "left": 1
+   "used": 3,
+   "left": 5
   },
   "rows": [
    {
@@ -98784,10 +98796,12 @@
     "title": "fix(natives): skip unused ref-check reads and recover display refs",
     "action": "keep",
     "reasons": [],
-    "note": "accepted pair with #19036: Main, 2026-11-12: only conflict is the AxProps literal in crates/pi-natives/src/desktop/macos/ax.rs: #19036 adds 'unread_children: 0,', this entry rewrites 'role_name: role_name.map(str::to_owned),' to 'role_name,' (already owned). Combined form: 'role_name,' then 'unread_children: 0,'",
+    "note": "accepted pair with #19036: Main, 2026-11-12: only conflict is the AxProps literal in crates/pi-natives/src/desktop/macos/ax.rs: #19036 adds 'unread_children: 0,', this entry rewrites 'role_name: role_name.map(str::to_owned),' to 'role_name,' (already owned). Combined form: 'role_name,' then 'unread_children: 0,'; accepted pair with #19061: Main, 2026-11-12: function bodies in desktop/ax.rs require_read_as/check_read_as and macos/ax.rs. Combined form (trial 4ceba366e76, bench-mac desktop:: 603 pass, goliath desktop::ax 45): the read-as check compares this entry's read_as_fingerprint override when present, else #19054's label_fingerprint(role, trimmed label); public fingerprint wrapper kept; macos/ax.rs keeps #19054's label-only decoder beside this entry's enrichment/own-label tracking; both sides' regressions kept. #19054's AxReadAs decoder replaces the label_complete filter in check_read_as, so the second to land re-runs an_own_label_disappearing_is_refused_even_when_the_link_is_unread on the merged code.; accepted pair with #19063: QueueFifteen, 2026-11-12 (Main's standing rule: use/import list): only conflict is the use list in crates/pi-natives/src/desktop/macos/ax.rs: this entry imports performable_name, #19054 imports AxReadAs; neither removes a name the other calls. Combined form: both names.",
     "over": [],
     "paired": [
-     "#19036"
+     "#19036",
+     "#19061",
+     "#19063"
     ],
     "blocked_by": [],
     "needs": [],
@@ -98911,9 +98925,10 @@
     "title": "fix(natives): stop Linux accessibility reads from freezing apps that show long tables",
     "action": "keep",
     "reasons": [],
-    "note": "accepted pair with #19054: Main, 2026-11-12: only conflict is the AxProps literal in crates/pi-natives/src/desktop/macos/ax.rs: #19036 adds 'unread_children: 0,', this entry rewrites 'role_name: role_name.map(str::to_owned),' to 'role_name,' (already owned). Combined form: 'role_name,' then 'unread_children: 0,'",
+    "note": "accepted pair with #19061: Main, 2026-11-12: #19036 adds 'unread_children: 0,' to the AxProps literal in macos/ax.rs and a field to the AxProps struct in desktop/ax.rs; this entry returns that literal inside a tuple (AxProps{...}, has_own_label) and adds its own struct field (rustfmt realignment only). Combined form: this entry's tuple with 'unread_children: 0,' inside its AxProps literal; struct with both fields; accepted pair with #19054: Main, 2026-11-12: only conflict is the AxProps literal in crates/pi-natives/src/desktop/macos/ax.rs: #19036 adds 'unread_children: 0,', this entry rewrites 'role_name: role_name.map(str::to_owned),' to 'role_name,' (already owned). Combined form: 'role_name,' then 'unread_children: 0,'",
     "over": [],
     "paired": [
+     "#19061",
      "#19054"
     ],
     "blocked_by": [],
@@ -98930,10 +98945,11 @@
     "title": "fix(natives,coding-agent): stop Windows takeover typing from losing text the app had not read yet",
     "action": "keep",
     "reasons": [],
-    "note": "accepted pair with #19025: Main, 2026-11-12 (via QueueThirteen): only conflict is the use list in crates/pi-natives/src/desktop/win32/input.rs: this entry adds GetKeyState, #19025 (win-target-layout) replaces MapVirtualKeyW with MapVirtualKeyExW; this entry adds no MapVirtualKeyW call. Combined form: one use list with GetKeyState and MapVirtualKeyExW.",
+    "note": "accepted pair with #19025: Main, 2026-11-12 (via QueueThirteen): only conflict is the use list in crates/pi-natives/src/desktop/win32/input.rs: this entry adds GetKeyState, #19025 (win-target-layout) replaces MapVirtualKeyW with MapVirtualKeyExW; this entry adds no MapVirtualKeyW call. Combined form: one use list with GetKeyState and MapVirtualKeyExW.; accepted pair with #19062: QueueFourteen, 2026-11-12 (recorded combined form; use list + docs): conflicts are the test-module use list in crates/pi-natives/src/desktop/win32/mod.rs (#19037: control::{self, CancellationSource}; this entry adds types::DesktopFocusReturn) and the docs/computer-use.md 'Window input defaults' paragraph (#19037: 'delivered (or only sent, when Windows takeover typing was not seen read)'; this entry: 'macOS or Windows reports \u2026 (Linux, \u2026)'). Combined: use crate::desktop::{control::{self, CancellationSource}, types::DesktopFocusReturn}; paragraph carries both edits",
     "over": [],
     "paired": [
-     "#19025"
+     "#19025",
+     "#19062"
     ],
     "blocked_by": [],
     "needs": [],
@@ -98968,14 +98984,74 @@
     "title": "fix(natives): follow rebuilt macOS table rows without selecting a neighbour",
     "action": "keep",
     "reasons": [],
-    "note": "accepted pair with #16553: QueueFourteen, 2026-11-12 (Main's standing rule: use-list collision, opener records): only conflict is the use list in crates/pi-natives/src/desktop/macos/mod.rs: #16553 adds 'pub(super) use clicks::ClickJournal;', this entry adds is_standard_window and window_titles to the ax/capture use lines; nothing removed; combined form is both",
+    "note": "accepted pair with #16553: QueueFourteen, 2026-11-12 (Main's standing rule: use-list collision, opener records): only conflict is the use list in crates/pi-natives/src/desktop/macos/mod.rs: #16553 adds 'pub(super) use clicks::ClickJournal;', this entry adds is_standard_window and window_titles to the ax/capture use lines; nothing removed; combined form is both; accepted pair with #19061: QueueFifteen, 2026-11-12 (Main's standing rule: a field added beside a line the other side reshapes without changing a value): only conflict is the Registered struct in crates/pi-natives/src/desktop/ax.rs: #19048 adds 'row: Option<RowProof>,' where this entry rewrites the doc comment of 'held'; #19048 reads neither held nor fingerprint. Combined form: #19048's row field, then this entry's doc comment and 'held: Option<u64>'.",
     "over": [],
     "paired": [
-     "#16553"
+     "#16553",
+     "#19061"
     ],
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-12T16:50:41Z"
+   },
+   {
+    "id": "macos-ax-linked-label",
+    "label": "#19061",
+    "number": 19061,
+    "state": "open",
+    "area": "natives",
+    "priority": "P1",
+    "title": "fix(natives): name a macOS control by the label its AXTitleUIElement links to",
+    "action": "keep",
+    "reasons": [],
+    "note": "accepted pair with #19036: Main, 2026-11-12: #19036 adds 'unread_children: 0,' to the AxProps literal in macos/ax.rs and a field to the AxProps struct in desktop/ax.rs; this entry returns that literal inside a tuple (AxProps{...}, has_own_label) and adds its own struct field (rustfmt realignment only). Combined form: this entry's tuple with 'unread_children: 0,' inside its AxProps literal; struct with both fields; accepted pair with #19048: QueueFifteen, 2026-11-12 (Main's standing rule: a field added beside a line the other side reshapes without changing a value): only conflict is the Registered struct in crates/pi-natives/src/desktop/ax.rs: #19048 adds 'row: Option<RowProof>,' where this entry rewrites the doc comment of 'held'; #19048 reads neither held nor fingerprint. Combined form: #19048's row field, then this entry's doc comment and 'held: Option<u64>'.; accepted pair with #19054: Main, 2026-11-12: function bodies in desktop/ax.rs require_read_as/check_read_as and macos/ax.rs. Combined form (trial 4ceba366e76, bench-mac desktop:: 603 pass, goliath desktop::ax 45): the read-as check compares this entry's read_as_fingerprint override when present, else #19054's label_fingerprint(role, trimmed label); public fingerprint wrapper kept; macos/ax.rs keeps #19054's label-only decoder beside this entry's enrichment/own-label tracking; both sides' regressions kept. #19054's AxReadAs decoder replaces the label_complete filter in check_read_as, so the second to land re-runs an_own_label_disappearing_is_refused_even_when_the_link_is_unread on the merged code.",
+    "over": [],
+    "paired": [
+     "#19036",
+     "#19048",
+     "#19054"
+    ],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-12T17:45:09Z"
+   },
+   {
+    "id": "win-focus-report",
+    "label": "#19062",
+    "number": 19062,
+    "state": "open",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): report where focus went after a Windows takeover",
+    "action": "keep",
+    "reasons": [],
+    "note": "accepted pair with #19037: QueueFourteen, 2026-11-12 (recorded combined form; use list + docs): conflicts are the test-module use list in crates/pi-natives/src/desktop/win32/mod.rs (#19037: control::{self, CancellationSource}; this entry adds types::DesktopFocusReturn) and the docs/computer-use.md 'Window input defaults' paragraph (#19037: 'delivered (or only sent, when Windows takeover typing was not seen read)'; this entry: 'macOS or Windows reports \u2026 (Linux, \u2026)'). Combined: use crate::desktop::{control::{self, CancellationSource}, types::DesktopFocusReturn}; paragraph carries both edits",
+    "over": [],
+    "paired": [
+     "#19037"
+    ],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-12T17:53:01Z"
+   },
+   {
+    "id": "macos-press-click-hint",
+    "label": "#19063",
+    "number": 19063,
+    "state": "open",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): point a refused macOS press at the element's own click",
+    "action": "keep",
+    "reasons": [],
+    "note": "accepted pair with #19054: QueueFifteen, 2026-11-12 (Main's standing rule: use/import list): only conflict is the use list in crates/pi-natives/src/desktop/macos/ax.rs: this entry imports performable_name, #19054 imports AxReadAs; neither removes a name the other calls. Combined form: both names.",
+    "over": [],
+    "paired": [
+     "#19054"
+    ],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-12T18:01:18Z"
    },
    {
     "id": "claude-refusal-strip-retry",
@@ -99263,13 +99339,15 @@
     "reasons": [
      "needs #19036 (open)",
      "conflicts with #19036 in crates/pi-natives/src/desktop/linux/ax.rs",
+     "conflicts with #19061 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#19036"
+     "#19036",
+     "#19061"
     ],
     "needs": [
      "atspi-huge-children"
@@ -99584,6 +99662,7 @@
     "action": "wait",
     "reasons": [
      "conflicts with #19037 in packages/coding-agent/src/tools/computer/worker.ts",
+     "conflicts with #19062 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #18222 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #18987 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/computer/worker.ts"
@@ -99593,6 +99672,7 @@
     "paired": [],
     "blocked_by": [
      "#19037",
+     "#19062",
      "#18222",
      "#18987"
     ],
@@ -99611,6 +99691,8 @@
     "reasons": [
      "conflicts with #19037 in docs/computer-use.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #19048 in docs/computer-use.md",
+     "conflicts with #19061 in docs/computer-use.md",
+     "conflicts with #19062 in docs/computer-use.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #18353 in docs/computer-use.md",
      "conflicts with #19034 in docs/computer-use.md",
      "conflicts with #19035 in docs/computer-use.md",
@@ -99625,6 +99707,8 @@
     "blocked_by": [
      "#19037",
      "#19048",
+     "#19061",
+     "#19062",
      "#18353",
      "#19034",
      "#19035",
@@ -99649,6 +99733,8 @@
      "conflicts with #19054 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with #19036 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with #19048 in crates/pi-natives/src/desktop/macos/ax.rs",
+     "conflicts with #19061 in crates/pi-natives/src/desktop/macos/ax.rs",
+     "conflicts with #19063 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with main in crates/pi-natives/src/desktop/macos/ax.rs"
     ],
     "note": "",
@@ -99658,50 +99744,12 @@
      "#19027",
      "#19054",
      "#19036",
-     "#19048"
+     "#19048",
+     "#19061",
+     "#19063"
     ],
     "needs": [],
     "created": "2026-11-11T09:59:13Z"
-   },
-   {
-    "id": "macos-ax-linked-label",
-    "label": "macos-ax-linked-label",
-    "number": null,
-    "state": "queued",
-    "area": "natives",
-    "priority": "P2",
-    "title": "fix(natives): name a macOS control by the label its AXTitleUIElement links to",
-    "action": "next-hour",
-    "reasons": [],
-    "note": "accepted pair with #19036: Main, 2026-11-12: #19036 adds 'unread_children: 0,' to the AxProps literal in macos/ax.rs and a field to the AxProps struct in desktop/ax.rs; this entry returns that literal inside a tuple (AxProps{...}, has_own_label) and adds its own struct field (rustfmt realignment only). Combined form: this entry's tuple with 'unread_children: 0,' inside its AxProps literal; struct with both fields; accepted pair with #19048: QueueFifteen, 2026-11-12 (Main's standing rule: a field added beside a line the other side reshapes without changing a value): only conflict is the Registered struct in crates/pi-natives/src/desktop/ax.rs: #19048 adds 'row: Option<RowProof>,' where this entry rewrites the doc comment of 'held'; #19048 reads neither held nor fingerprint. Combined form: #19048's row field, then this entry's doc comment and 'held: Option<u64>'.; accepted pair with #19054: Main, 2026-11-12: function bodies in desktop/ax.rs require_read_as/check_read_as and macos/ax.rs. Combined form (trial 4ceba366e76, bench-mac desktop:: 603 pass, goliath desktop::ax 45): the read-as check compares this entry's read_as_fingerprint override when present, else #19054's label_fingerprint(role, trimmed label); public fingerprint wrapper kept; macos/ax.rs keeps #19054's label-only decoder beside this entry's enrichment/own-label tracking; both sides' regressions kept. #19054's AxReadAs decoder replaces the label_complete filter in check_read_as, so the second to land re-runs an_own_label_disappearing_is_refused_even_when_the_link_is_unread on the merged code.",
-    "over": [],
-    "paired": [
-     "#19036",
-     "#19048",
-     "#19054"
-    ],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-11T14:43:42Z"
-   },
-   {
-    "id": "macos-press-click-hint",
-    "label": "macos-press-click-hint",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P2",
-    "title": "fix(natives): point a refused macOS press at the element's own click",
-    "action": "next-hour",
-    "reasons": [],
-    "note": "accepted pair with #19054: QueueFifteen, 2026-11-12 (Main's standing rule: use/import list): only conflict is the use list in crates/pi-natives/src/desktop/macos/ax.rs: this entry imports performable_name, #19054 imports AxReadAs; neither removes a name the other calls. Combined form: both names.",
-    "over": [],
-    "paired": [
-     "#19054"
-    ],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-11T18:49:11Z"
    },
    {
     "id": "macos-scroll-direction",
@@ -99719,6 +99767,8 @@
      "conflicts with #17756 in crates/pi-natives/src/desktop/macos/input.rs",
      "conflicts with #19037 in docs/computer-use.md",
      "conflicts with #19048 in crates/pi-natives/src/desktop/macos/input.rs, docs/computer-use.md",
+     "conflicts with #19061 in docs/computer-use.md",
+     "conflicts with #19062 in docs/computer-use.md",
      "conflicts with #18353 in docs/computer-use.md",
      "conflicts with #19034 in docs/computer-use.md",
      "conflicts with #19035 in docs/computer-use.md",
@@ -99726,7 +99776,6 @@
      "conflicts with #18013 in docs/computer-use.md",
      "conflicts with #18222 in docs/computer-use.md",
      "conflicts with #18987 in docs/computer-use.md",
-     "conflicts with macos-ax-linked-label in docs/computer-use.md",
      "conflicts with main in docs/computer-use.md"
     ],
     "note": "",
@@ -99738,14 +99787,15 @@
      "#17756",
      "#19037",
      "#19048",
+     "#19061",
+     "#19062",
      "#18353",
      "#19034",
      "#19035",
      "#17897",
      "#18013",
      "#18222",
-     "#18987",
-     "macos-ax-linked-label"
+     "#18987"
     ],
     "needs": [
      "iphone-mirror-scroll-distance"
@@ -99887,9 +99937,9 @@
      "conflicts with #19036 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs",
      "conflicts with #19037 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19048 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with #19061 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs",
+     "conflicts with #19063 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
-     "conflicts with macos-ax-linked-label in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs",
-     "conflicts with macos-press-click-hint in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs"
     ],
     "note": "",
@@ -99901,31 +99951,12 @@
      "#19036",
      "#19037",
      "#19048",
-     "#18925",
-     "macos-ax-linked-label",
-     "macos-press-click-hint"
+     "#19061",
+     "#19063",
+     "#18925"
     ],
     "needs": [],
     "created": "2026-11-11T10:16:04Z"
-   },
-   {
-    "id": "win-focus-report",
-    "label": "win-focus-report",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P2",
-    "title": "fix(natives): report where focus went after a Windows takeover",
-    "action": "next-hour",
-    "reasons": [],
-    "note": "accepted pair with #19037: QueueFourteen, 2026-11-12 (recorded combined form; use list + docs): conflicts are the test-module use list in crates/pi-natives/src/desktop/win32/mod.rs (#19037: control::{self, CancellationSource}; this entry adds types::DesktopFocusReturn) and the docs/computer-use.md 'Window input defaults' paragraph (#19037: 'delivered (or only sent, when Windows takeover typing was not seen read)'; this entry: 'macOS or Windows reports \u2026 (Linux, \u2026)'). Combined: use crate::desktop::{control::{self, CancellationSource}, types::DesktopFocusReturn}; paragraph carries both edits",
-    "over": [],
-    "paired": [
-     "#19037"
-    ],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-11T13:11:20Z"
    },
    {
     "id": "win-minimised-windows",
@@ -99939,8 +99970,8 @@
     "reasons": [
      "conflicts with #19025 in crates/pi-natives/src/desktop/win32/mod.rs",
      "conflicts with #19037 in crates/pi-natives/src/desktop/win32/mod.rs",
+     "conflicts with #19062 in crates/pi-natives/src/desktop/win32/capture.rs, crates/pi-natives/src/desktop/win32/mod.rs",
      "conflicts with #18222 in packages/coding-agent/src/prompts/tools/computer.md",
-     "conflicts with win-focus-report in crates/pi-natives/src/desktop/win32/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/win32/mod.rs, packages/coding-agent/src/prompts/tools/computer.md"
     ],
     "note": "",
@@ -99949,8 +99980,8 @@
     "blocked_by": [
      "#19025",
      "#19037",
-     "#18222",
-     "win-focus-report"
+     "#19062",
+     "#18222"
     ],
     "needs": [],
     "created": "2026-11-11T09:06:32Z"
@@ -100140,6 +100171,8 @@
      "conflicts with #19026 in docs/tools/computer.md",
      "conflicts with #19037 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19048 in docs/computer-use.md",
+     "conflicts with #19061 in docs/computer-use.md",
+     "conflicts with #19062 in docs/computer-use.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #18353 in docs/computer-use.md, docs/tools/computer.md",
      "conflicts with #19034 in docs/computer-use.md",
      "conflicts with #19035 in docs/computer-use.md",
@@ -100147,8 +100180,6 @@
      "conflicts with #18222 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/tools/eval.ts",
      "conflicts with #18987 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/worker.ts",
-     "conflicts with macos-ax-linked-label in docs/computer-use.md",
-     "conflicts with win-focus-report in docs/computer-use.md, packages/coding-agent/src/tools/computer/worker.ts",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -100159,15 +100190,15 @@
      "#19026",
      "#19037",
      "#19048",
+     "#19061",
+     "#19062",
      "#18353",
      "#19034",
      "#19035",
      "#18013",
      "#18222",
      "#18786",
-     "#18987",
-     "macos-ax-linked-label",
-     "win-focus-report"
+     "#18987"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -100191,12 +100222,12 @@
      "conflicts with #19036 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19037 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19048 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with #19061 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with #19063 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18987 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
-     "conflicts with macos-ax-linked-label in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
-     "conflicts with macos-press-click-hint in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs"
     ],
@@ -100210,12 +100241,12 @@
      "#19036",
      "#19037",
      "#19048",
+     "#19061",
+     "#19063",
      "#18353",
      "#18222",
      "#18925",
-     "#18987",
-     "macos-ax-linked-label",
-     "macos-press-click-hint"
+     "#18987"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -100240,11 +100271,11 @@
      "conflicts with #19036 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19037 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
      "conflicts with #19048 in crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with #19061 in crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with #19063 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md",
      "conflicts with #18925 in crates/pi-natives/src/desktop/macos/capture.rs, crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs",
-     "conflicts with macos-ax-linked-label in crates/pi-natives/src/desktop/mod.rs",
-     "conflicts with macos-press-click-hint in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
@@ -100257,11 +100288,11 @@
      "#19036",
      "#19037",
      "#19048",
+     "#19061",
+     "#19063",
      "#18353",
      "#18222",
-     "#18925",
-     "macos-ax-linked-label",
-     "macos-press-click-hint"
+     "#18925"
     ],
     "needs": [
      "agent-identity"
@@ -100415,7 +100446,7 @@
      "needs #19037 (open)",
      "conflicts with #19025 in crates/pi-natives/src/desktop/win32/input.rs, crates/pi-natives/src/desktop/win32/mod.rs",
      "conflicts with #19037 in crates/pi-natives/src/desktop/win32/input.rs, crates/pi-natives/src/desktop/win32/mod.rs, docs/tools/computer.md",
-     "conflicts with win-focus-report in crates/pi-natives/src/desktop/win32/input.rs, crates/pi-natives/src/desktop/win32/mod.rs",
+     "conflicts with #19062 in crates/pi-natives/src/desktop/win32/input.rs, crates/pi-natives/src/desktop/win32/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/win32/input.rs, crates/pi-natives/src/desktop/win32/mod.rs"
     ],
     "note": "",
@@ -100424,7 +100455,7 @@
     "blocked_by": [
      "#19025",
      "#19037",
-     "win-focus-report"
+     "#19062"
     ],
     "needs": [
      "win-type-drain"
@@ -100629,7 +100660,7 @@
     "area": "factory-droid",
     "priority": null,
     "title": "feat(catalog): add the Factory Droid models droid 1.7.1 serves",
-    "action": "next-hour",
+    "action": "open",
     "reasons": [],
     "note": "advance first",
     "over": [],
