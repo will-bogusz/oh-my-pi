@@ -90080,7 +90080,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-12T20:34:02Z",
+  "checked": "2026-11-12T21:04:56Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -90785,27 +90785,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-05T20:36:30Z",
-    "kind": "unopenable",
-    "id": "atspi-setvalue-readback",
-    "title": "fix(natives): read back AT-SPI text writes before reporting success",
-    "why": "opened as #18220"
-   },
-   {
-    "at": "2026-11-05T20:36:30Z",
-    "kind": "unopenable",
-    "id": "ax-find-depth",
-    "title": "fix(natives): search 64 levels deep in find()",
-    "why": "opened as #18221"
-   },
-   {
-    "at": "2026-11-05T20:36:30Z",
-    "kind": "unopenable",
-    "id": "computer-menu-subtree",
-    "title": "feat(coding-agent): find nested menu commands in one read",
-    "why": "opened as #18222"
-   },
    {
     "at": "2026-11-06T02:41:53Z",
     "kind": "released",
