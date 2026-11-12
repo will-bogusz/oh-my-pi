@@ -86282,7 +86282,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-type-drain",
    "host": "MacBook-Pro",
    "added": "2026-11-12T04:40:03Z",
-   "updated": "2026-11-12T13:11:47Z",
+   "updated": "2026-11-12T14:08:25Z",
    "note": "QueueTwelve, 2026-11-12: local head ce216ae356443bcf8a2e54a5ff4b4d99269c29c6; unpushed until #18919 merges. Named advance waits on the open need; these local-ahead commits ride its post-merge push. Return regression green/red on Windows; rust-check macOS/Linux/Windows recorded.",
    "advanced": "2026-11-12T12:14:12Z",
    "rebases_after": [
@@ -86292,7 +86292,29 @@
    "pair_reasons": {
     "18783": "QueueThirteen, 2026-11-12 (Main: docs pairs are the opener's): docs-only collision in docs/computer-use.md, adjacent: #18783 adds two X11 covered-window screenshot paragraphs right before the 'Window input defaults to background routes' paragraph that this entry edits. Combined form: #18783's two paragraphs, blank line, then this entry's wording of the 'Window input defaults' paragraph. No code overlap.",
     "19025": "Main, 2026-11-12 (via QueueThirteen): only conflict is the use list in crates/pi-natives/src/desktop/win32/input.rs: this entry adds GetKeyState, #19025 (win-target-layout) replaces MapVirtualKeyW with MapVirtualKeyExW; this entry adds no MapVirtualKeyW call. Combined form: one use list with GetKeyState and MapVirtualKeyExW."
-   }
+   },
+   "built": [
+    {
+     "with": "#19026",
+     "code": "acdd4f27bc7d05de9a4d74fa76c828ff3dd73a9a",
+     "with_code": "8ae975d64a9d7bc86ef8767bdb875641f2d2798b",
+     "tip": "fd584c210248c482984df6d58b35b2d8d641f79c",
+     "with_tip": "0430659225aaad7e5e66d22e22ae2f187b39b20c",
+     "at": "2026-11-12T14:08:25Z",
+     "host": "goliath",
+     "tree": "2c890fbed4838436ff03d7b275eb3febc661e4f3"
+    },
+    {
+     "with": "#18925",
+     "code": "acdd4f27bc7d05de9a4d74fa76c828ff3dd73a9a",
+     "with_code": "744d68aa21c23ce354aaeba502ee86a1a72f67a8",
+     "tip": "fd584c210248c482984df6d58b35b2d8d641f79c",
+     "with_tip": "7b20023ed27a970d5eda717426ba3cae816f0538",
+     "at": "2026-11-12T14:08:25Z",
+     "host": "goliath",
+     "tree": "2c890fbed4838436ff03d7b275eb3febc661e4f3"
+    }
+   ]
   },
   {
    "id": "win-type-insert",
