@@ -44,7 +44,7 @@ The takeover guard handed the foreground back 40 ms after the last key, so keys 
 
 ## Testing
 
-Linux `cargo test -p pi-natives --lib`: 656 passed. Windows tests cross-build with `cargo xwin test -p pi-natives --lib --target x86_64-pc-windows-msvc --no-run`; clippy and rustfmt pass on Linux, Windows and macOS.
+Linux (goliath) `cargo test -p pi-natives --lib` on current main bcd5b0b996e: 702 passed, 31 ignored. Windows tests cross-build with `cargo xwin test -p pi-natives --lib --target x86_64-pc-windows-msvc --no-run`; clippy and rustfmt pass on Linux, Windows and macOS.
 
 <details><summary>Windows desktop test setup and negative controls</summary>
 
