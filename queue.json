@@ -82577,9 +82577,10 @@
    "worktree": null,
    "host": "MacBook-Pro",
    "added": "2026-11-12T01:34:53Z",
-   "updated": "2026-11-12T01:35:07Z",
+   "updated": "2026-11-12T01:35:10Z",
    "note": "",
-   "hold": "SecretFill-2 for Main, 2026-11-12: proposal written, not built; needs a maintainer decision (own secret resolution in core or document the recipe) before any code"
+   "hold": "SecretFill-2 for Main, 2026-11-12: proposal written, not built; needs a maintainer decision (own secret resolution in core or document the recipe) before any code",
+   "kind": "proposal"
   }
  ],
  "watch": {
