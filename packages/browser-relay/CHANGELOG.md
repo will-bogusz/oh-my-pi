@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed omp losing, and closing, a tab it drives when a password manager's menu or save card opens there while omp is attached: once Chrome drops omp from that tab, the extension empties and hides the frame and takes focus off the element focused beside it before omp attaches again, so re-adopting the tab no longer reopens the menu and drops omp again
+
 ## [18.18.2] - 2026-11-08
 
 ### Added

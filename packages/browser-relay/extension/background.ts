@@ -19,7 +19,7 @@ import {
 } from "../../coding-agent/src/tools/browser/relay/protocol";
 import { ownedDebuggerTabs } from "./debugger-ownership";
 import { DownloadPairing } from "./download-pairing";
-import { pastForeignFrames } from "./foreign-frames";
+import { clearForeignFramesAfterDetach, pastForeignFrames } from "./foreign-frames";
 
 const DEFAULT_PORT = 9224;
 const PING_INTERVAL_MS = 20_000;
@@ -39,6 +39,16 @@ let ws: WebSocket | null = null;
 let reconnectDelay = RECONNECT_MIN_MS;
 let pingTimer: NodeJS.Timeout | null = null;
 const relayInitiatedDetachTabs = new Set<number>();
+/**
+ * Tabs omp drives, as the relay's last `attach` or `send` for each said (`clearForeignFrames`). A claim the relay
+ * dropped stays here until its next request for the tab, Chrome's detach of it, or its close.
+ */
+const drivenTabs = new Set<number>();
+
+function noteDriven(tabId: number, driven: boolean | undefined): void {
+	if (driven) drivenTabs.add(tabId);
+	else drivenTabs.delete(tabId);
+}
 
 /**
  * Stable per-install browser identity, persisted in `chrome.storage.local` and
@@ -235,6 +245,7 @@ async function buildHello(): Promise<ExtToRelayMessage> {
 async function runRpc(msg: Extract<RelayToExtMessage, { t: "rpc" }>, origin: WebSocket): Promise<unknown> {
 	switch (msg.op) {
 		case "attach": {
+			noteDriven(msg.tabId, msg.clearForeignFrames);
 			const attach = () => chrome.debugger.attach({ tabId: msg.tabId }, "1.3");
 			await (msg.clearForeignFrames ? pastForeignFrames(msg.tabId, attach) : attach());
 			return {};
@@ -249,6 +260,7 @@ async function runRpc(msg: Extract<RelayToExtMessage, { t: "rpc" }>, origin: Web
 				throw error;
 			}
 		case "send": {
+			noteDriven(msg.tabId, msg.clearForeignFrames);
 			const send = () =>
 				chrome.debugger.sendCommand(
 					msg.sessionId ? { tabId: msg.tabId, sessionId: msg.sessionId } : { tabId: msg.tabId },
@@ -374,9 +386,13 @@ chrome.debugger.onEvent.addListener((source, method, params) => {
 });
 
 chrome.debugger.onDetach.addListener((source, reason) => {
-	if (source.tabId === undefined) return;
-	const relayInitiated = relayInitiatedDetachTabs.delete(source.tabId);
-	post({ t: "detached", tabId: source.tabId, reason, relayInitiated });
+	const tabId = source.tabId;
+	if (tabId === undefined) return;
+	const relayInitiated = relayInitiatedDetachTabs.delete(tabId);
+	if (relayInitiated || reason !== "target_closed") drivenTabs.delete(tabId);
+	// Chrome's own detach of a tab omp drives: empty the frame that caused it before the relay reattaches.
+	else if (drivenTabs.has(tabId)) clearForeignFramesAfterDetach(tabId);
+	post({ t: "detached", tabId, reason, relayInitiated });
 });
 
 chrome.tabs.onCreated.addListener(tab => {
@@ -399,6 +415,7 @@ chrome.tabs.onActivated.addListener(({ tabId }) => {
 });
 
 chrome.tabs.onRemoved.addListener(tabId => {
+	drivenTabs.delete(tabId);
 	post({ t: "tabRemoved", tabId });
 });
 

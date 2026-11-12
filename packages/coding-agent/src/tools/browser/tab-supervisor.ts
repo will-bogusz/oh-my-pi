@@ -293,7 +293,7 @@ const WORKER_RESETS =
 const RECYCLE_RESETS = `${WORKER_RESETS}, any open dialog was dismissed, and any page still loading was stopped.`;
 const RENDERER_RELOADED_NOTE = `This tab's renderer had crashed, so the tab was reattached to a new worker and its page reloaded. ${RECYCLE_RESETS}`;
 const DEBUGGER_DETACH_CAUSE =
-	"Chrome does this when another extension's frame loads in the tab, such as a password manager's inline autofill menu";
+	"Chrome does this when another extension's frame loads in the tab, such as a password manager's inline autofill menu; the relay then empties and hides that frame and takes focus off the element focused beside it, so focus a field again before typing into it";
 const DEBUGGER_DETACH_REFUSAL =
 	"Chrome refuses the attach while another extension's frame, such as a password manager's inline autofill menu, is open in it";
 /** Chrome's `chrome.debugger.onDetach` reason when the user pressed Cancel on its debugging bar. */

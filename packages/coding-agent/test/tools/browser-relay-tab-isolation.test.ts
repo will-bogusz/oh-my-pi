@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
@@ -10,7 +10,7 @@ import {
 	ensureChromiumExecutable,
 	RENDERER_PRIORITY_ARGS,
 } from "@oh-my-pi/pi-coding-agent/tools/browser/launch";
-import { acquireBrowser, releaseBrowser } from "@oh-my-pi/pi-coding-agent/tools/browser/registry";
+import { acquireBrowser, type BrowserHandle, releaseBrowser } from "@oh-my-pi/pi-coding-agent/tools/browser/registry";
 import { unpackedExtensionId } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/extension-files";
 import { waitForRelayExtension } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/probe";
 import { type RelayServer, startRelayServer } from "@oh-my-pi/pi-coding-agent/tools/browser/relay/server";
@@ -136,7 +136,7 @@ async function launchRelayFixture(
 					: route === "/second"
 						? "<title>Second</title><button>Second</button>"
 						: route === "/login"
-							? `<title>Login ${url.searchParams.get("who")}</title><input id="pw" type="password">`
+							? `<title>Login ${url.searchParams.get("who")}</title><form onsubmit="event.preventDefault(); document.title = 'Signed in'"><input id="pw" type="password"${url.searchParams.has("autofocus") ? " autofocus" : ""}><button id="go">Log in</button></form>`
 							: route === "/download"
 								? `<title>Download</title><a id="report" href="/report.csv">Report</a><a id="held" href="/held.csv">Held</a>`
 								: route === "/framed"
@@ -293,6 +293,28 @@ const session = {
 	settings: Settings.isolated(),
 	getSessionFile: () => null,
 } as unknown as ToolSession;
+
+/**
+ * A stand-in password manager running `contentScript` on the fixture site, which may draw its `menu.html` and
+ * `notification.html` into the page as chrome-extension:// frames.
+ */
+async function writeStandInVault(contentScript: string): Promise<string> {
+	const vaultDir = await fs.mkdtemp(path.join(os.tmpdir(), "omp-relay-vault-"));
+	await fs.writeFile(
+		path.join(vaultDir, "manifest.json"),
+		JSON.stringify({
+			manifest_version: 3,
+			name: "Stand-in vault",
+			version: "1.0",
+			content_scripts: [{ matches: ["http://127.0.0.1/*"], js: ["content.js"] }],
+			web_accessible_resources: [{ resources: ["menu.html", "notification.html"], matches: ["http://127.0.0.1/*"] }],
+		}),
+	);
+	await fs.writeFile(path.join(vaultDir, "menu.html"), "<button>Fill</button>");
+	await fs.writeFile(path.join(vaultDir, "notification.html"), "<h3>Save login?</h3><button>Save</button>");
+	await fs.writeFile(path.join(vaultDir, "content.js"), contentScript);
+	return vaultDir;
+}
 
 describe.skipIf(!CHROMIUM_AVAILABLE)("relay tab ownership", () => {
 	it("keeps another connection's cross-site frame alive when a page disables auto-attach", async () => {
@@ -541,56 +563,68 @@ describe.skipIf(!CHROMIUM_AVAILABLE)("relay tab ownership", () => {
 
 	it("empties a password manager's menu only in the tab omp drives", async () => {
 		// A stand-in password manager: a focused password field opens its inline menu, a chrome-extension:// frame in
-		// a closed shadow root, the way 1Password draws it.
-		const vaultDir = await fs.mkdtemp(path.join(os.tmpdir(), "omp-relay-vault-"));
-		await fs.writeFile(
-			path.join(vaultDir, "manifest.json"),
-			JSON.stringify({
-				manifest_version: 3,
-				name: "Stand-in vault",
-				version: "1.0",
-				content_scripts: [{ matches: ["http://127.0.0.1/*"], js: ["content.js"] }],
-				web_accessible_resources: [{ resources: ["menu.html"], matches: ["http://127.0.0.1/*"] }],
-			}),
-		);
-		await fs.writeFile(path.join(vaultDir, "menu.html"), "<button>Fill</button>");
-		await fs.writeFile(
-			path.join(vaultDir, "content.js"),
-			`document.addEventListener("focusin", event => {
-	if (event.target.type !== "password" || document.querySelector("vault-menu")) return;
+		// a closed shadow root, the way 1Password draws it, and one frame per page.
+		const vaultDir = await writeStandInVault(
+			`function showMenu(field) {
+	if (field?.type !== "password" || document.querySelector("vault-menu")) return;
 	const host = document.createElement("vault-menu");
 	const menu = document.createElement("iframe");
 	menu.src = chrome.runtime.getURL("menu.html");
 	host.attachShadow({ mode: "closed" }).append(menu);
 	document.body.append(host);
-});`,
+}
+document.addEventListener("focusin", event => showMenu(event.target));
+showMenu(document.activeElement);`,
 		);
-		const fixture = await launchRelayFixture(undefined, [vaultDir]);
+		let userTabId = 0;
+		const userTabDetached = Promise.withResolvers<void>();
+		const fixture = await launchRelayFixture(
+			(message, data) => {
+				if (message === "tab detached" && typeof data?.tabKey === "string" && data.tabKey.endsWith(`:${userTabId}`))
+					userTabDetached.resolve();
+			},
+			[vaultDir],
+		);
 		const menuOpen = (page: Page) => page.frames().some(frame => frame.url().startsWith("chrome-extension://"));
-		const driven = await fixture.browser.newPage();
-		await driven.goto(`${fixture.origin}/login?who=driven`);
-		// The user's own tab has its menu open when omp connects.
+		// One of the user's own tabs has its menu open when omp connects; the other opens it later, while the relay is
+		// attached to it, so Chrome drops the relay there too.
 		const user = await fixture.browser.newPage();
 		await user.goto(`${fixture.origin}/login?who=user`);
 		await user.focus("#pw");
 		await user.waitForFrame(frame => frame.url().startsWith("chrome-extension://"));
+		const userLater = await fixture.browser.newPage();
+		await userLater.goto(`${fixture.origin}/login?who=later`);
 		const relay = await acquireBrowser({ kind: "relay", cdpUrl: fixture.cdpUrl }, { cwd: process.cwd() });
 		const name = `relay-vault-${process.pid}`;
-		const fill = {
-			code: "await tab.fill('#pw', 'secret'); return await tab.value('#pw');",
-			timeoutMs: 10_000,
-			session,
-		};
 		try {
-			await acquireTab(name, relay, { target: "Login driven", timeoutMs: 20_000 });
-			// Focusing the field opens the menu, and Chrome detaches omp from the tab during the call.
-			await runInTab(name, fill).catch(() => undefined);
-			expect((await runInTab(name, fill)).returnValue).toBe("secret");
-			// The menu opened, and its frame was emptied.
+			// The tab omp opens has its field focused on load, so the menu opens as omp adopts it, and Chrome drops omp.
+			await acquireTab(name, relay, { url: `${fixture.origin}/login?who=driven&autofocus`, timeoutMs: 20_000 });
+			const driven = (await fixture.browser.pages()).find(page => page.url().includes("who=driven"));
+			if (!driven) throw new Error("omp's tab is gone");
+			await driven.waitForFrame(frame => frame.url() === "about:srcdoc");
+			const filled = await runInTab(name, {
+				code: "await tab.fill('#pw', 'secret'); return await tab.value('#pw');",
+				timeoutMs: 10_000,
+				session,
+			});
+			expect(filled.returnValue).toBe("secret");
+			// The menu's frame was emptied.
 			expect(await driven.$("vault-menu")).not.toBeNull();
 			expect(menuOpen(driven)).toBeFalse();
-			// Chrome refused the relay the user's tab too, yet its menu there is left alone.
+			userTabId = (await fixture.inExtension(
+				`chrome.tabs.query({}).then(tabs => tabs.find(tab => tab.url.includes("who=later")).id)`,
+			)) as number;
+			await userLater.focus("#pw");
+			await userTabDetached.promise;
+			// A wrongful sweep there would run right after the drop; one more call on omp's tab outlasts it.
+			expect(
+				(await runInTab(name, { code: "return await tab.title();", timeoutMs: 10_000, session })).returnValue,
+			).toBe("Login driven");
+			// The user's tabs keep their menus and their focus, whether Chrome refused the relay there or dropped it.
 			expect(menuOpen(user)).toBeTrue();
+			expect(await userLater.$("vault-menu")).not.toBeNull();
+			expect(userLater.frames().some(frame => frame.url() === "about:srcdoc")).toBeFalse();
+			expect(await userLater.evaluate("document.activeElement?.id")).toBe("pw");
 		} finally {
 			await releaseTab(name).catch(() => undefined);
 			await releaseBrowser(relay, { kill: false });
@@ -598,6 +632,89 @@ describe.skipIf(!CHROMIUM_AVAILABLE)("relay tab ownership", () => {
 			await fs.rm(vaultDir, { recursive: true, force: true });
 		}
 	}, 60_000);
+
+	describe("with a password manager that builds a new menu on every focus of a password field", () => {
+		// Every re-adoption focuses the page again (focus emulation), which focuses the field again and makes this
+		// vendor start loading a new menu frame; Chrome drops omp once it does. A submit opens a "Save login?" card.
+		const vendor = `let menu = null;
+function showMenu() {
+	menu?.remove();
+	menu = document.createElement("vault-menu");
+	const frame = document.createElement("iframe");
+	menu.attachShadow({ mode: "closed" }).append(frame);
+	document.documentElement.append(menu);
+	frame.src = chrome.runtime.getURL("menu.html");
+}
+document.addEventListener("focusin", event => {
+	if (event.target.type === "password") showMenu();
+}, true);
+if (document.activeElement?.type === "password") showMenu();
+document.addEventListener("submit", () => {
+	const card = document.createElement("vault-notification");
+	const frame = document.createElement("iframe");
+	card.attachShadow({ mode: "closed" }).append(frame);
+	document.documentElement.append(card);
+	frame.src = chrome.runtime.getURL("notification.html");
+}, true);`;
+		let vaultDir = "";
+		let fixture: RelayFixture;
+		let relay: BrowserHandle;
+		const extensionFrames = (page: Page) =>
+			page.frames().filter(frame => frame.url().startsWith("chrome-extension://"));
+		const title = { code: "return await tab.title();", timeoutMs: 10_000, session };
+		const pageOf = async (who: string) => {
+			const page = (await fixture.browser.pages()).find(page => page.url().includes(`who=${who}`));
+			if (!page) throw new Error(`the ${who} tab is gone`);
+			return page;
+		};
+		/** Resolves once `count` of the vendor's frames in `page` are emptied, so Chrome has dropped omp for each. */
+		const emptied = (page: Page, count: number) =>
+			page.waitForFrame(() => page.frames().filter(frame => frame.url() === "about:srcdoc").length >= count);
+		beforeEach(async () => {
+			vaultDir = await writeStandInVault(vendor);
+			fixture = await launchRelayFixture(undefined, [vaultDir]);
+			relay = await acquireBrowser({ kind: "relay", cdpUrl: fixture.cdpUrl }, { cwd: process.cwd() });
+		});
+		afterEach(async () => {
+			for (const name of ["vault-open", "vault-submit"]) {
+				await releaseTab(name).catch(() => undefined);
+			}
+			await releaseBrowser(relay, { kill: false });
+			await fixture.close();
+			await fs.rm(vaultDir, { recursive: true, force: true });
+		});
+
+		it("opens a login page whose password field is focused on load", async () => {
+			const { tab } = await acquireTab("vault-open", relay, {
+				url: `${fixture.origin}/login?who=open&autofocus`,
+				timeoutMs: 20_000,
+			});
+			const page = await pageOf("open");
+			await emptied(page, 1);
+			expect((await runInTab("vault-open", title)).returnValue).toBe("Login open");
+			expect(extensionFrames(page)).toEqual([]);
+			// The field lost focus, so the re-adoption's focus emulation opened no new menu.
+			expect(await page.evaluate("document.activeElement === document.body")).toBeTrue();
+			expect(await chromeTab(fixture, chromeTabId(tab.targetId))).not.toBeNull();
+		}, 60_000);
+
+		it("keeps the tab through the save card a submit opens", async () => {
+			await acquireTab("vault-submit", relay, {
+				url: `${fixture.origin}/login?who=submit&autofocus`,
+				timeoutMs: 20_000,
+			});
+			const page = await pageOf("submit");
+			await emptied(page, 1);
+			// The card starts loading as the click submits, so Chrome may drop omp during this call.
+			await runInTab("vault-submit", { code: "await tab.click('#go');", timeoutMs: 10_000, session }).catch(
+				() => undefined,
+			);
+			await emptied(page, 2);
+			expect((await runInTab("vault-submit", title)).returnValue).toBe("Signed in");
+			expect(extensionFrames(page)).toEqual([]);
+		}, 60_000);
+	});
+
 	it("closes an owned relay tab whose debugger the user dismissed", async () => {
 		const detached = Promise.withResolvers<void>();
 		let ownedTabId = 0;

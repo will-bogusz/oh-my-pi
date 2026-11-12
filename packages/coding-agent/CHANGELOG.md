@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- A browser relay tab no longer gets lost when a password manager's inline menu opens on a field focused on load, or its save card opens after a submit: the relay extension empties the frame and takes focus off the element focused beside it before omp re-adopts the tab. The call during which the frame opened still fails; with a password manager that builds a new menu on every focus of a field, so does every call that focuses that field
+
 ## [18.19.0] - 2026-11-12
 
 ### Breaking Changes

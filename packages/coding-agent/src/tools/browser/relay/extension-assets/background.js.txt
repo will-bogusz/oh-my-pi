@@ -1,9 +1,9 @@
-// packages/coding-agent/src/tools/browser/relay/protocol.ts
+// ../coding-agent/src/tools/browser/relay/protocol.ts
 var EXTENSION_RELOAD_PROTOCOL_VERSION = 1;
 var FOREIGN_FRAME_REFUSAL = /chrome-extension:\/\/ URL of different extension/i;
 var DOWNLOADS_PROTOCOL_VERSION = 1;
 
-// packages/browser-relay/extension/debugger-ownership.ts
+// extension/debugger-ownership.ts
 async function ownedDebuggerTabs(targets, probe) {
   const owned = await Promise.all(targets.map(async (target) => {
     if (!target.attached || target.tabId === undefined)
@@ -18,7 +18,7 @@ async function ownedDebuggerTabs(targets, probe) {
   return owned.filter((tabId) => tabId !== undefined);
 }
 
-// packages/browser-relay/extension/download-pairing.ts
+// extension/download-pairing.ts
 var DOWNLOAD_PAIRING_MS = 5000;
 var DOWNLOAD_LOOKUP_MS = 60000;
 
@@ -69,38 +69,61 @@ class DownloadPairing {
   }
 }
 
-// packages/browser-relay/extension/foreign-frames.ts
+// extension/foreign-frames.ts
 var RETRY_DELAYS_MS = [50, 100, 200, 400];
+var DETACH_SWEEP_DELAYS_MS = [50, 100, 200];
+var DETACH_SWEEP_WAIT_MS = 1000;
 var sweeps = new Map;
+var detachSweeps = new Map;
 async function pastForeignFrames(tabId, request) {
+  const detachSweep = detachSweeps.get(tabId);
+  if (detachSweep)
+    await Promise.race([detachSweep, delay(DETACH_SWEEP_WAIT_MS)]);
   for (let attempt = 0;; attempt++) {
     try {
       return await request();
     } catch (error) {
-      if (attempt === RETRY_DELAYS_MS.length || !FOREIGN_FRAME_REFUSAL.test(String(error)) || await sweep(tabId) === 0)
+      if (attempt === RETRY_DELAYS_MS.length || !FOREIGN_FRAME_REFUSAL.test(String(error)) || (await sweep(tabId)).found === 0)
         throw error;
     }
-    const { promise, resolve } = Promise.withResolvers();
-    setTimeout(resolve, RETRY_DELAYS_MS[attempt]);
-    await promise;
+    await delay(RETRY_DELAYS_MS[attempt]);
   }
+}
+function clearForeignFramesAfterDetach(tabId) {
+  const pending = (async () => {
+    for (let pass = 0;; pass++) {
+      const { emptied } = await neutralizeForeignFrames(tabId, true);
+      if (emptied === 0 || pass === DETACH_SWEEP_DELAYS_MS.length)
+        return;
+      await delay(DETACH_SWEEP_DELAYS_MS[pass]);
+    }
+  })().finally(() => {
+    if (detachSweeps.get(tabId) === pending)
+      detachSweeps.delete(tabId);
+  });
+  detachSweeps.set(tabId, pending);
+}
+function delay(ms) {
+  const { promise, resolve } = Promise.withResolvers();
+  setTimeout(resolve, ms);
+  return promise;
 }
 function sweep(tabId) {
   let pending = sweeps.get(tabId);
   if (!pending) {
-    pending = neutralizeForeignFrames(tabId).finally(() => sweeps.delete(tabId));
+    pending = neutralizeForeignFrames(tabId, false).finally(() => sweeps.delete(tabId));
     sweeps.set(tabId, pending);
   }
   return pending;
 }
-async function neutralizeForeignFrames(tabId) {
+async function neutralizeForeignFrames(tabId, blur) {
   try {
     const results = await chrome.scripting.executeScript({
       target: { tabId, allFrames: true },
       injectImmediately: true,
-      args: [chrome.runtime.id],
-      func: (self) => {
-        let found = 0;
+      args: [chrome.runtime.id, blur],
+      func: (self, blurFocus) => {
+        const counts = { found: 0, emptied: 0 };
         const visit = (root) => {
           const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT);
           for (let element = walker.nextNode();element; element = walker.nextNode()) {
@@ -108,12 +131,15 @@ async function neutralizeForeignFrames(tabId) {
             if (tag === "IFRAME" || tag === "FRAME") {
               const src = element.getAttribute("src") ?? "";
               if (src.startsWith("chrome-extension://") && !src.startsWith(`chrome-extension://${self}/`)) {
-                if (tag === "FRAME")
+                if (tag === "FRAME") {
                   element.setAttribute("src", "about:blank");
-                else if (element.getAttribute("srcdoc") === null)
+                  counts.emptied++;
+                } else if (element.getAttribute("srcdoc") === null) {
                   element.setAttribute("srcdoc", "");
+                  counts.emptied++;
+                }
                 element.style.setProperty("display", "none", "important");
-                found++;
+                counts.found++;
               }
             }
             const shadow = chrome.dom.openOrClosedShadowRoot(element);
@@ -122,16 +148,23 @@ async function neutralizeForeignFrames(tabId) {
           }
         };
         visit(document);
-        return found;
+        if (blurFocus && counts.found > 0 && document.activeElement !== document.body)
+          document.activeElement?.blur();
+        return counts;
       }
     });
-    return results.reduce((total, frame) => total + (frame.result ?? 0), 0);
+    const total = { found: 0, emptied: 0 };
+    for (const { result } of results) {
+      total.found += result?.found ?? 0;
+      total.emptied += result?.emptied ?? 0;
+    }
+    return total;
   } catch {
-    return 0;
+    return { found: 0, emptied: 0 };
   }
 }
 
-// packages/browser-relay/extension/background.ts
+// extension/background.ts
 var DEFAULT_PORT = 9224;
 var PING_INTERVAL_MS = 20000;
 var RECONNECT_MIN_MS = 1000;
@@ -142,6 +175,13 @@ var ws = null;
 var reconnectDelay = RECONNECT_MIN_MS;
 var pingTimer = null;
 var relayInitiatedDetachTabs = new Set;
+var drivenTabs = new Set;
+function noteDriven(tabId, driven) {
+  if (driven)
+    drivenTabs.add(tabId);
+  else
+    drivenTabs.delete(tabId);
+}
 var instanceId = null;
 async function ensureInstanceId() {
   if (instanceId)
@@ -300,6 +340,7 @@ async function buildHello() {
 async function runRpc(msg, origin) {
   switch (msg.op) {
     case "attach": {
+      noteDriven(msg.tabId, msg.clearForeignFrames);
       const attach = () => chrome.debugger.attach({ tabId: msg.tabId }, "1.3");
       await (msg.clearForeignFrames ? pastForeignFrames(msg.tabId, attach) : attach());
       return {};
@@ -314,6 +355,7 @@ async function runRpc(msg, origin) {
         throw error;
       }
     case "send": {
+      noteDriven(msg.tabId, msg.clearForeignFrames);
       const send = () => chrome.debugger.sendCommand(msg.sessionId ? { tabId: msg.tabId, sessionId: msg.sessionId } : { tabId: msg.tabId }, msg.method, msg.params);
       return await (msg.clearForeignFrames ? pastForeignFrames(msg.tabId, send) : send());
     }
@@ -426,10 +468,15 @@ chrome.debugger.onEvent.addListener((source, method, params) => {
   post({ t: "cdpEvent", tabId: source.tabId, sessionId: source.sessionId, method, params });
 });
 chrome.debugger.onDetach.addListener((source, reason) => {
-  if (source.tabId === undefined)
+  const tabId = source.tabId;
+  if (tabId === undefined)
     return;
-  const relayInitiated = relayInitiatedDetachTabs.delete(source.tabId);
-  post({ t: "detached", tabId: source.tabId, reason, relayInitiated });
+  const relayInitiated = relayInitiatedDetachTabs.delete(tabId);
+  if (relayInitiated || reason !== "target_closed")
+    drivenTabs.delete(tabId);
+  else if (drivenTabs.has(tabId))
+    clearForeignFramesAfterDetach(tabId);
+  post({ t: "detached", tabId, reason, relayInitiated });
 });
 chrome.tabs.onCreated.addListener((tab) => {
   const snap = snapshot(tab);
@@ -449,6 +496,7 @@ chrome.tabs.onActivated.addListener(({ tabId }) => {
   }).catch(() => {});
 });
 chrome.tabs.onRemoved.addListener((tabId) => {
+  drivenTabs.delete(tabId);
   post({ t: "tabRemoved", tabId });
 });
 chrome.alarms.create("omp-relay-keepalive", { periodInMinutes: 0.5 });

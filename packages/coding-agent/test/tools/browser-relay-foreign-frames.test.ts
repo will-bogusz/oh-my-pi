@@ -5,7 +5,7 @@ import {
 	RENDERER_PRIORITY_ARGS,
 } from "@oh-my-pi/pi-coding-agent/tools/browser/launch";
 import puppeteer from "puppeteer-core";
-import { pastForeignFrames } from "../../../browser-relay/extension/foreign-frames";
+import { clearForeignFramesAfterDetach, pastForeignFrames } from "../../../browser-relay/extension/foreign-frames";
 import { rejectionOf } from "../helpers/rejection";
 import { chromiumAvailable } from "./chromium-probe";
 
@@ -14,19 +14,19 @@ const CHROMIUM_AVAILABLE = await chromiumAvailable();
 const REFUSAL = new Error("Cannot access a chrome-extension:// URL of different extension");
 
 /**
- * Install a `chrome` global whose `scripting.executeScript` reports `emptied` frames changed, or throws when the
- * page cannot be scripted (`null`); returns the sweeps it ran. The real sweep runs in Chrome in
- * `browser-relay-tab-isolation.test.ts`.
+ * Install a `chrome` global whose `scripting.executeScript` reports `found` foreign frames, each one emptied by the
+ * first sweep, or throws when the page cannot be scripted (`null`); returns the sweeps it ran. The real sweep runs in
+ * Chrome in `browser-relay-tab-isolation.test.ts`.
  */
-function sweepsEmptying(emptied: number | null): number[] {
+function sweepsEmptying(found: number | null): number[] {
 	const sweeps: number[] = [];
 	Reflect.set(globalThis, "chrome", {
 		runtime: { id: "selfextensionid" },
 		scripting: {
 			executeScript: async (injection: { target: { tabId: number } }) => {
 				sweeps.push(injection.target.tabId);
-				if (emptied === null) throw new Error("Cannot access contents of the page");
-				return [{ frameId: 0, result: emptied }];
+				if (found === null) throw new Error("Cannot access contents of the page");
+				return [{ frameId: 0, result: { found, emptied: sweeps.length === 1 ? found : 0 } }];
 			},
 		},
 	});
@@ -71,6 +71,26 @@ describe("pastForeignFrames", () => {
 	it("rethrows the refusal when the page cannot be scripted", async () => {
 		sweepsEmptying(null);
 		expect(await rejectionOf(pastForeignFrames(1, () => Promise.reject(REFUSAL)))).toBe(REFUSAL);
+	});
+
+	it("holds the next attach after Chrome dropped omp until the frames are emptied, sweeping again while one was", async () => {
+		const sweeps = sweepsEmptying(1);
+		clearForeignFramesAfterDetach(1);
+		const attached = await pastForeignFrames(1, async () => sweeps.length);
+		// The first sweep emptied the frame, so a second one ran; it emptied nothing new, so the sweep ended there.
+		expect(attached).toBe(2);
+		expect(sweeps).toEqual([1, 1]);
+	});
+
+	it("attaches without waiting out a sweep the page cannot run, as while an alert() is open", async () => {
+		// Only the reattach can dismiss the dialog; a sweep that held it until it settled would never let it run.
+		const stalled = Promise.withResolvers<never>();
+		Reflect.set(globalThis, "chrome", {
+			runtime: { id: "selfextensionid" },
+			scripting: { executeScript: () => stalled.promise },
+		});
+		clearForeignFramesAfterDetach(2);
+		expect(await pastForeignFrames(2, async () => "attached")).toBe("attached");
 	});
 
 	it("never sweeps for other errors", async () => {
