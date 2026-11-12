@@ -93844,5 +93844,11 @@
     "wake": ""
    }
   ]
+ },
+ "opening": {
+  "id": "tern-kit-password-mask",
+  "token": "dcd117f4cd7c464794403f16ead93c91",
+  "host": "MacBook-Pro",
+  "at": "2026-11-12T03:50:51Z"
  }
 }
