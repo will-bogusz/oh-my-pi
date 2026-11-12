@@ -84731,21 +84731,200 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-12T08:53:03Z",
+  "checked": "2026-11-12T09:22:42Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
-  "openable": {},
+  "openable": {
+   "x11-mpx-reattach": {
+    "since": "2026-11-12T09:22:42Z",
+    "title": "fix(natives): keep X11 background input out of your window after a screen lock or VT switch"
+   },
+   "takeover-attached-hint": {
+    "since": "2026-11-12T09:22:42Z",
+    "title": "fix(natives): name the background route when takeover refuses a macOS suggestion list"
+   }
+  },
   "conflicts": {
+   "#16553": {
+    "since": "2026-11-12T09:22:42Z",
+    "title": "fix(natives): place macOS clicks for the focus guard where WindowServer routed them",
+    "files": [
+     "crates/pi-natives/src/desktop/control/macos.rs"
+    ]
+   },
    "#16611": {
     "since": "2026-11-12T01:15:20Z",
     "title": "feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio",
     "files": [
      "packages/coding-agent/src/prompts/tools/read.md"
     ]
+   },
+   "#18013": {
+    "since": "2026-11-12T09:22:42Z",
+    "title": "feat(natives): type text the wayland layout lacks through libei text",
+    "files": [
+     "crates/pi-natives/Cargo.toml"
+    ]
+   },
+   "#18751": {
+    "since": "2026-11-12T09:22:42Z",
+    "title": "fix(browser): run tab.run page evaluations in the page's main world",
+    "files": [
+     "docs/tools/browser.md"
+    ]
+   },
+   "#18783": {
+    "since": "2026-11-12T09:22:42Z",
+    "title": "fix(natives): capture a covered X11 window from its own pixels, or say it is covered",
+    "files": [
+     "crates/pi-natives/Cargo.toml"
+    ]
+   },
+   "#18915": {
+    "since": "2026-11-12T09:22:42Z",
+    "title": "fix(natives): verify Windows value writes and notify combo selections",
+    "files": [
+     "crates/pi-natives/Cargo.toml",
+     "crates/pi-natives/src/desktop/ax.rs",
+     "crates/pi-natives/src/desktop/win32/mod.rs"
+    ]
+   },
+   "#18892": {
+    "since": "2026-11-12T09:22:42Z",
+    "title": "fix(natives): refuse macOS element actions once the ref's element reads as another control",
+    "files": [
+     "crates/pi-natives/src/desktop/macos/ax.rs"
+    ]
    }
   },
-  "merged_through": "2026-11-11T13:55:07Z",
-  "unreleased": {},
+  "merged_through": "2026-11-12T09:21:51Z",
+  "unreleased": {
+   "19004": {
+    "title": "fix(natives): own macOS suggestion-list elements by the window that lists them",
+    "merge_commit": "21a97d4a16d1a3963762720c3927a1c25eb9bb2b",
+    "merged_at": "2026-11-12T09:21:49Z"
+   },
+   "18989": {
+    "title": "fix(natives): never quote the written text when a setValue read-back disagrees",
+    "merge_commit": "d6bee4520e7463c7c592714eb176d58befd37953",
+    "merged_at": "2026-11-12T09:21:49Z"
+   },
+   "18983": {
+    "title": "fix(browser): mask password values in Tern kit observations",
+    "merge_commit": "8b2854e1aed7b7a8f68fd3e5f3808023a344f108",
+    "merged_at": "2026-11-12T09:21:49Z"
+   },
+   "18982": {
+    "title": "fix(natives,coding-agent): report macOS secure input and stop claiming globalEscape under it",
+    "merge_commit": "36e1e9146e59072bb76941612dd774d771c0e9e4",
+    "merged_at": "2026-11-12T09:21:49Z"
+   },
+   "18981": {
+    "title": "fix(coding-agent): keep text a cell enters out of browser and computer status lines",
+    "merge_commit": "3d889fde7f0d9f40a50588bd235055c96a6cc305",
+    "merged_at": "2026-11-12T09:21:49Z"
+   },
+   "18924": {
+    "title": "fix(browser): honor selector wait states and reject unknown options",
+    "merge_commit": "2f5bfcda776212950c26bb16eaaf4509e722631f",
+    "merged_at": "2026-11-12T09:21:49Z"
+   },
+   "18923": {
+    "title": "fix(natives): name the menu items on offer when a menu bar path misses",
+    "merge_commit": "2874f5e4683ed74c08fc218626b49326436c5f20",
+    "merged_at": "2026-11-12T09:21:49Z"
+   },
+   "18922": {
+    "title": "fix(natives): confirm Windows menu commands that open modal dialogs",
+    "merge_commit": "b28bc78e39409219e32da42c8aace3c7dfd7c96f",
+    "merged_at": "2026-11-12T09:21:49Z"
+   },
+   "18921": {
+    "title": "fix(natives): press Chromium menu items, options and tabs on Linux",
+    "merge_commit": "66ddd2320dadeff96d18f15c07e45bec5dd2aba4",
+    "merged_at": "2026-11-12T09:21:49Z"
+   },
+   "18919": {
+    "title": "fix(natives): hand the foreground back after Windows element takeover input",
+    "merge_commit": "0d06eb9a5c12a471b186cd5f60f2bfe659677445",
+    "merged_at": "2026-11-12T09:21:49Z"
+   },
+   "18897": {
+    "title": "fix(natives): press macOS key chords on the keys of the current keyboard layout",
+    "merge_commit": "8ac2d8af6a22580d48768a1ceca66b4023e47755",
+    "merged_at": "2026-11-12T09:21:49Z"
+   },
+   "18896": {
+    "title": "fix(natives): stop macOS input refusals between omp processes",
+    "merge_commit": "d9afa27da5848de89fa131dcf2a1f770d822291f",
+    "merged_at": "2026-11-12T09:21:49Z"
+   },
+   "18895": {
+    "title": "fix(natives): refuse Windows background input that holds a modifier",
+    "merge_commit": "5182a0337de792b46294c1aee437ece744988093",
+    "merged_at": "2026-11-12T09:21:49Z"
+   },
+   "18884": {
+    "title": "fix(browser): rearm main-world waits after navigation",
+    "merge_commit": "6a714aed8012080a61cd55ac2d30910e61a2ccc6",
+    "merged_at": "2026-11-12T09:21:49Z"
+   },
+   "18828": {
+    "title": "fix(natives): confirm every X11 virtual-keyboard key release, in order",
+    "merge_commit": "3c4e4ff6186822aae018256151f90e9fa64ae7f3",
+    "merged_at": "2026-11-12T09:21:49Z"
+   },
+   "18753": {
+    "title": "fix(computer): reject unknown helper option keys",
+    "merge_commit": "fab1c42803f0587cdca6c76b9b313216fb83696c",
+    "merged_at": "2026-11-12T09:21:49Z"
+   },
+   "18947": {
+    "title": "fix(natives,coding-agent): report unavailable Windows desktop sessions",
+    "merge_commit": "6c5d3800260612701ea558d453b45d5edc827f53",
+    "merged_at": "2026-11-12T09:21:50Z"
+   },
+   "18883": {
+    "title": "fix(browser): keep main-world waits from exposing query bindings",
+    "merge_commit": "4b2cf992e56c92e67d2a1b0a26970ef2d0523dd0",
+    "merged_at": "2026-11-12T09:21:50Z"
+   },
+   "18825": {
+    "title": "fix(natives): stop X11 background input from crashing your running Qt 6.5+ apps",
+    "merge_commit": "211fcf2ec129141e8edfe57346192a106780c741",
+    "merged_at": "2026-11-12T09:21:50Z"
+   },
+   "18776": {
+    "title": "feat(coding-agent): report browser screenshots and opens on one line",
+    "merge_commit": "c9a963fb362aaaa79ffd4175c22a2e20c286274d",
+    "merged_at": "2026-11-12T09:21:50Z"
+   },
+   "18775": {
+    "title": "fix(coding-agent): print a failed JavaScript cell's own frames, not omp's host stack",
+    "merge_commit": "9e55249163e7b70157a49182473ffcd572b36619",
+    "merged_at": "2026-11-12T09:21:50Z"
+   },
+   "18772": {
+    "title": "fix(browser): print every observed element, one line each, instead of cutting at 100",
+    "merge_commit": "3e30ec5806aa9dd6c597045ef8043331df889d6a",
+    "merged_at": "2026-11-12T09:21:50Z"
+   },
+   "18750": {
+    "title": "fix(browser): hover on a hidden match waits and names the reason, like click",
+    "merge_commit": "1e487d5819c15ecb7d9a47f12fdfe69e17b22f7a",
+    "merged_at": "2026-11-12T09:21:50Z"
+   },
+   "18738": {
+    "title": "fix(browser): tell agents that treat console() or errors() as an array to read .entries",
+    "merge_commit": "76e17f831b72228997a2a684a3c2b44a15cdb6c4",
+    "merged_at": "2026-11-12T09:21:50Z"
+   },
+   "18898": {
+    "title": "fix(natives): refuse a macOS press on a disabled element",
+    "merge_commit": "58662823f058a8380cab9667088c158b8f11d0b6",
+    "merged_at": "2026-11-12T09:21:51Z"
+   }
+  },
   "ready": [
    16553,
    16611,
@@ -84758,44 +84937,19 @@
    18353,
    18624,
    18737,
-   18738,
    18743,
-   18750,
    18751,
-   18753,
    18771,
-   18772,
-   18775,
-   18776,
    18783,
    18784,
    18786,
    18789,
-   18825,
-   18828,
-   18883,
-   18884,
    18892,
-   18895,
-   18896,
-   18897,
-   18898,
    18914,
    18915,
-   18919,
-   18921,
-   18922,
-   18923,
-   18924,
    18925,
-   18947,
-   18981,
-   18982,
-   18983,
    18987,
-   18989,
-   19001,
-   19004
+   19001
   ],
   "post_merge": {
    "16274": {
@@ -84863,6 +85017,12 @@
     "merged_at": "2026-11-10T22:02:28Z",
     "findings": []
    },
+   "18738": {
+    "title": "fix(browser): tell agents that treat console() or errors() as an array to read .entries",
+    "merge_commit": "76e17f831b72228997a2a684a3c2b44a15cdb6c4",
+    "merged_at": "2026-11-12T09:21:50Z",
+    "findings": []
+   },
    "18739": {
     "title": "fix(browser): point calls on a tab that is not open at browser.open()",
     "merge_commit": "1fe8469b25abbbec5a17733b5d144669186af0f8",
@@ -84885,6 +85045,18 @@
     "title": "fix(natives): wait for another session's input lock before failing InputBusy",
     "merge_commit": "0198fc0ac2ffde96712fa23d5e5b64ab24dbcccd",
     "merged_at": "2026-11-10T22:02:27Z",
+    "findings": []
+   },
+   "18750": {
+    "title": "fix(browser): hover on a hidden match waits and names the reason, like click",
+    "merge_commit": "1e487d5819c15ecb7d9a47f12fdfe69e17b22f7a",
+    "merged_at": "2026-11-12T09:21:50Z",
+    "findings": []
+   },
+   "18753": {
+    "title": "fix(computer): reject unknown helper option keys",
+    "merge_commit": "fab1c42803f0587cdca6c76b9b313216fb83696c",
+    "merged_at": "2026-11-12T09:21:49Z",
     "findings": []
    },
    "18761": {
@@ -84911,10 +85083,28 @@
     "merged_at": "2026-11-10T22:02:27Z",
     "findings": []
    },
+   "18772": {
+    "title": "fix(browser): print every observed element, one line each, instead of cutting at 100",
+    "merge_commit": "3e30ec5806aa9dd6c597045ef8043331df889d6a",
+    "merged_at": "2026-11-12T09:21:50Z",
+    "findings": []
+   },
    "18773": {
     "title": "fix(coding-agent): keep a child omp's browser tabs out of its parent's Tern pane and cmux workspace",
     "merge_commit": "827d50cac3718d9e2b82326f024b1d28e68d219e",
     "merged_at": "2026-11-10T22:02:27Z",
+    "findings": []
+   },
+   "18775": {
+    "title": "fix(coding-agent): print a failed JavaScript cell's own frames, not omp's host stack",
+    "merge_commit": "9e55249163e7b70157a49182473ffcd572b36619",
+    "merged_at": "2026-11-12T09:21:50Z",
+    "findings": []
+   },
+   "18776": {
+    "title": "feat(coding-agent): report browser screenshots and opens on one line",
+    "merge_commit": "c9a963fb362aaaa79ffd4175c22a2e20c286274d",
+    "merged_at": "2026-11-12T09:21:50Z",
     "findings": []
    },
    "18795": {
@@ -84933,6 +85123,18 @@
     "title": "fix(natives): stop macOS background left clicks from crashing Electron and Chrome pages",
     "merge_commit": "dedac96a9b24ab54dc535267967ae864d97f9174",
     "merged_at": "2026-11-11T13:55:07Z",
+    "findings": []
+   },
+   "18825": {
+    "title": "fix(natives): stop X11 background input from crashing your running Qt 6.5+ apps",
+    "merge_commit": "211fcf2ec129141e8edfe57346192a106780c741",
+    "merged_at": "2026-11-12T09:21:50Z",
+    "findings": []
+   },
+   "18828": {
+    "title": "fix(natives): confirm every X11 virtual-keyboard key release, in order",
+    "merge_commit": "3c4e4ff6186822aae018256151f90e9fa64ae7f3",
+    "merged_at": "2026-11-12T09:21:49Z",
     "findings": []
    },
    "18829": {
@@ -84975,6 +85177,108 @@
     "title": "fix(coding-agent): print nothing for a JavaScript eval cell that ends in an assignment",
     "merge_commit": "58f020f5b6494d28571dc20f1027ca6c0b175e47",
     "merged_at": "2026-11-11T13:55:07Z",
+    "findings": []
+   },
+   "18883": {
+    "title": "fix(browser): keep main-world waits from exposing query bindings",
+    "merge_commit": "4b2cf992e56c92e67d2a1b0a26970ef2d0523dd0",
+    "merged_at": "2026-11-12T09:21:50Z",
+    "findings": []
+   },
+   "18884": {
+    "title": "fix(browser): rearm main-world waits after navigation",
+    "merge_commit": "6a714aed8012080a61cd55ac2d30910e61a2ccc6",
+    "merged_at": "2026-11-12T09:21:49Z",
+    "findings": []
+   },
+   "18895": {
+    "title": "fix(natives): refuse Windows background input that holds a modifier",
+    "merge_commit": "5182a0337de792b46294c1aee437ece744988093",
+    "merged_at": "2026-11-12T09:21:49Z",
+    "findings": []
+   },
+   "18896": {
+    "title": "fix(natives): stop macOS input refusals between omp processes",
+    "merge_commit": "d9afa27da5848de89fa131dcf2a1f770d822291f",
+    "merged_at": "2026-11-12T09:21:49Z",
+    "findings": []
+   },
+   "18897": {
+    "title": "fix(natives): press macOS key chords on the keys of the current keyboard layout",
+    "merge_commit": "8ac2d8af6a22580d48768a1ceca66b4023e47755",
+    "merged_at": "2026-11-12T09:21:49Z",
+    "findings": []
+   },
+   "18898": {
+    "title": "fix(natives): refuse a macOS press on a disabled element",
+    "merge_commit": "58662823f058a8380cab9667088c158b8f11d0b6",
+    "merged_at": "2026-11-12T09:21:51Z",
+    "findings": []
+   },
+   "18919": {
+    "title": "fix(natives): hand the foreground back after Windows element takeover input",
+    "merge_commit": "0d06eb9a5c12a471b186cd5f60f2bfe659677445",
+    "merged_at": "2026-11-12T09:21:49Z",
+    "findings": []
+   },
+   "18921": {
+    "title": "fix(natives): press Chromium menu items, options and tabs on Linux",
+    "merge_commit": "66ddd2320dadeff96d18f15c07e45bec5dd2aba4",
+    "merged_at": "2026-11-12T09:21:49Z",
+    "findings": []
+   },
+   "18922": {
+    "title": "fix(natives): confirm Windows menu commands that open modal dialogs",
+    "merge_commit": "b28bc78e39409219e32da42c8aace3c7dfd7c96f",
+    "merged_at": "2026-11-12T09:21:49Z",
+    "findings": []
+   },
+   "18923": {
+    "title": "fix(natives): name the menu items on offer when a menu bar path misses",
+    "merge_commit": "2874f5e4683ed74c08fc218626b49326436c5f20",
+    "merged_at": "2026-11-12T09:21:49Z",
+    "findings": []
+   },
+   "18924": {
+    "title": "fix(browser): honor selector wait states and reject unknown options",
+    "merge_commit": "2f5bfcda776212950c26bb16eaaf4509e722631f",
+    "merged_at": "2026-11-12T09:21:49Z",
+    "findings": []
+   },
+   "18947": {
+    "title": "fix(natives,coding-agent): report unavailable Windows desktop sessions",
+    "merge_commit": "6c5d3800260612701ea558d453b45d5edc827f53",
+    "merged_at": "2026-11-12T09:21:50Z",
+    "findings": []
+   },
+   "18981": {
+    "title": "fix(coding-agent): keep text a cell enters out of browser and computer status lines",
+    "merge_commit": "3d889fde7f0d9f40a50588bd235055c96a6cc305",
+    "merged_at": "2026-11-12T09:21:49Z",
+    "findings": []
+   },
+   "18982": {
+    "title": "fix(natives,coding-agent): report macOS secure input and stop claiming globalEscape under it",
+    "merge_commit": "36e1e9146e59072bb76941612dd774d771c0e9e4",
+    "merged_at": "2026-11-12T09:21:49Z",
+    "findings": []
+   },
+   "18983": {
+    "title": "fix(browser): mask password values in Tern kit observations",
+    "merge_commit": "8b2854e1aed7b7a8f68fd3e5f3808023a344f108",
+    "merged_at": "2026-11-12T09:21:49Z",
+    "findings": []
+   },
+   "18989": {
+    "title": "fix(natives): never quote the written text when a setValue read-back disagrees",
+    "merge_commit": "d6bee4520e7463c7c592714eb176d58befd37953",
+    "merged_at": "2026-11-12T09:21:49Z",
+    "findings": []
+   },
+   "19004": {
+    "title": "fix(natives): own macOS suggestion-list elements by the window that lists them",
+    "merge_commit": "21a97d4a16d1a3963762720c3927a1c25eb9bb2b",
+    "merged_at": "2026-11-12T09:21:49Z",
     "findings": []
    }
   },
@@ -87298,6 +87602,274 @@
     "id": "autofill-rows",
     "title": "fix(natives): own macOS suggestion-list elements by the window that lists them",
     "why": "opened as #19004"
+   },
+   {
+    "at": "2026-11-12T09:22:42Z",
+    "kind": "merged",
+    "number": 19004,
+    "title": "fix(natives): own macOS suggestion-list elements by the window that lists them",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-12T09:22:42Z",
+    "kind": "merged",
+    "number": 18989,
+    "title": "fix(natives): never quote the written text when a setValue read-back disagrees",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-12T09:22:42Z",
+    "kind": "merged",
+    "number": 18983,
+    "title": "fix(browser): mask password values in Tern kit observations",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-12T09:22:42Z",
+    "kind": "merged",
+    "number": 18982,
+    "title": "fix(natives,coding-agent): report macOS secure input and stop claiming globalEscape under it",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-12T09:22:42Z",
+    "kind": "merged",
+    "number": 18981,
+    "title": "fix(coding-agent): keep text a cell enters out of browser and computer status lines",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-12T09:22:42Z",
+    "kind": "merged",
+    "number": 18924,
+    "title": "fix(browser): honor selector wait states and reject unknown options",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-12T09:22:42Z",
+    "kind": "merged",
+    "number": 18923,
+    "title": "fix(natives): name the menu items on offer when a menu bar path misses",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-12T09:22:42Z",
+    "kind": "merged",
+    "number": 18922,
+    "title": "fix(natives): confirm Windows menu commands that open modal dialogs",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-12T09:22:42Z",
+    "kind": "merged",
+    "number": 18921,
+    "title": "fix(natives): press Chromium menu items, options and tabs on Linux",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-12T09:22:42Z",
+    "kind": "merged",
+    "number": 18919,
+    "title": "fix(natives): hand the foreground back after Windows element takeover input",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-12T09:22:42Z",
+    "kind": "merged",
+    "number": 18897,
+    "title": "fix(natives): press macOS key chords on the keys of the current keyboard layout",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-12T09:22:42Z",
+    "kind": "merged",
+    "number": 18896,
+    "title": "fix(natives): stop macOS input refusals between omp processes",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-12T09:22:42Z",
+    "kind": "merged",
+    "number": 18895,
+    "title": "fix(natives): refuse Windows background input that holds a modifier",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-12T09:22:42Z",
+    "kind": "merged",
+    "number": 18884,
+    "title": "fix(browser): rearm main-world waits after navigation",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-12T09:22:42Z",
+    "kind": "merged",
+    "number": 18828,
+    "title": "fix(natives): confirm every X11 virtual-keyboard key release, in order",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-12T09:22:42Z",
+    "kind": "merged",
+    "number": 18753,
+    "title": "fix(computer): reject unknown helper option keys",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-12T09:22:42Z",
+    "kind": "merged",
+    "number": 18947,
+    "title": "fix(natives,coding-agent): report unavailable Windows desktop sessions",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-12T09:22:42Z",
+    "kind": "merged",
+    "number": 18883,
+    "title": "fix(browser): keep main-world waits from exposing query bindings",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-12T09:22:42Z",
+    "kind": "merged",
+    "number": 18825,
+    "title": "fix(natives): stop X11 background input from crashing your running Qt 6.5+ apps",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-12T09:22:42Z",
+    "kind": "merged",
+    "number": 18776,
+    "title": "feat(coding-agent): report browser screenshots and opens on one line",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-12T09:22:42Z",
+    "kind": "merged",
+    "number": 18775,
+    "title": "fix(coding-agent): print a failed JavaScript cell's own frames, not omp's host stack",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-12T09:22:42Z",
+    "kind": "merged",
+    "number": 18772,
+    "title": "fix(browser): print every observed element, one line each, instead of cutting at 100",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-12T09:22:42Z",
+    "kind": "merged",
+    "number": 18750,
+    "title": "fix(browser): hover on a hidden match waits and names the reason, like click",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-12T09:22:42Z",
+    "kind": "merged",
+    "number": 18738,
+    "title": "fix(browser): tell agents that treat console() or errors() as an array to read .entries",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-12T09:22:42Z",
+    "kind": "merged",
+    "number": 18898,
+    "title": "fix(natives): refuse a macOS press on a disabled element",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-12T09:22:42Z",
+    "kind": "openable",
+    "id": "x11-mpx-reattach",
+    "title": "fix(natives): keep X11 background input out of your window after a screen lock or VT switch"
+   },
+   {
+    "at": "2026-11-12T09:22:42Z",
+    "kind": "openable",
+    "id": "takeover-attached-hint",
+    "title": "fix(natives): name the background route when takeover refuses a macOS suggestion list"
+   },
+   {
+    "at": "2026-11-12T09:22:42Z",
+    "kind": "conflict",
+    "label": "#16553",
+    "title": "fix(natives): place macOS clicks for the focus guard where WindowServer routed them",
+    "files": [
+     "crates/pi-natives/src/desktop/control/macos.rs"
+    ]
+   },
+   {
+    "at": "2026-11-12T09:22:42Z",
+    "kind": "conflict",
+    "label": "#18013",
+    "title": "feat(natives): type text the wayland layout lacks through libei text",
+    "files": [
+     "crates/pi-natives/Cargo.toml"
+    ]
+   },
+   {
+    "at": "2026-11-12T09:22:42Z",
+    "kind": "conflict",
+    "label": "#18751",
+    "title": "fix(browser): run tab.run page evaluations in the page's main world",
+    "files": [
+     "docs/tools/browser.md"
+    ]
+   },
+   {
+    "at": "2026-11-12T09:22:42Z",
+    "kind": "conflict",
+    "label": "#18783",
+    "title": "fix(natives): capture a covered X11 window from its own pixels, or say it is covered",
+    "files": [
+     "crates/pi-natives/Cargo.toml"
+    ]
+   },
+   {
+    "at": "2026-11-12T09:22:42Z",
+    "kind": "conflict",
+    "label": "#18915",
+    "title": "fix(natives): verify Windows value writes and notify combo selections",
+    "files": [
+     "crates/pi-natives/Cargo.toml",
+     "crates/pi-natives/src/desktop/ax.rs",
+     "crates/pi-natives/src/desktop/win32/mod.rs"
+    ]
+   },
+   {
+    "at": "2026-11-12T09:22:42Z",
+    "kind": "conflict",
+    "label": "#18892",
+    "title": "fix(natives): refuse macOS element actions once the ref's element reads as another control",
+    "files": [
+     "crates/pi-natives/src/desktop/macos/ax.rs"
+    ]
    }
   ]
  },
@@ -92403,7 +92975,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-12T08:53:04.685448Z",
+  "at": "2026-11-12T09:22:43.077415Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -92412,144 +92984,6 @@
   },
   "rows": [
    {
-    "id": "browser-main-wait-globals",
-    "label": "#18883",
-    "number": 18883,
-    "state": "open",
-    "area": "browser",
-    "priority": "P0",
-    "title": "fix(browser): keep main-world waits from exposing query bindings",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-11T11:33:30Z"
-   },
-   {
-    "id": "browser-main-wait-navigation",
-    "label": "#18884",
-    "number": 18884,
-    "state": "open",
-    "area": "browser",
-    "priority": "P0",
-    "title": "fix(browser): rearm main-world waits after navigation",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-11T11:39:57Z"
-   },
-   {
-    "id": "macos-press-disabled",
-    "label": "#18898",
-    "number": 18898,
-    "state": "open",
-    "area": "natives",
-    "priority": "P0",
-    "title": "fix(natives): refuse a macOS press on a disabled element",
-    "action": "keep",
-    "reasons": [],
-    "note": "accepted pair with #18892",
-    "over": [],
-    "paired": [
-     "#18892"
-    ],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-11T13:04:20Z"
-   },
-   {
-    "id": "win-takeover-focus",
-    "label": "#18919",
-    "number": 18919,
-    "state": "open",
-    "area": "computer",
-    "priority": "P0",
-    "title": "fix(natives): hand the foreground back after Windows element takeover input",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-11T16:22:34Z"
-   },
-   {
-    "id": "atspi-press-actions",
-    "label": "#18921",
-    "number": 18921,
-    "state": "open",
-    "area": "computer",
-    "priority": "P0",
-    "title": "fix(natives): press Chromium menu items, options and tabs on Linux",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-11T16:28:13Z"
-   },
-   {
-    "id": "computer-secure-input",
-    "label": "#18982",
-    "number": 18982,
-    "state": "open",
-    "area": "computer",
-    "priority": "P0",
-    "title": "fix(natives,coding-agent): report macOS secure input and stop claiming globalEscape under it",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-12T03:50:13Z"
-   },
-   {
-    "id": "tern-kit-password-mask",
-    "label": "#18983",
-    "number": 18983,
-    "state": "open",
-    "area": "browser",
-    "priority": "P0",
-    "title": "fix(browser): mask password values in Tern kit observations",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-12T03:56:50Z"
-   },
-   {
-    "id": "autofill-rows",
-    "label": "#19004",
-    "number": 19004,
-    "state": "open",
-    "area": "computer",
-    "priority": "P0",
-    "title": "fix(natives): own macOS suggestion-list elements by the window that lists them",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-12T05:44:43Z"
-   },
-   {
     "id": "click-place-release",
     "label": "#16553",
     "number": 16553,
@@ -92557,13 +92991,14 @@
     "area": "natives-macos",
     "priority": "P1",
     "title": "fix(natives): place macOS clicks for the focus guard where WindowServer routed them",
-    "action": "keep",
-    "reasons": [],
-    "note": "accepted pair with #18743; accepted pair with #18896",
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in crates/pi-natives/src/desktop/control/macos.rs"
+    ],
+    "note": "accepted pair with #18743",
     "over": [],
     "paired": [
-     "#18743",
-     "#18896"
+     "#18743"
     ],
     "blocked_by": [],
     "needs": [],
@@ -92621,23 +93056,6 @@
     "created": "2026-11-10T16:35:49Z"
    },
    {
-    "id": "browser-console-shape",
-    "label": "#18738",
-    "number": 18738,
-    "state": "open",
-    "area": "browser",
-    "priority": "P1",
-    "title": "fix(browser): tell agents that treat console() or errors() as an array to read .entries",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-10T16:38:09Z"
-   },
-   {
     "id": "computer-open-window",
     "label": "#18743",
     "number": 18743,
@@ -92657,23 +93075,6 @@
     "created": "2026-11-10T16:42:22Z"
    },
    {
-    "id": "browser-hover-actionable",
-    "label": "#18750",
-    "number": 18750,
-    "state": "open",
-    "area": "browser",
-    "priority": "P1",
-    "title": "fix(browser): hover on a hidden match waits and names the reason, like click",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-10T17:21:24Z"
-   },
-   {
     "id": "browser-run-main-world",
     "label": "#18751",
     "number": 18751,
@@ -92681,69 +93082,16 @@
     "area": "browser",
     "priority": "P1",
     "title": "fix(browser): run tab.run page evaluations in the page's main world",
-    "action": "keep",
-    "reasons": [],
-    "note": "accepted pair with #18772",
-    "over": [],
-    "paired": [
-     "#18772"
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in docs/tools/browser.md"
     ],
+    "note": "",
+    "over": [],
+    "paired": [],
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-10T17:23:38Z"
-   },
-   {
-    "id": "computer-strict-options",
-    "label": "#18753",
-    "number": 18753,
-    "state": "open",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(computer): reject unknown helper option keys",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-10T17:43:14Z"
-   },
-   {
-    "id": "observe-print",
-    "label": "#18772",
-    "number": 18772,
-    "state": "open",
-    "area": "browser",
-    "priority": "P1",
-    "title": "fix(browser): print every observed element, one line each, instead of cutting at 100",
-    "action": "keep",
-    "reasons": [],
-    "note": "accepted pair with #18751",
-    "over": [],
-    "paired": [
-     "#18751"
-    ],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-10T20:05:43Z"
-   },
-   {
-    "id": "eval-error-frames",
-    "label": "#18775",
-    "number": 18775,
-    "state": "open",
-    "area": "eval",
-    "priority": "P1",
-    "title": "fix(coding-agent): print a failed JavaScript cell's own frames, not omp's host stack",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-10T20:33:07Z"
    },
    {
     "id": "x11-covered-capture",
@@ -92753,13 +93101,14 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): capture a covered X11 window from its own pixels, or say it is covered",
-    "action": "keep",
-    "reasons": [],
-    "note": "accepted pair with #18013; accepted pair with #18825",
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in crates/pi-natives/Cargo.toml"
+    ],
+    "note": "accepted pair with #18013",
     "over": [],
     "paired": [
-     "#18013",
-     "#18825"
+     "#18013"
     ],
     "blocked_by": [],
     "needs": [],
@@ -92783,43 +93132,6 @@
     "created": "2026-11-10T22:08:25Z"
    },
    {
-    "id": "x11-mpx-qt",
-    "label": "#18825",
-    "number": 18825,
-    "state": "open",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives): stop X11 background input from crashing your running Qt 6.5+ apps",
-    "action": "keep",
-    "reasons": [],
-    "note": "accepted pair with #18013; accepted pair with #18783",
-    "over": [],
-    "paired": [
-     "#18013",
-     "#18783"
-    ],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-11T03:47:36Z"
-   },
-   {
-    "id": "x11-mpx-key-confirm",
-    "label": "#18828",
-    "number": 18828,
-    "state": "open",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives): confirm every X11 virtual-keyboard key release, in order",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-11T04:50:22Z"
-   },
-   {
     "id": "ax-ref-read-as",
     "label": "#18892",
     "number": 18892,
@@ -92827,69 +93139,16 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): refuse macOS element actions once the ref's element reads as another control",
-    "action": "keep",
-    "reasons": [],
-    "note": "accepted pair with #18898",
-    "over": [],
-    "paired": [
-     "#18898"
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in crates/pi-natives/src/desktop/macos/ax.rs"
     ],
+    "note": "",
+    "over": [],
+    "paired": [],
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T12:38:46Z"
-   },
-   {
-    "id": "win-posted-modifiers",
-    "label": "#18895",
-    "number": 18895,
-    "state": "open",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives): refuse Windows background input that holds a modifier",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-11T12:45:02Z"
-   },
-   {
-    "id": "xproc-intervention",
-    "label": "#18896",
-    "number": 18896,
-    "state": "open",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives): stop macOS input refusals between omp processes",
-    "action": "keep",
-    "reasons": [],
-    "note": "accepted pair with #16553",
-    "over": [],
-    "paired": [
-     "#16553"
-    ],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-11T12:51:11Z"
-   },
-   {
-    "id": "macos-layout-chords",
-    "label": "#18897",
-    "number": 18897,
-    "state": "open",
-    "area": "natives",
-    "priority": "P1",
-    "title": "fix(natives): press macOS key chords on the keys of the current keyboard layout",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-11T12:58:04Z"
    },
    {
     "id": "atspi-unanswered-app",
@@ -92919,104 +93178,16 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): verify Windows value writes and notify combo selections",
-    "action": "keep",
-    "reasons": [],
-    "note": "accepted pair with #18947; accepted pair with #18989: Main, 2026-11-12: accepted; adjacent doc/cfg lines on ax.rs text_readback; whichever lands second deletes the cfg_attr(..., allow(dead_code)) on masked",
-    "over": [],
-    "paired": [
-     "#18947",
-     "#18989"
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/win32/mod.rs"
     ],
+    "note": "",
+    "over": [],
+    "paired": [],
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T16:16:48Z"
-   },
-   {
-    "id": "win-menu-modal",
-    "label": "#18922",
-    "number": 18922,
-    "state": "open",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives): confirm Windows menu commands that open modal dialogs",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-11T16:33:59Z"
-   },
-   {
-    "id": "macos-menu-miss-items",
-    "label": "#18923",
-    "number": 18923,
-    "state": "open",
-    "area": "natives",
-    "priority": "P1",
-    "title": "fix(natives): name the menu items on offer when a menu bar path misses",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-11T16:39:41Z"
-   },
-   {
-    "id": "browser-wait-selector-state",
-    "label": "#18924",
-    "number": 18924,
-    "state": "open",
-    "area": "browser",
-    "priority": "P1",
-    "title": "fix(browser): honor selector wait states and reject unknown options",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-11T16:45:32Z"
-   },
-   {
-    "id": "win-screen-locked",
-    "label": "#18947",
-    "number": 18947,
-    "state": "open",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives,coding-agent): report unavailable Windows desktop sessions",
-    "action": "keep",
-    "reasons": [],
-    "note": "accepted pair with #18915",
-    "over": [],
-    "paired": [
-     "#18915"
-    ],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-11T22:00:07Z"
-   },
-   {
-    "id": "status-entered-text",
-    "label": "#18981",
-    "number": 18981,
-    "state": "open",
-    "area": "browser",
-    "priority": "P1",
-    "title": "fix(coding-agent): keep text a cell enters out of browser and computer status lines",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-12T03:43:45Z"
    },
    {
     "id": "factory-droid-171-pin",
@@ -93152,15 +93323,16 @@
     "area": "natives",
     "priority": "P2",
     "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "action": "keep",
-    "reasons": [],
-    "note": "accepted pair with #18353; accepted pair with #18914; accepted pair with #18783; accepted pair with #18825",
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in crates/pi-natives/Cargo.toml"
+    ],
+    "note": "accepted pair with #18353; accepted pair with #18914; accepted pair with #18783",
     "over": [],
     "paired": [
      "#18353",
      "#18914",
-     "#18783",
-     "#18825"
+     "#18783"
     ],
     "blocked_by": [],
     "needs": [],
@@ -93182,23 +93354,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-05T19:41:05Z"
-   },
-   {
-    "id": "screenshot-result-line",
-    "label": "#18776",
-    "number": 18776,
-    "state": "open",
-    "area": "browser",
-    "priority": "P2",
-    "title": "feat(coding-agent): report browser screenshots and opens on one line",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-10T20:37:04Z"
    },
    {
     "id": "browser-core-first-use",
@@ -93271,25 +93426,6 @@
     "created": "2026-11-12T04:03:05Z"
    },
    {
-    "id": "ax-masked-readback",
-    "label": "#18989",
-    "number": 18989,
-    "state": "open",
-    "area": "computer",
-    "priority": "P3",
-    "title": "fix(natives): never quote the written text when a setValue read-back disagrees",
-    "action": "keep",
-    "reasons": [],
-    "note": "accepted pair with #18915: Main, 2026-11-12: accepted; adjacent doc/cfg lines on ax.rs text_readback; whichever lands second deletes the cfg_attr(..., allow(dead_code)) on masked",
-    "over": [],
-    "paired": [
-     "#18915"
-    ],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-12T04:18:11Z"
-   },
-   {
     "id": "atspi-huge-children",
     "label": "atspi-huge-children",
     "number": null,
@@ -93320,17 +93456,13 @@
     "area": "computer",
     "priority": "P0",
     "title": "fix(natives): keep X11 background input out of your window after a screen lock or VT switch",
-    "action": "wait",
-    "reasons": [
-     "needs #18825 (open)"
-    ],
-    "note": "",
+    "action": "open",
+    "reasons": [],
+    "note": "advance first",
     "over": [],
     "paired": [],
     "blocked_by": [],
-    "needs": [
-     "#18825"
-    ],
+    "needs": [],
     "created": "2026-11-11T17:39:36Z"
    },
    {
@@ -93344,19 +93476,15 @@
     "action": "wait",
     "reasons": [
      "needs #18914 (open)",
-     "conflicts with #18921 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18892 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with #18989 in crates/pi-natives/src/desktop/linux/ax.rs"
+     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18921",
      "#18892",
-     "#18914",
-     "#18989"
+     "#18914"
     ],
     "needs": [
      "atspi-unanswered-app"
@@ -93395,36 +93523,24 @@
     "action": "wait",
     "reasons": [
      "needs #18914 (open)",
-     "conflicts with #18921 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with #18982 in crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #18783 in crates/pi-natives/Cargo.toml",
-     "conflicts with #18825 in crates/pi-natives/Cargo.toml",
      "conflicts with #18892 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18914 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/wayland/libei.rs, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #18915 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/ax.rs",
-     "conflicts with #18923 in crates/pi-natives/src/desktop/ax.rs",
-     "conflicts with #18947 in crates/pi-natives/Cargo.toml",
      "conflicts with #18353 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #18013 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/libei.rs",
-     "conflicts with #18989 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18921",
-     "#18982",
      "#18783",
-     "#18825",
      "#18892",
      "#18914",
      "#18915",
-     "#18923",
-     "#18947",
      "#18353",
-     "#18013",
-     "#18989"
+     "#18013"
     ],
     "needs": [
      "atspi-unanswered-app"
@@ -93443,6 +93559,7 @@
     "reasons": [
      "needs #18892 (open)",
      "conflicts with #18892 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs",
+     "its need #18892 conflicts with main in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with main in crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs"
     ],
     "note": "",
@@ -93466,15 +93583,12 @@
     "title": "fix(coding-agent): fail a click whose frame the page removed while the button was down",
     "action": "wait",
     "reasons": [
-     "conflicts with #18750 in packages/coding-agent/src/tools/browser/interactions.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/interactions.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#18750"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T00:14:54Z"
    },
@@ -93488,16 +93602,12 @@
     "title": "fix(computer): retain output and screenshots when a run fails",
     "action": "wait",
     "reasons": [
-     "conflicts with #18982 in packages/coding-agent/src/tools/computer.ts",
-     "conflicts with #18753 in packages/coding-agent/test/tools/computer.test.ts"
+     "conflicts with main in packages/coding-agent/src/tools/computer.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#18982",
-     "#18753"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T00:07:07Z"
    },
@@ -93511,17 +93621,12 @@
     "title": "fix(coding-agent): refuse browser keys aimed at a field a modal dialog covers",
     "action": "wait",
     "reasons": [
-     "conflicts with #18924 in packages/coding-agent/src/tools/browser/frames.ts",
-     "conflicts with #18776 in packages/coding-agent/src/tools/browser/frames.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/frames.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#18924",
-     "#18776"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T02:11:47Z"
    },
@@ -93577,19 +93682,13 @@
     "title": "fix(natives): map Windows keys on the receiving keyboard layout",
     "action": "wait",
     "reasons": [
-     "needs #18895 (open)",
-     "conflicts with #18919 in crates/pi-natives/src/desktop/win32/input.rs",
      "conflicts with main in crates/pi-natives/src/desktop/win32/input.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#18919"
-    ],
-    "needs": [
-     "win-posted-modifiers"
-    ],
+    "blocked_by": [],
+    "needs": [],
     "created": "2026-11-11T09:13:32Z"
    },
    {
@@ -93602,7 +93701,6 @@
     "title": "fix(natives,coding-agent): stop Windows takeover typing from losing text the app had not read yet",
     "action": "wait",
     "reasons": [
-     "needs #18919 (open)",
      "conflicts with #18783 in docs/computer-use.md"
     ],
     "note": "",
@@ -93611,9 +93709,7 @@
     "blocked_by": [
      "#18783"
     ],
-    "needs": [
-     "win-takeover-focus"
-    ],
+    "needs": [],
     "created": "2026-11-12T04:40:03Z"
    },
    {
@@ -93668,17 +93764,13 @@
     "title": "fix(natives): type X11 XTest text through a neutral keyboard state",
     "action": "wait",
     "reasons": [
-     "conflicts with #18783 in crates/pi-natives/Cargo.toml",
-     "conflicts with #18784 in crates/pi-natives/src/desktop/linux/x11/input.rs",
-     "conflicts with #18013 in crates/pi-natives/Cargo.toml"
+     "conflicts with #18784 in crates/pi-natives/src/desktop/linux/x11/input.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18783",
-     "#18784",
-     "#18013"
+     "#18784"
     ],
     "needs": [],
     "created": "2026-11-11T02:32:01Z"
@@ -93717,21 +93809,15 @@
     "action": "wait",
     "reasons": [
      "conflicts with #18737 in packages/coding-agent/src/prompts/tools/browser.md",
-     "conflicts with #18738 in packages/coding-agent/src/prompts/tools/browser.md",
-     "conflicts with #18924 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with #18776 in packages/coding-agent/src/tools/browser/frames.ts",
      "conflicts with #18786 in packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18789 in packages/coding-agent/src/prompts/tools/browser.md",
-     "conflicts with main in packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts"
+     "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
      "#18737",
-     "#18738",
-     "#18924",
-     "#18776",
      "#18786",
      "#18789"
     ],
@@ -93749,14 +93835,13 @@
     "action": "wait",
     "reasons": [
      "needs #18751 (open)",
-     "conflicts with #18772 in docs/tools/browser.md",
-     "conflicts with #18925 in packages/coding-agent/src/tools/browser/tab-worker.ts"
+     "conflicts with #18925 in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "its need #18751 conflicts with main in docs/tools/browser.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18772",
      "#18925"
     ],
     "needs": [
@@ -93775,16 +93860,14 @@
     "action": "wait",
     "reasons": [
      "needs observe-settle (queued)",
-     "conflicts with #18772 in docs/tools/browser.md",
-     "conflicts with #18924 in packages/coding-agent/src/tools/browser/frames.ts",
-     "conflicts with #18925 in packages/coding-agent/src/tools/browser/tab-worker.ts"
+     "conflicts with #18925 in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "its need observe-settle conflicts with main in docs/tools/browser.md",
+     "conflicts with main in packages/coding-agent/src/tools/browser/frames.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18772",
-     "#18924",
      "#18925"
     ],
     "needs": [
@@ -93803,19 +93886,15 @@
     "action": "wait",
     "reasons": [
      "needs #18914 (open)",
-     "conflicts with #18921 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18892 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/ax/menus.rs",
-     "conflicts with #18989 in crates/pi-natives/src/desktop/linux/ax.rs"
+     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/ax/menus.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18921",
      "#18892",
-     "#18914",
-     "#18989"
+     "#18914"
     ],
     "needs": [
      "atspi-unanswered-app"
@@ -93833,19 +93912,15 @@
     "action": "wait",
     "reasons": [
      "needs #18914 (open)",
-     "conflicts with #18921 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18892 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with #18989 in crates/pi-natives/src/desktop/linux/ax.rs"
+     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18921",
      "#18892",
-     "#18914",
-     "#18989"
+     "#18914"
     ],
     "needs": [
      "atspi-unanswered-app"
@@ -93862,13 +93937,12 @@
     "title": "fix(natives): preserve the empty-field warning on Linux write timeouts",
     "action": "wait",
     "reasons": [
-     "needs #18914 (open)"
+     "needs #18914 (open)",
+     "conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
-    "note": "accepted pair with #18989: Main, 2026-11-12: prerequisite-owned test-guard overlap, not a masked-length-ok conflict. Combined form: apply #18989 removal of the contains(\"secure\") condition and the timeout entry added !contains(\"emptied\") condition; keep both exclusions of the written and old text. Shared masked-helper removal and text_write_error insertion are independently composable adjacency. Combined form not run.",
+    "note": "",
     "over": [],
-    "paired": [
-     "#18989"
-    ],
+    "paired": [],
     "blocked_by": [],
     "needs": [
      "atspi-unanswered-app"
@@ -93886,14 +93960,12 @@
     "action": "wait",
     "reasons": [
      "needs #18892 (open)",
-     "conflicts with #18898 in crates/pi-natives/src/desktop/macos/ax.rs"
+     "its need #18892 conflicts with main in crates/pi-natives/src/desktop/macos/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#18898"
-    ],
+    "blocked_by": [],
     "needs": [
      "ax-ref-read-as"
     ],
@@ -93910,18 +93982,13 @@
     "action": "wait",
     "reasons": [
      "needs browser-wait-predicate (queued)",
-     "conflicts with #18924 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with #18776 in packages/coding-agent/src/tools/browser/tern/tern-tab.ts",
-     "its need browser-wait-predicate conflicts with main in packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts",
+     "its need browser-wait-predicate conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#18924",
-     "#18776"
-    ],
+    "blocked_by": [],
     "needs": [
      "browser-wait-predicate"
     ],
@@ -93938,15 +94005,12 @@
     "action": "wait",
     "reasons": [
      "needs browser-wait-text-regexp (queued)",
-     "conflicts with #18924 in docs/tools/browser.md",
-     "its need browser-wait-text-regexp conflicts with main in packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
+     "its need browser-wait-text-regexp conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#18924"
-    ],
+    "blocked_by": [],
     "needs": [
      "browser-wait-text-regexp"
     ],
@@ -93962,14 +94026,12 @@
     "title": "fix(computer): say window and element filters take text when given a RegExp",
     "action": "wait",
     "reasons": [
-     "conflicts with #18753 in packages/coding-agent/src/tools/computer/worker.ts"
+     "conflicts with main in packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#18753"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T01:40:14Z"
    },
@@ -93983,18 +94045,16 @@
     "title": "fix(computer): wait for the app to finish reacting before the next read or input",
     "action": "wait",
     "reasons": [
-     "conflicts with #18898 in docs/computer-use.md",
      "conflicts with #18783 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #18784 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18892 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18222 in packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
-     "conflicts with main in packages/coding-agent/src/prompts/tools/computer.md"
+     "conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18898",
      "#18783",
      "#18784",
      "#18892",
@@ -94013,14 +94073,12 @@
     "title": "fix(natives): send no macOS AX action once its run is cancelled",
     "action": "wait",
     "reasons": [
-     "conflicts with #18898 in crates/pi-natives/src/desktop/macos/ax.rs"
+     "conflicts with main in crates/pi-natives/src/desktop/macos/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#18898"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T09:59:13Z"
    },
@@ -94079,10 +94137,9 @@
      "needs iphone-mirror-scroll-distance (queued)",
      "conflicts with #16553 in crates/pi-natives/src/desktop/macos/input.rs",
      "conflicts with #17756 in crates/pi-natives/src/desktop/macos/input.rs",
-     "conflicts with #18753 in docs/computer-use.md",
      "conflicts with #18892 in crates/pi-natives/src/desktop/macos/input.rs",
-     "conflicts with #18897 in crates/pi-natives/src/desktop/macos/input.rs",
-     "conflicts with #17897 in crates/pi-natives/src/desktop/macos/input.rs"
+     "conflicts with #17897 in crates/pi-natives/src/desktop/macos/input.rs",
+     "conflicts with main in docs/computer-use.md"
     ],
     "note": "",
     "over": [],
@@ -94090,9 +94147,7 @@
     "blocked_by": [
      "#16553",
      "#17756",
-     "#18753",
      "#18892",
-     "#18897",
      "#17897"
     ],
     "needs": [
@@ -94110,7 +94165,6 @@
     "title": "fix(natives): report a setValue that reads back as a same-length mask as done, not failed",
     "action": "wait",
     "reasons": [
-     "needs #18989 (open)",
      "conflicts with #18915 in crates/pi-natives/src/desktop/ax.rs",
      "conflicts with main in docs/tools/computer.md"
     ],
@@ -94120,9 +94174,7 @@
     "blocked_by": [
      "#18915"
     ],
-    "needs": [
-     "ax-masked-readback"
-    ],
+    "needs": [],
     "created": "2026-11-12T04:00:44Z"
    },
    {
@@ -94137,12 +94189,8 @@
     "reasons": [
      "needs #18925 (open)",
      "conflicts with #18737 in docs/tools/browser.md",
-     "conflicts with #18738 in docs/tools/browser.md",
      "conflicts with #18751 in docs/tools/browser.md",
-     "conflicts with #18772 in docs/tools/browser.md",
-     "conflicts with #18924 in docs/tools/browser.md",
      "conflicts with #19001 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
-     "conflicts with #18776 in docs/tools/browser.md",
      "conflicts with #18786 in docs/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md",
      "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts"
@@ -94152,12 +94200,8 @@
     "paired": [],
     "blocked_by": [
      "#18737",
-     "#18738",
      "#18751",
-     "#18772",
-     "#18924",
      "#19001",
-     "#18776",
      "#18786",
      "#18789"
     ],
@@ -94178,12 +94222,8 @@
     "reasons": [
      "needs r2/relay-own-only (queued)",
      "conflicts with #18737 in docs/tools/browser.md",
-     "conflicts with #18738 in docs/tools/browser.md",
      "conflicts with #18751 in docs/tools/browser.md",
-     "conflicts with #18772 in docs/tools/browser.md",
-     "conflicts with #18924 in docs/tools/browser.md",
      "conflicts with #19001 in packages/browser-relay/extension/background.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
-     "conflicts with #18776 in docs/tools/browser.md",
      "conflicts with #18786 in docs/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md",
      "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts"
@@ -94193,12 +94233,8 @@
     "paired": [],
     "blocked_by": [
      "#18737",
-     "#18738",
      "#18751",
-     "#18772",
-     "#18924",
      "#19001",
-     "#18776",
      "#18786",
      "#18789"
     ],
@@ -94219,14 +94255,8 @@
     "reasons": [
      "needs r2/relay-popup-owned (queued), r2/page-waiting (queued)",
      "conflicts with #18737 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
-     "conflicts with #18738 in docs/tools/browser.md",
-     "conflicts with #18750 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18751 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with #18772 in docs/tools/browser.md",
-     "conflicts with #18924 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with #18981 in packages/coding-agent/src/tools/browser.ts",
      "conflicts with #19001 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
-     "conflicts with #18776 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18786 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts",
      "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts",
      "its need r2/relay-popup-owned conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts",
@@ -94238,14 +94268,8 @@
     "paired": [],
     "blocked_by": [
      "#18737",
-     "#18738",
-     "#18750",
      "#18751",
-     "#18772",
-     "#18924",
-     "#18981",
      "#19001",
-     "#18776",
      "#18786",
      "#18789"
     ],
@@ -94288,17 +94312,13 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): name the background route when takeover refuses a macOS suggestion list",
-    "action": "wait",
-    "reasons": [
-     "needs #19004 (open)"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [],
-    "needs": [
-     "autofill-rows"
-    ],
+    "needs": [],
     "created": "2026-11-12T04:03:51Z"
    },
    {
@@ -94334,7 +94354,6 @@
     "title": "fix(natives): report where focus went after a Windows takeover",
     "action": "wait",
     "reasons": [
-     "needs #18919 (open)",
      "conflicts with #18783 in docs/computer-use.md"
     ],
     "note": "",
@@ -94343,9 +94362,7 @@
     "blocked_by": [
      "#18783"
     ],
-    "needs": [
-     "win-takeover-focus"
-    ],
+    "needs": [],
     "created": "2026-11-11T13:11:20Z"
    },
    {
@@ -94361,9 +94378,8 @@
      "conflicts with #18784 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18892 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18915 in crates/pi-natives/src/desktop/win32/mod.rs",
-     "conflicts with #18947 in crates/pi-natives/src/desktop/win32/mod.rs",
      "conflicts with #18222 in packages/coding-agent/src/prompts/tools/computer.md",
-     "conflicts with main in packages/coding-agent/src/prompts/tools/computer.md"
+     "conflicts with main in crates/pi-natives/src/desktop/win32/mod.rs, packages/coding-agent/src/prompts/tools/computer.md"
     ],
     "note": "",
     "over": [],
@@ -94372,7 +94388,6 @@
      "#18784",
      "#18892",
      "#18915",
-     "#18947",
      "#18222"
     ],
     "needs": [],
@@ -94389,16 +94404,15 @@
     "action": "wait",
     "reasons": [
      "conflicts with #18784 in crates/pi-natives/src/desktop/linux/x11/input.rs",
-     "conflicts with #18825 in crates/pi-natives/src/desktop/linux/x11/mpx.rs",
-     "conflicts with #18828 in crates/pi-natives/src/desktop/linux/x11/mpx.rs"
+     "conflicts with x11-mpx-reattach in crates/pi-natives/src/desktop/linux/x11/mpx.rs",
+     "conflicts with main in crates/pi-natives/src/desktop/linux/x11/mpx.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
      "#18784",
-     "#18825",
-     "#18828"
+     "x11-mpx-reattach"
     ],
     "needs": [],
     "created": "2026-11-11T13:55:21Z"
@@ -94415,10 +94429,9 @@
     "reasons": [
      "needs settle-reads (queued)",
      "conflicts with #18737 in packages/coding-agent/src/prompts/tools/browser.md",
-     "conflicts with #18738 in packages/coding-agent/src/prompts/tools/browser.md",
-     "conflicts with #18772 in docs/tools/browser.md",
      "conflicts with #18786 in packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18789 in packages/coding-agent/src/prompts/tools/browser.md",
+     "its need settle-reads conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts",
      "conflicts with main in packages/coding-agent/src/prompts/tools/browser.md"
     ],
     "note": "",
@@ -94426,8 +94439,6 @@
     "paired": [],
     "blocked_by": [
      "#18737",
-     "#18738",
-     "#18772",
      "#18786",
      "#18789"
     ],
@@ -94447,19 +94458,15 @@
     "action": "wait",
     "reasons": [
      "conflicts with #18737 in packages/coding-agent/src/prompts/tools/browser.md",
-     "conflicts with #18738 in packages/coding-agent/src/prompts/tools/browser.md",
-     "conflicts with #18924 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts",
      "conflicts with #18786 in packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18789 in packages/coding-agent/src/prompts/tools/browser.md",
-     "conflicts with main in packages/coding-agent/src/prompts/tools/browser.md"
+     "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
      "#18737",
-     "#18738",
-     "#18924",
      "#18786",
      "#18789"
     ],
@@ -94480,7 +94487,6 @@
      "needs #18987 (open)",
      "conflicts with #18737 in packages/coding-agent/src/tools/browser/tab-supervisor.ts",
      "conflicts with #19001 in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with #18776 in packages/coding-agent/src/tools/browser/tern/tern-tab.ts",
      "conflicts with #18925 in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
     ],
@@ -94490,7 +94496,6 @@
     "blocked_by": [
      "#18737",
      "#19001",
-     "#18776",
      "#18925"
     ],
     "needs": [
@@ -94509,11 +94514,7 @@
     "action": "wait",
     "reasons": [
      "conflicts with #18737 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
-     "conflicts with #18738 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18751 in docs/tools/browser.md",
-     "conflicts with #18772 in docs/tools/browser.md",
-     "conflicts with #18924 in docs/tools/browser.md",
-     "conflicts with #18776 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tern/tern-tab.ts",
      "conflicts with #18786 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18925 in docs/tools/browser.md",
@@ -94524,11 +94525,7 @@
     "paired": [],
     "blocked_by": [
      "#18737",
-     "#18738",
      "#18751",
-     "#18772",
-     "#18924",
-     "#18776",
      "#18786",
      "#18789",
      "#18925"
@@ -94548,10 +94545,7 @@
     "reasons": [
      "held: Main, 2026-11-11: stays held until #18786 merges with the typed-message guide channel (design check replace); then one property on the computer prelude, drop the wrap variant, re-run its blind legs",
      "needs #18786 (open)",
-     "conflicts with #18982 in packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with #18753 in packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with #18947 in packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with #18981 in packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with #18783 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18222 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/prompts/tools/eval.md, packages/coding-agent/src/tools/eval.ts",
      "conflicts with main in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/sdk-computer-prelude-toggle.test.ts, packages/coding-agent/test/tools/computer.test.ts"
@@ -94560,10 +94554,7 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18982",
-     "#18753",
-     "#18947",
-     "#18981",
+     "#18783",
      "#18222",
      "#18786"
     ],
@@ -94584,45 +94575,31 @@
     "reasons": [
      "held: Main for InputDiffFix, 2026-11-12: held; the fix round failed two Opus acceptance lines fixed beforehand (Finder steps 1.47x, Automator tokens 1.26x vs main); code branch stays local and unpushed; see note",
      "needs computer-ui-quiet (queued)",
-     "conflicts with #18898 in docs/computer-use.md, docs/tools/computer.md",
-     "conflicts with #18982 in docs/tools/computer.md, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18737 in packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts",
-     "conflicts with #18753 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with #18783 in packages/coding-agent/src/tools/computer/worker.ts",
+     "conflicts with #18783 in packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18784 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18892 in packages/coding-agent/src/prompts/tools/computer.md",
-     "conflicts with #18895 in docs/tools/computer.md",
      "conflicts with #18915 in docs/tools/computer.md",
-     "conflicts with #18947 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with #18981 in packages/coding-agent/src/tools/computer.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/tools/eval.ts",
      "conflicts with #18987 in docs/tools/computer.md, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/worker.ts",
-     "conflicts with #18989 in docs/tools/computer.md",
-     "its need computer-ui-quiet conflicts with main in packages/coding-agent/src/prompts/tools/computer.md",
-     "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/computer/worker.ts"
+     "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18898",
-     "#18982",
      "#18737",
-     "#18753",
      "#18783",
      "#18784",
      "#18892",
-     "#18895",
      "#18915",
-     "#18947",
-     "#18981",
      "#18353",
      "#18222",
      "#18786",
-     "#18987",
-     "#18989"
+     "#18987"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -94640,47 +94617,35 @@
     "action": "wait",
     "reasons": [
      "needs computer-ui-quiet (queued)",
-     "conflicts with #18898 in crates/pi-natives/src/desktop/macos/ax.rs, docs/tools/computer.md",
-     "conflicts with #18982 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with #19004 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with #18743 in crates/pi-natives/src/desktop/macos/ax.rs",
-     "conflicts with #18753 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with #18783 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18784 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18892 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/prompts/tools/computer.md",
-     "conflicts with #18895 in docs/tools/computer.md",
      "conflicts with #18914 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18915 in docs/tools/computer.md",
-     "conflicts with #18947 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with #18981 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18987 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
-     "conflicts with #18989 in docs/tools/computer.md",
-     "its need computer-ui-quiet conflicts with main in packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with takeover-attached-hint in crates/pi-natives/src/desktop/macos/ax.rs",
+     "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#18898",
-     "#18982",
-     "#19004",
      "#18743",
-     "#18753",
+     "#18783",
      "#18784",
      "#18892",
-     "#18895",
      "#18914",
      "#18915",
-     "#18947",
-     "#18981",
      "#18353",
      "#18222",
      "#18925",
      "#18987",
-     "#18989"
+     "takeover-attached-hint"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -94775,16 +94740,11 @@
     "reasons": [
      "needs act-look-prompt (queued)",
      "conflicts with #18737 in packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with #18738 in packages/coding-agent/src/prompts/tools/browser.md",
-     "conflicts with #18750 in packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with #18772 in docs/tools/browser.md",
-     "conflicts with #18924 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19001 in packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with #18776 in packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts",
      "conflicts with #18786 in packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18789 in packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18925 in packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "its need act-look-prompt conflicts with main in packages/coding-agent/src/prompts/tools/browser.md",
+     "its need act-look-prompt conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
     ],
     "note": "",
@@ -94792,12 +94752,7 @@
     "paired": [],
     "blocked_by": [
      "#18737",
-     "#18738",
-     "#18750",
-     "#18772",
-     "#18924",
      "#19001",
-     "#18776",
      "#18786",
      "#18789",
      "#18925"
@@ -94819,12 +94774,8 @@
     "reasons": [
      "needs r2/relay-own-only (queued)",
      "conflicts with #18737 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
-     "conflicts with #18738 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18751 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with #18772 in docs/tools/browser.md",
-     "conflicts with #18924 in docs/tools/browser.md",
      "conflicts with #19001 in packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with #18776 in docs/tools/browser.md",
      "conflicts with #18786 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts",
@@ -94835,12 +94786,8 @@
     "paired": [],
     "blocked_by": [
      "#18737",
-     "#18738",
      "#18751",
-     "#18772",
-     "#18924",
      "#19001",
-     "#18776",
      "#18786",
      "#18789"
     ],
