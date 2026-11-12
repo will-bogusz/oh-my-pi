@@ -85841,7 +85841,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-12T10:53:55Z",
+  "checked": "2026-11-12T11:24:23Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -85876,6 +85876,34 @@
     "title": "feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio",
     "files": [
      "packages/coding-agent/src/prompts/tools/read.md"
+    ]
+   },
+   "#18353": {
+    "since": "2026-11-12T11:24:23Z",
+    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
+    "files": [
+     "MODULE.bazel.lock"
+    ]
+   },
+   "#18013": {
+    "since": "2026-11-12T11:24:23Z",
+    "title": "feat(natives): type text the wayland layout lacks through libei text",
+    "files": [
+     "MODULE.bazel.lock"
+    ]
+   },
+   "#18914": {
+    "since": "2026-11-12T11:24:23Z",
+    "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool",
+    "files": [
+     "MODULE.bazel.lock"
+    ]
+   },
+   "#18783": {
+    "since": "2026-11-12T11:24:23Z",
+    "title": "fix(natives): capture a covered X11 window from its own pixels, or say it is covered",
+    "files": [
+     "MODULE.bazel.lock"
     ]
    }
   },
@@ -89028,6 +89056,42 @@
     "kind": "openable",
     "id": "atspi-text-first",
     "title": "fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility"
+   },
+   {
+    "at": "2026-11-12T11:24:23Z",
+    "kind": "conflict",
+    "label": "#18353",
+    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
+    "files": [
+     "MODULE.bazel.lock"
+    ]
+   },
+   {
+    "at": "2026-11-12T11:24:23Z",
+    "kind": "conflict",
+    "label": "#18013",
+    "title": "feat(natives): type text the wayland layout lacks through libei text",
+    "files": [
+     "MODULE.bazel.lock"
+    ]
+   },
+   {
+    "at": "2026-11-12T11:24:23Z",
+    "kind": "conflict",
+    "label": "#18914",
+    "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool",
+    "files": [
+     "MODULE.bazel.lock"
+    ]
+   },
+   {
+    "at": "2026-11-12T11:24:23Z",
+    "kind": "conflict",
+    "label": "#18783",
+    "title": "fix(natives): capture a covered X11 window from its own pixels, or say it is covered",
+    "files": [
+     "MODULE.bazel.lock"
+    ]
    }
   ]
  },
@@ -94246,7 +94310,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-12T10:53:56.109377Z",
+  "at": "2026-11-12T11:24:24.283194Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -94368,8 +94432,10 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): capture a covered X11 window from its own pixels, or say it is covered",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in MODULE.bazel.lock"
+    ],
     "note": "accepted pair with #18353: Main, 2026-11-12 (via QueueThirteen): generated MODULE.bazel.lock only: the FILE:@@//crates/pi-natives/Cargo.toml hash line differs because each PR changes Cargo.toml; whichever merges second reruns gen-bazel-lock (--check). No code overlap.; accepted pair with #18013; accepted pair with #18914: Main, 2026-11-12 (via QueueThirteen): generated MODULE.bazel.lock only: the FILE:@@//crates/pi-natives/Cargo.toml hash line differs because each PR changes Cargo.toml; whichever merges second reruns gen-bazel-lock (--check). No code overlap.",
     "over": [],
     "paired": [
@@ -94423,8 +94489,10 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in MODULE.bazel.lock"
+    ],
     "note": "accepted pair with #18353; accepted pair with #18013; accepted pair with #18783: Main, 2026-11-12 (via QueueThirteen): generated MODULE.bazel.lock only: the FILE:@@//crates/pi-natives/Cargo.toml hash line differs because each PR changes Cargo.toml; whichever merges second reruns gen-bazel-lock (--check). No code overlap.",
     "over": [],
     "paired": [
@@ -94512,8 +94580,10 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in MODULE.bazel.lock"
+    ],
     "note": "accepted pair with #18013; accepted pair with #18914; accepted pair with #18783: Main, 2026-11-12 (via QueueThirteen): generated MODULE.bazel.lock only: the FILE:@@//crates/pi-natives/Cargo.toml hash line differs because each PR changes Cargo.toml; whichever merges second reruns gen-bazel-lock (--check). No code overlap.",
     "over": [],
     "paired": [
@@ -94588,8 +94658,10 @@
     "area": "natives",
     "priority": "P2",
     "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in MODULE.bazel.lock"
+    ],
     "note": "accepted pair with #18353; accepted pair with #18914; accepted pair with #18783",
     "over": [],
     "paired": [
@@ -94740,7 +94812,8 @@
     "reasons": [
      "needs #18914 (open)",
      "conflicts with #18892 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs"
+     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs",
+     "its need #18914 conflicts with main in MODULE.bazel.lock"
     ],
     "note": "",
     "over": [],
@@ -94791,6 +94864,7 @@
      "conflicts with #18353 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #18013 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/libei.rs",
      "conflicts with atspi-text-first in crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
+     "its need #18914 conflicts with main in MODULE.bazel.lock",
      "conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
@@ -94864,6 +94938,7 @@
     "title": "fix(computer): retain output and screenshots when a run fails",
     "action": "wait",
     "reasons": [
+     "conflicts with #18783 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18987 in packages/coding-agent/src/tools/computer.ts",
      "conflicts with main in packages/coding-agent/src/tools/computer.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -94871,6 +94946,7 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#18783",
      "#18987"
     ],
     "needs": [],
@@ -95156,7 +95232,8 @@
      "needs #18914 (open)",
      "conflicts with #18892 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/ax/menus.rs",
-     "conflicts with atspi-text-first in crates/pi-natives/src/desktop/linux/ax.rs"
+     "conflicts with atspi-text-first in crates/pi-natives/src/desktop/linux/ax.rs",
+     "its need #18914 conflicts with main in MODULE.bazel.lock"
     ],
     "note": "",
     "over": [],
@@ -95184,7 +95261,8 @@
      "needs #18914 (open)",
      "conflicts with #18892 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with atspi-text-first in crates/pi-natives/src/desktop/linux/ax.rs"
+     "conflicts with atspi-text-first in crates/pi-natives/src/desktop/linux/ax.rs",
+     "its need #18914 conflicts with main in MODULE.bazel.lock"
     ],
     "note": "",
     "over": [],
@@ -95212,6 +95290,7 @@
      "needs #18914 (open)",
      "conflicts with #18892 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with atspi-text-first in crates/pi-natives/src/desktop/linux/ax.rs",
+     "its need #18914 conflicts with main in MODULE.bazel.lock",
      "conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
@@ -95871,6 +95950,7 @@
     "reasons": [
      "held: Main, 2026-11-11: stays held until #18786 merges with the typed-message guide channel (design check replace); then one property on the computer prelude, drop the wrap variant, re-run its blind legs",
      "needs #18786 (open)",
+     "conflicts with #18783 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18222 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/prompts/tools/eval.md, packages/coding-agent/src/tools/eval.ts",
      "conflicts with main in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/sdk-computer-prelude-toggle.test.ts, packages/coding-agent/test/tools/computer.test.ts"
@@ -95879,6 +95959,7 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#18783",
      "#18222",
      "#18786"
     ],
@@ -95901,7 +95982,7 @@
      "needs computer-ui-quiet (queued)",
      "conflicts with #18737 in packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts",
      "conflicts with #18743 in docs/computer-use.md",
-     "conflicts with #18783 in docs/computer-use.md, packages/coding-agent/src/tools/computer/worker.ts",
+     "conflicts with #18783 in docs/computer-use.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18784 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18892 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18915 in docs/tools/computer.md",
@@ -95952,6 +96033,7 @@
     "reasons": [
      "needs computer-ui-quiet (queued)",
      "conflicts with #18743 in crates/pi-natives/src/desktop/macos/ax.rs",
+     "conflicts with #18783 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18784 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18892 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18914 in crates/pi-natives/src/desktop/mod.rs",
@@ -95970,6 +96052,7 @@
     "paired": [],
     "blocked_by": [
      "#18743",
+     "#18783",
      "#18784",
      "#18892",
      "#18914",
