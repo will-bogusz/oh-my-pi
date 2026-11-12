@@ -91598,12 +91598,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-12T04:06:52.508993Z",
+  "at": "2026-11-12T04:19:40.958176Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 4,
-   "left": 4
+   "used": 5,
+   "left": 3
   },
   "rows": [
    {
@@ -92099,10 +92099,11 @@
     "title": "fix(natives): verify Windows value writes and notify combo selections",
     "action": "keep",
     "reasons": [],
-    "note": "accepted pair with #18947",
+    "note": "accepted pair with #18947; accepted pair with #18989: Main, 2026-11-12: accepted; adjacent doc/cfg lines on ax.rs text_readback; whichever lands second deletes the cfg_attr(..., allow(dead_code)) on masked",
     "over": [],
     "paired": [
-     "#18947"
+     "#18947",
+     "#18989"
     ],
     "blocked_by": [],
     "needs": [],
@@ -92427,6 +92428,25 @@
     "created": "2026-11-12T04:03:05Z"
    },
    {
+    "id": "ax-masked-readback",
+    "label": "#18989",
+    "number": 18989,
+    "state": "open",
+    "area": "computer",
+    "priority": "P3",
+    "title": "fix(natives): never quote the written text when a setValue read-back disagrees",
+    "action": "keep",
+    "reasons": [],
+    "note": "accepted pair with #18915: Main, 2026-11-12: accepted; adjacent doc/cfg lines on ax.rs text_readback; whichever lands second deletes the cfg_attr(..., allow(dead_code)) on masked",
+    "over": [],
+    "paired": [
+     "#18915"
+    ],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-12T04:18:11Z"
+   },
+   {
     "id": "atspi-huge-children",
     "label": "atspi-huge-children",
     "number": null,
@@ -92483,7 +92503,8 @@
      "needs #18914 (open)",
      "conflicts with #18921 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18892 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs"
+     "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs",
+     "conflicts with #18989 in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
     "over": [],
@@ -92491,7 +92512,8 @@
     "blocked_by": [
      "#18921",
      "#18892",
-     "#18914"
+     "#18914",
+     "#18989"
     ],
     "needs": [
      "atspi-unanswered-app"
@@ -92541,6 +92563,7 @@
      "conflicts with #18947 in crates/pi-natives/Cargo.toml",
      "conflicts with #18353 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs",
      "conflicts with #18013 in crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/libei.rs",
+     "conflicts with #18989 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with main in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
@@ -92557,31 +92580,13 @@
      "#18923",
      "#18947",
      "#18353",
-     "#18013"
+     "#18013",
+     "#18989"
     ],
     "needs": [
      "atspi-unanswered-app"
     ],
     "created": "2026-11-03T09:05:24Z"
-   },
-   {
-    "id": "ax-masked-readback",
-    "label": "ax-masked-readback",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives): never quote the written text when a setValue read-back disagrees",
-    "action": "open",
-    "reasons": [],
-    "note": "accepted pair with #18915: Main, 2026-11-12: accepted; adjacent doc/cfg lines on ax.rs text_readback; whichever lands second deletes the cfg_attr(..., allow(dead_code)) on masked",
-    "over": [],
-    "paired": [
-     "#18915"
-    ],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-12T02:37:51Z"
    },
    {
     "id": "ax-row-action",
@@ -92953,7 +92958,7 @@
      "conflicts with #18921 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18892 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/linux/ax/menus.rs",
-     "conflicts with ax-masked-readback in crates/pi-natives/src/desktop/linux/ax.rs"
+     "conflicts with #18989 in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
     "over": [],
@@ -92962,7 +92967,7 @@
      "#18921",
      "#18892",
      "#18914",
-     "ax-masked-readback"
+     "#18989"
     ],
     "needs": [
      "atspi-unanswered-app"
@@ -92983,7 +92988,7 @@
      "conflicts with #18921 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18892 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with ax-masked-readback in crates/pi-natives/src/desktop/linux/ax.rs"
+     "conflicts with #18989 in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
     "over": [],
@@ -92992,7 +92997,7 @@
      "#18921",
      "#18892",
      "#18914",
-     "ax-masked-readback"
+     "#18989"
     ],
     "needs": [
      "atspi-unanswered-app"
@@ -93010,13 +93015,13 @@
     "action": "wait",
     "reasons": [
      "needs #18914 (open)",
-     "conflicts with ax-masked-readback in crates/pi-natives/src/desktop/linux/ax.rs"
+     "conflicts with #18989 in crates/pi-natives/src/desktop/linux/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "ax-masked-readback"
+     "#18989"
     ],
     "needs": [
      "atspi-unanswered-app"
@@ -93275,7 +93280,7 @@
     "title": "fix(natives): report a setValue that reads back as a same-length mask as done, not failed",
     "action": "wait",
     "reasons": [
-     "needs ax-masked-readback (queued)",
+     "needs #18989 (open)",
      "conflicts with #18892 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #18915 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/win32/ax.rs"
@@ -93769,7 +93774,7 @@
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/tools/eval.ts",
      "conflicts with #18987 in docs/tools/computer.md, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with ax-masked-readback in docs/tools/computer.md",
+     "conflicts with #18989 in docs/tools/computer.md",
      "its need computer-ui-quiet conflicts with main in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/computer/worker.ts"
     ],
@@ -93792,7 +93797,7 @@
      "#18222",
      "#18786",
      "#18987",
-     "ax-masked-readback"
+     "#18989"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -93825,7 +93830,7 @@
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18987 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with ax-masked-readback in docs/tools/computer.md",
+     "conflicts with #18989 in docs/tools/computer.md",
      "conflicts with autofill-rows in crates/pi-natives/src/desktop/macos/ax.rs",
      "its need computer-ui-quiet conflicts with main in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/tools/computer/worker.ts"
@@ -93849,7 +93854,7 @@
      "#18222",
      "#18925",
      "#18987",
-     "ax-masked-readback",
+     "#18989",
      "autofill-rows"
     ],
     "needs": [
@@ -93872,7 +93877,8 @@
      "conflicts with #16553 in crates/pi-natives/src/desktop/macos/mod.rs",
      "conflicts with #18784 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
      "conflicts with #18892 in crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs",
-     "conflicts with #18925 in crates/pi-natives/src/desktop/macos/capture.rs"
+     "conflicts with #18925 in crates/pi-natives/src/desktop/macos/capture.rs",
+     "conflicts with main in packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
     "over": [],
