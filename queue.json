@@ -75287,7 +75287,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "f39a8853b81b3980997518f78d1594cc448d6e87",
+   "base": "ced5efc0c2750f43dfdb7d223c7d22cb6c5f1f44",
    "body": "bodies/x11-covered-capture.md",
    "state": "open",
    "pr": 18783,
@@ -75295,7 +75295,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-covered-capture",
    "host": "MacBook-Pro",
    "added": "2026-11-10T20:41:59Z",
-   "updated": "2026-11-12T00:02:28Z",
+   "updated": "2026-11-12T01:44:59Z",
    "note": "",
    "built": [
     {
@@ -75418,7 +75418,7 @@
    ],
    "opened": "2026-11-10T22:05:36Z",
    "readied": "2026-11-10T22:05:58Z",
-   "advanced": "2026-11-12T00:02:28Z",
+   "advanced": "2026-11-12T01:44:59Z",
    "design_checks": [
     {
      "pr": 18783,
