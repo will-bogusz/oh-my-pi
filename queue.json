@@ -90080,7 +90080,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-12T22:04:31Z",
+  "checked": "2026-11-12T23:05:54Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -90096,226 +90096,31 @@
     "files": [
      "packages/coding-agent/src/prompts/tools/read.md"
     ]
+   },
+   "#17610": {
+    "since": "2026-11-12T23:05:54Z",
+    "title": "fix(ai,coding-agent): carry other models' reasoning to Claude and retry its refusal without it",
+    "files": [
+     "packages/ai/src/providers/pi-native-server.ts"
+    ]
+   },
+   "#18353": {
+    "since": "2026-11-12T23:05:54Z",
+    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
+    "files": [
+     "MODULE.bazel.lock"
+    ]
+   },
+   "#18013": {
+    "since": "2026-11-12T23:05:54Z",
+    "title": "feat(natives): type text the wayland layout lacks through libei text",
+    "files": [
+     "MODULE.bazel.lock"
+    ]
    }
   },
   "merged_through": "2026-11-12T19:20:12Z",
-  "unreleased": {
-   "19004": {
-    "title": "fix(natives): own macOS suggestion-list elements by the window that lists them",
-    "merge_commit": "21a97d4a16d1a3963762720c3927a1c25eb9bb2b",
-    "merged_at": "2026-11-12T09:21:49Z"
-   },
-   "18989": {
-    "title": "fix(natives): never quote the written text when a setValue read-back disagrees",
-    "merge_commit": "d6bee4520e7463c7c592714eb176d58befd37953",
-    "merged_at": "2026-11-12T09:21:49Z"
-   },
-   "18983": {
-    "title": "fix(browser): mask password values in Tern kit observations",
-    "merge_commit": "8b2854e1aed7b7a8f68fd3e5f3808023a344f108",
-    "merged_at": "2026-11-12T09:21:49Z"
-   },
-   "18982": {
-    "title": "fix(natives,coding-agent): report macOS secure input and stop claiming globalEscape under it",
-    "merge_commit": "36e1e9146e59072bb76941612dd774d771c0e9e4",
-    "merged_at": "2026-11-12T09:21:49Z"
-   },
-   "18981": {
-    "title": "fix(coding-agent): keep text a cell enters out of browser and computer status lines",
-    "merge_commit": "3d889fde7f0d9f40a50588bd235055c96a6cc305",
-    "merged_at": "2026-11-12T09:21:49Z"
-   },
-   "18924": {
-    "title": "fix(browser): honor selector wait states and reject unknown options",
-    "merge_commit": "2f5bfcda776212950c26bb16eaaf4509e722631f",
-    "merged_at": "2026-11-12T09:21:49Z"
-   },
-   "18923": {
-    "title": "fix(natives): name the menu items on offer when a menu bar path misses",
-    "merge_commit": "2874f5e4683ed74c08fc218626b49326436c5f20",
-    "merged_at": "2026-11-12T09:21:49Z"
-   },
-   "18922": {
-    "title": "fix(natives): confirm Windows menu commands that open modal dialogs",
-    "merge_commit": "b28bc78e39409219e32da42c8aace3c7dfd7c96f",
-    "merged_at": "2026-11-12T09:21:49Z"
-   },
-   "18921": {
-    "title": "fix(natives): press Chromium menu items, options and tabs on Linux",
-    "merge_commit": "66ddd2320dadeff96d18f15c07e45bec5dd2aba4",
-    "merged_at": "2026-11-12T09:21:49Z"
-   },
-   "18919": {
-    "title": "fix(natives): hand the foreground back after Windows element takeover input",
-    "merge_commit": "0d06eb9a5c12a471b186cd5f60f2bfe659677445",
-    "merged_at": "2026-11-12T09:21:49Z"
-   },
-   "18897": {
-    "title": "fix(natives): press macOS key chords on the keys of the current keyboard layout",
-    "merge_commit": "8ac2d8af6a22580d48768a1ceca66b4023e47755",
-    "merged_at": "2026-11-12T09:21:49Z"
-   },
-   "18896": {
-    "title": "fix(natives): stop macOS input refusals between omp processes",
-    "merge_commit": "d9afa27da5848de89fa131dcf2a1f770d822291f",
-    "merged_at": "2026-11-12T09:21:49Z"
-   },
-   "18895": {
-    "title": "fix(natives): refuse Windows background input that holds a modifier",
-    "merge_commit": "5182a0337de792b46294c1aee437ece744988093",
-    "merged_at": "2026-11-12T09:21:49Z"
-   },
-   "18884": {
-    "title": "fix(browser): rearm main-world waits after navigation",
-    "merge_commit": "6a714aed8012080a61cd55ac2d30910e61a2ccc6",
-    "merged_at": "2026-11-12T09:21:49Z"
-   },
-   "18828": {
-    "title": "fix(natives): confirm every X11 virtual-keyboard key release, in order",
-    "merge_commit": "3c4e4ff6186822aae018256151f90e9fa64ae7f3",
-    "merged_at": "2026-11-12T09:21:49Z"
-   },
-   "18753": {
-    "title": "fix(computer): reject unknown helper option keys",
-    "merge_commit": "fab1c42803f0587cdca6c76b9b313216fb83696c",
-    "merged_at": "2026-11-12T09:21:49Z"
-   },
-   "18947": {
-    "title": "fix(natives,coding-agent): report unavailable Windows desktop sessions",
-    "merge_commit": "6c5d3800260612701ea558d453b45d5edc827f53",
-    "merged_at": "2026-11-12T09:21:50Z"
-   },
-   "18883": {
-    "title": "fix(browser): keep main-world waits from exposing query bindings",
-    "merge_commit": "4b2cf992e56c92e67d2a1b0a26970ef2d0523dd0",
-    "merged_at": "2026-11-12T09:21:50Z"
-   },
-   "18825": {
-    "title": "fix(natives): stop X11 background input from crashing your running Qt 6.5+ apps",
-    "merge_commit": "211fcf2ec129141e8edfe57346192a106780c741",
-    "merged_at": "2026-11-12T09:21:50Z"
-   },
-   "18776": {
-    "title": "feat(coding-agent): report browser screenshots and opens on one line",
-    "merge_commit": "c9a963fb362aaaa79ffd4175c22a2e20c286274d",
-    "merged_at": "2026-11-12T09:21:50Z"
-   },
-   "18775": {
-    "title": "fix(coding-agent): print a failed JavaScript cell's own frames, not omp's host stack",
-    "merge_commit": "9e55249163e7b70157a49182473ffcd572b36619",
-    "merged_at": "2026-11-12T09:21:50Z"
-   },
-   "18772": {
-    "title": "fix(browser): print every observed element, one line each, instead of cutting at 100",
-    "merge_commit": "3e30ec5806aa9dd6c597045ef8043331df889d6a",
-    "merged_at": "2026-11-12T09:21:50Z"
-   },
-   "18750": {
-    "title": "fix(browser): hover on a hidden match waits and names the reason, like click",
-    "merge_commit": "1e487d5819c15ecb7d9a47f12fdfe69e17b22f7a",
-    "merged_at": "2026-11-12T09:21:50Z"
-   },
-   "18738": {
-    "title": "fix(browser): tell agents that treat console() or errors() as an array to read .entries",
-    "merge_commit": "76e17f831b72228997a2a684a3c2b44a15cdb6c4",
-    "merged_at": "2026-11-12T09:21:50Z"
-   },
-   "18898": {
-    "title": "fix(natives): refuse a macOS press on a disabled element",
-    "merge_commit": "58662823f058a8380cab9667088c158b8f11d0b6",
-    "merged_at": "2026-11-12T09:21:51Z"
-   },
-   "18915": {
-    "title": "fix(natives): verify Windows value writes and notify combo selections",
-    "merge_commit": "ac8eb3c9e23b8b55fdc85ecfd25e15a079482c3e",
-    "merged_at": "2026-11-12T11:39:16Z"
-   },
-   "18914": {
-    "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool",
-    "merge_commit": "9211953f02d4b5f9a9447dc6bf5532e6820d25b9",
-    "merged_at": "2026-11-12T11:39:16Z"
-   },
-   "18892": {
-    "title": "fix(natives): refuse macOS element actions once the ref's element reads as another control",
-    "merge_commit": "e2e98408daf189d8536b5c38245abdb0c2f1b39f",
-    "merged_at": "2026-11-12T11:39:16Z"
-   },
-   "18784": {
-    "title": "fix(natives): keep X11 takeover from taking a typing user's keys",
-    "merge_commit": "4e4ae1becfc02c90ba8991e45d79ffc6cb918adc",
-    "merged_at": "2026-11-12T11:39:16Z"
-   },
-   "18783": {
-    "title": "fix(natives): capture a covered X11 window from its own pixels, or say it is covered",
-    "merge_commit": "fe6d2de3479aecf09dcaf591d41838367dc2b1f4",
-    "merged_at": "2026-11-12T11:39:16Z"
-   },
-   "18771": {
-    "title": "feat(ai,catalog): identify Factory Droid requests as droid 1.7.1",
-    "merge_commit": "2cea068b616002848bdc54498063f481b51ed69e",
-    "merged_at": "2026-11-12T11:39:16Z"
-   },
-   "18751": {
-    "title": "fix(browser): run tab.run page evaluations in the page's main world",
-    "merge_commit": "3c97ff9aebebf69742d6274c49a27b53b9bb07df",
-    "merged_at": "2026-11-12T11:39:16Z"
-   },
-   "18743": {
-    "title": "fix(natives): return the window showing a page from macOS apps.open in a browser",
-    "merge_commit": "48b61f3516b274d1654a347fa1a107dac31fcb1b",
-    "merged_at": "2026-11-12T11:39:16Z"
-   },
-   "18737": {
-    "title": "fix(browser): give browser calls without a timeout the Eval cell's timeout",
-    "merge_commit": "c82d63d286c91fb69ef208eacb459635e7b97715",
-    "merged_at": "2026-11-12T11:39:16Z"
-   },
-   "19054": {
-    "title": "fix(natives): skip unused ref-check reads and recover display refs",
-    "merge_commit": "92a49399858cb2db0284cce419ebbbff2fe67ad1",
-    "merged_at": "2026-11-12T19:20:12Z"
-   },
-   "19050": {
-    "title": "fix(natives): preserve the empty-field warning on Linux write timeouts",
-    "merge_commit": "d414acfd95508fc622ac6894746ee75239bacaf6",
-    "merged_at": "2026-11-12T19:20:12Z"
-   },
-   "19047": {
-    "title": "fix(natives): read back AT-SPI numeric setValue before reporting success",
-    "merge_commit": "4a948e50ef1bf58118baed2078a813360eff9b40",
-    "merged_at": "2026-11-12T19:20:12Z"
-   },
-   "19046": {
-    "title": "fix(natives): let Linux menu.select walk into Qt apps' menus",
-    "merge_commit": "1228eeeb110d0e1659b8d905e8e192886d7cdf90",
-    "merged_at": "2026-11-12T19:20:12Z"
-   },
-   "19044": {
-    "title": "fix(natives): refuse X11 presses outside an open popup of the app",
-    "merge_commit": "5666bef88365c64eeb73267d393843566098b264",
-    "merged_at": "2026-11-12T19:20:12Z"
-   },
-   "19037": {
-    "title": "fix(natives,coding-agent): stop Windows takeover typing from losing text the app had not read yet",
-    "merge_commit": "a2d9745a913d523f0007813f533d06a72e99d74c",
-    "merged_at": "2026-11-12T19:20:12Z"
-   },
-   "19027": {
-    "title": "fix(natives): name the background route when takeover refuses a macOS suggestion list",
-    "merge_commit": "14bb8a76fcba145f9386c543da8520f8b924371c",
-    "merged_at": "2026-11-12T19:20:12Z"
-   },
-   "19026": {
-    "title": "fix(natives): report a setValue that reads back as a same-length mask as done, not failed",
-    "merge_commit": "e8863de13a4c0888aa0cfdbdc52c480c842e9d13",
-    "merged_at": "2026-11-12T19:20:12Z"
-   },
-   "19023": {
-    "title": "fix(natives): keep X11 background input out of your window after a screen lock or VT switch",
-    "merge_commit": "e9daf76efb52ed7c9129cebdaa8d28556eb99ea0",
-    "merged_at": "2026-11-12T19:20:12Z"
-   }
-  },
+  "unreleased": {},
   "ready": [
    16553,
    16611,
@@ -90342,7 +90147,6 @@
    19062,
    19063,
    19066,
-   19078,
    19080
   ],
   "post_merge": {
@@ -93754,6 +93558,334 @@
     "id": "x11-takeover-keyboard-state",
     "title": "fix(natives): type X11 XTest text through a neutral keyboard state",
     "why": "opened as #19080"
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "released",
+    "number": 19004,
+    "title": "fix(natives): own macOS suggestion-list elements by the window that lists them",
+    "tag": "v18.20.0"
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "released",
+    "number": 18989,
+    "title": "fix(natives): never quote the written text when a setValue read-back disagrees",
+    "tag": "v18.20.0"
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "released",
+    "number": 18983,
+    "title": "fix(browser): mask password values in Tern kit observations",
+    "tag": "v18.20.0"
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "released",
+    "number": 18982,
+    "title": "fix(natives,coding-agent): report macOS secure input and stop claiming globalEscape under it",
+    "tag": "v18.20.0"
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "released",
+    "number": 18981,
+    "title": "fix(coding-agent): keep text a cell enters out of browser and computer status lines",
+    "tag": "v18.20.0"
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "released",
+    "number": 18924,
+    "title": "fix(browser): honor selector wait states and reject unknown options",
+    "tag": "v18.20.0"
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "released",
+    "number": 18923,
+    "title": "fix(natives): name the menu items on offer when a menu bar path misses",
+    "tag": "v18.20.0"
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "released",
+    "number": 18922,
+    "title": "fix(natives): confirm Windows menu commands that open modal dialogs",
+    "tag": "v18.20.0"
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "released",
+    "number": 18921,
+    "title": "fix(natives): press Chromium menu items, options and tabs on Linux",
+    "tag": "v18.20.0"
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "released",
+    "number": 18919,
+    "title": "fix(natives): hand the foreground back after Windows element takeover input",
+    "tag": "v18.20.0"
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "released",
+    "number": 18897,
+    "title": "fix(natives): press macOS key chords on the keys of the current keyboard layout",
+    "tag": "v18.20.0"
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "released",
+    "number": 18896,
+    "title": "fix(natives): stop macOS input refusals between omp processes",
+    "tag": "v18.20.0"
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "released",
+    "number": 18895,
+    "title": "fix(natives): refuse Windows background input that holds a modifier",
+    "tag": "v18.20.0"
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "released",
+    "number": 18884,
+    "title": "fix(browser): rearm main-world waits after navigation",
+    "tag": "v18.20.0"
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "released",
+    "number": 18828,
+    "title": "fix(natives): confirm every X11 virtual-keyboard key release, in order",
+    "tag": "v18.20.0"
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "released",
+    "number": 18753,
+    "title": "fix(computer): reject unknown helper option keys",
+    "tag": "v18.20.0"
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "released",
+    "number": 18947,
+    "title": "fix(natives,coding-agent): report unavailable Windows desktop sessions",
+    "tag": "v18.20.0"
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "released",
+    "number": 18883,
+    "title": "fix(browser): keep main-world waits from exposing query bindings",
+    "tag": "v18.20.0"
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "released",
+    "number": 18825,
+    "title": "fix(natives): stop X11 background input from crashing your running Qt 6.5+ apps",
+    "tag": "v18.20.0"
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "released",
+    "number": 18776,
+    "title": "feat(coding-agent): report browser screenshots and opens on one line",
+    "tag": "v18.20.0"
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "released",
+    "number": 18775,
+    "title": "fix(coding-agent): print a failed JavaScript cell's own frames, not omp's host stack",
+    "tag": "v18.20.0"
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "released",
+    "number": 18772,
+    "title": "fix(browser): print every observed element, one line each, instead of cutting at 100",
+    "tag": "v18.20.0"
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "released",
+    "number": 18750,
+    "title": "fix(browser): hover on a hidden match waits and names the reason, like click",
+    "tag": "v18.20.0"
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "released",
+    "number": 18738,
+    "title": "fix(browser): tell agents that treat console() or errors() as an array to read .entries",
+    "tag": "v18.20.0"
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "released",
+    "number": 18898,
+    "title": "fix(natives): refuse a macOS press on a disabled element",
+    "tag": "v18.20.0"
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "released",
+    "number": 18915,
+    "title": "fix(natives): verify Windows value writes and notify combo selections",
+    "tag": "v18.20.0"
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "released",
+    "number": 18914,
+    "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool",
+    "tag": "v18.20.0"
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "released",
+    "number": 18892,
+    "title": "fix(natives): refuse macOS element actions once the ref's element reads as another control",
+    "tag": "v18.20.0"
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "released",
+    "number": 18784,
+    "title": "fix(natives): keep X11 takeover from taking a typing user's keys",
+    "tag": "v18.20.0"
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "released",
+    "number": 18783,
+    "title": "fix(natives): capture a covered X11 window from its own pixels, or say it is covered",
+    "tag": "v18.20.0"
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "released",
+    "number": 18771,
+    "title": "feat(ai,catalog): identify Factory Droid requests as droid 1.7.1",
+    "tag": "v18.20.0"
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "released",
+    "number": 18751,
+    "title": "fix(browser): run tab.run page evaluations in the page's main world",
+    "tag": "v18.20.0"
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "released",
+    "number": 18743,
+    "title": "fix(natives): return the window showing a page from macOS apps.open in a browser",
+    "tag": "v18.20.0"
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "released",
+    "number": 18737,
+    "title": "fix(browser): give browser calls without a timeout the Eval cell's timeout",
+    "tag": "v18.20.0"
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "released",
+    "number": 19054,
+    "title": "fix(natives): skip unused ref-check reads and recover display refs",
+    "tag": "v18.20.0"
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "released",
+    "number": 19050,
+    "title": "fix(natives): preserve the empty-field warning on Linux write timeouts",
+    "tag": "v18.20.0"
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "released",
+    "number": 19047,
+    "title": "fix(natives): read back AT-SPI numeric setValue before reporting success",
+    "tag": "v18.20.0"
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "released",
+    "number": 19046,
+    "title": "fix(natives): let Linux menu.select walk into Qt apps' menus",
+    "tag": "v18.20.0"
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "released",
+    "number": 19044,
+    "title": "fix(natives): refuse X11 presses outside an open popup of the app",
+    "tag": "v18.20.0"
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "released",
+    "number": 19037,
+    "title": "fix(natives,coding-agent): stop Windows takeover typing from losing text the app had not read yet",
+    "tag": "v18.20.0"
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "released",
+    "number": 19027,
+    "title": "fix(natives): name the background route when takeover refuses a macOS suggestion list",
+    "tag": "v18.20.0"
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "released",
+    "number": 19026,
+    "title": "fix(natives): report a setValue that reads back as a same-length mask as done, not failed",
+    "tag": "v18.20.0"
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "released",
+    "number": 19023,
+    "title": "fix(natives): keep X11 background input out of your window after a screen lock or VT switch",
+    "tag": "v18.20.0"
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "conflict",
+    "label": "#17610",
+    "title": "fix(ai,coding-agent): carry other models' reasoning to Claude and retry its refusal without it",
+    "files": [
+     "packages/ai/src/providers/pi-native-server.ts"
+    ]
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "conflict",
+    "label": "#18353",
+    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
+    "files": [
+     "MODULE.bazel.lock"
+    ]
+   },
+   {
+    "at": "2026-11-12T23:05:54Z",
+    "kind": "conflict",
+    "label": "#18013",
+    "title": "feat(natives): type text the wayland layout lacks through libei text",
+    "files": [
+     "MODULE.bazel.lock"
+    ]
    }
   ]
  },
@@ -99414,31 +99546,14 @@
   }
  },
  "plan": {
-  "at": "2026-11-12T23:02:29.038096Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-12T23:05:55.263296Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 0,
    "left": 8
   },
   "rows": [
-   {
-    "id": "win-masks-cfg",
-    "label": "#19078",
-    "number": 19078,
-    "state": "open",
-    "area": "computer",
-    "priority": "P0",
-    "title": "fix(natives): compile pi-natives for Windows again",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-12T20:22:32Z"
-   },
    {
     "id": "click-place-release",
     "label": "#16553",
