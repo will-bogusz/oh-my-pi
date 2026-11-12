@@ -89661,13 +89661,13 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-12T18:31:43Z",
+  "checked": "2026-11-12T19:02:34Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "x11-takeover-keyboard-grab": {
-    "since": "2026-11-12T17:31:18Z",
-    "title": "fix(natives): refuse X11 XTest keys while another client grabs the keyboard"
+   "x11-takeover-keyboard-state": {
+    "since": "2026-11-12T19:02:34Z",
+    "title": "fix(natives): type X11 XTest text through a neutral keyboard state"
    },
    "factory-droid-171-models": {
     "since": "2026-11-12T12:26:00Z",
@@ -89889,7 +89889,8 @@
    19054,
    19061,
    19062,
-   19063
+   19063,
+   19066
   ],
   "post_merge": {
    "16274": {
@@ -93185,6 +93186,19 @@
     "id": "win-focus-report",
     "title": "fix(natives): report where focus went after a Windows takeover",
     "why": "opened as #19062"
+   },
+   {
+    "at": "2026-11-12T19:02:34Z",
+    "kind": "openable",
+    "id": "x11-takeover-keyboard-state",
+    "title": "fix(natives): type X11 XTest text through a neutral keyboard state"
+   },
+   {
+    "at": "2026-11-12T19:02:34Z",
+    "kind": "unopenable",
+    "id": "x11-takeover-keyboard-grab",
+    "title": "fix(natives): refuse X11 XTest keys while another client grabs the keyboard",
+    "why": "opened as #19066"
    }
   ]
  },
@@ -98766,12 +98780,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-12T18:31:44.651375Z",
+  "at": "2026-11-12T19:02:35.105127Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 3,
-   "left": 5
+   "used": 1,
+   "left": 7
   },
   "rows": [
    {
@@ -98801,9 +98815,11 @@
     "title": "fix(natives): refuse X11 presses outside an open popup of the app",
     "action": "keep",
     "reasons": [],
-    "note": "",
+    "note": "accepted pair with #19066: QueueFifteen, 2026-11-12 (Main's standing rule: test cases appended to the same block): only conflict is crates/pi-natives/src/desktop/linux/x11/input.rs tests, where each side appends its own test at the same spot (base empty); combined form is both tests.",
     "over": [],
-    "paired": [],
+    "paired": [
+     "#19066"
+    ],
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-12T16:35:49Z"
@@ -99112,6 +99128,25 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-12T18:01:18Z"
+   },
+   {
+    "id": "x11-takeover-keyboard-grab",
+    "label": "#19066",
+    "number": 19066,
+    "state": "open",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): refuse X11 XTest keys while another client grabs the keyboard",
+    "action": "keep",
+    "reasons": [],
+    "note": "accepted pair with #19044: QueueFifteen, 2026-11-12 (Main's standing rule: test cases appended to the same block): only conflict is crates/pi-natives/src/desktop/linux/x11/input.rs tests, where each side appends its own test at the same spot (base empty); combined form is both tests.",
+    "over": [],
+    "paired": [
+     "#19044"
+    ],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-12T18:57:27Z"
    },
    {
     "id": "claude-refusal-strip-retry",
@@ -99524,25 +99559,6 @@
     "created": "2026-11-09T18:20:14Z"
    },
    {
-    "id": "x11-takeover-keyboard-grab",
-    "label": "x11-takeover-keyboard-grab",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives): refuse X11 XTest keys while another client grabs the keyboard",
-    "action": "open",
-    "reasons": [],
-    "note": "accepted pair with #19044: QueueFifteen, 2026-11-12 (Main's standing rule: test cases appended to the same block): only conflict is crates/pi-natives/src/desktop/linux/x11/input.rs tests, where each side appends its own test at the same spot (base empty); combined form is both tests.",
-    "over": [],
-    "paired": [
-     "#19044"
-    ],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-11T02:55:11Z"
-   },
-   {
     "id": "x11-takeover-keyboard-state",
     "label": "x11-takeover-keyboard-state",
     "number": null,
@@ -99550,18 +99566,15 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): type X11 XTest text through a neutral keyboard state",
-    "action": "wait",
-    "reasons": [
-     "conflicts with x11-takeover-keyboard-grab in crates/pi-natives/src/desktop/linux/x11/input.rs"
-    ],
-    "note": "accepted pair with #19044: QueueFifteen, 2026-11-12 (Main's standing rule: test cases appended to the same block): only conflict is crates/pi-natives/src/desktop/linux/x11/input.rs tests, where each side appends its own test at the same spot (base empty); combined form is both tests.",
+    "action": "open",
+    "reasons": [],
+    "note": "accepted pair with #19066: Main, 2026-11-12: only code conflict is the two with_foreground closures in crates/pi-natives/src/desktop/linux/x11/input.rs, where #19066 adds this.check_keyboard_grab(window)? before xtest_steps and this entry passes matches!(keys, Keys::Text(_)) to xtest_steps; the combined form keeps both lines (trial merge 2a04e89911c), which built and passed both X11 suites (63 tests, excluding two MPX/uinput hotplug tests that fail identically on main under Xvfb).; accepted pair with #19044: QueueFifteen, 2026-11-12 (Main's standing rule: test cases appended to the same block): only conflict is crates/pi-natives/src/desktop/linux/x11/input.rs tests, where each side appends its own test at the same spot (base empty); combined form is both tests.",
     "over": [],
     "paired": [
+     "#19066",
      "#19044"
     ],
-    "blocked_by": [
-     "x11-takeover-keyboard-grab"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T02:32:01Z"
    },
@@ -99576,8 +99589,9 @@
     "action": "wait",
     "reasons": [
      "conflicts with #19044 in crates/pi-natives/src/desktop/linux/x11/input.rs",
+     "conflicts with #19066 in crates/pi-natives/src/desktop/linux/x11/input.rs",
      "conflicts with #18222 in docs/computer-use.md, docs/tools/computer.md",
-     "conflicts with x11-takeover-keyboard-grab in crates/pi-natives/src/desktop/linux/x11/input.rs",
+     "conflicts with x11-takeover-keyboard-state in crates/pi-natives/src/desktop/linux/x11/input.rs",
      "conflicts with main in crates/pi-natives/src/desktop/linux/x11/input.rs"
     ],
     "note": "",
@@ -99585,8 +99599,9 @@
     "paired": [],
     "blocked_by": [
      "#19044",
+     "#19066",
      "#18222",
-     "x11-takeover-keyboard-grab"
+     "x11-takeover-keyboard-state"
     ],
     "needs": [],
     "created": "2026-11-11T02:31:05Z"
@@ -100058,7 +100073,8 @@
     "reasons": [
      "conflicts with #19044 in crates/pi-natives/src/desktop/linux/x11/input.rs",
      "conflicts with #19023 in crates/pi-natives/src/desktop/linux/x11/mpx.rs",
-     "conflicts with x11-takeover-keyboard-grab in crates/pi-natives/src/desktop/linux/x11/input.rs",
+     "conflicts with #19066 in crates/pi-natives/src/desktop/linux/x11/input.rs",
+     "conflicts with x11-takeover-keyboard-state in crates/pi-natives/src/desktop/linux/x11/input.rs",
      "conflicts with main in crates/pi-natives/src/desktop/linux/x11/input.rs, crates/pi-natives/src/desktop/linux/x11/mpx.rs"
     ],
     "note": "",
@@ -100067,7 +100083,8 @@
     "blocked_by": [
      "#19044",
      "#19023",
-     "x11-takeover-keyboard-grab"
+     "#19066",
+     "x11-takeover-keyboard-state"
     ],
     "needs": [],
     "created": "2026-11-11T13:55:21Z"
