@@ -95176,6 +95176,13 @@
     "at": "2026-11-12T13:21:33Z",
     "host": "goliath"
    }
+  },
+  "7e3affebeb98ca265cd3e6db3ad1453cefa5a5aa": {
+   "linux": {
+    "sha": "8745c5bd9c21f2c06c956d85e5057d8a8ebef29b",
+    "at": "2026-11-12T13:25:43Z",
+    "host": "goliath"
+   }
   }
  },
  "plan": {
