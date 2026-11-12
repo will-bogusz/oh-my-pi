@@ -73318,7 +73318,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-observe-settle",
    "host": "MacBook-Pro",
    "added": "2026-11-10T18:56:46Z",
-   "updated": "2026-11-12T16:24:29Z",
+   "updated": "2026-11-12T16:32:55Z",
    "note": "",
    "advanced": "2026-11-12T12:21:14Z",
    "kind": "proposal",
@@ -73672,6 +73672,15 @@
      "tip": "6534dc961a38c9c1c090f5f2c2e653f08c9d5fc9",
      "with_tip": "450e66bd8af16ce6e03c3151135b8ff67982c8d3",
      "at": "2026-11-12T16:24:27Z",
+     "host": "goliath"
+    },
+    {
+     "with": "win-focus-report",
+     "code": "36b2065463c91106f29adfd1df76b4a051127cb1",
+     "with_code": "eeea17112c4476e129e1cb45a4fc5b9f7c5eac3b",
+     "tip": "6534dc961a38c9c1c090f5f2c2e653f08c9d5fc9",
+     "with_tip": "93a1726e2ddd6c6a508bb68d341bf5fa1010d09f",
+     "at": "2026-11-12T16:32:48Z",
      "host": "goliath"
     }
    ],
