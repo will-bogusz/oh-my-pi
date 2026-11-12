@@ -82620,6 +82620,26 @@
    "added": "2026-11-12T01:59:31Z",
    "updated": "2026-11-12T01:59:31Z",
    "note": ""
+  },
+  {
+   "id": "relay-hidden-frames",
+   "branch": "will/relay-hidden-frames",
+   "title": "fix(browser-relay): name the frame the relay hid in a driven tab",
+   "area": "browser",
+   "priority": "P1",
+   "needs": [
+    "relay-frame-race"
+   ],
+   "base": "5893c007c075dfed3fb970b035d0caf3580a1c94",
+   "body": "bodies/relay-hidden-frames.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-hidden-frames",
+   "host": "MacBook-Pro",
+   "added": "2026-11-12T02:04:21Z",
+   "updated": "2026-11-12T02:04:21Z",
+   "note": ""
   }
  ],
  "watch": {
