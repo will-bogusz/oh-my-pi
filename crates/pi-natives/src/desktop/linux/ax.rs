@@ -706,7 +706,7 @@ impl AtSpiAx {
 				bounds,
 				children,
 			),
-		)))?
+		)))??
 	}
 
 	/// [`Self::read_node`] on `bus`: first the fields and interfaces, then
@@ -1283,22 +1283,6 @@ fn action_index<'a>(
 				.or_else(|| position(&|name| folds_to(name, SELECT)))
 		})?
 	})
-}
-
-/// The text of an element with the `Text` interface, up to 16,384 characters,
-/// read without zbus's property cache, whose `GetAll` Qt refuses.
-async fn text_value(connection: &zbus::Connection, object: &ObjectRefOwned) -> Option<String> {
-	let text = atspi::proxy::text::TextProxy::builder(connection)
-		.destination(object.name()?.clone())
-		.ok()?
-		.path(object.path().clone())
-		.ok()?
-		.cache_properties(zbus::proxy::CacheProperties::No)
-		.build()
-		.await
-		.ok()?;
-	let count = text.character_count().await.ok()?.min(16_384);
-	text.get_text(0, count).await.ok().filter(|s| !s.is_empty())
 }
 
 /// The most actions read of one element: the count comes from the app.
