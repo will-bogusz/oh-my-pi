@@ -90183,7 +90183,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-12T02:19:02.544711Z",
+  "at": "2026-11-12T02:37:30.636891Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -91233,10 +91233,9 @@
     "state": "queued",
     "area": "browser",
     "priority": "P1",
-    "title": "fix(browser-relay): name the frame the relay hid in a driven tab",
-    "action": "held",
+    "title": "fix(browser-relay): say what the relay hid in a driven tab",
+    "action": "wait",
     "reasons": [
-     "held: Main, 2026-11-12: adds Chrome's management permission; waiting on whether a no-permission form exists",
      "needs relay-frame-race (queued)",
      "conflicts with #18925 in packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
@@ -92103,10 +92102,8 @@
     "area": "tui",
     "priority": "P2",
     "title": "feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy",
-    "action": "held",
-    "reasons": [
-     "held: Main, 2026-11-12: prepared; held until Main releases (key-chord Cancelled vs InputBusy VM check)"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -92232,6 +92229,7 @@
      "conflicts with #18786 in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/prompts/tools/eval.md, packages/coding-agent/src/tools/eval.ts",
      "conflicts with computer-secure-input in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with status-entered-text in packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with agent-identity in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with main in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/sdk-computer-prelude-toggle.test.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
@@ -92243,7 +92241,8 @@
      "#18222",
      "#18786",
      "computer-secure-input",
-     "status-entered-text"
+     "status-entered-text",
+     "agent-identity"
     ],
     "needs": [
      "browser-core-first-use"
@@ -92275,6 +92274,7 @@
      "conflicts with #18786 in packages/coding-agent/src/tools/eval.ts",
      "conflicts with computer-secure-input in docs/tools/computer.md, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with status-entered-text in packages/coding-agent/src/tools/computer.ts, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with agent-identity in docs/tools/computer.md, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "its need computer-ui-quiet conflicts with main in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/computer/worker.ts"
     ],
@@ -92295,7 +92295,8 @@
      "#18222",
      "#18786",
      "computer-secure-input",
-     "status-entered-text"
+     "status-entered-text",
+     "agent-identity"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -92327,6 +92328,7 @@
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with computer-secure-input in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with status-entered-text in packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with agent-identity in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "its need computer-ui-quiet conflicts with main in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/tools/computer/worker.ts"
     ],
@@ -92347,7 +92349,8 @@
      "#18222",
      "#18925",
      "computer-secure-input",
-     "status-entered-text"
+     "status-entered-text",
+     "agent-identity"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -92364,7 +92367,7 @@
     "title": "feat(coding-agent,natives): show each agent's cursor where its computer input lands on macOS",
     "action": "held",
     "reasons": [
-     "held: Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check",
+     "held: Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check | Main 2026-11-12: before it opens, the waiting-key-chord case with the cursor actually drawn (20 trials at a 20 s deadline; CursorDemo's cursor-on arm never drew one, and an early run on the combined tree returned 'Cancelled, input may be partial' 11/11, unexplained), on the polished branch will/desktop-cursor-polish.",
      "needs agent-identity (queued)",
      "conflicts with #16553 in crates/pi-natives/src/desktop/macos/mod.rs",
      "conflicts with #18784 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
