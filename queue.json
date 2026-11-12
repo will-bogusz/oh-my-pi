@@ -82691,8 +82691,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-frame-race",
    "host": "MacBook-Pro",
    "added": "2026-11-12T01:59:31Z",
-   "updated": "2026-11-12T01:59:31Z",
-   "note": ""
+   "updated": "2026-11-12T02:47:03Z",
+   "note": "",
+   "hold": "Main, 2026-11-12: regression against a signed-in real 1Password (VaultSignedIn, VM, Chrome 154, 1Password 8.12.44.33): autofocus cell tab kept 4/10 on the fix, 10/10 on main; after the first sweep 1Password puts back a frame the sweep finds but cannot empty and Chrome refuses every attach"
   },
   {
    "id": "relay-hidden-frames",
