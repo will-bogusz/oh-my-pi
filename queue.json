@@ -90065,18 +90065,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-12T20:03:07Z",
+  "checked": "2026-11-12T20:34:02Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "win-masks-cfg": {
-    "since": "2026-11-12T20:03:07Z",
-    "title": "fix(natives): compile pi-natives for Windows again"
-   },
-   "x11-takeover-keyboard-state": {
-    "since": "2026-11-12T19:02:34Z",
-    "title": "fix(natives): type X11 XTest text through a neutral keyboard state"
-   },
    "factory-droid-171-models": {
     "since": "2026-11-12T12:26:00Z",
     "title": "feat(catalog): add the Factory Droid models droid 1.7.1 serves"
@@ -90088,22 +90080,6 @@
     "title": "feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio",
     "files": [
      "packages/coding-agent/src/prompts/tools/read.md"
-    ]
-   },
-   "#19025": {
-    "since": "2026-11-12T19:32:37Z",
-    "title": "fix(natives): map Windows keys on the receiving keyboard layout",
-    "files": [
-     "crates/pi-natives/src/desktop/win32/input.rs",
-     "crates/pi-natives/src/desktop/win32/mod.rs"
-    ]
-   },
-   "#19062": {
-    "since": "2026-11-12T19:32:37Z",
-    "title": "fix(natives): report where focus went after a Windows takeover",
-    "files": [
-     "crates/pi-natives/src/desktop/win32/mod.rs",
-     "docs/computer-use.md"
     ]
    }
   },
@@ -90350,7 +90326,9 @@
    19061,
    19062,
    19063,
-   19066
+   19066,
+   19078,
+   19080
   ],
   "post_merge": {
    "16274": {
@@ -93840,6 +93818,20 @@
     "kind": "openable",
     "id": "win-masks-cfg",
     "title": "fix(natives): compile pi-natives for Windows again"
+   },
+   {
+    "at": "2026-11-12T20:34:02Z",
+    "kind": "unopenable",
+    "id": "win-masks-cfg",
+    "title": "fix(natives): compile pi-natives for Windows again",
+    "why": "opened as #19078"
+   },
+   {
+    "at": "2026-11-12T20:34:02Z",
+    "kind": "unopenable",
+    "id": "x11-takeover-keyboard-state",
+    "title": "fix(natives): type X11 XTest text through a neutral keyboard state",
+    "why": "opened as #19080"
    }
   ]
  },
