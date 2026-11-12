@@ -75784,7 +75784,7 @@
    "area": "tui",
    "priority": "P2",
    "needs": [],
-   "base": "c53ede7245d5582fc526c0fc37568bac872dc004",
+   "base": "f39a8853b81b3980997518f78d1594cc448d6e87",
    "body": "bodies/agent-identity.md",
    "state": "queued",
    "pr": null,
@@ -75792,8 +75792,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/agent-identity",
    "host": "MacBook-Pro",
    "added": "2026-11-10T23:39:10Z",
-   "updated": "2026-11-10T23:39:10Z",
-   "note": ""
+   "updated": "2026-11-12T00:15:14Z",
+   "note": "",
+   "advanced": "2026-11-12T00:15:14Z"
   },
   {
    "id": "browser-cursor",
