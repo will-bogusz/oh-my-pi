@@ -77705,7 +77705,34 @@
    "host": "MacBook-Pro",
    "added": "2026-11-11T01:54:02Z",
    "updated": "2026-11-12T13:09:57Z",
-   "note": "Overlaps (same functions, textual conflicts): atspi-unanswered-app (P0; read_props/walk_node/find_focused/children get request()/timeouts), atspi-walk-reads (reads GetChildren in round 1 beside the element's fields and drops ChildCount: on rebase, read ChildCount in round 1 and GetChildren/by-index after it), computer-rich-text (linux/ax.rs, ax.rs, backend.rs). Rust records linux/macos/windows at 8a6acdf497."
+   "note": "Overlaps (same functions, textual conflicts): atspi-unanswered-app (P0; read_props/walk_node/find_focused/children get request()/timeouts), atspi-walk-reads (reads GetChildren in round 1 beside the element's fields and drops ChildCount: on rebase, read ChildCount in round 1 and GetChildren/by-index after it), computer-rich-text (linux/ax.rs, ax.rs, backend.rs). Rust records linux/macos/windows at 8a6acdf497.",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-12T13:10:03Z",
+     "reason": "Main-approved combined form: bounded children_of with request timeout/cancel, preserve read_as and label_complete; unknown counts and failed indices remain unread",
+     "old": "8a6acdf497b82e8ef3b96a92a8b705b4b33501a7",
+     "new": "00c28ffb54eb852aff7ece814d7421c0c8fd9a20",
+     "dropped": {
+      "crates/pi-natives/src/desktop/linux/ax.rs": [
+       "/// left unread: one `GetChildren` for at most [`MAX_CHILDREN`] or an unknown",
+       "/// count, else the first `limit` asked for one at a time, as libatspi clients",
+       "/// ask, so a long list costs the app only the children read. A child that",
+       "/// fails to read is dropped; if none answers, the first error is returned.",
+       "\tlet Some(count) = count.filter(|&count| count > MAX_CHILDREN) else {",
+       "\tOk((children, count - read))",
+       "\t\tlet (state, count) = futures::join!(proxy.get_state(), proxy.child_count());",
+       "\t\tlet (children, _) = children_of(&proxy, count, MAX_CHILDREN)",
+       "\t\t\t\tunread_children: 0,",
+       "\t\t\t\tif self.refuses {",
+       "\t\t\t\tlet table =",
+       "\t\t\t\t\tTable { whole_reads: whole_reads.clone(), focused_at: 2, refuses: false };",
+       "\t\t\t\tlet refusing =",
+       "\t\t\t\t\tTable { whole_reads: whole_reads.clone(), focused_at: -1, refuses: true };",
+       "\t\t\t\tAtSpiAx::find_focused(client, table, 0).await"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "qt5-getall-crash",
