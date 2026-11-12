@@ -76897,8 +76897,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/desktop-cursor",
    "host": "MacBook-Pro",
    "added": "2026-11-11T00:21:12Z",
-   "updated": "2026-11-12T02:35:02Z",
-   "note": "",
+   "updated": "2026-11-12T05:37:12Z",
+   "note": "Main 2026-11-12: Will chose theme-resolved agent colours for #18987 (lane AgentColors, one push); after it lands, restack this entry onto #18987's new colour API (small) before it can open.",
    "hold": "Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check | Main 2026-11-12: before it opens, the waiting-key-chord case with the cursor actually drawn (20 trials at a 20 s deadline; CursorDemo's cursor-on arm never drew one, and an early run on the combined tree returned 'Cancelled, input may be partial' 11/11, unexplained), on the polished branch will/desktop-cursor-polish."
   },
   {
