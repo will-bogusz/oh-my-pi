@@ -12,7 +12,7 @@ The change deletes the `#[cfg(any(target_os = "macos", target_os = "linux", test
 
 - `cargo xwin check -p pi-natives --lib --target x86_64-pc-windows-msvc` (a non-test build): fails on `main` 7c2ab113ec9 with E0425, cannot find function `masks` in `text_readback` (`desktop/ax.rs`), and passes on this branch.
 - `scripts/rust-check` (clippy `--all-targets`, rustfmt) passes on Windows through cargo-xwin, Linux and macOS.
-- `cargo test -p pi-natives --lib desktop::ax`: TEST_LINE
+- `cargo test -p pi-natives --lib desktop::ax`: passes on Linux (46) and macOS (47).
 
 ---
 
