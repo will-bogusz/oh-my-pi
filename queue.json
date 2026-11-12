@@ -79126,13 +79126,13 @@
    ],
    "base": "7059d343d0de1df69784d0b4c6f33407d39d7918",
    "body": "bodies/atspi-value-readback.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19047,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-value-readback",
    "host": "MacBook-Pro",
    "added": "2026-11-11T02:53:57Z",
-   "updated": "2026-11-12T17:09:34Z",
+   "updated": "2026-11-12T19:20:45Z",
    "note": "",
    "advanced": "2026-11-12T17:04:29Z",
    "line_loss_overrides": [
@@ -79379,7 +79379,8 @@
     }
    ],
    "opened": "2026-11-12T16:47:12Z",
-   "readied": "2026-11-12T16:47:37Z"
+   "readied": "2026-11-12T16:47:37Z",
+   "merged_by": "pr"
   },
   {
    "id": "x11-takeover-keyboard-grab",
@@ -79666,13 +79667,13 @@
    "needs": [],
    "base": "9f728bd56e170453c927d5b162cebe9b308e63ce",
    "body": "bodies/x11-click-stale-popup.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19044,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-click-stale-popup",
    "host": "MacBook-Pro",
    "added": "2026-11-11T03:06:32Z",
-   "updated": "2026-11-12T17:09:34Z",
+   "updated": "2026-11-12T19:20:45Z",
    "note": "Main-approved additive test resolution. Linux rust-check and 61 X11 tests pass on rebased head. The two MPX/uinput hotplug tests fail under Xvfb (no udev/libinput hotplug); each fails identically on origin/main 9f728bd56e1 in one baseline run.",
    "line_loss_overrides": [
     {
@@ -79997,7 +79998,8 @@
     }
    ],
    "opened": "2026-11-12T16:35:50Z",
-   "readied": "2026-11-12T16:36:14Z"
+   "readied": "2026-11-12T16:36:14Z",
+   "merged_by": "pr"
   },
   {
    "id": "print-pref",
@@ -85436,13 +85438,13 @@
    ],
    "base": "9f728bd56e170453c927d5b162cebe9b308e63ce",
    "body": "bodies/atspi-qt-menus.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19046,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-qt-menus",
    "host": "MacBook-Pro",
    "added": "2026-11-11T13:21:21Z",
-   "updated": "2026-11-12T17:09:34Z",
+   "updated": "2026-11-12T19:20:45Z",
    "note": "",
    "advanced": "2026-11-12T12:59:38Z",
    "line_loss_overrides": [
@@ -85654,7 +85656,8 @@
     }
    ],
    "opened": "2026-11-12T16:43:36Z",
-   "readied": "2026-11-12T16:44:02Z"
+   "readied": "2026-11-12T16:44:02Z",
+   "merged_by": "pr"
   },
   {
    "id": "atspi-combo-choice",
@@ -86204,13 +86207,13 @@
    ],
    "base": "7059d343d0de1df69784d0b4c6f33407d39d7918",
    "body": "bodies/ax-ref-read-as-followup.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19054,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ax-ref-read-as-followup",
    "host": "MacBook-Pro",
    "added": "2026-11-11T15:44:29Z",
-   "updated": "2026-11-12T17:09:34Z",
+   "updated": "2026-11-12T19:20:45Z",
    "note": "",
    "advanced": "2026-11-12T17:03:23Z",
    "line_loss_overrides": [
@@ -86417,7 +86420,8 @@
      "host": "goliath"
     }
    ],
-   "opened": "2026-11-12T16:58:57Z"
+   "opened": "2026-11-12T16:58:57Z",
+   "merged_by": "pr"
   },
   {
    "id": "x11-mpx-reattach",
@@ -86430,13 +86434,13 @@
    ],
    "base": "bcd5b0b996e0f4a107f51cb398a6492ffb7d44b9",
    "body": "bodies/x11-mpx-reattach.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19023,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-mpx-reattach",
    "host": "MacBook-Pro",
    "added": "2026-11-11T17:39:36Z",
-   "updated": "2026-11-12T12:09:41Z",
+   "updated": "2026-11-12T19:20:45Z",
    "note": "X11SlaveReattach 2026-11-11: merged with #18828 (x11-mpx-key-confirm), #18828's xvfb-only ignored tests typing_loss_fails_and_inhibits_the_next_call and typing_deadline_bounds_busy_events_and_rejects_late_releases fail at run time (its typing_fixture names its keyboard slave after the core master, so begin() refuses it as gone); whichever lands second adds a #[cfg(test)] seam in Mpx::routes() returning [None, None] when release_events is set. Compiles either way. P0 on LightDM lock with real password unlock 10/10 (main) vs 0/10 (fix); suspend not measurable in the guest.",
    "advanced": "2026-11-12T12:07:17Z",
    "built": [
@@ -86602,7 +86606,8 @@
     }
    ],
    "opened": "2026-11-12T11:45:07Z",
-   "readied": "2026-11-12T11:45:35Z"
+   "readied": "2026-11-12T11:45:35Z",
+   "merged_by": "pr"
   },
   {
    "id": "click-snapshot-first",
@@ -87031,13 +87036,13 @@
    ],
    "base": "9f728bd56e170453c927d5b162cebe9b308e63ce",
    "body": "bodies/atspi-write-timeout-warning.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19050,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-write-timeout-warning",
    "host": "MacBook-Pro",
    "added": "2026-11-11T21:44:32Z",
-   "updated": "2026-11-12T17:09:34Z",
+   "updated": "2026-11-12T19:20:45Z",
    "note": "Main-approved #18989 combined pair form. interrupted_masked_text_write_warns_if_the_field_may_be_empty asserts post-timeout/cancellation warnings contain neither old secret nor new secret (linux/ax.rs assertions for both); current-main Goliath Linux 100 tests plus AX 45 tests passed.",
    "rebases_after": [
     18989,
@@ -87255,7 +87260,8 @@
     }
    ],
    "opened": "2026-11-12T16:54:40Z",
-   "readied": "2026-11-12T16:55:08Z"
+   "readied": "2026-11-12T16:55:08Z",
+   "merged_by": "pr"
   },
   {
    "id": "tern-kit-password-mask",
@@ -89123,13 +89129,13 @@
    ],
    "base": "bcd5b0b996e0f4a107f51cb398a6492ffb7d44b9",
    "body": "bodies/masked-length-ok.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19026,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/masked-length-ok",
    "host": "MacBook-Pro",
    "added": "2026-11-12T04:00:44Z",
-   "updated": "2026-11-12T12:31:11Z",
+   "updated": "2026-11-12T19:20:45Z",
    "note": "MaskedReshape, 2026-11-12: head 6d9511488c03b415a44bfb8e035321a0e47c3adb; verdict-only same-length mask success, no set_value note channel. #18915 comment/cfg adjacency only; four other counterpart entries clean. Prerequisite #18989 vs atspi-write-timeout-warning test guard remains statement-level, accepted on the timeout entry by Main; combined form not run. Keep queued; needs ax-masked-readback.",
    "line_loss_overrides": [
     {
@@ -89322,7 +89328,8 @@
     }
    ],
    "opened": "2026-11-12T11:59:46Z",
-   "readied": "2026-11-12T12:00:11Z"
+   "readied": "2026-11-12T12:00:11Z",
+   "merged_by": "pr"
   },
   {
    "id": "takeover-attached-hint",
@@ -89335,13 +89342,13 @@
    ],
    "base": "bcd5b0b996e0f4a107f51cb398a6492ffb7d44b9",
    "body": "bodies/takeover-attached-hint.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19027,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/takeover-attached-hint",
    "host": "MacBook-Pro",
    "added": "2026-11-12T04:03:51Z",
-   "updated": "2026-11-12T12:24:50Z",
+   "updated": "2026-11-12T19:20:45Z",
    "note": "",
    "advanced": "2026-11-12T12:24:50Z",
    "built": [
@@ -89539,7 +89546,8 @@
       ]
      }
     }
-   ]
+   ],
+   "merged_by": "pr"
   },
   {
    "id": "win-type-drain",
@@ -89552,13 +89560,13 @@
    ],
    "base": "aece16f78fad7e9e777b4aeaa1ca583544a17723",
    "body": "bodies/win-type-drain.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19037,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-type-drain",
    "host": "MacBook-Pro",
    "added": "2026-11-12T04:40:03Z",
-   "updated": "2026-11-12T15:51:42Z",
+   "updated": "2026-11-12T19:20:45Z",
    "note": "QueueTwelve, 2026-11-12: local head ce216ae356443bcf8a2e54a5ff4b4d99269c29c6; unpushed until #18919 merges. Named advance waits on the open need; these local-ahead commits ride its post-merge push. Return regression green/red on Windows; rust-check macOS/Linux/Windows recorded.",
    "advanced": "2026-11-12T15:51:42Z",
    "rebases_after": [
@@ -89780,7 +89788,8 @@
       ]
      }
     }
-   ]
+   ],
+   "merged_by": "pr"
   },
   {
    "id": "win-type-insert",
