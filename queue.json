@@ -84205,7 +84205,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-focus-report",
    "host": "MacBook-Pro",
    "added": "2026-11-11T13:11:20Z",
-   "updated": "2026-11-12T16:22:48Z",
+   "updated": "2026-11-12T16:33:15Z",
    "note": "",
    "rebases_after": [
     18783,
@@ -84283,16 +84283,6 @@
      "with_code": "8902cd30ceb756054684263f77d588cb736cf735",
      "tip": "d2c0adb2d2864b57200f933cdd991123837251fd",
      "with_tip": "317c4d4710b2448f9fc315434a55fd26b91ed283",
-     "at": "2026-11-12T10:53:05Z",
-     "host": "MacBook-Pro",
-     "tree": "6b674f56a5c7b0eef7e0aa27e354c36a9e11cdf5"
-    },
-    {
-     "with": "#19001",
-     "code": "b77f9ea072f9cbdf8712319e370f8a3b25a916be",
-     "with_code": "17b7cc4041faf16a00ae6141e0ac3965ca75fa02",
-     "tip": "d2c0adb2d2864b57200f933cdd991123837251fd",
-     "with_tip": "79379ee29a8fd2e68fd3d4857d7418e3e203f9c1",
      "at": "2026-11-12T10:53:05Z",
      "host": "MacBook-Pro",
      "tree": "6b674f56a5c7b0eef7e0aa27e354c36a9e11cdf5"
@@ -84384,33 +84374,6 @@
      "host": "goliath"
     },
     {
-     "with": "#19025",
-     "code": "eeea17112c4476e129e1cb45a4fc5b9f7c5eac3b",
-     "with_code": "5db66d992b8472a4603b55e2969f1345d8d2fde5",
-     "tip": "93a1726e2ddd6c6a508bb68d341bf5fa1010d09f",
-     "with_tip": "f434a94b537426a1707ff706b25550d5c3fa4d72",
-     "at": "2026-11-12T16:22:47Z",
-     "host": "goliath"
-    },
-    {
-     "with": "#19026",
-     "code": "eeea17112c4476e129e1cb45a4fc5b9f7c5eac3b",
-     "with_code": "8ae975d64a9d7bc86ef8767bdb875641f2d2798b",
-     "tip": "93a1726e2ddd6c6a508bb68d341bf5fa1010d09f",
-     "with_tip": "0430659225aaad7e5e66d22e22ae2f187b39b20c",
-     "at": "2026-11-12T16:22:47Z",
-     "host": "goliath"
-    },
-    {
-     "with": "#19036",
-     "code": "eeea17112c4476e129e1cb45a4fc5b9f7c5eac3b",
-     "with_code": "ae0818c2121d16433cd4d4f8484296b9dc2e1f62",
-     "tip": "93a1726e2ddd6c6a508bb68d341bf5fa1010d09f",
-     "with_tip": "68d568296ae6fcbc3fe6850f9c43a885b8e02250",
-     "at": "2026-11-12T16:22:47Z",
-     "host": "goliath"
-    },
-    {
      "with": "#17610",
      "code": "eeea17112c4476e129e1cb45a4fc5b9f7c5eac3b",
      "with_code": "644c5c54c67a775f3b2874cd623e2091e401c716",
@@ -84429,29 +84392,11 @@
      "host": "goliath"
     },
     {
-     "with": "#18353",
-     "code": "eeea17112c4476e129e1cb45a4fc5b9f7c5eac3b",
-     "with_code": "f0586af0647e4e206ee9154d7917dd7de31879c6",
-     "tip": "93a1726e2ddd6c6a508bb68d341bf5fa1010d09f",
-     "with_tip": "4bbf3b4dc92dca19fa35a07a0d97d574998431c4",
-     "at": "2026-11-12T16:22:47Z",
-     "host": "goliath"
-    },
-    {
      "with": "#19034",
      "code": "eeea17112c4476e129e1cb45a4fc5b9f7c5eac3b",
      "with_code": "da9d02017c240e0d16c85668e84466516ae5c50a",
      "tip": "93a1726e2ddd6c6a508bb68d341bf5fa1010d09f",
      "with_tip": "300596a1841441c506f0a8c525668bbd128e561e",
-     "at": "2026-11-12T16:22:47Z",
-     "host": "goliath"
-    },
-    {
-     "with": "#19035",
-     "code": "eeea17112c4476e129e1cb45a4fc5b9f7c5eac3b",
-     "with_code": "6985961b013c7864e5437d4020188e1966f37ce2",
-     "tip": "93a1726e2ddd6c6a508bb68d341bf5fa1010d09f",
-     "with_tip": "e7ca98273595a4f4a3d92dcc288e2efd31339e83",
      "at": "2026-11-12T16:22:47Z",
      "host": "goliath"
     },
@@ -84525,6 +84470,78 @@
      "tip": "93a1726e2ddd6c6a508bb68d341bf5fa1010d09f",
      "with_tip": "2a57dae17943e098e8a24dacc93d7bc9442cf5c4",
      "at": "2026-11-12T16:22:48Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#19025",
+     "code": "eeea17112c4476e129e1cb45a4fc5b9f7c5eac3b",
+     "with_code": "5db66d992b8472a4603b55e2969f1345d8d2fde5",
+     "tip": "93a1726e2ddd6c6a508bb68d341bf5fa1010d09f",
+     "with_tip": "f434a94b537426a1707ff706b25550d5c3fa4d72",
+     "at": "2026-11-12T16:33:13Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#19026",
+     "code": "eeea17112c4476e129e1cb45a4fc5b9f7c5eac3b",
+     "with_code": "8ae975d64a9d7bc86ef8767bdb875641f2d2798b",
+     "tip": "93a1726e2ddd6c6a508bb68d341bf5fa1010d09f",
+     "with_tip": "0430659225aaad7e5e66d22e22ae2f187b39b20c",
+     "at": "2026-11-12T16:33:15Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#19036",
+     "code": "eeea17112c4476e129e1cb45a4fc5b9f7c5eac3b",
+     "with_code": "ae0818c2121d16433cd4d4f8484296b9dc2e1f62",
+     "tip": "93a1726e2ddd6c6a508bb68d341bf5fa1010d09f",
+     "with_tip": "68d568296ae6fcbc3fe6850f9c43a885b8e02250",
+     "at": "2026-11-12T16:33:15Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#18353",
+     "code": "eeea17112c4476e129e1cb45a4fc5b9f7c5eac3b",
+     "with_code": "f0586af0647e4e206ee9154d7917dd7de31879c6",
+     "tip": "93a1726e2ddd6c6a508bb68d341bf5fa1010d09f",
+     "with_tip": "4bbf3b4dc92dca19fa35a07a0d97d574998431c4",
+     "at": "2026-11-12T16:33:15Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#19001",
+     "code": "eeea17112c4476e129e1cb45a4fc5b9f7c5eac3b",
+     "with_code": "17b7cc4041faf16a00ae6141e0ac3965ca75fa02",
+     "tip": "93a1726e2ddd6c6a508bb68d341bf5fa1010d09f",
+     "with_tip": "79379ee29a8fd2e68fd3d4857d7418e3e203f9c1",
+     "at": "2026-11-12T16:33:15Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#19035",
+     "code": "eeea17112c4476e129e1cb45a4fc5b9f7c5eac3b",
+     "with_code": "6985961b013c7864e5437d4020188e1966f37ce2",
+     "tip": "93a1726e2ddd6c6a508bb68d341bf5fa1010d09f",
+     "with_tip": "e7ca98273595a4f4a3d92dcc288e2efd31339e83",
+     "at": "2026-11-12T16:33:15Z",
+     "host": "goliath"
+    },
+    {
+     "with": "observe-settle",
+     "code": "eeea17112c4476e129e1cb45a4fc5b9f7c5eac3b",
+     "with_code": "36b2065463c91106f29adfd1df76b4a051127cb1",
+     "tip": "93a1726e2ddd6c6a508bb68d341bf5fa1010d09f",
+     "with_tip": "6534dc961a38c9c1c090f5f2c2e653f08c9d5fc9",
+     "at": "2026-11-12T16:33:15Z",
+     "host": "goliath"
+    },
+    {
+     "with": "atspi-qt-menus",
+     "code": "eeea17112c4476e129e1cb45a4fc5b9f7c5eac3b",
+     "with_code": "2b1264f00ef1cf9011053957331525f48f0e1ebe",
+     "tip": "93a1726e2ddd6c6a508bb68d341bf5fa1010d09f",
+     "with_tip": "833651a13dce4efcfa05e1d93002837f0e4e2ae3",
+     "at": "2026-11-12T16:33:15Z",
      "host": "goliath"
     }
    ]
