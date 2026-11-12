@@ -6,6 +6,10 @@
 
 - `typeText` and `axType` resolve to `{ unconfirmed, focusReturn }` on every platform instead of the takeover focus report; only Windows takeover typing sets `unconfirmed`, saying why the target was not seen reading the typed text
 
+### Changed
+
+- Windows takeover typing into a focused multi-line edit control (Windows 11 Notepad, Win32 and RichEdit multi-line fields) inserts each stretch of characters with the control's own `EM_REPLACESEL` and proves it from the control's text, instead of typing keys that Notepad's spell check threw away while the call reported success; line breaks stay Return keys, and a control whose text comes out other than the typed text fails with `InputFailed`
+
 ### Added
 
 - `OMP_APPLEFM_DISABLE=1` builds without the Apple Foundation Models bridge and never probes Xcode or the Command Line Tools; it cannot be combined with `OMP_APPLEFM_SWIFTC` ([#18911](https://github.com/can1357/oh-my-pi/pull/18911))

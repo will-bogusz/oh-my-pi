@@ -956,9 +956,11 @@ mod foreground {
 				MapVirtualKeyW, SendInput, VK_RETURN,
 			},
 			WindowsAndMessaging::{
-				GA_ROOTOWNER, GetAncestor, GetCursorPos, GetForegroundWindow, GetSystemMetrics,
+				DLGC_HASSETSEL, ES_MULTILINE, ES_READONLY, GA_ROOTOWNER, GWL_STYLE, GetAncestor,
+				GetCursorPos, GetForegroundWindow, GetSystemMetrics, GetWindowLongPtrW,
 				GetWindowThreadProcessId, IsWindow, SM_CXVIRTUALSCREEN, SM_CYVIRTUALSCREEN,
-				SM_XVIRTUALSCREEN, SM_YVIRTUALSCREEN, SetCursorPos, WindowFromPoint,
+				SM_XVIRTUALSCREEN, SM_YVIRTUALSCREEN, SMTO_ABORTIFHUNG, SendMessageTimeoutW,
+				SetCursorPos, WM_GETDLGCODE, WM_GETTEXT, WM_GETTEXTLENGTH, WindowFromPoint,
 			},
 		},
 	};
@@ -969,7 +971,7 @@ mod foreground {
 	};
 	use crate::desktop::win32::{
 		delivery::{TextUnit, text_units},
-		window,
+		edit, window,
 	};
 
 	/// Time the target keeps the foreground after pointer input, so
@@ -990,6 +992,15 @@ mod foreground {
 	/// Longest wait for the target to read typed text before the foreground
 	/// is handed back.
 	const DRAIN_TIMEOUT: Duration = Duration::from_secs(5);
+	/// Longest wait, in milliseconds, for an edit control to answer one
+	/// question about its text.
+	const EDIT_QUERY_MS: u32 = 250;
+	/// Longest wait, in milliseconds, for an edit control to take inserted
+	/// text, as `AutoHotkey`'s `EditPaste` bounds the same message.
+	const EDIT_INSERT_MS: u32 = 2000;
+	/// Replaces an edit control's selection with text; `wParam` TRUE makes it
+	/// one step the user can undo. Not in the features this crate enables.
+	const EM_REPLACESEL: u32 = 0x00c2;
 
 	/// Activates the target for foreground input and hands the foreground back
 	/// to the user's window once the target has consumed it.
@@ -1691,13 +1702,163 @@ mod foreground {
 		}
 		ForegroundGuard::activate(id, KEY_SETTLE)?.run(|target| {
 			focus()?;
-			send_text(Some(target), text)?;
-			let enter = text_units(text).any(|unit| matches!(unit, TextUnit::Enter));
-			if let Some(reason) = drain(target, &format!("window {id}"), enter) {
-				control::report_text_unconfirmed(reason);
-			}
-			Ok(())
+			let editor =
+				window::focused_descendant(target).filter(|&control| multi_line_edit(control));
+			type_stretches(target, editor, text, &format!("window {id}"))
 		})
+	}
+
+	/// Sends `message` to `control` and returns its answer, or `None` when it
+	/// gave none within `ms` or hangs.
+	fn ask(control: HWND, message: u32, wparam: usize, lparam: isize, ms: u32) -> Option<isize> {
+		let mut answer = 0;
+		// SAFETY: `answer` is writable; Win32 validates the handle, and the
+		// caller keeps whatever `lparam` points at alive for the call.
+		let sent = unsafe {
+			SendMessageTimeoutW(control, message, wparam, lparam, SMTO_ABORTIFHUNG, ms, &mut answer)
+		};
+		(sent != 0).then_some(answer.cast_signed())
+	}
+
+	/// Whether `control` is an edit control that holds lines and takes text
+	/// from the user: it handles selection messages (`DLGC_HASSETSEL`), has
+	/// `ES_MULTILINE` and not `ES_READONLY`. Single-line fields keep keys,
+	/// since validators, autocomplete and Return as a command work per key.
+	fn multi_line_edit(control: HWND) -> bool {
+		// SAFETY: Win32 validates the handle.
+		let style = unsafe { GetWindowLongPtrW(control, GWL_STYLE) };
+		style & ES_MULTILINE as isize != 0
+			&& style & ES_READONLY as isize == 0
+			&& ask(control, WM_GETDLGCODE, 0, 0, EDIT_QUERY_MS)
+				.is_some_and(|code| code & DLGC_HASSETSEL as isize != 0)
+	}
+
+	/// `control`'s text, or `None` when it did not answer a question about it
+	/// within [`EDIT_QUERY_MS`].
+	fn edit_text(control: HWND) -> Option<Vec<u16>> {
+		let length = usize::try_from(ask(control, WM_GETTEXTLENGTH, 0, 0, EDIT_QUERY_MS)?).ok()?;
+		let mut buffer = vec![0u16; length + 1];
+		let lparam = buffer.as_mut_ptr() as isize;
+		let copied = ask(control, WM_GETTEXT, buffer.len(), lparam, EDIT_QUERY_MS)?;
+		buffer.truncate(usize::try_from(copied).ok()?.min(length));
+		Some(buffer)
+	}
+
+	/// What [`insert`] did with a stretch of text.
+	enum Inserted {
+		/// The control's text is now what it was with the stretch spliced in.
+		Whole(Vec<u16>),
+		/// The control's text could not be read first, or did not change: the
+		/// stretch goes as keys.
+		Declined,
+		/// The control was given the stretch but did not answer, so what it
+		/// holds is unknown.
+		Unconfirmed(String),
+	}
+
+	/// Puts `stretch` into `control`, the multi-line edit control of
+	/// foreground window `target`, with one `EM_REPLACESEL`, proved from the
+	/// control's text before and after ([`edit::spliced`]). `held` is the text
+	/// the last insert left, when only line break keys went since: finding it
+	/// unchanged means the control dropped them. Text that came out any other
+	/// way is an error naming what the control holds now; keys never go on
+	/// top of an attempted insert.
+	fn insert(
+		target: HWND,
+		control: HWND,
+		stretch: &str,
+		held: Option<&[u16]>,
+		name: &str,
+	) -> CoreResult<Inserted> {
+		let Some(before) = edit_text(control) else {
+			return Ok(Inserted::Declined);
+		};
+		if held == Some(before.as_slice()) {
+			return Err(DesktopError::input_failed(format!(
+				"{name}'s focused edit control dropped a line break typed as a Return key; it holds \
+				 the text typed before it"
+			)));
+		}
+		control::check()?;
+		ensure_foreground(target)?;
+		let units: Vec<u16> = stretch.encode_utf16().collect();
+		let terminated: Vec<u16> = units.iter().copied().chain([0]).collect();
+		let answered =
+			ask(control, EM_REPLACESEL, 1, terminated.as_ptr() as isize, EDIT_INSERT_MS).is_some();
+		let after = edit_text(control);
+		match after {
+			_ if !answered => Ok(Inserted::Unconfirmed(format!(
+				"{name}'s focused edit control did not answer within {} s of being given the text, so \
+				 it may take it later",
+				EDIT_INSERT_MS / 1000
+			))),
+			None => Ok(Inserted::Unconfirmed(format!(
+				"{name}'s focused edit control did not answer when its text was read after the insert"
+			))),
+			Some(after) if edit::spliced(&before, &after, &units) => Ok(Inserted::Whole(after)),
+			Some(after) if after == before => Ok(Inserted::Declined),
+			Some(after) => Err(DesktopError::input_failed(format!(
+				"{name}'s focused edit control did not take the text as typed: it held {} UTF-16 \
+				 units, was given {} and holds {}",
+				before.len(),
+				units.len(),
+				after.len()
+			))),
+		}
+	}
+
+	/// Types `text` into foreground window `target`, named `name` in reports.
+	/// Stretches of characters go into `editor`, its focused multi-line edit
+	/// control, by [`insert`] while it takes them; line breaks and everything
+	/// a declined insert leaves go as keys. Keys are drained ([`drain`])
+	/// before an insert, which would otherwise overtake them, and at the end.
+	fn type_stretches(
+		target: HWND,
+		mut editor: Option<HWND>,
+		text: &str,
+		name: &str,
+	) -> CoreResult<()> {
+		let mut keys = false;
+		// Whether a line break went as a Return key, which may move the
+		// foreground on ([`drain`]).
+		let mut enter = false;
+		let mut held = None;
+		let mut stretches = edit::stretches(text).peekable();
+		while let Some((line_break, stretch)) = stretches.next() {
+			if !line_break && keys && editor.is_some() {
+				keys = false;
+				if let Some(reason) = drain(target, name, enter) {
+					// An insert now could land ahead of keys still unread.
+					control::report_text_unconfirmed(reason);
+					editor = None;
+				}
+			}
+			if !line_break && let Some(control) = editor {
+				match insert(target, control, stretch, held.as_deref(), name)? {
+					Inserted::Whole(after) => {
+						held = Some(after);
+						continue;
+					},
+					Inserted::Declined => editor = None,
+					Inserted::Unconfirmed(reason) if stretches.peek().is_none() => {
+						control::report_text_unconfirmed(reason);
+						return Ok(());
+					},
+					Inserted::Unconfirmed(reason) => {
+						return Err(DesktopError::input_failed(format!(
+							"{reason}; the rest of the text was not sent"
+						)));
+					},
+				}
+			}
+			send_text(Some(target), stretch)?;
+			keys = true;
+			enter |= line_break;
+		}
+		if keys && let Some(reason) = drain(target, name, enter) {
+			control::report_text_unconfirmed(reason);
+		}
+		Ok(())
 	}
 
 	#[cfg(test)]

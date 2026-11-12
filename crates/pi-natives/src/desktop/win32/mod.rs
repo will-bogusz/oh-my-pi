@@ -4,6 +4,8 @@ mod ax;
 mod capture;
 pub mod delivery;
 #[cfg(any(target_os = "windows", test))]
+mod edit;
+#[cfg(any(target_os = "windows", test))]
 mod geometry;
 #[cfg(target_os = "windows")]
 mod input;
@@ -222,15 +224,16 @@ mod tests {
 		fmt::Write as _,
 		io::{BufRead, BufReader, Write},
 		process::{Child, Command, Stdio},
-		time::Duration,
+		time::{Duration, Instant},
 	};
 
 	use windows_sys::Win32::{
 		Foundation::HWND,
 		UI::WindowsAndMessaging::{
-			CW_USEDEFAULT, CreateWindowExW, DispatchMessageW, ES_AUTOHSCROLL, GetForegroundWindow,
-			GetMessageW, MSG, PostMessageW, SendMessageW, SetForegroundWindow, TranslateMessage,
-			WM_APP, WM_GETTEXT, WM_KEYDOWN, WM_SETTEXT, WS_OVERLAPPEDWINDOW, WS_VISIBLE,
+			CW_USEDEFAULT, CreateWindowExW, DispatchMessageW, ES_AUTOHSCROLL, ES_AUTOVSCROLL,
+			ES_MULTILINE, GetForegroundWindow, GetMessageW, MSG, PostMessageW, SendMessageW,
+			SetForegroundWindow, TranslateMessage, WM_APP, WM_GETTEXT, WM_GETTEXTLENGTH, WM_KEYDOWN,
+			WM_SETTEXT, WS_OVERLAPPEDWINDOW, WS_VISIBLE,
 		},
 	};
 
@@ -243,6 +246,7 @@ mod tests {
 
 	const USER: &str = "omp test: user window";
 	const TARGET: &str = "omp test: takeover target";
+	const MULTI: &str = "omp test: multi-line target";
 	/// Set for the copy of this test binary that hosts the windows.
 	const HOST: &str = "OMP_TAKEOVER_TEST_WINDOWS";
 
@@ -260,6 +264,8 @@ mod tests {
 	struct Windows {
 		user:   HWND,
 		target: HWND,
+		/// A multi-line edit control, the kind typing inserts text into.
+		multi:  HWND,
 		host:   Child,
 	}
 
@@ -285,16 +291,19 @@ mod tests {
 				.split(' ')
 				.skip(1)
 				.map(|handle| handle.parse::<usize>().unwrap());
-			let (user, target) = (handles.next().unwrap(), handles.next().unwrap());
-			Self { user: user as HWND, target: target as HWND, host }
+			let mut next = || handles.next().unwrap() as HWND;
+			let (user, target, multi) = (next(), next(), next());
+			Self { user, target, multi, host }
 		}
 
 		fn text(window: HWND) -> String {
-			let mut buffer = [0u16; 1024];
+			// SAFETY: no pointer arguments.
+			let length = unsafe { SendMessageW(window, WM_GETTEXTLENGTH, 0, 0) }.cast_unsigned();
+			let mut buffer = vec![0u16; length + 1];
 			// SAFETY: `buffer` holds the length WM_GETTEXT is told.
-			let length =
+			let copied =
 				unsafe { SendMessageW(window, WM_GETTEXT, buffer.len(), buffer.as_mut_ptr() as isize) };
-			String::from_utf16_lossy(&buffer[..length as usize])
+			String::from_utf16_lossy(&buffer[..copied.cast_unsigned().min(length)])
 		}
 	}
 
@@ -305,7 +314,7 @@ mod tests {
 		}
 	}
 
-	/// The window host `Windows::open` starts: opens both windows, prints their
+	/// The window host `Windows::open` starts: opens its windows, prints their
 	/// handles and pumps their messages until it is killed. Run any other way,
 	/// it returns at once.
 	#[test]
@@ -314,7 +323,7 @@ mod tests {
 		if std::env::var_os(HOST).is_none() {
 			return;
 		}
-		fn create(title: &str) -> HWND {
+		fn create(title: &str, style: u32) -> HWND {
 			let (class, text) = (wide("EDIT"), wide(title));
 			// SAFETY: both strings are NUL-terminated and outlive the call;
 			// EDIT is a system class, so no instance handle is needed.
@@ -323,7 +332,7 @@ mod tests {
 					0,
 					class.as_ptr(),
 					text.as_ptr(),
-					WS_OVERLAPPEDWINDOW | WS_VISIBLE | ES_AUTOHSCROLL as u32,
+					WS_OVERLAPPEDWINDOW | WS_VISIBLE | style,
 					CW_USEDEFAULT,
 					CW_USEDEFAULT,
 					400,
@@ -359,14 +368,15 @@ mod tests {
 
 		let (sender, receiver) = std::sync::mpsc::channel();
 		std::thread::spawn(move || {
-			let user = create(USER);
+			let user = create(USER, ES_AUTOHSCROLL as u32);
 			sender.send(user as usize).unwrap();
 			pump();
 		});
 		let user = receiver.recv().unwrap();
-		let target = create(TARGET);
-		assert!(user != 0 && !target.is_null());
-		println!("windows {user} {}", target as usize);
+		let target = create(TARGET, ES_AUTOHSCROLL as u32);
+		let multi = create(MULTI, (ES_MULTILINE | ES_AUTOVSCROLL) as u32);
+		assert!(user != 0 && !target.is_null() && !multi.is_null());
+		println!("windows {user} {} {}", target as usize, multi as usize);
 		std::io::stdout().flush().unwrap();
 		pump();
 	}
@@ -409,12 +419,19 @@ mod tests {
 		assert_eq!(Windows::text(windows.user), USER);
 	}
 
-	/// 240 characters, each block numbered so a dropped one shows.
-	fn long_text() -> String {
-		(0..30).fold(String::new(), |mut text, k| {
+	/// `length` characters, each block numbered so a dropped one shows.
+	fn numbered(length: usize) -> String {
+		let mut text = (0..length.div_ceil(8)).fold(String::new(), |mut text, k| {
 			let _ = write!(text, "t{k:03}-ab ");
 			text
-		})
+		});
+		text.truncate(length);
+		text
+	}
+
+	/// 240 characters, as [`numbered`].
+	fn long_text() -> String {
+		numbered(240)
 	}
 
 	/// Types [`long_text`] in takeover into the emptied target, whose thread
@@ -474,5 +491,109 @@ mod tests {
 		// the hung one first.
 		let reason = unconfirmed.expect("the call reported the text unconfirmed");
 		assert!(reason.contains("read all the typed text"), "{reason}");
+	}
+
+	/// Windows 11 Notepad's window on a new empty file `name` and its editor,
+	/// once the editor holds keyboard focus.
+	fn notepad(backend: &mut Win32Backend, name: &str) -> (DesktopWindow, HWND) {
+		let path = std::env::temp_dir().join(name);
+		std::fs::write(&path, "").unwrap();
+		// Notepad stays open for the test to type into; its launcher may hand
+		// the file to a running instance and exit.
+		#[expect(clippy::zombie_processes, reason = "Notepad outlives the test")]
+		Command::new("notepad.exe").arg(&path).spawn().unwrap();
+		let deadline = Instant::now() + Duration::from_secs(20);
+		loop {
+			let found = backend
+				.windows()
+				.unwrap()
+				.into_iter()
+				.find(|window| window.title.starts_with(name) && window.title.ends_with("Notepad"));
+			if let Some(window) = found
+				&& let Some(editor) = window::focused_descendant(std::ptr::with_exposed_provenance_mut(
+					window.id.parse::<usize>().unwrap(),
+				))
+				&& window::class_name(editor) == "RichEditD2DPT"
+			{
+				return (window, editor);
+			}
+			assert!(Instant::now() < deadline, "Notepad did not open {name} with its editor focused");
+			std::thread::sleep(Duration::from_millis(200));
+		}
+	}
+
+	/// Types `text` in takeover into window `id`; returns the call's result
+	/// and its unconfirmed report.
+	fn type_into(id: &str, text: &str) -> (CoreResult<()>, Option<String>) {
+		let mut backend = Win32Backend::new(DisplaySelector::Active).unwrap();
+		let token = CancellationSource::default().token();
+		control::take_text_unconfirmed();
+		let result = backend.type_text(
+			&Target::Window(id.to_string()),
+			text,
+			DeliveryMode::ForegroundReturnFocus,
+			&token,
+		);
+		(result, control::take_text_unconfirmed())
+	}
+
+	#[test]
+	#[ignore = "opens Windows 11 Notepad and types into it; run with --ignored in a signed-in \
+	            desktop session"]
+	fn takeover_typing_into_notepad_arrives_whole() {
+		let mut backend = Win32Backend::new(DisplaySelector::Active).unwrap();
+		let stamp = std::time::SystemTime::now()
+			.duration_since(std::time::UNIX_EPOCH)
+			.unwrap()
+			.as_millis();
+		for length in [240, 2000] {
+			let (window, editor) =
+				notepad(&mut backend, &format!("omp-type-insert-{length}-{stamp}.txt"));
+			let text = numbered(length);
+			let (result, unconfirmed) = type_into(&window.id, &text);
+			result.unwrap();
+			assert_eq!(unconfirmed, None);
+			assert_eq!(Windows::text(editor).trim_end_matches(['\r', '\n']), text);
+		}
+	}
+
+	/// Empties the multi-line target and gives it `text`, a length limit and
+	/// a read-only state.
+	fn reset_multi(windows: &Windows, text: &str, limit: usize, read_only: bool) {
+		const EM_LIMITTEXT: u32 = 0x00c5;
+		const EM_SETREADONLY: u32 = 0x00cf;
+		let text = wide(text);
+		// SAFETY: WM_SETTEXT copies the NUL-terminated string before it
+		// returns; the others take no pointers.
+		unsafe {
+			SendMessageW(windows.multi, EM_SETREADONLY, usize::from(read_only), 0);
+			SendMessageW(windows.multi, EM_LIMITTEXT, limit, 0);
+			SendMessageW(windows.multi, WM_SETTEXT, 0, text.as_ptr() as isize);
+		}
+	}
+
+	#[test]
+	#[ignore = "moves the foreground between windows it opens; run with --ignored from a focused \
+	            terminal in a signed-in desktop session"]
+	fn takeover_typing_into_a_multi_line_edit_proves_the_insert_from_its_text() {
+		let windows = Windows::open();
+		let id = (windows.multi as usize).to_string();
+		// Whole, with non-ASCII and a surrogate pair; line breaks stay keys.
+		reset_multi(&windows, "", 0, false);
+		let text = "h\u{e9}llo \u{2713} \u{65e5}\u{672c} \u{1F600}\r\nsecond line";
+		let (result, unconfirmed) = type_into(&id, text);
+		result.unwrap();
+		assert_eq!(unconfirmed, None);
+		assert_eq!(Windows::text(windows.multi), text);
+		// A length limit cuts the text: an error naming what the control holds.
+		reset_multi(&windows, "", 10, false);
+		let error = type_into(&id, "abc 123 def").0.unwrap_err().to_string();
+		assert!(error.contains("did not take the text as typed"), "{error}");
+		assert_eq!(Windows::text(windows.multi), "abc 123 de");
+		// A read-only control is never written to: keys go, and it ignores them.
+		reset_multi(&windows, "locked", 0, true);
+		let (result, _) = type_into(&id, "abc");
+		result.unwrap();
+		assert_eq!(Windows::text(windows.multi), "locked");
 	}
 }
