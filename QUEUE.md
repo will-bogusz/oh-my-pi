@@ -1,16 +1,15 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12 01:47Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12 01:48Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-12 01:40Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 2, conflict-held 28, stacked 27, held 10, parked 2, open PRs 42; merged 291, closed 33
+**Counts:** openable now 1, conflict-held 28, stacked 27, held 11, parked 2, open PRs 42; merged 291, closed 33
 
-## Openable now (2)
+## Openable now (1)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
-| agent-identity | feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy | tui | P2 | 1d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/agent-identity) |
 | tern-kit-password-mask | fix(browser): mask password values in Tern kit observations | browser | P2 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/tern-kit-password-mask) |
 
 ## Conflict-held (28)
@@ -78,7 +77,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12
 | x11-mpx-reattach | fix(natives): keep X11 background input out of your window after a screen lock or VT switch | computer | P0 | 8h | [#18825](https://github.com/can1357/oh-my-pi/pull/18825) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-mpx-reattach) |
 | atspi-write-timeout-warning | fix(natives): preserve the empty-field warning on Linux write timeouts | computer | P2 | 4h | atspi-unanswered-app ([#18914](https://github.com/can1357/oh-my-pi/pull/18914)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-write-timeout-warning) |
 
-## Held (10)
+## Held (11)
 
 | id | title | area | priority | age | hold | branch |
 |---|---|---|---|---|---|---|
@@ -89,6 +88,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-12
 | broker-reset-sweep | feat(coding-agent): spend saved resets from the auth broker before they expire | broker |  | 29d | Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-reset-sweep) |
 | broker-sweep-clients-defer | feat(ai,coding-agent): stop sessions sweeping saved resets the auth broker already spends | broker |  | 29d | Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-sweep-clients-defer) |
 | computer-guide-first-use | feat(coding-agent): send the computer guide with the first computer call | computer | P2 | 1d | Main, 2026-11-11: stays held until #18786 merges with the typed-message guide channel (design check replace); then one property on the computer prelude, drop the wrap variant, re-run its blind legs | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-guide-first-use) |
+| agent-identity | feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy | tui | P2 | 1d | Main, 2026-11-12: prepared; held until Main releases (key-chord Cancelled vs InputBusy VM check) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/agent-identity) |
 | browser-cursor | feat(browser): draw the acting agent's cursor in OMP-driven tabs | browser | P2 | 1d | Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-cursor) |
 | desktop-cursor | feat(coding-agent,natives): show each agent's cursor where its computer input lands on macOS | coding-agent | P2 | 1d | Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/desktop-cursor) |
 | computer-secure-input | fix(natives,coding-agent): report macOS secure input and stop claiming globalEscape under it | computer | P1 | 0h | QueueTwelve for Main, 2026-11-12: code collision with open #18947 (screenStateNotice, read_screen_state); Main decides | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-secure-input) |
