@@ -78966,7 +78966,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-value-readback",
    "host": "MacBook-Pro",
    "added": "2026-11-11T02:53:57Z",
-   "updated": "2026-11-12T16:47:12Z",
+   "updated": "2026-11-12T16:47:37Z",
    "note": "",
    "advanced": "2026-11-12T12:20:18Z",
    "line_loss_overrides": [
@@ -79177,7 +79177,8 @@
      "host": "goliath"
     }
    ],
-   "opened": "2026-11-12T16:47:12Z"
+   "opened": "2026-11-12T16:47:12Z",
+   "readied": "2026-11-12T16:47:37Z"
   },
   {
    "id": "x11-takeover-keyboard-grab",
