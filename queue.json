@@ -83884,6 +83884,26 @@
    "added": "2026-11-12T04:00:08Z",
    "updated": "2026-11-12T04:00:08Z",
    "note": ""
+  },
+  {
+   "id": "masked-length-ok",
+   "branch": "will/masked-length-ok",
+   "title": "fix(natives): report a setValue that reads back as a same-length mask as done, not failed",
+   "area": "computer",
+   "priority": "P2",
+   "needs": [
+    "ax-masked-readback"
+   ],
+   "base": "c0363292c8a33779fa71e47d676466ab97ba6477",
+   "body": "bodies/masked-length-ok.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/masked-length-ok",
+   "host": "MacBook-Pro",
+   "added": "2026-11-12T04:00:44Z",
+   "updated": "2026-11-12T04:00:44Z",
+   "note": ""
   }
  ],
  "watch": {
