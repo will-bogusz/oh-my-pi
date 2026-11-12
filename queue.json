@@ -96583,5 +96583,11 @@
     "wake": ""
    }
   ]
+ },
+ "opening": {
+  "id": "x11-mpx-reattach",
+  "token": "354805a227154edc81e8b9455a223c70",
+  "host": "MacBook-Pro",
+  "at": "2026-11-12T11:41:44Z"
  }
 }
