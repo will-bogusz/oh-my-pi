@@ -79428,6 +79428,17 @@
        "\t\tlet display = format!(\":{}\", number.trim());"
       ]
      }
+    },
+    {
+     "at": "2026-11-12T20:01:38Z",
+     "reason": "Main, 2026-11-12: PR line `.find(|&child| self.is_grab_popup(child) && self.root_child_pid(child) == Some(pid))` is expressed by main\u2019s `is_grab_popup_of(child, pid)`, which delegates to exactly that predicate (Main-authorized resolution, single predicate). Main Xvfb 62 pass / 4 fail; PR 63 pass / 4 fail, same four no-hotplug tests.",
+     "old": "986a137dbed59c342c1b5503bcb7d515c0244972",
+     "new": "1f2316c50f90dcceb4851babcfa0a93e357f6c8a",
+     "dropped": {
+      "crates/pi-natives/src/desktop/linux/x11/wm.rs": [
+       "\t\t\t.find(|&child| self.is_grab_popup(child) && self.root_child_pid(child) == Some(pid))"
+      ]
+     }
     }
    ],
    "advanced": "2026-11-12T19:18:42Z",
