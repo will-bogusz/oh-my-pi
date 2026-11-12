@@ -32,6 +32,8 @@ Typing 2,000 characters into a Chrome field kept 218 to 237 of them on `main`, e
 
 Before handing the foreground back, takeover typing sends an unassigned key (VK 0xE8) behind the text and waits, at most 5 s, until the focused control's thread has read it. When it cannot see that, the call still succeeds and the run output adds `type sent the text but could not confirm it arrived: <why>`; `typeText` and `axType` resolve to `{ unconfirmed, focusReturn }`.
 
+The model-facing prompt is unchanged; the result text itself carries "sent, not confirmed" when the drain cannot confirm delivery.
+
 ## Why
 
 The takeover guard handed the foreground back 40 ms after the last key, so keys the app had not read yet went to the next window in front: the user's.
@@ -46,6 +48,8 @@ Windows 11 (build 26200) VM, fresh builds: `main` at ced5efc0c2 with PR 18919 (a
 
 The VM's takeover tests (`cargo test -p pi-natives -- --ignored desktop::win32::tests`, foreground lock timeout at 0 so the test process may take the foreground): `takeover_typing_hands_the_foreground_back_once_a_busy_target_read_the_text` (the target sleeps 1.5 s at the first key) passes, and with `drain` removed fails with the target still empty when focus went back; `takeover_typing_into_a_hung_target_says_the_text_is_unconfirmed` (8 s) passes, and without `drain` reports nothing; `element_takeover_hands_the_foreground_back_to_the_users_window` still passes.
 
+The desktop tests ran with the guest's foreground lock timeout at 0: at the default, a Terminal window in front refused the foreground after the first try.
+
 `bun test packages/coding-agent/test/tools/computer.test.ts`: 145 pass; the new case fails with the worker change reverted.
 
 ---
@@ -53,3 +57,4 @@ The VM's takeover tests (`cargo test -p pi-natives -- --ignored desktop::win32::
 - [ ] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
