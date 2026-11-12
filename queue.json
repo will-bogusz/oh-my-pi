@@ -86470,7 +86470,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-press-click-hint",
    "host": "MacBook-Pro",
    "added": "2026-11-11T18:49:11Z",
-   "updated": "2026-11-12T17:36:16Z",
+   "updated": "2026-11-12T17:54:55Z",
    "note": "",
    "line_loss_overrides": [
     {
@@ -86723,15 +86723,6 @@
      "host": "goliath"
     },
     {
-     "with": "x11-takeover-keyboard-grab",
-     "code": "52ec0e7c205573e87870e67e75850901a9f2c835",
-     "with_code": "1698a87e5b87cdd19166e2e318aab569684b6947",
-     "tip": "3ca41a9795156f00a3f57133a94781c609ca8956",
-     "with_tip": "24e19ebf5a9bd5ca86d5e3560ad938bb032cf962",
-     "at": "2026-11-12T17:36:15Z",
-     "host": "goliath"
-    },
-    {
      "with": "macos-ax-linked-label",
      "code": "52ec0e7c205573e87870e67e75850901a9f2c835",
      "with_code": "8c7f3669696ec5ac6110c3bc8c0ba8defa3ed32c",
@@ -86747,6 +86738,69 @@
      "tip": "3ca41a9795156f00a3f57133a94781c609ca8956",
      "with_tip": "93a1726e2ddd6c6a508bb68d341bf5fa1010d09f",
      "at": "2026-11-12T17:36:15Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#19036",
+     "code": "52ec0e7c205573e87870e67e75850901a9f2c835",
+     "with_code": "ae0818c2121d16433cd4d4f8484296b9dc2e1f62",
+     "tip": "3ca41a9795156f00a3f57133a94781c609ca8956",
+     "with_tip": "68d568296ae6fcbc3fe6850f9c43a885b8e02250",
+     "at": "2026-11-12T17:54:52Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#19037",
+     "code": "52ec0e7c205573e87870e67e75850901a9f2c835",
+     "with_code": "f71449ae4b8d60dadab639d0d0adb884af4bfb62",
+     "tip": "3ca41a9795156f00a3f57133a94781c609ca8956",
+     "with_tip": "450e66bd8af16ce6e03c3151135b8ff67982c8d3",
+     "at": "2026-11-12T17:54:54Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#19048",
+     "code": "52ec0e7c205573e87870e67e75850901a9f2c835",
+     "with_code": "3a6e5e168a4b689f044865e6dd66590973fef2f3",
+     "tip": "3ca41a9795156f00a3f57133a94781c609ca8956",
+     "with_tip": "bfaa5e049e7a08e0a229eb0471889738a800e86d",
+     "at": "2026-11-12T17:54:54Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#19034",
+     "code": "52ec0e7c205573e87870e67e75850901a9f2c835",
+     "with_code": "da9d02017c240e0d16c85668e84466516ae5c50a",
+     "tip": "3ca41a9795156f00a3f57133a94781c609ca8956",
+     "with_tip": "300596a1841441c506f0a8c525668bbd128e561e",
+     "at": "2026-11-12T17:54:54Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#19035",
+     "code": "52ec0e7c205573e87870e67e75850901a9f2c835",
+     "with_code": "6985961b013c7864e5437d4020188e1966f37ce2",
+     "tip": "3ca41a9795156f00a3f57133a94781c609ca8956",
+     "with_tip": "e7ca98273595a4f4a3d92dcc288e2efd31339e83",
+     "at": "2026-11-12T17:54:54Z",
+     "host": "goliath"
+    },
+    {
+     "with": "#18013",
+     "code": "52ec0e7c205573e87870e67e75850901a9f2c835",
+     "with_code": "c4d6b2ac1ad011c06167107c07a359eb739617ad",
+     "tip": "3ca41a9795156f00a3f57133a94781c609ca8956",
+     "with_tip": "fc2484d4c6650dd8ee2a8c6f44209d04e3812a7e",
+     "at": "2026-11-12T17:54:54Z",
+     "host": "goliath"
+    },
+    {
+     "with": "x11-takeover-keyboard-grab",
+     "code": "52ec0e7c205573e87870e67e75850901a9f2c835",
+     "with_code": "1698a87e5b87cdd19166e2e318aab569684b6947",
+     "tip": "3ca41a9795156f00a3f57133a94781c609ca8956",
+     "with_tip": "24e19ebf5a9bd5ca86d5e3560ad938bb032cf962",
+     "at": "2026-11-12T17:54:54Z",
      "host": "goliath"
     }
    ],
