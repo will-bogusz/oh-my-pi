@@ -84887,13 +84887,13 @@
    ],
    "base": "9f728bd56e170453c927d5b162cebe9b308e63ce",
    "body": "bodies/atspi-qt-menus.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19046,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-qt-menus",
    "host": "MacBook-Pro",
    "added": "2026-11-11T13:21:21Z",
-   "updated": "2026-11-12T16:37:57Z",
+   "updated": "2026-11-12T16:43:36Z",
    "note": "",
    "advanced": "2026-11-12T12:59:38Z",
    "line_loss_overrides": [
@@ -85103,7 +85103,8 @@
      "at": "2026-11-12T16:37:57Z",
      "host": "goliath"
     }
-   ]
+   ],
+   "opened": "2026-11-12T16:43:36Z"
   },
   {
    "id": "atspi-combo-choice",
