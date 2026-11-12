@@ -91213,6 +91213,11 @@
     "sha": "8ac8efba096151c32ab2510047d4f60f7b6fb782",
     "at": "2026-11-12T03:53:34Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "8ac8efba096151c32ab2510047d4f60f7b6fb782",
+    "at": "2026-11-12T03:54:05Z",
+    "host": "goliath"
    }
   }
  },
