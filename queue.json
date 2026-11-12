@@ -81658,7 +81658,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "b437322d9a3900206228e17077415c87ce67c8ca",
+   "base": "cfd8d04ef37acee404bd341661b052c00c6acc9c",
    "body": "bodies/ax-ref-read-as.md",
    "state": "open",
    "pr": 18892,
@@ -81666,7 +81666,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ax-ref-read-as",
    "host": "MacBook-Pro",
    "added": "2026-11-11T10:51:34Z",
-   "updated": "2026-11-12T09:59:04Z",
+   "updated": "2026-11-12T09:59:45Z",
    "note": "QueueThirteen 2026-11-12 rebase onto #18898's choose_action: require_behind stays inside `perform`, as in the PR's original. `perform` runs at most once per perform_choosing call: choose_action takes an FnOnce closure and calls it once, open_menu::guard takes `run: impl FnOnce` and calls it once, and press_into_view has no retry (its optional scroll send comes after the check). So the check guards the single send exactly as before. The identity check (require_read_as / require_element_read_as) runs before choose_action, so before any raise.",
    "built": [
     {
@@ -81852,7 +81852,7 @@
    ],
    "opened": "2026-11-11T12:38:47Z",
    "readied": "2026-11-11T12:39:15Z",
-   "advanced": "2026-11-12T01:55:10Z",
+   "advanced": "2026-11-12T09:59:45Z",
    "rebases_after": [
     18898
    ],
