@@ -82718,123 +82718,25 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-12T01:45:57Z",
+  "checked": "2026-11-12T02:16:56Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
+   "relay-frame-race": {
+    "since": "2026-11-12T02:16:56Z",
+    "title": "fix(browser-relay): keep a driven tab when a password manager's frame drops omp from it"
+   },
    "tern-kit-password-mask": {
     "since": "2026-11-12T01:45:57Z",
     "title": "fix(browser): mask password values in Tern kit observations"
-   },
-   "agent-identity": {
-    "since": "2026-11-12T00:44:35Z",
-    "title": "feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy"
    }
   },
   "conflicts": {
-   "#18925": {
-    "since": "2026-11-12T01:15:20Z",
-    "title": "feat(coding-agent): name the native windows a browser call raised on macOS",
-    "files": [
-     "packages/coding-agent/src/tools/browser/tab-protocol.ts"
-    ]
-   },
    "#16611": {
     "since": "2026-11-12T01:15:20Z",
     "title": "feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio",
     "files": [
      "packages/coding-agent/src/prompts/tools/read.md"
-    ]
-   },
-   "#18222": {
-    "since": "2026-11-12T01:15:20Z",
-    "title": "feat(coding-agent): find nested menu commands in one read",
-    "files": [
-     "packages/coding-agent/src/prompts/tools/computer.md"
-    ]
-   },
-   "#18353": {
-    "since": "2026-11-12T01:45:57Z",
-    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
-    "files": [
-     "MODULE.bazel.lock"
-    ]
-   },
-   "#18013": {
-    "since": "2026-11-12T01:45:57Z",
-    "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "files": [
-     "MODULE.bazel.lock"
-    ]
-   },
-   "#18737": {
-    "since": "2026-11-12T01:15:20Z",
-    "title": "fix(browser): give browser calls without a timeout the Eval cell's timeout",
-    "files": [
-     "packages/coding-agent/src/prompts/tools/browser.md"
-    ]
-   },
-   "#18738": {
-    "since": "2026-11-12T01:15:20Z",
-    "title": "fix(browser): tell agents that treat console() or errors() as an array to read .entries",
-    "files": [
-     "packages/coding-agent/src/prompts/tools/browser.md"
-    ]
-   },
-   "#18786": {
-    "since": "2026-11-12T01:15:20Z",
-    "title": "feat(agent,coding-agent): send a short browser guide with the first browser call",
-    "files": [
-     "packages/coding-agent/src/prompts/tools/browser.md",
-     "packages/coding-agent/src/tools/browser.ts",
-     "packages/coding-agent/src/tools/eval.ts",
-     "packages/coding-agent/test/tools/browser-relay-kind.test.ts"
-    ]
-   },
-   "#18789": {
-    "since": "2026-11-12T01:15:20Z",
-    "title": "feat(coding-agent): keep subagents' browser tabs out of the user's Chrome and Tern pane unless asked",
-    "files": [
-     "docs/tools/browser.md",
-     "packages/browser-relay/README.md",
-     "packages/coding-agent/src/prompts/tools/browser.md",
-     "packages/coding-agent/src/tools/browser.ts",
-     "packages/coding-agent/src/tools/browser/settings.ts"
-    ]
-   },
-   "#18776": {
-    "since": "2026-11-12T01:15:20Z",
-    "title": "feat(coding-agent): report browser screenshots and opens on one line",
-    "files": [
-     "packages/coding-agent/src/tools/browser.ts"
-    ]
-   },
-   "#18784": {
-    "since": "2026-11-12T01:15:20Z",
-    "title": "fix(natives): keep X11 takeover from taking a typing user's keys",
-    "files": [
-     "packages/coding-agent/src/prompts/tools/computer.md"
-    ]
-   },
-   "#18947": {
-    "since": "2026-11-12T01:15:20Z",
-    "title": "fix(natives,coding-agent): report unavailable Windows desktop sessions",
-    "files": [
-     "packages/coding-agent/src/prompts/tools/computer-screen-state.md"
-    ]
-   },
-   "#18892": {
-    "since": "2026-11-12T01:15:20Z",
-    "title": "fix(natives): refuse macOS element actions once the ref's element reads as another control",
-    "files": [
-     "packages/coding-agent/src/prompts/tools/computer.md"
-    ]
-   },
-   "#18924": {
-    "since": "2026-11-12T01:15:20Z",
-    "title": "fix(browser): honor selector wait states and reject unknown options",
-    "files": [
-     "docs/tools/browser.md"
     ]
    }
   },
@@ -83066,62 +82968,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-05T01:49:11Z",
-    "kind": "unopenable",
-    "id": "diff-binary-files",
-    "title": "fix(pi-shell): list binary and line-less files in minimized diff summaries",
-    "why": "opened as #18148"
-   },
-   {
-    "at": "2026-11-05T01:49:11Z",
-    "kind": "unopenable",
-    "id": "rustfmt-check-files",
-    "title": "fix(pi-shell): count files, not diff locations, in minimized rustfmt --check output",
-    "why": "opened as #18147"
-   },
-   {
-    "at": "2026-11-05T01:49:11Z",
-    "kind": "unopenable",
-    "id": "sec-edgar-document-urls",
-    "title": "fix(coding-agent): read SEC EDGAR filing documents instead of the company profile",
-    "why": "opened as #18150"
-   },
-   {
-    "at": "2026-11-05T01:49:11Z",
-    "kind": "unopenable",
-    "id": "download-wait-busy",
-    "title": "fix(coding-agent): show browser agents how to wait for a download they start",
-    "why": "opened as #18155"
-   },
-   {
-    "at": "2026-11-05T01:49:11Z",
-    "kind": "unopenable",
-    "id": "lsp-references-stale-open",
-    "title": "fix(lsp): sync open documents edited outside OMP before cross-file queries",
-    "why": "opened as #18153"
-   },
-   {
-    "at": "2026-11-05T01:49:11Z",
-    "kind": "unopenable",
-    "id": "markdown-parse-status",
-    "title": "fix(edit): stopped warning that valid Markdown edits broke the file",
-    "why": "opened as #18151"
-   },
-   {
-    "at": "2026-11-05T01:49:11Z",
-    "kind": "unopenable",
-    "id": "ssh-write-new-projection",
-    "title": "fix(coding-agent): create new ssh:// files from bounded read output",
-    "why": "opened as #18154"
-   },
-   {
-    "at": "2026-11-05T01:49:11Z",
-    "kind": "unopenable",
-    "id": "tui-file-bun-be-bun",
-    "title": "fix(tui-debug): run file entries with bun under the compiled omp binary",
-    "why": "opened as #18156"
-   },
    {
     "at": "2026-11-05T02:49:26Z",
     "kind": "unopenable",
@@ -85384,6 +85230,19 @@
     "files": [
      "MODULE.bazel.lock"
     ]
+   },
+   {
+    "at": "2026-11-12T02:16:56Z",
+    "kind": "openable",
+    "id": "relay-frame-race",
+    "title": "fix(browser-relay): keep a driven tab when a password manager's frame drops omp from it"
+   },
+   {
+    "at": "2026-11-12T02:16:56Z",
+    "kind": "unopenable",
+    "id": "agent-identity",
+    "title": "feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy",
+    "why": "plan: held (held: Main, 2026-11-12: prepared; held until Main releases (key-chord Cancelled vs InputBusy VM check))"
    }
   ]
  },
