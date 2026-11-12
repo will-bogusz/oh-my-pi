@@ -4,46 +4,42 @@ I kept losing track of which subagent was which, so every agent now gets a fixed
 
 Main is blue; every subagent hashes its id into one of six other colours, the same colour in every row, live or finished.
 
-<!-- IMAGE: upload with `pr-images upload --themed --scale 2 --alt "Task tool agent rows on main and on this branch" ~/tmp/trycua-omp/next-round/CursorChecks/identity/agent-rows-dark.png ~/tmp/trycua-omp/next-round/CursorChecks/identity/agent-rows-light.png` and replace this comment with its Markdown -->
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/89922411-8596-4e66-9bcb-7e6aa106827c">
+  <source media="(prefers-color-scheme: light)" srcset="https://github.com/user-attachments/assets/dc5d463c-857d-446f-96ee-8d1f036ce01b">
+  <img width="1010" alt="Task tool agent rows on main and on this branch" src="https://github.com/user-attachments/assets/dc5d463c-857d-446f-96ee-8d1f036ce01b" />
+</picture>
 
 | Surface | main | this PR |
 |---|---|---|
-| Task tool agent rows | name in accent while live, text when done | name in the agent's colour; the description keeps main's colours; a frozen snapshot stays dim |
-| Agent hub roster rows | bold id, the selected one in accent | unselected ids in the agent's colour; the selected row keeps accent |
-| `InputBusy` after waiting for another session | `another desktop operation owns input/focus control; no input was sent` | `agent "CursorChecks.Scout" (omp pid 4242) owns input/focus control; no input was sent`; main's text when the holder has no agent id or its process is gone |
+| Task tool agent rows | name in accent while live, text when done | name in the agent's colour; description unchanged; frozen snapshots stay dim |
+| Agent hub roster | bold id; selected one in accent | unselected ids in the agent's colour; selection unchanged |
+| `InputBusy` after waiting | unnamed input/focus owner | full agent id and omp pid when known; original message otherwise |
 
 **For the maintainer:** rows are coloured by default, with no setting. Keep it on, or gate it? Gating is a check around the `agentColored` calls.
 
-<details><summary>Reading order</summary>
-
-- `tui/src/overlays/agent-identity.ts`: `agentIdentity`, `AGENT_COLOR_HEX`, `agentColored`.
-- Rows: `renderAgentTreeRow` (`agentId`), `renderAgentResult`, `AgentHubOverlayComponent#renderEntry`.
-- Lock holder: `buildComputerSnapshot` (`agentId`) → worker `#ensureSession` → `DesktopSessionOptions.agent_id` → `CancellationSource::counting_escapes` → `KernelOwner::acquire` → `ProcessLease::name` (same omp), `KernelLease::record` / `KernelLease::holder` (other omp processes).
-
-</details>
+This PR is the base of two follow-ups that are not open yet: a browser cursor in OMP-driven tabs, and a desktop cursor where computer input lands on macOS. Both cursor settings default to off; neither cursor is included here.
 
 ## Why
 
-With several subagents running, rows differ only by name; a stable colour lets you follow one agent across the Task card and the hub. The palette is fixed names with one hex each, at least 3:1 against white and `#1e1e1e`, so a later agent cursor in a browser or on the desktop can draw an agent in the same colour without a theme. The agent cannot pick its colour.
+A stable colour lets you follow one agent across the Task card and hub. A fixed palette, rather than the theme-dependent `session-color` hue, lets future cursors use that same colour outside the terminal. The cost is ignoring the theme: yellow and teal fall just under 3:1 on Solarized Light.
 
-- A fixed palette rather than `session-color`'s hue: that hue follows the active theme, and a cursor outside the terminal has none. The cost: it ignores the theme, and yellow and teal fall just under 3:1 on Solarized Light's background.
-- `InputBusy` names the full agent id, not its last segment: `A.Scout` and `B.Scout` stay distinct, and the waiting agent can message the holder.
-- The holder's name goes in the existing lock file: every new lease clears it, a named lease writes it, release clears it, and a waiter trusts it only while that pid is alive. A second file would be one more thing to keep in step with the lock.
-- Windows keeps its named mutex, so there only a holder in the same omp is named.
+`InputBusy` names the full id so `A.Scout` and `B.Scout` stay distinct. The existing lock file carries the holder, is cleared with each lease, and is trusted only while its pid lives. Windows retains its named mutex and names only same-process holders.
 
-Non-goals: Tern's native view (its spans carry theme tokens, not colours); `eval` `agent()` rows; text during the 5 s wait (there is none). Related: #11959 is about an identity the model can reference.
+Non-goals: Tern's native view, whose spans carry theme tokens rather than colours; `eval` `agent()` rows; text during the lock wait. Related: #11959 concerns identity the model can reference.
+
+Review colour selection in `tui/src/overlays/agent-identity.ts`, then row rendering, then `buildComputerSnapshot` through the native control lease.
 
 ## Testing
 
-- Live on Linux (Xvfb, this branch's addon): one process takes control as `Scout`; a second sends a key chord and fails after 5,061 ms with `agent "Scout" (omp pid 967685) owns input/focus control; no input was sent`, the holder's pid. Two sessions in one process: `agent "Scout" (omp pid 962789)`. With the holder gone the chord is sent.
-- Each row test and the agent-id test fail with their source change reverted; the natives tests fail when the message stops naming the holder.
-- No model sample run: the change is the text of an error on a rare contention path, and the agent's options after it are the same.
-- Not run: the live check on macOS and Windows.
+- Linux/Xvfb live check using this branch's addon: a second process times out naming the `Scout` holder and its pid; same-process contention also names it. With the holder gone, the chord is sent.
+- Row and agent-id tests fail with their source changes reverted; native tests fail without holder naming.
+- No model sample run: this changes error text on contention, not the agent's options. Live macOS and Windows checks were not run.
 
-<details><summary>Commands</summary>
+<details><summary>Commands and covered paths</summary>
 
 - `packages/tui`: `bun test test/agent-identity.test.ts test/task-progress-render.test.ts`
-- `packages/coding-agent`: `bun test test/agent-hub-ordering.test.ts test/tools/computer.test.ts` (the agent-id test drives a computer call through the host snapshot and the worker and checks the native session gets `agentId: "CursorChecks.Scout"`)
-- `cargo test -p pi-natives --lib desktop::control`: `input_refused_by_another_sessions_control_names_its_agent` (a held session's id reaches the in-process refusal and the lock file, and leaves with its control) and `independent_kernel_handles_contend_and_release` (no record, a record whose process exited, cleared on release, a dead host's record cleared by the next lease)
+- `packages/coding-agent`: `bun test test/agent-hub-ordering.test.ts test/tools/computer.test.ts`; the agent-id case drives a host snapshot through the worker to the native session.
+- `cargo test -p pi-natives --lib desktop::control`: `input_refused_by_another_sessions_control_names_its_agent` covers in-process refusal and lock-file naming; `independent_kernel_handles_contend_and_release` covers absent, stale and cleared records.
 
 </details>
