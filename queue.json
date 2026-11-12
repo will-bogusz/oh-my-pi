@@ -84030,6 +84030,26 @@
    "added": "2026-11-12T04:03:51Z",
    "updated": "2026-11-12T04:03:51Z",
    "note": ""
+  },
+  {
+   "id": "win-type-drain",
+   "branch": "will/win-type-drain",
+   "title": "fix(natives,coding-agent): stop Windows takeover typing from losing text the app had not read yet",
+   "area": "computer",
+   "priority": "P1",
+   "needs": [
+    "win-takeover-focus"
+   ],
+   "base": "ee6912f7dc531a48793cfc6afd832b020b708d0a",
+   "body": "bodies/win-type-drain.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-type-drain",
+   "host": "MacBook-Pro",
+   "added": "2026-11-12T04:40:03Z",
+   "updated": "2026-11-12T04:40:03Z",
+   "note": ""
   }
  ],
  "watch": {
