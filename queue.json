@@ -75576,7 +75576,7 @@
    "area": "factory-droid",
    "priority": null,
    "needs": [
-    "factory-droid-171-pin"
+    "gemini-hydrogen-overlap"
    ],
    "base": "8b1fd3233b873b94ec1d658fee26b2cbaf72d9d4",
    "body": "bodies/factory-droid-171-models.md",
@@ -75586,7 +75586,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-171-models",
    "host": "MacBook-Pro",
    "added": "2026-11-10T19:41:03Z",
-   "updated": "2026-11-13T17:04:02Z",
+   "updated": "2026-11-13T17:09:19Z",
    "note": "",
    "advanced": "2026-11-13T17:00:40Z",
    "hold": "Main, 2026-11-13: regenerated rules.json compiles main's gemini-4-hydrogen overlap (AmbiguousOverlapError at startup); opens after gemini-hydrogen-overlap merges"
