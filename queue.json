@@ -101027,7 +101027,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-13T17:02:52.490503Z",
+  "at": "2026-11-13T17:06:18.211108Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -101035,26 +101035,6 @@
    "left": 7
   },
   "rows": [
-   {
-    "id": "relay-restored-frame",
-    "label": "#19178",
-    "number": 19178,
-    "state": "open",
-    "area": "browser",
-    "priority": "P0",
-    "title": "fix(browser-relay): keep a relay tab when another extension's frame keeps omp out",
-    "action": "keep",
-    "reasons": [],
-    "note": "accepted pair with #18925: Main, 2026-11-13: tab-supervisor.ts import block only, keep both lines (import { isLoopbackRelayUrl } from \"./relay/daemon\"; import { FOREIGN_FRAME_REFUSAL } from \"./relay/protocol\"); accepted pair with #19001: Main, 2026-11-13: tab-supervisor.ts only, module scope: import line keeps both names (import { FOREIGN_FRAME_REFUSAL, type HiddenFrame } from \"./relay/protocol\") and WorkerTabSession gains both adjacent fields (heldOut, hiddenFrames); combined form ~/tmp/oh-my-pi/RelayRestoredFrame2/combined-19001.txt",
-    "over": [],
-    "paired": [
-     "#18925",
-     "#19001"
-    ],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-13T17:01:54Z"
-   },
    {
     "id": "click-place-release",
     "label": "#16553",
@@ -101272,6 +101252,26 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-12T23:56:35Z"
+   },
+   {
+    "id": "relay-restored-frame",
+    "label": "#19178",
+    "number": 19178,
+    "state": "open",
+    "area": "browser",
+    "priority": "P1",
+    "title": "fix(browser-relay): keep a relay tab when another extension's frame keeps omp out",
+    "action": "keep",
+    "reasons": [],
+    "note": "accepted pair with #18925: Main, 2026-11-13: tab-supervisor.ts import block only, keep both lines (import { isLoopbackRelayUrl } from \"./relay/daemon\"; import { FOREIGN_FRAME_REFUSAL } from \"./relay/protocol\"); accepted pair with #19001: Main, 2026-11-13: tab-supervisor.ts only, module scope: import line keeps both names (import { FOREIGN_FRAME_REFUSAL, type HiddenFrame } from \"./relay/protocol\") and WorkerTabSession gains both adjacent fields (heldOut, hiddenFrames); combined form ~/tmp/oh-my-pi/RelayRestoredFrame2/combined-19001.txt",
+    "over": [],
+    "paired": [
+     "#18925",
+     "#19001"
+    ],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-13T17:01:54Z"
    },
    {
     "id": "claude-refusal-strip-retry",
@@ -101966,6 +101966,23 @@
     ],
     "needs": [],
     "created": "2026-10-19T07:26:45Z"
+   },
+   {
+    "id": "devin-pin-31257",
+    "label": "devin-pin-31257",
+    "number": null,
+    "state": "queued",
+    "area": "catalog",
+    "priority": "P2",
+    "title": "fix(catalog): identify Devin requests as CLI 3000.12.57",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-13T17:05:09Z"
    },
    {
     "id": "macos-ax-cancel-before-send",
@@ -102897,8 +102914,10 @@
     "area": "factory-droid",
     "priority": null,
     "title": "feat(catalog): add the Factory Droid models droid 1.7.1 serves",
-    "action": "open",
-    "reasons": [],
+    "action": "held",
+    "reasons": [
+     "held: Main, 2026-11-13: regenerated rules.json compiles main's gemini-4-hydrogen overlap (AmbiguousOverlapError at startup); opens after gemini-hydrogen-overlap merges"
+    ],
     "note": "",
     "over": [],
     "paired": [],
