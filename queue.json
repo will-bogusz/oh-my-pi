@@ -99980,8 +99980,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-13T02:07:14.727019Z",
-  "host": "goliath",
+  "at": "2026-11-13T02:48:00.790987Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -100524,6 +100524,23 @@
     "created": "2026-11-03T09:05:24Z"
    },
    {
+    "id": "ax-relabel-recovery",
+    "label": "ax-relabel-recovery",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): tell the model it may act on the new ref a relabelled-ref refusal names",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-13T02:45:02Z"
+   },
+   {
     "id": "covered-fill",
     "label": "covered-fill",
     "number": null,
@@ -100780,6 +100797,7 @@
      "conflicts with #18013 in docs/computer-use.md",
      "conflicts with #18222 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #18987 in docs/computer-use.md, packages/coding-agent/src/tools/computer/worker.ts",
+     "conflicts with ax-relabel-recovery in docs/computer-use.md",
      "conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
@@ -100795,7 +100813,8 @@
      "#19035",
      "#18013",
      "#18222",
-     "#18987"
+     "#18987",
+     "ax-relabel-recovery"
     ],
     "needs": [],
     "created": "2026-10-19T07:26:45Z"
@@ -100851,6 +100870,7 @@
      "conflicts with #18013 in docs/computer-use.md",
      "conflicts with #18222 in docs/computer-use.md",
      "conflicts with #18987 in docs/computer-use.md",
+     "conflicts with ax-relabel-recovery in docs/computer-use.md",
      "conflicts with main in docs/computer-use.md"
     ],
     "note": "",
@@ -100868,7 +100888,8 @@
      "#17897",
      "#18013",
      "#18222",
-     "#18987"
+     "#18987",
+     "ax-relabel-recovery"
     ],
     "needs": [
      "iphone-mirror-scroll-distance"
@@ -101011,6 +101032,7 @@
      "conflicts with #19063 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18987 in crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with ax-relabel-recovery in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs"
     ],
     "note": "",
@@ -101022,7 +101044,8 @@
      "#19061",
      "#19063",
      "#18925",
-     "#18987"
+     "#18987",
+     "ax-relabel-recovery"
     ],
     "needs": [],
     "created": "2026-11-11T10:16:04Z"
@@ -101244,6 +101267,7 @@
      "conflicts with #18222 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/tools/eval.ts",
      "conflicts with #18987 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/worker.ts",
+     "conflicts with ax-relabel-recovery in docs/computer-use.md",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -101261,7 +101285,8 @@
      "#18013",
      "#18222",
      "#18786",
-     "#18987"
+     "#18987",
+     "ax-relabel-recovery"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -101288,6 +101313,7 @@
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18987 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
+     "conflicts with ax-relabel-recovery in crates/pi-natives/src/desktop/mod.rs",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs"
     ],
@@ -101303,7 +101329,8 @@
      "#18353",
      "#18222",
      "#18925",
-     "#18987"
+     "#18987",
+     "ax-relabel-recovery"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -101331,6 +101358,7 @@
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md",
      "conflicts with #18925 in crates/pi-natives/src/desktop/macos/capture.rs, crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with ax-relabel-recovery in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
@@ -101345,7 +101373,8 @@
      "#19100",
      "#18353",
      "#18222",
-     "#18925"
+     "#18925",
+     "ax-relabel-recovery"
     ],
     "needs": [
      "agent-identity"
@@ -101547,6 +101576,40 @@
      "wire-delta-count"
     ],
     "created": "2026-11-03T01:54:17Z"
+   },
+   {
+    "id": "stats-reply-link",
+    "label": "stats-reply-link",
+    "number": null,
+    "state": "queued",
+    "area": "other",
+    "priority": null,
+    "title": "fix(stats): count every answered message in the Frustration per-model table",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-13T02:46:31Z"
+   },
+   {
+    "id": "stats-trace-jobs",
+    "label": "stats-trace-jobs",
+    "number": null,
+    "state": "queued",
+    "area": "stats",
+    "priority": null,
+    "title": "fix(stats): close Traces background jobs when they finish, so idle time and turn ends show",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-13T02:47:10Z"
    },
    {
     "id": "text-reader-usage-shift",
