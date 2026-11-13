@@ -101069,12 +101069,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-13T17:06:18.211108Z",
+  "at": "2026-11-13T17:13:24.612405Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 1,
-   "left": 7
+   "used": 2,
+   "left": 6
   },
   "rows": [
    {
@@ -101314,6 +101314,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-13T17:01:54Z"
+   },
+   {
+    "id": "key-menu",
+    "label": "#19179",
+    "number": 19179,
+    "state": "open",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): close the menu a macOS background key press opens",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-13T17:10:23Z"
    },
    {
     "id": "claude-refusal-strip-retry",
@@ -101627,6 +101644,23 @@
     "created": "2026-11-12T16:39:36Z"
    },
    {
+    "id": "gemini-hydrogen-overlap",
+    "label": "gemini-hydrogen-overlap",
+    "number": null,
+    "state": "queued",
+    "area": "catalog",
+    "priority": "P0",
+    "title": "fix(catalog): keep Gemini 4 Hydrogen in one thinking rule so a regenerated catalog starts",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-13T17:08:59Z"
+   },
+   {
     "id": "atspi-walk-reads",
     "label": "atspi-walk-reads",
     "number": null,
@@ -101719,23 +101753,6 @@
     ],
     "needs": [],
     "created": "2026-10-30T21:35:55Z"
-   },
-   {
-    "id": "key-menu",
-    "label": "key-menu",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives): close the menu a macOS background key press opens",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-13T12:43:28Z"
    },
    {
     "id": "macos-drag-confirm",
@@ -101977,6 +101994,7 @@
      "conflicts with #19061 in docs/computer-use.md",
      "conflicts with #19062 in docs/computer-use.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #19100 in packages/coding-agent/src/tools/computer/worker.ts",
+     "conflicts with #19179 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18353 in docs/computer-use.md",
      "conflicts with #19034 in docs/computer-use.md",
      "conflicts with #19035 in docs/computer-use.md",
@@ -101984,7 +102002,6 @@
      "conflicts with #18013 in docs/computer-use.md",
      "conflicts with #18222 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #18987 in docs/computer-use.md, packages/coding-agent/src/tools/computer/worker.ts",
-     "conflicts with key-menu in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with macos-drag-confirm in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts"
     ],
@@ -101996,6 +102013,7 @@
      "#19061",
      "#19062",
      "#19100",
+     "#19179",
      "#18353",
      "#19034",
      "#19035",
@@ -102003,7 +102021,6 @@
      "#18013",
      "#18222",
      "#18987",
-     "key-menu",
      "macos-drag-confirm"
     ],
     "needs": [],
@@ -102228,8 +102245,8 @@
     "reasons": [
      "conflicts with #19025 in crates/pi-natives/src/desktop/win32/mod.rs",
      "conflicts with #19062 in crates/pi-natives/src/desktop/win32/capture.rs, crates/pi-natives/src/desktop/win32/mod.rs",
+     "conflicts with #19179 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18222 in packages/coding-agent/src/prompts/tools/computer.md",
-     "conflicts with key-menu in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with macos-drag-confirm in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/win32/mod.rs, packages/coding-agent/src/prompts/tools/computer.md"
     ],
@@ -102239,8 +102256,8 @@
     "blocked_by": [
      "#19025",
      "#19062",
+     "#19179",
      "#18222",
-     "key-menu",
      "macos-drag-confirm"
     ],
     "needs": [],
@@ -102441,6 +102458,7 @@
      "conflicts with #19061 in docs/computer-use.md",
      "conflicts with #19062 in docs/computer-use.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #19100 in docs/tools/computer.md, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with #19179 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18353 in docs/computer-use.md, docs/tools/computer.md",
      "conflicts with #19034 in docs/computer-use.md",
      "conflicts with #19035 in docs/computer-use.md",
@@ -102449,7 +102467,6 @@
      "conflicts with #18222 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/tools/eval.ts",
      "conflicts with #18987 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with key-menu in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with macos-drag-confirm in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/test/tools/computer.test.ts"
@@ -102462,6 +102479,7 @@
      "#19061",
      "#19062",
      "#19100",
+     "#19179",
      "#18353",
      "#19034",
      "#19035",
@@ -102470,7 +102488,6 @@
      "#18222",
      "#18786",
      "#18987",
-     "key-menu",
      "macos-drag-confirm"
     ],
     "needs": [
@@ -102494,11 +102511,11 @@
      "conflicts with #19061 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19063 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19100 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with #19179 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18987 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with key-menu in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with macos-drag-confirm in crates/pi-natives/src/desktop/macos/ax.rs, packages/coding-agent/src/prompts/tools/computer.md",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs"
@@ -102512,11 +102529,11 @@
      "#19061",
      "#19063",
      "#19100",
+     "#19179",
      "#18353",
      "#18222",
      "#18925",
      "#18987",
-     "key-menu",
      "macos-drag-confirm"
     ],
     "needs": [
@@ -102958,13 +102975,16 @@
     "title": "feat(catalog): add the Factory Droid models droid 1.7.1 serves",
     "action": "held",
     "reasons": [
-     "held: Main, 2026-11-13: regenerated rules.json compiles main's gemini-4-hydrogen overlap (AmbiguousOverlapError at startup); opens after gemini-hydrogen-overlap merges"
+     "held: Main, 2026-11-13: regenerated rules.json compiles main's gemini-4-hydrogen overlap (AmbiguousOverlapError at startup); opens after gemini-hydrogen-overlap merges",
+     "needs gemini-hydrogen-overlap (queued)"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [],
-    "needs": [],
+    "needs": [
+     "gemini-hydrogen-overlap"
+    ],
     "created": "2026-11-10T19:41:03Z"
    },
    {
