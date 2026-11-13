@@ -91574,13 +91574,13 @@
    "needs": [],
    "base": "8b1fd3233b873b94ec1d658fee26b2cbaf72d9d4",
    "body": "bodies/gemini-hydrogen-overlap.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19181,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/gemini-hydrogen-overlap",
    "host": "MacBook-Pro",
    "added": "2026-11-13T17:08:59Z",
-   "updated": "2026-11-13T17:22:12Z",
+   "updated": "2026-11-13T17:25:36Z",
    "note": "",
    "built": [
     {
@@ -91592,7 +91592,8 @@
      "at": "2026-11-13T17:22:07Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-13T17:25:36Z"
   },
   {
    "id": "factory-droid-config-update-upstreams",
