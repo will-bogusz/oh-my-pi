@@ -77382,7 +77382,7 @@
    "area": "browser",
    "priority": "P0",
    "needs": [],
-   "base": "c308970263ae13744ea15ab67302e3dac840e266",
+   "base": "84f5adc3bbfc0c2a7caecbad78b1b6eedf0a2939",
    "body": "bodies/browser-click-frame-removed.md",
    "state": "open",
    "pr": 19094,
@@ -77390,9 +77390,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-click-frame-removed",
    "host": "MacBook-Pro",
    "added": "2026-11-11T00:14:54Z",
-   "updated": "2026-11-13T00:07:13Z",
+   "updated": "2026-11-13T04:24:46Z",
    "note": "QueueSeventeen, 2026-11-12: rebased onto c308970263a (Main-approved combined form in clickTarget: main's detached check, then clickPoint(frame.page(), \u2026, checkWhileDown)); test-only repair: String() around page.evaluate in the frame-click helper (TS2322).",
-   "advanced": "2026-11-13T00:07:13Z",
+   "advanced": "2026-11-13T04:24:46Z",
    "built": [
     {
      "with": "#19062",
