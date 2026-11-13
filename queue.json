@@ -91540,7 +91540,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-pin-31257",
    "host": "MacBook-Pro",
    "added": "2026-11-13T17:05:09Z",
-   "updated": "2026-11-13T17:20:22Z",
+   "updated": "2026-11-13T17:20:48Z",
    "note": "",
    "built": [
     {
@@ -91562,7 +91562,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-11-13T17:20:22Z"
+   "opened": "2026-11-13T17:20:22Z",
+   "readied": "2026-11-13T17:20:47Z"
   },
   {
    "id": "gemini-hydrogen-overlap",
