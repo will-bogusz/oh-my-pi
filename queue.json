@@ -77380,7 +77380,7 @@
    "branch": "will/browser-click-frame-removed",
    "title": "fix(coding-agent): fail a click whose frame the page removed while the button was down",
    "area": "browser",
-   "priority": "P1",
+   "priority": "P0",
    "needs": [],
    "base": "c308970263ae13744ea15ab67302e3dac840e266",
    "body": "bodies/browser-click-frame-removed.md",
@@ -77390,7 +77390,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-click-frame-removed",
    "host": "MacBook-Pro",
    "added": "2026-11-11T00:14:54Z",
-   "updated": "2026-11-13T00:02:12Z",
+   "updated": "2026-11-13T00:06:14Z",
    "note": "QueueSeventeen, 2026-11-12: rebased onto c308970263a (Main-approved combined form in clickTarget: main's detached check, then clickPoint(frame.page(), \u2026, checkWhileDown)); test-only repair: String() around page.evaluate in the frame-click helper (TS2322).",
    "advanced": "2026-11-13T00:02:12Z",
    "built": [
