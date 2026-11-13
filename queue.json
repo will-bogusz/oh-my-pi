@@ -58543,7 +58543,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-scroll-direction",
    "host": "MacBook-Pro",
    "added": "2026-10-30T21:36:10Z",
-   "updated": "2026-11-13T13:03:11Z",
+   "updated": "2026-11-13T13:12:04Z",
    "note": "FalseSuccess2 2026-11-13: rebased onto main 84f5adc as 7d8261c (report_scroll hunks and iPhone report-path tests dropped; iPhone Mirroring gets the flip through background_scroll). P1 per Main: every macOS scroll goes the wrong way on main. No needs. Opening order A (macos-drag-confirm), this, B (macos-scroll-confirm).",
    "built": [
     {
@@ -58661,6 +58661,42 @@
      "tip": "7d8261c7bafe49615178ea15e284ebb3ecc98631",
      "with_tip": "04b9bba56545a2c501645c76526d064b66be9230",
      "at": "2026-11-13T13:03:11Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19061",
+     "code": "0a55ce1d58efe70232d1449eac9fdbd7e282f1c3",
+     "with_code": "11bcf21534ec11dd5ee5a195f17422c279c34173",
+     "tip": "7d8261c7bafe49615178ea15e284ebb3ecc98631",
+     "with_tip": "d98ee19b1a5c753a47997fb8c5ed74c988f1632a",
+     "at": "2026-11-13T13:11:59Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19080",
+     "code": "0a55ce1d58efe70232d1449eac9fdbd7e282f1c3",
+     "with_code": "2fc9a13b2e03bc86e294b02bf35f636fdbe36388",
+     "tip": "7d8261c7bafe49615178ea15e284ebb3ecc98631",
+     "with_tip": "4d847e81d003ae9dfcd24d0795b26e1e3f5b1321",
+     "at": "2026-11-13T13:12:03Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#18013",
+     "code": "0a55ce1d58efe70232d1449eac9fdbd7e282f1c3",
+     "with_code": "24080b3df6d631e487de760000bf866070bf2137",
+     "tip": "7d8261c7bafe49615178ea15e284ebb3ecc98631",
+     "with_tip": "6fe24191442ad2b5d5922e12a2feb474f682cc84",
+     "at": "2026-11-13T13:12:04Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#18925",
+     "code": "0a55ce1d58efe70232d1449eac9fdbd7e282f1c3",
+     "with_code": "8acec1d3364f9a8fc19437a88852ce63bcbb1ebe",
+     "tip": "7d8261c7bafe49615178ea15e284ebb3ecc98631",
+     "with_tip": "53b6588f7ff4d1d8be06d3399c7cc930ccf7bcb5",
+     "at": "2026-11-13T13:12:04Z",
      "host": "MacBook-Pro"
     }
    ]
