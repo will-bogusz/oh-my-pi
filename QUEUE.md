@@ -4,7 +4,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13
 
 **Opening:** not paused
 **Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-11-13 03:39Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 1, conflict-held 18, stacked 16, held 13, parked 2, open PRs 31; merged 334, closed 35
+**Counts:** openable now 1, conflict-held 18, stacked 16, held 13, parked 2, open PRs 31, queued since the last plan 1; merged 334, closed 35
 
 ## Openable now (1)
 
@@ -116,3 +116,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13
 | [#19114](https://github.com/can1357/oh-my-pi/pull/19114) | stats-reply-link | fix(stats): count every answered message in the Frustration per-model table | other | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-reply-link) |
 | [#19115](https://github.com/can1357/oh-my-pi/pull/19115) | stats-trace-jobs | fix(stats): close Traces background jobs when they finish, so idle time and turn ends show | stats | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-trace-jobs) |
 | [#19118](https://github.com/can1357/oh-my-pi/pull/19118) | stats-spotlight-freeze | fix(stats,coding-agent): keep the stats dashboard answering while Spotlight rebuilds | other |  | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-spotlight-freeze) |
+
+## Queued since the last plan (1)
+
+| id | title | area | priority | age | branch |
+|---|---|---|---|---|---|
+| stats-gain-compaction | fix(stats): count snapcompact compactions on the Gain tab | other |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-gain-compaction) |
