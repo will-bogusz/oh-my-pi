@@ -102941,5 +102941,11 @@
     "wake": ""
    }
   ]
+ },
+ "opening": {
+  "id": "key-menu",
+  "token": "b7c5b617e7044fcda09c2ab317e431dd",
+  "host": "MacBook-Pro",
+  "at": "2026-11-13T17:06:59Z"
  }
 }
