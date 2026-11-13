@@ -3781,7 +3781,7 @@
    "area": "browser",
    "priority": "P2",
    "needs": [],
-   "base": "5de4b038103fdf390daa1ad6ac490e290d276d99",
+   "base": "be96cff2d26b406765b428ae985f4e5f0ff020bd",
    "body": "bodies/r2/native-window-report.md",
    "state": "open",
    "pr": 18925,
@@ -3791,9 +3791,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/r2-native-window-report",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-11-13T12:43:51Z",
+   "updated": "2026-11-13T12:54:06Z",
    "note": "r2 restack 2026-10-18 (RelayTriage, TRIAGE.md in ~/tmp/oh-my-pi/relay-r2): sits on main + #15508 head 5ccf9eac6b (adjacent print-hold lines) 2026-11-02 (QueueRestructure): after Brit's merge round, a rebase must keep main's 1c45a9113ce (relay timeout typed by class; detach-report wait only in user-driven browsers), a47a579ff17 (acquireBrowser startRelay:false for a kept tab's close), 49a19f8ec19 (PI_BROWSER_RELAY_KEEP_FRONT=0 opt-out of the front-app hold: any new SkyLight/front-app call must honor it), 89833d37f43 (cancelled press releases on a sentinel off-page point; tab-worker click guard). | Main 2026-11-12: accepted pair relay-hidden-frames <-> #18925 (record with set --pair once both open). Combined form at tab-worker.ts WorkerCore.#run failure branch: #18925 enrichment of `error` (message and stack with the native notices), then `this.#sendResult({ id: msg.id, ok: false, error })`, so both native-window notices and the once-only hidden-frames notice ride the failure. Second to land adds one test that a failed run carries both.",
-   "advanced": "2026-11-13T12:43:51Z",
+   "advanced": "2026-11-13T12:54:06Z",
    "built": [
     {
      "with": "#18883",
@@ -76779,7 +76779,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "5de4b038103fdf390daa1ad6ac490e290d276d99",
+   "base": "be96cff2d26b406765b428ae985f4e5f0ff020bd",
    "body": "bodies/computer-run-failure-output.md",
    "state": "open",
    "pr": 19100,
@@ -76787,9 +76787,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-run-failure-output",
    "host": "MacBook-Pro",
    "added": "2026-11-11T00:07:07Z",
-   "updated": "2026-11-13T12:43:51Z",
+   "updated": "2026-11-13T12:54:06Z",
    "note": "",
-   "advanced": "2026-11-13T12:43:51Z",
+   "advanced": "2026-11-13T12:54:06Z",
    "built": [
     {
      "with": "#18624",
