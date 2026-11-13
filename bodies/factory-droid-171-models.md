@@ -27,7 +27,7 @@ Maintenance: the Carbon card ends by itself on 2026-12-01; the next sync round d
 
 ## Testing
 
-- Live on a Factory login from this branch, `omp -p` two-read turn (read two files, reply with their sum): 42 on `claude-fable-5.2`, `gemini-4-carbon` and `kimi-k3.1-pro`; Carbon's turn billed $2/$10, $0.10 cached.
+- Live on a Factory login from this branch, `omp -p` two-read turn (read two files, sum them): 42 on `claude-fable-5.2`, `gemini-4-carbon` and `kimi-k3.1-pro`; Carbon's turn billed $2/$10, $0.10 cached.
 - One-image turn on `muse-spark-1.3` (red/blue split PNG): this branch sends an `input_image` part; `main` sends another model's description instead. Meta's upstream rejected every Muse Spark 1.3 request that day, text-only too, so neither side got an answer.
 - `generate_image` with the `image` role set to `factory-droid/gpt-image-2.6-sunburst` returned an image from that model.
 - Native parity: droid 1.7.1 captures for `claude-fable-5.2@anthropic`, `gemini-4-carbon@google` and `kimi-k3.1-pro@fireworks` match omp's requests (`factory-droid-native-parity.test.ts` 64 pass). With Carbon removed from Argon's dialect line its parity case fails; with Kimi K3.1 Pro removed from `requires-tool-result-name` the new completions test fails.
