@@ -2,6 +2,7 @@ mod enablement;
 pub(crate) mod menus;
 pub(super) mod open_menu;
 mod popup;
+pub(super) mod scroll_view;
 mod selection;
 
 use std::{

@@ -4,6 +4,7 @@
 
 ### Fixed
 
+- Fixed a macOS background scroll returning as done when the scroll view under the pointer did not move though it could: over a view with scroll bars, such as an AppKit list, it now throws `InputFailed` saying no change was observed; scrolls in web content stay unchecked.
 - Fixed `<text>` disappearing from rendered SVGs when a generic font family names a font that is not installed ([#15181](https://github.com/can1357/oh-my-pi/issues/15181)) ([#18538](https://github.com/can1357/oh-my-pi/pull/18538) by [@Alex-Wengg](https://github.com/Alex-Wengg)).
 - Fixed `worktree add` failing, or leaving behind a worktree that could not be removed, when the checkout being cloned contains read-only files or directories ([#14190](https://github.com/can1357/oh-my-pi/issues/14190)) ([#18537](https://github.com/can1357/oh-my-pi/pull/18537) by [@Alex-Wengg](https://github.com/Alex-Wengg)).
 - Fixed `worktree add` deleting a file outside the new worktree when the source checkout had replaced a tracked directory with a symlink ([#18537](https://github.com/can1357/oh-my-pi/pull/18537) by [@Alex-Wengg](https://github.com/Alex-Wengg)).

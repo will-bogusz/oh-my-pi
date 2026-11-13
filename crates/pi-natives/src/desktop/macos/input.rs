@@ -2393,7 +2393,14 @@ fn background_gesture(
 		},
 		PointerEvent::Scroll { x, y, dx, dy } => {
 			before_post()?;
-			background_scroll(source, to, to_wid, window, x, y, dx, dy)
+			// The scroll view under the pointer, read before the wheel posts.
+			let view = ax::scroll_view::at(to, x, y)
+				.and_then(|view| view.position().map(|before| (view, before)));
+			background_scroll(source, to, to_wid, window, x, y, dx, dy)?;
+			let Some((view, before)) = view else {
+				return Ok(());
+			};
+			scroll_outcome(window, before, (dx, dy), || view.position(), control::wait)
 		},
 		PointerEvent::Drag { path, button, modifiers, mut keys } => {
 			control::add_modifiers(&mut keys, modifiers);
@@ -3097,6 +3104,69 @@ fn stamp_now(event: &CGEvent) {
 	unsafe {
 		set_event_timestamp(std::ptr::from_ref::<CGEvent>(event).cast_mut(), control::uptime_ns());
 	}
+}
+
+/// How long [`scroll_outcome`] waits for a scroll view to follow a scroll, in
+/// reads `SCROLL_POLL` apart.
+const SCROLL_POLLS: u32 = 15;
+const SCROLL_POLL: Duration = Duration::from_millis(40);
+
+/// The verdict of a background scroll by `(dx, dy)` over a scroll view that
+/// was at `before`, from where `position` reads it afterwards (`wait` paces
+/// the reads). A positive `dy` asks for the content below and a positive `dx`
+/// for the content to the right, as on Windows and Linux. The scroll is done
+/// once anything of the position differs from `before` or it is no longer
+/// readable, and done without a change when no axis it asks to move could
+/// move that way: one with no scroll bar, one whose scroll bar is at the end
+/// of its range in that direction, or one whose content does not reach past
+/// the view on that side. Either sign of an end is enough, since a scroll
+/// bar can lag behind its content, and a view whose content or own frame
+/// does not read is not checked. Otherwise the wheel event was delivered and
+/// nothing scrolled: the call throws `InputFailed` with its outcome
+/// unconfirmed instead of returning as if the view had scrolled.
+fn scroll_outcome(
+	window: &DesktopWindow,
+	before: ax::scroll_view::ScrollPosition,
+	(dx, dy): (f64, f64),
+	mut position: impl FnMut() -> Option<ax::scroll_view::ScrollPosition>,
+	mut wait: impl FnMut(Duration) -> CoreResult<()>,
+) -> CoreResult<()> {
+	let (Some(content), Some(view)) = (before.content, before.view) else {
+		return Ok(());
+	};
+	// Whether the content reaches past the view on the side `delta` heads
+	// for, along the axis whose leading edge and length these are.
+	let reaches = |delta: f64, (content, length): (f64, f64), (view, span): (f64, f64)| {
+		if delta > 0.0 {
+			content + length > view + span
+		} else {
+			content < view
+		}
+	};
+	let can_move = |delta: f64, bar: Option<f64>, content, view| {
+		delta.abs() >= 1.0
+			&& bar.is_some_and(|at| if delta > 0.0 { at < 1.0 } else { at > 0.0 })
+			&& reaches(delta, content, view)
+	};
+	if !can_move(dx, before.horizontal, (content.x, content.width), (view.x, view.width))
+		&& !can_move(dy, before.vertical, (content.y, content.height), (view.y, view.height))
+	{
+		return Ok(());
+	}
+	for read in 0..SCROLL_POLLS {
+		if read > 0 {
+			wait(SCROLL_POLL)?;
+		}
+		if position().is_none_or(|after| after != before) {
+			return Ok(());
+		}
+	}
+	Err(DesktopError::input_failed(format!(
+		"the scroll reached window {} ({}), but its outcome could not be confirmed: the scroll view \
+		 under the pointer did not move, though it was not at the end of its range in that \
+		 direction, so no change was observed. Read the target before retrying",
+		window.id, window.app,
+	)))
 }
 
 fn background_scroll(
@@ -8004,6 +8074,74 @@ mod tests {
 		.unwrap();
 		assert_eq!(entry, EntryFront(Some(9)));
 		assert_eq!(front_target(entry, Some(7), 7, || true), FrontTarget::CameForward);
+	}
+
+	#[test]
+	fn a_scroll_that_leaves_its_view_where_it_was_reports_no_change_observed() {
+		use std::cell::Cell;
+
+		use ax::scroll_view::{Frame, ScrollPosition};
+		let window = background_window("Electron");
+		// A list 100 points tall showing 400 points of rows, scrolled `bar` of
+		// the way down by its scroll bar and `top` points by its content.
+		let view = Frame { x: 0.0, y: 100.0, width: 200.0, height: 100.0 };
+		let list = |bar, top: f64| ScrollPosition {
+			horizontal: None,
+			vertical:   Some(bar),
+			content:    Some(Frame { x: 0.0, y: 100.0 - top, width: 200.0, height: 400.0 }),
+			view:       Some(view),
+		};
+		let at = |bar: f64| list(bar, bar * 300.0);
+		// `reads` are the view's positions after the wheel, in order; the last
+		// repeats. Returns the verdict and how many reads it took.
+		let run = |before, delta, reads: &[Option<ScrollPosition>]| {
+			let next = Cell::new(0);
+			let outcome = scroll_outcome(
+				&window,
+				before,
+				delta,
+				|| {
+					let position = reads[next.get().min(reads.len() - 1)];
+					next.update(|v| v + 1);
+					position
+				},
+				|gap| {
+					assert_eq!(gap, SCROLL_POLL);
+					Ok(())
+				},
+			);
+			(outcome.map_err(|error| (error.code.as_str(), error.message)), next.get())
+		};
+		// A list at its top asked for the content below that does not move:
+		// the wheel was delivered and nothing scrolled, so the call says so.
+		let (outcome, reads) = run(at(0.0), (0.0, 3.0), &[Some(at(0.0))]);
+		let (code, message) = outcome.unwrap_err();
+		assert_eq!(code, "InputFailed");
+		assert!(message.contains("could not be confirmed"), "{message}");
+		assert!(message.contains("no change was observed"), "{message}");
+		assert!(message.contains("before retrying"), "{message}");
+		assert_eq!(reads, SCROLL_POLLS as usize);
+		// Moving, late or at once, or no longer readable, is done.
+		assert_eq!(run(at(0.0), (0.0, 3.0), &[Some(at(0.0)), Some(at(0.01))]), (Ok(()), 2));
+		assert_eq!(run(at(0.5), (0.0, -3.0), &[Some(at(0.4))]), (Ok(()), 1));
+		assert_eq!(run(at(0.5), (0.0, -3.0), &[None]), (Ok(()), 1));
+		// A scroll bar that lags its content: the content moving is enough.
+		assert_eq!(run(list(0.01, 0.0), (0.0, 3.0), &[Some(list(0.01, 3.0))]), (Ok(()), 1));
+		// At the end it is asked to go past, by its scroll bar or by its
+		// content, along an axis with no scroll bar, or by less than a point,
+		// a view cannot move: done without a read.
+		assert_eq!(run(at(0.0), (0.0, -3.0), &[Some(at(0.0))]), (Ok(()), 0));
+		assert_eq!(run(at(1.0), (0.0, 3.0), &[Some(at(1.0))]), (Ok(()), 0));
+		assert_eq!(run(list(0.01, 0.0), (0.0, -3.0), &[Some(list(0.01, 0.0))]), (Ok(()), 0));
+		assert_eq!(run(at(0.3), (40.0, 0.0), &[Some(at(0.3))]), (Ok(()), 0));
+		assert_eq!(run(at(0.3), (0.0, 0.4), &[Some(at(0.3))]), (Ok(()), 0));
+		// Content that fits its view, or whose frame is unknown, is not checked.
+		let fits = ScrollPosition { content: Some(view), ..at(0.0) };
+		assert_eq!(run(fits, (0.0, 3.0), &[Some(fits)]), (Ok(()), 0));
+		let unknown = ScrollPosition { content: None, ..at(0.0) };
+		assert_eq!(run(unknown, (0.0, 3.0), &[Some(unknown)]), (Ok(()), 0));
+		// The end it sits at does not excuse a scroll the other way.
+		assert!(run(at(1.0), (0.0, -3.0), &[Some(at(1.0))]).0.is_err());
 	}
 
 	#[test]
