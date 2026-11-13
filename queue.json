@@ -100875,8 +100875,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-13T15:53:07.476022Z",
-  "host": "goliath",
+  "at": "2026-11-13T16:33:53.618566Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -101411,6 +101411,26 @@
     "created": "2026-11-12T16:39:36Z"
    },
    {
+    "id": "relay-restored-frame",
+    "label": "relay-restored-frame",
+    "number": null,
+    "state": "queued",
+    "area": "browser",
+    "priority": "P0",
+    "title": "fix(browser-relay): keep a relay tab when another extension's frame keeps omp out",
+    "action": "open",
+    "reasons": [],
+    "note": "accepted pair with #18925: Main, 2026-11-13: tab-supervisor.ts import block only, keep both lines (import { isLoopbackRelayUrl } from \"./relay/daemon\"; import { FOREIGN_FRAME_REFUSAL } from \"./relay/protocol\"); accepted pair with #19001: Main, 2026-11-13: tab-supervisor.ts only, module scope: import line keeps both names (import { FOREIGN_FRAME_REFUSAL, type HiddenFrame } from \"./relay/protocol\") and WorkerTabSession gains both adjacent fields (heldOut, hiddenFrames); combined form ~/tmp/oh-my-pi/RelayRestoredFrame2/combined-19001.txt",
+    "over": [],
+    "paired": [
+     "#18925",
+     "#19001"
+    ],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-13T16:33:20Z"
+   },
+   {
     "id": "atspi-walk-reads",
     "label": "atspi-walk-reads",
     "number": null,
@@ -101601,6 +101621,7 @@
      "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19045 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with relay-restored-frame in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with covered-fill in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
@@ -101612,6 +101633,7 @@
      "#18789",
      "#18925",
      "#19045",
+     "relay-restored-frame",
      "covered-fill"
     ],
     "needs": [],
@@ -101631,6 +101653,7 @@
      "conflicts with #18786 in docs/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md",
      "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with relay-restored-frame in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with covered-fill in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
@@ -101641,6 +101664,7 @@
      "#18786",
      "#18789",
      "#18925",
+     "relay-restored-frame",
      "covered-fill"
     ],
     "needs": [
@@ -101663,6 +101687,7 @@
      "conflicts with #18789 in docs/tools/browser.md",
      "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19045 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with relay-restored-frame in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with covered-fill in packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts",
      "its need browser-wait-predicate conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
@@ -101675,6 +101700,7 @@
      "#18789",
      "#18925",
      "#19045",
+     "relay-restored-frame",
      "covered-fill"
     ],
     "needs": [
@@ -101894,6 +101920,7 @@
      "conflicts with #18786 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts",
      "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts",
      "conflicts with #19045 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/network.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with relay-restored-frame in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-detach.test.ts",
      "conflicts with covered-fill in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need r2/relay-popup-owned conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts",
      "its need r2/page-waiting conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
@@ -101907,6 +101934,7 @@
      "#18786",
      "#18789",
      "#19045",
+     "relay-restored-frame",
      "covered-fill"
     ],
     "needs": [
@@ -101927,6 +101955,7 @@
     "reasons": [
      "conflicts with #19001 in packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts",
+     "conflicts with relay-restored-frame in packages/coding-agent/src/tools/browser/tab-supervisor.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-supervisor.ts"
     ],
     "note": "",
@@ -101934,7 +101963,8 @@
     "paired": [],
     "blocked_by": [
      "#19001",
-     "#18925"
+     "#18925",
+     "relay-restored-frame"
     ],
     "needs": [],
     "created": "2026-11-11T07:04:56Z"
@@ -102101,6 +102131,7 @@
      "needs #18987 (open)",
      "conflicts with #19001 in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18925 in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts",
+     "conflicts with relay-restored-frame in packages/coding-agent/src/tools/browser/tab-supervisor.ts",
      "conflicts with covered-fill in packages/coding-agent/src/tools/browser/tern/tern-tab.ts",
      "its need #18987 conflicts with main in docs/theme.md, packages/tui/src/theme/loader.ts, packages/tui/src/theme/schema.ts, packages/tui/src/theme/theme-schema.json",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
@@ -102111,6 +102142,7 @@
     "blocked_by": [
      "#19001",
      "#18925",
+     "relay-restored-frame",
      "covered-fill"
     ],
     "needs": [
@@ -102381,6 +102413,7 @@
      "conflicts with #18786 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with relay-restored-frame in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with covered-fill in packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts",
      "its need act-look-prompt conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
@@ -102393,6 +102426,7 @@
      "#18786",
      "#18789",
      "#18925",
+     "relay-restored-frame",
      "covered-fill"
     ],
     "needs": [
@@ -102415,6 +102449,7 @@
      "conflicts with #18786 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #19045 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with relay-restored-frame in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with covered-fill in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts",
      "conflicts with main in packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts"
@@ -102427,6 +102462,7 @@
      "#18786",
      "#18789",
      "#19045",
+     "relay-restored-frame",
      "covered-fill"
     ],
     "needs": [
@@ -102530,10 +102566,8 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "wait",
-    "reasons": [
-     "conflicts with main in (branch missing on the fork)"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
