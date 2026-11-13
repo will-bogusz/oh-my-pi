@@ -103074,5 +103074,11 @@
     "wake": ""
    }
   ]
+ },
+ "opening": {
+  "id": "gemini-hydrogen-overlap",
+  "token": "dd81490734a54a8899fb55a664d08d18",
+  "host": "MacBook-Pro",
+  "at": "2026-11-13T17:22:23Z"
  }
 }
