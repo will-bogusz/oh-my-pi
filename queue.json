@@ -91393,7 +91393,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-13T13:20:12Z",
+  "checked": "2026-11-13T14:21:30Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -91481,18 +91481,6 @@
    19165
   ],
   "post_merge": {
-   "16274": {
-    "title": "fix(agent,coding-agent): re-read a file an earlier bash call changed in the same message",
-    "merge_commit": "a5201c069a85d19943b2c6da52a8515211a37316",
-    "merged_at": "2026-11-11T13:55:07Z",
-    "findings": []
-   },
-   "17757": {
-    "title": "fix(natives): match macOS window screenshots to the window on screen",
-    "merge_commit": "61f01d06fafbf434b28dd337a5d0785a380e40aa",
-    "merged_at": "2026-11-11T13:55:07Z",
-    "findings": []
-   },
    "18632": {
     "title": "fix(coding-agent): resolve Chromium role selectors through Chrome's accessibility tree",
     "merge_commit": "0c740e39652b83516103538b63225385a945bf6c",
@@ -91515,12 +91503,6 @@
       "addressed_by": 18658
      }
     ]
-   },
-   "18676": {
-    "title": "fix(coding-agent): look a click's selector up again when the page replaces its element",
-    "merge_commit": "ee8160ffb86af8fb882a437ab26a2ca7360a5d6b",
-    "merged_at": "2026-11-11T13:55:07Z",
-    "findings": []
    },
    "18737": {
     "title": "fix(browser): give browser calls without a timeout the Eval cell's timeout",
@@ -91556,12 +91538,6 @@
     "title": "fix(computer): reject unknown helper option keys",
     "merge_commit": "fab1c42803f0587cdca6c76b9b313216fb83696c",
     "merged_at": "2026-11-12T09:21:49Z",
-    "findings": []
-   },
-   "18766": {
-    "title": "fix(catalog): identify Devin requests as CLI 3000.12.43",
-    "merge_commit": "b5e40952057622e12281f37533d22deed645aa1b",
-    "merged_at": "2026-11-11T13:55:07Z",
     "findings": []
    },
    "18771": {
@@ -91600,24 +91576,6 @@
     "merged_at": "2026-11-12T11:39:16Z",
     "findings": []
    },
-   "18795": {
-    "title": "fix(catalog): drop Devin's retired SWE-1.6 Fast seed row",
-    "merge_commit": "3af9a2c45eecfd781e2aa8f74cc3cd8d218b6ab1",
-    "merged_at": "2026-11-11T13:55:07Z",
-    "findings": []
-   },
-   "18823": {
-    "title": "fix(natives): stop Linux computer reads from crashing Qt, GTK 3 and Firefox apps",
-    "merge_commit": "16ca13d05c50da22b2cb78fe20e9f87d2b00d1c3",
-    "merged_at": "2026-11-11T13:55:07Z",
-    "findings": []
-   },
-   "18824": {
-    "title": "fix(natives): stop macOS background left clicks from crashing Electron and Chrome pages",
-    "merge_commit": "dedac96a9b24ab54dc535267967ae864d97f9174",
-    "merged_at": "2026-11-11T13:55:07Z",
-    "findings": []
-   },
    "18825": {
     "title": "fix(natives): stop X11 background input from crashing your running Qt 6.5+ apps",
     "merge_commit": "211fcf2ec129141e8edfe57346192a106780c741",
@@ -91628,48 +91586,6 @@
     "title": "fix(natives): confirm every X11 virtual-keyboard key release, in order",
     "merge_commit": "3c4e4ff6186822aae018256151f90e9fa64ae7f3",
     "merged_at": "2026-11-12T09:21:49Z",
-    "findings": []
-   },
-   "18829": {
-    "title": "fix(coding-agent): return the options a page leaves selected after its change handlers",
-    "merge_commit": "68c99fc2470b0d1d2a119e2841bcca139d022fd7",
-    "merged_at": "2026-11-11T13:55:07Z",
-    "findings": []
-   },
-   "18830": {
-    "title": "fix(coding-agent): fail a download wait when the saved file is not on this machine",
-    "merge_commit": "4a76166fe7c81c11a02be7b527565e884cddd015",
-    "merged_at": "2026-11-11T13:55:07Z",
-    "findings": []
-   },
-   "18832": {
-    "title": "fix(browser): give owned relay tabs truthful detach recovery guidance",
-    "merge_commit": "06776dba22f4a34704488d3af2fa4b7c52ff2410",
-    "merged_at": "2026-11-11T13:55:07Z",
-    "findings": []
-   },
-   "18833": {
-    "title": "fix(browser): name the relay's own-tab open when a target matches no tab",
-    "merge_commit": "02c2bfa8a9be23367eb528056a4b08175b5946d4",
-    "merged_at": "2026-11-11T13:55:07Z",
-    "findings": []
-   },
-   "18838": {
-    "title": "fix(coding-agent): stop a page calling window.print() from hanging the browser omp launches",
-    "merge_commit": "c47a7fefff94cf5a70787b4068d499e1f0c68ddd",
-    "merged_at": "2026-11-11T13:55:07Z",
-    "findings": []
-   },
-   "18840": {
-    "title": "fix(browser): say where tab.run code runs when it reaches for a page global",
-    "merge_commit": "10a95c883976fa56b6c760f6034f5a71e1471210",
-    "merged_at": "2026-11-11T13:55:07Z",
-    "findings": []
-   },
-   "18865": {
-    "title": "fix(coding-agent): print nothing for a JavaScript eval cell that ends in an assignment",
-    "merge_commit": "58f020f5b6494d28571dc20f1027ca6c0b175e47",
-    "merged_at": "2026-11-11T13:55:07Z",
     "findings": []
    },
    "18883": {
@@ -100901,12 +100817,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-13T13:50:33.050319Z",
+  "at": "2026-11-13T14:21:31.131902Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 1,
-   "left": 7
+   "used": 0,
+   "left": 8
   },
   "rows": [
    {
