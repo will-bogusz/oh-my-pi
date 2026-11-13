@@ -90883,7 +90883,7 @@
    "worktree": null,
    "host": "MacBook-Pro",
    "added": "2026-11-13T10:32:49Z",
-   "updated": "2026-11-13T13:03:52Z",
+   "updated": "2026-11-13T13:20:14Z",
    "note": "Head 37bd49376ef. Touches the Drag arm of background_gesture in crates/pi-natives/src/desktop/macos/input.rs; neighbouring arms are touched by macos-scroll-direction (Scroll arm / background_scroll) and by a separate lane's key-press fix: expect adjacent-hunk rebases, no semantic overlap. Review DragConfirm.ReviewDragConfirm needs-changes at abc556586fa, all F1-F9 fixed in 37bd493 (not re-reviewed per skill). VM: DragConfirm block3 (bench-mac runs dc-main-e/dc-C-e/dc-C-a/dc-main-a).",
    "built": [
     {
@@ -91082,6 +91082,42 @@
      "tip": "37bd49376ef341f5bb8300edb771cb9d55245278",
      "with_tip": "7d8261c7bafe49615178ea15e284ebb3ecc98631",
      "at": "2026-11-13T13:03:42Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19061",
+     "code": "1b6b064830c44ca81fd501711b388c9d9edb8a46",
+     "with_code": "11bcf21534ec11dd5ee5a195f17422c279c34173",
+     "tip": "37bd49376ef341f5bb8300edb771cb9d55245278",
+     "with_tip": "d98ee19b1a5c753a47997fb8c5ed74c988f1632a",
+     "at": "2026-11-13T13:20:03Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19080",
+     "code": "1b6b064830c44ca81fd501711b388c9d9edb8a46",
+     "with_code": "2fc9a13b2e03bc86e294b02bf35f636fdbe36388",
+     "tip": "37bd49376ef341f5bb8300edb771cb9d55245278",
+     "with_tip": "4d847e81d003ae9dfcd24d0795b26e1e3f5b1321",
+     "at": "2026-11-13T13:20:08Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#18013",
+     "code": "1b6b064830c44ca81fd501711b388c9d9edb8a46",
+     "with_code": "24080b3df6d631e487de760000bf866070bf2137",
+     "tip": "37bd49376ef341f5bb8300edb771cb9d55245278",
+     "with_tip": "6fe24191442ad2b5d5922e12a2feb474f682cc84",
+     "at": "2026-11-13T13:20:08Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#18925",
+     "code": "1b6b064830c44ca81fd501711b388c9d9edb8a46",
+     "with_code": "8acec1d3364f9a8fc19437a88852ce63bcbb1ebe",
+     "tip": "37bd49376ef341f5bb8300edb771cb9d55245278",
+     "with_tip": "53b6588f7ff4d1d8be06d3399c7cc930ccf7bcb5",
+     "at": "2026-11-13T13:20:08Z",
      "host": "MacBook-Pro"
     }
    ],
