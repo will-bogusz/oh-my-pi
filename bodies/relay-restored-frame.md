@@ -12,7 +12,7 @@ On real Bitwarden, when the agent's next call comes 300 ms after it clicks a log
 | Next call 1.5 s after the click | 10/10, next call median 0.91 s | 10/10 | 10/10, median 1.22 s | | |
 | The page focuses its field on load (5 tries) | 5/5, median 0.42 s | 5/5 | 5/5, median 1.22 s | | |
 
-The failing call tells the model the tab is still open, that another extension's frame holds it, and that calling again reattaches; the call that reattaches says so (texts below).
+The failing call says the tab is still open, what holds it and that calling again works (texts below).
 
 ## Why
 
