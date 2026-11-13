@@ -26,7 +26,7 @@ A refusal for any other reason keeps `main`'s path: the tab is let go with its "
 
 ## Testing
 
-Real Bitwarden and 1Password, signed in to fixture logins in a macOS VM, Chrome 157, driven through `tab-supervisor` with no model (tables above and below). 1Password never made Chrome refuse in its six cells, so this PR's path did not run there, and tabs were kept 10 of 10 on both sides.
+Real Bitwarden and 1Password, signed in to fixture logins in a macOS VM, Chrome 157, driven through `tab-supervisor` with no model (tables above and below). 1Password never made Chrome refuse in its six cells, so this PR's path did not run there, and tabs were kept in every try on both sides (10 or 20 tries per cell).
 
 - `bun test test/tools/browser-relay-*.test.ts` in three shuffled orders: 230 of 230 each.
 - The four held-out cases in `browser-relay-detach.test.ts` fail on `main` (4 of 19) and pass here; the case for any other refusal passes on both.
