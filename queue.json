@@ -90344,6 +90344,24 @@
    "added": "2026-11-13T02:45:02Z",
    "updated": "2026-11-13T02:45:02Z",
    "note": ""
+  },
+  {
+   "id": "stats-reply-link",
+   "branch": "will/stats-reply-link",
+   "title": "fix(stats): count every answered message in the Frustration per-model table",
+   "area": "other",
+   "priority": null,
+   "needs": [],
+   "base": "d8493454a2eab3c88f5410d6ce48bf3fe4352300",
+   "body": "bodies/stats-reply-link.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/stats-reply-link",
+   "host": "MacBook-Pro",
+   "added": "2026-11-13T02:46:31Z",
+   "updated": "2026-11-13T02:46:31Z",
+   "note": ""
   }
  ],
  "watch": {
