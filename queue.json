@@ -90453,9 +90453,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ax-read-as-live-label",
    "host": "MacBook-Pro",
    "added": "2026-11-13T02:49:00Z",
-   "updated": "2026-11-13T05:12:54Z",
+   "updated": "2026-11-13T05:35:19Z",
    "note": "",
-   "hold": "Will, 2026-11-13: Main decides the approach once #19061 has merged, with all the data in. In so far: release leg (RESULTS.md, 'relabel refusals'): 9 refusals in 93 runs, 4 true catches, 5 same-control relabels (Reminders count x3, a Finder icon the model renamed, a Calendar text the model's own edit extended), about +2 steps each, no grade changed; the wording change saved nothing and is closed; TitleTwin: 0 wrong-item actions in 200 trials; fixture same-title reuse limit 10/10. Owed: which of the 5 this change accepts (lane RelabelCases)."
+   "hold": "Will, 2026-11-13: Main decides the approach once #19061 merges, with all the data in. Data so far: release leg 9 refusals in 93 runs (4 true catches, 5 same-control relabels, about +2 steps each, no grade changed); wording-only change closed (no step saved, 6 runs per arm); TitleTwin 0 wrong-item actions in 200 trials on stock apps, fixture same-title reuse 10/10 wrong; RelabelCases (scripted, 10 tries per case, v18.20.0 vs b42c6d20412, ~/tmp/oh-my-pi/RelabelCases/{signals,recovery}.md): Reminders count refused 10/10 -> right control 10/10; Finder rename and Calendar location still refused 10/10 (no title link); Contacts City->Street still refused 10/10. Finder and Calendar differ from Contacts in that frame, value and sibling count are unchanged, but that is not shown safe in general. A refusal that carried its parent's subtree would be an estimated 150-460 chars against the 1,300-7,400 the model re-read, and would save one of the two recovery steps (reconstructed, not run)."
   },
   {
    "id": "stats-live-appends",
