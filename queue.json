@@ -3781,7 +3781,7 @@
    "area": "browser",
    "priority": "P2",
    "needs": [],
-   "base": "be96cff2d26b406765b428ae985f4e5f0ff020bd",
+   "base": "aa5f045f98a90f5c7bbc6b091f1e97e42263194d",
    "body": "bodies/r2/native-window-report.md",
    "state": "open",
    "pr": 18925,
@@ -3791,9 +3791,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/r2-native-window-report",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-11-13T12:54:06Z",
+   "updated": "2026-11-13T20:03:14Z",
    "note": "r2 restack 2026-10-18 (RelayTriage, TRIAGE.md in ~/tmp/oh-my-pi/relay-r2): sits on main + #15508 head 5ccf9eac6b (adjacent print-hold lines) 2026-11-02 (QueueRestructure): after Brit's merge round, a rebase must keep main's 1c45a9113ce (relay timeout typed by class; detach-report wait only in user-driven browsers), a47a579ff17 (acquireBrowser startRelay:false for a kept tab's close), 49a19f8ec19 (PI_BROWSER_RELAY_KEEP_FRONT=0 opt-out of the front-app hold: any new SkyLight/front-app call must honor it), 89833d37f43 (cancelled press releases on a sentinel off-page point; tab-worker click guard). | Main 2026-11-12: accepted pair relay-hidden-frames <-> #18925 (record with set --pair once both open). Combined form at tab-worker.ts WorkerCore.#run failure branch: #18925 enrichment of `error` (message and stack with the native notices), then `this.#sendResult({ id: msg.id, ok: false, error })`, so both native-window notices and the once-only hidden-frames notice ride the failure. Second to land adds one test that a failed run carries both.",
-   "advanced": "2026-11-13T12:54:06Z",
+   "advanced": "2026-11-13T20:03:14Z",
    "built": [
     {
      "with": "#18883",
@@ -36814,7 +36814,7 @@
    "area": "natives-macos",
    "priority": "P1",
    "needs": [],
-   "base": "84f5adc3bbfc0c2a7caecbad78b1b6eedf0a2939",
+   "base": "aa5f045f98a90f5c7bbc6b091f1e97e42263194d",
    "body": "bodies/click-place-release.md",
    "state": "open",
    "pr": 16553,
@@ -36822,7 +36822,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/click-place-release",
    "host": "MacBook-Pro",
    "added": "2026-10-20T20:11:57Z",
-   "updated": "2026-11-13T04:25:24Z",
+   "updated": "2026-11-13T20:03:14Z",
    "note": "",
    "built": [
     {
@@ -36855,7 +36855,7 @@
    ],
    "opened": "2026-10-20T20:20:44Z",
    "readied": "2026-10-20T20:21:05Z",
-   "advanced": "2026-11-13T04:25:24Z",
+   "advanced": "2026-11-13T20:03:14Z",
    "design_checks": [
     {
      "pr": 16553,
@@ -55840,7 +55840,7 @@
    "area": "computer",
    "priority": "P2",
    "needs": [],
-   "base": "84f5adc3bbfc0c2a7caecbad78b1b6eedf0a2939",
+   "base": "aa5f045f98a90f5c7bbc6b091f1e97e42263194d",
    "body": "bodies/computer-menu-subtree.md",
    "state": "open",
    "pr": 18222,
@@ -55848,9 +55848,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-menu-subtree",
    "host": "MacBook-Pro",
    "added": "2026-10-24T05:06:00Z",
-   "updated": "2026-11-13T04:26:56Z",
+   "updated": "2026-11-13T20:03:14Z",
    "note": "2026-10-29 (ComputerDocs): rebased onto main b0756921ed and pushed (e2b2d3a213); check + computer.test.ts (137 pass) on goliath; precheck has no timing FIX. Waits: its menu.items line in prompts/tools/computer.md sits next to lines #16925 (apps.open line) and #15282 (ax() line) change, so it conflicts with both until they merge; then rebase (pr-queue advance) and open.",
-   "advanced": "2026-11-13T04:26:56Z",
+   "advanced": "2026-11-13T20:03:14Z",
    "built": [
     {
      "with": "#16274",
@@ -58124,7 +58124,7 @@
    "area": "computer",
    "priority": "P2",
    "needs": [],
-   "base": "84f5adc3bbfc0c2a7caecbad78b1b6eedf0a2939",
+   "base": "aa5f045f98a90f5c7bbc6b091f1e97e42263194d",
    "body": "bodies/iphone-mirror-key-gap.md",
    "state": "open",
    "pr": 17897,
@@ -58132,7 +58132,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/iphone-mirror-key-gap",
    "host": "MacBook-Pro",
    "added": "2026-10-30T21:15:44Z",
-   "updated": "2026-11-13T04:26:37Z",
+   "updated": "2026-11-13T20:03:14Z",
    "note": "",
    "built": [
     {
@@ -58233,7 +58233,7 @@
      "tree": "91b54a3c61655e10eb8e95bc1a11f335eff2bb2f"
     }
    ],
-   "advanced": "2026-11-13T04:26:37Z",
+   "advanced": "2026-11-13T20:03:14Z",
    "opened": "2026-11-03T02:19:44Z",
    "readied": "2026-11-03T02:20:04Z"
   },
@@ -58335,7 +58335,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "84f5adc3bbfc0c2a7caecbad78b1b6eedf0a2939",
+   "base": "aa5f045f98a90f5c7bbc6b091f1e97e42263194d",
    "body": "bodies/iphone-mirror-pointer.md",
    "state": "open",
    "pr": 17756,
@@ -58343,7 +58343,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/iphone-mirror-pointer",
    "host": "MacBook-Pro",
    "added": "2026-10-30T21:35:47Z",
-   "updated": "2026-11-13T04:25:32Z",
+   "updated": "2026-11-13T20:03:14Z",
    "note": "",
    "built": [
     {
@@ -58414,7 +58414,7 @@
      "tree": "1c2e904f816765145387f519b84705329a98de9a"
     }
    ],
-   "advanced": "2026-11-13T04:25:32Z",
+   "advanced": "2026-11-13T20:03:14Z",
    "opened": "2026-11-02T03:27:34Z",
    "readied": "2026-11-02T03:27:55Z"
   },
@@ -58535,7 +58535,7 @@
    "area": "computer",
    "priority": "P2",
    "needs": [],
-   "base": "84f5adc3bbfc0c2a7caecbad78b1b6eedf0a2939",
+   "base": "aa5f045f98a90f5c7bbc6b091f1e97e42263194d",
    "body": "bodies/macos-scroll-direction.md",
    "state": "open",
    "pr": 19165,
@@ -58543,7 +58543,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-scroll-direction",
    "host": "MacBook-Pro",
    "added": "2026-10-30T21:36:10Z",
-   "updated": "2026-11-13T13:20:02Z",
+   "updated": "2026-11-13T20:03:14Z",
    "note": "FalseSuccess2 2026-11-13: rebased onto main 84f5adc as 7d8261c (report_scroll hunks and iPhone report-path tests dropped; iPhone Mirroring gets the flip through background_scroll). P1 per Main: every macOS scroll goes the wrong way on main. No needs. Opening order A (macos-drag-confirm), this, B (macos-scroll-confirm).",
    "built": [
     {
@@ -58701,7 +58701,8 @@
     }
    ],
    "opened": "2026-11-13T13:15:56Z",
-   "readied": "2026-11-13T13:16:25Z"
+   "readied": "2026-11-13T13:16:25Z",
+   "advanced": "2026-11-13T20:03:14Z"
   },
   {
    "id": "snapcompact-text-reader",
@@ -63351,7 +63352,7 @@
    "area": "computer",
    "priority": "P2",
    "needs": [],
-   "base": "84f5adc3bbfc0c2a7caecbad78b1b6eedf0a2939",
+   "base": "aa5f045f98a90f5c7bbc6b091f1e97e42263194d",
    "body": "bodies/wayland-pipewire-dlopen.md",
    "state": "open",
    "pr": 18353,
@@ -63359,9 +63360,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-pipewire-dlopen",
    "host": "MacBook-Pro",
    "added": "2026-11-03T05:43:31Z",
-   "updated": "2026-11-13T04:27:05Z",
+   "updated": "2026-11-13T20:03:14Z",
    "note": "",
-   "advanced": "2026-11-13T04:27:05Z",
+   "advanced": "2026-11-13T20:03:14Z",
    "built": [
     {
      "with": "#17757",
@@ -63929,7 +63930,7 @@
    "area": "natives",
    "priority": "P2",
    "needs": [],
-   "base": "84f5adc3bbfc0c2a7caecbad78b1b6eedf0a2939",
+   "base": "aa5f045f98a90f5c7bbc6b091f1e97e42263194d",
    "body": "bodies/wayland-ei-text.md",
    "state": "open",
    "pr": 18013,
@@ -63937,9 +63938,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-ei-text",
    "host": "MacBook-Pro",
    "added": "2026-11-03T06:23:33Z",
-   "updated": "2026-11-13T04:26:47Z",
+   "updated": "2026-11-13T20:03:14Z",
    "note": "Main, 2026-11-11: accepted pair with #18783 (one-line adjacent Cargo.toml dependency edit: #18783's x11rb render feature next to this PR's reis line); not requeued; whichever merges second takes the one-line rebase.",
-   "advanced": "2026-11-13T04:26:47Z",
+   "advanced": "2026-11-13T20:03:14Z",
    "built": [
     {
      "with": "#17757",
@@ -72556,7 +72557,7 @@
    "area": "browser",
    "priority": "P2",
    "needs": [],
-   "base": "84f5adc3bbfc0c2a7caecbad78b1b6eedf0a2939",
+   "base": "aa5f045f98a90f5c7bbc6b091f1e97e42263194d",
    "body": "bodies/browser-core-first-use.md",
    "state": "open",
    "pr": 18786,
@@ -72564,9 +72565,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-core-first-use",
    "host": "MacBook-Pro",
    "added": "2026-11-10T18:04:09Z",
-   "updated": "2026-11-13T04:28:58Z",
+   "updated": "2026-11-13T20:03:14Z",
    "note": "",
-   "advanced": "2026-11-13T04:28:58Z",
+   "advanced": "2026-11-13T20:03:14Z",
    "built": [
     {
      "with": "#18658",
@@ -73220,7 +73221,7 @@
    "needs": [
     "subagent-browser"
    ],
-   "base": "84f5adc3bbfc0c2a7caecbad78b1b6eedf0a2939",
+   "base": "aa5f045f98a90f5c7bbc6b091f1e97e42263194d",
    "body": "bodies/subagent-browser-relay.md",
    "state": "open",
    "pr": 18789,
@@ -73228,9 +73229,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/subagent-browser-relay",
    "host": "MacBook-Pro",
    "added": "2026-11-10T18:40:43Z",
-   "updated": "2026-11-13T04:27:16Z",
+   "updated": "2026-11-13T20:03:14Z",
    "note": "",
-   "advanced": "2026-11-13T04:27:16Z",
+   "advanced": "2026-11-13T20:03:14Z",
    "built": [
     {
      "with": "#18676",
@@ -73501,7 +73502,7 @@
    "needs": [
     "#18751"
    ],
-   "base": "84f5adc3bbfc0c2a7caecbad78b1b6eedf0a2939",
+   "base": "aa5f045f98a90f5c7bbc6b091f1e97e42263194d",
    "body": "bodies/observe-settle.md",
    "state": "open",
    "pr": 19045,
@@ -73509,9 +73510,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-observe-settle",
    "host": "MacBook-Pro",
    "added": "2026-11-10T18:56:46Z",
-   "updated": "2026-11-13T04:28:02Z",
+   "updated": "2026-11-13T20:03:14Z",
    "note": "",
-   "advanced": "2026-11-13T04:28:02Z",
+   "advanced": "2026-11-13T20:03:14Z",
    "kind": "proposal",
    "built": [
     {
@@ -77076,7 +77077,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "be96cff2d26b406765b428ae985f4e5f0ff020bd",
+   "base": "aa5f045f98a90f5c7bbc6b091f1e97e42263194d",
    "body": "bodies/computer-run-failure-output.md",
    "state": "open",
    "pr": 19100,
@@ -77084,9 +77085,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-run-failure-output",
    "host": "MacBook-Pro",
    "added": "2026-11-11T00:07:07Z",
-   "updated": "2026-11-13T12:54:06Z",
+   "updated": "2026-11-13T20:03:14Z",
    "note": "",
-   "advanced": "2026-11-13T12:54:06Z",
+   "advanced": "2026-11-13T20:03:14Z",
    "built": [
     {
      "with": "#18624",
@@ -78486,7 +78487,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "84f5adc3bbfc0c2a7caecbad78b1b6eedf0a2939",
+   "base": "aa5f045f98a90f5c7bbc6b091f1e97e42263194d",
    "body": "bodies/atspi-huge-children.md",
    "state": "open",
    "pr": 19036,
@@ -78494,7 +78495,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-huge-children",
    "host": "MacBook-Pro",
    "added": "2026-11-11T01:54:02Z",
-   "updated": "2026-11-13T04:25:05Z",
+   "updated": "2026-11-13T20:03:14Z",
    "note": "Overlaps (same functions, textual conflicts): atspi-unanswered-app (P0; read_props/walk_node/find_focused/children get request()/timeouts), atspi-walk-reads (reads GetChildren in round 1 beside the element's fields and drops ChildCount: on rebase, read ChildCount in round 1 and GetChildren/by-index after it), computer-rich-text (linux/ax.rs, ax.rs, backend.rs). Rust records linux/macos/windows at 8a6acdf497.",
    "line_loss_overrides": [
     {
@@ -78572,7 +78573,7 @@
      }
     }
    ],
-   "advanced": "2026-11-13T04:25:05Z",
+   "advanced": "2026-11-13T20:03:14Z",
    "built": [
     {
      "with": "#18925",
@@ -78947,7 +78948,7 @@
    "area": "computer",
    "priority": "P2",
    "needs": [],
-   "base": "84f5adc3bbfc0c2a7caecbad78b1b6eedf0a2939",
+   "base": "aa5f045f98a90f5c7bbc6b091f1e97e42263194d",
    "body": "bodies/atspi-text-first.md",
    "state": "open",
    "pr": 19035,
@@ -78955,9 +78956,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-text-first",
    "host": "MacBook-Pro",
    "added": "2026-11-11T02:21:41Z",
-   "updated": "2026-11-13T04:27:53Z",
+   "updated": "2026-11-13T20:03:14Z",
    "note": "LinuxTextFinish 2026-11-11: overlaps (no needs): code conflict with queued atspi-unanswered-app (linux/wayland/mod.rs) and atspi-walk-reads (linux/ax.rs); same files as open #18013 (merges clean) and #18784 (CHANGELOG-only conflict); reuses #18220's merged text_readback; merges clean with qt5-getall-crash (same ax.rs). Linux-only Rust diff: rust-check linux recorded at 82bde80f19; review stamped needs-changes at eb0a087bcd, findings fixed.",
-   "advanced": "2026-11-13T04:27:53Z",
+   "advanced": "2026-11-13T20:03:14Z",
    "rebases_after": [
     18914
    ],
@@ -79348,7 +79349,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "84f5adc3bbfc0c2a7caecbad78b1b6eedf0a2939",
+   "base": "aa5f045f98a90f5c7bbc6b091f1e97e42263194d",
    "body": "bodies/x11-takeover-keyboard-state.md",
    "state": "open",
    "pr": 19080,
@@ -79356,9 +79357,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-takeover-keyboard-state",
    "host": "MacBook-Pro",
    "added": "2026-11-11T02:32:01Z",
-   "updated": "2026-11-13T04:26:29Z",
+   "updated": "2026-11-13T20:03:14Z",
    "note": "Main-authorized bounded latch repair: ten red/green Xvfb runs, ten latched-Control sibling checks, locked-group restoration green. Linux rust-check recorded; 62 X11 tests pass excluding two MPX/uinput hotplug tests that fail identically on main 9f728bd56e1 under Xvfb without udev/libinput hotplug.",
-   "advanced": "2026-11-13T04:26:29Z",
+   "advanced": "2026-11-13T20:03:14Z",
    "line_loss_overrides": [
     {
      "at": "2026-11-12T13:27:06Z",
@@ -79977,7 +79978,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "84f5adc3bbfc0c2a7caecbad78b1b6eedf0a2939",
+   "base": "aa5f045f98a90f5c7bbc6b091f1e97e42263194d",
    "body": "bodies/x11-takeover-keyboard-grab.md",
    "state": "open",
    "pr": 19066,
@@ -79985,7 +79986,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-takeover-keyboard-grab",
    "host": "MacBook-Pro",
    "added": "2026-11-11T02:55:11Z",
-   "updated": "2026-11-13T04:26:21Z",
+   "updated": "2026-11-13T20:03:14Z",
    "note": "Main-approved additive test resolution. Linux rust-check and 61 X11 tests pass on rebased head. The two MPX/uinput hotplug tests fail under Xvfb (no udev/libinput hotplug); each fails identically on origin/main 9f728bd56e1 in one baseline run.",
    "line_loss_overrides": [
     {
@@ -80029,7 +80030,7 @@
      }
     }
    ],
-   "advanced": "2026-11-13T04:26:21Z",
+   "advanced": "2026-11-13T20:03:14Z",
    "rebases_after": [
     19044
    ],
@@ -80892,7 +80893,7 @@
    "needs": [
     "win-posted-modifiers"
    ],
-   "base": "84f5adc3bbfc0c2a7caecbad78b1b6eedf0a2939",
+   "base": "aa5f045f98a90f5c7bbc6b091f1e97e42263194d",
    "body": "bodies/win-target-layout.md",
    "state": "open",
    "pr": 19025,
@@ -80900,7 +80901,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-target-layout",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:13:32Z",
-   "updated": "2026-11-13T04:25:40Z",
+   "updated": "2026-11-13T20:03:14Z",
    "note": "",
    "line_loss_overrides": [
     {
@@ -80954,7 +80955,7 @@
      }
     }
    ],
-   "advanced": "2026-11-13T04:25:40Z",
+   "advanced": "2026-11-13T20:03:14Z",
    "built": [
     {
      "with": "#18743",
@@ -84634,7 +84635,7 @@
    "needs": [
     "ax-ref-read-as"
    ],
-   "base": "84f5adc3bbfc0c2a7caecbad78b1b6eedf0a2939",
+   "base": "aa5f045f98a90f5c7bbc6b091f1e97e42263194d",
    "body": "bodies/ax-row-action.md",
    "state": "open",
    "pr": 19048,
@@ -84642,7 +84643,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ax-row-action",
    "host": "MacBook-Pro",
    "added": "2026-11-11T11:44:46Z",
-   "updated": "2026-11-13T04:25:48Z",
+   "updated": "2026-11-13T20:03:14Z",
    "note": "Main, 2026-11-12: approved combined row-two-functions.diff. No reusable row read plus failing second walk is covered by read_whole whole-read requirement, not a dedicated test.",
    "line_loss_overrides": [
     {
@@ -84692,7 +84693,7 @@
      }
     }
    ],
-   "advanced": "2026-11-13T04:25:48Z",
+   "advanced": "2026-11-13T20:03:14Z",
    "rebases_after": [
     16553
    ],
@@ -85379,7 +85380,7 @@
    "needs": [
     "win-takeover-focus"
    ],
-   "base": "84f5adc3bbfc0c2a7caecbad78b1b6eedf0a2939",
+   "base": "aa5f045f98a90f5c7bbc6b091f1e97e42263194d",
    "body": "bodies/win-focus-report.md",
    "state": "open",
    "pr": 19062,
@@ -85387,7 +85388,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-focus-report",
    "host": "MacBook-Pro",
    "added": "2026-11-11T13:11:20Z",
-   "updated": "2026-11-13T04:26:06Z",
+   "updated": "2026-11-13T20:03:14Z",
    "note": "",
    "rebases_after": [
     18783,
@@ -85397,7 +85398,7 @@
     "18783": "QueueThirteen, 2026-11-12 (Main: docs pairs are the opener's): docs-only collision in docs/computer-use.md, adjacent: #18783 adds two X11 covered-window screenshot paragraphs right before the 'Window input defaults to background routes' paragraph that this entry edits. Combined form: #18783's two paragraphs, blank line, then this entry's wording of the 'Window input defaults' paragraph. No code overlap.",
     "19037": "QueueFourteen, 2026-11-12 (recorded combined form; use list + docs): conflicts are the test-module use list in crates/pi-natives/src/desktop/win32/mod.rs (#19037: control::{self, CancellationSource}; this entry adds types::DesktopFocusReturn) and the docs/computer-use.md 'Window input defaults' paragraph (#19037: 'delivered (or only sent, when Windows takeover typing was not seen read)'; this entry: 'macOS or Windows reports \u2026 (Linux, \u2026)'). Combined: use crate::desktop::{control::{self, CancellationSource}, types::DesktopFocusReturn}; paragraph carries both edits"
    },
-   "advanced": "2026-11-13T04:26:06Z",
+   "advanced": "2026-11-13T20:03:14Z",
    "built": [
     {
      "with": "#18737",
@@ -86307,7 +86308,7 @@
    "needs": [
     "atspi-unanswered-app"
    ],
-   "base": "84f5adc3bbfc0c2a7caecbad78b1b6eedf0a2939",
+   "base": "aa5f045f98a90f5c7bbc6b091f1e97e42263194d",
    "body": "bodies/atspi-combo-choice.md",
    "state": "open",
    "pr": 19034,
@@ -86315,9 +86316,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-combo-choice",
    "host": "MacBook-Pro",
    "added": "2026-11-11T13:30:39Z",
-   "updated": "2026-11-13T04:27:45Z",
+   "updated": "2026-11-13T20:03:14Z",
    "note": "",
-   "advanced": "2026-11-13T04:27:45Z",
+   "advanced": "2026-11-13T20:03:14Z",
    "line_loss_overrides": [
     {
      "at": "2026-11-12T12:19:53Z",
@@ -86591,7 +86592,7 @@
    "area": "natives",
    "priority": "P1",
    "needs": [],
-   "base": "84f5adc3bbfc0c2a7caecbad78b1b6eedf0a2939",
+   "base": "aa5f045f98a90f5c7bbc6b091f1e97e42263194d",
    "body": "bodies/macos-ax-linked-label.md",
    "state": "open",
    "pr": 19061,
@@ -86599,7 +86600,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-ax-linked-label",
    "host": "MacBook-Pro",
    "added": "2026-11-11T14:43:42Z",
-   "updated": "2026-11-13T04:25:57Z",
+   "updated": "2026-11-13T20:03:14Z",
    "note": "Main, 2026-11-12: approved linked-own-guard.diff. Naming-only: changed linked text alone is not an action guard. Five AxProps constructor sites migrated; adjacency with entries adding AxProps fields requires opener pair builds. Unbuilt design note: retain {own,linked} fingerprints independently and compare each only when answered at registration and action; closes a rerender moving an unnamed control ref onto its neighbour; measure that case before building. Rebase 5d78d9683a9 onto 7c2ab113ec9: Main approved decoder equivalence. Registration keeps `.then(|| props.read_as_fingerprint.unwrap_or(fingerprint))`; read_as_values reads own labels only, never the linked-label enrichment, so the check-side override is unnecessary. bench-mac passed an_own_label_disappearing_is_refused_even_when_the_link_is_unread, a_changed_linked_label_alone_is_not_an_action_guard, an_unchanged_linked_label_does_not_refuse_its_control. All three use the real read_as_values decoder, including unchanged-linked coverage against future enrichment in the decoder; desktop:: 606 passed.",
    "line_loss_overrides": [
     {
@@ -86653,7 +86654,7 @@
      }
     }
    ],
-   "advanced": "2026-11-13T04:25:57Z",
+   "advanced": "2026-11-13T20:03:14Z",
    "rebases_after": [
     19036,
     19048,
@@ -87298,7 +87299,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "84f5adc3bbfc0c2a7caecbad78b1b6eedf0a2939",
+   "base": "aa5f045f98a90f5c7bbc6b091f1e97e42263194d",
    "body": "bodies/macos-press-click-hint.md",
    "state": "open",
    "pr": 19063,
@@ -87306,7 +87307,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-press-click-hint",
    "host": "MacBook-Pro",
    "added": "2026-11-11T18:49:11Z",
-   "updated": "2026-11-13T04:26:13Z",
+   "updated": "2026-11-13T20:03:14Z",
    "note": "",
    "line_loss_overrides": [
     {
@@ -87341,7 +87342,7 @@
      }
     }
    ],
-   "advanced": "2026-11-13T04:26:13Z",
+   "advanced": "2026-11-13T20:03:14Z",
    "built": [
     {
      "with": "#18925",
