@@ -4,7 +4,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-13 02:48Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 3, conflict-held 18, stacked 15, held 12, parked 2, open PRs 28, queued since the last plan 1; merged 334, closed 35
+**Counts:** openable now 3, conflict-held 18, stacked 15, held 13, parked 2, open PRs 28; merged 334, closed 35
 
 ## Openable now (3)
 
@@ -57,7 +57,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13
 | act-look-prompt | docs(browser): teach acting and looking in one Eval cell without sleeps | browser | P2 | 2d | settle-reads | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-act-look-prompt) |
 | observe-stable-ids | feat(browser): keep observe() ids stable across observations | browser | P2 | 2d | act-look-prompt | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-observe-stable-ids) |
 
-## Held (12)
+## Held (13)
 
 | id | title | area | priority | age | hold | branch |
 |---|---|---|---|---|---|---|
@@ -73,6 +73,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13
 | desktop-cursor | feat(coding-agent,natives): show each agent's cursor where its computer input lands on macOS | coding-agent | P2 | 2d | Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check \| Main 2026-11-12: before it opens, the waiting-key-chord case with the cursor actually drawn (20 trials at a 20 s deadline; CursorDemo's cursor-on arm never drew one, and an early run on the combined tree returned 'Cancelled, input may be partial' 11/11, unexplained), on the polished branch will/desktop-cursor-polish. | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/desktop-cursor) |
 | win-type-insert | feat(natives): insert typed text into a focused Windows multi-line edit control | computer | P2 | 22h | Main, 2026-11-12: proposal; opens only after entry A merges and Will has seen the body | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-type-insert) |
 | ax-relabel-recovery | fix(natives): tell the model it may act on the new ref a relabelled-ref refusal names | computer | P1 | 0h | Main, 2026-11-13: the new error text invites acting on the ref a refusal names; opens only after a blind Sol sample on the Contacts task (strict grade) and the Reminders task, B against its base, shows no wrong-field write the base does not make and a step saving on Reminders | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-relabel-recovery) |
+| ax-read-as-title-link | fix(natives): keep a macOS ref whose own label changes while its title element shows the same text | computer | P1 | 0h | Main, 2026-11-13: accepts a reused row that shows the same title text as the one read (clicked the neighbour 10/10 on the fixture); held for a measurement of whether real macOS lists with duplicate titles reuse rows that way, then Will's decision | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-read-as-live-label) |
 
 ## Parked (2)
 
@@ -113,9 +114,3 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13
 | [#19061](https://github.com/can1357/oh-my-pi/pull/19061) | macos-ax-linked-label | fix(natives): name a macOS control by the label its AXTitleUIElement links to | natives | P1 | 9h | keep; accepted pair with #19036: Main, 2026-11-12: #19036 adds 'unread_children: 0,' to the AxProps literal in macos/ax.rs and a field to the AxProps struct in desktop/ax.rs; this entry returns that literal inside a tuple (AxProps{...}, has_own_label) and adds its own struct field (rustfmt realignment only). Combined form: this entry's tuple with 'unread_children: 0,' inside its AxProps literal; struct with both fields; accepted pair with #19048: QueueFifteen, 2026-11-12 (Main's standing rule: a field added beside a line the other side reshapes without changing a value): only conflict is the Registered struct in crates/pi-natives/src/desktop/ax.rs: #19048 adds 'row: Option<RowProof>,' where this entry rewrites the doc comment of 'held'; #19048 reads neither held nor fingerprint. Combined form: #19048's row field, then this entry's doc comment and 'held: Option<u64>'. | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-ax-linked-label) |
 | [#19063](https://github.com/can1357/oh-my-pi/pull/19063) | macos-press-click-hint | fix(natives): point a refused macOS press at the element's own click | computer | P1 | 8h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-press-click-hint) |
 | [#19001](https://github.com/can1357/oh-my-pi/pull/19001) | relay-hidden-frames-main | fix(browser-relay): say what the relay hid in a driven tab | browser | P2 | 21h | keep; accepted pair with #18925: Main, 2026-11-12: accepted (HiddenOnMain's combined form). tab-worker.ts WorkerCore.#run after the finally: this branch's hinted take (if this.#unanswered === active && this.#hiddenFramesWaiting && this.#page) await this.#takeHiddenFrames(this.#page)) stays before the answered guard; in the failure branch #18925's enrichment of error (message and stack with the native notices), then this.#sendResult({ id: msg.id, ok: false, error }), so both native-window notices and the once-only hidden-frames notice ride the failure. Second to land adds one test that a failed run carries both. | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-hidden-frames-main) |
-
-## Queued since the last plan (1)
-
-| id | title | area | priority | age | branch |
-|---|---|---|---|---|---|
-| ax-read-as-title-link | fix(natives): keep a macOS ref whose own label changes while its title element shows the same text | computer | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-read-as-live-label) |
