@@ -101161,14 +101161,31 @@
   }
  },
  "plan": {
-  "at": "2026-11-13T17:16:33.830414Z",
+  "at": "2026-11-13T17:34:53.981637Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 2,
-   "left": 6
+   "used": 4,
+   "left": 4
   },
   "rows": [
+   {
+    "id": "devin-pin-31257",
+    "label": "#19180",
+    "number": 19180,
+    "state": "open",
+    "area": "catalog",
+    "priority": "P0",
+    "title": "fix(catalog): identify Devin requests as CLI 3000.12.57",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-13T17:20:21Z"
+   },
    {
     "id": "click-place-release",
     "label": "#16553",
@@ -101736,23 +101753,6 @@
     "created": "2026-11-12T16:39:36Z"
    },
    {
-    "id": "gemini-hydrogen-overlap",
-    "label": "gemini-hydrogen-overlap",
-    "number": null,
-    "state": "queued",
-    "area": "catalog",
-    "priority": "P0",
-    "title": "fix(catalog): keep Gemini 4 Hydrogen in one thinking rule so a regenerated catalog starts",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-13T17:08:59Z"
-   },
-   {
     "id": "atspi-walk-reads",
     "label": "atspi-walk-reads",
     "number": null,
@@ -101833,17 +101833,13 @@
     "area": "catalog",
     "priority": "P1",
     "title": "fix(catalog): keep GPT-6 effort changes off configuration_update on Factory Droid Bedrock and Snowflake",
-    "action": "wait",
-    "reasons": [
-     "needs gemini-hydrogen-overlap (queued)"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [],
-    "needs": [
-     "gemini-hydrogen-overlap"
-    ],
+    "needs": [],
     "created": "2026-11-13T17:14:46Z"
    },
    {
@@ -102140,23 +102136,6 @@
     "created": "2026-10-19T07:26:45Z"
    },
    {
-    "id": "devin-pin-31257",
-    "label": "devin-pin-31257",
-    "number": null,
-    "state": "queued",
-    "area": "catalog",
-    "priority": "P2",
-    "title": "fix(catalog): identify Devin requests as CLI 3000.12.57",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-13T17:05:09Z"
-   },
-   {
     "id": "macos-ax-cancel-before-send",
     "label": "macos-ax-cancel-before-send",
     "number": null,
@@ -102197,6 +102176,7 @@
     "action": "wait",
     "reasons": [
      "needs #18925 (open)",
+     "conflicts with #19178 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19001 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "conflicts with #18786 in docs/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md",
@@ -102207,6 +102187,7 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#19178",
      "#19001",
      "#18786",
      "#18789",
@@ -102228,6 +102209,7 @@
     "action": "wait",
     "reasons": [
      "needs r2/relay-own-only (queued)",
+     "conflicts with #19178 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19001 in packages/browser-relay/extension/background.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "conflicts with #18786 in docs/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md",
@@ -102238,6 +102220,7 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#19178",
      "#19001",
      "#18786",
      "#18789",
@@ -103086,18 +103069,13 @@
     "area": "factory-droid",
     "priority": null,
     "title": "feat(catalog): add the Factory Droid models droid 1.7.1 serves",
-    "action": "held",
-    "reasons": [
-     "held: Main, 2026-11-13: regenerated rules.json compiles main's gemini-4-hydrogen overlap (AmbiguousOverlapError at startup); opens after gemini-hydrogen-overlap merges",
-     "needs gemini-hydrogen-overlap (queued)"
-    ],
+    "action": "next-hour",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [],
-    "needs": [
-     "gemini-hydrogen-overlap"
-    ],
+    "needs": [],
     "created": "2026-11-10T19:41:03Z"
    },
    {
