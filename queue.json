@@ -90706,6 +90706,24 @@
     }
    ],
    "advanced": "2026-11-13T04:23:16Z"
+  },
+  {
+   "id": "macos-drag-confirm",
+   "branch": "will/macos-drag-confirm",
+   "title": "fix(natives): stop macOS background drags reporting moves that did not happen",
+   "area": "computer",
+   "priority": "P1",
+   "needs": [],
+   "base": "84f5adc3bbfc0c2a7caecbad78b1b6eedf0a2939",
+   "body": "bodies/macos-drag-confirm.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": null,
+   "host": "MacBook-Pro",
+   "added": "2026-11-13T10:32:49Z",
+   "updated": "2026-11-13T10:32:49Z",
+   "note": ""
   }
  ],
  "watch": {
