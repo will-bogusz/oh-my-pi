@@ -91163,7 +91163,7 @@
    "worktree": "/home/will/.omp/main-wt/oh-my-pi/key-menu",
    "host": "goliath",
    "added": "2026-11-13T12:43:28Z",
-   "updated": "2026-11-13T17:10:24Z",
+   "updated": "2026-11-13T17:10:52Z",
    "note": "KeyMenu2 2026-11-13: head 93708ea2d43, P1 per Main. First seen in Cua Driver Bench task IR-01 in the background (one trial: 7 of 63 of the typist's keys lost); re-measure IR-01 after this merges. Review KeyMenu2.KeyMenuReview needs-changes at db2e3584fc, all findings fixed or stated in the body (not re-reviewed per skill). rust-check linux+macos for Rust diff 102f6ff0e3. Touches MacInput::window_chord / hold_keys and a new key-menu block after menu_watch in crates/pi-natives/src/desktop/macos/input.rs; queued neighbours macos-drag-confirm (Drag arm of background_gesture) and macos-scroll-direction (background_scroll / quartz_scroll_deltas) touch nearby parts of the same file: expect adjacent-hunk rebases, no semantic overlap. VM evidence: bench-mac:~/tmp/oh-my-pi/KeyMenu2/logs-b1, logs-b2.",
    "built": [
     {
@@ -91420,7 +91420,8 @@
     }
    ],
    "advanced": "2026-11-13T16:44:24Z",
-   "opened": "2026-11-13T17:10:24Z"
+   "opened": "2026-11-13T17:10:24Z",
+   "readied": "2026-11-13T17:10:52Z"
   },
   {
    "id": "relay-restored-frame",
