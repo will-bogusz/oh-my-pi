@@ -90464,7 +90464,7 @@
    "branch": "will/stats-spotlight-freeze",
    "title": "fix(stats,coding-agent): keep the stats dashboard answering while Spotlight rebuilds",
    "area": "other",
-   "priority": null,
+   "priority": "P1",
    "needs": [],
    "base": "84f5adc3bbfc0c2a7caecbad78b1b6eedf0a2939",
    "body": "bodies/stats-spotlight-freeze.md",
@@ -90474,7 +90474,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/stats-spotlight-freeze",
    "host": "MacBook-Pro",
    "added": "2026-11-13T03:07:37Z",
-   "updated": "2026-11-13T03:49:41Z",
+   "updated": "2026-11-13T04:09:52Z",
    "note": "",
    "advanced": "2026-11-13T03:49:41Z",
    "built": [
@@ -90613,7 +90613,7 @@
    "branch": "will/stats-gain-compaction",
    "title": "fix(stats): count snapcompact compactions on the Gain tab",
    "area": "other",
-   "priority": null,
+   "priority": "P2",
    "needs": [],
    "base": "d8493454a2eab3c88f5410d6ce48bf3fe4352300",
    "body": "bodies/stats-gain-compaction.md",
@@ -90623,7 +90623,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/stats-gain-compaction",
    "host": "MacBook-Pro",
    "added": "2026-11-13T03:43:16Z",
-   "updated": "2026-11-13T04:03:12Z",
+   "updated": "2026-11-13T04:09:52Z",
    "note": "",
    "built": [
     {
