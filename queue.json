@@ -91393,7 +91393,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-13T14:21:30Z",
+  "checked": "2026-11-13T14:51:31Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -91423,6 +91423,16 @@
     "title": "fix(ai,coding-agent): carry other models' reasoning to Claude and retry its refusal without it",
     "files": [
      "packages/ai/src/providers/pi-native-server.ts"
+    ]
+   },
+   "#18987": {
+    "since": "2026-11-13T14:51:31Z",
+    "title": "feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy",
+    "files": [
+     "docs/theme.md",
+     "packages/tui/src/theme/loader.ts",
+     "packages/tui/src/theme/schema.ts",
+     "packages/tui/src/theme/theme-schema.json"
     ]
    }
   },
@@ -94979,6 +94989,18 @@
     "id": "macos-scroll-direction",
     "title": "fix(natives): scroll down for a positive dy on macOS, as on Windows and Linux",
     "why": "opened as #19165"
+   },
+   {
+    "at": "2026-11-13T14:51:31Z",
+    "kind": "conflict",
+    "label": "#18987",
+    "title": "feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy",
+    "files": [
+     "docs/theme.md",
+     "packages/tui/src/theme/loader.ts",
+     "packages/tui/src/theme/schema.ts",
+     "packages/tui/src/theme/theme-schema.json"
+    ]
    }
   ]
  },
@@ -100817,7 +100839,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-13T14:21:31.131902Z",
+  "at": "2026-11-13T14:51:32.657884Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -101322,8 +101344,10 @@
     "area": "tui",
     "priority": "P2",
     "title": "feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in docs/theme.md, packages/tui/src/theme/loader.ts, packages/tui/src/theme/schema.ts, packages/tui/src/theme/theme-schema.json"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -102033,6 +102057,7 @@
      "needs #18987 (open)",
      "conflicts with #19001 in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18925 in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts",
+     "its need #18987 conflicts with main in docs/theme.md, packages/tui/src/theme/loader.ts, packages/tui/src/theme/schema.ts, packages/tui/src/theme/theme-schema.json",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
     ],
     "note": "",
@@ -102090,6 +102115,7 @@
      "conflicts with #19100 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18222 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/prompts/tools/eval.md, packages/coding-agent/src/tools/eval.ts",
+     "conflicts with #18987 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with main in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/sdk-computer-prelude-toggle.test.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
@@ -102098,7 +102124,8 @@
     "blocked_by": [
      "#19100",
      "#18222",
-     "#18786"
+     "#18786",
+     "#18987"
     ],
     "needs": [
      "browser-core-first-use"
@@ -102128,7 +102155,7 @@
      "conflicts with #18013 in docs/computer-use.md",
      "conflicts with #18222 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/tools/eval.ts",
-     "conflicts with #18987 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/worker.ts",
+     "conflicts with #18987 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with key-menu in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with macos-drag-confirm in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
@@ -102177,7 +102204,7 @@
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
-     "conflicts with #18987 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
+     "conflicts with #18987 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with key-menu in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with macos-drag-confirm in crates/pi-natives/src/desktop/macos/ax.rs, packages/coding-agent/src/prompts/tools/computer.md",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
@@ -102225,6 +102252,7 @@
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md",
      "conflicts with #18925 in crates/pi-natives/src/desktop/macos/capture.rs, crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs",
+     "its need #18987 conflicts with main in docs/theme.md, packages/tui/src/theme/loader.ts, packages/tui/src/theme/schema.ts, packages/tui/src/theme/theme-schema.json",
      "conflicts with main in crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
