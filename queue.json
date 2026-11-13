@@ -101009,14 +101009,34 @@
   }
  },
  "plan": {
-  "at": "2026-11-13T16:54:23.212866Z",
-  "host": "goliath",
+  "at": "2026-11-13T17:02:52.490503Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 1,
+   "left": 7
   },
   "rows": [
+   {
+    "id": "relay-restored-frame",
+    "label": "#19178",
+    "number": 19178,
+    "state": "open",
+    "area": "browser",
+    "priority": "P0",
+    "title": "fix(browser-relay): keep a relay tab when another extension's frame keeps omp out",
+    "action": "keep",
+    "reasons": [],
+    "note": "accepted pair with #18925: Main, 2026-11-13: tab-supervisor.ts import block only, keep both lines (import { isLoopbackRelayUrl } from \"./relay/daemon\"; import { FOREIGN_FRAME_REFUSAL } from \"./relay/protocol\"); accepted pair with #19001: Main, 2026-11-13: tab-supervisor.ts only, module scope: import line keeps both names (import { FOREIGN_FRAME_REFUSAL, type HiddenFrame } from \"./relay/protocol\") and WorkerTabSession gains both adjacent fields (heldOut, hiddenFrames); combined form ~/tmp/oh-my-pi/RelayRestoredFrame2/combined-19001.txt",
+    "over": [],
+    "paired": [
+     "#18925",
+     "#19001"
+    ],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-13T17:01:54Z"
+   },
    {
     "id": "click-place-release",
     "label": "#16553",
@@ -101301,10 +101321,11 @@
     "title": "fix(browser-relay): say what the relay hid in a driven tab",
     "action": "keep",
     "reasons": [],
-    "note": "accepted pair with #18925: Main, 2026-11-12: accepted (HiddenOnMain's combined form). tab-worker.ts WorkerCore.#run after the finally: this branch's hinted take (if this.#unanswered === active && this.#hiddenFramesWaiting && this.#page) await this.#takeHiddenFrames(this.#page)) stays before the answered guard; in the failure branch #18925's enrichment of error (message and stack with the native notices), then this.#sendResult({ id: msg.id, ok: false, error }), so both native-window notices and the once-only hidden-frames notice ride the failure. Second to land adds one test that a failed run carries both.",
+    "note": "accepted pair with #18925: Main, 2026-11-12: accepted (HiddenOnMain's combined form). tab-worker.ts WorkerCore.#run after the finally: this branch's hinted take (if this.#unanswered === active && this.#hiddenFramesWaiting && this.#page) await this.#takeHiddenFrames(this.#page)) stays before the answered guard; in the failure branch #18925's enrichment of error (message and stack with the native notices), then this.#sendResult({ id: msg.id, ok: false, error }), so both native-window notices and the once-only hidden-frames notice ride the failure. Second to land adds one test that a failed run carries both.; accepted pair with #19178: Main, 2026-11-13: tab-supervisor.ts only, module scope: import line keeps both names (import { FOREIGN_FRAME_REFUSAL, type HiddenFrame } from \"./relay/protocol\") and WorkerTabSession gains both adjacent fields (heldOut, hiddenFrames); combined form ~/tmp/oh-my-pi/RelayRestoredFrame2/combined-19001.txt",
     "over": [],
     "paired": [
-     "#18925"
+     "#18925",
+     "#19178"
     ],
     "blocked_by": [],
     "needs": [],
@@ -101496,11 +101517,12 @@
     "title": "feat(coding-agent): name the native windows a browser call raised on macOS",
     "action": "keep",
     "reasons": [],
-    "note": "accepted pair with #19045: Main, 2026-11-12: only conflict is adjacent class fields in packages/coding-agent/src/tools/browser/tab-worker.ts: #18925 adds #nativeWindows?, this entry adds #actionRequestSeq? and #settling? at the same spot; nothing removed; combined form is both declarations; accepted pair with #19001: Main, 2026-11-12: accepted (HiddenOnMain's combined form). tab-worker.ts WorkerCore.#run after the finally: this branch's hinted take (if this.#unanswered === active && this.#hiddenFramesWaiting && this.#page) await this.#takeHiddenFrames(this.#page)) stays before the answered guard; in the failure branch #18925's enrichment of error (message and stack with the native notices), then this.#sendResult({ id: msg.id, ok: false, error }), so both native-window notices and the once-only hidden-frames notice ride the failure. Second to land adds one test that a failed run carries both.",
+    "note": "accepted pair with #19045: Main, 2026-11-12: only conflict is adjacent class fields in packages/coding-agent/src/tools/browser/tab-worker.ts: #18925 adds #nativeWindows?, this entry adds #actionRequestSeq? and #settling? at the same spot; nothing removed; combined form is both declarations; accepted pair with #19001: Main, 2026-11-12: accepted (HiddenOnMain's combined form). tab-worker.ts WorkerCore.#run after the finally: this branch's hinted take (if this.#unanswered === active && this.#hiddenFramesWaiting && this.#page) await this.#takeHiddenFrames(this.#page)) stays before the answered guard; in the failure branch #18925's enrichment of error (message and stack with the native notices), then this.#sendResult({ id: msg.id, ok: false, error }), so both native-window notices and the once-only hidden-frames notice ride the failure. Second to land adds one test that a failed run carries both.; accepted pair with #19178: Main, 2026-11-13: tab-supervisor.ts import block only, keep both lines (import { isLoopbackRelayUrl } from \"./relay/daemon\"; import { FOREIGN_FRAME_REFUSAL } from \"./relay/protocol\")",
     "over": [],
     "paired": [
      "#19045",
-     "#19001"
+     "#19001",
+     "#19178"
     ],
     "blocked_by": [],
     "needs": [],
@@ -101543,26 +101565,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-12T16:39:36Z"
-   },
-   {
-    "id": "relay-restored-frame",
-    "label": "relay-restored-frame",
-    "number": null,
-    "state": "queued",
-    "area": "browser",
-    "priority": "P0",
-    "title": "fix(browser-relay): keep a relay tab when another extension's frame keeps omp out",
-    "action": "open",
-    "reasons": [],
-    "note": "accepted pair with #18925: Main, 2026-11-13: tab-supervisor.ts import block only, keep both lines (import { isLoopbackRelayUrl } from \"./relay/daemon\"; import { FOREIGN_FRAME_REFUSAL } from \"./relay/protocol\"); accepted pair with #19001: Main, 2026-11-13: tab-supervisor.ts only, module scope: import line keeps both names (import { FOREIGN_FRAME_REFUSAL, type HiddenFrame } from \"./relay/protocol\") and WorkerTabSession gains both adjacent fields (heldOut, hiddenFrames); combined form ~/tmp/oh-my-pi/RelayRestoredFrame2/combined-19001.txt",
-    "over": [],
-    "paired": [
-     "#18925",
-     "#19001"
-    ],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-13T16:33:20Z"
    },
    {
     "id": "atspi-walk-reads",
@@ -101751,11 +101753,11 @@
     "title": "feat(browser): add waitForFunction to tabs and frames",
     "action": "wait",
     "reasons": [
+     "conflicts with #19178 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18786 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19045 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with relay-restored-frame in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with covered-fill in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
@@ -101763,11 +101765,11 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#19178",
      "#18786",
      "#18789",
      "#18925",
      "#19045",
-     "relay-restored-frame",
      "covered-fill"
     ],
     "needs": [],
@@ -101784,10 +101786,10 @@
     "action": "wait",
     "reasons": [
      "needs #19045 (open)",
+     "conflicts with #19178 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18786 in docs/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md",
      "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with relay-restored-frame in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with covered-fill in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
@@ -101795,10 +101797,10 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#19178",
      "#18786",
      "#18789",
      "#18925",
-     "relay-restored-frame",
      "covered-fill"
     ],
     "needs": [
@@ -101817,11 +101819,11 @@
     "action": "wait",
     "reasons": [
      "needs browser-wait-predicate (queued)",
+     "conflicts with #19178 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18786 in docs/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md",
      "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19045 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with relay-restored-frame in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with covered-fill in packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts",
      "its need browser-wait-predicate conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
@@ -101830,11 +101832,11 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#19178",
      "#18786",
      "#18789",
      "#18925",
      "#19045",
-     "relay-restored-frame",
      "covered-fill"
     ],
     "needs": [
@@ -102050,11 +102052,11 @@
     "action": "wait",
     "reasons": [
      "needs r2/relay-popup-owned (queued), r2/page-waiting (queued)",
+     "conflicts with #19178 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-detach.test.ts",
      "conflicts with #19001 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "conflicts with #18786 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts",
      "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts",
      "conflicts with #19045 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/network.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with relay-restored-frame in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-detach.test.ts",
      "conflicts with covered-fill in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need r2/relay-popup-owned conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts",
      "its need r2/page-waiting conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
@@ -102064,11 +102066,11 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#19178",
      "#19001",
      "#18786",
      "#18789",
      "#19045",
-     "relay-restored-frame",
      "covered-fill"
     ],
     "needs": [
@@ -102087,18 +102089,18 @@
     "title": "fix(coding-agent,browser-relay): fail a browser call a print preview holds in an attached browser within seconds",
     "action": "wait",
     "reasons": [
+     "conflicts with #19178 in packages/coding-agent/src/tools/browser/tab-supervisor.ts",
      "conflicts with #19001 in packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts",
-     "conflicts with relay-restored-frame in packages/coding-agent/src/tools/browser/tab-supervisor.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-supervisor.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#19178",
      "#19001",
-     "#18925",
-     "relay-restored-frame"
+     "#18925"
     ],
     "needs": [],
     "created": "2026-11-11T07:04:56Z"
@@ -102263,9 +102265,9 @@
     "reasons": [
      "held: Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check",
      "needs #18987 (open)",
+     "conflicts with #19178 in packages/coding-agent/src/tools/browser/tab-supervisor.ts",
      "conflicts with #19001 in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18925 in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts",
-     "conflicts with relay-restored-frame in packages/coding-agent/src/tools/browser/tab-supervisor.ts",
      "conflicts with covered-fill in packages/coding-agent/src/tools/browser/tern/tern-tab.ts",
      "its need #18987 conflicts with main in docs/theme.md, packages/tui/src/theme/loader.ts, packages/tui/src/theme/schema.ts, packages/tui/src/theme/theme-schema.json",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
@@ -102274,9 +102276,9 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#19178",
      "#19001",
      "#18925",
-     "relay-restored-frame",
      "covered-fill"
     ],
     "needs": [
@@ -102543,11 +102545,11 @@
     "action": "wait",
     "reasons": [
      "needs act-look-prompt (queued)",
+     "conflicts with #19178 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19001 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18786 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with relay-restored-frame in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with covered-fill in packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts",
      "its need act-look-prompt conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
@@ -102556,11 +102558,11 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#19178",
      "#19001",
      "#18786",
      "#18789",
      "#18925",
-     "relay-restored-frame",
      "covered-fill"
     ],
     "needs": [
@@ -102579,11 +102581,11 @@
     "action": "wait",
     "reasons": [
      "needs r2/relay-own-only (queued)",
+     "conflicts with #19178 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19001 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18786 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #19045 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with relay-restored-frame in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with covered-fill in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts",
      "conflicts with main in packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts"
@@ -102592,11 +102594,11 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#19178",
      "#19001",
      "#18786",
      "#18789",
      "#19045",
-     "relay-restored-frame",
      "covered-fill"
     ],
     "needs": [
@@ -102700,10 +102702,8 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "wait",
-    "reasons": [
-     "conflicts with main in (branch missing on the fork)"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -102881,7 +102881,7 @@
     "title": "feat(catalog): add the Factory Droid models droid 1.7.1 serves",
     "action": "open",
     "reasons": [],
-    "note": "advance first",
+    "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [],
