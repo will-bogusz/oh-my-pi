@@ -101893,5 +101893,11 @@
     "wake": ""
    }
   ]
+ },
+ "opening": {
+  "id": "stats-gain-compaction",
+  "token": "4dc260ed2be144d59345c196a31599b5",
+  "host": "MacBook-Pro",
+  "at": "2026-11-13T03:44:21Z"
  }
 }
