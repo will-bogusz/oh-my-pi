@@ -90655,7 +90655,40 @@
     }
    ],
    "opened": "2026-11-13T04:02:03Z",
-   "readied": "2026-11-13T04:03:12Z"
+   "readied": "2026-11-13T04:03:12Z",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-13T04:23:10Z",
+     "reason": "the dropped lines are the renamed toolResults payload keys and labels this push replaces with the original snapcompact key, per roboomp's API finding",
+     "old": "d06954d4eae36faaab4918efaa660eef11b0e8bf",
+     "new": "1ba431d88512090a3337678bd3c8ba74f7358893",
+     "dropped": {
+      "packages/stats/src/client/routes/GainRoute.tsx": [
+       "\ttoolResults: \"Snapcompact imaged tool results\",",
+       "\tcompaction: \"Snapcompact compaction\","
+      ],
+      "packages/stats/src/gain-aggregator.ts": [
+       "\tconst timeMap = new Map<string, { toolResults: number; compaction: number }>();",
+       "\t\t\tbucket = { toolResults: 0, compaction: 0 };",
+       "\t\tbucketFor(rec.ts).toolResults += rec.savedTokens;",
+       "\t\t\ttoolResults: bucket.toolResults,",
+       "\t\t\ttotal: bucket.toolResults + bucket.compaction,",
+       "\t\tbySource: { toolResults, compaction },"
+      ],
+      "packages/stats/src/shared-types.ts": [
+       " * Per-source breakdown: `toolResults` are tool results snapcompact sent as images,",
+       "export type GainSource = \"toolResults\" | \"compaction\";",
+       "\ttoolResults: number;"
+      ],
+      "packages/stats/test/gain-aggregator.test.ts": [
+       "\t\texpect(fooStats.bySource.toolResults.hits).toBe(2);",
+       "\t\t\t{ date: new Date(now).toISOString().slice(0, 10), toolResults: 150, compaction: 0, total: 150 },",
+       "\t\texpect(foobarStats.bySource.toolResults.hits).toBe(1);",
+       "\t\texpect(stats.timeSeries).toEqual([{ date: \"2026-11-01\", toolResults: 0, compaction: 600, total: 600 }]);"
+      ]
+     }
+    }
+   ]
   }
  ],
  "watch": {
