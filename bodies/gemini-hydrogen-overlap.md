@@ -23,7 +23,7 @@ This PR removes Hydrogen from the shared list and regenerates `rules.json`.
 
 Keeping the dedicated block keeps the ladder v18.20.0 released ("low, medium, high, and xhigh thinking levels on the native Google transports"). The Argon/Carbon listing and its `[Unreleased]` clause "on Google, Vertex AI and OpenCode Zen it offers low, medium and high" were written before the xhigh block existed, so I removed that clause and updated the Gemini 4 test that expected three levels for Hydrogen.
 
-**Maintainer call:** if Hydrogen should stop at `high` on Google and Vertex, the alternative is to delete the dedicated `models "gemini-4-hydrogen"` block instead (Zen and Antigravity keep xhigh through their own rules). Every existing test passes with either form; this PR keeps what is released.
+**Alternative not taken:** deleting the dedicated block instead would also stop the crash and pass every existing test, but would drop the released `xhigh` on Google and Vertex, which [Google documents](https://aistudio.google.com/docs/whats-new-gemini-4-hydrogen#understanding-thinking-levels) for Hydrogen.
 
 ## Testing
 
