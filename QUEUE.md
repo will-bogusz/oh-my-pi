@@ -4,7 +4,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-13 05:11Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 1, conflict-held 18, stacked 16, held 13, parked 2, open PRs 32; merged 334, closed 35
+**Counts:** openable now 1, conflict-held 18, stacked 16, held 12, parked 2, open PRs 32; merged 334, closed 36
 
 ## Openable now (1)
 
@@ -56,7 +56,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13
 | observe-stable-ids | feat(browser): keep observe() ids stable across observations | browser | P2 | 2d | act-look-prompt | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-observe-stable-ids) |
 | stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 2h | stats-spotlight-freeze ([#19118](https://github.com/can1357/oh-my-pi/pull/19118)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 
-## Held (13)
+## Held (12)
 
 | id | title | area | priority | age | hold | branch |
 |---|---|---|---|---|---|---|
@@ -71,7 +71,6 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13
 | browser-cursor | feat(browser): draw the acting agent's cursor in OMP-driven tabs | browser | P2 | 2d | Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-cursor) |
 | desktop-cursor | feat(coding-agent,natives): show each agent's cursor where its computer input lands on macOS | coding-agent | P2 | 2d | Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check \| Main 2026-11-12: before it opens, the waiting-key-chord case with the cursor actually drawn (20 trials at a 20 s deadline; CursorDemo's cursor-on arm never drew one, and an early run on the combined tree returned 'Cancelled, input may be partial' 11/11, unexplained), on the polished branch will/desktop-cursor-polish. | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/desktop-cursor) |
 | win-type-insert | feat(natives): insert typed text into a focused Windows multi-line edit control | computer | P2 | 1d | Main, 2026-11-12: proposal; opens only after entry A merges and Will has seen the body | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-type-insert) |
-| ax-relabel-recovery | fix(natives): tell the model it may act on the new ref a relabelled-ref refusal names | computer | P1 | 2h | Main, 2026-11-13: the new error text invites acting on the ref a refusal names; opens only after a blind Sol sample on the Contacts task (strict grade) and the Reminders task, B against its base, shows no wrong-field write the base does not make and a step saving on Reminders | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-relabel-recovery) |
 | ax-read-as-title-link | fix(natives): keep a macOS ref whose own label changes while its title element shows the same text | computer | P1 | 2h | Will, 2026-11-13: Main decides the approach once #19061 has merged, with all the data in: the release leg's count of this refusal across 32 tasks (true catches against relabels), the wording change's Sol sample on Contacts and Reminders, TitleTwin's 0 wrong-item actions in 200 trials (~/tmp/oh-my-pi/TitleTwin/HANDOFF.md), and the fixture's same-title reuse limit (10/10). Not to open before that decision. | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-read-as-live-label) |
 
 ## Parked (2)

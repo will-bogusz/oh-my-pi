@@ -90354,14 +90354,14 @@
    "needs": [],
    "base": "d8493454a2eab3c88f5410d6ce48bf3fe4352300",
    "body": "bodies/ax-relabel-recovery.md",
-   "state": "queued",
+   "state": "closed",
    "pr": null,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ax-relabel-recovery",
    "host": "MacBook-Pro",
    "added": "2026-11-13T02:45:02Z",
-   "updated": "2026-11-13T02:52:49Z",
-   "note": "",
+   "updated": "2026-11-13T05:12:51Z",
+   "note": "Closed by Main, 2026-11-13, on measurement: the reworded refusal saved no step. Sol, 6 runs per task per arm (legs 20261113-relabel-sol and -p2, ~/tmp/trycua-omp/bench-release-20261113/RESULTS.md): Reminders median 8 steps in both arms (6 without the refusal); the model acted on the named ref in 1 of 6 runs and re-read in 5. Contacts 6/6 strict in both arms, no wrong-field write. Do not requeue the wording alone.",
    "hold": "Main, 2026-11-13: the new error text invites acting on the ref a refusal names; opens only after a blind Sol sample on the Contacts task (strict grade) and the Reminders task, B against its base, shows no wrong-field write the base does not make and a step saving on Reminders"
   },
   {
