@@ -602,7 +602,7 @@ describe("Factory Droid discovery gates", () => {
 		for (const id of retired) expect(ids).toContain(id);
 	});
 
-	it("gates droid 1.1.0's and 1.7's new models on their live flags and Ultra Fast on the high-cost opt-in", async () => {
+	it("gates droid 1.1.0's, 1.7's and 1.10's new models on their live flags and Ultra Fast on the high-cost opt-in", async () => {
 		const gated = [
 			"gpt-6.1-terra",
 			"nemotron-3.5-super",
@@ -611,6 +611,7 @@ describe("Factory Droid discovery gates", () => {
 			"gpt-6-astra-ultrafast",
 			"claude-fable-5.2",
 			"gemini-4-carbon",
+			"gemini-4-hydrogen",
 			"kimi-k3.1-pro",
 		];
 		const ultraFast = ["gpt-6-astra-ultrafast", "gpt-6.1-sol-ultrafast"];

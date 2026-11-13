@@ -3555,5 +3555,58 @@
 				}
 			}
 		]
+	},
+	{
+		"model": "gemini-4-hydrogen",
+		"upstream": "google",
+		"effort": "medium",
+		"requests": [
+			{
+				"path": "/api/llm/g/v1/generate",
+				"headers": {
+					"user-agent": "factory-cli/1.10.0",
+					"x-api-provider": "google",
+					"x-client-version": "1.10.0",
+					"x-factory-client": "cli",
+					"x-provider-routing-source": "session_lock"
+				},
+				"body": {
+					"model": "gemini-4-hydrogen",
+					"generationConfig": {
+						"temperature": 1,
+						"topP": 0.95,
+						"topK": 64,
+						"thinkingConfig": {
+							"includeThoughts": true,
+							"thinkingLevel": "MEDIUM"
+						}
+					},
+					"<tool-keys>": []
+				}
+			},
+			{
+				"path": "/api/llm/g/v1/generate",
+				"headers": {
+					"user-agent": "factory-cli/1.10.0",
+					"x-api-provider": "google",
+					"x-client-version": "1.10.0",
+					"x-factory-client": "cli",
+					"x-provider-routing-source": "session_lock"
+				},
+				"body": {
+					"model": "gemini-4-hydrogen",
+					"generationConfig": {
+						"temperature": 1,
+						"topP": 0.95,
+						"topK": 64,
+						"thinkingConfig": {
+							"includeThoughts": true,
+							"thinkingLevel": "MEDIUM"
+						}
+					},
+					"<tool-keys>": []
+				}
+			}
+		]
 	}
 ]
