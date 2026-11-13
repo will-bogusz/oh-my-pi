@@ -90709,10 +90709,14 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-13T08:14:52Z",
+  "checked": "2026-11-13T08:45:48Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
+   "macos-scroll-direction": {
+    "since": "2026-11-13T08:45:48Z",
+    "title": "fix(natives): scroll down for a positive dy on macOS, as on Windows and Linux"
+   },
    "factory-droid-171-models": {
     "since": "2026-11-12T12:26:00Z",
     "title": "feat(catalog): add the Factory Droid models droid 1.7.1 serves"
@@ -94272,6 +94276,12 @@
     "id": "stats-spotlight-freeze",
     "title": "fix(stats,coding-agent): keep the stats dashboard answering while Spotlight rebuilds",
     "why": "opened as #19118"
+   },
+   {
+    "at": "2026-11-13T08:45:48Z",
+    "kind": "openable",
+    "id": "macos-scroll-direction",
+    "title": "fix(natives): scroll down for a positive dy on macOS, as on Windows and Linux"
    }
   ]
  },
@@ -100048,7 +100058,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-13T07:44:21.105785Z",
+  "at": "2026-11-13T08:45:49.559768Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -100729,6 +100739,23 @@
     "created": "2026-10-30T21:35:55Z"
    },
    {
+    "id": "macos-scroll-direction",
+    "label": "macos-scroll-direction",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): scroll down for a positive dy on macOS, as on Windows and Linux",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-10-30T21:36:10Z"
+   },
+   {
     "id": "upload-stall-error-all-providers",
     "label": "upload-stall-error-all-providers",
     "number": null,
@@ -100943,6 +100970,7 @@
      "conflicts with #18013 in docs/computer-use.md",
      "conflicts with #18222 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #18987 in docs/computer-use.md, packages/coding-agent/src/tools/computer/worker.ts",
+     "conflicts with macos-scroll-direction in docs/computer-use.md",
      "conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
@@ -100958,7 +100986,8 @@
      "#19035",
      "#18013",
      "#18222",
-     "#18987"
+     "#18987",
+     "macos-scroll-direction"
     ],
     "needs": [],
     "created": "2026-10-19T07:26:45Z"
@@ -100990,53 +101019,6 @@
     ],
     "needs": [],
     "created": "2026-11-11T09:59:13Z"
-   },
-   {
-    "id": "macos-scroll-direction",
-    "label": "macos-scroll-direction",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P2",
-    "title": "fix(natives): scroll down for a positive dy on macOS, as on Windows and Linux",
-    "action": "wait",
-    "reasons": [
-     "needs iphone-mirror-scroll-distance (queued)",
-     "conflicts with #16553 in crates/pi-natives/src/desktop/macos/input.rs",
-     "conflicts with #17756 in crates/pi-natives/src/desktop/macos/input.rs",
-     "conflicts with #19048 in crates/pi-natives/src/desktop/macos/input.rs, docs/computer-use.md",
-     "conflicts with #19061 in docs/computer-use.md",
-     "conflicts with #19062 in docs/computer-use.md",
-     "conflicts with #18353 in docs/computer-use.md",
-     "conflicts with #19034 in docs/computer-use.md",
-     "conflicts with #19035 in docs/computer-use.md",
-     "conflicts with #17897 in crates/pi-natives/src/desktop/macos/input.rs",
-     "conflicts with #18013 in docs/computer-use.md",
-     "conflicts with #18222 in docs/computer-use.md",
-     "conflicts with #18987 in docs/computer-use.md",
-     "conflicts with main in docs/computer-use.md"
-    ],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [
-     "#16553",
-     "#17756",
-     "#19048",
-     "#19061",
-     "#19062",
-     "#18353",
-     "#19034",
-     "#19035",
-     "#17897",
-     "#18013",
-     "#18222",
-     "#18987"
-    ],
-    "needs": [
-     "iphone-mirror-scroll-distance"
-    ],
-    "created": "2026-10-30T21:36:10Z"
    },
    {
     "id": "r2/relay-own-only",
@@ -101407,6 +101389,7 @@
      "conflicts with #18222 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/tools/eval.ts",
      "conflicts with #18987 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/worker.ts",
+     "conflicts with macos-scroll-direction in docs/computer-use.md",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -101424,7 +101407,8 @@
      "#18013",
      "#18222",
      "#18786",
-     "#18987"
+     "#18987",
+     "macos-scroll-direction"
     ],
     "needs": [
      "computer-ui-quiet"
