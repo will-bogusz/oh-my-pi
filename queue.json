@@ -91406,13 +91406,15 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-restored-frame",
    "host": "MacBook-Pro",
    "added": "2026-11-13T16:33:20Z",
-   "updated": "2026-11-13T16:33:45Z",
+   "updated": "2026-11-13T16:33:49Z",
    "note": "",
    "rebases_after": [
-    19001
+    19001,
+    18925
    ],
    "pair_reasons": {
-    "19001": "Main, 2026-11-13: tab-supervisor.ts only, module scope: import line keeps both names (import { FOREIGN_FRAME_REFUSAL, type HiddenFrame } from \"./relay/protocol\") and WorkerTabSession gains both adjacent fields (heldOut, hiddenFrames); combined form ~/tmp/oh-my-pi/RelayRestoredFrame2/combined-19001.txt"
+    "19001": "Main, 2026-11-13: tab-supervisor.ts only, module scope: import line keeps both names (import { FOREIGN_FRAME_REFUSAL, type HiddenFrame } from \"./relay/protocol\") and WorkerTabSession gains both adjacent fields (heldOut, hiddenFrames); combined form ~/tmp/oh-my-pi/RelayRestoredFrame2/combined-19001.txt",
+    "18925": "Main, 2026-11-13: tab-supervisor.ts import block only, keep both lines (import { isLoopbackRelayUrl } from \"./relay/daemon\"; import { FOREIGN_FRAME_REFUSAL } from \"./relay/protocol\")"
    }
   }
  ],
