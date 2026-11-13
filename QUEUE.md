@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13 17:05Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13 17:06Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-13 16:54Z on goliath; groups below are from it, states from the manifest)
@@ -120,4 +120,4 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13
 
 | id | title | area | priority | age | branch |
 |---|---|---|---|---|---|
-| devin-pin-31257 | fix(catalog): identify Devin requests as CLI 3000.12.57 | broker | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-pin-31257) |
+| devin-pin-31257 | fix(catalog): identify Devin requests as CLI 3000.12.57 | catalog | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-pin-31257) |
