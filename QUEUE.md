@@ -1,17 +1,16 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13 02:51Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13 02:52Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-13 02:48Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 4, conflict-held 18, stacked 15, held 11, parked 2, open PRs 28, queued since the last plan 1; merged 334, closed 35
+**Counts:** openable now 3, conflict-held 18, stacked 15, held 12, parked 2, open PRs 28, queued since the last plan 1; merged 334, closed 35
 
-## Openable now (4)
+## Openable now (3)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
 | factory-droid-171-models | feat(catalog): add the Factory Droid models droid 1.7.1 serves | factory-droid |  | 2d | open; advance first | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-171-models) |
-| ax-relabel-recovery | fix(natives): tell the model it may act on the new ref a relabelled-ref refusal names | computer | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-relabel-recovery) |
 | stats-reply-link | fix(stats): count every answered message in the Frustration per-model table | other |  | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-reply-link) |
 | stats-trace-jobs | fix(stats): close Traces background jobs when they finish, so idle time and turn ends show | stats |  | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-trace-jobs) |
 
@@ -58,7 +57,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13
 | act-look-prompt | docs(browser): teach acting and looking in one Eval cell without sleeps | browser | P2 | 2d | settle-reads | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-act-look-prompt) |
 | observe-stable-ids | feat(browser): keep observe() ids stable across observations | browser | P2 | 2d | act-look-prompt | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-observe-stable-ids) |
 
-## Held (11)
+## Held (12)
 
 | id | title | area | priority | age | hold | branch |
 |---|---|---|---|---|---|---|
@@ -73,6 +72,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13
 | browser-cursor | feat(browser): draw the acting agent's cursor in OMP-driven tabs | browser | P2 | 2d | Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-cursor) |
 | desktop-cursor | feat(coding-agent,natives): show each agent's cursor where its computer input lands on macOS | coding-agent | P2 | 2d | Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check \| Main 2026-11-12: before it opens, the waiting-key-chord case with the cursor actually drawn (20 trials at a 20 s deadline; CursorDemo's cursor-on arm never drew one, and an early run on the combined tree returned 'Cancelled, input may be partial' 11/11, unexplained), on the polished branch will/desktop-cursor-polish. | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/desktop-cursor) |
 | win-type-insert | feat(natives): insert typed text into a focused Windows multi-line edit control | computer | P2 | 22h | Main, 2026-11-12: proposal; opens only after entry A merges and Will has seen the body | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-type-insert) |
+| ax-relabel-recovery | fix(natives): tell the model it may act on the new ref a relabelled-ref refusal names | computer | P1 | 0h | Main, 2026-11-13: the new error text invites acting on the ref a refusal names; opens only after a blind Sol sample on the Contacts task (strict grade) and the Reminders task, B against its base, shows no wrong-field write the base does not make and a step saving on Reminders | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-relabel-recovery) |
 
 ## Parked (2)
 
@@ -106,7 +106,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13
 | [#19035](https://github.com/can1357/oh-my-pi/pull/19035) | atspi-text-first | fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility | computer | P2 | 12h | keep; accepted pair with #18353 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-text-first) |
 | [#19080](https://github.com/can1357/oh-my-pi/pull/19080) | x11-takeover-keyboard-state | fix(natives): type X11 XTest text through a neutral keyboard state | computer | P1 | 6h | keep; accepted pair with #19066: Main, 2026-11-12: only code conflict is the two with_foreground closures in crates/pi-natives/src/desktop/linux/x11/input.rs, where #19066 adds this.check_keyboard_grab(window)? before xtest_steps and this entry passes matches!(keys, Keys::Text(_)) to xtest_steps; the combined form keeps both lines (trial merge 2a04e89911c), which built and passed both X11 suites (63 tests, excluding two MPX/uinput hotplug tests that fail identically on main under Xvfb). | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-takeover-keyboard-state) |
 | [#19066](https://github.com/can1357/oh-my-pi/pull/19066) | x11-takeover-keyboard-grab | fix(natives): refuse X11 XTest keys while another client grabs the keyboard | computer | P1 | 7h | keep; accepted pair with #19080: Main, 2026-11-12: only code conflict is the two with_foreground closures in crates/pi-natives/src/desktop/linux/x11/input.rs, where #19066 adds this.check_keyboard_grab(window)? before xtest_steps and this entry passes matches!(keys, Keys::Text(_)) to xtest_steps; the combined form keeps both lines (trial merge 2a04e89911c), which built and passed both X11 suites (63 tests, excluding two MPX/uinput hotplug tests that fail identically on main under Xvfb). | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-takeover-keyboard-grab) |
-| [#19025](https://github.com/can1357/oh-my-pi/pull/19025) | win-target-layout | fix(natives): map Windows keys on the receiving keyboard layout | computer | P1 | 14h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-target-layout) |
+| [#19025](https://github.com/can1357/oh-my-pi/pull/19025) | win-target-layout | fix(natives): map Windows keys on the receiving keyboard layout | computer | P1 | 15h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-target-layout) |
 | [#19048](https://github.com/can1357/oh-my-pi/pull/19048) | ax-row-action | fix(natives): follow rebuilt macOS table rows without selecting a neighbour | computer | P1 | 10h | keep; accepted pair with #16553: QueueFourteen, 2026-11-12 (Main's standing rule: use-list collision, opener records): only conflict is the use list in crates/pi-natives/src/desktop/macos/mod.rs: #16553 adds 'pub(super) use clicks::ClickJournal;', this entry adds is_standard_window and window_titles to the ax/capture use lines; nothing removed; combined form is both; accepted pair with #19061: QueueFifteen, 2026-11-12 (Main's standing rule: a field added beside a line the other side reshapes without changing a value): only conflict is the Registered struct in crates/pi-natives/src/desktop/ax.rs: #19048 adds 'row: Option<RowProof>,' where this entry rewrites the doc comment of 'held'; #19048 reads neither held nor fingerprint. Combined form: #19048's row field, then this entry's doc comment and 'held: Option<u64>'. | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-row-action) |
 | [#19062](https://github.com/can1357/oh-my-pi/pull/19062) | win-focus-report | fix(natives): report where focus went after a Windows takeover | computer | P1 | 8h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-focus-report) |
 | [#19034](https://github.com/can1357/oh-my-pi/pull/19034) | atspi-combo-choice | fix(natives): choose Linux combo box options without opening their keyboard-grabbing list | computer | P2 | 12h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-combo-choice) |
