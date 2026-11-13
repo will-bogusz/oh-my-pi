@@ -90435,9 +90435,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ax-read-as-live-label",
    "host": "MacBook-Pro",
    "added": "2026-11-13T02:49:00Z",
-   "updated": "2026-11-13T03:35:23Z",
+   "updated": "2026-11-13T03:59:08Z",
    "note": "",
-   "hold": "Main, 2026-11-13: accepts a reused row that shows the same title text as the one read (fixture: clicked the neighbour 10/10). Measured since (TitleTwin, ~/tmp/oh-my-pi/TitleTwin/HANDOFF.md): 0 wrong-item actions in 200 scripted trials across Notes, Reminders, Finder search and Contacts with duplicate titles; saved refs stayed on the same item or were destroyed. Main recommends opening with the limit stated; waits on Will's word and on #19061"
+   "hold": "Will, 2026-11-13: Main decides the approach once #19061 has merged, with all the data in: the release leg's count of this refusal across 32 tasks (true catches against relabels), the wording change's Sol sample on Contacts and Reminders, TitleTwin's 0 wrong-item actions in 200 trials (~/tmp/oh-my-pi/TitleTwin/HANDOFF.md), and the fixture's same-title reuse limit (10/10). Not to open before that decision."
   },
   {
    "id": "stats-live-appends",
