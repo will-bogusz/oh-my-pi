@@ -10,7 +10,7 @@ I added the Factory Droid models droid 1.7.1 serves and caught Muse Spark 1.3 up
 | `image` role, Factory defaults | GPT Image 2.5, 2.5 Flare, Gemini 3 Pro Image | GPT Image 2.6 and 2.6 Flare first, then the same three |
 | Muse Spark 1.3 image input | image dropped (or described by another model) | image sent; hidden only by the account's region, not by its retired feature flag |
 
-> **Factory context.** Factory has no model-listing endpoint: omp ships the CLI's roster in `factory-droid.kdl` and narrows it per account with feature flags, org policy and inference region. A credit promotion is two dated `effective-rates` cards, so the rate switches back on its own date.
+> **Factory context.** Factory has no model-listing endpoint: omp ships the CLI's roster in `factory-droid.kdl` and narrows it per account with feature flags, org policy and inference region. A credit promotion is two dated `effective-rates` cards that switch on their own.
 
 Reading order: the seed rows, then the `models` blocks in `factory-droid.kdl` (each new model sits above its predecessor, then the image block) → the dialect lines that gained an id (`disabled-thinking "adaptive"`, `requires-tool-result-name`, Argon's `google-*` lines) → `quota-tiers`, `api-routes` and `role-defaults "image"` in `runtime/behavior.kdl`.
 
@@ -29,8 +29,8 @@ Related: #19173 asks for Fable 5.2 and Carbon, and also for Gemini 4 Hydrogen, w
 
 ## Testing
 
-- Live on a Factory login from this branch, `omp -p` two-read turn (read two files, sum them): 42 on `claude-fable-5.2`, `gemini-4-carbon` and `kimi-k3.1-pro`; Carbon's turn billed $2/$10, $0.10 cached.
-- One-image turn on `muse-spark-1.3` (red/blue split PNG): this branch sends an `input_image` part; `main` sends another model's description instead. Meta's upstream rejected every Muse Spark 1.3 request that day, text-only too, so neither side got an answer.
+- Live on a Factory login from this branch, `omp -p` turn reading two files and summing them: 42 on `claude-fable-5.2`, `gemini-4-carbon` and `kimi-k3.1-pro`; Carbon's turn billed $2/$10, $0.10 cached.
+- One-image turn on `muse-spark-1.3` (red/blue split PNG): this branch sends an `input_image` part; `main` sends another model's description instead. Meta's upstream rejected every Muse request that day, text included, so no answer came back.
 - `generate_image` with the `image` role set to `factory-droid/gpt-image-2.6-sunburst` returned an image from that model.
 - Native parity: droid 1.7.1 captures for `claude-fable-5.2@anthropic`, `gemini-4-carbon@google` and `kimi-k3.1-pro@fireworks` match omp's requests (`factory-droid-native-parity.test.ts` 64 pass). With Carbon removed from Argon's dialect line its parity case fails; with Kimi K3.1 Pro removed from `requires-tool-result-name` the new completions test fails.
 - Discovery tests now check that the three new flags gate their models and that Muse Spark 1.3 is listed with its flag off and carries image input.
