@@ -92055,13 +92055,13 @@
    "needs": [],
    "base": "aa5f045f98a90f5c7bbc6b091f1e97e42263194d",
    "body": "bodies/macos-handback-key.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19208,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-handback-key",
    "host": "MacBook-Pro",
    "added": "2026-11-13T21:56:33Z",
-   "updated": "2026-11-13T23:37:47Z",
+   "updated": "2026-11-13T23:41:41Z",
    "note": "HandBack 2026-11-13. Head 3efb12fdce0 (3 commits: takeover make-key, keyboard report field+text, guard make-key). P1 not P0: user's window left inactive (title bar, page blur/hasFocus false) and the tool said focus returned; typed keys still arrived 10/10 (Main). Combined with #19062 (win-focus-report): textual merge clean; semantic hunk: the three Windows DesktopFocusReturn literals (win32/input.rs focus report, win32/mod.rs two hand-back sites) need keyboard: None; worker.ts focusReport branches 'focus returned to'/'was handed back' stay for Windows. Textually clean with #19179 key-menu, #19165 scroll-direction, macos-drag-confirm, click-place-release, unqueued will/macos-key-divert. rust-check: macos recorded; linux+windows OWED (goliath down 2026-11-13 ~21:30Z). TS computer.test.ts 152 pass, coding-agent check clean (bench-mac). Review HandBackReview2 needs-changes -> fixed (same-app entry baseline, settled from entry, notSent text when no hand-back, 26.5-scoped comment, guard front check); docs line 129 kept (Windows example after #19062). Change 2 (window order) stacks on this branch.",
    "built": [
     {
@@ -92325,7 +92325,8 @@
      "at": "2026-11-13T23:37:47Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-13T23:41:41Z"
   }
  ],
  "watch": {
