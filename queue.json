@@ -91683,21 +91683,17 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-13T16:54:22Z",
+  "checked": "2026-11-13T17:55:52Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "relay-restored-frame": {
-    "since": "2026-11-13T16:54:22Z",
-    "title": "fix(browser-relay): keep a relay tab when another extension's frame keeps omp out"
-   },
    "covered-fill": {
     "since": "2026-11-13T15:53:06Z",
     "title": "fix(coding-agent): refuse browser keys aimed at a field a modal dialog covers"
    },
-   "key-menu": {
-    "since": "2026-11-13T12:49:10Z",
-    "title": "fix(natives): close the menu a macOS background key press opens"
+   "factory-droid-config-update-upstreams": {
+    "since": "2026-11-13T17:55:52Z",
+    "title": "fix(catalog): keep GPT-6 effort changes off configuration_update on Factory Droid Bedrock and Snowflake"
    },
    "macos-drag-confirm": {
     "since": "2026-11-13T13:20:12Z",
@@ -91734,7 +91730,7 @@
     ]
    }
   },
-  "merged_through": "2026-11-13T12:51:31Z",
+  "merged_through": "2026-11-13T17:32:46Z",
   "unreleased": {
    "19118": {
     "title": "fix(stats,coding-agent): keep the stats dashboard answering while Spotlight rebuilds",
@@ -91755,6 +91751,11 @@
     "title": "fix(coding-agent): fail a click whose frame the page removed while the button was down",
     "merge_commit": "193152feeab89b05972e64bca776f087985aea1c",
     "merged_at": "2026-11-13T12:51:31Z"
+   },
+   "19181": {
+    "title": "fix(catalog): keep Gemini 4 Hydrogen in one thinking rule so a regenerated catalog starts",
+    "merge_commit": "2a4692ad38714031a2deea4db7dec62a8745a6f2",
+    "merged_at": "2026-11-13T17:32:46Z"
    }
   },
   "ready": [
@@ -91786,7 +91787,10 @@
    19080,
    19100,
    19120,
-   19165
+   19165,
+   19178,
+   19179,
+   19180
   ],
   "post_merge": {
    "18632": {
@@ -92093,25 +92097,15 @@
     "merge_commit": "b43ea3a1e6dda912b547e6b17dfe004a8c3d2bef",
     "merged_at": "2026-11-13T12:51:30Z",
     "findings": []
+   },
+   "19181": {
+    "title": "fix(catalog): keep Gemini 4 Hydrogen in one thinking rule so a regenerated catalog starts",
+    "merge_commit": "2a4692ad38714031a2deea4db7dec62a8745a6f2",
+    "merged_at": "2026-11-13T17:32:46Z",
+    "findings": []
    }
   },
   "events": [
-   {
-    "at": "2026-11-06T17:29:52Z",
-    "kind": "merged",
-    "number": 18252,
-    "title": "fix(browser): keep the tab an open successfully reattaches",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-06T17:29:52Z",
-    "kind": "merged",
-    "number": 18221,
-    "title": "fix(natives): search 64 levels deep in find()",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
    {
     "at": "2026-11-06T23:05:05Z",
     "kind": "openable",
@@ -95311,6 +95305,34 @@
     "kind": "openable",
     "id": "relay-restored-frame",
     "title": "fix(browser-relay): keep a relay tab when another extension's frame keeps omp out"
+   },
+   {
+    "at": "2026-11-13T17:55:52Z",
+    "kind": "merged",
+    "number": 19181,
+    "title": "fix(catalog): keep Gemini 4 Hydrogen in one thinking rule so a regenerated catalog starts",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-13T17:55:52Z",
+    "kind": "openable",
+    "id": "factory-droid-config-update-upstreams",
+    "title": "fix(catalog): keep GPT-6 effort changes off configuration_update on Factory Droid Bedrock and Snowflake"
+   },
+   {
+    "at": "2026-11-13T17:55:52Z",
+    "kind": "unopenable",
+    "id": "relay-restored-frame",
+    "title": "fix(browser-relay): keep a relay tab when another extension's frame keeps omp out",
+    "why": "opened as #19178"
+   },
+   {
+    "at": "2026-11-13T17:55:52Z",
+    "kind": "unopenable",
+    "id": "key-menu",
+    "title": "fix(natives): close the menu a macOS background key press opens",
+    "why": "opened as #19179"
    }
   ]
  },
@@ -101161,8 +101183,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-13T17:34:53.981637Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-13T17:55:53.381494Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 4,
@@ -102892,8 +102914,10 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with main in (branch missing on the fork)"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -103062,6 +103086,48 @@
     "created": "2026-10-13T21:47:19Z"
    },
    {
+    "id": "factory-droid-1100-models",
+    "label": "factory-droid-1100-models",
+    "number": null,
+    "state": "queued",
+    "area": "factory-droid",
+    "priority": null,
+    "title": "feat(catalog): add the Factory Droid models droid 1.10.0 serves",
+    "action": "wait",
+    "reasons": [
+     "needs factory-droid-1100-pin (queued)"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [
+     "factory-droid-1100-pin"
+    ],
+    "created": "2026-11-13T17:37:22Z"
+   },
+   {
+    "id": "factory-droid-1100-pin",
+    "label": "factory-droid-1100-pin",
+    "number": null,
+    "state": "queued",
+    "area": "factory-droid",
+    "priority": null,
+    "title": "feat(catalog): identify Factory Droid requests as droid 1.10.0",
+    "action": "wait",
+    "reasons": [
+     "needs factory-droid-171-models (queued)"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [
+     "factory-droid-171-models"
+    ],
+    "created": "2026-11-13T17:35:36Z"
+   },
+   {
     "id": "factory-droid-171-models",
     "label": "factory-droid-171-models",
     "number": null,
@@ -103069,7 +103135,7 @@
     "area": "factory-droid",
     "priority": null,
     "title": "feat(catalog): add the Factory Droid models droid 1.7.1 serves",
-    "action": "next-hour",
+    "action": "open",
     "reasons": [],
     "note": "",
     "over": [],
