@@ -1,10 +1,10 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13 17:08Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13 17:09Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-13 17:02Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 4, conflict-held 17, stacked 14, held 13, parked 2, open PRs 30, queued since the last plan 1; merged 338, closed 36
+**Counts:** openable now 4, conflict-held 17, stacked 14, held 13, parked 2, open PRs 30, queued since the last plan 2; merged 338, closed 36
 
 ## Openable now (4)
 
@@ -116,8 +116,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13
 | [#19120](https://github.com/can1357/oh-my-pi/pull/19120) | stats-gain-compaction | fix(stats): count snapcompact compactions on the Gain tab | other | P2 | 13h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-gain-compaction) |
 | [#19178](https://github.com/can1357/oh-my-pi/pull/19178) | relay-restored-frame | fix(browser-relay): keep a relay tab when another extension's frame keeps omp out | browser | P0 | 0h | keep; accepted pair with #18925: Main, 2026-11-13: tab-supervisor.ts import block only, keep both lines (import { isLoopbackRelayUrl } from "./relay/daemon"; import { FOREIGN_FRAME_REFUSAL } from "./relay/protocol"); accepted pair with #19001: Main, 2026-11-13: tab-supervisor.ts only, module scope: import line keeps both names (import { FOREIGN_FRAME_REFUSAL, type HiddenFrame } from "./relay/protocol") and WorkerTabSession gains both adjacent fields (heldOut, hiddenFrames); combined form ~/tmp/oh-my-pi/RelayRestoredFrame2/combined-19001.txt | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-restored-frame) |
 
-## Queued since the last plan (1)
+## Queued since the last plan (2)
 
 | id | title | area | priority | age | branch |
 |---|---|---|---|---|---|
 | devin-pin-31257 | fix(catalog): identify Devin requests as CLI 3000.12.57 | catalog | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-pin-31257) |
+| gemini-hydrogen-overlap | fix(catalog): keep Gemini 4 Hydrogen in one thinking rule so a regenerated catalog starts | catalog | P0 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/gemini-hydrogen-overlap) |
