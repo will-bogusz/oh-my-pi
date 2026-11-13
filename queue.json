@@ -101460,12 +101460,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-13T18:57:04.644659Z",
-  "host": "goliath",
+  "at": "2026-11-13T19:23:00.935759Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 2,
-   "left": 6
+   "used": 1,
+   "left": 7
   },
   "rows": [
    {
@@ -102244,6 +102244,23 @@
     ],
     "needs": [],
     "created": "2026-11-11T02:31:05Z"
+   },
+   {
+    "id": "factory-droid-capture-resilience",
+    "label": "factory-droid-capture-resilience",
+    "number": null,
+    "state": "queued",
+    "area": "other",
+    "priority": "P1",
+    "title": "test(ai): keep captured Factory Droid parity cases when one case fails",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-13T19:22:46Z"
    },
    {
     "id": "browser-wait-predicate",
@@ -103208,10 +103225,8 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "wait",
-    "reasons": [
-     "conflicts with main in (branch missing on the fork)"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
