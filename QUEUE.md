@@ -1,19 +1,20 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13 23:04Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13 23:07Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-13 22:52Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 2, conflict-held 18, stacked 16, held 12, parked 2, open PRs 36; merged 339, closed 36
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-13 23:02Z on MacBook-Pro; groups below are from it, states from the manifest)
+**Counts:** openable now 3, conflict-held 17, stacked 16, held 12, parked 2, open PRs 36; merged 339, closed 36
 
-## Openable now (2)
+## Openable now (3)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
 | covered-fill | fix(coding-agent): refuse browser keys aimed at a field a modal dialog covers | browser | P1 | 2d | open (over #19045) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/covered-fill) |
+| stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 20h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 | macos-handback-key | fix(natives): give the user's key window back after macOS takeover and focus-guard hand-backs | computer | P1 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-handback-key) |
 
-## Conflict-held (18)
+## Conflict-held (17)
 
 | id | title | area | priority | age | blocked by | branch |
 |---|---|---|---|---|---|---|
@@ -34,7 +35,6 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13
 | macos-ax-cancel-before-send | fix(natives): send no macOS AX action once its run is cancelled | natives | P2 | 2d | [#19036](https://github.com/can1357/oh-my-pi/pull/19036), [#19048](https://github.com/can1357/oh-my-pi/pull/19048), [#19061](https://github.com/can1357/oh-my-pi/pull/19061), [#19063](https://github.com/can1357/oh-my-pi/pull/19063), [#19195](https://github.com/can1357/oh-my-pi/pull/19195), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-ax-cancel-before-send) |
 | win-ax-states | fix(natives): expose Windows control state and stale-reference matches | computer | P2 | 2d | [#19036](https://github.com/can1357/oh-my-pi/pull/19036), [#19048](https://github.com/can1357/oh-my-pi/pull/19048), [#19061](https://github.com/can1357/oh-my-pi/pull/19061), [#19063](https://github.com/can1357/oh-my-pi/pull/19063), [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#18925](https://github.com/can1357/oh-my-pi/pull/18925), [#18987](https://github.com/can1357/oh-my-pi/pull/18987), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-ax-states) |
 | x11-keysym-remap | fix(natives): type characters outside the X11 keymap through temporary keycodes | computer | P2 | 2d | [#19066](https://github.com/can1357/oh-my-pi/pull/19066), [#19080](https://github.com/can1357/oh-my-pi/pull/19080), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-keysym-remap) |
-| stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 20h | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 
 ## Stacked (16)
 
