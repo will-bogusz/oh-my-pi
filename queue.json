@@ -91420,10 +91420,14 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-13T15:53:06Z",
+  "checked": "2026-11-13T16:54:22Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
+   "relay-restored-frame": {
+    "since": "2026-11-13T16:54:22Z",
+    "title": "fix(browser-relay): keep a relay tab when another extension's frame keeps omp out"
+   },
    "covered-fill": {
     "since": "2026-11-13T15:53:06Z",
     "title": "fix(coding-agent): refuse browser keys aimed at a field a modal dialog covers"
@@ -95038,6 +95042,12 @@
     "kind": "openable",
     "id": "covered-fill",
     "title": "fix(coding-agent): refuse browser keys aimed at a field a modal dialog covers"
+   },
+   {
+    "at": "2026-11-13T16:54:22Z",
+    "kind": "openable",
+    "id": "relay-restored-frame",
+    "title": "fix(browser-relay): keep a relay tab when another extension's frame keeps omp out"
    }
   ]
  },
@@ -100876,8 +100886,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-13T16:33:53.618566Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-13T16:54:23.212866Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -102567,8 +102577,10 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with main in (branch missing on the fork)"
+    ],
     "note": "",
     "over": [],
     "paired": [],
