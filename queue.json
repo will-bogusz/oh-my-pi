@@ -58433,8 +58433,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/iphone-mirror-scroll-distance",
    "host": "MacBook-Pro",
    "added": "2026-10-30T21:35:55Z",
-   "updated": "2026-11-10T22:13:06Z",
-   "note": "",
+   "updated": "2026-11-13T08:33:33Z",
+   "note": "FalseSuccess2 2026-11-13: needs a redo on main's new_scroll_wheel_event2 call and on the direction fix (macos-scroll-direction, now on main 84f5adc as 7d8261c with no needs; it no longer carries this entry's report_scroll lines, and iPhone Mirroring's scroll sign flips through background_scroll there).",
    "advanced": "2026-11-10T22:13:06Z"
   },
   {
