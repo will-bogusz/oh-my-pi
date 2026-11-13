@@ -58533,7 +58533,7 @@
    "branch": "will/macos-scroll-direction",
    "title": "fix(natives): scroll down for a positive dy on macOS, as on Windows and Linux",
    "area": "computer",
-   "priority": "P1",
+   "priority": "P2",
    "needs": [],
    "base": "84f5adc3bbfc0c2a7caecbad78b1b6eedf0a2939",
    "body": "bodies/macos-scroll-direction.md",
@@ -58543,7 +58543,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-scroll-direction",
    "host": "MacBook-Pro",
    "added": "2026-10-30T21:36:10Z",
-   "updated": "2026-11-13T13:16:25Z",
+   "updated": "2026-11-13T13:20:02Z",
    "note": "FalseSuccess2 2026-11-13: rebased onto main 84f5adc as 7d8261c (report_scroll hunks and iPhone report-path tests dropped; iPhone Mirroring gets the flip through background_scroll). P1 per Main: every macOS scroll goes the wrong way on main. No needs. Opening order A (macos-drag-confirm), this, B (macos-scroll-confirm).",
    "built": [
     {
@@ -77548,13 +77548,13 @@
    "needs": [],
    "base": "5de4b038103fdf390daa1ad6ac490e290d276d99",
    "body": "bodies/browser-click-frame-removed.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19094,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-click-frame-removed",
    "host": "MacBook-Pro",
    "added": "2026-11-11T00:14:54Z",
-   "updated": "2026-11-13T12:43:51Z",
+   "updated": "2026-11-13T13:20:02Z",
    "note": "QueueSeventeen, 2026-11-12: rebased onto c308970263a (Main-approved combined form in clickTarget: main's detached check, then clickPoint(frame.page(), \u2026, checkWhileDown)); test-only repair: String() around page.evaluate in the frame-click helper (TS2322).",
    "advanced": "2026-11-13T12:43:51Z",
    "built": [
@@ -77668,7 +77668,8 @@
     }
    ],
    "opened": "2026-11-12T23:53:09Z",
-   "readied": "2026-11-12T23:53:34Z"
+   "readied": "2026-11-12T23:53:34Z",
+   "merged_by": "pr"
   },
   {
    "id": "desktop-cursor",
@@ -90528,13 +90529,13 @@
    "needs": [],
    "base": "d8493454a2eab3c88f5410d6ce48bf3fe4352300",
    "body": "bodies/stats-reply-link.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19114,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/stats-reply-link",
    "host": "MacBook-Pro",
    "added": "2026-11-13T02:46:31Z",
-   "updated": "2026-11-13T03:08:44Z",
+   "updated": "2026-11-13T13:20:02Z",
    "note": "",
    "built": [
     {
@@ -90548,7 +90549,8 @@
     }
    ],
    "opened": "2026-11-13T02:59:23Z",
-   "readied": "2026-11-13T02:59:58Z"
+   "readied": "2026-11-13T02:59:58Z",
+   "merged_by": "pr"
   },
   {
    "id": "stats-trace-jobs",
@@ -90559,13 +90561,13 @@
    "needs": [],
    "base": "84f5adc3bbfc0c2a7caecbad78b1b6eedf0a2939",
    "body": "bodies/stats-trace-jobs.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19115,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/stats-trace-jobs",
    "host": "MacBook-Pro",
    "added": "2026-11-13T02:47:10Z",
-   "updated": "2026-11-13T03:10:27Z",
+   "updated": "2026-11-13T13:20:02Z",
    "note": "",
    "opened": "2026-11-13T03:06:57Z",
    "readied": "2026-11-13T03:07:30Z",
@@ -90589,7 +90591,8 @@
      }
     }
    ],
-   "advanced": "2026-11-13T03:10:27Z"
+   "advanced": "2026-11-13T03:10:27Z",
+   "merged_by": "pr"
   },
   {
    "id": "ax-read-as-title-link",
@@ -90641,13 +90644,13 @@
    "needs": [],
    "base": "84f5adc3bbfc0c2a7caecbad78b1b6eedf0a2939",
    "body": "bodies/stats-spotlight-freeze.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19118,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/stats-spotlight-freeze",
    "host": "MacBook-Pro",
    "added": "2026-11-13T03:07:37Z",
-   "updated": "2026-11-13T04:09:52Z",
+   "updated": "2026-11-13T13:20:02Z",
    "note": "",
    "advanced": "2026-11-13T03:49:41Z",
    "built": [
@@ -90779,7 +90782,8 @@
     }
    ],
    "opened": "2026-11-13T03:42:56Z",
-   "readied": "2026-11-13T03:43:35Z"
+   "readied": "2026-11-13T03:43:35Z",
+   "merged_by": "pr"
   },
   {
    "id": "stats-gain-compaction",
