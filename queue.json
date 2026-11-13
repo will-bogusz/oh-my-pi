@@ -101585,6 +101585,11 @@
     "sha": "310a8dbff09cf97596bb21609b6ef21ddb0da657",
     "at": "2026-11-13T20:23:23Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "310a8dbff09cf97596bb21609b6ef21ddb0da657",
+    "at": "2026-11-13T20:25:18Z",
+    "host": "goliath"
    }
   }
  },
