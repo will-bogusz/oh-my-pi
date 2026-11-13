@@ -91039,7 +91039,7 @@
    "worktree": null,
    "host": "MacBook-Pro",
    "added": "2026-11-13T10:32:49Z",
-   "updated": "2026-11-13T20:04:31Z",
+   "updated": "2026-11-13T20:15:32Z",
    "note": "Head 37bd49376ef. Touches the Drag arm of background_gesture in crates/pi-natives/src/desktop/macos/input.rs; neighbouring arms are touched by macos-scroll-direction (Scroll arm / background_scroll) and by a separate lane's key-press fix: expect adjacent-hunk rebases, no semantic overlap. Review DragConfirm.ReviewDragConfirm needs-changes at abc556586fa, all F1-F9 fixed in 37bd493 (not re-reviewed per skill). VM: DragConfirm block3 (bench-mac runs dc-main-e/dc-C-e/dc-C-a/dc-main-a).",
    "built": [
     {
@@ -91075,15 +91075,6 @@
      "with_code": "6f132c34421de5c96f52d6eca790850c3d6c7ad2",
      "tip": "37bd49376ef341f5bb8300edb771cb9d55245278",
      "with_tip": "fc02f33af772f9cf0c0b871655a75fff79972a45",
-     "at": "2026-11-13T13:03:40Z",
-     "host": "MacBook-Pro"
-    },
-    {
-     "with": "#19048",
-     "code": "1b6b064830c44ca81fd501711b388c9d9edb8a46",
-     "with_code": "3a6e5e168a4b689f044865e6dd66590973fef2f3",
-     "tip": "37bd49376ef341f5bb8300edb771cb9d55245278",
-     "with_tip": "61d9f5023edd9d931b134c0907cce19ec1492e8e",
      "at": "2026-11-13T13:03:40Z",
      "host": "MacBook-Pro"
     },
@@ -91277,21 +91268,48 @@
      "host": "MacBook-Pro"
     },
     {
-     "with": "#19178",
-     "code": "1b6b064830c44ca81fd501711b388c9d9edb8a46",
-     "with_code": "e96c21fc30fc7cc37aab5b505864b28571bc5f94",
-     "tip": "37bd49376ef341f5bb8300edb771cb9d55245278",
-     "with_tip": "c4be88ec6b27039282a9a3fa7efde2f246922ff8",
-     "at": "2026-11-13T17:05:48Z",
-     "host": "MacBook-Pro"
-    },
-    {
      "with": "key-menu",
      "code": "1b6b064830c44ca81fd501711b388c9d9edb8a46",
      "with_code": "dd3cb2c4349ee54b6feea71f208daf109281950d",
      "tip": "37bd49376ef341f5bb8300edb771cb9d55245278",
      "with_tip": "55ce074a735320dde46a5c7a5971b4455cf0d5fa",
      "at": "2026-11-13T17:05:53Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19178",
+     "code": "1b6b064830c44ca81fd501711b388c9d9edb8a46",
+     "with_code": "0bafced28364fed966dbdbb47319cf6ab7fe74da",
+     "tip": "75440b98bc86f12e7d58bd13027ce0508d05bdc7",
+     "with_tip": "b2a3ea7cb38d849838e6e2a498827ce67aa4649e",
+     "at": "2026-11-13T20:15:26Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19179",
+     "code": "1b6b064830c44ca81fd501711b388c9d9edb8a46",
+     "with_code": "f2e0ab7d3e793eb43fe7a45715aa6c6bb4f6dbe6",
+     "tip": "75440b98bc86f12e7d58bd13027ce0508d05bdc7",
+     "with_tip": "91d3a4cabe1e4a608ffb123c49dd581ec5e91b1f",
+     "at": "2026-11-13T20:15:31Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19048",
+     "code": "1b6b064830c44ca81fd501711b388c9d9edb8a46",
+     "with_code": "3a6e5e168a4b689f044865e6dd66590973fef2f3",
+     "tip": "75440b98bc86f12e7d58bd13027ce0508d05bdc7",
+     "with_tip": "dcb679788ba6bd9ab6399e068a8a68f035fb4448",
+     "at": "2026-11-13T20:15:31Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19165",
+     "code": "1b6b064830c44ca81fd501711b388c9d9edb8a46",
+     "with_code": "0a55ce1d58efe70232d1449eac9fdbd7e282f1c3",
+     "tip": "75440b98bc86f12e7d58bd13027ce0508d05bdc7",
+     "with_tip": "c78bb77160b8795da0b43480ad4420b3daa97092",
+     "at": "2026-11-13T20:15:31Z",
      "host": "MacBook-Pro"
     }
    ],
