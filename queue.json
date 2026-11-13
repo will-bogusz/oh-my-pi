@@ -91660,6 +91660,26 @@
    "added": "2026-11-13T17:35:36Z",
    "updated": "2026-11-13T17:35:36Z",
    "note": ""
+  },
+  {
+   "id": "factory-droid-1100-models",
+   "branch": "will/factory-droid-1100-models",
+   "title": "feat(catalog): add the Factory Droid models droid 1.10.0 serves",
+   "area": "factory-droid",
+   "priority": null,
+   "needs": [
+    "factory-droid-1100-pin"
+   ],
+   "base": "3336d0c48fe7e24ff937dcba4743738472ed1c1f",
+   "body": "bodies/factory-droid-1100-models.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-1100-models",
+   "host": "MacBook-Pro",
+   "added": "2026-11-13T17:37:22Z",
+   "updated": "2026-11-13T17:37:22Z",
+   "note": ""
   }
  ],
  "watch": {
