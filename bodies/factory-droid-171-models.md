@@ -12,20 +12,20 @@ I added the Factory Droid models droid 1.7.1 serves and caught Muse Spark 1.3 up
 
 > **Factory context.** Factory has no model-listing endpoint: omp ships the CLI's roster in `factory-droid.kdl` and narrows it per account with feature flags, org policy and inference region. A credit promotion is two dated `effective-rates` cards, so the rate switches back on its own date.
 
-Reading order: the seed rows, then the per-model `models` blocks in `factory-droid.kdl` (Fable 5.2 above Fable 5.1, Carbon above Argon, Kimi K3.1 Pro above Kimi K3, the image block) → the dialect lines that gained an id (`disabled-thinking "adaptive"`, `requires-tool-result-name`, Argon's `google-*` lines) → `quota-tiers`, `api-routes` and `role-defaults "image"` in `runtime/behavior.kdl`.
+Reading order: the seed rows, then the `models` blocks in `factory-droid.kdl` (each new model sits above its predecessor, then the image block) → the dialect lines that gained an id (`disabled-thinking "adaptive"`, `requires-tool-result-name`, Argon's `google-*` lines) → `quota-tiers`, `api-routes` and `role-defaults "image"` in `runtime/behavior.kdl`.
 
 ## Why
 
 droid 1.7.0/1.7.1 add these models and retire Muse Spark 1.3's gate (its flag is deprecated, served only for older clients). Each new model reuses an existing rule axis; Fable 5.2 is prefix-bound, so it gets `drop_block` on the direct Anthropic upstream like Opus 5.5.
 
 Decisions:
-- Carbon reads its list price from the Gemini API row, as Argon does, so it follows the dated cards the Gemini class rules put there: $2/$10 per million tokens ($0.10 cached) through 2026-11-30, then $4/$20 ($0.20).
+- Carbon reads its list price from the Gemini API row, as Argon does, so it follows that row's dated cards: $2/$10 per million tokens ($0.10 cached) through 2026-11-30, then $4/$20 ($0.20).
 - Muse Spark 1.3 gains image input only: droid also enables PDF, but omp's model `input` has no PDF modality to set.
 - GPT Image 2.6's new `complexity` and GIF controls are left out; its default request matches 2.5's.
 
 Maintenance: the Carbon card ends by itself on 2026-12-01; the next sync round drops it.
 
-Related: #19173 asks for Fable 5.2 and Carbon, and also for Gemini 4 Hydrogen, which droid 1.7.1 does not have and this PR does not add.
+Related: #19173 asks for Fable 5.2 and Carbon, and also for Gemini 4 Hydrogen, which droid 1.7.1 lacks and this PR does not add.
 
 ## Testing
 
@@ -41,5 +41,6 @@ Related: #19173 asks for Fable 5.2 and Carbon, and also for Gemini 4 Hydrogen, w
 - [x] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
 
 
