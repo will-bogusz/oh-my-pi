@@ -79663,7 +79663,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "c8fe41d6b15724611a6bc7ec693e788a3f0c6c95",
+   "base": "84f5adc3bbfc0c2a7caecbad78b1b6eedf0a2939",
    "body": "bodies/x11-takeover-keyboard-grab.md",
    "state": "open",
    "pr": 19066,
@@ -79671,7 +79671,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-takeover-keyboard-grab",
    "host": "MacBook-Pro",
    "added": "2026-11-11T02:55:11Z",
-   "updated": "2026-11-12T23:07:44Z",
+   "updated": "2026-11-13T04:26:21Z",
    "note": "Main-approved additive test resolution. Linux rust-check and 61 X11 tests pass on rebased head. The two MPX/uinput hotplug tests fail under Xvfb (no udev/libinput hotplug); each fails identically on origin/main 9f728bd56e1 in one baseline run.",
    "line_loss_overrides": [
     {
@@ -79715,7 +79715,7 @@
      }
     }
    ],
-   "advanced": "2026-11-12T23:07:44Z",
+   "advanced": "2026-11-13T04:26:21Z",
    "rebases_after": [
     19044
    ],
