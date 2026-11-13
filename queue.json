@@ -103620,5 +103620,11 @@
     "wake": ""
    }
   ]
+ },
+ "opening": {
+  "id": "macos-drag-confirm",
+  "token": "00b7eac6d754419bab90c926ba0eefdf",
+  "host": "MacBook-Pro",
+  "at": "2026-11-13T20:25:16Z"
  }
 }
