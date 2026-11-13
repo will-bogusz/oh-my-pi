@@ -90474,7 +90474,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/stats-spotlight-freeze",
    "host": "MacBook-Pro",
    "added": "2026-11-13T03:07:37Z",
-   "updated": "2026-11-13T03:42:56Z",
+   "updated": "2026-11-13T03:43:35Z",
    "note": "",
    "advanced": "2026-11-13T03:16:36Z",
    "built": [
@@ -90605,7 +90605,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-11-13T03:42:56Z"
+   "opened": "2026-11-13T03:42:56Z",
+   "readied": "2026-11-13T03:43:35Z"
   },
   {
    "id": "stats-gain-compaction",
