@@ -91934,7 +91934,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-13T18:26:45Z",
+  "checked": "2026-11-13T18:57:03Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -91945,10 +91945,6 @@
    "macos-drag-confirm": {
     "since": "2026-11-13T13:20:12Z",
     "title": "fix(natives): stop macOS background drags reporting moves that did not happen"
-   },
-   "factory-droid-171-models": {
-    "since": "2026-11-12T12:26:00Z",
-    "title": "feat(catalog): add the Factory Droid models droid 1.7.1 serves"
    }
   },
   "conflicts": {
@@ -92038,7 +92034,8 @@
    19178,
    19179,
    19180,
-   19188
+   19188,
+   19191
   ],
   "post_merge": {
    "18632": {
@@ -95588,6 +95585,13 @@
     "id": "factory-droid-config-update-upstreams",
     "title": "fix(catalog): keep GPT-6 effort changes off configuration_update on Factory Droid Bedrock and Snowflake",
     "why": "opened as #19188"
+   },
+   {
+    "at": "2026-11-13T18:57:03Z",
+    "kind": "unopenable",
+    "id": "factory-droid-171-models",
+    "title": "feat(catalog): add the Factory Droid models droid 1.7.1 serves",
+    "why": "opened as #19191"
    }
   ]
  },
@@ -101438,12 +101442,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-13T18:26:45.870476Z",
+  "at": "2026-11-13T18:57:04.644659Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 1,
-   "left": 7
+   "used": 2,
+   "left": 6
   },
   "rows": [
    {
@@ -102045,6 +102049,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-12T16:39:36Z"
+   },
+   {
+    "id": "factory-droid-171-models",
+    "label": "#19191",
+    "number": 19191,
+    "state": "open",
+    "area": "factory-droid",
+    "priority": "P2",
+    "title": "feat(catalog): add the Factory Droid models droid 1.7.1 serves",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-13T18:30:23Z"
    },
    {
     "id": "atspi-walk-reads",
@@ -103371,7 +103392,7 @@
     "title": "feat(catalog): identify Factory Droid requests as droid 1.10.0",
     "action": "wait",
     "reasons": [
-     "needs factory-droid-171-models (queued)"
+     "needs #19191 (open)"
     ],
     "note": "",
     "over": [],
@@ -103381,23 +103402,6 @@
      "factory-droid-171-models"
     ],
     "created": "2026-11-13T17:35:36Z"
-   },
-   {
-    "id": "factory-droid-171-models",
-    "label": "factory-droid-171-models",
-    "number": null,
-    "state": "queued",
-    "area": "factory-droid",
-    "priority": null,
-    "title": "feat(catalog): add the Factory Droid models droid 1.7.1 serves",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-10T19:41:03Z"
    },
    {
     "id": "gemma-tokenizer",
