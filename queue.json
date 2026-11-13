@@ -90623,7 +90623,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/stats-gain-compaction",
    "host": "MacBook-Pro",
    "added": "2026-11-13T03:43:16Z",
-   "updated": "2026-11-13T04:02:03Z",
+   "updated": "2026-11-13T04:03:12Z",
    "note": "",
    "built": [
     {
@@ -90654,7 +90654,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-11-13T04:02:03Z"
+   "opened": "2026-11-13T04:02:03Z",
+   "readied": "2026-11-13T04:03:12Z"
   }
  ],
  "watch": {
