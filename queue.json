@@ -90355,13 +90355,13 @@
    "needs": [],
    "base": "d8493454a2eab3c88f5410d6ce48bf3fe4352300",
    "body": "bodies/stats-reply-link.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19114,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/stats-reply-link",
    "host": "MacBook-Pro",
    "added": "2026-11-13T02:46:31Z",
-   "updated": "2026-11-13T02:56:05Z",
+   "updated": "2026-11-13T02:59:23Z",
    "note": "",
    "built": [
     {
@@ -90373,7 +90373,8 @@
      "at": "2026-11-13T02:55:59Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-13T02:59:23Z"
   },
   {
    "id": "stats-trace-jobs",
