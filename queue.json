@@ -91039,7 +91039,7 @@
    "worktree": null,
    "host": "MacBook-Pro",
    "added": "2026-11-13T10:32:49Z",
-   "updated": "2026-11-13T20:29:30Z",
+   "updated": "2026-11-13T20:48:08Z",
    "note": "Head 37bd49376ef. Touches the Drag arm of background_gesture in crates/pi-natives/src/desktop/macos/input.rs; neighbouring arms are touched by macos-scroll-direction (Scroll arm / background_scroll) and by a separate lane's key-press fix: expect adjacent-hunk rebases, no semantic overlap. Review DragConfirm.ReviewDragConfirm needs-changes at abc556586fa, all F1-F9 fixed in 37bd493 (not re-reviewed per skill). VM: DragConfirm block3 (bench-mac runs dc-main-e/dc-C-e/dc-C-a/dc-main-a).",
    "built": [
     {
@@ -91328,7 +91328,7 @@
    "pair_reasons": {
     "19048": "QueueNineteen, 2026-11-13: only conflict is adjacent #[test] fns appended at the same spot at the end of mod tests in crates/pi-natives/src/desktop/macos/input.rs (this entry's drag tests, #19048's row-action tests); nothing removed or reshaped; combined form is both sets of tests. Built as one tree with key-menu and macos-scroll-direction: macOS cargo test desktop 641 pass (bench-mac), Linux 345 pass, check:ts clean"
    },
-   "advanced": "2026-11-13T20:04:31Z",
+   "advanced": "2026-11-13T20:48:08Z",
    "opened": "2026-11-13T20:29:00Z",
    "readied": "2026-11-13T20:29:30Z"
   },
