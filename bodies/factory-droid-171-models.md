@@ -25,6 +25,8 @@ Decisions:
 
 Maintenance: the Carbon card ends by itself on 2026-12-01; the next sync round drops it.
 
+Related: #19173 asks for Fable 5.2 and Carbon, and also for Gemini 4 Hydrogen, which droid 1.7.1 does not have and this PR does not add.
+
 ## Testing
 
 - Live on a Factory login from this branch, `omp -p` two-read turn (read two files, sum them): 42 on `claude-fable-5.2`, `gemini-4-carbon` and `kimi-k3.1-pro`; Carbon's turn billed $2/$10, $0.10 cached.
