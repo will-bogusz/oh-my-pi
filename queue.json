@@ -90711,7 +90711,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-13T05:11:02Z",
+  "checked": "2026-11-13T06:12:27Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -91140,13 +91140,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-06T05:45:12Z",
-    "kind": "unopenable",
-    "id": "browser-open-recovered-tab",
-    "title": "fix(browser): keep the tab an open successfully reattaches",
-    "why": "opened as #18252"
-   },
    {
     "at": "2026-11-06T17:29:52Z",
     "kind": "merged",
