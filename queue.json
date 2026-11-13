@@ -92002,7 +92002,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-13T19:27:17Z",
+  "checked": "2026-11-13T19:57:40Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -92013,10 +92013,6 @@
    "macos-drag-confirm": {
     "since": "2026-11-13T13:20:12Z",
     "title": "fix(natives): stop macOS background drags reporting moves that did not happen"
-   },
-   "factory-droid-capture-resilience": {
-    "since": "2026-11-13T19:27:17Z",
-    "title": "test(ai): keep captured Factory Droid parity cases when one case fails"
    }
   },
   "conflicts": {
@@ -92107,7 +92103,8 @@
    19179,
    19180,
    19188,
-   19191
+   19191,
+   19194
   ],
   "post_merge": {
    "18632": {
@@ -95670,6 +95667,13 @@
     "kind": "openable",
     "id": "factory-droid-capture-resilience",
     "title": "test(ai): keep captured Factory Droid parity cases when one case fails"
+   },
+   {
+    "at": "2026-11-13T19:57:40Z",
+    "kind": "unopenable",
+    "id": "factory-droid-capture-resilience",
+    "title": "test(ai): keep captured Factory Droid parity cases when one case fails",
+    "why": "opened as #19194"
    }
   ]
  },
@@ -101527,7 +101531,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-13T19:27:18.573251Z",
+  "at": "2026-11-13T19:57:41.122876Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -101823,6 +101827,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-13T18:15:41Z"
+   },
+   {
+    "id": "factory-droid-capture-resilience",
+    "label": "#19194",
+    "number": 19194,
+    "state": "open",
+    "area": "other",
+    "priority": "P1",
+    "title": "test(ai): keep captured Factory Droid parity cases when one case fails",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-13T19:32:40Z"
    },
    {
     "id": "claude-refusal-strip-retry",
@@ -102311,23 +102332,6 @@
     ],
     "needs": [],
     "created": "2026-11-11T02:31:05Z"
-   },
-   {
-    "id": "factory-droid-capture-resilience",
-    "label": "factory-droid-capture-resilience",
-    "number": null,
-    "state": "queued",
-    "area": "other",
-    "priority": "P1",
-    "title": "test(ai): keep captured Factory Droid parity cases when one case fails",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-13T19:22:46Z"
    },
    {
     "id": "browser-wait-predicate",
