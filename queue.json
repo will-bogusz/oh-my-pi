@@ -90453,9 +90453,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ax-read-as-live-label",
    "host": "MacBook-Pro",
    "added": "2026-11-13T02:49:00Z",
-   "updated": "2026-11-13T03:59:08Z",
+   "updated": "2026-11-13T05:12:54Z",
    "note": "",
-   "hold": "Will, 2026-11-13: Main decides the approach once #19061 has merged, with all the data in: the release leg's count of this refusal across 32 tasks (true catches against relabels), the wording change's Sol sample on Contacts and Reminders, TitleTwin's 0 wrong-item actions in 200 trials (~/tmp/oh-my-pi/TitleTwin/HANDOFF.md), and the fixture's same-title reuse limit (10/10). Not to open before that decision."
+   "hold": "Will, 2026-11-13: Main decides the approach once #19061 has merged, with all the data in. In so far: release leg (RESULTS.md, 'relabel refusals'): 9 refusals in 93 runs, 4 true catches, 5 same-control relabels (Reminders count x3, a Finder icon the model renamed, a Calendar text the model's own edit extended), about +2 steps each, no grade changed; the wording change saved nothing and is closed; TitleTwin: 0 wrong-item actions in 200 trials; fixture same-title reuse limit 10/10. Owed: which of the 5 this change accepts (lane RelabelCases)."
   },
   {
    "id": "stats-live-appends",
