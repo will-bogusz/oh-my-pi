@@ -91390,6 +91390,24 @@
      "host": "MacBook-Pro"
     }
    ]
+  },
+  {
+   "id": "relay-restored-frame",
+   "branch": "will/relay-restored-frame",
+   "title": "fix(browser-relay): keep a relay tab when another extension's frame keeps omp out",
+   "area": "browser",
+   "priority": "P0",
+   "needs": [],
+   "base": "6e374adc76aeed920c5f3ff2674d1c9e3002bcbd",
+   "body": "bodies/relay-restored-frame.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-restored-frame",
+   "host": "MacBook-Pro",
+   "added": "2026-11-13T16:33:20Z",
+   "updated": "2026-11-13T16:33:20Z",
+   "note": ""
   }
  ],
  "watch": {
