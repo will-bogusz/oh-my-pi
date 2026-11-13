@@ -91999,7 +91999,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-13T18:57:03Z",
+  "checked": "2026-11-13T19:27:17Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -92010,6 +92010,10 @@
    "macos-drag-confirm": {
     "since": "2026-11-13T13:20:12Z",
     "title": "fix(natives): stop macOS background drags reporting moves that did not happen"
+   },
+   "factory-droid-capture-resilience": {
+    "since": "2026-11-13T19:27:17Z",
+    "title": "test(ai): keep captured Factory Droid parity cases when one case fails"
    }
   },
   "conflicts": {
@@ -95657,6 +95661,12 @@
     "id": "factory-droid-171-models",
     "title": "feat(catalog): add the Factory Droid models droid 1.7.1 serves",
     "why": "opened as #19191"
+   },
+   {
+    "at": "2026-11-13T19:27:17Z",
+    "kind": "openable",
+    "id": "factory-droid-capture-resilience",
+    "title": "test(ai): keep captured Factory Droid parity cases when one case fails"
    }
   ]
  },
@@ -101507,8 +101517,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-13T19:23:00.935759Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-13T19:27:18.573251Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 1,
@@ -103272,8 +103282,10 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with main in (branch missing on the fork)"
+    ],
     "note": "",
     "over": [],
     "paired": [],
