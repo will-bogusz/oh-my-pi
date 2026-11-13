@@ -91393,10 +91393,14 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-13T14:51:31Z",
+  "checked": "2026-11-13T15:53:06Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
+   "covered-fill": {
+    "since": "2026-11-13T15:53:06Z",
+    "title": "fix(coding-agent): refuse browser keys aimed at a field a modal dialog covers"
+   },
    "key-menu": {
     "since": "2026-11-13T12:49:10Z",
     "title": "fix(natives): close the menu a macOS background key press opens"
@@ -95001,6 +95005,12 @@
      "packages/tui/src/theme/schema.ts",
      "packages/tui/src/theme/theme-schema.json"
     ]
+   },
+   {
+    "at": "2026-11-13T15:53:06Z",
+    "kind": "openable",
+    "id": "covered-fill",
+    "title": "fix(coding-agent): refuse browser keys aimed at a field a modal dialog covers"
    }
   ]
  },
@@ -100839,7 +100849,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-13T14:51:32.657884Z",
+  "at": "2026-11-13T15:53:07.476022Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -101436,16 +101446,14 @@
     "area": "browser",
     "priority": "P1",
     "title": "fix(coding-agent): refuse browser keys aimed at a field a modal dialog covers",
-    "action": "wait",
-    "reasons": [
-     "conflicts with #19045 in packages/coding-agent/src/tools/browser/frames.ts"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [
+    "over": [
      "#19045"
     ],
+    "paired": [],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T02:11:47Z"
    },
@@ -101567,6 +101575,7 @@
      "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19045 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with covered-fill in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
@@ -101576,7 +101585,8 @@
      "#18786",
      "#18789",
      "#18925",
-     "#19045"
+     "#19045",
+     "covered-fill"
     ],
     "needs": [],
     "created": "2026-11-10T15:45:44Z"
@@ -101595,6 +101605,7 @@
      "conflicts with #18786 in docs/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md",
      "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with covered-fill in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
@@ -101603,7 +101614,8 @@
     "blocked_by": [
      "#18786",
      "#18789",
-     "#18925"
+     "#18925",
+     "covered-fill"
     ],
     "needs": [
      "observe-settle"
@@ -101625,6 +101637,7 @@
      "conflicts with #18789 in docs/tools/browser.md",
      "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19045 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with covered-fill in packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts",
      "its need browser-wait-predicate conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
     ],
@@ -101635,7 +101648,8 @@
      "#18786",
      "#18789",
      "#18925",
-     "#19045"
+     "#19045",
+     "covered-fill"
     ],
     "needs": [
      "browser-wait-predicate"
@@ -101854,6 +101868,7 @@
      "conflicts with #18786 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts",
      "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts",
      "conflicts with #19045 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/network.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with covered-fill in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need r2/relay-popup-owned conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts",
      "its need r2/page-waiting conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-detach.test.ts"
@@ -101865,7 +101880,8 @@
      "#19001",
      "#18786",
      "#18789",
-     "#19045"
+     "#19045",
+     "covered-fill"
     ],
     "needs": [
      "r2/relay-popup-owned",
@@ -102029,6 +102045,7 @@
      "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18925 in docs/tools/browser.md",
      "conflicts with #19045 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with covered-fill in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts"
     ],
     "note": "",
@@ -102038,7 +102055,8 @@
      "#18786",
      "#18789",
      "#18925",
-     "#19045"
+     "#19045",
+     "covered-fill"
     ],
     "needs": [],
     "created": "2026-11-10T19:19:48Z"
@@ -102057,6 +102075,7 @@
      "needs #18987 (open)",
      "conflicts with #19001 in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18925 in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts",
+     "conflicts with covered-fill in packages/coding-agent/src/tools/browser/tern/tern-tab.ts",
      "its need #18987 conflicts with main in docs/theme.md, packages/tui/src/theme/loader.ts, packages/tui/src/theme/schema.ts, packages/tui/src/theme/theme-schema.json",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
     ],
@@ -102065,7 +102084,8 @@
     "paired": [],
     "blocked_by": [
      "#19001",
-     "#18925"
+     "#18925",
+     "covered-fill"
     ],
     "needs": [
      "agent-identity"
@@ -102086,6 +102106,7 @@
      "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18925 in docs/tools/browser.md",
      "conflicts with #19045 in docs/tools/browser.md",
+     "conflicts with covered-fill in packages/coding-agent/src/tools/browser/tern/tern-tab.ts",
      "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
     ],
     "note": "",
@@ -102095,7 +102116,8 @@
      "#18786",
      "#18789",
      "#18925",
-     "#19045"
+     "#19045",
+     "covered-fill"
     ],
     "needs": [],
     "created": "2026-11-11T09:27:26Z"
@@ -102333,6 +102355,7 @@
      "conflicts with #18786 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with covered-fill in packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts",
      "its need act-look-prompt conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
     ],
@@ -102343,7 +102366,8 @@
      "#19001",
      "#18786",
      "#18789",
-     "#18925"
+     "#18925",
+     "covered-fill"
     ],
     "needs": [
      "act-look-prompt"
@@ -102365,6 +102389,7 @@
      "conflicts with #18786 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #19045 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with covered-fill in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts",
      "conflicts with main in packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
@@ -102375,7 +102400,8 @@
      "#19001",
      "#18786",
      "#18789",
-     "#19045"
+     "#19045",
+     "covered-fill"
     ],
     "needs": [
      "r2/relay-own-only"
