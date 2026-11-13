@@ -90362,6 +90362,24 @@
    "added": "2026-11-13T02:46:31Z",
    "updated": "2026-11-13T02:46:31Z",
    "note": ""
+  },
+  {
+   "id": "stats-trace-jobs",
+   "branch": "will/stats-trace-jobs",
+   "title": "fix(stats): close Traces background jobs when they finish, so idle time and turn ends show",
+   "area": "stats",
+   "priority": null,
+   "needs": [],
+   "base": "d8493454a2eab3c88f5410d6ce48bf3fe4352300",
+   "body": "bodies/stats-trace-jobs.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/stats-trace-jobs",
+   "host": "MacBook-Pro",
+   "added": "2026-11-13T02:47:10Z",
+   "updated": "2026-11-13T02:47:10Z",
+   "note": ""
   }
  ],
  "watch": {
