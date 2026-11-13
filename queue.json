@@ -92331,17 +92331,13 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-13T23:23:44Z",
+  "checked": "2026-11-13T23:54:48Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
    "covered-fill": {
     "since": "2026-11-13T15:53:06Z",
     "title": "fix(coding-agent): refuse browser keys aimed at a field a modal dialog covers"
-   },
-   "macos-handback-key": {
-    "since": "2026-11-13T22:52:46Z",
-    "title": "fix(natives): give the user's key window back after macOS takeover and focus-guard hand-backs"
    }
   },
   "conflicts": {
@@ -92424,7 +92420,8 @@
    19188,
    19191,
    19194,
-   19195
+   19195,
+   19208
   ],
   "post_merge": {
    "18632": {
@@ -92740,13 +92737,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-06T23:35:10Z",
-    "kind": "unopenable",
-    "id": "wayland-pipewire-dlopen",
-    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
-    "why": "opened as #18353"
-   },
    {
     "at": "2026-11-07T01:37:29Z",
     "kind": "released",
@@ -96001,6 +95991,13 @@
     "kind": "openable",
     "id": "macos-handback-key",
     "title": "fix(natives): give the user's key window back after macOS takeover and focus-guard hand-backs"
+   },
+   {
+    "at": "2026-11-13T23:54:48Z",
+    "kind": "unopenable",
+    "id": "macos-handback-key",
+    "title": "fix(natives): give the user's key window back after macOS takeover and focus-guard hand-backs",
+    "why": "opened as #19208"
    }
   ]
  },
@@ -101989,12 +101986,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-13T23:23:45.435759Z",
+  "at": "2026-11-13T23:54:49.297925Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 1,
+   "left": 7
   },
   "rows": [
    {
@@ -102305,6 +102302,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-13T20:28:59Z"
+   },
+   {
+    "id": "macos-handback-key",
+    "label": "#19208",
+    "number": 19208,
+    "state": "open",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): give the user's key window back after macOS takeover and focus-guard hand-backs",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-13T23:41:40Z"
    },
    {
     "id": "factory-droid-capture-resilience",
@@ -102744,23 +102758,6 @@
     "created": "2026-10-30T21:35:55Z"
    },
    {
-    "id": "macos-handback-key",
-    "label": "macos-handback-key",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives): give the user's key window back after macOS takeover and focus-guard hand-backs",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-13T21:56:33Z"
-   },
-   {
     "id": "upload-stall-error-all-providers",
     "label": "upload-stall-error-all-providers",
     "number": null,
@@ -102951,9 +102948,9 @@
     "reasons": [
      "conflicts with #19062 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #19100 in packages/coding-agent/src/tools/computer/worker.ts",
+     "conflicts with #19208 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #18222 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #18987 in packages/coding-agent/src/tools/computer/worker.ts",
-     "conflicts with macos-handback-key in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
@@ -102962,9 +102959,9 @@
     "blocked_by": [
      "#19062",
      "#19100",
+     "#19208",
      "#18222",
-     "#18987",
-     "macos-handback-key"
+     "#18987"
     ],
     "needs": [],
     "created": "2026-11-11T01:40:14Z"
@@ -102985,6 +102982,7 @@
      "conflicts with #19100 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #19179 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #19195 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with #19208 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #18353 in docs/computer-use.md",
      "conflicts with #19034 in docs/computer-use.md",
      "conflicts with #19035 in docs/computer-use.md",
@@ -102992,7 +102990,6 @@
      "conflicts with #18013 in docs/computer-use.md",
      "conflicts with #18222 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #18987 in docs/computer-use.md, packages/coding-agent/src/tools/computer/worker.ts",
-     "conflicts with macos-handback-key in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
@@ -103005,14 +103002,14 @@
      "#19100",
      "#19179",
      "#19195",
+     "#19208",
      "#18353",
      "#19034",
      "#19035",
      "#19165",
      "#18013",
      "#18222",
-     "#18987",
-     "macos-handback-key"
+     "#18987"
     ],
     "needs": [],
     "created": "2026-10-19T07:26:45Z"
@@ -103225,8 +103222,8 @@
      "conflicts with #19062 in crates/pi-natives/src/desktop/win32/capture.rs, crates/pi-natives/src/desktop/win32/mod.rs",
      "conflicts with #19179 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #19195 in packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with #19208 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18222 in packages/coding-agent/src/prompts/tools/computer.md",
-     "conflicts with macos-handback-key in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/win32/mod.rs, packages/coding-agent/src/prompts/tools/computer.md"
     ],
     "note": "",
@@ -103237,8 +103234,8 @@
      "#19062",
      "#19179",
      "#19195",
-     "#18222",
-     "macos-handback-key"
+     "#19208",
+     "#18222"
     ],
     "needs": [],
     "created": "2026-11-11T09:06:32Z"
@@ -103402,9 +103399,9 @@
      "held: Main, 2026-11-11: stays held until #18786 merges with the typed-message guide channel (design check replace); then one property on the computer prelude, drop the wrap variant, re-run its blind legs",
      "needs #18786 (open)",
      "conflicts with #19100 in packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with #19208 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18222 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/prompts/tools/eval.md, packages/coding-agent/src/tools/eval.ts",
-     "conflicts with macos-handback-key in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with main in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/sdk-computer-prelude-toggle.test.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
@@ -103412,9 +103409,9 @@
     "paired": [],
     "blocked_by": [
      "#19100",
+     "#19208",
      "#18222",
-     "#18786",
-     "macos-handback-key"
+     "#18786"
     ],
     "needs": [
      "browser-core-first-use"
@@ -103439,6 +103436,7 @@
      "conflicts with #19100 in docs/tools/computer.md, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19179 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #19195 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with #19208 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18353 in docs/computer-use.md, docs/tools/computer.md",
      "conflicts with #19034 in docs/computer-use.md",
      "conflicts with #19035 in docs/computer-use.md",
@@ -103447,7 +103445,6 @@
      "conflicts with #18222 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/tools/eval.ts",
      "conflicts with #18987 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/worker.ts",
-     "conflicts with macos-handback-key in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -103461,6 +103458,7 @@
      "#19100",
      "#19179",
      "#19195",
+     "#19208",
      "#18353",
      "#19034",
      "#19035",
@@ -103468,8 +103466,7 @@
      "#18013",
      "#18222",
      "#18786",
-     "#18987",
-     "macos-handback-key"
+     "#18987"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -103494,11 +103491,11 @@
      "conflicts with #19100 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19179 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #19195 in crates/pi-natives/src/desktop/macos/ax.rs, packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with #19208 in packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18987 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
-     "conflicts with macos-handback-key in packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs"
     ],
@@ -103513,11 +103510,11 @@
      "#19100",
      "#19179",
      "#19195",
+     "#19208",
      "#18353",
      "#18222",
      "#18925",
-     "#18987",
-     "macos-handback-key"
+     "#18987"
     ],
     "needs": [
      "computer-ui-quiet"
