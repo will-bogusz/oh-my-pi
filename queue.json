@@ -90326,6 +90326,24 @@
    ],
    "opened": "2026-11-12T20:22:33Z",
    "readied": "2026-11-12T20:22:56Z"
+  },
+  {
+   "id": "ax-relabel-recovery",
+   "branch": "will/ax-relabel-recovery",
+   "title": "fix(natives): tell the model it may act on the new ref a relabelled-ref refusal names",
+   "area": "computer",
+   "priority": "P1",
+   "needs": [],
+   "base": "d8493454a2eab3c88f5410d6ce48bf3fe4352300",
+   "body": "bodies/ax-relabel-recovery.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ax-relabel-recovery",
+   "host": "MacBook-Pro",
+   "added": "2026-11-13T02:45:02Z",
+   "updated": "2026-11-13T02:45:02Z",
+   "note": ""
   }
  ],
  "watch": {
