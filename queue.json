@@ -99893,6 +99893,11 @@
     "sha": "9f2aeb3f9d54c4b8d0f064f6173b43fe4f67f315",
     "at": "2026-11-13T02:46:07Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "9f2aeb3f9d54c4b8d0f064f6173b43fe4f67f315",
+    "at": "2026-11-13T02:46:35Z",
+    "host": "goliath"
    }
   }
  },
