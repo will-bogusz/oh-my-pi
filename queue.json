@@ -91523,7 +91523,30 @@
     }
    ],
    "opened": "2026-11-13T17:01:55Z",
-   "readied": "2026-11-13T17:02:29Z"
+   "readied": "2026-11-13T17:02:29Z",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-13T17:26:47Z",
+     "reason": "Settle roboomp review: move held-out re-adoption onto reuse only, centralize its guard by name, and replace duplicate target-info probes with one result-bearing browser probe; removed lines are intentionally superseded and covered by 232 passing goliath relay tests.",
+     "old": "c4be88ec6b27039282a9a3fa7efde2f246922ff8",
+     "new": "b2a3ea7cb38d849838e6e2a498827ce67aa4649e",
+     "dropped": {
+      "packages/coding-agent/src/tools/browser/tab-supervisor.ts": [
+       "\t// A tab Chrome refused over another extension's frame is re-adopted first, as a run does it.",
+       "\tconst heldOut = tabs.get(name);",
+       "\tif (heldOut?.backend === \"worker\" && heldOut.heldOut && !heldOut.workerRecovery) {",
+       "\t\treadoptHeldOutTab(heldOut, opts.timeoutMs);",
+       "function readoptHeldOutTab(tab: WorkerTabSession, timeoutMs: number): void {"
+      ],
+      "packages/coding-agent/src/tools/browser/tab-worker.ts": [
+       "\t\tlet refusal: string | undefined;",
+       "\t\t\tconst result: unknown = await browserConnection(this.#browser).send(\"Target.getTargetInfo\", { targetId });",
+       "\t\t\tif (isRecord(result) && typeof result.refusal === \"string\") refusal = result.refusal;",
+       "\t\t\t// Not the omp relay, or the target is gone: decided below."
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "devin-pin-31257",
