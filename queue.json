@@ -91760,13 +91760,13 @@
    ],
    "base": "0d59f5c5097ad18a7d6f7c10316a3d40a93d1747",
    "body": "bodies/factory-droid-config-update-upstreams.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19188,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-config-update-upstreams",
    "host": "MacBook-Pro",
    "added": "2026-11-13T17:14:46Z",
-   "updated": "2026-11-13T18:12:10Z",
+   "updated": "2026-11-13T18:15:42Z",
    "note": "",
    "built": [
     {
@@ -91877,7 +91877,8 @@
      "at": "2026-11-13T18:12:09Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-13T18:15:42Z"
   },
   {
    "id": "factory-droid-1100-pin",
