@@ -90380,6 +90380,26 @@
    "added": "2026-11-13T02:47:10Z",
    "updated": "2026-11-13T02:47:10Z",
    "note": ""
+  },
+  {
+   "id": "ax-read-as-title-link",
+   "branch": "will/ax-read-as-live-label",
+   "title": "fix(natives): keep a macOS ref whose own label changes while its title element shows the same text",
+   "area": "computer",
+   "priority": "P1",
+   "needs": [
+    "#19061"
+   ],
+   "base": "5428042979f97d543e5a94985f450d3060a74af3",
+   "body": "bodies/ax-read-as-title-link.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ax-read-as-live-label",
+   "host": "MacBook-Pro",
+   "added": "2026-11-13T02:49:00Z",
+   "updated": "2026-11-13T02:49:00Z",
+   "note": ""
   }
  ],
  "watch": {
