@@ -90424,7 +90424,9 @@
    "title": "fix(stats): show running sessions' new requests within a second on macOS",
    "area": "other",
    "priority": null,
-   "needs": [],
+   "needs": [
+    "stats-spotlight-freeze"
+   ],
    "base": "d8493454a2eab3c88f5410d6ce48bf3fe4352300",
    "body": "bodies/stats-live-appends.md",
    "state": "queued",
@@ -90433,7 +90435,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/stats-live-appends",
    "host": "MacBook-Pro",
    "added": "2026-11-13T02:56:27Z",
-   "updated": "2026-11-13T02:56:27Z",
+   "updated": "2026-11-13T03:08:38Z",
    "note": ""
   },
   {
