@@ -7,6 +7,10 @@
 - Added Gemini 4 Hydrogen on Google Antigravity as one model with low, medium, high and xhigh thinking levels, priced at $1.50/$7.50 per million tokens.
 - Added Factory Droid's Claude Fable 5.2, Gemini 4 Carbon (with its launch credit promotion, half the input rate until 2026-12-01) and Kimi K3.1 Pro, each listed once the account's feature flag enables it, and GPT Image 2.6 and GPT Image 2.6 Flare ahead of GPT Image 2.5 in the `image` role's Factory defaults
 
+### Changed
+
+- Factory Droid requests identify as droid 1.10.0
+
 ### Fixed
 
 - Fixed Gemini 4 Argon on Command Code reporting $0 spend and dropping image attachments; it now bills at Command Code's $2 input, $10 output and $0.10 cache-read rates per million tokens and accepts images ([#19125](https://github.com/can1357/oh-my-pi/pull/19125) by [@wolfiesch](https://github.com/wolfiesch))
