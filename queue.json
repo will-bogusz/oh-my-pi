@@ -91417,7 +91417,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/relay-restored-frame",
    "host": "MacBook-Pro",
    "added": "2026-11-13T16:33:20Z",
-   "updated": "2026-11-13T17:01:55Z",
+   "updated": "2026-11-13T17:02:29Z",
    "note": "",
    "rebases_after": [
     19001,
@@ -91501,7 +91501,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-11-13T17:01:55Z"
+   "opened": "2026-11-13T17:01:55Z",
+   "readied": "2026-11-13T17:02:29Z"
   }
  ],
  "watch": {
