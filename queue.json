@@ -91393,7 +91393,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-13T12:49:10Z",
+  "checked": "2026-11-13T13:20:12Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -91401,9 +91401,9 @@
     "since": "2026-11-13T12:49:10Z",
     "title": "fix(natives): close the menu a macOS background key press opens"
    },
-   "macos-scroll-direction": {
-    "since": "2026-11-13T08:45:48Z",
-    "title": "fix(natives): scroll down for a positive dy on macOS, as on Windows and Linux"
+   "macos-drag-confirm": {
+    "since": "2026-11-13T13:20:12Z",
+    "title": "fix(natives): stop macOS background drags reporting moves that did not happen"
    },
    "factory-droid-171-models": {
     "since": "2026-11-12T12:26:00Z",
@@ -91426,8 +91426,29 @@
     ]
    }
   },
-  "merged_through": "2026-11-12T19:20:12Z",
-  "unreleased": {},
+  "merged_through": "2026-11-13T12:51:31Z",
+  "unreleased": {
+   "19118": {
+    "title": "fix(stats,coding-agent): keep the stats dashboard answering while Spotlight rebuilds",
+    "merge_commit": "b43ea3a1e6dda912b547e6b17dfe004a8c3d2bef",
+    "merged_at": "2026-11-13T12:51:30Z"
+   },
+   "19115": {
+    "title": "fix(stats): close Traces background jobs when they finish, so idle time and turn ends show",
+    "merge_commit": "08448c2ff1570494fd4fd93087c5f5638bf38e16",
+    "merged_at": "2026-11-13T12:51:30Z"
+   },
+   "19114": {
+    "title": "fix(stats): count every answered message in the Frustration per-model table",
+    "merge_commit": "1834c8ba28a3063cfe80d604b4f90561d13cc58c",
+    "merged_at": "2026-11-13T12:51:30Z"
+   },
+   "19094": {
+    "title": "fix(coding-agent): fail a click whose frame the page removed while the button was down",
+    "merge_commit": "193152feeab89b05972e64bca776f087985aea1c",
+    "merged_at": "2026-11-13T12:51:31Z"
+   }
+  },
   "ready": [
    16553,
    16611,
@@ -91455,12 +91476,9 @@
    19063,
    19066,
    19080,
-   19094,
    19100,
-   19114,
-   19115,
-   19118,
-   19120
+   19120,
+   19165
   ],
   "post_merge": {
    "16274": {
@@ -91826,6 +91844,30 @@
     "title": "fix(natives): skip unused ref-check reads and recover display refs",
     "merge_commit": "92a49399858cb2db0284cce419ebbbff2fe67ad1",
     "merged_at": "2026-11-12T19:20:12Z",
+    "findings": []
+   },
+   "19094": {
+    "title": "fix(coding-agent): fail a click whose frame the page removed while the button was down",
+    "merge_commit": "193152feeab89b05972e64bca776f087985aea1c",
+    "merged_at": "2026-11-13T12:51:31Z",
+    "findings": []
+   },
+   "19114": {
+    "title": "fix(stats): count every answered message in the Frustration per-model table",
+    "merge_commit": "1834c8ba28a3063cfe80d604b4f90561d13cc58c",
+    "merged_at": "2026-11-13T12:51:30Z",
+    "findings": []
+   },
+   "19115": {
+    "title": "fix(stats): close Traces background jobs when they finish, so idle time and turn ends show",
+    "merge_commit": "08448c2ff1570494fd4fd93087c5f5638bf38e16",
+    "merged_at": "2026-11-13T12:51:30Z",
+    "findings": []
+   },
+   "19118": {
+    "title": "fix(stats,coding-agent): keep the stats dashboard answering while Spotlight rebuilds",
+    "merge_commit": "b43ea3a1e6dda912b547e6b17dfe004a8c3d2bef",
+    "merged_at": "2026-11-13T12:51:30Z",
     "findings": []
    }
   },
@@ -94976,6 +95018,51 @@
     "kind": "openable",
     "id": "key-menu",
     "title": "fix(natives): close the menu a macOS background key press opens"
+   },
+   {
+    "at": "2026-11-13T13:20:12Z",
+    "kind": "merged",
+    "number": 19118,
+    "title": "fix(stats,coding-agent): keep the stats dashboard answering while Spotlight rebuilds",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-13T13:20:12Z",
+    "kind": "merged",
+    "number": 19115,
+    "title": "fix(stats): close Traces background jobs when they finish, so idle time and turn ends show",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-13T13:20:12Z",
+    "kind": "merged",
+    "number": 19114,
+    "title": "fix(stats): count every answered message in the Frustration per-model table",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-13T13:20:12Z",
+    "kind": "merged",
+    "number": 19094,
+    "title": "fix(coding-agent): fail a click whose frame the page removed while the button was down",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-13T13:20:12Z",
+    "kind": "openable",
+    "id": "macos-drag-confirm",
+    "title": "fix(natives): stop macOS background drags reporting moves that did not happen"
+   },
+   {
+    "at": "2026-11-13T13:20:12Z",
+    "kind": "unopenable",
+    "id": "macos-scroll-direction",
+    "title": "fix(natives): scroll down for a positive dy on macOS, as on Windows and Linux",
+    "why": "opened as #19165"
    }
   ]
  },
@@ -100814,65 +100901,14 @@
   }
  },
  "plan": {
-  "at": "2026-11-13T12:49:11.471874Z",
+  "at": "2026-11-13T13:20:13.334634Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 1,
+   "left": 7
   },
   "rows": [
-   {
-    "id": "browser-click-frame-removed",
-    "label": "#19094",
-    "number": 19094,
-    "state": "open",
-    "area": "browser",
-    "priority": "P0",
-    "title": "fix(coding-agent): fail a click whose frame the page removed while the button was down",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-12T23:53:08Z"
-   },
-   {
-    "id": "stats-reply-link",
-    "label": "#19114",
-    "number": 19114,
-    "state": "open",
-    "area": "other",
-    "priority": "P0",
-    "title": "fix(stats): count every answered message in the Frustration per-model table",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-13T02:59:22Z"
-   },
-   {
-    "id": "stats-trace-jobs",
-    "label": "#19115",
-    "number": 19115,
-    "state": "open",
-    "area": "stats",
-    "priority": "P0",
-    "title": "fix(stats): close Traces background jobs when they finish, so idle time and turn ends show",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-13T03:06:56Z"
-   },
    {
     "id": "click-place-release",
     "label": "#16553",
@@ -101092,23 +101128,6 @@
     "created": "2026-11-12T23:56:35Z"
    },
    {
-    "id": "stats-spotlight-freeze",
-    "label": "#19118",
-    "number": 19118,
-    "state": "open",
-    "area": "other",
-    "priority": "P1",
-    "title": "fix(stats,coding-agent): keep the stats dashboard answering while Spotlight rebuilds",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-13T03:42:55Z"
-   },
-   {
     "id": "claude-refusal-strip-retry",
     "label": "#17610",
     "number": 17610,
@@ -101235,6 +101254,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-13T04:02:02Z"
+   },
+   {
+    "id": "macos-scroll-direction",
+    "label": "#19165",
+    "number": 19165,
+    "state": "open",
+    "area": "computer",
+    "priority": "P2",
+    "title": "fix(natives): scroll down for a positive dy on macOS, as on Windows and Linux",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-13T13:15:55Z"
    },
    {
     "id": "iphone-mirror-key-gap",
@@ -101519,35 +101555,16 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): stop macOS background drags reporting moves that did not happen",
-    "action": "wait",
-    "reasons": [
-     "conflicts with #19048 in crates/pi-natives/src/desktop/macos/input.rs"
-    ],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [
-     "#19048"
-    ],
-    "needs": [],
-    "created": "2026-11-13T10:32:49Z"
-   },
-   {
-    "id": "macos-scroll-direction",
-    "label": "macos-scroll-direction",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives): scroll down for a positive dy on macOS, as on Windows and Linux",
     "action": "open",
     "reasons": [],
-    "note": "",
+    "note": "accepted pair with #19048: QueueNineteen, 2026-11-13: only conflict is adjacent #[test] fns appended at the same spot at the end of mod tests in crates/pi-natives/src/desktop/macos/input.rs (this entry's drag tests, #19048's row-action tests); nothing removed or reshaped; combined form is both sets of tests. Built as one tree with key-menu and macos-scroll-direction: macOS cargo test desktop 641 pass (bench-mac), Linux 345 pass, check:ts clean",
     "over": [],
-    "paired": [],
+    "paired": [
+     "#19048"
+    ],
     "blocked_by": [],
     "needs": [],
-    "created": "2026-10-30T21:36:10Z"
+    "created": "2026-11-13T10:32:49Z"
    },
    {
     "id": "upload-stall-error-all-providers",
@@ -101761,11 +101778,12 @@
      "conflicts with #18353 in docs/computer-use.md",
      "conflicts with #19034 in docs/computer-use.md",
      "conflicts with #19035 in docs/computer-use.md",
+     "conflicts with #19165 in docs/computer-use.md",
      "conflicts with #18013 in docs/computer-use.md",
      "conflicts with #18222 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #18987 in docs/computer-use.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with key-menu in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
-     "conflicts with macos-scroll-direction in docs/computer-use.md",
+     "conflicts with macos-drag-confirm in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
@@ -101779,11 +101797,12 @@
      "#18353",
      "#19034",
      "#19035",
+     "#19165",
      "#18013",
      "#18222",
      "#18987",
      "key-menu",
-     "macos-scroll-direction"
+     "macos-drag-confirm"
     ],
     "needs": [],
     "created": "2026-10-19T07:26:45Z"
@@ -101802,6 +101821,7 @@
      "conflicts with #19048 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with #19061 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with #19063 in crates/pi-natives/src/desktop/macos/ax.rs",
+     "conflicts with macos-drag-confirm in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with main in crates/pi-natives/src/desktop/macos/ax.rs"
     ],
     "note": "",
@@ -101811,7 +101831,8 @@
      "#19036",
      "#19048",
      "#19061",
-     "#19063"
+     "#19063",
+     "macos-drag-confirm"
     ],
     "needs": [],
     "created": "2026-11-11T09:59:13Z"
@@ -101952,6 +101973,7 @@
      "conflicts with #19063 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18987 in crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with macos-drag-confirm in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with main in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs"
     ],
     "note": "",
@@ -101963,7 +101985,8 @@
      "#19061",
      "#19063",
      "#18925",
-     "#18987"
+     "#18987",
+     "macos-drag-confirm"
     ],
     "needs": [],
     "created": "2026-11-11T10:16:04Z"
@@ -101982,6 +102005,7 @@
      "conflicts with #19062 in crates/pi-natives/src/desktop/win32/capture.rs, crates/pi-natives/src/desktop/win32/mod.rs",
      "conflicts with #18222 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with key-menu in packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with macos-drag-confirm in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/win32/mod.rs, packages/coding-agent/src/prompts/tools/computer.md"
     ],
     "note": "",
@@ -101991,7 +102015,8 @@
      "#19025",
      "#19062",
      "#18222",
-     "key-menu"
+     "key-menu",
+     "macos-drag-confirm"
     ],
     "needs": [],
     "created": "2026-11-11T09:06:32Z"
@@ -102183,12 +102208,13 @@
      "conflicts with #18353 in docs/computer-use.md, docs/tools/computer.md",
      "conflicts with #19034 in docs/computer-use.md",
      "conflicts with #19035 in docs/computer-use.md",
+     "conflicts with #19165 in docs/computer-use.md",
      "conflicts with #18013 in docs/computer-use.md",
      "conflicts with #18222 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/tools/eval.ts",
      "conflicts with #18987 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with key-menu in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
-     "conflicts with macos-scroll-direction in docs/computer-use.md",
+     "conflicts with macos-drag-confirm in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -102203,12 +102229,13 @@
      "#18353",
      "#19034",
      "#19035",
+     "#19165",
      "#18013",
      "#18222",
      "#18786",
      "#18987",
      "key-menu",
-     "macos-scroll-direction"
+     "macos-drag-confirm"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -102236,6 +102263,7 @@
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18987 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
      "conflicts with key-menu in packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with macos-drag-confirm in crates/pi-natives/src/desktop/macos/ax.rs, packages/coding-agent/src/prompts/tools/computer.md",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs"
     ],
@@ -102252,7 +102280,8 @@
      "#18222",
      "#18925",
      "#18987",
-     "key-menu"
+     "key-menu",
+     "macos-drag-confirm"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -102480,8 +102509,8 @@
      "needs token-count-policy (queued), wire-delta-count (queued)",
      "conflicts with #17610 in packages/ai/src/providers/factory-droid.ts",
      "conflicts with #18786 in packages/coding-agent/src/session/agent-session.ts",
-     "its need token-count-policy conflicts with main in packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/session/session-stats.ts, packages/coding-agent/test/context-fits-model.test.ts",
-     "its need wire-delta-count conflicts with main in packages/agent/src/tokenizer.ts, packages/ai/src/providers/factory-droid.ts, packages/coding-agent/src/session/session-maintenance.ts",
+     "its need token-count-policy conflicts with main in packages/catalog/src/compat/rules/classes/anthropic.kdl, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/session/session-stats.ts, packages/coding-agent/test/context-fits-model.test.ts",
+     "its need wire-delta-count conflicts with main in packages/agent/src/tokenizer.ts, packages/ai/src/providers/factory-droid.ts, packages/ai/src/providers/transform-messages.ts, packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with main in packages/agent/src/agent.ts, packages/ai/src/providers/factory-droid/gemini.ts, packages/ai/src/providers/google-gemini-cli.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/context-view.ts, packages/coding-agent/test/modes/context-view.test.ts, packages/tui/src/status-line/context-usage.ts, packages/tui/test/context-usage.test.ts"
     ],
     "note": "",
@@ -102507,16 +102536,13 @@
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
     "action": "wait",
     "reasons": [
-     "needs #19118 (open)",
      "conflicts with main in (branch missing on the fork)"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [],
-    "needs": [
-     "stats-spotlight-freeze"
-    ],
+    "needs": [],
     "created": "2026-11-13T02:56:27Z"
    },
    {
@@ -102549,7 +102575,7 @@
     "action": "wait",
     "reasons": [
      "conflicts with #17610 in packages/ai/src/providers/factory-droid.ts, packages/ai/src/providers/transform-messages.ts",
-     "conflicts with main in packages/agent/src/tokenizer.ts, packages/ai/src/providers/factory-droid.ts, packages/coding-agent/src/session/session-maintenance.ts"
+     "conflicts with main in packages/agent/src/tokenizer.ts, packages/ai/src/providers/factory-droid.ts, packages/ai/src/providers/transform-messages.ts, packages/coding-agent/src/session/session-maintenance.ts"
     ],
     "note": "",
     "over": [],
@@ -102707,7 +102733,7 @@
     "action": "wait",
     "reasons": [
      "needs token-count-policy (queued)",
-     "its need token-count-policy conflicts with main in packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/session/session-stats.ts, packages/coding-agent/test/context-fits-model.test.ts"
+     "its need token-count-policy conflicts with main in packages/catalog/src/compat/rules/classes/anthropic.kdl, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/session/session-stats.ts, packages/coding-agent/test/context-fits-model.test.ts"
     ],
     "note": "",
     "over": [],
@@ -102728,7 +102754,7 @@
     "title": "feat(catalog,coding-agent): token-count framing policy in KDL",
     "action": "wait",
     "reasons": [
-     "conflicts with main in packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/session/session-stats.ts, packages/coding-agent/test/context-fits-model.test.ts"
+     "conflicts with main in packages/catalog/src/compat/rules/classes/anthropic.kdl, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/session/session-stats.ts, packages/coding-agent/test/context-fits-model.test.ts"
     ],
     "note": "",
     "over": [],
