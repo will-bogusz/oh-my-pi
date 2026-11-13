@@ -90395,7 +90395,27 @@
    "updated": "2026-11-13T03:08:44Z",
    "note": "",
    "opened": "2026-11-13T03:06:57Z",
-   "readied": "2026-11-13T03:07:30Z"
+   "readied": "2026-11-13T03:07:30Z",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-13T03:10:19Z",
+     "reason": "b58a18f replaces the close-at-result lines with settledAtMs (roboomp nit)",
+     "old": "50329e705cea9aee3572c32daa788c35b8ce1864",
+     "new": "1a48f7556923b3e131616759416990a6c344ab99",
+     "dropped": {
+      "packages/stats/src/trace.ts": [
+       "/** End the open background job with `jobId` at `at`; a later job may reuse the id. */",
+       "\tjob.end = at;",
+       "\t\t\t// job replaces its async-result delivery, so the job closes at this result.",
+       "\t\t\t\t\t\tcloseBackgroundJob(activeBackgroundJobs, job.id, end);"
+      ],
+      "packages/stats/test/trace-builder.test.ts": [
+       "\t\t\t\t\t{ id: \"bg_1\", type: \"bash\", status: \"completed\" },",
+       "\t\t\t[T + 2000, T + 5000, undefined],"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "ax-read-as-title-link",
