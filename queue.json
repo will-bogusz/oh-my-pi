@@ -86277,7 +86277,7 @@
    "area": "natives",
    "priority": "P1",
    "needs": [],
-   "base": "c8fe41d6b15724611a6bc7ec693e788a3f0c6c95",
+   "base": "84f5adc3bbfc0c2a7caecbad78b1b6eedf0a2939",
    "body": "bodies/macos-ax-linked-label.md",
    "state": "open",
    "pr": 19061,
@@ -86285,7 +86285,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-ax-linked-label",
    "host": "MacBook-Pro",
    "added": "2026-11-11T14:43:42Z",
-   "updated": "2026-11-12T23:08:47Z",
+   "updated": "2026-11-13T04:25:57Z",
    "note": "Main, 2026-11-12: approved linked-own-guard.diff. Naming-only: changed linked text alone is not an action guard. Five AxProps constructor sites migrated; adjacency with entries adding AxProps fields requires opener pair builds. Unbuilt design note: retain {own,linked} fingerprints independently and compare each only when answered at registration and action; closes a rerender moving an unnamed control ref onto its neighbour; measure that case before building. Rebase 5d78d9683a9 onto 7c2ab113ec9: Main approved decoder equivalence. Registration keeps `.then(|| props.read_as_fingerprint.unwrap_or(fingerprint))`; read_as_values reads own labels only, never the linked-label enrichment, so the check-side override is unnecessary. bench-mac passed an_own_label_disappearing_is_refused_even_when_the_link_is_unread, a_changed_linked_label_alone_is_not_an_action_guard, an_unchanged_linked_label_does_not_refuse_its_control. All three use the real read_as_values decoder, including unchanged-linked coverage against future enrichment in the decoder; desktop:: 606 passed.",
    "line_loss_overrides": [
     {
@@ -86339,7 +86339,7 @@
      }
     }
    ],
-   "advanced": "2026-11-12T23:08:47Z",
+   "advanced": "2026-11-13T04:25:57Z",
    "rebases_after": [
     19036,
     19048,
