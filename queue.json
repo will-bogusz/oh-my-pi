@@ -90617,13 +90617,13 @@
    "needs": [],
    "base": "d8493454a2eab3c88f5410d6ce48bf3fe4352300",
    "body": "bodies/stats-gain-compaction.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19120,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/stats-gain-compaction",
    "host": "MacBook-Pro",
    "added": "2026-11-13T03:43:16Z",
-   "updated": "2026-11-13T03:58:15Z",
+   "updated": "2026-11-13T04:02:03Z",
    "note": "",
    "built": [
     {
@@ -90653,7 +90653,8 @@
      "at": "2026-11-13T03:53:43Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-13T04:02:03Z"
   }
  ],
  "watch": {
