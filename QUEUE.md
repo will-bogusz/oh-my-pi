@@ -1,10 +1,10 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13 02:48Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13 02:49Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-13 02:07Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 1, conflict-held 18, stacked 15, held 11, parked 2, open PRs 28, queued since the last plan 3; merged 334, closed 35
+**Counts:** openable now 1, conflict-held 18, stacked 15, held 11, parked 2, open PRs 28, queued since the last plan 4; merged 334, closed 35
 
 ## Openable now (1)
 
@@ -111,10 +111,11 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13
 | [#19063](https://github.com/can1357/oh-my-pi/pull/19063) | macos-press-click-hint | fix(natives): point a refused macOS press at the element's own click | computer | P1 | 8h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-press-click-hint) |
 | [#19001](https://github.com/can1357/oh-my-pi/pull/19001) | relay-hidden-frames-main | fix(browser-relay): say what the relay hid in a driven tab | browser | P2 | 21h | keep; accepted pair with #18925: Main, 2026-11-12: accepted (HiddenOnMain's combined form). tab-worker.ts WorkerCore.#run after the finally: this branch's hinted take (if this.#unanswered === active && this.#hiddenFramesWaiting && this.#page) await this.#takeHiddenFrames(this.#page)) stays before the answered guard; in the failure branch #18925's enrichment of error (message and stack with the native notices), then this.#sendResult({ id: msg.id, ok: false, error }), so both native-window notices and the once-only hidden-frames notice ride the failure. Second to land adds one test that a failed run carries both. | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-hidden-frames-main) |
 
-## Queued since the last plan (3)
+## Queued since the last plan (4)
 
 | id | title | area | priority | age | branch |
 |---|---|---|---|---|---|
 | ax-relabel-recovery | fix(natives): tell the model it may act on the new ref a relabelled-ref refusal names | computer | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-relabel-recovery) |
 | stats-reply-link | fix(stats): count every answered message in the Frustration per-model table | other |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-reply-link) |
 | stats-trace-jobs | fix(stats): close Traces background jobs when they finish, so idle time and turn ends show | stats |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-trace-jobs) |
+| ax-read-as-title-link | fix(natives): keep a macOS ref whose own label changes while its title element shows the same text | computer | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-read-as-live-label) |
