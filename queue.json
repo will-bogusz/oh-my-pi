@@ -85065,7 +85065,7 @@
    "needs": [
     "win-takeover-focus"
    ],
-   "base": "c8fe41d6b15724611a6bc7ec693e788a3f0c6c95",
+   "base": "84f5adc3bbfc0c2a7caecbad78b1b6eedf0a2939",
    "body": "bodies/win-focus-report.md",
    "state": "open",
    "pr": 19062,
@@ -85073,7 +85073,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-focus-report",
    "host": "MacBook-Pro",
    "added": "2026-11-11T13:11:20Z",
-   "updated": "2026-11-12T23:11:46Z",
+   "updated": "2026-11-13T04:26:06Z",
    "note": "",
    "rebases_after": [
     18783,
@@ -85083,7 +85083,7 @@
     "18783": "QueueThirteen, 2026-11-12 (Main: docs pairs are the opener's): docs-only collision in docs/computer-use.md, adjacent: #18783 adds two X11 covered-window screenshot paragraphs right before the 'Window input defaults to background routes' paragraph that this entry edits. Combined form: #18783's two paragraphs, blank line, then this entry's wording of the 'Window input defaults' paragraph. No code overlap.",
     "19037": "QueueFourteen, 2026-11-12 (recorded combined form; use list + docs): conflicts are the test-module use list in crates/pi-natives/src/desktop/win32/mod.rs (#19037: control::{self, CancellationSource}; this entry adds types::DesktopFocusReturn) and the docs/computer-use.md 'Window input defaults' paragraph (#19037: 'delivered (or only sent, when Windows takeover typing was not seen read)'; this entry: 'macOS or Windows reports \u2026 (Linux, \u2026)'). Combined: use crate::desktop::{control::{self, CancellationSource}, types::DesktopFocusReturn}; paragraph carries both edits"
    },
-   "advanced": "2026-11-12T23:11:46Z",
+   "advanced": "2026-11-13T04:26:06Z",
    "built": [
     {
      "with": "#18737",
