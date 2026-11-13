@@ -91560,6 +91560,26 @@
    "added": "2026-11-13T17:08:59Z",
    "updated": "2026-11-13T17:11:57Z",
    "note": ""
+  },
+  {
+   "id": "factory-droid-config-update-upstreams",
+   "branch": "will/factory-droid-config-update-upstreams",
+   "title": "fix(catalog): keep GPT-6 effort changes off configuration_update on Factory Droid Bedrock and Snowflake",
+   "area": "catalog",
+   "priority": "P1",
+   "needs": [
+    "gemini-hydrogen-overlap"
+   ],
+   "base": "0d59f5c5097ad18a7d6f7c10316a3d40a93d1747",
+   "body": "bodies/factory-droid-config-update-upstreams.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-config-update-upstreams",
+   "host": "MacBook-Pro",
+   "added": "2026-11-13T17:14:46Z",
+   "updated": "2026-11-13T17:14:46Z",
+   "note": ""
   }
  ],
  "watch": {
