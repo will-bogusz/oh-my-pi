@@ -91947,8 +91947,55 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-capture-resilience",
    "host": "MacBook-Pro",
    "added": "2026-11-13T19:22:46Z",
-   "updated": "2026-11-13T19:22:46Z",
-   "note": ""
+   "updated": "2026-11-13T19:28:55Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#19180",
+     "code": "0a6fc6fd1584f5f443ac7aa58fdf8087a23dd5aa",
+     "with_code": "a0c5237794a5d1cad0ca03457ec2975d4409fe33",
+     "tip": "9fdd1511bbc7d16febf9bee9f016171256e02a92",
+     "with_tip": "5dd6983c54889b303406062fce30d0cbc4876cb6",
+     "at": "2026-11-13T19:28:49Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#18624",
+     "code": "0a6fc6fd1584f5f443ac7aa58fdf8087a23dd5aa",
+     "with_code": "a6c3686b678ac8e1348dd9b3262238ddf925504d",
+     "tip": "9fdd1511bbc7d16febf9bee9f016171256e02a92",
+     "with_tip": "94e431fde263071d11de8fd12876d691b641ac77",
+     "at": "2026-11-13T19:28:54Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19188",
+     "code": "0a6fc6fd1584f5f443ac7aa58fdf8087a23dd5aa",
+     "with_code": "e5443edcfca303332b7b4ae0b5f538f02f799674",
+     "tip": "9fdd1511bbc7d16febf9bee9f016171256e02a92",
+     "with_tip": "beb69841379fdd2f545dcb6febbb21420fd2683a",
+     "at": "2026-11-13T19:28:54Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#18125",
+     "code": "0a6fc6fd1584f5f443ac7aa58fdf8087a23dd5aa",
+     "with_code": "5402656ebc173c662e80a512b0822fe7187eb1f0",
+     "tip": "9fdd1511bbc7d16febf9bee9f016171256e02a92",
+     "with_tip": "6b86ca5962814963a30016e9a7d93222e309c1cf",
+     "at": "2026-11-13T19:28:54Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19191",
+     "code": "0a6fc6fd1584f5f443ac7aa58fdf8087a23dd5aa",
+     "with_code": "a23b8912a5455ed49d362c01e2816239dc9ea351",
+     "tip": "9fdd1511bbc7d16febf9bee9f016171256e02a92",
+     "with_tip": "6ff9ece05e98ccc20f9a874782cf9ccb38ccfb35",
+     "at": "2026-11-13T19:28:54Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   }
  ],
  "watch": {
