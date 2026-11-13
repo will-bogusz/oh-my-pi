@@ -75574,7 +75574,7 @@
    "branch": "will/factory-droid-171-models",
    "title": "feat(catalog): add the Factory Droid models droid 1.7.1 serves",
    "area": "factory-droid",
-   "priority": null,
+   "priority": "P2",
    "needs": [
     "gemini-hydrogen-overlap"
    ],
@@ -75586,7 +75586,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-171-models",
    "host": "MacBook-Pro",
    "added": "2026-11-10T19:41:03Z",
-   "updated": "2026-11-13T18:30:53Z",
+   "updated": "2026-11-13T18:56:59Z",
    "note": "",
    "advanced": "2026-11-13T17:00:40Z",
    "built": [
