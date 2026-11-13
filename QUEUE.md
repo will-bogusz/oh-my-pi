@@ -1,17 +1,16 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13 03:40Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13 03:42Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-11-13 03:39Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 2, conflict-held 18, stacked 16, held 13, parked 2, open PRs 30; merged 334, closed 35
+**Counts:** openable now 1, conflict-held 18, stacked 16, held 13, parked 2, open PRs 31; merged 334, closed 35
 
-## Openable now (2)
+## Openable now (1)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
 | factory-droid-171-models | feat(catalog): add the Factory Droid models droid 1.7.1 serves | factory-droid |  | 2d | open; advance first | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-171-models) |
-| stats-spotlight-freeze | fix(stats,coding-agent): keep the stats dashboard answering while Spotlight rebuilds | other |  | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-spotlight-freeze) |
 
 ## Conflict-held (18)
 
@@ -55,7 +54,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13
 | settle-reads | feat(browser): settle the preceding action before reads too | browser | P1 | 2d | observe-settle ([#19045](https://github.com/can1357/oh-my-pi/pull/19045)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-settle-reads) |
 | act-look-prompt | docs(browser): teach acting and looking in one Eval cell without sleeps | browser | P2 | 2d | settle-reads | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-act-look-prompt) |
 | observe-stable-ids | feat(browser): keep observe() ids stable across observations | browser | P2 | 2d | act-look-prompt | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-observe-stable-ids) |
-| stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 0h | stats-spotlight-freeze | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
+| stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 0h | stats-spotlight-freeze ([#19118](https://github.com/can1357/oh-my-pi/pull/19118)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 
 ## Held (13)
 
@@ -82,7 +81,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13
 | [#15128](https://github.com/can1357/oh-my-pi/pull/15128) | reset-restore-longest-wait | feat(coding-agent): restore the blocked account whose reset buys the most time | broker | P2 | 2d | Will, 2026-11-02: account broker redesign, on hold since 2026-11-02 | not checked or kept fresh | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-restore-longest-wait) |
 | [#15130](https://github.com/can1357/oh-my-pi/pull/15130) | reset-before-reserve | feat(coding-agent): opt in to spending a blocked account's saved reset before a reserve-only backup | broker | P2 | 2d | Will, 2026-11-02: account broker redesign, on hold since 2026-11-02 | not checked or kept fresh | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-before-reserve) |
 
-## Open PRs (30)
+## Open PRs (31)
 
 | PR | id | title | area | rank | open | plan | branch |
 |---|---|---|---|---|---|---|---|
@@ -116,3 +115,4 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13
 | [#19001](https://github.com/can1357/oh-my-pi/pull/19001) | relay-hidden-frames-main | fix(browser-relay): say what the relay hid in a driven tab | browser | P2 | 22h | keep; accepted pair with #18925: Main, 2026-11-12: accepted (HiddenOnMain's combined form). tab-worker.ts WorkerCore.#run after the finally: this branch's hinted take (if this.#unanswered === active && this.#hiddenFramesWaiting && this.#page) await this.#takeHiddenFrames(this.#page)) stays before the answered guard; in the failure branch #18925's enrichment of error (message and stack with the native notices), then this.#sendResult({ id: msg.id, ok: false, error }), so both native-window notices and the once-only hidden-frames notice ride the failure. Second to land adds one test that a failed run carries both. | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-hidden-frames-main) |
 | [#19114](https://github.com/can1357/oh-my-pi/pull/19114) | stats-reply-link | fix(stats): count every answered message in the Frustration per-model table | other | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-reply-link) |
 | [#19115](https://github.com/can1357/oh-my-pi/pull/19115) | stats-trace-jobs | fix(stats): close Traces background jobs when they finish, so idle time and turn ends show | stats | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-trace-jobs) |
+| [#19118](https://github.com/can1357/oh-my-pi/pull/19118) | stats-spotlight-freeze | fix(stats,coding-agent): keep the stats dashboard answering while Spotlight rebuilds | other |  | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-spotlight-freeze) |

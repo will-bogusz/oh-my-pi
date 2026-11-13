@@ -90468,13 +90468,13 @@
    "needs": [],
    "base": "84f5adc3bbfc0c2a7caecbad78b1b6eedf0a2939",
    "body": "bodies/stats-spotlight-freeze.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19118,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/stats-spotlight-freeze",
    "host": "MacBook-Pro",
    "added": "2026-11-13T03:07:37Z",
-   "updated": "2026-11-13T03:39:22Z",
+   "updated": "2026-11-13T03:42:56Z",
    "note": "",
    "advanced": "2026-11-13T03:16:36Z",
    "built": [
@@ -90604,7 +90604,8 @@
      "at": "2026-11-13T03:39:16Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-13T03:42:56Z"
   }
  ],
  "watch": {
