@@ -1,20 +1,21 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13 13:22Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13 13:27Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-13 13:20Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 3, conflict-held 19, stacked 14, held 12, parked 2, open PRs 29; merged 338, closed 36
+**Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-13 13:23Z on MacBook-Pro; groups below are from it, states from the manifest)
+**Counts:** openable now 4, conflict-held 18, stacked 14, held 12, parked 2, open PRs 29; merged 338, closed 36
 
-## Openable now (3)
+## Openable now (4)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
 | factory-droid-171-models | feat(catalog): add the Factory Droid models droid 1.7.1 serves | factory-droid |  | 2d | open; advance first | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-171-models) |
+| stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 10h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 | macos-drag-confirm | fix(natives): stop macOS background drags reporting moves that did not happen | computer | P1 | 2h | open; accepted pair with #19048: QueueNineteen, 2026-11-13: only conflict is adjacent #[test] fns appended at the same spot at the end of mod tests in crates/pi-natives/src/desktop/macos/input.rs (this entry's drag tests, #19048's row-action tests); nothing removed or reshaped; combined form is both sets of tests. Built as one tree with key-menu and macos-scroll-direction: macOS cargo test desktop 641 pass (bench-mac), Linux 345 pass, check:ts clean | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-drag-confirm) |
 | key-menu | fix(natives): close the menu a macOS background key press opens | computer | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/key-menu) |
 
-## Conflict-held (19)
+## Conflict-held (18)
 
 | id | title | area | priority | age | blocked by | branch |
 |---|---|---|---|---|---|---|
@@ -36,7 +37,6 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13
 | macos-ax-cancel-before-send | fix(natives): send no macOS AX action once its run is cancelled | natives | P2 | 2d | [#19036](https://github.com/can1357/oh-my-pi/pull/19036), [#19048](https://github.com/can1357/oh-my-pi/pull/19048), [#19061](https://github.com/can1357/oh-my-pi/pull/19061), [#19063](https://github.com/can1357/oh-my-pi/pull/19063), macos-drag-confirm, main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-ax-cancel-before-send) |
 | win-ax-states | fix(natives): expose Windows control state and stale-reference matches | computer | P2 | 2d | [#19036](https://github.com/can1357/oh-my-pi/pull/19036), [#19048](https://github.com/can1357/oh-my-pi/pull/19048), [#19061](https://github.com/can1357/oh-my-pi/pull/19061), [#19063](https://github.com/can1357/oh-my-pi/pull/19063), [#18925](https://github.com/can1357/oh-my-pi/pull/18925), [#18987](https://github.com/can1357/oh-my-pi/pull/18987), macos-drag-confirm, main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-ax-states) |
 | x11-keysym-remap | fix(natives): type characters outside the X11 keymap through temporary keycodes | computer | P2 | 1d | [#19066](https://github.com/can1357/oh-my-pi/pull/19066), [#19080](https://github.com/can1357/oh-my-pi/pull/19080), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-keysym-remap) |
-| stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 10h | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 
 ## Stacked (14)
 
