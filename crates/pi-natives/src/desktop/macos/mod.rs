@@ -13,6 +13,7 @@ mod route;
 mod session;
 mod skylight;
 mod spaces;
+mod window_order;
 
 #[cfg(test)]
 pub(super) use ax::application_handle;
