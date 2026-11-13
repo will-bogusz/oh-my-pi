@@ -31,7 +31,7 @@ Related: #19173 asks for Fable 5.2 and Carbon, and also for Gemini 4 Hydrogen, w
 
 - Live on a Factory login from this branch, `omp -p` turn reading two files and summing them: 42 on `claude-fable-5.2`, `gemini-4-carbon` and `kimi-k3.1-pro`; Carbon's turn billed $2/$10, $0.10 cached.
 - One-image turn on `muse-spark-1.3` (red/blue split PNG): this branch sends an `input_image` part; `main` sends another model's description instead. Meta's upstream rejected every Muse request that day, text included, so no answer came back.
-- `generate_image` with the `image` role set to `factory-droid/gpt-image-2.6-sunburst` returned an image from that model.
+- `generate_image` with the `image` role on `factory-droid/gpt-image-2.6-sunburst` returned an image.
 - Native parity: droid 1.7.1 captures for `claude-fable-5.2@anthropic`, `gemini-4-carbon@google` and `kimi-k3.1-pro@fireworks` match omp's requests (`factory-droid-native-parity.test.ts` 64 pass). With Carbon removed from Argon's dialect line its parity case fails; with Kimi K3.1 Pro removed from `requires-tool-result-name` the new completions test fails.
 - Discovery tests check that the three new flags gate their models, and that Muse Spark 1.3 lists with its flag off and takes images.
 - `bun test` (`env -i`): `packages/ai` Factory tests 295 pass; `packages/catalog` Factory and compat tests 211 pass; `packages/coding-agent` image-gen and image-budget tests 93 pass. `check:types` clean for all three.
