@@ -91554,7 +91554,7 @@
    "branch": "will/devin-pin-31257",
    "title": "fix(catalog): identify Devin requests as CLI 3000.12.57",
    "area": "catalog",
-   "priority": "P2",
+   "priority": "P0",
    "needs": [],
    "base": "8b1fd3233b873b94ec1d658fee26b2cbaf72d9d4",
    "body": "bodies/devin-pin-31257.md",
@@ -91564,7 +91564,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-pin-31257",
    "host": "MacBook-Pro",
    "added": "2026-11-13T17:05:09Z",
-   "updated": "2026-11-13T17:20:48Z",
+   "updated": "2026-11-13T17:34:38Z",
    "note": "",
    "built": [
     {
@@ -91598,13 +91598,13 @@
    "needs": [],
    "base": "8b1fd3233b873b94ec1d658fee26b2cbaf72d9d4",
    "body": "bodies/gemini-hydrogen-overlap.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19181,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/gemini-hydrogen-overlap",
    "host": "MacBook-Pro",
    "added": "2026-11-13T17:08:59Z",
-   "updated": "2026-11-13T17:29:05Z",
+   "updated": "2026-11-13T17:34:38Z",
    "note": "",
    "built": [
     {
@@ -91619,7 +91619,8 @@
    ],
    "opened": "2026-11-13T17:25:36Z",
    "readied": "2026-11-13T17:26:01Z",
-   "advanced": "2026-11-13T17:29:05Z"
+   "advanced": "2026-11-13T17:29:05Z",
+   "merged_by": "pr"
   },
   {
    "id": "factory-droid-config-update-upstreams",
