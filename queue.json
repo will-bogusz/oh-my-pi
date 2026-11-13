@@ -90885,7 +90885,7 @@
    "worktree": null,
    "host": "MacBook-Pro",
    "added": "2026-11-13T10:32:49Z",
-   "updated": "2026-11-13T13:20:14Z",
+   "updated": "2026-11-13T17:05:53Z",
    "note": "Head 37bd49376ef. Touches the Drag arm of background_gesture in crates/pi-natives/src/desktop/macos/input.rs; neighbouring arms are touched by macos-scroll-direction (Scroll arm / background_scroll) and by a separate lane's key-press fix: expect adjacent-hunk rebases, no semantic overlap. Review DragConfirm.ReviewDragConfirm needs-changes at abc556586fa, all F1-F9 fixed in 37bd493 (not re-reviewed per skill). VM: DragConfirm block3 (bench-mac runs dc-main-e/dc-C-e/dc-C-a/dc-main-a).",
    "built": [
     {
@@ -91120,6 +91120,24 @@
      "tip": "37bd49376ef341f5bb8300edb771cb9d55245278",
      "with_tip": "53b6588f7ff4d1d8be06d3399c7cc930ccf7bcb5",
      "at": "2026-11-13T13:20:08Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19178",
+     "code": "1b6b064830c44ca81fd501711b388c9d9edb8a46",
+     "with_code": "e96c21fc30fc7cc37aab5b505864b28571bc5f94",
+     "tip": "37bd49376ef341f5bb8300edb771cb9d55245278",
+     "with_tip": "c4be88ec6b27039282a9a3fa7efde2f246922ff8",
+     "at": "2026-11-13T17:05:48Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "key-menu",
+     "code": "1b6b064830c44ca81fd501711b388c9d9edb8a46",
+     "with_code": "dd3cb2c4349ee54b6feea71f208daf109281950d",
+     "tip": "37bd49376ef341f5bb8300edb771cb9d55245278",
+     "with_tip": "55ce074a735320dde46a5c7a5971b4455cf0d5fa",
+     "at": "2026-11-13T17:05:53Z",
      "host": "MacBook-Pro"
     }
    ],
