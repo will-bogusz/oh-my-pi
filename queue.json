@@ -90724,6 +90724,24 @@
    "added": "2026-11-13T10:32:49Z",
    "updated": "2026-11-13T10:33:01Z",
    "note": "Head 37bd49376ef. Touches the Drag arm of background_gesture in crates/pi-natives/src/desktop/macos/input.rs; neighbouring arms are touched by macos-scroll-direction (Scroll arm / background_scroll) and by a separate lane's key-press fix: expect adjacent-hunk rebases, no semantic overlap. Review DragConfirm.ReviewDragConfirm needs-changes at abc556586fa, all F1-F9 fixed in 37bd493 (not re-reviewed per skill). VM: DragConfirm block3 (bench-mac runs dc-main-e/dc-C-e/dc-C-a/dc-main-a)."
+  },
+  {
+   "id": "key-menu",
+   "branch": "will/key-menu",
+   "title": "fix(natives): close the menu a macOS background key press opens",
+   "area": "computer",
+   "priority": "P1",
+   "needs": [],
+   "base": "a2c0cb98745053b9d052206d080e53d6a0415384",
+   "body": "bodies/key-menu.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/home/will/.omp/main-wt/oh-my-pi/key-menu",
+   "host": "goliath",
+   "added": "2026-11-13T12:43:28Z",
+   "updated": "2026-11-13T12:43:28Z",
+   "note": ""
   }
  ],
  "watch": {
