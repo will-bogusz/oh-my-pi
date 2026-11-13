@@ -90435,6 +90435,24 @@
    "added": "2026-11-13T02:56:27Z",
    "updated": "2026-11-13T02:56:27Z",
    "note": ""
+  },
+  {
+   "id": "stats-spotlight-freeze",
+   "branch": "will/stats-spotlight-freeze",
+   "title": "fix(stats,coding-agent): keep the stats dashboard answering while Spotlight rebuilds",
+   "area": "other",
+   "priority": null,
+   "needs": [],
+   "base": "d8493454a2eab3c88f5410d6ce48bf3fe4352300",
+   "body": "bodies/stats-spotlight-freeze.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/stats-spotlight-freeze",
+   "host": "MacBook-Pro",
+   "added": "2026-11-13T03:07:37Z",
+   "updated": "2026-11-13T03:07:37Z",
+   "note": ""
   }
  ],
  "watch": {
