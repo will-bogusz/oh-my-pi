@@ -100038,7 +100038,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-13T05:11:03.266024Z",
+  "at": "2026-11-13T05:41:30.749896Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -100659,7 +100659,7 @@
     "title": "fix(natives): keep a macOS ref whose own label changes while its title element shows the same text",
     "action": "held",
     "reasons": [
-     "held: Will, 2026-11-13: Main decides the approach once #19061 has merged, with all the data in: the release leg's count of this refusal across 32 tasks (true catches against relabels), the wording change's Sol sample on Contacts and Reminders, TitleTwin's 0 wrong-item actions in 200 trials (~/tmp/oh-my-pi/TitleTwin/HANDOFF.md), and the fixture's same-title reuse limit (10/10). Not to open before that decision.",
+     "held: Will, 2026-11-13: Main decides the approach once #19061 merges, with all the data in. Data so far: release leg 9 refusals in 93 runs (4 true catches, 5 same-control relabels, about +2 steps each, no grade changed); wording-only change closed (no step saved, 6 runs per arm); TitleTwin 0 wrong-item actions in 200 trials on stock apps, fixture same-title reuse 10/10 wrong; RelabelCases (scripted, 10 tries per case, v18.20.0 vs b42c6d20412, ~/tmp/oh-my-pi/RelabelCases/{signals,recovery}.md): Reminders count refused 10/10 -> right control 10/10; Finder rename and Calendar location still refused 10/10 (no title link); Contacts City->Street still refused 10/10. Finder and Calendar differ from Contacts in that frame, value and sibling count are unchanged, but that is not shown safe in general. A refusal that carried its parent's subtree would be an estimated 150-460 chars against the 1,300-7,400 the model re-read, and would save one of the two recovery steps (reconstructed, not run).",
      "needs #19061 (open)",
      "conflicts with #19036 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with #19048 in crates/pi-natives/src/desktop/ax.rs"
@@ -100675,25 +100675,6 @@
      "#19061"
     ],
     "created": "2026-11-13T02:49:00Z"
-   },
-   {
-    "id": "ax-relabel-recovery",
-    "label": "ax-relabel-recovery",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives): tell the model it may act on the new ref a relabelled-ref refusal names",
-    "action": "held",
-    "reasons": [
-     "held: Main, 2026-11-13: the new error text invites acting on the ref a refusal names; opens only after a blind Sol sample on the Contacts task (strict grade) and the Reminders task, B against its base, shows no wrong-field write the base does not make and a step saving on Reminders"
-    ],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-13T02:45:02Z"
    },
    {
     "id": "covered-fill",
