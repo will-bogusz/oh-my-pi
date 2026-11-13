@@ -90329,18 +90329,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-12T23:36:11Z",
+  "checked": "2026-11-13T00:06:18Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "browser-click-frame-removed": {
-    "since": "2026-11-12T23:36:11Z",
-    "title": "fix(coding-agent): fail a click whose frame the page removed while the button was down"
-   },
-   "computer-run-failure-output": {
-    "since": "2026-11-12T23:36:11Z",
-    "title": "fix(computer): retain output and screenshots when a run fails"
-   },
    "factory-droid-171-models": {
     "since": "2026-11-12T12:26:00Z",
     "title": "feat(catalog): add the Factory Droid models droid 1.7.1 serves"
@@ -90390,7 +90382,9 @@
    19062,
    19063,
    19066,
-   19080
+   19080,
+   19094,
+   19100
   ],
   "post_merge": {
    "16274": {
@@ -94141,6 +94135,20 @@
     "kind": "openable",
     "id": "computer-run-failure-output",
     "title": "fix(computer): retain output and screenshots when a run fails"
+   },
+   {
+    "at": "2026-11-13T00:06:18Z",
+    "kind": "unopenable",
+    "id": "browser-click-frame-removed",
+    "title": "fix(coding-agent): fail a click whose frame the page removed while the button was down",
+    "why": "opened as #19094"
+   },
+   {
+    "at": "2026-11-13T00:06:18Z",
+    "kind": "unopenable",
+    "id": "computer-run-failure-output",
+    "title": "fix(computer): retain output and screenshots when a run fails",
+    "why": "opened as #19100"
    }
   ]
  },
@@ -99821,14 +99829,31 @@
   }
  },
  "plan": {
-  "at": "2026-11-12T23:23:25.866716Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-13T00:06:19.220759Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 2,
+   "left": 6
   },
   "rows": [
+   {
+    "id": "browser-click-frame-removed",
+    "label": "#19094",
+    "number": 19094,
+    "state": "open",
+    "area": "browser",
+    "priority": "P0",
+    "title": "fix(coding-agent): fail a click whose frame the page removed while the button was down",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-12T23:53:08Z"
+   },
    {
     "id": "click-place-release",
     "label": "#16553",
@@ -100029,6 +100054,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-12T20:30:22Z"
+   },
+   {
+    "id": "computer-run-failure-output",
+    "label": "#19100",
+    "number": 19100,
+    "state": "open",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(computer): retain output and screenshots when a run fails",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-12T23:56:35Z"
    },
    {
     "id": "claude-refusal-strip-retry",
@@ -100331,40 +100373,6 @@
     "created": "2026-11-03T09:05:24Z"
    },
    {
-    "id": "browser-click-frame-removed",
-    "label": "browser-click-frame-removed",
-    "number": null,
-    "state": "queued",
-    "area": "browser",
-    "priority": "P1",
-    "title": "fix(coding-agent): fail a click whose frame the page removed while the button was down",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-11T00:14:54Z"
-   },
-   {
-    "id": "computer-run-failure-output",
-    "label": "computer-run-failure-output",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(computer): retain output and screenshots when a run fails",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-11T00:07:07Z"
-   },
-   {
     "id": "covered-fill",
     "label": "covered-fill",
     "number": null,
@@ -100584,9 +100592,9 @@
     "action": "wait",
     "reasons": [
      "conflicts with #19062 in packages/coding-agent/src/tools/computer/worker.ts",
+     "conflicts with #19100 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #18222 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #18987 in packages/coding-agent/src/tools/computer/worker.ts",
-     "conflicts with computer-run-failure-output in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
@@ -100594,9 +100602,9 @@
     "paired": [],
     "blocked_by": [
      "#19062",
+     "#19100",
      "#18222",
-     "#18987",
-     "computer-run-failure-output"
+     "#18987"
     ],
     "needs": [],
     "created": "2026-11-11T01:40:14Z"
@@ -100614,13 +100622,13 @@
      "conflicts with #19048 in docs/computer-use.md",
      "conflicts with #19061 in docs/computer-use.md",
      "conflicts with #19062 in docs/computer-use.md, packages/coding-agent/src/tools/computer/worker.ts",
+     "conflicts with #19100 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #18353 in docs/computer-use.md",
      "conflicts with #19034 in docs/computer-use.md",
      "conflicts with #19035 in docs/computer-use.md",
      "conflicts with #18013 in docs/computer-use.md",
      "conflicts with #18222 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #18987 in docs/computer-use.md, packages/coding-agent/src/tools/computer/worker.ts",
-     "conflicts with computer-run-failure-output in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
@@ -100630,13 +100638,13 @@
      "#19048",
      "#19061",
      "#19062",
+     "#19100",
      "#18353",
      "#19034",
      "#19035",
      "#18013",
      "#18222",
-     "#18987",
-     "computer-run-failure-output"
+     "#18987"
     ],
     "needs": [],
     "created": "2026-10-19T07:26:45Z"
@@ -101044,18 +101052,18 @@
     "reasons": [
      "held: Main, 2026-11-11: stays held until #18786 merges with the typed-message guide channel (design check replace); then one property on the computer prelude, drop the wrap variant, re-run its blind legs",
      "needs #18786 (open)",
+     "conflicts with #19100 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18222 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/prompts/tools/eval.md, packages/coding-agent/src/tools/eval.ts",
-     "conflicts with computer-run-failure-output in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with main in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/sdk-computer-prelude-toggle.test.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#19100",
      "#18222",
-     "#18786",
-     "computer-run-failure-output"
+     "#18786"
     ],
     "needs": [
      "browser-core-first-use"
@@ -101077,6 +101085,7 @@
      "conflicts with #19048 in docs/computer-use.md",
      "conflicts with #19061 in docs/computer-use.md",
      "conflicts with #19062 in docs/computer-use.md, packages/coding-agent/src/tools/computer/worker.ts",
+     "conflicts with #19100 in docs/tools/computer.md, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18353 in docs/computer-use.md, docs/tools/computer.md",
      "conflicts with #19034 in docs/computer-use.md",
      "conflicts with #19035 in docs/computer-use.md",
@@ -101084,7 +101093,6 @@
      "conflicts with #18222 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/tools/eval.ts",
      "conflicts with #18987 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/worker.ts",
-     "conflicts with computer-run-failure-output in docs/tools/computer.md, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -101095,14 +101103,14 @@
      "#19048",
      "#19061",
      "#19062",
+     "#19100",
      "#18353",
      "#19034",
      "#19035",
      "#18013",
      "#18222",
      "#18786",
-     "#18987",
-     "computer-run-failure-output"
+     "#18987"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -101124,11 +101132,11 @@
      "conflicts with #19048 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19061 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19063 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with #19100 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18987 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
-     "conflicts with computer-run-failure-output in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs"
     ],
@@ -101140,11 +101148,11 @@
      "#19048",
      "#19061",
      "#19063",
+     "#19100",
      "#18353",
      "#18222",
      "#18925",
-     "#18987",
-     "computer-run-failure-output"
+     "#18987"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -101168,10 +101176,10 @@
      "conflicts with #19048 in crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19061 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19063 in crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with #19100 in docs/tools/computer.md",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md",
      "conflicts with #18925 in crates/pi-natives/src/desktop/macos/capture.rs, crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs",
-     "conflicts with computer-run-failure-output in docs/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
@@ -101183,10 +101191,10 @@
      "#19048",
      "#19061",
      "#19063",
+     "#19100",
      "#18353",
      "#18222",
-     "#18925",
-     "computer-run-failure-output"
+     "#18925"
     ],
     "needs": [
      "agent-identity"
@@ -101339,10 +101347,10 @@
      "held: Main, 2026-11-12: proposal; opens only after entry A merges and Will has seen the body",
      "conflicts with #19025 in crates/pi-natives/src/desktop/win32/input.rs, crates/pi-natives/src/desktop/win32/mod.rs",
      "conflicts with #19062 in crates/pi-natives/src/desktop/win32/input.rs, crates/pi-natives/src/desktop/win32/mod.rs",
+     "conflicts with #19100 in docs/tools/computer.md",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md",
      "conflicts with #18987 in docs/tools/computer.md",
-     "conflicts with computer-run-failure-output in docs/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/win32/input.rs, crates/pi-natives/src/desktop/win32/mod.rs"
     ],
     "note": "",
@@ -101351,10 +101359,10 @@
     "blocked_by": [
      "#19025",
      "#19062",
+     "#19100",
      "#18353",
      "#18222",
-     "#18987",
-     "computer-run-failure-output"
+     "#18987"
     ],
     "needs": [],
     "created": "2026-11-12T04:40:13Z"
