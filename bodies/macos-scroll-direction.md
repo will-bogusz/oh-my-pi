@@ -6,7 +6,7 @@ On macOS a positive `dy` scrolled up while Windows and Linux scroll down, and bo
 
 **The decision this PR asks for:** macOS scripts written against the old sign now scroll the other way. The alternative is to keep macOS's sign and document it per platform, which leaves an agent's first macOS scroll going the wrong way (below).
 
-- `quartz_scroll_deltas` (`macos/input.rs`) negates `dx` and `dy` once, for all three macOS scroll paths: `global_scroll` (takeover, through `scroll_plan`), `background_scroll`, and `report_scroll` (iPhone Mirroring).
+- `quartz_scroll_deltas` (`macos/input.rs`) negates `dx` and `dy` once, for both macOS scroll paths: `global_scroll` (takeover, through `scroll_plan`) and `background_scroll`. iPhone Mirroring's scroll posts through `background_scroll`, so it follows.
 - `docs/computer-use.md` states the sign for every platform.
 
 ## Why
@@ -22,9 +22,20 @@ What agents write: given the `computer` tool documentation and asked for the one
 | `dy: +300` in a tall document (vertical scroll bar) | 0 → 0.037, down | 0.037 → 0.074, down |
 | `dx: +200` in a wide one (horizontal scroll bar) | 0.029 → 1, right | 0 → 0.980, right |
 
-On iPhone Mirroring `dy: 300` moved the phone's page down 300 px and `dy: -300` back, over 3 runs. Posted wheel events ignore the Natural scrolling preference, so no setting is read.
+A scripted run on a macOS 26.5 VM scrolled a list in an Electron page and in an AppKit app, 5 times in each of four conditions (target focused, behind the user's window, covered, the user typing elsewhere), with the list's real scroll offset as the check. Every call returned without an error on both builds:
 
-`scroll_deltas_map_down_and_right_to_negative_quartz_axes` (an out-of-range delta's error quotes the caller's value), `paced_scrolls_go_down_and_right_as_negative_wheel_steps` (takeover), and the report-path scroll tests, which now expect negative wheel steps for a scroll down and right; removing the negation fails them. `cargo test -p pi-natives --lib desktop` on macOS; clippy and rustfmt on macOS and Linux.
+| Background `scroll` on a list, rows correct of 20 | `main` | this change |
+|---|---|---|
+| Electron page, `dy: 3` at the top | 0, went up | 20 |
+| Electron page, `dy: -3` at the top (nothing to scroll) | 0, went down | 20 |
+| Electron page, `dy: -3` from 60 px down | 0, went down | 20 |
+| AppKit table, `dy: 3` at the top | 0, went up | 20 |
+| AppKit table, `dy: -3` at the top (nothing to scroll) | 0, went down | 20 |
+| AppKit table, `dy: -3` from 60 px down | 0, went down | 20 |
+
+On iPhone Mirroring a positive `dy` moved the phone's page down and a negative one back up, over 3 runs. Posted wheel events ignore the Natural scrolling preference, so no setting is read.
+
+`scroll_deltas_map_down_and_right_to_negative_quartz_axes` (an out-of-range delta's error quotes the caller's value) and `paced_scrolls_go_down_and_right_as_negative_wheel_steps` (takeover); removing the negation fails both. `cargo test -p pi-natives --lib desktop` on macOS; clippy and rustfmt on macOS and Linux.
 
 ---
 

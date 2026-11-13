@@ -58533,11 +58533,9 @@
    "branch": "will/macos-scroll-direction",
    "title": "fix(natives): scroll down for a positive dy on macOS, as on Windows and Linux",
    "area": "computer",
-   "priority": "P2",
-   "needs": [
-    "iphone-mirror-scroll-distance"
-   ],
-   "base": "f32a0eda46d0cc17ca9f751467fc3b6c1129ec0c",
+   "priority": "P1",
+   "needs": [],
+   "base": "84f5adc3bbfc0c2a7caecbad78b1b6eedf0a2939",
    "body": "bodies/macos-scroll-direction.md",
    "state": "queued",
    "pr": null,
@@ -58545,8 +58543,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-scroll-direction",
    "host": "MacBook-Pro",
    "added": "2026-10-30T21:36:10Z",
-   "updated": "2026-10-30T21:36:10Z",
-   "note": ""
+   "updated": "2026-11-13T08:33:18Z",
+   "note": "FalseSuccess2 2026-11-13: rebased onto main 84f5adc as 7d8261c (report_scroll hunks and iPhone report-path tests dropped; iPhone Mirroring gets the flip through background_scroll). P1 per Main: every macOS scroll goes the wrong way on main. No needs. Opening order A (macos-drag-confirm), this, B (macos-scroll-confirm)."
   },
   {
    "id": "snapcompact-text-reader",
