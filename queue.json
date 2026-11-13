@@ -90659,14 +90659,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-13T03:39:19Z",
+  "checked": "2026-11-13T04:09:56Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "stats-spotlight-freeze": {
-    "since": "2026-11-13T03:39:19Z",
-    "title": "fix(stats,coding-agent): keep the stats dashboard answering while Spotlight rebuilds"
-   },
    "factory-droid-171-models": {
     "since": "2026-11-12T12:26:00Z",
     "title": "feat(catalog): add the Factory Droid models droid 1.7.1 serves"
@@ -90720,7 +90716,9 @@
    19094,
    19100,
    19114,
-   19115
+   19115,
+   19118,
+   19120
   ],
   "post_merge": {
    "16274": {
@@ -94230,6 +94228,13 @@
     "kind": "openable",
     "id": "stats-spotlight-freeze",
     "title": "fix(stats,coding-agent): keep the stats dashboard answering while Spotlight rebuilds"
+   },
+   {
+    "at": "2026-11-13T04:09:56Z",
+    "kind": "unopenable",
+    "id": "stats-spotlight-freeze",
+    "title": "fix(stats,coding-agent): keep the stats dashboard answering while Spotlight rebuilds",
+    "why": "opened as #19118"
    }
   ]
  },
@@ -99987,7 +99992,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-13T03:39:20.087185Z",
+  "at": "2026-11-13T04:09:57.010214Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -100265,6 +100270,23 @@
     "created": "2026-11-12T23:56:35Z"
    },
    {
+    "id": "stats-spotlight-freeze",
+    "label": "#19118",
+    "number": 19118,
+    "state": "open",
+    "area": "other",
+    "priority": "P1",
+    "title": "fix(stats,coding-agent): keep the stats dashboard answering while Spotlight rebuilds",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-13T03:42:55Z"
+   },
+   {
     "id": "claude-refusal-strip-retry",
     "label": "#17610",
     "number": 17610,
@@ -100374,6 +100396,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-12T14:32:13Z"
+   },
+   {
+    "id": "stats-gain-compaction",
+    "label": "#19120",
+    "number": 19120,
+    "state": "open",
+    "area": "other",
+    "priority": "P2",
+    "title": "fix(stats): count snapcompact compactions on the Gain tab",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-13T04:02:02Z"
    },
    {
     "id": "iphone-mirror-key-gap",
@@ -100574,7 +100613,7 @@
     "title": "fix(natives): keep a macOS ref whose own label changes while its title element shows the same text",
     "action": "held",
     "reasons": [
-     "held: Main, 2026-11-13: accepts a reused row that shows the same title text as the one read (fixture: clicked the neighbour 10/10). Measured since (TitleTwin, ~/tmp/oh-my-pi/TitleTwin/HANDOFF.md): 0 wrong-item actions in 200 scripted trials across Notes, Reminders, Finder search and Contacts with duplicate titles; saved refs stayed on the same item or were destroyed. Main recommends opening with the limit stated; waits on Will's word and on #19061",
+     "held: Will, 2026-11-13: Main decides the approach once #19061 has merged, with all the data in: the release leg's count of this refusal across 32 tasks (true catches against relabels), the wording change's Sol sample on Contacts and Reminders, TitleTwin's 0 wrong-item actions in 200 trials (~/tmp/oh-my-pi/TitleTwin/HANDOFF.md), and the fixture's same-title reuse limit (10/10). Not to open before that decision.",
      "needs #19061 (open)",
      "conflicts with #19036 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with #19048 in crates/pi-natives/src/desktop/ax.rs"
@@ -101645,7 +101684,7 @@
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
     "action": "wait",
     "reasons": [
-     "needs stats-spotlight-freeze (queued)",
+     "needs #19118 (open)",
      "conflicts with main in (branch missing on the fork)"
     ],
     "note": "",
@@ -101656,23 +101695,6 @@
      "stats-spotlight-freeze"
     ],
     "created": "2026-11-13T02:56:27Z"
-   },
-   {
-    "id": "stats-spotlight-freeze",
-    "label": "stats-spotlight-freeze",
-    "number": null,
-    "state": "queued",
-    "area": "other",
-    "priority": null,
-    "title": "fix(stats,coding-agent): keep the stats dashboard answering while Spotlight rebuilds",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-13T03:07:37Z"
    },
    {
     "id": "text-reader-usage-shift",

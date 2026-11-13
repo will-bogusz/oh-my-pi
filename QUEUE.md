@@ -1,9 +1,9 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13 04:09Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13 04:11Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-11-13 03:39Z on goliath; groups below are from it, states from the manifest)
+**Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-11-13 04:09Z on goliath; groups below are from it, states from the manifest)
 **Counts:** openable now 1, conflict-held 18, stacked 16, held 13, parked 2, open PRs 32; merged 334, closed 35
 
 ## Openable now (1)
@@ -115,5 +115,5 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13
 | [#19001](https://github.com/can1357/oh-my-pi/pull/19001) | relay-hidden-frames-main | fix(browser-relay): say what the relay hid in a driven tab | browser | P2 | 22h | keep; accepted pair with #18925: Main, 2026-11-12: accepted (HiddenOnMain's combined form). tab-worker.ts WorkerCore.#run after the finally: this branch's hinted take (if this.#unanswered === active && this.#hiddenFramesWaiting && this.#page) await this.#takeHiddenFrames(this.#page)) stays before the answered guard; in the failure branch #18925's enrichment of error (message and stack with the native notices), then this.#sendResult({ id: msg.id, ok: false, error }), so both native-window notices and the once-only hidden-frames notice ride the failure. Second to land adds one test that a failed run carries both. | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-hidden-frames-main) |
 | [#19114](https://github.com/can1357/oh-my-pi/pull/19114) | stats-reply-link | fix(stats): count every answered message in the Frustration per-model table | other | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-reply-link) |
 | [#19115](https://github.com/can1357/oh-my-pi/pull/19115) | stats-trace-jobs | fix(stats): close Traces background jobs when they finish, so idle time and turn ends show | stats | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-trace-jobs) |
-| [#19118](https://github.com/can1357/oh-my-pi/pull/19118) | stats-spotlight-freeze | fix(stats,coding-agent): keep the stats dashboard answering while Spotlight rebuilds | other | P1 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-spotlight-freeze) |
-| [#19120](https://github.com/can1357/oh-my-pi/pull/19120) | stats-gain-compaction | fix(stats): count snapcompact compactions on the Gain tab | other | P2 | 0h |  | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-gain-compaction) |
+| [#19118](https://github.com/can1357/oh-my-pi/pull/19118) | stats-spotlight-freeze | fix(stats,coding-agent): keep the stats dashboard answering while Spotlight rebuilds | other | P1 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-spotlight-freeze) |
+| [#19120](https://github.com/can1357/oh-my-pi/pull/19120) | stats-gain-compaction | fix(stats): count snapcompact compactions on the Gain tab | other | P2 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-gain-compaction) |
