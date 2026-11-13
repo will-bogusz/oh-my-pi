@@ -2978,6 +2978,8 @@ mod capture_tests {
 			};
 			Ok(AxProps {
 				read_as_fingerprint: None,
+				read_as_shown: None,
+				title_element: None,
 				role: role.to_string(),
 				native_role: role.to_string(),
 				identity: (!partial).then(|| ax::test_identity((role, &title))),

@@ -4,6 +4,7 @@
 
 ### Fixed
 
+- Fixed macOS `computer` refusing a relabelled cell whose role, title link and linked title text still match the snapshot
 - macOS `ax()` now shows a toggle in a SwiftUI settings form with the label beside it, and `find({ title })` matches that label, instead of leaving the control unnamed ([#19061](https://github.com/can1357/oh-my-pi/pull/19061) by [@will-bogusz](https://github.com/will-bogusz))
 
 ## [18.20.0] - 2026-11-12

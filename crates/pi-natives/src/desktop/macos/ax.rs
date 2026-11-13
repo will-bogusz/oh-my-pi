@@ -1342,6 +1342,7 @@ fn labelled_props(
 	};
 	match label {
 		Ok(Some(title)) => {
+			props.read_as_shown = Some(super::super::ax::own_shown(&props));
 			props.read_as_fingerprint = Some(super::super::ax::fingerprint(&props));
 			props.title = Some(title);
 			props.description = None;
@@ -1428,6 +1429,10 @@ fn own_props(
 	Ok((
 		AxProps {
 			read_as_fingerprint: None,
+			read_as_shown: None,
+			title_element: read(TITLE_ELEMENT)
+				.and_then(|element| element.downcast::<AXUIElement>().ok())
+				.map(AxHandle::Mac),
 			role: normalize_role_macos(&native_role),
 			native_role,
 			title,
@@ -1906,16 +1911,23 @@ fn verify_text_value(element: &AXUIElement, sent: &str, expected: &str) -> CoreR
 
 /// Every pre-action fingerprint probe must preserve the front-app boundary,
 /// even on paths whose longer-lived background guard starts after the probe.
+/// The title element a relabelled ref is checked through is read inside the
+/// same boundary. Outside a held request nothing is read.
 pub(super) fn require_element_read_as(element: &AXUIElement) -> CoreResult<()> {
-	require_read_as(|| {
-		checked_ref_read(skylight::front_pid, || Ok((element_pid(element)?, read_as(element)?)))
-	})
+	if !super::super::ax::read_as_pending() {
+		return Ok(());
+	}
+	checked_ref_read(skylight::front_pid, || {
+		let pid = element_pid(element)?;
+		let result = require_read_as(|| read_as(element));
+		Ok((pid, result))
+	})?
 }
 
-fn checked_ref_read(
+fn checked_ref_read<T>(
 	front: impl Fn() -> Option<libc::pid_t>,
-	probe: impl FnOnce() -> CoreResult<(libc::pid_t, Option<AxReadAs>)>,
-) -> CoreResult<Option<AxReadAs>> {
+	probe: impl FnOnce() -> CoreResult<(libc::pid_t, T)>,
+) -> CoreResult<T> {
 	let (entry, (pid, props)) = input::EntryFront::before(&front, probe)?;
 	if entry.behind(pid) && front() == Some(pid) {
 		return Err(DesktopError::user_intervened(
@@ -1944,7 +1956,72 @@ pub(super) fn read_as(element: &AXUIElement) -> CoreResult<Option<AxReadAs>> {
 	read_as_values(&values)
 }
 
+/// What the element `handle` names reads with and shows now
+/// ([`super::super::ax::shown_fingerprint`]), for an element that links to it
+/// as its title. `None` when it does not answer: that vouches for nothing.
+fn read_shown(handle: &AxHandle) -> Option<u64> {
+	let element = mac_handle(handle).ok()?;
+	let read = NodeRead::Props;
+	let values = NodeValues::from_batch(NodeValues::batch(element, read), read.attributes(), |_| {
+		Err(AXError::CannotComplete)
+	});
+	if let Some(value) = values.get(VALUE).ok().flatten()
+		&& value.downcast_ref::<AXUIElement>().is_some()
+	{
+		// Resolve element-valued text before the batch-only decoder.
+		let text: CFRetained<CFType> = CFString::from_str(&stringify_value(&value)).into();
+		let decoded = NodeValues {
+			values: NodeBatch::Lone(
+				read
+					.attributes()
+					.map(|index| {
+						if index == VALUE {
+							Ok(Some(text.clone()))
+						} else {
+							values.get(index)
+						}
+					})
+					.collect(),
+			),
+			first:  values.first,
+		};
+		return shown_of(&decoded);
+	}
+	shown_of(&values)
+}
+
+/// Decodes the element's own labels and displayed text from the batch.
+fn shown_of(values: &NodeValues) -> Option<u64> {
+	let labels = element_labels(values).ok()?;
+	let role = normalize_role_macos(&labels.native_role);
+	if !labels.complete || role == "window" {
+		return None;
+	}
+	let value = values.get(VALUE).ok().flatten();
+	if value
+		.as_deref()
+		.is_some_and(|value| value.downcast_ref::<AXUIElement>().is_some())
+	{
+		return None;
+	}
+	let text = nonempty(value.map(|value| stringify_value(&value))).or_else(|| labels.title.clone());
+	let has_label = [&labels.title, &labels.description, &labels.role_name]
+		.into_iter()
+		.flatten()
+		.any(|label| !label.trim().is_empty());
+	let read_as = AxReadAs::from_labels(role, [labels.title, labels.description, labels.role_name]);
+	(text.is_some() || has_label)
+		.then(|| super::super::ax::shown_fingerprint(read_as.fingerprint(), text.as_deref()))
+}
+
 fn read_as_values(values: &NodeValues) -> CoreResult<Option<AxReadAs>> {
+	read_as_values_with(values, read_shown)
+}
+
+fn read_as_values_with(
+	values: &NodeValues,
+	shown: super::super::ax::ShownRead,
+) -> CoreResult<Option<AxReadAs>> {
 	match element_labels(values) {
 		Ok(labels) => Ok(labels.complete.then(|| {
 			AxReadAs::from_labels(normalize_role_macos(&labels.native_role), [
@@ -1952,6 +2029,15 @@ fn read_as_values(values: &NodeValues) -> CoreResult<Option<AxReadAs>> {
 				labels.description,
 				labels.role_name,
 			])
+			.linked(
+				values
+					.get(TITLE_ELEMENT)
+					.ok()
+					.flatten()
+					.and_then(|element| element.downcast::<AXUIElement>().ok())
+					.map(AxHandle::Mac),
+				shown,
+			)
 		})),
 		Err(error) if error.code == ErrorCode::StaleRef => Err(error),
 		Err(_) => Ok(None),
@@ -2936,6 +3022,7 @@ mod tests {
 		);
 		SINGLE_ATTRIBUTE_READS.with(|reads| reads.set(0));
 		assert!(read_as_values(&values).unwrap().is_some());
+		assert_eq!(super::shown_of(&values), None);
 		assert_eq!(SINGLE_ATTRIBUTE_READS.with(|reads| reads.get()), 0);
 	}
 
@@ -3095,14 +3182,14 @@ mod tests {
 			|| front.get(),
 			|| {
 				front.set(Some(7));
-				Ok((7, None))
+				Ok((7, None::<super::AxReadAs>))
 			},
 		);
 		assert_eq!(result.unwrap_err().code, ErrorCode::UserIntervened);
 		// A target already in front, or one that stays behind, still passes
 		// the check even when its fingerprint was unanswered.
-		assert!(checked_ref_read(|| Some(7), || Ok((7, None))).is_ok());
-		assert!(checked_ref_read(|| Some(9), || Ok((7, None))).is_ok());
+		assert!(checked_ref_read(|| Some(7), || Ok((7, None::<super::AxReadAs>))).is_ok());
+		assert!(checked_ref_read(|| Some(9), || Ok((7, None::<super::AxReadAs>))).is_ok());
 	}
 
 	#[test]
@@ -3248,6 +3335,118 @@ mod tests {
 	fn an_unchanged_linked_label_does_not_refuse_its_control() {
 		let (before, after) = linked_field(None, Ok(Some("City")));
 		assert!(check_linked_field(&before, after).is_ok());
+	}
+
+	thread_local! {
+		static BATCH_SHOWN: Cell<Option<u64>> = const { Cell::new(None) };
+		static PROBE_FRONT: Cell<Option<libc::pid_t>> = const { Cell::new(Some(9)) };
+		static PICK_APP_ON_LINK_READ: Cell<bool> = const { Cell::new(false) };
+	}
+
+	fn batch_shown(_: &super::AxHandle) -> Option<u64> {
+		if PICK_APP_ON_LINK_READ.with(Cell::get) {
+			PROBE_FRONT.with(|front| front.set(Some(7)));
+		}
+		BATCH_SHOWN.with(Cell::get)
+	}
+
+	fn check_title_batch(pick_app: bool) {
+		use super::{TITLE_ELEMENT, WalkBounds, checked_ref_read, read_as_values_with, shown_of};
+		use crate::desktop::ax::{AxHandle, AxRegistry, Uniqueness, own_shown};
+
+		let role = CFString::from_static_str("AXTextField");
+		let title = CFString::from_static_str("City");
+		let value = CFString::from_static_str("Displayed city");
+		let link = create_system_wide();
+		// SAFETY: kCFNull is a process-lifetime constant.
+		let null: &CFType = unsafe { kCFNull }.unwrap();
+		for (own_title, own_value, borrowed) in [
+			(Some(&*title), Some(&*value), None),
+			(None, Some(&*value), Some("Borrowed title")),
+			(None, None, Some("Borrowed title")),
+		] {
+			let mut entries = [null; NodeRead::Walk.attributes().end];
+			entries[ROLE] = &role;
+			entries[TITLE] = own_title.map_or(null, |title| title);
+			entries[VALUE] = own_value.map_or(null, |value| value);
+			entries[TITLE_ELEMENT] = &link;
+			let values = NodeValues::from_batch(
+				Ok(CFArray::from_objects(&entries)),
+				NodeRead::Walk.attributes(),
+				|_| unreachable!("the batch answered"),
+			);
+			let (own, _) = super::own_props(&values, 0, WalkBounds::Skip).unwrap();
+			let mut props = super::labelled_props(&values, 0, WalkBounds::Skip, |_, attribute| {
+				Ok(if attribute == "AXValue" {
+					borrowed.map(|text| CFString::from_str(text).into())
+				} else {
+					None
+				})
+			})
+			.unwrap();
+			let shown = shown_of(&values);
+			assert_eq!(shown, own_shown(&own));
+			assert_eq!(props.title_element, Some(AxHandle::Mac(link.clone())));
+			if borrowed.is_none() {
+				assert_eq!(
+					shown,
+					own_shown(&super::element_props(&values, 0, WalkBounds::Skip).unwrap())
+				);
+			}
+			// The title's own link is not a second cell referring to itself.
+			props.title_element = None;
+			let mut registry = AxRegistry::default();
+			let generation = registry.begin_snapshot("batch");
+			let (mut cell, _) = linked_field(Some("Before"), Ok(None));
+			cell.title_element = Some(AxHandle::Mac(link.clone()));
+			let reference = registry.register(
+				&mut super::MacAx,
+				"batch",
+				generation,
+				AxHandle::Test(1),
+				&cell,
+				Uniqueness::Unknown,
+			);
+			registry.register(
+				&mut super::MacAx,
+				"batch",
+				generation,
+				AxHandle::Mac(link.clone()),
+				&props,
+				Uniqueness::Unknown,
+			);
+			registry.end_snapshot("batch", generation);
+			for changed in [false, true] {
+				BATCH_SHOWN.with(|current| {
+					current.set(shown.map(|hash| if changed { hash ^ 1 } else { hash }));
+				});
+				PROBE_FRONT.with(|front| front.set(Some(9)));
+				PICK_APP_ON_LINK_READ.with(|pick| pick.set(pick_app));
+				let _scope = registry.expect_read_as(&reference).unwrap();
+				let result = checked_ref_read(
+					|| PROBE_FRONT.with(Cell::get),
+					|| Ok((7, super::require_read_as(|| read_as_values_with(&values, batch_shown)))),
+				);
+				if pick_app && shown.is_some() {
+					assert_eq!(result.unwrap_err().code, ErrorCode::UserIntervened);
+				} else if shown.is_some() && !changed {
+					result.unwrap().unwrap();
+				} else {
+					assert_eq!(result.unwrap().unwrap_err().code, ErrorCode::StaleRef);
+				}
+			}
+		}
+		PICK_APP_ON_LINK_READ.with(|pick| pick.set(false));
+	}
+
+	#[test]
+	fn a_title_batch_matches_the_registered_own_text_and_supplies_the_ref_link() {
+		check_title_batch(false);
+	}
+
+	#[test]
+	fn a_user_picking_the_app_during_the_linked_read_stops_the_ref_check() {
+		check_title_batch(true);
 	}
 
 	#[test]

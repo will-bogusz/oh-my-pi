@@ -92,6 +92,12 @@ impl Hash for AxHandle {
 	}
 }
 
+impl std::fmt::Debug for AxHandle {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		f.write_str("AxHandle")
+	}
+}
+
 #[derive(Debug, Clone)]
 pub struct AxProps {
 	pub role:                String,
@@ -119,6 +125,18 @@ pub struct AxProps {
 	/// label's fingerprint. None uses the displayed fingerprint.
 	#[cfg(any(target_os = "macos", test))]
 	pub read_as_fingerprint: Option<u64>,
+	/// The element's own shown fingerprint before a linked title names it:
+	/// `Some(None)` when it shows nothing of its own, `None` to read it from
+	/// these props.
+	#[cfg(any(target_os = "macos", test))]
+	#[allow(
+		clippy::option_option,
+		reason = "an element that shows nothing of its own differs from one not overridden"
+	)]
+	pub read_as_shown:       Option<Option<u64>>,
+	/// The element the element's `AXTitleUIElement` links to as its title.
+	#[cfg(any(target_os = "macos", test))]
+	pub title_element:       Option<AxHandle>,
 	/// Whether a row, cell, button or file icon reports itself selected.
 	pub selected:            bool,
 	/// A name the platform derives when the element has neither title nor
@@ -184,6 +202,13 @@ struct Registered {
 	/// own label was unanswered, nor for a window naming its document.
 	#[cfg(any(target_os = "macos", test))]
 	held:        Option<u64>,
+	/// The element the ref's element linked to as its title when read.
+	#[cfg(any(target_os = "macos", test))]
+	link:        Option<TitleLink>,
+	/// [`shown_fingerprint`] of the element as read, for a ref another
+	/// element links to as its title.
+	#[cfg(any(target_os = "macos", test))]
+	shown:       Option<u64>,
 }
 
 pub struct AxRegistry {
@@ -221,6 +246,51 @@ impl AxRegistry {
 		self.evict(|entry| {
 			entry.target_key == target && entry.generation.saturating_add(1) < generation
 		});
+		#[cfg(any(target_os = "macos", test))]
+		self.resolve_title_links(target, generation);
+	}
+
+	/// Gives each ref `target`'s snapshot `generation` read with a title link
+	/// what the linked element showed in the same snapshot. A link the
+	/// snapshot did not read stays unresolved, so it vouches for nothing.
+	#[cfg(any(target_os = "macos", test))]
+	fn resolve_title_links(&mut self, target: &str, generation: u64) {
+		let Some(refs) = self.refs.get(target) else {
+			return;
+		};
+		let mut uses = HashMap::new();
+		for entry in self
+			.entries
+			.values()
+			.filter(|entry| entry.target_key == target && entry.generation == generation)
+		{
+			if let Some(link) = &entry.link {
+				*uses.entry(&link.element).or_insert(0usize) += 1;
+			}
+		}
+		let resolved: Vec<(u64, Option<u64>)> = self
+			.entries
+			.iter()
+			.filter(|(_, entry)| entry.target_key == target && entry.generation == generation)
+			.filter_map(|(&id, entry)| {
+				let link = entry.link.as_ref()?;
+				let shown = (uses.get(&link.element) == Some(&1))
+					.then(|| self.entries.get(refs.get(&link.element)?))
+					.flatten()
+					.filter(|linked| linked.generation == generation)
+					.and_then(|linked| linked.shown);
+				Some((id, shown))
+			})
+			.collect();
+		for (id, shown) in resolved {
+			if let Some(link) = self
+				.entries
+				.get_mut(&id)
+				.and_then(|entry| entry.link.as_mut())
+			{
+				link.shown = shown;
+			}
+		}
 	}
 
 	pub(crate) fn current_generation(&mut self, target: &str) -> u64 {
@@ -273,6 +343,8 @@ impl AxRegistry {
 			}
 			id
 		});
+		#[cfg(any(target_os = "macos", test))]
+		let old_link = renewed.and_then(|id| self.entries.get(&id)?.link.clone());
 		let proof = match uniqueness {
 			Uniqueness::Proven(walk) => props
 				.identity
@@ -283,6 +355,20 @@ impl AxRegistry {
 				.and_then(|entry| entry.proof)
 				.filter(|proof| props.identity == Some(proof.identity)),
 		};
+		#[cfg(any(target_os = "macos", test))]
+		let held = (props.label_complete && props.role != "window")
+			.then(|| props.read_as_fingerprint.unwrap_or(fingerprint));
+		#[cfg(any(target_os = "macos", test))]
+		let link = props
+			.title_element
+			.clone()
+			.filter(|_| held.is_some())
+			.map(|element| {
+				let shown = old_link
+					.filter(|old| old.element == element)
+					.and_then(|old| old.shown);
+				TitleLink { element, role: label_fingerprint(&props.role, None), shown }
+			});
 		self.entries.insert(id, Registered {
 			handle,
 			target_key: target.to_string(),
@@ -290,8 +376,11 @@ impl AxRegistry {
 			fingerprint,
 			proof,
 			#[cfg(any(target_os = "macos", test))]
-			held: (props.label_complete && props.role != "window")
-				.then(|| props.read_as_fingerprint.unwrap_or(fingerprint)),
+			held,
+			#[cfg(any(target_os = "macos", test))]
+			link,
+			#[cfg(any(target_os = "macos", test))]
+			shown: props.read_as_shown.unwrap_or_else(|| own_shown(props)),
 		});
 		self.enforce_cap();
 		format!("e{id}")
@@ -325,11 +414,14 @@ impl AxRegistry {
 	/// to its label.
 	#[cfg(any(target_os = "macos", test))]
 	pub(crate) fn expect_read_as(&self, reference: &str) -> Option<ReadAsScope> {
-		let fingerprint = self.entry(reference).ok()?.held?;
+		let entry = self.entry(reference).ok()?;
+		let fingerprint = entry.held?;
+		let link = entry.link.clone().filter(|link| link.shown.is_some());
 		READ_AS.with_borrow_mut(|read_as| {
 			*read_as = Some(ReadAs {
 				reference: reference.to_owned(),
 				fingerprint,
+				link,
 				checked: false,
 				tripped: false,
 			});
@@ -394,6 +486,11 @@ fn label_fingerprint(role: &str, label: Option<&str>) -> u64 {
 	hasher.finish()
 }
 
+/// Reads what the element a title link names reads with and shows now
+/// ([`shown_fingerprint`]); `None` when it does not answer.
+#[cfg(any(target_os = "macos", test))]
+pub(crate) type ShownRead = fn(&AxHandle) -> Option<u64>;
+
 /// The answered role and chosen label, without decoding an unused value or
 /// the broader identity during an action's fingerprint probe.
 #[cfg(any(target_os = "macos", test))]
@@ -401,6 +498,10 @@ fn label_fingerprint(role: &str, label: Option<&str>) -> u64 {
 pub(crate) struct AxReadAs {
 	role:  String,
 	label: Option<String>,
+	/// The element its `AXTitleUIElement` links to now, and the read of that
+	/// element's [`shown_fingerprint`], made only when the element's own
+	/// role or label differs from the ref's.
+	link:  Option<(AxHandle, ShownRead)>,
 }
 
 #[cfg(any(target_os = "macos", test))]
@@ -413,7 +514,20 @@ impl AxReadAs {
 				.into_iter()
 				.flatten()
 				.find(|label| !label.trim().is_empty()),
+			link: None,
 		}
+	}
+
+	/// The element's title link, read with `shown` when needed.
+	pub(crate) fn linked(mut self, link: Option<AxHandle>, shown: ShownRead) -> Self {
+		self.link = link.map(|link| (link, shown));
+		self
+	}
+
+	/// The fingerprint [`AxRegistry::register`] holds an element read as
+	/// this to.
+	pub(crate) fn fingerprint(&self) -> u64 {
+		label_fingerprint(&self.role, self.label.as_deref().map(str::trim))
 	}
 
 	#[cfg(test)]
@@ -434,6 +548,59 @@ struct ReadAs {
 	checked:     bool,
 	/// Whether the element read otherwise when a backend checked it.
 	tripped:     bool,
+	/// The element the ref's element linked to as its title when read.
+	link:        Option<TitleLink>,
+}
+
+/// An element a ref's element linked to as its title when read: the ref's
+/// element is still that control while it keeps the role it was read with,
+/// still links to that element, and that element still reads and shows what
+/// it did, though the ref's own label changes with its state.
+#[cfg(any(target_os = "macos", test))]
+#[derive(Clone)]
+struct TitleLink {
+	element: AxHandle,
+	role:    u64,
+	/// [`shown_fingerprint`] of `element` in the snapshot that read the ref;
+	/// `None` until [`AxRegistry::end_snapshot`] finds it there.
+	shown:   Option<u64>,
+}
+
+/// An element's held role-and-label fingerprint with the text it shows, as a
+/// title element does: its `AXValue`, else its `AXTitle`.
+#[cfg(any(target_os = "macos", test))]
+pub(crate) fn shown_fingerprint(fingerprint: u64, text: Option<&str>) -> u64 {
+	let mut hasher = DefaultHasher::new();
+	fingerprint.hash(&mut hasher);
+	text.hash(&mut hasher);
+	hasher.finish()
+}
+
+#[cfg(any(target_os = "macos", test))]
+pub(crate) fn own_shown(props: &AxProps) -> Option<u64> {
+	let text = props.value.as_deref().or(props.title.as_deref());
+	(props.label_complete
+		&& props.role != "window"
+		&& (label(props).is_some() || text.is_some_and(|text| !text.is_empty())))
+	.then(|| {
+		shown_fingerprint(
+			props
+				.read_as_fingerprint
+				.unwrap_or_else(|| fingerprint(props)),
+			text,
+		)
+	})
+}
+
+/// Whether an element that reads with another label than its ref is still
+/// the control the ref was read from ([`TitleLink`]).
+#[cfg(any(target_os = "macos", test))]
+fn still_linked(props: &AxReadAs, link: &TitleLink) -> bool {
+	label_fingerprint(&props.role, None) == link.role
+		&& props
+			.link
+			.as_ref()
+			.is_some_and(|(element, shown)| *element == link.element && shown(element) == link.shown)
 }
 
 #[cfg(any(target_os = "macos", test))]
@@ -472,6 +639,13 @@ fn read_as_state() -> Option<bool> {
 	READ_AS.with_borrow(|read_as| read_as.as_ref().map(|read_as| read_as.checked))
 }
 
+/// Whether the current request holds an element action to its ref and the
+/// element has not been checked yet: [`require_read_as`] would read it.
+#[cfg(target_os = "macos")]
+pub(crate) fn read_as_pending() -> bool {
+	read_as_state() == Some(false)
+}
+
 /// Compares the element `props` reads with the current request's ref: what
 /// it reads as now when that is another role or label. A read the app did
 /// not answer, or left the role or a field needed for its label unanswered,
@@ -483,7 +657,12 @@ fn check_read_as(props: Option<&AxReadAs>) -> Option<String> {
 		read_as.checked = true;
 		let props = props?;
 		let label = props.label.as_deref().map(str::trim);
-		if read_as.fingerprint == label_fingerprint(&props.role, label) {
+		if read_as.fingerprint == props.fingerprint()
+			|| read_as
+				.link
+				.as_ref()
+				.is_some_and(|link| still_linked(props, link))
+		{
 			return None;
 		}
 		read_as.tripped = true;
@@ -1836,6 +2015,8 @@ mod tests {
 	fn p(role: &str, title: Option<&str>) -> AxProps {
 		AxProps {
 			read_as_fingerprint: None,
+			read_as_shown:       None,
+			title_element:       None,
 			role:                role.into(),
 			native_role:         role.into(),
 			title:               title.map(str::to_string),
@@ -3168,5 +3349,280 @@ mod tests {
 		let error =
 			text_readback("hunter2", "a hunter2", Some("a hunter2hunter2"), false).unwrap_err();
 		assert!(!error.message.contains("hunter2"), "{}", error.message);
+	}
+
+	thread_local! {
+		/// What [`test_shown`] reports the linked element reads and shows now.
+		static SHOWN_NOW: std::cell::Cell<Option<u64>> = const { std::cell::Cell::new(None) };
+		static SHOWN_READS: std::cell::Cell<usize> = const { std::cell::Cell::new(0) };
+	}
+	fn test_shown(_: &AxHandle) -> Option<u64> {
+		SHOWN_READS.with(|reads| reads.set(reads.get() + 1));
+		SHOWN_NOW.with(std::cell::Cell::get)
+	}
+	fn shown_as(role: &str, label: &str, text: &str) -> u64 {
+		shown_fingerprint(label_fingerprint(role, Some(label)), Some(text))
+	}
+	fn errands_text(text: &str) -> AxProps {
+		let mut field = p("textfield", Some("Errands"));
+		field.value = Some(text.into());
+		field
+	}
+	/// What cell 1 reads as at the action: `label`, linking to `link`.
+	fn cell_now(role: &str, label: &str, link: Option<u64>) -> AxReadAs {
+		AxReadAs::from_labels(role.into(), [None, Some(label.into()), None])
+			.linked(link.map(AxHandle::Test), test_shown)
+	}
+	/// Reads cell 1 ("Errands, 0 items", its title linked to field 2, which
+	/// shows "Errands") in one snapshot, field 2 too when `read_link`; then
+	/// runs `between` on the registry and checks an action through the cell's
+	/// ref that reads as `now` while field 2 reads and shows `link_now`.
+	fn check_title_linked(
+		read_link: bool,
+		between: impl FnOnce(&mut AxRegistry, &mut Mock),
+		now: AxReadAs,
+		link_now: Option<u64>,
+	) -> CoreResult<()> {
+		let mut m = Mock::default();
+		let mut r = AxRegistry::default();
+		let mut cell = p("cell", None);
+		cell.description = Some("Errands, 0 items".into());
+		cell.title_element = Some(AxHandle::Test(2));
+		let generation = r.begin_snapshot("w");
+		let reference =
+			r.register(&mut m, "w", generation, AxHandle::Test(1), &cell, Uniqueness::Unknown);
+		if read_link {
+			let field = errands_text("Errands");
+			r.register(&mut m, "w", generation, AxHandle::Test(2), &field, Uniqueness::Unknown);
+		}
+		r.end_snapshot("w", generation);
+		between(&mut r, &mut m);
+		SHOWN_NOW.with(|shown| shown.set(link_now));
+		let _scope = r.expect_read_as(&reference).unwrap();
+		require_read_as(|| Ok(Some(now)))
+	}
+
+	#[test]
+	fn renewing_a_cell_outside_a_snapshot_keeps_what_its_title_showed() {
+		for (text, accepted) in [("Errands", true), ("Groceries", false)] {
+			let renew = |r: &mut AxRegistry, m: &mut Mock| {
+				let mut cell = p("cell", None);
+				cell.description = Some("Errands, 0 items".into());
+				cell.title_element = Some(AxHandle::Test(2));
+				let generation = r.current_generation("w");
+				assert_eq!(
+					r.register(m, "w", generation, AxHandle::Test(1), &cell, Uniqueness::Unknown),
+					"e1"
+				);
+			};
+			let result = check_title_linked(
+				true,
+				renew,
+				cell_now("cell", "Errands, 1 item", Some(2)),
+				Some(shown_as("textfield", "Errands", text)),
+			);
+			if accepted {
+				result.unwrap();
+			} else {
+				assert_eq!(result.unwrap_err().code, ErrorCode::StaleRef);
+			}
+		}
+	}
+
+	#[test]
+	fn a_title_shared_by_two_cells_vouches_for_neither() {
+		let mut m = Mock::default();
+		let mut r = AxRegistry::default();
+		let generation = r.begin_snapshot("w");
+		let mut cell = p("cell", Some("Before"));
+		cell.title_element = Some(AxHandle::Test(2));
+		let refs: Vec<_> = [1, 3]
+			.into_iter()
+			.map(|id| {
+				r.register(&mut m, "w", generation, AxHandle::Test(id), &cell, Uniqueness::Unknown)
+			})
+			.collect();
+		r.register(
+			&mut m,
+			"w",
+			generation,
+			AxHandle::Test(2),
+			&errands_text("Errands"),
+			Uniqueness::Unknown,
+		);
+		r.end_snapshot("w", generation);
+		SHOWN_NOW.with(|shown| shown.set(Some(shows_errands())));
+		for reference in refs {
+			let _scope = r.expect_read_as(&reference).unwrap();
+			assert_eq!(
+				require_read_as(|| Ok(Some(cell_now("cell", "After", Some(2)))))
+					.unwrap_err()
+					.code,
+				ErrorCode::StaleRef
+			);
+		}
+	}
+
+	#[test]
+	fn confirming_a_relabel_uses_the_title_as_it_was_read() {
+		for (text, accepted) in [("Errands", true), ("Groceries", false)] {
+			let mut m = Mock::default();
+			let mut r = AxRegistry::default();
+			let generation = r.begin_snapshot("w");
+			let mut cell = p("cell", Some("Before"));
+			cell.title_element = Some(AxHandle::Test(2));
+			let reference =
+				r.register(&mut m, "w", generation, AxHandle::Test(1), &cell, Uniqueness::Unknown);
+			r.register(
+				&mut m,
+				"w",
+				generation,
+				AxHandle::Test(2),
+				&errands_text("Errands"),
+				Uniqueness::Unknown,
+			);
+			r.end_snapshot("w", generation);
+			let _scope = r.expect_read_as(&reference).unwrap();
+			require_read_as(|| Ok(Some(cell_now("cell", "Before", Some(2))))).unwrap();
+			SHOWN_NOW.with(|shown| shown.set(Some(shown_as("textfield", "Errands", text))));
+			let result = confirm_read_as(|| Ok(Some(cell_now("cell", "After", Some(2)))));
+			if accepted {
+				result.unwrap();
+			} else {
+				assert_eq!(result.unwrap_err().code, ErrorCode::AxUnconfirmed);
+			}
+		}
+	}
+
+	#[test]
+	fn a_title_is_read_only_for_a_relabel_with_the_same_link() {
+		for (label, link, accepted) in
+			[("Errands, 0 items", Some(2), true), ("Errands, 1 item", Some(3), false)]
+		{
+			SHOWN_READS.with(|reads| reads.set(0));
+			let result = check_title_linked(
+				true,
+				|_, _| {},
+				cell_now("cell", label, link),
+				Some(shows_errands()),
+			);
+			assert_eq!(result.is_ok(), accepted);
+			assert_eq!(SHOWN_READS.with(std::cell::Cell::get), 0);
+		}
+	}
+
+	fn shows_errands() -> u64 {
+		shown_as("textfield", "Errands", "Errands")
+	}
+
+	#[test]
+	fn a_label_changing_while_its_title_element_shows_the_same_text_is_the_same_control() {
+		let now = cell_now("cell", "Errands, 1 item", Some(2));
+		check_title_linked(true, |_, _| {}, now, Some(shows_errands())).unwrap();
+	}
+
+	#[test]
+	fn a_title_element_showing_other_text_does_not_vouch_for_the_relabel() {
+		// A reused row: the cell and its title element now show a neighbour.
+		// The field keeps its own label; only the text it shows changed.
+		let now = cell_now("cell", "Groceries, 4 items", Some(2));
+		let link_now = Some(shown_as("textfield", "Errands", "Groceries"));
+		let error = check_title_linked(true, |_, _| {}, now, link_now).unwrap_err();
+		assert_eq!(error.code, ErrorCode::StaleRef);
+		assert!(
+			error
+				.message
+				.contains(r#"now reads as cell "Groceries, 4 items""#),
+			"{}",
+			error.message
+		);
+	}
+
+	#[test]
+	fn a_title_element_read_again_since_vouches_only_for_what_it_showed_with_the_ref() {
+		// The window is read again after the row was reused: the field keeps
+		// its ref with the neighbour's text, but the cell's old ref still
+		// expects what the field showed when the cell was read.
+		let reread = |r: &mut AxRegistry, m: &mut Mock| {
+			let generation = r.begin_snapshot("w");
+			let field = errands_text("Groceries");
+			r.register(m, "w", generation, AxHandle::Test(2), &field, Uniqueness::Unknown);
+			r.end_snapshot("w", generation);
+		};
+		let now = cell_now("cell", "Groceries, 4 items", Some(2));
+		let link_now = Some(shown_as("textfield", "Errands", "Groceries"));
+		let error = check_title_linked(true, reread, now, link_now).unwrap_err();
+		assert_eq!(error.code, ErrorCode::StaleRef);
+	}
+
+	#[test]
+	fn a_relabel_is_refused_without_the_same_title_element_showing_the_same_text() {
+		let refused = |read_link, now, link_now| {
+			check_title_linked(read_link, |_, _| {}, now, link_now)
+				.unwrap_err()
+				.code
+				== ErrorCode::StaleRef
+		};
+		// Another role.
+		assert!(refused(true, cell_now("button", "Errands, 1 item", Some(2)), Some(shows_errands())));
+		// A link to another element, though that one shows the same text.
+		assert!(refused(true, cell_now("cell", "Errands, 1 item", Some(3)), Some(shows_errands())));
+		// No link now.
+		assert!(refused(true, cell_now("cell", "Errands, 1 item", None), Some(shows_errands())));
+		// The linked element does not answer.
+		assert!(refused(true, cell_now("cell", "Errands, 1 item", Some(2)), None));
+		// The snapshot did not read the linked element.
+		assert!(refused(false, cell_now("cell", "Errands, 1 item", Some(2)), Some(shows_errands())));
+		// A title element with neither a label nor text vouches for nothing.
+		let mut m = Mock::default();
+		let mut r = AxRegistry::default();
+		let generation = r.begin_snapshot("w");
+		let mut cell = p("cell", Some("Before"));
+		cell.title_element = Some(AxHandle::Test(2));
+		let reference =
+			r.register(&mut m, "w", generation, AxHandle::Test(1), &cell, Uniqueness::Unknown);
+		r.register(
+			&mut m,
+			"w",
+			generation,
+			AxHandle::Test(2),
+			&p("group", None),
+			Uniqueness::Unknown,
+		);
+		r.end_snapshot("w", generation);
+		{
+			let _scope = r.expect_read_as(&reference).unwrap();
+			SHOWN_NOW.with(|shown| {
+				shown.set(Some(shown_fingerprint(label_fingerprint("group", None), None)));
+			});
+			assert_eq!(
+				require_read_as(|| Ok(Some(cell_now("cell", "After", Some(2)))))
+					.unwrap_err()
+					.code,
+				ErrorCode::StaleRef
+			);
+		}
+		// A self-link changes its own shown fingerprint along with its label.
+		let generation = r.begin_snapshot("self");
+		cell.title_element = Some(AxHandle::Test(1));
+		let reference =
+			r.register(&mut m, "self", generation, AxHandle::Test(1), &cell, Uniqueness::Unknown);
+		r.end_snapshot("self", generation);
+		{
+			let _scope = r.expect_read_as(&reference).unwrap();
+			SHOWN_NOW.with(|shown| shown.set(Some(shown_as("cell", "After", "After"))));
+			assert_eq!(
+				require_read_as(|| Ok(Some(cell_now("cell", "After", Some(1)))))
+					.unwrap_err()
+					.code,
+				ErrorCode::StaleRef
+			);
+		}
+		// Window refs are not held to the title that names their document.
+		let mut window = p("window", Some("Document"));
+		window.title_element = Some(AxHandle::Test(2));
+		let reference =
+			r.register(&mut m, "window", 1, AxHandle::Test(4), &window, Uniqueness::Unknown);
+		assert!(r.expect_read_as(&reference).is_none());
 	}
 }

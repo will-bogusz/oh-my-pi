@@ -724,6 +724,10 @@ impl AtSpiAx {
 			Ok(AxProps {
 				#[cfg(test)]
 				read_as_fingerprint: None,
+				#[cfg(test)]
+				read_as_shown: None,
+				#[cfg(test)]
+				title_element: None,
 				role: normalize_role_atspi(&native_role, multiline),
 				native_role,
 				title,
