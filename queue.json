@@ -91527,7 +91527,7 @@
    "id": "devin-pin-31257",
    "branch": "will/devin-pin-31257",
    "title": "fix(catalog): identify Devin requests as CLI 3000.12.57",
-   "area": "broker",
+   "area": "catalog",
    "priority": "P2",
    "needs": [],
    "base": "8b1fd3233b873b94ec1d658fee26b2cbaf72d9d4",
@@ -91538,7 +91538,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-pin-31257",
    "host": "MacBook-Pro",
    "added": "2026-11-13T17:05:09Z",
-   "updated": "2026-11-13T17:05:09Z",
+   "updated": "2026-11-13T17:06:02Z",
    "note": ""
   }
  ],
