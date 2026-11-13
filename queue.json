@@ -77046,6 +77046,21 @@
        "\t\texpect(row).not.toContain(agentColored(\"KeySettingsHotPaths\", \"KeySettingsHotPaths\"));"
       ]
      }
+    },
+    {
+     "at": "2026-11-13T20:09:51Z",
+     "reason": "Main, 2026-11-13 ~20:00Z: approved combined form ~/tmp/oh-my-pi/queuetwenty/r2/combined-18987.txt; the 3 'dropped' lines are the PR's optional-token lists in docs/theme.md (x2) and theme-schema.json, rewritten to list main's mdExtensionLink beside subagent1-6 (both sides kept); goliath on 4a985402b08: check:ts clean, tui 53/0 (agent-identity 102-theme + theme-extension-link-color), coding-agent agent-hub-ordering 28/0",
+     "old": "04b9bba56545a2c501645c76526d064b66be9230",
+     "new": "4a985402b08bdafda13b7c50b116c235791efe37",
+     "dropped": {
+      "docs/theme.md": [
+       "All tokens below are required in `colors` except `thinkingMax` (falls back to `thinkingXhigh`), `assistantMessageText` (unset/empty keeps the terminal default foreground) and `subagent1`\u2013`subagent6` (unset lets omp pick agent colors from the theme).",
+       "- All `colors` tokens are required for custom themes except optional `thinkingMax` (falls back to `thinkingXhigh`), `assistantMessageText` (unset keeps the terminal default foreground) and `subagent1`\u2013`subagent6` (unset lets omp pick agent colors from the theme)."
+      ],
+      "packages/tui/src/theme/theme-schema.json": [
+       "\t\t\t\"description\": \"Theme color definitions (all required except thinkingMax, assistantMessageText and subagent1-subagent6)\","
+      ]
+     }
     }
    ]
   },
