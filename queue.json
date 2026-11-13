@@ -90478,7 +90478,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-13T02:07:14Z",
+  "checked": "2026-11-13T03:08:47Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -90533,7 +90533,9 @@
    19066,
    19080,
    19094,
-   19100
+   19100,
+   19114,
+   19115
   ],
   "post_merge": {
    "16274": {
@@ -90903,267 +90905,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-06T02:41:53Z",
-    "kind": "released",
-    "number": 17496,
-    "title": "feat(coding-agent): show whether the next message reads the prompt cache",
-    "tag": "v18.17.0"
-   },
-   {
-    "at": "2026-11-06T02:41:53Z",
-    "kind": "released",
-    "number": 17936,
-    "title": "fix(natives): match AT-SPI actions by their machine names",
-    "tag": "v18.17.0"
-   },
-   {
-    "at": "2026-11-06T02:41:53Z",
-    "kind": "released",
-    "number": 17932,
-    "title": "fix(natives): give up an unanswered Wayland RemoteDesktop dialog before the run ends",
-    "tag": "v18.17.0"
-   },
-   {
-    "at": "2026-11-06T02:41:53Z",
-    "kind": "released",
-    "number": 17931,
-    "title": "fix(coding-agent): open ~ paths from the home folder in computer apps.open",
-    "tag": "v18.17.0"
-   },
-   {
-    "at": "2026-11-06T02:41:53Z",
-    "kind": "released",
-    "number": 17922,
-    "title": "fix(natives): name the focused application window on Wayland, not an always-active shell frame",
-    "tag": "v18.17.0"
-   },
-   {
-    "at": "2026-11-06T02:41:53Z",
-    "kind": "released",
-    "number": 17921,
-    "title": "fix(natives): keep X11 background element typing from raising the element's window",
-    "tag": "v18.17.0"
-   },
-   {
-    "at": "2026-11-06T02:41:53Z",
-    "kind": "released",
-    "number": 17915,
-    "title": "fix(natives): refuse Wayland element input before focusing the element",
-    "tag": "v18.17.0"
-   },
-   {
-    "at": "2026-11-06T02:41:53Z",
-    "kind": "released",
-    "number": 17913,
-    "title": "fix(natives): refuse background drags on Windows Tk windows",
-    "tag": "v18.17.0"
-   },
-   {
-    "at": "2026-11-06T02:41:53Z",
-    "kind": "released",
-    "number": 17912,
-    "title": "fix(natives): keep X11 takeover keys running when the core keyboard switches source",
-    "tag": "v18.17.0"
-   },
-   {
-    "at": "2026-11-06T02:41:53Z",
-    "kind": "released",
-    "number": 17911,
-    "title": "fix(natives): refuse X11 background keys to Qt apps instead of reporting them sent",
-    "tag": "v18.17.0"
-   },
-   {
-    "at": "2026-11-06T02:41:53Z",
-    "kind": "released",
-    "number": 17910,
-    "title": "fix(natives): release the X11 virtual keyboard's focus before takeover activates its window",
-    "tag": "v18.17.0"
-   },
-   {
-    "at": "2026-11-06T02:41:53Z",
-    "kind": "released",
-    "number": 17909,
-    "title": "fix(natives): stop takeover keys into iPhone Mirroring and Screen Sharing from leaving Fn held",
-    "tag": "v18.17.0"
-   },
-   {
-    "at": "2026-11-06T02:41:53Z",
-    "kind": "released",
-    "number": 17908,
-    "title": "fix(browser): exit a process-local headless Chrome when the process that launched it is killed",
-    "tag": "v18.17.0"
-   },
-   {
-    "at": "2026-11-06T02:41:53Z",
-    "kind": "released",
-    "number": 17903,
-    "title": "fix(natives): pace Wayland multi-clicks so KDE Qt apps see double clicks",
-    "tag": "v18.17.0"
-   },
-   {
-    "at": "2026-11-06T02:41:53Z",
-    "kind": "released",
-    "number": 17896,
-    "title": "fix(coding-agent): find app windows by application id or path",
-    "tag": "v18.17.0"
-   },
-   {
-    "at": "2026-11-06T02:41:53Z",
-    "kind": "released",
-    "number": 17883,
-    "title": "fix(snapcompact,coding-agent): count a legacy archive's frames as dropped, not replaced",
-    "tag": "v18.17.0"
-   },
-   {
-    "at": "2026-11-06T02:41:53Z",
-    "kind": "released",
-    "number": 17881,
-    "title": "docs(coding-agent): restore the --models row in the CLI reference",
-    "tag": "v18.17.0"
-   },
-   {
-    "at": "2026-11-06T02:41:53Z",
-    "kind": "released",
-    "number": 17885,
-    "title": "feat(ai,catalog): identify Factory Droid requests as droid 1.1.0",
-    "tag": "v18.17.0"
-   },
-   {
-    "at": "2026-11-06T02:41:53Z",
-    "kind": "released",
-    "number": 17862,
-    "title": "feat(catalog): add Muse Spark 1.3 to Factory Droid",
-    "tag": "v18.17.0"
-   },
-   {
-    "at": "2026-11-06T02:41:53Z",
-    "kind": "released",
-    "number": 17861,
-    "title": "feat(ai,catalog,coding-agent): add Factory Droid Gemini 4 Argon with its request dialect",
-    "tag": "v18.17.0"
-   },
-   {
-    "at": "2026-11-06T02:41:53Z",
-    "kind": "released",
-    "number": 18012,
-    "title": "fix(natives): report Wayland input unavailable when no RemoteDesktop portal exists",
-    "tag": "v18.17.0"
-   },
-   {
-    "at": "2026-11-06T02:41:53Z",
-    "kind": "released",
-    "number": 18011,
-    "title": "fix(natives): read GTK3 file dialogs as AT-SPI windows",
-    "tag": "v18.17.0"
-   },
-   {
-    "at": "2026-11-06T02:41:53Z",
-    "kind": "released",
-    "number": 18166,
-    "title": "fix(coding-agent,tui): name the command in background job notices",
-    "tag": "v18.17.0"
-   },
-   {
-    "at": "2026-11-06T02:41:53Z",
-    "kind": "released",
-    "number": 18163,
-    "title": "fix(shell): pass a scheme followed by words to external commands as written",
-    "tag": "v18.17.0"
-   },
-   {
-    "at": "2026-11-06T02:41:53Z",
-    "kind": "released",
-    "number": 18162,
-    "title": "fix(coding-agent): fetch Read the Docs raw source only from the page's own Edit link",
-    "tag": "v18.17.0"
-   },
-   {
-    "at": "2026-11-06T02:41:53Z",
-    "kind": "released",
-    "number": 18161,
-    "title": "fix(find): return the hits verified before find's deadline",
-    "tag": "v18.17.0"
-   },
-   {
-    "at": "2026-11-06T02:41:53Z",
-    "kind": "released",
-    "number": 18160,
-    "title": "fix(coding-agent): apply the open viewport on attached and visible browsers",
-    "tag": "v18.17.0"
-   },
-   {
-    "at": "2026-11-06T02:41:53Z",
-    "kind": "released",
-    "number": 18158,
-    "title": "fix(coding-agent): say the computer screenshot path holds the scaled frame",
-    "tag": "v18.17.0"
-   },
-   {
-    "at": "2026-11-06T02:41:53Z",
-    "kind": "released",
-    "number": 18156,
-    "title": "fix(tui-debug): run file entries with bun under the compiled omp binary",
-    "tag": "v18.17.0"
-   },
-   {
-    "at": "2026-11-06T02:41:53Z",
-    "kind": "released",
-    "number": 18155,
-    "title": "fix(coding-agent): show browser agents how to wait for a download they start",
-    "tag": "v18.17.0"
-   },
-   {
-    "at": "2026-11-06T02:41:53Z",
-    "kind": "released",
-    "number": 18154,
-    "title": "fix(coding-agent): create new ssh:// files from bounded read output",
-    "tag": "v18.17.0"
-   },
-   {
-    "at": "2026-11-06T02:41:53Z",
-    "kind": "released",
-    "number": 18153,
-    "title": "fix(lsp): sync open documents edited outside OMP before cross-file queries",
-    "tag": "v18.17.0"
-   },
-   {
-    "at": "2026-11-06T02:41:53Z",
-    "kind": "released",
-    "number": 18150,
-    "title": "fix(coding-agent): read SEC EDGAR filing documents instead of the company profile",
-    "tag": "v18.17.0"
-   },
-   {
-    "at": "2026-11-06T02:41:53Z",
-    "kind": "released",
-    "number": 18148,
-    "title": "fix(pi-shell): list binary and line-less files in minimized diff summaries",
-    "tag": "v18.17.0"
-   },
-   {
-    "at": "2026-11-06T02:41:53Z",
-    "kind": "released",
-    "number": 18147,
-    "title": "fix(pi-shell): count files, not diff locations, in minimized rustfmt --check output",
-    "tag": "v18.17.0"
-   },
-   {
-    "at": "2026-11-06T02:41:53Z",
-    "kind": "released",
-    "number": 18124,
-    "title": "feat(coding-agent): record failed web search providers in tool details",
-    "tag": "v18.17.0"
-   },
-   {
-    "at": "2026-11-06T02:41:53Z",
-    "kind": "conflict",
-    "label": "#18013",
-    "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "files": [
-     "MODULE.bazel.lock"
-    ]
-   },
    {
     "at": "2026-11-06T04:43:49Z",
     "kind": "openable",
@@ -100055,12 +99796,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-13T02:48:00.790987Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-13T03:08:48.000054Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 2,
+   "left": 6
   },
   "rows": [
    {
@@ -100079,6 +99820,40 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-12T23:53:08Z"
+   },
+   {
+    "id": "stats-reply-link",
+    "label": "#19114",
+    "number": 19114,
+    "state": "open",
+    "area": "other",
+    "priority": "P0",
+    "title": "fix(stats): count every answered message in the Frustration per-model table",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-13T02:59:22Z"
+   },
+   {
+    "id": "stats-trace-jobs",
+    "label": "#19115",
+    "number": 19115,
+    "state": "open",
+    "area": "stats",
+    "priority": "P0",
+    "title": "fix(stats): close Traces background jobs when they finish, so idle time and turn ends show",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-13T03:06:56Z"
    },
    {
     "id": "click-place-release",
@@ -100599,6 +100374,33 @@
     "created": "2026-11-03T09:05:24Z"
    },
    {
+    "id": "ax-read-as-title-link",
+    "label": "ax-read-as-title-link",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): keep a macOS ref whose own label changes while its title element shows the same text",
+    "action": "held",
+    "reasons": [
+     "held: Main, 2026-11-13: accepts a reused row that shows the same title text as the one read (clicked the neighbour 10/10 on the fixture); held for a measurement of whether real macOS lists with duplicate titles reuse rows that way, then Will's decision",
+     "needs #19061 (open)",
+     "conflicts with #19036 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs",
+     "conflicts with #19048 in crates/pi-natives/src/desktop/ax.rs"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "#19036",
+     "#19048"
+    ],
+    "needs": [
+     "#19061"
+    ],
+    "created": "2026-11-13T02:49:00Z"
+   },
+   {
     "id": "ax-relabel-recovery",
     "label": "ax-relabel-recovery",
     "number": null,
@@ -100606,8 +100408,10 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): tell the model it may act on the new ref a relabelled-ref refusal names",
-    "action": "open",
-    "reasons": [],
+    "action": "held",
+    "reasons": [
+     "held: Main, 2026-11-13: the new error text invites acting on the ref a refusal names; opens only after a blind Sol sample on the Contacts task (strict grade) and the Reminders task, B against its base, shows no wrong-field write the base does not make and a step saving on Reminders"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -100872,7 +100676,6 @@
      "conflicts with #18013 in docs/computer-use.md",
      "conflicts with #18222 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #18987 in docs/computer-use.md, packages/coding-agent/src/tools/computer/worker.ts",
-     "conflicts with ax-relabel-recovery in docs/computer-use.md",
      "conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
@@ -100888,8 +100691,7 @@
      "#19035",
      "#18013",
      "#18222",
-     "#18987",
-     "ax-relabel-recovery"
+     "#18987"
     ],
     "needs": [],
     "created": "2026-10-19T07:26:45Z"
@@ -100945,7 +100747,6 @@
      "conflicts with #18013 in docs/computer-use.md",
      "conflicts with #18222 in docs/computer-use.md",
      "conflicts with #18987 in docs/computer-use.md",
-     "conflicts with ax-relabel-recovery in docs/computer-use.md",
      "conflicts with main in docs/computer-use.md"
     ],
     "note": "",
@@ -100963,8 +100764,7 @@
      "#17897",
      "#18013",
      "#18222",
-     "#18987",
-     "ax-relabel-recovery"
+     "#18987"
     ],
     "needs": [
      "iphone-mirror-scroll-distance"
@@ -101107,7 +100907,6 @@
      "conflicts with #19063 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18987 in crates/pi-natives/src/desktop/mod.rs",
-     "conflicts with ax-relabel-recovery in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs"
     ],
     "note": "",
@@ -101119,8 +100918,7 @@
      "#19061",
      "#19063",
      "#18925",
-     "#18987",
-     "ax-relabel-recovery"
+     "#18987"
     ],
     "needs": [],
     "created": "2026-11-11T10:16:04Z"
@@ -101342,7 +101140,6 @@
      "conflicts with #18222 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/tools/eval.ts",
      "conflicts with #18987 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/worker.ts",
-     "conflicts with ax-relabel-recovery in docs/computer-use.md",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -101360,8 +101157,7 @@
      "#18013",
      "#18222",
      "#18786",
-     "#18987",
-     "ax-relabel-recovery"
+     "#18987"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -101388,7 +101184,6 @@
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18987 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
-     "conflicts with ax-relabel-recovery in crates/pi-natives/src/desktop/mod.rs",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs"
     ],
@@ -101404,8 +101199,7 @@
      "#18353",
      "#18222",
      "#18925",
-     "#18987",
-     "ax-relabel-recovery"
+     "#18987"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -101433,7 +101227,6 @@
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md",
      "conflicts with #18925 in crates/pi-natives/src/desktop/macos/capture.rs, crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs",
-     "conflicts with ax-relabel-recovery in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
@@ -101448,8 +101241,7 @@
      "#19100",
      "#18353",
      "#18222",
-     "#18925",
-     "ax-relabel-recovery"
+     "#18925"
     ],
     "needs": [
      "agent-identity"
@@ -101653,38 +101445,45 @@
     "created": "2026-11-03T01:54:17Z"
    },
    {
-    "id": "stats-reply-link",
-    "label": "stats-reply-link",
+    "id": "stats-live-appends",
+    "label": "stats-live-appends",
     "number": null,
     "state": "queued",
     "area": "other",
     "priority": null,
-    "title": "fix(stats): count every answered message in the Frustration per-model table",
-    "action": "open",
-    "reasons": [],
+    "title": "fix(stats): show running sessions' new requests within a second on macOS",
+    "action": "wait",
+    "reasons": [
+     "needs stats-spotlight-freeze (queued)",
+     "conflicts with main in (branch missing on the fork)"
+    ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-13T02:46:31Z"
+    "needs": [
+     "stats-spotlight-freeze"
+    ],
+    "created": "2026-11-13T02:56:27Z"
    },
    {
-    "id": "stats-trace-jobs",
-    "label": "stats-trace-jobs",
+    "id": "stats-spotlight-freeze",
+    "label": "stats-spotlight-freeze",
     "number": null,
     "state": "queued",
-    "area": "stats",
+    "area": "other",
     "priority": null,
-    "title": "fix(stats): close Traces background jobs when they finish, so idle time and turn ends show",
-    "action": "open",
-    "reasons": [],
+    "title": "fix(stats,coding-agent): keep the stats dashboard answering while Spotlight rebuilds",
+    "action": "wait",
+    "reasons": [
+     "conflicts with main in (branch missing on the fork)"
+    ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [],
     "needs": [],
-    "created": "2026-11-13T02:47:10Z"
+    "created": "2026-11-13T03:07:37Z"
    },
    {
     "id": "text-reader-usage-shift",
