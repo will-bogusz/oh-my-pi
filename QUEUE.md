@@ -1,18 +1,19 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13 03:12Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13 03:15Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-11-13 03:08Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 1, conflict-held 19, stacked 16, held 13, parked 2, open PRs 30; merged 334, closed 35
+**Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-11-13 03:12Z on MacBook-Pro; groups below are from it, states from the manifest)
+**Counts:** openable now 2, conflict-held 18, stacked 16, held 13, parked 2, open PRs 30; merged 334, closed 35
 
-## Openable now (1)
+## Openable now (2)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
 | factory-droid-171-models | feat(catalog): add the Factory Droid models droid 1.7.1 serves | factory-droid |  | 2d | open; advance first | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-171-models) |
+| stats-spotlight-freeze | fix(stats,coding-agent): keep the stats dashboard answering while Spotlight rebuilds | other |  | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-spotlight-freeze) |
 
-## Conflict-held (19)
+## Conflict-held (18)
 
 | id | title | area | priority | age | blocked by | branch |
 |---|---|---|---|---|---|---|
@@ -34,7 +35,6 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13
 | macos-ax-cancel-before-send | fix(natives): send no macOS AX action once its run is cancelled | natives | P2 | 1d | [#19036](https://github.com/can1357/oh-my-pi/pull/19036), [#19048](https://github.com/can1357/oh-my-pi/pull/19048), [#19061](https://github.com/can1357/oh-my-pi/pull/19061), [#19063](https://github.com/can1357/oh-my-pi/pull/19063), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-ax-cancel-before-send) |
 | win-ax-states | fix(natives): expose Windows control state and stale-reference matches | computer | P2 | 1d | [#19036](https://github.com/can1357/oh-my-pi/pull/19036), [#19048](https://github.com/can1357/oh-my-pi/pull/19048), [#19061](https://github.com/can1357/oh-my-pi/pull/19061), [#19063](https://github.com/can1357/oh-my-pi/pull/19063), [#18925](https://github.com/can1357/oh-my-pi/pull/18925), [#18987](https://github.com/can1357/oh-my-pi/pull/18987), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-ax-states) |
 | x11-keysym-remap | fix(natives): type characters outside the X11 keymap through temporary keycodes | computer | P2 | 1d | [#19066](https://github.com/can1357/oh-my-pi/pull/19066), [#19080](https://github.com/can1357/oh-my-pi/pull/19080), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-keysym-remap) |
-| stats-spotlight-freeze | fix(stats,coding-agent): keep the stats dashboard answering while Spotlight rebuilds | other |  | 0h | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-spotlight-freeze) |
 
 ## Stacked (16)
 

@@ -99797,8 +99797,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-13T03:08:48.000054Z",
-  "host": "goliath",
+  "at": "2026-11-13T03:12:15.938120Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 2,
@@ -101455,8 +101455,7 @@
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
     "action": "wait",
     "reasons": [
-     "needs stats-spotlight-freeze (queued)",
-     "conflicts with main in (branch missing on the fork)"
+     "needs stats-spotlight-freeze (queued)"
     ],
     "note": "",
     "over": [],
@@ -101475,10 +101474,8 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats,coding-agent): keep the stats dashboard answering while Spotlight rebuilds",
-    "action": "wait",
-    "reasons": [
-     "conflicts with main in (branch missing on the fork)"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
