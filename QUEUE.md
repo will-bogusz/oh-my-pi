@@ -1,9 +1,9 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13 18:26Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13 18:28Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 4 of 8 ready events used in the hour before the last plan, 4 left (plan of 2026-11-13 17:55Z on goliath; groups below are from it, states from the manifest)
+**Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-13 18:26Z on goliath; groups below are from it, states from the manifest)
 **Counts:** openable now 3, conflict-held 18, stacked 16, held 12, parked 2, open PRs 33; merged 339, closed 36
 
 ## Openable now (3)
@@ -118,4 +118,4 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13
 | [#19179](https://github.com/can1357/oh-my-pi/pull/19179) | key-menu | fix(natives): close the menu a macOS background key press opens | computer | P1 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/key-menu) |
 | [#19178](https://github.com/can1357/oh-my-pi/pull/19178) | relay-restored-frame | fix(browser-relay): keep a relay tab when another extension's frame keeps omp out | browser | P1 | 1h | keep; accepted pair with #18925: Main, 2026-11-13: tab-supervisor.ts import block only, keep both lines (import { isLoopbackRelayUrl } from "./relay/daemon"; import { FOREIGN_FRAME_REFUSAL } from "./relay/protocol"); accepted pair with #19001: Main, 2026-11-13: tab-supervisor.ts only, module scope: import line keeps both names (import { FOREIGN_FRAME_REFUSAL, type HiddenFrame } from "./relay/protocol") and WorkerTabSession gains both adjacent fields (heldOut, hiddenFrames); combined form ~/tmp/oh-my-pi/RelayRestoredFrame2/combined-19001.txt | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-restored-frame) |
 | [#19180](https://github.com/can1357/oh-my-pi/pull/19180) | devin-pin-31257 | fix(catalog): identify Devin requests as CLI 3000.12.57 | catalog | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-pin-31257) |
-| [#19188](https://github.com/can1357/oh-my-pi/pull/19188) | factory-droid-config-update-upstreams | fix(catalog): keep GPT-6 effort changes off configuration_update on Factory Droid Bedrock and Snowflake | catalog | P1 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-config-update-upstreams) |
+| [#19188](https://github.com/can1357/oh-my-pi/pull/19188) | factory-droid-config-update-upstreams | fix(catalog): keep GPT-6 effort changes off configuration_update on Factory Droid Bedrock and Snowflake | catalog | P1 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-config-update-upstreams) |
