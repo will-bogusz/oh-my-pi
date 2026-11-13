@@ -90608,10 +90608,14 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-13T03:08:47Z",
+  "checked": "2026-11-13T03:39:19Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
+   "stats-spotlight-freeze": {
+    "since": "2026-11-13T03:39:19Z",
+    "title": "fix(stats,coding-agent): keep the stats dashboard answering while Spotlight rebuilds"
+   },
    "factory-droid-171-models": {
     "since": "2026-11-12T12:26:00Z",
     "title": "feat(catalog): add the Factory Droid models droid 1.7.1 serves"
@@ -94169,6 +94173,12 @@
     "id": "computer-run-failure-output",
     "title": "fix(computer): retain output and screenshots when a run fails",
     "why": "opened as #19100"
+   },
+   {
+    "at": "2026-11-13T03:39:19Z",
+    "kind": "openable",
+    "id": "stats-spotlight-freeze",
+    "title": "fix(stats,coding-agent): keep the stats dashboard answering while Spotlight rebuilds"
    }
   ]
  },
@@ -99926,8 +99936,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-13T03:12:15.938120Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-13T03:39:20.087185Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 2,
@@ -100513,7 +100523,7 @@
     "title": "fix(natives): keep a macOS ref whose own label changes while its title element shows the same text",
     "action": "held",
     "reasons": [
-     "held: Main, 2026-11-13: accepts a reused row that shows the same title text as the one read (clicked the neighbour 10/10 on the fixture); held for a measurement of whether real macOS lists with duplicate titles reuse rows that way, then Will's decision",
+     "held: Main, 2026-11-13: accepts a reused row that shows the same title text as the one read (fixture: clicked the neighbour 10/10). Measured since (TitleTwin, ~/tmp/oh-my-pi/TitleTwin/HANDOFF.md): 0 wrong-item actions in 200 scripted trials across Notes, Reminders, Finder search and Contacts with duplicate titles; saved refs stayed on the same item or were destroyed. Main recommends opening with the limit stated; waits on Will's word and on #19061",
      "needs #19061 (open)",
      "conflicts with #19036 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with #19048 in crates/pi-natives/src/desktop/ax.rs"
@@ -101584,7 +101594,8 @@
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
     "action": "wait",
     "reasons": [
-     "needs stats-spotlight-freeze (queued)"
+     "needs stats-spotlight-freeze (queued)",
+     "conflicts with main in (branch missing on the fork)"
     ],
     "note": "",
     "over": [],
