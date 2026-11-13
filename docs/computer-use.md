@@ -193,6 +193,8 @@ On macOS, an element action on a reference (`press()`, `perform()`, `click()`, `
 
 If the user brings the target application forward while a background action's reference check is waiting for it, the action throws `UserIntervened` and sends nothing. Explicit `AXRaise` actions still change stacking as requested; they keep the identity check without this background-input restriction.
 
+When a refusal because the reference's element now reads as another control names no other candidate, the error says to act on the element's new reference only if it is the control meant, and otherwise to read the window again; it advises only the read when it could not give the element a new reference.
+
 On macOS, `press()`, `perform()` and `raise()` throw `AxUnconfirmed` when the action was requested but the app did not reply in time or messaging failed, for example because the action opened a modal dialog. The action may already have taken effect, so observe the window before repeating it.
 
 On macOS, native text fields support verified whole-value replacement and exact-window selected-text insertion, including when an app has multiple windows. Web-content or unidentifiable AX value writes refuse before mutation rather than trusting stale accessibility echoes. On Linux, generic `press()` selects an advertised activation action, never an arbitrary first action. On Windows, known self-activating UIA hosts may require explicit takeover coordinate input; background automation does not disable another application's windows or mutate their styles.

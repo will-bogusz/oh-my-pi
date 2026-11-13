@@ -1224,14 +1224,21 @@ impl Worker {
 		let Some(ax) = backend.as_mut().ok().and_then(|backend| backend.ax()) else {
 			return error;
 		};
+		// Whether the message gives the element a ref as it reads now, which
+		// the caller can act on, if that is the control it meant, without
+		// reading the window again.
+		let mut current_ref = false;
 		let mut message = if relabelled {
 			// The element still answers, as another control: give it a ref.
 			match ax::element_line(ax, registry, &target, handle) {
-				Ok(line) => format!(
-					"{reference} now reads as {}, not with the role and label it was read with; \
-					 nothing was sent.",
-					line.trim_start_matches("- ")
-				),
+				Ok(line) => {
+					current_ref = true;
+					format!(
+						"{reference} now reads as {}, not with the role and label it was read with; \
+						 nothing was sent.",
+						line.trim_start_matches("- ")
+					)
+				},
 				Err(_) => format!("{}.", error.message),
 			}
 		} else if ax.destroyed(&handle) {
@@ -1253,7 +1260,11 @@ impl Worker {
 			if !relabelled {
 				return error;
 			}
-			message.push_str(" Re-run ax()/find()");
+			message.push_str(if current_ref {
+				" Act on that ref only if it is the control you meant; otherwise re-run ax()/find()"
+			} else {
+				" Re-run ax()/find()"
+			});
 			return DesktopError::stale_ref(message);
 		};
 		let _ = write!(message, " {found} is the one element {fields} {reference} was read with.");
@@ -2877,6 +2888,9 @@ mod capture_tests {
 		on_call:           Option<Box<dyn Fn(Call) + Send>>,
 		/// A press is delivered and the app answers with an unrelated error.
 		unconfirmed:       bool,
+		/// Elements whose full read fails while their role and label still
+		/// answer the ref check.
+		unreadable:        HashSet<u64>,
 	}
 
 	#[derive(Clone, Copy, PartialEq, Eq)]
@@ -3081,7 +3095,11 @@ mod capture_tests {
 
 		fn props(&mut self, h: &AxHandle) -> CoreResult<AxProps> {
 			if let Some(tree) = &self.tree {
-				tree.lock().reads += 1;
+				let mut tree = tree.lock();
+				tree.reads += 1;
+				if tree.unreadable.contains(&tree.element(h)?) {
+					return Err(DesktopError::ax_failed("the element's fields did not answer"));
+				}
 			}
 			self.read_as(h)
 		}
@@ -4175,9 +4193,49 @@ mod capture_tests {
 		}
 		let error = press(&mut worker, "e3").unwrap_err();
 		assert_eq!(error.code, ErrorCode::StaleRef);
-		assert!(error.message.contains("Re-run ax()/find()"), "{}", error.message);
+		// The error names the element's current reading with a ref and no
+		// candidate: that ref is for the caller to act on only if it is the
+		// control it meant.
+		assert!(
+			error.message.ends_with(
+				"nothing was sent. Act on that ref only if it is the control you meant; otherwise \
+				 re-run ax()/find()"
+			),
+			"{}",
+			error.message
+		);
+		assert!(
+			error
+				.message
+				.contains("now reads as button \"Street\" [ref="),
+			"{}",
+			error.message
+		);
 		// One read for the element's new ref, then root + four children.
 		assert_eq!(tree.lock().reads, 6);
+		assert!(tree.lock().pressed.is_empty());
+	}
+
+	#[test]
+	fn a_relabelled_ref_whose_element_cannot_be_named_again_advises_reading_the_window() {
+		let (mut worker, tree) = read_buttons(&[(2, "Street"), (3, "City")]);
+		shift_address_row(&tree);
+		{
+			let mut tree = tree.lock();
+			tree.titles.insert(5, "City");
+			tree.children.push(5);
+			tree.unreadable.insert(3);
+		}
+		let error = press(&mut worker, "e3").unwrap_err();
+		assert_eq!(error.code, ErrorCode::StaleRef);
+		assert!(
+			error
+				.message
+				.ends_with("nothing was sent. Re-run ax()/find()"),
+			"{}",
+			error.message
+		);
+		assert!(!error.message.contains("[ref="), "{}", error.message);
 		assert!(tree.lock().pressed.is_empty());
 	}
 
