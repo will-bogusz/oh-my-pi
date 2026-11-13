@@ -90615,7 +90615,7 @@
    "area": "other",
    "priority": "P2",
    "needs": [],
-   "base": "d8493454a2eab3c88f5410d6ce48bf3fe4352300",
+   "base": "84f5adc3bbfc0c2a7caecbad78b1b6eedf0a2939",
    "body": "bodies/stats-gain-compaction.md",
    "state": "open",
    "pr": 19120,
@@ -90623,7 +90623,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/stats-gain-compaction",
    "host": "MacBook-Pro",
    "added": "2026-11-13T03:43:16Z",
-   "updated": "2026-11-13T04:09:52Z",
+   "updated": "2026-11-13T04:23:16Z",
    "note": "",
    "built": [
     {
@@ -90688,7 +90688,8 @@
       ]
      }
     }
-   ]
+   ],
+   "advanced": "2026-11-13T04:23:16Z"
   }
  ],
  "watch": {
