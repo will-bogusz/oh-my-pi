@@ -77390,9 +77390,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-click-frame-removed",
    "host": "MacBook-Pro",
    "added": "2026-11-11T00:14:54Z",
-   "updated": "2026-11-13T00:06:14Z",
+   "updated": "2026-11-13T00:07:13Z",
    "note": "QueueSeventeen, 2026-11-12: rebased onto c308970263a (Main-approved combined form in clickTarget: main's detached check, then clickPoint(frame.page(), \u2026, checkWhileDown)); test-only repair: String() around page.evaluate in the frame-click helper (TS2322).",
-   "advanced": "2026-11-13T00:02:12Z",
+   "advanced": "2026-11-13T00:07:13Z",
    "built": [
     {
      "with": "#19062",
