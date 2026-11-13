@@ -90745,10 +90745,14 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-13T11:48:44Z",
+  "checked": "2026-11-13T12:49:10Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
+   "key-menu": {
+    "since": "2026-11-13T12:49:10Z",
+    "title": "fix(natives): close the menu a macOS background key press opens"
+   },
    "macos-scroll-direction": {
     "since": "2026-11-13T08:45:48Z",
     "title": "fix(natives): scroll down for a positive dy on macOS, as on Windows and Linux"
@@ -94318,6 +94322,12 @@
     "kind": "openable",
     "id": "macos-scroll-direction",
     "title": "fix(natives): scroll down for a positive dy on macOS, as on Windows and Linux"
+   },
+   {
+    "at": "2026-11-13T12:49:10Z",
+    "kind": "openable",
+    "id": "key-menu",
+    "title": "fix(natives): close the menu a macOS background key press opens"
    }
   ]
  },
@@ -100156,8 +100166,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-13T12:40:47.133792Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-13T12:49:11.471874Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -100837,6 +100847,23 @@
     "created": "2026-10-30T21:35:55Z"
    },
    {
+    "id": "key-menu",
+    "label": "key-menu",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): close the menu a macOS background key press opens",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-13T12:43:28Z"
+   },
+   {
     "id": "macos-drag-confirm",
     "label": "macos-drag-confirm",
     "number": null,
@@ -101089,6 +101116,7 @@
      "conflicts with #18013 in docs/computer-use.md",
      "conflicts with #18222 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #18987 in docs/computer-use.md, packages/coding-agent/src/tools/computer/worker.ts",
+     "conflicts with key-menu in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with macos-scroll-direction in docs/computer-use.md",
      "conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts"
     ],
@@ -101106,6 +101134,7 @@
      "#18013",
      "#18222",
      "#18987",
+     "key-menu",
      "macos-scroll-direction"
     ],
     "needs": [],
@@ -101304,6 +101333,7 @@
      "conflicts with #19025 in crates/pi-natives/src/desktop/win32/mod.rs",
      "conflicts with #19062 in crates/pi-natives/src/desktop/win32/capture.rs, crates/pi-natives/src/desktop/win32/mod.rs",
      "conflicts with #18222 in packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with key-menu in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/win32/mod.rs, packages/coding-agent/src/prompts/tools/computer.md"
     ],
     "note": "",
@@ -101312,7 +101342,8 @@
     "blocked_by": [
      "#19025",
      "#19062",
-     "#18222"
+     "#18222",
+     "key-menu"
     ],
     "needs": [],
     "created": "2026-11-11T09:06:32Z"
@@ -101508,6 +101539,7 @@
      "conflicts with #18222 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/tools/eval.ts",
      "conflicts with #18987 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/worker.ts",
+     "conflicts with key-menu in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with macos-scroll-direction in docs/computer-use.md",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/test/tools/computer.test.ts"
@@ -101527,6 +101559,7 @@
      "#18222",
      "#18786",
      "#18987",
+     "key-menu",
      "macos-scroll-direction"
     ],
     "needs": [
@@ -101554,6 +101587,7 @@
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18987 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
+     "conflicts with key-menu in packages/coding-agent/src/prompts/tools/computer.md",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs"
     ],
@@ -101569,7 +101603,8 @@
      "#18353",
      "#18222",
      "#18925",
-     "#18987"
+     "#18987",
+     "key-menu"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -101824,7 +101859,8 @@
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
     "action": "wait",
     "reasons": [
-     "needs #19118 (open)"
+     "needs #19118 (open)",
+     "conflicts with main in (branch missing on the fork)"
     ],
     "note": "",
     "over": [],
