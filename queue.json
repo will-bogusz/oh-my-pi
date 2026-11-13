@@ -91540,6 +91540,24 @@
    "added": "2026-11-13T17:05:09Z",
    "updated": "2026-11-13T17:08:06Z",
    "note": ""
+  },
+  {
+   "id": "gemini-hydrogen-overlap",
+   "branch": "will/gemini-hydrogen-overlap",
+   "title": "fix(catalog): keep Gemini 4 Hydrogen in one thinking rule so a regenerated catalog starts",
+   "area": "catalog",
+   "priority": "P0",
+   "needs": [],
+   "base": "8b1fd3233b873b94ec1d658fee26b2cbaf72d9d4",
+   "body": "bodies/gemini-hydrogen-overlap.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/gemini-hydrogen-overlap",
+   "host": "MacBook-Pro",
+   "added": "2026-11-13T17:08:59Z",
+   "updated": "2026-11-13T17:08:59Z",
+   "note": ""
   }
  ],
  "watch": {
