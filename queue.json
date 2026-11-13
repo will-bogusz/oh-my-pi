@@ -91580,7 +91580,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/gemini-hydrogen-overlap",
    "host": "MacBook-Pro",
    "added": "2026-11-13T17:08:59Z",
-   "updated": "2026-11-13T17:25:36Z",
+   "updated": "2026-11-13T17:26:02Z",
    "note": "",
    "built": [
     {
@@ -91593,7 +91593,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-11-13T17:25:36Z"
+   "opened": "2026-11-13T17:25:36Z",
+   "readied": "2026-11-13T17:26:01Z"
   },
   {
    "id": "factory-droid-config-update-upstreams",
