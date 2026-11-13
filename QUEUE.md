@@ -1,10 +1,10 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13 21:54Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13 21:56Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-13 20:58Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 1, conflict-held 18, stacked 16, held 12, parked 2, open PRs 36; merged 339, closed 36
+**Counts:** openable now 1, conflict-held 18, stacked 16, held 12, parked 2, open PRs 36, queued since the last plan 1; merged 339, closed 36
 
 ## Openable now (1)
 
@@ -33,7 +33,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13
 | macos-ax-cancel-before-send | fix(natives): send no macOS AX action once its run is cancelled | natives | P2 | 2d | [#19036](https://github.com/can1357/oh-my-pi/pull/19036), [#19048](https://github.com/can1357/oh-my-pi/pull/19048), [#19061](https://github.com/can1357/oh-my-pi/pull/19061), [#19063](https://github.com/can1357/oh-my-pi/pull/19063), [#19195](https://github.com/can1357/oh-my-pi/pull/19195), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-ax-cancel-before-send) |
 | win-ax-states | fix(natives): expose Windows control state and stale-reference matches | computer | P2 | 2d | [#19036](https://github.com/can1357/oh-my-pi/pull/19036), [#19048](https://github.com/can1357/oh-my-pi/pull/19048), [#19061](https://github.com/can1357/oh-my-pi/pull/19061), [#19063](https://github.com/can1357/oh-my-pi/pull/19063), [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#18925](https://github.com/can1357/oh-my-pi/pull/18925), [#18987](https://github.com/can1357/oh-my-pi/pull/18987), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-ax-states) |
 | x11-keysym-remap | fix(natives): type characters outside the X11 keymap through temporary keycodes | computer | P2 | 2d | [#19066](https://github.com/can1357/oh-my-pi/pull/19066), [#19080](https://github.com/can1357/oh-my-pi/pull/19080), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-keysym-remap) |
-| stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 18h | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
+| stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 19h | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 
 ## Stacked (16)
 
@@ -101,7 +101,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13
 | [#19045](https://github.com/can1357/oh-my-pi/pull/19045) | observe-settle | feat(browser): let observe() settle the effects of the preceding action | browser | P2 | 1d | keep; accepted pair with #18925: Main, 2026-11-12: only conflict is adjacent class fields in packages/coding-agent/src/tools/browser/tab-worker.ts: #18925 adds #nativeWindows?, this entry adds #actionRequestSeq? and #settling? at the same spot; nothing removed; combined form is both declarations | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-observe-settle) |
 | [#19191](https://github.com/can1357/oh-my-pi/pull/19191) | factory-droid-171-models | feat(catalog): add the Factory Droid models droid 1.7.1 serves | factory-droid | P2 | 3h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-171-models) |
 | [#18987](https://github.com/can1357/oh-my-pi/pull/18987) | agent-identity | feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy | tui | P2 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/agent-identity) |
-| [#19100](https://github.com/can1357/oh-my-pi/pull/19100) | computer-run-failure-output | fix(computer): retain output and screenshots when a run fails | computer | P1 | 21h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-run-failure-output) |
+| [#19100](https://github.com/can1357/oh-my-pi/pull/19100) | computer-run-failure-output | fix(computer): retain output and screenshots when a run fails | computer | P1 | 22h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-run-failure-output) |
 | [#19036](https://github.com/can1357/oh-my-pi/pull/19036) | atspi-huge-children | fix(natives): stop Linux accessibility reads from freezing apps that show long tables | computer | P1 | 1d | keep; accepted pair with #19061: Main, 2026-11-12: #19036 adds 'unread_children: 0,' to the AxProps literal in macos/ax.rs and a field to the AxProps struct in desktop/ax.rs; this entry returns that literal inside a tuple (AxProps{...}, has_own_label) and adds its own struct field (rustfmt realignment only). Combined form: this entry's tuple with 'unread_children: 0,' inside its AxProps literal; struct with both fields | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-huge-children) |
 | [#19035](https://github.com/can1357/oh-my-pi/pull/19035) | atspi-text-first | fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility | computer | P2 | 1d | keep; accepted pair with #18353 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-text-first) |
 | [#19080](https://github.com/can1357/oh-my-pi/pull/19080) | x11-takeover-keyboard-state | fix(natives): type X11 XTest text through a neutral keyboard state | computer | P1 | 1d | keep; accepted pair with #19066: Main, 2026-11-12: only code conflict is the two with_foreground closures in crates/pi-natives/src/desktop/linux/x11/input.rs, where #19066 adds this.check_keyboard_grab(window)? before xtest_steps and this entry passes matches!(keys, Keys::Text(_)) to xtest_steps; the combined form keeps both lines (trial merge 2a04e89911c), which built and passed both X11 suites (63 tests, excluding two MPX/uinput hotplug tests that fail identically on main under Xvfb). | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-takeover-keyboard-state) |
@@ -120,3 +120,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-13
 | [#19180](https://github.com/can1357/oh-my-pi/pull/19180) | devin-pin-31257 | fix(catalog): identify Devin requests as CLI 3000.12.57 | catalog | P0 | 4h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-pin-31257) |
 | [#19188](https://github.com/can1357/oh-my-pi/pull/19188) | factory-droid-config-update-upstreams | fix(catalog): keep GPT-6 effort changes off configuration_update on Factory Droid Bedrock and Snowflake | catalog | P1 | 3h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-config-update-upstreams) |
 | [#19194](https://github.com/can1357/oh-my-pi/pull/19194) | factory-droid-capture-resilience | test(ai): keep captured Factory Droid parity cases when one case fails | other | P1 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-capture-resilience) |
+
+## Queued since the last plan (1)
+
+| id | title | area | priority | age | branch |
+|---|---|---|---|---|---|
+| macos-handback-key | fix(natives): give the user's key window back after macOS takeover and focus-guard hand-backs | computer | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-handback-key) |
