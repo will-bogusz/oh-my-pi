@@ -90413,6 +90413,24 @@
    "updated": "2026-11-13T02:52:52Z",
    "note": "",
    "hold": "Main, 2026-11-13: accepts a reused row that shows the same title text as the one read (clicked the neighbour 10/10 on the fixture); held for a measurement of whether real macOS lists with duplicate titles reuse rows that way, then Will's decision"
+  },
+  {
+   "id": "stats-live-appends",
+   "branch": "will/stats-live-appends",
+   "title": "fix(stats): show running sessions' new requests within a second on macOS",
+   "area": "other",
+   "priority": null,
+   "needs": [],
+   "base": "d8493454a2eab3c88f5410d6ce48bf3fe4352300",
+   "body": "bodies/stats-live-appends.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/stats-live-appends",
+   "host": "MacBook-Pro",
+   "added": "2026-11-13T02:56:27Z",
+   "updated": "2026-11-13T02:56:27Z",
+   "note": ""
   }
  ],
  "watch": {
