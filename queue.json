@@ -92784,7 +92784,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-14T07:02:08Z",
+  "checked": "2026-11-14T08:02:57Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -102813,7 +102813,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-14T07:02:09.335535Z",
+  "at": "2026-11-14T08:02:58.173181Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -103604,7 +103604,7 @@
     "state": "queued",
     "area": "computer",
     "priority": "P1",
-    "title": "fix(natives): put the user's key window back in front of a macOS background target",
+    "title": "fix(natives): put the user's key window back in front of a macOS target after background input and takeover",
     "action": "wait",
     "reasons": [
      "needs #19208 (open)"
