@@ -92564,7 +92564,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-move-receipt",
    "host": "MacBook-Pro",
    "added": "2026-11-14T04:35:48Z",
-   "updated": "2026-11-14T04:36:07Z",
+   "updated": "2026-11-14T04:41:04Z",
    "note": "MoveReview (needs-changes at 2609fd1) answered in e11ccec: 1 refuse-aware ending naming the setting, test under refuse; 2 oxfmt applied; 3 wording held to observations ('have shown', 'may still be hidden', takeover only after a screenshot shows it); docs/tools/computer.md one line; CHANGELOG tightened; behaviour NOTE answered in body (no sample set: macOS-only line, benchmark lane re-measures)."
   }
  ],
