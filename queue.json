@@ -93147,8 +93147,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ax-number-setvalue",
    "host": "MacBook-Pro",
    "added": "2026-11-14T18:08:21Z",
-   "updated": "2026-11-14T18:09:41Z",
-   "note": "",
+   "updated": "2026-11-14T18:09:51Z",
+   "note": "SliderValue, 2026-11-14: review e2b8f0e needs-changes; fixed: oxfmt (c14459a), rust-check mac+linux recorded at 16af99c, docs/tools/computer.md number paragraph, El-path number/boolean test, control::settle, single AXValue read via value_kind with test; kept: 8c7e150 in this PR by Main's decision (one PR about setValue on value controls). Limits: no-step not-settable controls keep today's refusal; SwiftUI steps by its own step; clamp read-back waits 500 ms.",
    "built": [
     {
      "with": "#19195",
