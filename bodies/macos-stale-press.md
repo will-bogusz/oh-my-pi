@@ -33,7 +33,7 @@ Measured in a macOS 26 guest, `main` (6ec2b71) against this branch's addon, 10 t
 | Same, background `el.click()` | refused 10/10 (key-window guard) | refused 10/10 (sheet) |
 | Button removed / disabled | refused 10/10 each (stale ref / disabled) | same |
 
-False refusals: every control `main` pressed (a native button, check box and pop-up choice, a background `el.click()`, a menu item), as "accepted by `main` / accepted by this PR" over its tries (each try in the app's own log matched between the two; a page `<select>` choice is accepted on both and rarely applied, a separate issue). No try that `main` pressed was refused: 1,290 of 1,290 accepted by both.
+False refusals: every control `main` pressed (a native button, check box and pop-up choice, a background `el.click()`, a menu item), as "accepted by `main` / accepted by this PR" over its tries (the app's own log shows the same actions for both, except that a page `<select>` already showing the option logs no change after the first try, which `main` happened to take). No try that `main` pressed was refused: 1,290 of 1,290 accepted by both.
 
 | Target is | AppKit | SwiftUI | WKWebView | Chrome | Electron |
 |---|---|---|---|---|---|
