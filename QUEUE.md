@@ -128,5 +128,5 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14
 
 | id | title | area | priority | age | branch |
 |---|---|---|---|---|---|
-| macos-stale-press | fix(natives): refuse macOS element actions on a control a person could not click | computer | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-stale-press) |
+| macos-stale-press | fix(natives): refuse macOS element actions on a control a person could not click | computer | P1 | 1h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-stale-press) |
 | macos-move-receipt | fix(coding-agent): say what a macOS background move did | computer | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-move-receipt) |
