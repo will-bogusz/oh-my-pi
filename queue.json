@@ -93068,14 +93068,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-14T12:06:36Z",
+  "checked": "2026-11-14T13:07:56Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "macos-stale-press": {
-    "since": "2026-11-14T05:00:07Z",
-    "title": "fix(natives): refuse macOS element actions on a control a person could not click"
-   },
    "macos-move-receipt": {
     "since": "2026-11-14T05:00:07Z",
     "title": "fix(coding-agent): say what a macOS background move did"
@@ -93179,7 +93175,8 @@
    19194,
    19195,
    19208,
-   19224
+   19224,
+   19258
   ],
   "post_merge": {
    "18632": {
@@ -96608,6 +96605,13 @@
     "files": [
      "packages/coding-agent/src/session/agent-session.ts"
     ]
+   },
+   {
+    "at": "2026-11-14T13:07:56Z",
+    "kind": "unopenable",
+    "id": "macos-stale-press",
+    "title": "fix(natives): refuse macOS element actions on a control a person could not click",
+    "why": "opened as #19258"
    }
   ]
  },
@@ -102986,12 +102990,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-14T12:38:26.484462Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-14T13:07:57.389063Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 1,
+   "left": 7
   },
   "rows": [
    {
@@ -103093,12 +103097,13 @@
     "title": "fix(natives): follow rebuilt macOS table rows without selecting a neighbour",
     "action": "keep",
     "reasons": [],
-    "note": "accepted pair with #16553: QueueFourteen, 2026-11-12 (Main's standing rule: use-list collision, opener records): only conflict is the use list in crates/pi-natives/src/desktop/macos/mod.rs: #16553 adds 'pub(super) use clicks::ClickJournal;', this entry adds is_standard_window and window_titles to the ax/capture use lines; nothing removed; combined form is both; accepted pair with #19061: QueueFifteen, 2026-11-12 (Main's standing rule: a field added beside a line the other side reshapes without changing a value): only conflict is the Registered struct in crates/pi-natives/src/desktop/ax.rs: #19048 adds 'row: Option<RowProof>,' where this entry rewrites the doc comment of 'held'; #19048 reads neither held nor fingerprint. Combined form: #19048's row field, then this entry's doc comment and 'held: Option<u64>'.; accepted pair with #19195: QueueNineteen, 2026-11-13: only conflict is adjacent #[test] fns appended at the same spot at the end of mod tests in crates/pi-natives/src/desktop/macos/input.rs (this entry's drag tests, #19048's row-action tests); nothing removed or reshaped; combined form is both sets of tests. Built as one tree with key-menu and macos-scroll-direction: macOS cargo test desktop 641 pass (bench-mac), Linux 345 pass, check:ts clean",
+    "note": "accepted pair with #16553: QueueFourteen, 2026-11-12 (Main's standing rule: use-list collision, opener records): only conflict is the use list in crates/pi-natives/src/desktop/macos/mod.rs: #16553 adds 'pub(super) use clicks::ClickJournal;', this entry adds is_standard_window and window_titles to the ax/capture use lines; nothing removed; combined form is both; accepted pair with #19061: QueueFifteen, 2026-11-12 (Main's standing rule: a field added beside a line the other side reshapes without changing a value): only conflict is the Registered struct in crates/pi-natives/src/desktop/ax.rs: #19048 adds 'row: Option<RowProof>,' where this entry rewrites the doc comment of 'held'; #19048 reads neither held nor fingerprint. Combined form: #19048's row field, then this entry's doc comment and 'held: Option<u64>'.; accepted pair with #19195: QueueNineteen, 2026-11-13: only conflict is adjacent #[test] fns appended at the same spot at the end of mod tests in crates/pi-natives/src/desktop/macos/input.rs (this entry's drag tests, #19048's row-action tests); nothing removed or reshaped; combined form is both sets of tests. Built as one tree with key-menu and macos-scroll-direction: macOS cargo test desktop 641 pass (bench-mac), Linux 345 pass, check:ts clean; accepted pair with #19258: Main, 2026-11-14: crates/pi-natives/src/desktop/macos/mod.rs element-click closure (function body): #19048's lines verbatim (hoisted mac handle, (target, event, _aimed) destructuring and everything after the closure, aim_at_element); stale-press adds only the two-line require_shown check before locate_element_click, reusing the hoisted handle. Combined form ~/tmp/oh-my-pi/queuetwenty/r5/combined-stale-press-19048.txt; build+test proof (#19048's tests + stale-press's nine, macOS desktop + Linux check) due when stale-press opens",
     "over": [],
     "paired": [
      "#16553",
      "#19061",
-     "#19195"
+     "#19195",
+     "#19258"
     ],
     "blocked_by": [],
     "needs": [],
@@ -103306,6 +103311,25 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-14T05:27:52Z"
+   },
+   {
+    "id": "macos-stale-press",
+    "label": "#19258",
+    "number": 19258,
+    "state": "open",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): refuse macOS element actions on a control a person could not click",
+    "action": "keep",
+    "reasons": [],
+    "note": "accepted pair with #19048: Main, 2026-11-14: crates/pi-natives/src/desktop/macos/mod.rs element-click closure (function body): #19048's lines verbatim (hoisted mac handle, (target, event, _aimed) destructuring and everything after the closure, aim_at_element); stale-press adds only the two-line require_shown check before locate_element_click, reusing the hoisted handle. Combined form ~/tmp/oh-my-pi/queuetwenty/r5/combined-stale-press-19048.txt; build+test proof (#19048's tests + stale-press's nine, macOS desktop + Linux check) due when stale-press opens",
+    "over": [],
+    "paired": [
+     "#19048"
+    ],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-14T12:49:36Z"
    },
    {
     "id": "factory-droid-capture-resilience",
@@ -103801,25 +103825,6 @@
     "created": "2026-11-14T10:49:09Z"
    },
    {
-    "id": "macos-stale-press",
-    "label": "macos-stale-press",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives): refuse macOS element actions on a control a person could not click",
-    "action": "open",
-    "reasons": [],
-    "note": "accepted pair with #19048: Main, 2026-11-14: crates/pi-natives/src/desktop/macos/mod.rs element-click closure (function body): #19048's lines verbatim (hoisted mac handle, (target, event, _aimed) destructuring and everything after the closure, aim_at_element); stale-press adds only the two-line require_shown check before locate_element_click, reusing the hoisted handle. Combined form ~/tmp/oh-my-pi/queuetwenty/r5/combined-stale-press-19048.txt; build+test proof (#19048's tests + stale-press's nine, macOS desktop + Linux check) due when stale-press opens",
-    "over": [],
-    "paired": [
-     "#19048"
-    ],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-14T03:42:51Z"
-   },
-   {
     "id": "macos-window-order",
     "label": "macos-window-order",
     "number": null,
@@ -104064,6 +104069,7 @@
      "conflicts with #19179 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #19195 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #19208 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
+     "conflicts with #19258 in docs/computer-use.md",
      "conflicts with #18353 in docs/computer-use.md",
      "conflicts with #19034 in docs/computer-use.md",
      "conflicts with #19035 in docs/computer-use.md",
@@ -104071,7 +104077,6 @@
      "conflicts with #18013 in docs/computer-use.md",
      "conflicts with #18222 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #18987 in docs/computer-use.md, packages/coding-agent/src/tools/computer/worker.ts",
-     "conflicts with macos-stale-press in docs/computer-use.md",
      "conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
@@ -104085,14 +104090,14 @@
      "#19179",
      "#19195",
      "#19208",
+     "#19258",
      "#18353",
      "#19034",
      "#19035",
      "#19165",
      "#18013",
      "#18222",
-     "#18987",
-     "macos-stale-press"
+     "#18987"
     ],
     "needs": [],
     "created": "2026-10-19T07:26:45Z"
@@ -104112,7 +104117,7 @@
      "conflicts with #19061 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with #19063 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with #19195 in crates/pi-natives/src/desktop/macos/ax.rs",
-     "conflicts with macos-stale-press in crates/pi-natives/src/desktop/macos/ax.rs",
+     "conflicts with #19258 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with main in crates/pi-natives/src/desktop/macos/ax.rs"
     ],
     "note": "",
@@ -104124,7 +104129,7 @@
      "#19061",
      "#19063",
      "#19195",
-     "macos-stale-press"
+     "#19258"
     ],
     "needs": [],
     "created": "2026-11-11T09:59:13Z"
@@ -104334,9 +104339,9 @@
      "conflicts with #19061 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs",
      "conflicts with #19063 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19195 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with #19258 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18987 in crates/pi-natives/src/desktop/mod.rs",
-     "conflicts with macos-stale-press in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with main in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs"
     ],
     "note": "",
@@ -104348,9 +104353,9 @@
      "#19061",
      "#19063",
      "#19195",
+     "#19258",
      "#18925",
-     "#18987",
-     "macos-stale-press"
+     "#18987"
     ],
     "needs": [],
     "created": "2026-11-11T10:16:04Z"
@@ -104585,6 +104590,7 @@
      "conflicts with #19195 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19208 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19224 in docs/tools/computer.md",
+     "conflicts with #19258 in docs/computer-use.md, docs/tools/computer.md",
      "conflicts with #18353 in docs/computer-use.md, docs/tools/computer.md",
      "conflicts with #19034 in docs/computer-use.md",
      "conflicts with #19035 in docs/computer-use.md",
@@ -104593,7 +104599,6 @@
      "conflicts with #18222 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/tools/eval.ts",
      "conflicts with #18987 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/worker.ts",
-     "conflicts with macos-stale-press in docs/computer-use.md, docs/tools/computer.md",
      "conflicts with macos-move-receipt in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/test/tools/computer.test.ts"
@@ -104610,6 +104615,7 @@
      "#19195",
      "#19208",
      "#19224",
+     "#19258",
      "#18353",
      "#19034",
      "#19035",
@@ -104618,7 +104624,6 @@
      "#18222",
      "#18786",
      "#18987",
-     "macos-stale-press",
      "macos-move-receipt"
     ],
     "needs": [
@@ -104646,11 +104651,11 @@
      "conflicts with #19195 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19208 in packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19224 in docs/tools/computer.md",
+     "conflicts with #19258 in crates/pi-natives/src/desktop/macos/ax.rs, docs/tools/computer.md",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18987 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
-     "conflicts with macos-stale-press in crates/pi-natives/src/desktop/macos/ax.rs, docs/tools/computer.md",
      "conflicts with macos-move-receipt in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs"
@@ -104668,11 +104673,11 @@
      "#19195",
      "#19208",
      "#19224",
+     "#19258",
      "#18353",
      "#18222",
      "#18925",
      "#18987",
-     "macos-stale-press",
      "macos-move-receipt"
     ],
     "needs": [
@@ -104700,10 +104705,10 @@
      "conflicts with #19100 in docs/tools/computer.md",
      "conflicts with #19195 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19224 in docs/tools/computer.md",
+     "conflicts with #19258 in crates/pi-natives/src/desktop/macos/mod.rs, docs/tools/computer.md",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md",
      "conflicts with #18925 in crates/pi-natives/src/desktop/macos/capture.rs, crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs",
-     "conflicts with macos-stale-press in crates/pi-natives/src/desktop/macos/mod.rs, docs/tools/computer.md",
      "conflicts with macos-move-receipt in docs/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -104719,10 +104724,10 @@
      "#19100",
      "#19195",
      "#19224",
+     "#19258",
      "#18353",
      "#18222",
      "#18925",
-     "macos-stale-press",
      "macos-move-receipt"
     ],
     "needs": [
@@ -104882,10 +104887,10 @@
      "conflicts with #19062 in crates/pi-natives/src/desktop/win32/input.rs, crates/pi-natives/src/desktop/win32/mod.rs",
      "conflicts with #19100 in docs/tools/computer.md",
      "conflicts with #19224 in docs/tools/computer.md",
+     "conflicts with #19258 in docs/tools/computer.md",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md",
      "conflicts with #18987 in docs/tools/computer.md",
-     "conflicts with macos-stale-press in docs/tools/computer.md",
      "conflicts with macos-move-receipt in docs/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/win32/input.rs, crates/pi-natives/src/desktop/win32/mod.rs"
     ],
@@ -104897,10 +104902,10 @@
      "#19062",
      "#19100",
      "#19224",
+     "#19258",
      "#18353",
      "#18222",
      "#18987",
-     "macos-stale-press",
      "macos-move-receipt"
     ],
     "needs": [],
@@ -104944,8 +104949,10 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with main in (branch missing on the fork)"
+    ],
     "note": "",
     "over": [],
     "paired": [],
