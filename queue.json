@@ -92823,6 +92823,26 @@
    "updated": "2026-11-14T10:49:17Z",
    "note": "DragConfirm r7 2026-11-14: head d44070508c4 on macos-window-order 4f8d2cd973d. Rule: keys skip the activating press only when AXFocusedWindow==target and the window draws its own content (key_without_press), read after the activation inside with_background_watch. VM block lease ce51b160 (r7/a/out-final.jsonl, kit r7/kit/sum8.py): 540 tries, all cells pass. Review DragConfirm.ReviewKeysNoPress ready@0c5567391a; after it: docs scope, remote panels keep the press (+test). rust-check macos+linux at d44070508c. Benchmark: keys/type on Electron/Chrome raised 2 of ~83 actions, 0 trials flip (OmpTrajClass2 s2).",
    "hold": "Will, 2026-11-14: Will's go needed before opening (proposal ~/tmp/oh-my-pi/HandBack/proposal-prevent.md)"
+  },
+  {
+   "id": "macos-handback-typed",
+   "branch": "will/macos-handback-typed",
+   "title": "fix(natives): give the macOS key window back after a takeover while another program types",
+   "area": "computer",
+   "priority": "P2",
+   "needs": [
+    "macos-handback-key"
+   ],
+   "base": "78c730db8e9c77bf5bde8c22d693aee99b9f831d",
+   "body": "bodies/macos-handback-typed.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-handback-typed",
+   "host": "MacBook-Pro",
+   "added": "2026-11-14T11:57:04Z",
+   "updated": "2026-11-14T11:57:04Z",
+   "note": ""
   }
  ],
  "watch": {
