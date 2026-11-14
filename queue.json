@@ -69822,7 +69822,7 @@
    "area": "other",
    "priority": "P1",
    "needs": [],
-   "base": "e176b37fc7d66ce83cbb8ad6c1e15ea66d8ab5d0",
+   "base": "b7fe8c7f43c378faa0863e79f5509f9dde16ad9a",
    "body": "bodies/upload-stall-error.md",
    "state": "open",
    "pr": 18624,
@@ -69830,7 +69830,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/upload-stall-error",
    "host": "MacBook-Pro",
    "added": "2026-11-09T16:12:04Z",
-   "updated": "2026-11-09T16:47:56Z",
+   "updated": "2026-11-14T17:49:00Z",
    "note": "",
    "built": [
     {
@@ -69862,7 +69862,8 @@
     }
    ],
    "opened": "2026-11-09T16:23:45Z",
-   "readied": "2026-11-09T16:24:05Z"
+   "readied": "2026-11-09T16:24:05Z",
+   "advanced": "2026-11-14T17:49:00Z"
   },
   {
    "id": "relay-autoattach-shared",
