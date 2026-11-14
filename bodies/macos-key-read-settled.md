@@ -8,7 +8,7 @@ When my agent typed a letter on a closed dropdown in a Mac app and then read the
 |---|---|---|
 | `el.press("r")` on a focused native pop-up | returns about 0.5 s after the key | unchanged |
 | `ax()`, `find`, `value()` of that pop-up right after | the option from before the key | waits until the option changes (about 0.5 s later), at most 1.5 s after the last key |
-| a letter that matches nothing, or the current option | read at once | read about 0.98 s later, unchanged, no error |
+| a letter that matches nothing, or the current option | read at once | read about 1.0 s later, unchanged, no error |
 | Chrome and Electron `<select>`, other keys, reads of other elements and windows, typing into text fields | | unchanged |
 
 ## Why
@@ -64,26 +64,26 @@ Trials in a macOS 26 VM: a fixture app with an AppKit pop-up and a SwiftUI picke
 **a letter that changes nothing, then ax(): value shown, errors, time of the read**
 | control | mode | letter | base shown | fix shown | ok base / fix | base ax ms | fix ax ms (min-median-max) |
 |---|---|---|---|---|---|---|---|
-| popup | bg | nomatch | ['Bravo'] | ['Bravo'] | 10/10 / 10/10 | 17 | 974-977-979 |
-| popup | bg | current | ['Bravo'] | ['Bravo'] | 10/10 / 10/10 | 18 | 972-979-981 |
-| popup | fg | nomatch | ['Bravo'] | ['Bravo'] | 10/10 / 10/10 | 17 | 971-978-981 |
-| popup | fg | current | ['Bravo'] | ['Bravo'] | 10/10 / 10/10 | 17 | 971-977-980 |
-| picker | bg | nomatch | ['Bravo'] | ['Bravo'] | 10/10 / 10/10 | 17 | 970-974-982 |
-| picker | bg | current | ['Bravo'] | ['Bravo'] | 10/10 / 10/10 | 18 | 970-974-981 |
-| picker | fg | nomatch | ['Bravo'] | ['Bravo'] | 10/10 / 10/10 | 18 | 968-974-978 |
-| picker | fg | current | ['Bravo'] | ['Bravo'] | 10/10 / 10/10 | 18 | 969-974-978 |
+| popup | bg | nomatch | ['Bravo'] | ['Bravo'] | 10/10 / 10/10 | 14 | 992-996-999 |
+| popup | bg | current | ['Bravo'] | ['Bravo'] | 10/10 / 10/10 | 19 | 994-997-1000 |
+| popup | fg | nomatch | ['Bravo'] | ['Bravo'] | 10/10 / 10/10 | 21 | 994-998-1008 |
+| popup | fg | current | ['Bravo'] | ['Bravo'] | 10/10 / 10/10 | 26 | 990-997-1003 |
+| picker | bg | nomatch | ['Bravo'] | ['Bravo'] | 10/10 / 10/10 | 23 | 992-997-999 |
+| picker | bg | current | ['Bravo'] | ['Bravo'] | 10/10 / 10/10 | 23 | 991-994-1001 |
+| picker | fg | nomatch | ['Bravo'] | ['Bravo'] | 10/10 / 10/10 | 24 | 988-995-999 |
+| picker | fg | current | ['Bravo'] | ['Bravo'] | 10/10 / 10/10 | 26 | 990-994-996 |
 
 **time per call with no read of the pop-up after it (median ms, p10-p90)**
 | mode | call | base | fix |
 |---|---|---|---|
-| bg | letter | 591 (585-606), n=10 | 587 (586-611), n=10 |
-| bg | tab | 566 (560-572), n=10 | 565 (557-572), n=10 |
-| bg | type16 | 545 (541-554), n=10 | 544 (543-552), n=10 |
-| bg | other_window | 29 (29-33), n=10 | 29 (27-31), n=10 |
-| fg | letter | 593 (587-618), n=10 | 592 (586-603), n=10 |
-| fg | tab | 561 (559-572), n=10 | 563 (559-568), n=10 |
-| fg | type16 | 544 (539-548), n=10 | 541 (540-548), n=10 |
-| fg | other_window | 28 (27-31), n=10 | 29 (28-31), n=10 |
+| bg | letter | 603 (594-613), n=10 | 609 (602-615), n=10 |
+| bg | tab | 573 (570-585), n=10 | 576 (573-585), n=10 |
+| bg | type16 | 548 (544-564), n=10 | 547 (539-562), n=10 |
+| bg | other_window | 38 (27-40), n=10 | 34 (27-42), n=10 |
+| fg | letter | 606 (600-617), n=10 | 610 (605-616), n=10 |
+| fg | tab | 576 (568-580), n=10 | 573 (561-585), n=10 |
+| fg | type16 | 544 (542-553), n=10 | 540 (536-560), n=10 |
+| fg | other_window | 29 (25-32), n=10 | 28 (28-31), n=10 |
 
 **type("<full title>") to the closed, focused control in the background, typist in front (fix)**
 | control | title | n | ends on title | app changes per try | menus seen | typist keys lost | Probe lost key status | Probe still in front | call ms |
@@ -92,8 +92,6 @@ Trials in a macOS 26 VM: a fixture app with an AppKit pop-up and a SwiftUI picke
 | popup | Zulu | 5 | 5 | [2] | 0 | 0 of 100 | 0 | 5/5 | 628 |
 | picker | Medium | 5 | 5 | [1] | 0 | 0 of 100 | 0 | 5/5 | 658 |
 | picker | Zulu | 5 | 5 | [1] | 0 | 0 of 100 | 0 | 5/5 | 624 |
-
-The last two tables come from the reviewed head, before the review fixes that make the deadline count from the last key.
 
 Unit tests: `cargo test -p pi-natives --lib type_ahead` (a mark counts from the last key and keeps the latest value-before; a read of the marked pop-up waits for its change, another element's read passes, an unchanged pop-up is read at the deadline, a cancel keeps the mark).
 
