@@ -1,17 +1,16 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14 12:45Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14 12:49Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-14 12:38Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 3, conflict-held 18, stacked 20, held 13, parked 2, open PRs 36; merged 341, closed 36
+**Counts:** openable now 2, conflict-held 18, stacked 20, held 13, parked 2, open PRs 37; merged 341, closed 36
 
-## Openable now (3)
+## Openable now (2)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
 | stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 1d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
-| macos-stale-press | fix(natives): refuse macOS element actions on a control a person could not click | computer | P1 | 9h | open; accepted pair with #19048: Main, 2026-11-14: crates/pi-natives/src/desktop/macos/mod.rs element-click closure (function body): #19048's lines verbatim (hoisted mac handle, (target, event, _aimed) destructuring and everything after the closure, aim_at_element); stale-press adds only the two-line require_shown check before locate_element_click, reusing the hoisted handle. Combined form ~/tmp/oh-my-pi/queuetwenty/r5/combined-stale-press-19048.txt; build+test proof (#19048's tests + stale-press's nine, macOS desktop + Linux check) due when stale-press opens | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-stale-press) |
 | macos-move-receipt | fix(coding-agent): say what a macOS background move did | computer | P2 | 8h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-move-receipt) |
 
 ## Conflict-held (18)
@@ -78,7 +77,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14
 | desktop-cursor | feat(coding-agent,natives): show each agent's cursor where its computer input lands on macOS | coding-agent | P2 | 3d | Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check \| Main 2026-11-12: before it opens, the waiting-key-chord case with the cursor actually drawn (20 trials at a 20 s deadline; CursorDemo's cursor-on arm never drew one, and an early run on the combined tree returned 'Cancelled, input may be partial' 11/11, unexplained), on the polished branch will/desktop-cursor-polish. | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/desktop-cursor) |
 | win-type-insert | feat(natives): insert typed text into a focused Windows multi-line edit control | computer | P2 | 2d | Main, 2026-11-12: proposal; opens only after entry A merges and Will has seen the body | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-type-insert) |
 | ax-read-as-title-link | fix(natives): keep a macOS ref whose own label changes while its title element shows the same text | computer | P1 | 1d | Will, 2026-11-13: Main decides the approach once #19061 merges, with all the data in. Data so far: release leg 9 refusals in 93 runs (4 true catches, 5 same-control relabels, about +2 steps each, no grade changed); wording-only change closed (no step saved, 6 runs per arm); TitleTwin 0 wrong-item actions in 200 trials on stock apps, fixture same-title reuse 10/10 wrong; RelabelCases (scripted, 10 tries per case, v18.20.0 vs b42c6d20412, ~/tmp/oh-my-pi/RelabelCases/{signals,recovery}.md): Reminders count refused 10/10 -> right control 10/10; Finder rename and Calendar location still refused 10/10 (no title link); Contacts City->Street still refused 10/10. Finder and Calendar differ from Contacts in that frame, value and sibling count are unchanged, but that is not shown safe in general. A refusal that carried its parent's subtree would be an estimated 150-460 chars against the 1,300-7,400 the model re-read, and would save one of the two recovery steps (reconstructed, not run). | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-read-as-live-label) |
-| macos-keys-no-press | fix(natives): send macOS background keys to the key window without a press | computer | P1 | 1h | Will, 2026-11-14: Will's go needed before opening (proposal ~/tmp/oh-my-pi/HandBack/proposal-prevent.md) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-keys-no-press) |
+| macos-keys-no-press | fix(natives): send macOS background keys to the key window without a press | computer | P1 | 2h | Will, 2026-11-14: Will's go needed before opening (proposal ~/tmp/oh-my-pi/HandBack/proposal-prevent.md) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-keys-no-press) |
 
 ## Parked (2)
 
@@ -87,7 +86,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14
 | [#15128](https://github.com/can1357/oh-my-pi/pull/15128) | reset-restore-longest-wait | feat(coding-agent): restore the blocked account whose reset buys the most time | broker | P2 | 3d | Will, 2026-11-02: account broker redesign, on hold since 2026-11-02 | not checked or kept fresh | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-restore-longest-wait) |
 | [#15130](https://github.com/can1357/oh-my-pi/pull/15130) | reset-before-reserve | feat(coding-agent): opt in to spending a blocked account's saved reset before a reserve-only backup | broker | P2 | 3d | Will, 2026-11-02: account broker redesign, on hold since 2026-11-02 | not checked or kept fresh | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-before-reserve) |
 
-## Open PRs (36)
+## Open PRs (37)
 
 | PR | id | title | area | rank | open | plan | branch |
 |---|---|---|---|---|---|---|---|
@@ -127,3 +126,4 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14
 | [#19194](https://github.com/can1357/oh-my-pi/pull/19194) | factory-droid-capture-resilience | test(ai): keep captured Factory Droid parity cases when one case fails | other | P1 | 17h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-capture-resilience) |
 | [#19208](https://github.com/can1357/oh-my-pi/pull/19208) | macos-handback-key | fix(natives): give the user's key window back after macOS takeover and focus-guard hand-backs | computer | P1 | 13h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-handback-key) |
 | [#19224](https://github.com/can1357/oh-my-pi/pull/19224) | macos-popup-value | fix(natives): choose a Chromium select's option on macOS and close the menu it opens | computer | P1 | 7h | keep; accepted pair with #19179: Main, 2026-11-14: built and tested, no textual conflict. popup-value says 'that is still open' (no Escape when the window list is unreadable or the menu left it); #19179 ec8a6c8d028 asserts contains("that is still open"), true in either merge order. macOS desktop: main+#19179 608/0, main+#19179+popup-value 620/0 (bench-mac); trees T1/T2 (r5/trees.sh) Linux check:ts, desktop 345/333, coding-agent 201/178 pass. items() untitled-by-value change left out (follow-up for the pop-up lane, r5/combined-popup-19179.diff) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-popup-value) |
+| [#19258](https://github.com/can1357/oh-my-pi/pull/19258) | macos-stale-press | fix(natives): refuse macOS element actions on a control a person could not click | computer | P1 | 9h | open; accepted pair with #19048: Main, 2026-11-14: crates/pi-natives/src/desktop/macos/mod.rs element-click closure (function body): #19048's lines verbatim (hoisted mac handle, (target, event, _aimed) destructuring and everything after the closure, aim_at_element); stale-press adds only the two-line require_shown check before locate_element_click, reusing the hoisted handle. Combined form ~/tmp/oh-my-pi/queuetwenty/r5/combined-stale-press-19048.txt; build+test proof (#19048's tests + stale-press's nine, macOS desktop + Linux check) due when stale-press opens | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-stale-press) |
