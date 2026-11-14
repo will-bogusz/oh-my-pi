@@ -4,7 +4,7 @@ After a macOS `computer` call that ran in takeover, or a background call whose t
 
 Both paths hand the user's app back with a `kCPSNoWindows` front request, which activates the app without making any window key. The takeover skipped its make-key records whenever the app's `AXFocusedWindow` named the user's window, which AppKit does even with no key window; the background focus guard sent one focus record that does not make a window key. Both now send the make-key records the takeover already uses to enter its target.
 
-Where the user's app never left the front, the old accessibility check stays, so an already-key Chromium window is not re-keyed. A click, shortcut or switch by the user still wins: nothing is sent over it. When the guard finds nothing stolen it sends nothing, as before.
+Where the user's app never left the front, the old check stays, so a key Chromium window is not re-keyed. A click, shortcut or switch by the user still wins: nothing is sent over it. When the guard finds nothing stolen it sends nothing, as before.
 
 | What the takeover did | Notice on macOS |
 |---|---|
@@ -13,7 +13,7 @@ Where the user's app never left the front, the old accessibility check stays, so
 | The user's last input was still being read | `handed the front back to Notes but not its window's keyboard: …`, or `focus is on Notes; … so nothing was sent to its window` when macOS refused the hand-back |
 | A record was rejected | the call fails with `restoration failed: window N rejected its make-key record` (unchanged) |
 
-Hosts read the same answer as `DesktopFocusReturn.keyboard`.
+Hosts read it as `DesktopFocusReturn.keyboard`.
 
 ## Why
 
@@ -32,12 +32,16 @@ Real addons, `main` against this branch interleaved, 10 tries each on one macOS 
 | Chrome page with a focused field ← takeover typing into TextEdit | 0/10 → 10/10 | 346 → 349 |
 | AppKit app ← background click into an app that activates itself | 0/20 → 20/20 | 668 → 670 |
 
-The simulated user's keys arrived on both builds in every takeover cell, so what changes is the window being drawn and reported as focused. With Chrome as the user's app and a background click that steals the front, the page reported a blur in 0 of 17 calls on this branch against 7 of 14 on `main`. A choice the user made during the call stood on both builds.
+The simulated user's keys arrived on both builds in every takeover cell; what changes is the window drawn and reported as focused. With Chrome as the user's app and a background click that steals the front, the page reported a blur in 0 of 17 calls on this branch against 7 of 14 on `main`.
 
 Where nothing was stolen nothing moved: 30 of 30 calls kept the user's page focused on both builds at the same call time, and a 250-action background run across six apps with a user typing lost 0 of 3000 keys on both (p50 534 → 533 ms).
 
-`cargo test -p pi-natives --lib -- the_hand_back_makes_the_previous_window_key a_choice_during_the_call`: the first fails on `main`'s rule. The guard change has no unit seam; it is the bytes sent, measured above.
+`cargo test -p pi-natives --lib -- the_hand_back_makes_the_previous_window_key a_choice_during_the_call`: the first fails on `main`'s rule. `the_guard_skips_make_key_when_front_moves_after_hand_back` and `a_switch_that_races_the_key_window_request_keeps_the_app_the_user_chose` cover the guard; its make-key request is conditional, so a racing switch by the user stands.
 
 ## Risk
 
 Review first: `give_key_back` and `choice_baseline` in `skylight.rs`. Each hand-back from behind the target now sends one `kCPSUserGenerated` front request that `main` sent only when the accessibility answer disagreed. Measured on macOS 26.5 only; older macOS was not run.
+
+Limit: on a real keyboard, a Cmd-` made during a takeover is left with no key window, or handed back over, in 2 of 40 tries, on this head and on a follow-up build alike.
+
+
