@@ -92799,8 +92799,8 @@
    "worktree": "/home/will/.omp/main-wt/oh-my-pi/key-read-settled",
    "host": "goliath",
    "added": "2026-11-14T10:14:31Z",
-   "updated": "2026-11-14T10:14:31Z",
-   "note": ""
+   "updated": "2026-11-14T10:14:47Z",
+   "note": "KeyMenu2 r3 2026-11-14: head b67260ce06d on key-menu 636a981d140 (#19179). Review KeyMenu2.KeyReadReview needs-changes at 159a5f5d5e; M1-M4, S2, N1-N5 fixed in the one commit; S1 (a click on the marked popup waits) and N6 stated as limits in the body. rust-check linux+macos at b67260ce06. Still/cost tables are from 159a5f5 until block b4 (final head) lands; then the body is updated. Benchmark lane re-runs IR-01/IR-02 after this merges."
   }
  ],
  "watch": {
