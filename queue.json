@@ -93211,10 +93211,14 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-14T20:14:45Z",
+  "checked": "2026-11-14T20:45:18Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
+   "macos-takeover-typing-pause": {
+    "since": "2026-11-14T20:45:18Z",
+    "title": "fix(natives): keep macOS takeover from taking a typing user's keys"
+   },
    "macos-move-receipt": {
     "since": "2026-11-14T05:00:07Z",
     "title": "fix(coding-agent): say what a macOS background move did"
@@ -93233,20 +93237,6 @@
     "title": "fix(ai,coding-agent): carry other models' reasoning to Claude and retry its refusal without it",
     "files": [
      "packages/ai/src/providers/pi-native-server.ts"
-    ]
-   },
-   "#18353": {
-    "since": "2026-11-14T20:14:45Z",
-    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
-    "files": [
-     "MODULE.bazel.lock"
-    ]
-   },
-   "#18013": {
-    "since": "2026-11-14T20:14:45Z",
-    "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "files": [
-     "MODULE.bazel.lock"
     ]
    },
    "#19120": {
@@ -96737,6 +96727,12 @@
     "files": [
      "MODULE.bazel.lock"
     ]
+   },
+   {
+    "at": "2026-11-14T20:45:18Z",
+    "kind": "openable",
+    "id": "macos-takeover-typing-pause",
+    "title": "fix(natives): keep macOS takeover from taking a typing user's keys"
    }
   ]
  },
@@ -103214,8 +103210,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-14T20:31:55.314362Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-14T20:45:19.603759Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -104058,16 +104054,14 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): keep macOS takeover from taking a typing user's keys",
-    "action": "wait",
-    "reasons": [
-     "conflicts with #16553 in crates/pi-natives/src/desktop/control/intervention.rs, crates/pi-natives/src/desktop/control/macos.rs"
-    ],
-    "note": "",
+    "action": "open",
+    "reasons": [],
+    "note": "accepted pair with #16553: Main, 2026-11-14: combined form: intervention.rs use list keeps typing-pause's USER_QUIET and #16553's macos::ClickJournal; control/macos.rs tap callback keeps #16553's button_record block first and unchanged, then typing-pause's observed() block using #16553's own pid variable (file ~/tmp/oh-my-pi/queuetwentyone/combined-typingpause-16553.md, tree 32a1e67a7b2); whichever merges second rebases onto main",
     "over": [],
-    "paired": [],
-    "blocked_by": [
+    "paired": [
      "#16553"
     ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-14T18:57:16Z"
    },
@@ -104351,6 +104345,7 @@
      "conflicts with #18013 in docs/computer-use.md",
      "conflicts with #18222 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #18987 in docs/computer-use.md, packages/coding-agent/src/tools/computer/worker.ts",
+     "conflicts with macos-takeover-typing-pause in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
@@ -104371,7 +104366,8 @@
      "#19165",
      "#18013",
      "#18222",
-     "#18987"
+     "#18987",
+     "macos-takeover-typing-pause"
     ],
     "needs": [],
     "created": "2026-10-19T07:26:45Z"
@@ -104650,6 +104646,7 @@
      "conflicts with #19195 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #19208 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18222 in packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with macos-takeover-typing-pause in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/win32/mod.rs, packages/coding-agent/src/prompts/tools/computer.md"
     ],
     "note": "",
@@ -104661,7 +104658,8 @@
      "#19179",
      "#19195",
      "#19208",
-     "#18222"
+     "#18222",
+     "macos-takeover-typing-pause"
     ],
     "needs": [],
     "created": "2026-11-11T09:06:32Z"
@@ -104875,6 +104873,7 @@
      "conflicts with #18222 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/tools/eval.ts",
      "conflicts with #18987 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/worker.ts",
+     "conflicts with macos-takeover-typing-pause in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with macos-move-receipt in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/test/tools/computer.test.ts"
@@ -104900,6 +104899,7 @@
      "#18222",
      "#18786",
      "#18987",
+     "macos-takeover-typing-pause",
      "macos-move-receipt"
     ],
     "needs": [
@@ -104932,6 +104932,7 @@
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18987 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
+     "conflicts with macos-takeover-typing-pause in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with macos-move-receipt in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs"
@@ -104954,6 +104955,7 @@
      "#18222",
      "#18925",
      "#18987",
+     "macos-takeover-typing-pause",
      "macos-move-receipt"
     ],
     "needs": [
@@ -104985,6 +104987,7 @@
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md",
      "conflicts with #18925 in crates/pi-natives/src/desktop/macos/capture.rs, crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with macos-takeover-typing-pause in crates/pi-natives/src/desktop/macos/mod.rs",
      "conflicts with macos-move-receipt in docs/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -105004,6 +105007,7 @@
      "#18353",
      "#18222",
      "#18925",
+     "macos-takeover-typing-pause",
      "macos-move-receipt"
     ],
     "needs": [
@@ -105225,8 +105229,10 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with main in (branch missing on the fork)"
+    ],
     "note": "",
     "over": [],
     "paired": [],
