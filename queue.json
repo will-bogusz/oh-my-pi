@@ -73502,7 +73502,7 @@
    "needs": [
     "#18751"
    ],
-   "base": "8c7353eb6c711b6e11bf66f67ad09cc481f31277",
+   "base": "b7fe8c7f43c378faa0863e79f5509f9dde16ad9a",
    "body": "bodies/observe-settle.md",
    "state": "open",
    "pr": 19045,
@@ -73510,9 +73510,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-observe-settle",
    "host": "MacBook-Pro",
    "added": "2026-11-10T18:56:46Z",
-   "updated": "2026-11-14T09:53:06Z",
+   "updated": "2026-11-14T17:48:05Z",
    "note": "",
-   "advanced": "2026-11-14T09:53:06Z",
+   "advanced": "2026-11-14T17:48:05Z",
    "kind": "proposal",
    "built": [
     {
