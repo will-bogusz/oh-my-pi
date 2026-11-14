@@ -72557,7 +72557,7 @@
    "area": "browser",
    "priority": "P2",
    "needs": [],
-   "base": "8c7353eb6c711b6e11bf66f67ad09cc481f31277",
+   "base": "20797b8941dc12c46489f696ad5d1c74b384aa93",
    "body": "bodies/browser-core-first-use.md",
    "state": "open",
    "pr": 18786,
@@ -72565,9 +72565,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-core-first-use",
    "host": "MacBook-Pro",
    "added": "2026-11-10T18:04:09Z",
-   "updated": "2026-11-14T09:53:40Z",
+   "updated": "2026-11-14T10:07:11Z",
    "note": "",
-   "advanced": "2026-11-14T09:53:40Z",
+   "advanced": "2026-11-14T10:07:11Z",
    "built": [
     {
      "with": "#18658",
