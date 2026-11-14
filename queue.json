@@ -92717,7 +92717,7 @@
   {
    "id": "macos-window-order",
    "branch": "will/macos-window-order",
-   "title": "fix(natives): put the user's key window back in front of a macOS background target",
+   "title": "fix(natives): put the user's key window back in front of a macOS target after background input and takeover",
    "area": "computer",
    "priority": "P1",
    "needs": [
@@ -92731,8 +92731,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-window-order",
    "host": "MacBook-Pro",
    "added": "2026-11-14T01:37:23Z",
-   "updated": "2026-11-14T01:37:43Z",
-   "note": "HandBack 2026-11-14: head 4f8d2cd973d on macos-handback-key (#19208, 78c730db8e9). Key-window-only restore (raising non-key windows took 12/520 typed keys). rust-check macos/linux/windows at 4f8d2cd973d (diff 6fbf5ac8c5). Review OrderReview2 needs-changes -> all 7 addressed (changelog dedupe, has_order/cadence/disarm tests, None when a user window is above key, still_kept re-check before raise, docs). Other overlaps: #19062 none, #19179 none, macos-drag-confirm/#19165 none, will/macos-key-divert none (textual).",
+   "updated": "2026-11-14T07:56:04Z",
+   "note": "HandBack 2026-11-14: head 37142503cd9 (amended): takeover hand-back also raises the user's key window (with_foreground, hand_back_keeps_order). rust-check macos/linux/windows at 37142503cd9 (diff d9e990b339). Review TakeoverOrderReview needs-changes -> fixed (cause wording, same-app test, doubled error text, docs/changelog/title). Earlier: key-window-only restore, OrderReview2 7/7. Overlaps: #16553 pair recorded; #19062/#19179/drag-confirm/scroll-direction none.",
    "rebases_after": [
     16553
    ],

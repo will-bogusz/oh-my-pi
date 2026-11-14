@@ -16,8 +16,9 @@ On a macOS 26.5 VM with my one-window app in front, each target behind it, 10 tr
 | Chrome | click / element click / key | 10, 10, 0 → 0, 0, 0 | 11 (16) / 16 (18) / - | 663 → 665 / 666 → 669 / 544 → 549 |
 | LibreOffice Calc | click / element click / key | 10, 10, 9 → 0, 0, 0 | 15 (22) / 15 (18) / 16 (22) | 676 → 668 / 669 → 661 / 541 → 551 |
 | Electron app | click / element click / key | 10, 10, 9 → 0, 0, 0 | 16 (30) / 12 (23) / 15 (20) | 667 → 665 / 658 → 669 / 548 → 548 |
+| TextEdit, through a takeover | click / drag / key | 10, 10, 0 → 0, 0, 0 (main: 10, 10, 0) | until the hand-back: 129 (150) / 181 (213) / - | 221 → 260 / 349 → 386 / 327 → 326 |
 
-Every call returned success on both builds. These were measured on the revision before key-window-only restore, which behaves the same with one window of mine; on this head TextEdit click, Chrome click, Calc key and Electron element click were measured again with the same result (0 of 10 in front at the end each, call time within 10 ms).
+A takeover leaves the target in front too (on main as well), and its hand-back brings my app back without its windows; it now raises my key window once after handing the keyboard back, which adds about 38 ms to a takeover click or drag while the raise is drawn and confirmed. Every call returned success on both builds. These were measured on the revision before key-window-only restore, which behaves the same with one window of mine; on this head TextEdit click, Chrome click, Calc key and Electron element click were measured again with the same result (0 of 10 in front at the end each, call time within 10 ms).
 
 With two windows of mine over the target, the front one key, a background click on the target while I type 52 keys through the call (10 tries each):
 
