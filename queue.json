@@ -93176,8 +93176,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-takeover-typing-pause",
    "host": "MacBook-Pro",
    "added": "2026-11-14T18:57:16Z",
-   "updated": "2026-11-14T18:57:16Z",
-   "note": ""
+   "updated": "2026-11-14T18:57:34Z",
+   "note": "",
+   "hold": "Main, 2026-11-14: owed in the body, each from a run: (1) switch2/switchapp1 handed back 1/10 on fix vs 0/10 in both quiet-0 runs: end states from traces, then switch2, switchapp1 and the race cell on #19208+fix1 vs #19208 alone, 20 tries each; (2) interleaved A/B of background calls on AppKit (+30 ms on the non-interleaved run); (3) the live bound cell, its returned text and the bound in seconds in body and docs."
   }
  ],
  "watch": {
