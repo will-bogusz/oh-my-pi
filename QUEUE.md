@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14 20:51Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14 21:00Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-14 20:45Z on goliath; groups below are from it, states from the manifest)
@@ -11,7 +11,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
 | macos-move-receipt | fix(coding-agent): say what a macOS background move did | computer | P2 | 16h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-move-receipt) |
-| macos-takeover-typing-pause | fix(natives): keep macOS takeover from taking a typing user's keys | computer | P1 | 1h | open; accepted pair with #16553: Main, 2026-11-14: combined form: intervention.rs use list keeps typing-pause's USER_QUIET and #16553's macos::ClickJournal; control/macos.rs tap callback keeps #16553's button_record block first and unchanged, then typing-pause's observed() block using #16553's own pid variable (file ~/tmp/oh-my-pi/queuetwentyone/combined-typingpause-16553.md, tree 32a1e67a7b2); whichever merges second rebases onto main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-takeover-typing-pause) |
+| macos-takeover-typing-pause | fix(natives): keep macOS takeover from taking a typing user's keys | computer | P1 | 2h | open; accepted pair with #16553: Main, 2026-11-14: combined form: intervention.rs use list keeps typing-pause's USER_QUIET and #16553's macos::ClickJournal; control/macos.rs tap callback keeps #16553's button_record block first and unchanged, then typing-pause's observed() block using #16553's own pid variable (file ~/tmp/oh-my-pi/queuetwentyone/combined-typingpause-16553.md, tree 32a1e67a7b2); whichever merges second rebases onto main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-takeover-typing-pause) |
 
 ## Conflict-held (20)
 
@@ -60,7 +60,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14
 | factory-droid-1100-models | feat(catalog): add the Factory Droid models droid 1.10.0 serves | factory-droid |  | 1d | factory-droid-1100-pin | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-models) |
 | macos-window-order | fix(natives): put the user's key window back in front of a macOS target after background input and takeover | computer | P1 | 19h | macos-handback-key ([#19208](https://github.com/can1357/oh-my-pi/pull/19208)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-window-order) |
 | macos-key-read-settled | fix(natives): read a macOS popup after the option its typed letters choose | computer | P1 | 10h | key-menu ([#19179](https://github.com/can1357/oh-my-pi/pull/19179)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-key-read-settled) |
-| macos-handback-typed | fix(natives): give the macOS key window back after a takeover while another program types | computer | P2 | 8h | macos-handback-key ([#19208](https://github.com/can1357/oh-my-pi/pull/19208)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-handback-typed) |
+| macos-handback-typed | fix(natives): give the macOS key window back after a takeover while another program types | computer | P2 | 9h | macos-handback-key ([#19208](https://github.com/can1357/oh-my-pi/pull/19208)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-handback-typed) |
 | macos-drag-no-change-note | fix(natives): note a macOS background drag that changed nothing readable | computer | P2 | 8h | macos-drag-confirm ([#19195](https://github.com/can1357/oh-my-pi/pull/19195)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-drag-no-change-note) |
 
 ## Held (13)

@@ -29,7 +29,8 @@ On a macOS 26.5 VM, `main` (`fe194ec2f12`) against this change, builds interleav
 
 | 10 calls each | `main` | this PR |
 |---|---|---|
-{intervention}
+| The person clicks the target (a Chrome page behind their window) 1.2 s into a background `el.type` of 150 characters | stopped 10 of 10 (`UserIntervened`), about 50 characters sent | stopped 10 of 10, the same |
+| The person types into the target while a takeover `el.type` has it in front | stopped 10 of 10, their keys in the target | stopped 10 of 10, the same |
 | Person typing in their own window, `el.type` into a Safari page field, with the macOS takeover pause and background typing into WebKit fields also applied (both queued) | 4 stopped with `UserIntervened` | 0 stopped, all typed in the background |
 | Same into a WKWebView field | 0 stopped | 0 stopped |
 
