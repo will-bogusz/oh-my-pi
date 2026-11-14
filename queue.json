@@ -92784,7 +92784,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-14T06:31:53Z",
+  "checked": "2026-11-14T07:02:08Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -92810,6 +92810,14 @@
     "title": "fix(ai,coding-agent): carry other models' reasoning to Claude and retry its refusal without it",
     "files": [
      "packages/ai/src/providers/pi-native-server.ts"
+    ]
+   },
+   "#19120": {
+    "since": "2026-11-14T07:02:08Z",
+    "title": "fix(stats): count snapcompact compactions on the Gain tab",
+    "files": [
+     "packages/stats/src/gain-aggregator.ts",
+     "packages/stats/test/gain-aggregator.test.ts"
     ]
    }
   },
@@ -92883,8 +92891,6 @@
    19165,
    19178,
    19179,
-   19180,
-   19188,
    19191,
    19194,
    19195,
@@ -96503,6 +96509,16 @@
     "title": "fix(catalog): identify Devin requests as CLI 3000.12.57",
     "merged_by": "can1357",
     "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-14T07:02:08Z",
+    "kind": "conflict",
+    "label": "#19120",
+    "title": "fix(stats): count snapcompact compactions on the Gain tab",
+    "files": [
+     "packages/stats/src/gain-aggregator.ts",
+     "packages/stats/test/gain-aggregator.test.ts"
+    ]
    }
   ]
  },
@@ -102727,7 +102743,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-14T06:31:54.240677Z",
+  "at": "2026-11-14T07:02:09.335535Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -102735,23 +102751,6 @@
    "left": 8
   },
   "rows": [
-   {
-    "id": "devin-pin-31257",
-    "label": "#19180",
-    "number": 19180,
-    "state": "open",
-    "area": "catalog",
-    "priority": "P0",
-    "title": "fix(catalog): identify Devin requests as CLI 3000.12.57",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-13T17:20:21Z"
-   },
    {
     "id": "click-place-release",
     "label": "#16553",
@@ -103011,23 +103010,6 @@
     "created": "2026-11-13T17:10:23Z"
    },
    {
-    "id": "factory-droid-config-update-upstreams",
-    "label": "#19188",
-    "number": 19188,
-    "state": "open",
-    "area": "catalog",
-    "priority": "P1",
-    "title": "fix(catalog): keep GPT-6 effort changes off configuration_update on Factory Droid Bedrock and Snowflake",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-13T18:15:41Z"
-   },
-   {
     "id": "macos-drag-confirm",
     "label": "#19195",
     "number": 19195,
@@ -103219,8 +103201,10 @@
     "area": "other",
     "priority": "P2",
     "title": "fix(stats): count snapcompact compactions on the Gain tab",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in packages/stats/src/gain-aggregator.ts, packages/stats/test/gain-aggregator.test.ts"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -104597,7 +104581,7 @@
      "conflicts with #17610 in packages/ai/src/providers/factory-droid.ts",
      "conflicts with #18786 in packages/coding-agent/src/session/agent-session.ts",
      "its need token-count-policy conflicts with main in packages/catalog/src/compat/rules/classes/anthropic.kdl, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/session/session-stats.ts, packages/coding-agent/test/context-fits-model.test.ts",
-     "its need wire-delta-count conflicts with main in packages/agent/src/tokenizer.ts, packages/ai/src/providers/factory-droid.ts, packages/ai/src/providers/transform-messages.ts, packages/coding-agent/src/session/session-maintenance.ts",
+     "its need wire-delta-count conflicts with main in packages/agent/src/tokenizer.ts, packages/agent/test/tokenizer.test.ts, packages/ai/src/providers/factory-droid.ts, packages/ai/src/providers/transform-messages.ts, packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with main in packages/agent/src/agent.ts, packages/ai/src/providers/factory-droid/gemini.ts, packages/ai/src/providers/google-gemini-cli.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/context-view.ts, packages/coding-agent/test/modes/context-view.test.ts, packages/tui/src/status-line/context-usage.ts, packages/tui/test/context-usage.test.ts"
     ],
     "note": "",
@@ -104662,7 +104646,7 @@
     "action": "wait",
     "reasons": [
      "conflicts with #17610 in packages/ai/src/providers/factory-droid.ts, packages/ai/src/providers/transform-messages.ts",
-     "conflicts with main in packages/agent/src/tokenizer.ts, packages/ai/src/providers/factory-droid.ts, packages/ai/src/providers/transform-messages.ts, packages/coding-agent/src/session/session-maintenance.ts"
+     "conflicts with main in packages/agent/src/tokenizer.ts, packages/agent/test/tokenizer.test.ts, packages/ai/src/providers/factory-droid.ts, packages/ai/src/providers/transform-messages.ts, packages/coding-agent/src/session/session-maintenance.ts"
     ],
     "note": "",
     "over": [],
