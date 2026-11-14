@@ -92530,6 +92530,24 @@
    "pair_reasons": {
     "16553": "HandBack, 2026-11-14: textual conflict only, in with_background_watch and WindowServerDesktop (skylight.rs). Combined form keeps both sides: #16553's 'let placement = match (clicks, previous.pid) {Tap|HitTest}' first, then this entry's 'let order = previous.pid.zip(capture::stacked_windows()).and_then(|(user, stack)| window_order::EntryOrder::new(pid, user, previous_key, &stack));' (read before anything is sent; placement sends nothing); WindowServerDesktop { spi, previous, key: previous_key, placement, stopped: &stopped, order: RefCell::new(order), raises: Cell::new(0) }; struct fields key, placement, stopped, order, raises. No semantic overlap: placement feeds SwitchSignals, order feeds keep_order."
    }
+  },
+  {
+   "id": "macos-stale-press",
+   "branch": "will/macos-stale-press",
+   "title": "fix(natives): refuse macOS element actions on a control a person could not click",
+   "area": "computer",
+   "priority": "P1",
+   "needs": [],
+   "base": "6ec2b71cd7d80e18e1b6481f2e3d9c05f5f0c56c",
+   "body": "bodies/macos-stale-press.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-stale-press",
+   "host": "MacBook-Pro",
+   "added": "2026-11-14T03:42:51Z",
+   "updated": "2026-11-14T03:42:51Z",
+   "note": ""
   }
  ],
  "watch": {
