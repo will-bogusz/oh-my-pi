@@ -14,16 +14,16 @@ In an Electron window behind the user's, drags on range inputs went from 0 of 20
 
 - **The pointer drag goes out as before**, and decides first.
 - **A web slider the page left behind is stepped on.** When a plain left drag on an `AXSlider` in web content that takes `AXIncrement` leaves it where it was or at the value under the press, it is stepped to the straight-line value under the path's end while its first two steps are even, and the result says so; one exposing its thumb (WebKit's range input) is stepped until the thumb reaches the release. At most 1,000 steps (995 took 1.7 s per call).
-- **A slider the pointer moved is left where it held.** The result names its value, and the straight-line value under the path's end when they differ.
-- **A control that did not move says so.** Any other left drag starting on a control publishing a number (AppKit slider, scroll bar, splitter) that could have moved and did not throws `InputFailed` instead of returning as done.
+- **A slider the pointer moved is left where it held.** The result names its value, and the straight-line value at the path's end if they differ.
+- **A control that did not move says so.** Any other left drag from a control with a number (AppKit slider, scroll bar, splitter) that could have moved and did not throws `InputFailed`.
 
 ## Why
 
-An agent reported slider settings changed that were not: during a background drag the real mouse button is up, and Chromium drops the moves. The pointer goes first because a slider built on `pointermove` is moved by it on `main`.
+An agent reported slider settings changed that were not: in a background drag the mouse button is up, so Chromium drops the moves. The pointer goes first because a slider built on `pointermove` is moved by it on `main`.
 
 Limits: a slider that ignores both pointer and `AXIncrement` fails honestly; a SwiftUI `Slider` ignores a background drag, so it fails honestly, and the same drag in takeover sets it (10 of 10); one laid out right to left, pressed on its thumb, throws `InputFailed` rather than being stepped toward the mirrored value.
 
-Chromium shows a native range input and an ARIA slider identically (role, subrole, actions, attributes, no thumb), so a curved-scale slider that ignores the pointer but answers increments is set to the straight-line value, and told so. Without a thumb a part-way move cannot be told from a curved scale, so it is left where it held and reported. If a stale read makes the first two steps uneven, both are sent back and the slider is reported where the pointer left it.
+Chromium shows a native range input and an ARIA slider alike (role, actions, attributes, no thumb), so a curved-scale slider that ignores the pointer but answers increments is set to the straight-line value, and told so. Without a thumb a part-way move cannot be told from a curved scale, so it is left where it held and reported. If a stale read makes the first two steps uneven, both are sent back and the slider is reported where the pointer left it.
 
 ## Testing
 
@@ -45,7 +45,7 @@ Electron 33, macOS 26.5 VM, 10 drags per cell in each of four conditions (focuse
 
 Step-on costs about 1.5 s against `main`'s 0.73 s false success. The note's text is covered by unit tests only. AppKit slider: 40 of 40 on `main`, 10 of 10 on this head, 40 of 40 on the unchanged path earlier.
 
-`cargo test -p pi-natives --lib -- desktop::macos`: 367 pass; `computer.test.ts` covers the note. The part-way range input and 76-step rows were re-run on this head; the rest on the commit before. clippy and rustfmt via `rust-check` on every platform the diff builds on. Not run: the guidance change was not sampled against models.
+`cargo test -p pi-natives --lib -- desktop::macos`: 367 pass; `computer.test.ts` covers the note. The part-way range input and 76-step rows were re-run on this head; the rest on the commit before. clippy and rustfmt pass via `rust-check`. Not run: the guidance change was not sampled against models.
 
 ---
 

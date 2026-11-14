@@ -91072,7 +91072,7 @@
    "worktree": null,
    "host": "MacBook-Pro",
    "added": "2026-11-13T10:32:49Z",
-   "updated": "2026-11-14T16:42:30Z",
+   "updated": "2026-11-14T16:43:20Z",
    "note": "Rule-4 probe (DragConfirm r2, 2026-11-14): Chromium/Electron range input vs ARIA slider indistinguishable via AX (all attributes + parameterised names dumped); WebKit range input exposes AXValueIndicator (thumb branch). Raw dumps: Mac ~/tmp/oh-my-pi/DragConfirm/r2/axdump-ssh.json, axdump-omp.json, probe2.json. VM tables: bench-mac ~/tmp/oh-my-pi/FalseSuccess/runs/r3-*, r4-H4-e.",
    "built": [
     {
