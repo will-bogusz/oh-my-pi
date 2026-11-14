@@ -227,7 +227,9 @@ impl MacInput {
 
 	/// Types `text` into `window`; with an `element`, into that element: AX
 	/// insertion when it takes it ([`inserts_first`]), else keys once it holds
-	/// keyboard focus ([`element_keys`]). A remote screen (Screen Sharing,
+	/// keyboard focus ([`element_keys`]). Keys sent on a web field's own report
+	/// of focus are read back ([`ax::typed_readback`]); text the field does
+	/// not show is reported as unconfirmed. A remote screen (Screen Sharing,
 	/// iPhone Mirroring) shows another device, so it takes no insertion: its
 	/// text goes out as keys of the user's keyboard layout ([`keys_for`]).
 	fn window_type(
@@ -275,14 +277,19 @@ impl MacInput {
 				}
 				let mut physical = remote_modifier_check(remote, window);
 				with_background_keyboard(&self.source, pid, wid, window, entry_front, |to, guard| {
-					element_keys(pid, element, || {
+					element_keys(pid, element, true, |self_reported| {
+						let readback = element
+							.filter(|_| self_reported)
+							.map(|element| ax::typed_readback(element, text));
 						let guard = || {
 							guard()?;
 							physical.as_mut().map_or(Ok(()), |check| check())
 						};
 						type_keys(&self.source, &keys, gap, guard, |event| {
 							skylight::post_keyboard(to, event)
-						})
+						})?;
+						report_unconfirmed(readback);
+						Ok(())
 					})
 				})
 			},
@@ -294,7 +301,10 @@ impl MacInput {
 					skylight::ForegroundInput::Keys,
 					|activated| {
 						control::wait(first_key_settle(activated))?;
-						element_keys(pid, element, || {
+						element_keys(pid, element, true, |self_reported| {
+							let readback = element
+								.filter(|_| self_reported)
+								.map(|element| ax::typed_readback(element, text));
 							if remote.is_some() {
 								// A remote screen may read modifiers from the keyboard
 								// state, which only bare key
@@ -303,7 +313,7 @@ impl MacInput {
 								// target still has focus.
 								post_bare_keys(&bare_transitions(&keys), gap, || {
 									skylight::require_front_window(pid, wid)
-								})
+								})?;
 							} else {
 								// Stop rather than typing into a newly user-selected
 								// app or window.
@@ -313,8 +323,10 @@ impl MacInput {
 									gap,
 									|| skylight::require_front_window(pid, wid),
 									post_global,
-								)
+								)?;
 							}
+							report_unconfirmed(readback);
+							Ok(())
 						})
 					},
 				)
@@ -322,9 +334,10 @@ impl MacInput {
 		}
 	}
 
-	/// Presses `keys` in `window`; with an `element`, once that element holds
-	/// keyboard focus ([`element_keys`]). The keys are the user's keyboard
-	/// layout's ([`chord_keys`]).
+	/// Presses `keys` in `window`; with an `element`, once its application
+	/// names that element as focused ([`element_keys`]): a chord is not read
+	/// back, so an element's own report of focus does not stand in. The keys
+	/// are the user's keyboard layout's ([`chord_keys`]).
 	fn window_chord(
 		&self,
 		window: &DesktopWindow,
@@ -353,7 +366,7 @@ impl MacInput {
 					window,
 					entry_front,
 					|to, guard| {
-						element_keys(pid, element, || {
+						element_keys(pid, element, false, |_| {
 							press_chord(&self.source, &chord, gap, |event| {
 								let guard = || {
 									guard()?;
@@ -382,7 +395,7 @@ impl MacInput {
 					skylight::ForegroundInput::Keys,
 					|activated| {
 						control::wait(first_key_settle(activated))?;
-						element_keys(pid, element, || {
+						element_keys(pid, element, false, |_| {
 							let chord = chord_keys(window, keys, remote, layout_strokes)?;
 							if remote.is_some() {
 								// As for typed text: a remote screen may read modifiers
@@ -950,19 +963,29 @@ fn unmapped_keyboard_refusal(wid: u32) -> DesktopError {
 	))
 }
 
+/// Text typed on a field's own report of focus that the field does not show
+/// is reported to the caller ([`control::report_text_unconfirmed`]).
+fn report_unconfirmed(readback: Option<ax::TypedReadback>) {
+	if let Some(reason) = readback.and_then(|readback| readback.unconfirmed()) {
+		control::report_text_unconfirmed(reason);
+	}
+}
+
 /// Runs `send` at once without an `element`. With one, focuses it and runs
-/// `send` only once `pid` reports it as its focused element within
+/// `send` only once it holds `pid`'s keyboard focus within
 /// [`ELEMENT_FOCUS_TIMEOUT`], read every [`ELEMENT_FOCUS_POLL`]
-/// ([`keys_after_focus`]); nothing is focused once the user has pressed a key
-/// or clicked in the app since the call was admitted
-/// ([`control::intervention::check_press`]).
+/// ([`keys_after_focus`]); with `self_report`, the element's own report of
+/// focus may stand in, and `send` is told when only that proved it. Nothing
+/// is focused once the user has pressed a key or clicked in the app since the
+/// call was admitted ([`control::intervention::check_press`]).
 fn element_keys(
 	pid: libc::pid_t,
 	element: Option<&AXUIElement>,
-	send: impl FnOnce() -> CoreResult<()>,
+	self_report: bool,
+	send: impl FnOnce(bool) -> CoreResult<()>,
 ) -> CoreResult<ElementDelivery> {
 	let Some(element) = element else {
-		send()?;
+		send(false)?;
 		return Ok(ElementDelivery::Delivered);
 	};
 	control::intervention::check_press()?;
@@ -976,51 +999,67 @@ fn element_keys(
 		},
 		|left| ax::holds_keyboard_focus(pid, element, left),
 		|left| control::wait(ELEMENT_FOCUS_POLL.min(left)),
+		self_report,
 		|| ax::keyboard_focus(pid),
 		send,
 	)
 }
 
 /// Keys addressed to an element: `focus` gives it keyboard focus, and `send`
-/// runs once `holds_focus` reports that it has it, read again after each
+/// runs once `holds_focus` shows that it has it, read again after each
 /// `wait` while `remaining` time is left; when it never does, nothing is sent
 /// and `unfocused` reads where focus is instead.
+///
+/// The application naming the element proves focus at once. With
+/// `self_report`, the element's own report ([`ax::FocusProof::SelfReported`])
+/// stands in only once the application has named no element through the
+/// whole wait, so one that names its focused element a moment after the
+/// focus request is still read as it names it; `send` is then told that only
+/// the element's report proved it.
 ///
 /// A focus setter the element refuses does not end the call on its own: the
 /// read decides, so the refusal names where focus is; only a destroyed
 /// element stops at once. Each read is bounded by the time left, and a read
-/// that returns after the deadline counts as unconfirmed. Focus is confirmed
-/// once, before the first key: a field that moves focus to the next one as
-/// each character lands, as split code inputs do, keeps receiving the rest,
-/// while every background press is still checked against the window that
-/// proved the keys reach it ([`keys_still_reach`]).
+/// that returns after the deadline confirms nothing the reads in time did not
+/// show. Focus is confirmed once, before the first key: a field that moves
+/// focus to the next one as each character lands, as split code inputs do,
+/// keeps receiving the rest, while every background press is still checked
+/// against the window that proved the keys reach it ([`keys_still_reach`]).
 fn keys_after_focus(
 	focus: impl FnOnce() -> CoreResult<()>,
 	mut remaining: impl FnMut() -> Option<Duration>,
-	mut holds_focus: impl FnMut(Duration) -> bool,
+	mut holds_focus: impl FnMut(Duration) -> Option<ax::FocusProof>,
 	mut wait: impl FnMut(Duration) -> CoreResult<()>,
+	self_report: bool,
 	unfocused: impl FnOnce() -> KeyboardFocus,
-	send: impl FnOnce() -> CoreResult<()>,
+	send: impl FnOnce(bool) -> CoreResult<()>,
 ) -> CoreResult<ElementDelivery> {
 	if let Err(error) = focus()
 		&& error.code == ErrorCode::StaleRef
 	{
 		return Err(error);
 	}
-	loop {
-		let Some(left) = remaining() else {
-			return Ok(ElementDelivery::Unfocused(unfocused()));
-		};
+	// Whether the reads so far found only the element's own report.
+	let mut self_reported = false;
+	while let Some(left) = remaining() {
 		let held = holds_focus(left);
+		let only_self = self_report && held == Some(ax::FocusProof::SelfReported);
 		let Some(left) = remaining() else {
-			return Ok(ElementDelivery::Unfocused(unfocused()));
+			self_reported &= only_self;
+			break;
 		};
-		if held {
-			send()?;
+		if held == Some(ax::FocusProof::Named) {
+			send(false)?;
 			return Ok(ElementDelivery::Delivered);
 		}
+		self_reported = only_self;
 		wait(left)?;
 	}
+	if self_reported {
+		send(true)?;
+		return Ok(ElementDelivery::Delivered);
+	}
+	Ok(ElementDelivery::Unfocused(unfocused()))
 }
 /// Before a background press: keys posted to the process now still reach
 /// `wid` as `proven`, the focus that admitted delivery, showed. The focus read
@@ -6405,14 +6444,16 @@ mod tests {
 			|| clock.remaining(),
 			|left| {
 				bounds.push(left);
-				bounds.len() == 3
+				(bounds.len() == 3).then_some(ax::FocusProof::Named)
 			},
 			|left| {
 				clock.advance(ELEMENT_FOCUS_POLL.min(left));
 				Ok(())
 			},
+			true,
 			|| panic!("a focused element needs no fresh read"),
-			|| {
+			|self_reported| {
+				assert!(!self_reported, "the application named it");
 				type_keys(
 					&source,
 					&unicode_keys("ab"),
@@ -6445,11 +6486,12 @@ mod tests {
 			|| clock.remaining(),
 			|_| {
 				reads.update(|v| v + 1);
-				focused_box.get() == 0
+				(focused_box.get() == 0).then_some(ax::FocusProof::Named)
 			},
 			|_| panic!("the first box has focus at once"),
+			true,
 			|| panic!("the first box took focus"),
-			|| {
+			|_| {
 				type_keys(
 					&source,
 					&unicode_keys("123456"),
@@ -6479,14 +6521,15 @@ mod tests {
 		let delivery = keys_after_focus(
 			|| Ok(()),
 			|| clock.remaining(),
-			|_| false,
+			|_| None,
 			|left| {
 				polls.update(|v| v + 1);
 				clock.advance(ELEMENT_FOCUS_POLL.min(left));
 				Ok(())
 			},
+			true,
 			|| KeyboardFocus { window: Some("9".to_owned()), element: None },
-			|| panic!("nothing is sent to an element without focus"),
+			|_| panic!("nothing is sent to an element without focus"),
 		);
 		let Ok(ElementDelivery::Unfocused(focus)) = delivery else {
 			panic!("an element that never took focus is refused");
@@ -6497,10 +6540,11 @@ mod tests {
 		let cancelled = keys_after_focus(
 			|| Ok(()),
 			|| Some(ELEMENT_FOCUS_TIMEOUT),
-			|_| false,
+			|_| None,
 			|_| Err(DesktopError::cancelled("cancelled")),
+			true,
 			|| panic!("a cancelled wait reads nothing"),
-			|| panic!("nothing is sent once the wait is cancelled"),
+			|_| panic!("nothing is sent once the wait is cancelled"),
 		);
 		assert!(matches!(cancelled, Err(error) if error.code == ErrorCode::Cancelled));
 	}
@@ -6517,14 +6561,15 @@ mod tests {
 				|| clock.remaining(),
 				|_| {
 					clock.advance(Duration::from_millis(read_takes));
-					true
+					Some(ax::FocusProof::Named)
 				},
 				|_| panic!("the first read answers"),
+				true,
 				|| {
 					fresh_reads.update(|v| v + 1);
 					KeyboardFocus::default()
 				},
-				|| {
+				|_| {
 					sent.set(true);
 					Ok(())
 				},
@@ -6545,6 +6590,95 @@ mod tests {
 	}
 
 	#[test]
+	fn an_elements_own_focus_report_stands_in_once_its_app_named_none_through_the_wait() {
+		// reads: what each focus read answers, by its index; returns the
+		// delivery, the reads made and what `send` was told.
+		let run = |self_report: bool, read: &dyn Fn(usize) -> Option<ax::FocusProof>| {
+			let clock = FocusClock::new();
+			let reads = std::cell::Cell::new(0);
+			let told = std::cell::Cell::new(None);
+			let delivery = keys_after_focus(
+				|| Ok(()),
+				|| clock.remaining(),
+				|_| {
+					reads.update(|v| v + 1);
+					read(reads.get())
+				},
+				|left| {
+					clock.advance(ELEMENT_FOCUS_POLL.min(left));
+					Ok(())
+				},
+				self_report,
+				KeyboardFocus::default,
+				|self_reported| {
+					told.set(Some(self_reported));
+					Ok(())
+				},
+			);
+			(matches!(delivery, Ok(ElementDelivery::Delivered)), reads.get(), told.get())
+		};
+		let named_at = |n| {
+			move |read| {
+				(read >= n)
+					.then_some(ax::FocusProof::Named)
+					.or(Some(ax::FocusProof::SelfReported))
+			}
+		};
+		// A WebKit view in an inactive app never names the field: its own
+		// report counts at the deadline, and the caller is told so.
+		assert_eq!(run(true, &|_| Some(ax::FocusProof::SelfReported)), (true, 25, Some(true)));
+		// An application that names the element a moment late is read as
+		// naming it, as on an app that names it at once.
+		assert_eq!(run(true, &named_at(3)), (true, 3, Some(false)));
+		// A chord takes no read-back, so the element's own report never stands
+		// in.
+		assert_eq!(run(false, &|_| Some(ax::FocusProof::SelfReported)), (false, 25, None));
+		// A read naming another element on the last poll leaves nothing to send.
+		assert_eq!(
+			run(true, &|read| (read < 25).then_some(ax::FocusProof::SelfReported)),
+			(false, 25, None)
+		);
+	}
+
+	#[test]
+	fn a_late_read_confirms_an_elements_own_report_only_when_the_reads_in_time_showed_it() {
+		let sent = |late: Option<ax::FocusProof>| {
+			let clock = FocusClock::new();
+			let told = std::cell::Cell::new(None);
+			let delivery = keys_after_focus(
+				|| Ok(()),
+				|| clock.remaining(),
+				// Each read takes 3 ms; the one that started at 247 ms answers
+				// late.
+				|_| {
+					clock.advance(Duration::from_millis(3));
+					if clock.remaining().is_some() {
+						Some(ax::FocusProof::SelfReported)
+					} else {
+						late
+					}
+				},
+				|left| {
+					clock.advance(ELEMENT_FOCUS_POLL.min(left));
+					Ok(())
+				},
+				true,
+				KeyboardFocus::default,
+				|self_reported| {
+					told.set(Some(self_reported));
+					Ok(())
+				},
+			);
+			matches!(delivery, Ok(ElementDelivery::Delivered))
+				.then(|| told.get())
+				.flatten()
+		};
+		assert_eq!(sent(Some(ax::FocusProof::SelfReported)), Some(true));
+		assert_eq!(sent(None), None);
+		assert_eq!(sent(Some(ax::FocusProof::Named)), None);
+	}
+
+	#[test]
 	fn a_refused_focus_setter_still_ends_in_the_focus_read() {
 		let reads = std::cell::Cell::new(0);
 		let delivery = keys_after_focus(
@@ -6552,11 +6686,12 @@ mod tests {
 			|| (reads.get() < 3).then_some(ELEMENT_FOCUS_TIMEOUT),
 			|_| {
 				reads.update(|v| v + 1);
-				false
+				None
 			},
 			|_| Ok(()),
+			true,
 			|| KeyboardFocus { window: Some("9".to_owned()), element: None },
-			|| panic!("nothing is sent to an element without focus"),
+			|_| panic!("nothing is sent to an element without focus"),
 		);
 		let Ok(ElementDelivery::Unfocused(focus)) = delivery else {
 			panic!("a refused setter ends in the refusal naming where focus is");
@@ -6569,8 +6704,9 @@ mod tests {
 			|| panic!("a destroyed element is not waited for"),
 			|_| panic!("a destroyed element is not read"),
 			|_| panic!("a destroyed element is not waited for"),
+			true,
 			|| panic!("a destroyed element needs no focus read"),
-			|| panic!("nothing is sent to a destroyed element"),
+			|_| panic!("nothing is sent to a destroyed element"),
 		);
 		assert!(matches!(gone, Err(error) if error.code == ErrorCode::StaleRef));
 	}

@@ -12,7 +12,7 @@ use std::{
 	ops::Range,
 	ptr::{self, NonNull},
 	sync::LazyLock,
-	time::Duration,
+	time::{Duration, Instant},
 };
 
 use objc2_app_kit::NSRunningApplication;
@@ -1952,21 +1952,167 @@ pub(super) fn set_focused(element: &AXUIElement) -> CoreResult<()> {
 	ax_result(focus_element(element), "setting AXFocused=true failed")
 }
 
-/// Whether `pid` reports `element` as its `AXFocusedUIElement`, waiting at
-/// most `within` for the application's reply.
+/// What shows that an element holds keyboard focus ([`holds_keyboard_focus`]).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(super) enum FocusProof {
+	/// Its application names it as its focused element.
+	Named,
+	/// Its application names no focused element at all, and the element, in
+	/// web content, reports `AXFocused` itself.
+	SelfReported,
+}
+
+/// How `element` holds `pid`'s keyboard focus, waiting at most `within` for
+/// the application's reply ([`focus_proof`]).
 pub(super) fn holds_keyboard_focus(
 	pid: libc::pid_t,
 	element: &AXUIElement,
 	within: Duration,
-) -> bool {
-	let Ok(app) = create_application(pid) else {
-		return false;
-	};
+) -> Option<FocusProof> {
+	let app = create_application(pid).ok()?;
 	// A zero timeout restores the system default, so the bound stays positive.
 	let timeout = within.as_secs_f32().clamp(0.001, PROBE_TIMEOUT_SECONDS);
 	// SAFETY: The retained application element is valid for the timeout update.
 	let _ = unsafe { app.set_messaging_timeout(timeout) };
-	copy_element(&app, "AXFocusedUIElement").is_some_and(|focused| *focused == *element)
+	let named = copy_attribute_result(&app, "AXFocusedUIElement").and_then(|value| {
+		value
+			.map(|value| {
+				value
+					.downcast::<AXUIElement>()
+					.map(|focused| *focused == *element)
+					.map_err(|_| AXError::Failure)
+			})
+			.transpose()
+	});
+	focus_proof(named, || web_self_focused(copy_bool(element, "AXFocused"), text_surface(element)))
+}
+
+/// The proof an element holds focus: its application names it (`named`
+/// reads whether the element it names is this one); or, when the
+/// application answers that it names none, the element reports its own focus
+/// (`self_reported`), as a page field does in a web view of an application
+/// that is not active. A read that fails proves nothing.
+fn focus_proof(
+	named: Result<Option<bool>, AXError>,
+	self_reported: impl FnOnce() -> bool,
+) -> Option<FocusProof> {
+	match named {
+		Ok(Some(true)) => Some(FocusProof::Named),
+		Ok(None) | Err(AXError::NoValue | AXError::AttributeUnsupported) => {
+			self_reported().then_some(FocusProof::SelfReported)
+		},
+		Ok(Some(false)) | Err(_) => None,
+	}
+}
+
+/// Whether an element's own report of keyboard focus counts: only web
+/// content's, whose page keeps its focused element while its application is
+/// not active.
+fn web_self_focused(focused: Option<bool>, surface: TextSurface) -> bool {
+	focused == Some(true) && surface == TextSurface::Web
+}
+
+/// How often, and for how long, text typed into a field only the field
+/// vouched for is read back.
+const READBACK_POLL: Duration = Duration::from_millis(20);
+const READBACK_TIMEOUT: Duration = Duration::from_secs(1);
+
+/// What a field must read once typed text lands in it.
+#[derive(Debug, PartialEq, Eq)]
+enum Expected {
+	/// Its value with its selection replaced by the text.
+	Value(String),
+	/// Its value or selection cannot be read, as in a password field.
+	Unreadable,
+	/// The text holds Return or Tab, which a field does not keep: the keys
+	/// submit a form or move focus.
+	Keys,
+}
+
+/// What a field reading `before` with `selection` (UTF-16 location and
+/// length) must read once `text` is typed into it.
+fn expected_value(
+	before: Option<String>,
+	selection: Option<(isize, isize)>,
+	text: &str,
+) -> Expected {
+	if text.contains(['\n', '\r', '\t']) {
+		return Expected::Keys;
+	}
+	before
+		.zip(selection)
+		.and_then(|(before, (location, length))| {
+			replace_utf16_selection(&before, location, length, text)
+		})
+		.map_or(Expected::Unreadable, Expected::Value)
+}
+
+/// The read-back of text typed into a field that only vouched for its own
+/// focus ([`FocusProof::SelfReported`]), read right before the first key.
+pub(super) struct TypedReadback {
+	element:  CFRetained<AXUIElement>,
+	sent:     String,
+	expected: Expected,
+}
+
+pub(super) fn typed_readback(element: &AXUIElement, text: &str) -> TypedReadback {
+	let selection =
+		copy_range(element, "AXSelectedTextRange").map(|range| (range.location, range.length));
+	TypedReadback {
+		element:  element.retain(),
+		sent:     text.to_owned(),
+		expected: expected_value(copy_string(element, "AXValue"), selection, text),
+	}
+}
+
+impl TypedReadback {
+	/// Why the typed text could not be confirmed, by the verdict an AX
+	/// insertion gets ([`text_readback`]); `None` once the field reads it,
+	/// waiting at most [`READBACK_TIMEOUT`]. Text with Return or Tab, and a
+	/// field whose value cannot be read, are not confirmed. The keys have gone
+	/// out, so a cancel does not cut the wait short.
+	pub(super) fn unconfirmed(&self) -> Option<String> {
+		let secure = is_secure(&self.element);
+		let expected = match &self.expected {
+			Expected::Value(expected) => expected,
+			Expected::Unreadable => {
+				return text_readback(&self.sent, &self.sent, None, secure)
+					.err()
+					.map(|error| error.message);
+			},
+			Expected::Keys => {
+				return Some(
+					"the text holds Return or Tab, which the field does not keep, so it was not read \
+					 back"
+						.to_owned(),
+				);
+			},
+		};
+		let deadline = Instant::now() + READBACK_TIMEOUT;
+		read_back(
+			|| {
+				let actual = copy_string(&self.element, "AXValue");
+				text_readback(&self.sent, expected, actual.as_deref(), secure)
+			},
+			|| Instant::now() >= deadline,
+			|| control::settle(READBACK_POLL),
+		)
+	}
+}
+
+/// [`TypedReadback::unconfirmed`] with its verdict, clock and wait given.
+fn read_back(
+	mut verify: impl FnMut() -> CoreResult<()>,
+	mut expired: impl FnMut() -> bool,
+	mut wait: impl FnMut(),
+) -> Option<String> {
+	loop {
+		match verify() {
+			Ok(()) => return None,
+			Err(error) if expired() => return Some(error.message),
+			Err(_) => wait(),
+		}
+	}
 }
 
 /// Where `pid` has keyboard focus now: its focused window, else the window
@@ -2743,13 +2889,14 @@ mod tests {
 	use objc2_core_foundation::{CFArray, CFNumber, CFString, CFType, CFURL, Type, kCFNull};
 
 	use super::{
-		AttachedCandidate, AxWindowRecord, CHILDREN, DESCRIPTION, ENABLED, FocusedWindow,
-		KeyDestination, KeyFocus, NodeRead, NodeValues, ROLE, TITLE, TextField, TextSurface, VALUE,
-		WindowContent, ax_result, content_owner, create_system_wide, element_action_result,
-		focused_window, is_outside_windows, may_borrow_focus, menu_window, perform_choosing,
-		replace_utf16_selection, replace_whole_value, required_string, secure_subrole,
-		select_attached, standard_window_subrole, stringify_value, takes_inserted_text,
-		target_window, window_records_of,
+		AttachedCandidate, AxWindowRecord, CHILDREN, DESCRIPTION, ENABLED, Expected, FocusProof,
+		FocusedWindow, KeyDestination, KeyFocus, NodeRead, NodeValues, ROLE, TITLE, TextField,
+		TextSurface, VALUE, WindowContent, ax_result, content_owner, create_system_wide,
+		element_action_result, expected_value, focus_proof, focused_window, is_outside_windows,
+		may_borrow_focus, menu_window, perform_choosing, read_back, replace_utf16_selection,
+		replace_whole_value, required_string, secure_subrole, select_attached,
+		standard_window_subrole, stringify_value, takes_inserted_text, target_window, text_readback,
+		web_self_focused, window_records_of,
 	};
 	use crate::desktop::error::{CoreResult, ErrorCode};
 
@@ -3486,6 +3633,72 @@ mod tests {
 		assert!(!takes_inserted_text(|| TextSurface::Native, Some("AXTextField"), || false));
 		assert!(!takes_inserted_text(|| TextSurface::Native, Some("AXButton"), settable));
 		assert!(!takes_inserted_text(|| TextSurface::Native, None, settable));
+	}
+
+	#[test]
+	fn an_elements_own_focus_counts_only_when_its_app_answers_that_it_names_none() {
+		let unasked = || -> bool { panic!("the application's answer decides") };
+		// The element the application names decides, without asking the element.
+		assert_eq!(focus_proof(Ok(Some(true)), unasked), Some(FocusProof::Named));
+		assert_eq!(focus_proof(Ok(Some(false)), unasked), None);
+		// It names none: the element's own report counts.
+		for none in [Ok(None), Err(AXError::NoValue), Err(AXError::AttributeUnsupported)] {
+			assert_eq!(focus_proof(none, || true), Some(FocusProof::SelfReported));
+			assert_eq!(focus_proof(none, || false), None);
+		}
+		// A read that failed proves nothing.
+		for failed in [AXError::CannotComplete, AXError::Failure, AXError::InvalidUIElement] {
+			assert_eq!(focus_proof(Err(failed), unasked), None);
+		}
+	}
+
+	#[test]
+	fn only_web_content_reporting_its_own_focus_holds_it() {
+		assert!(web_self_focused(Some(true), TextSurface::Web));
+		assert!(!web_self_focused(Some(true), TextSurface::Native));
+		assert!(!web_self_focused(Some(true), TextSurface::Unknown));
+		assert!(!web_self_focused(Some(false), TextSurface::Web));
+		assert!(!web_self_focused(None, TextSurface::Web));
+	}
+
+	#[test]
+	fn typed_text_is_expected_at_the_fields_selection_unless_it_holds_return_or_tab() {
+		let value = |before: &str, selection, text| {
+			expected_value(Some(before.to_owned()), Some(selection), text)
+		};
+		assert_eq!(value("hello ", (6, 0), "world"), Expected::Value("hello world".to_owned()));
+		assert_eq!(value("abc", (1, 1), "X"), Expected::Value("aXc".to_owned()));
+		// Return submits and Tab moves focus: neither stays in the field.
+		assert_eq!(value("", (0, 0), "query\n"), Expected::Keys);
+		assert_eq!(value("", (0, 0), "a\tb"), Expected::Keys);
+		// A value or selection that cannot be read leaves nothing to compare.
+		assert_eq!(expected_value(None, Some((0, 0)), "s3cret"), Expected::Unreadable);
+		assert_eq!(expected_value(Some(String::new()), None, "s3cret"), Expected::Unreadable);
+	}
+
+	#[test]
+	fn typed_text_counts_as_confirmed_once_the_field_reads_it() {
+		let mut reads = ["", "ab", "abc"].into_iter();
+		let mut waits = 0;
+		let reason =
+			read_back(|| text_readback("abc", "abc", reads.next(), false), || false, || waits += 1);
+		assert_eq!(reason, None);
+		assert_eq!(waits, 2);
+	}
+
+	#[test]
+	fn typed_text_the_field_never_shows_is_unconfirmed() {
+		let mut polls = 0;
+		let reason = read_back(
+			|| text_readback("bc", "abc", Some("a-bc"), false),
+			|| {
+				polls += 1;
+				polls > 3
+			},
+			|| {},
+		);
+		assert!(reason.is_some());
+		assert_eq!(polls, 4);
 	}
 
 	#[test]

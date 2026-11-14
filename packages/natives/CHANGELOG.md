@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed macOS `el.type` into a text field of a Safari or WKWebView page in an app that is not active falling back to a takeover that then failed: when the app names no focused element at all, the field's own focus report now counts, and the typed text is read back and reported as unconfirmed when the field does not show it.
+
 ## [18.20.1] - 2026-11-14
 
 ### Breaking Changes

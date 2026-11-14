@@ -259,9 +259,10 @@ pub struct DesktopDragResult {
 #[napi(object)]
 #[derive(Debug, Clone)]
 pub struct DesktopTypeResult {
-	/// Why the text was sent but the target was not seen reading it before
-	/// focus went back; absent when it was, or the backend does not wait for
-	/// it (only Windows takeover typing does).
+	/// Why the text was sent but the target was not seen taking it: on
+	/// Windows takeover typing, the target not reading it before focus went
+	/// back; on macOS, a web field that only its own report showed focused
+	/// not showing it. Absent when it was seen, or the backend does not check.
 	pub unconfirmed:  Option<String>,
 	/// Where focus ended when typing ran in takeover; see
 	/// [`DesktopFocusReturn`].

@@ -237,7 +237,7 @@ pub(crate) fn take_focus_return() -> Option<DesktopFocusReturn> {
 
 /// Records why the current operation could not see the target read the text
 /// it typed.
-#[cfg(target_os = "windows")]
+#[cfg(any(target_os = "windows", target_os = "macos"))]
 pub(crate) fn report_text_unconfirmed(reason: String) {
 	TEXT_UNCONFIRMED.set(Some(reason));
 }
