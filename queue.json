@@ -92509,7 +92509,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-popup-value",
    "host": "MacBook-Pro",
    "added": "2026-11-14T00:26:14Z",
-   "updated": "2026-11-14T05:27:53Z",
+   "updated": "2026-11-14T05:28:20Z",
    "note": "",
    "rebases_after": [
     19179
@@ -92709,7 +92709,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-11-14T05:27:53Z"
+   "opened": "2026-11-14T05:27:53Z",
+   "readied": "2026-11-14T05:28:20Z"
   },
   {
    "id": "macos-window-order",
