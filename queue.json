@@ -91852,13 +91852,13 @@
    "needs": [],
    "base": "8b1fd3233b873b94ec1d658fee26b2cbaf72d9d4",
    "body": "bodies/devin-pin-31257.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19180,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-pin-31257",
    "host": "MacBook-Pro",
    "added": "2026-11-13T17:05:09Z",
-   "updated": "2026-11-13T17:34:38Z",
+   "updated": "2026-11-14T07:02:05Z",
    "note": "",
    "built": [
     {
@@ -91881,7 +91881,8 @@
     }
    ],
    "opened": "2026-11-13T17:20:22Z",
-   "readied": "2026-11-13T17:20:47Z"
+   "readied": "2026-11-13T17:20:47Z",
+   "merged_by": "pr"
   },
   {
    "id": "gemini-hydrogen-overlap",
@@ -91927,13 +91928,13 @@
    ],
    "base": "0d59f5c5097ad18a7d6f7c10316a3d40a93d1747",
    "body": "bodies/factory-droid-config-update-upstreams.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19188,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-config-update-upstreams",
    "host": "MacBook-Pro",
    "added": "2026-11-13T17:14:46Z",
-   "updated": "2026-11-13T18:16:09Z",
+   "updated": "2026-11-14T07:02:05Z",
    "note": "",
    "built": [
     {
@@ -92046,7 +92047,8 @@
     }
    ],
    "opened": "2026-11-13T18:15:42Z",
-   "readied": "2026-11-13T18:16:08Z"
+   "readied": "2026-11-13T18:16:08Z",
+   "merged_by": "pr"
   },
   {
    "id": "factory-droid-1100-pin",
