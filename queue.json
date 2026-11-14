@@ -91363,7 +91363,71 @@
    },
    "advanced": "2026-11-14T01:47:34Z",
    "opened": "2026-11-13T20:29:00Z",
-   "readied": "2026-11-13T20:29:30Z"
+   "readied": "2026-11-13T20:29:30Z",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-14T01:47:52Z",
+     "reason": "Main, 2026-11-14: #19195 fix for the draft regression (pointer-set sliders) plus failed step-on undo; the 4 dropped lines are this PR's own docs/computer-use.md and prompts/tools/computer.md drag guidance, rewritten by its fix commit 7d26d4edabb (straight-line value, slider the pointer moved left there, uneven steps). rust-check L/W/M for Rust diff baf6af01a9; desktop::macos 367 pass.",
+     "old": "aaa564f251f19be806259de4ad33906177ce5b8e",
+     "new": "4e5f120f8576a8068017d050b288bae2e2e5a916",
+     "dropped": {
+      "crates/pi-natives/src/desktop/macos/input.rs": [
+       "\t\t\t\t\t\t(range.1 - range.0) * SLIDER_POSITION_TOLERANCE",
+       "\t\t\t\t\t\tAfterWebDrag::Unconfirmed(at) => {",
+       "\t\t\t\t\t\t\t\t\"the drag on window {} ({}) stopped at {at}, outside the path-end \\",
+       "\t\t\t\t\t\t\t\t estimate {target}; the slider exposes no thumb position or reliable \\",
+       "\t\t\t\t\t\t\t\t linear step, so its outcome could not be confirmed. Read the target \\",
+       "\t\t\t\t\t\t\t\t before retrying; takeover (takeover: true) drags it with the pointer\",",
+       "\t\t\t\t\tif let Some(distance) = control.distance_to(end.x, end.y) {",
+       "\t\t\t\t\tstep_slider(",
+       "\t/// The pointer reached the release, or the value is no longer readable.",
+       "\t/// The page left it short at this value: it is stepped on from there.",
+       "\t/// A moved slider without geometry cannot establish a linear mapping.",
+       "\tUnconfirmed(f64),",
+       "/// `before`, or reads about `pressed`, the value under the press, rather than",
+       "/// near `target`, the value under the path's end. A value that changed is",
+       "/// judged once it reads the same twice, so a page still applying the drag is",
+       "/// not caught midway.",
+       "\tlet mut at = match followed(before, &mut value, &mut wait) {",
+       "\t\t\tNone => return AfterWebDrag::Done,",
+       "\t\tNone if at == target => AfterWebDrag::Done,",
+       "\t\tNone => AfterWebDrag::Unconfirmed(at),",
+       "/// reads then. The first step is confirmed by `value` changing and gives the",
+       "/// slider's step size; the rest go out together, since the page applies them",
+       "/// in order, and the value is read until it settles. When the first step",
+       "/// changes nothing, or the slider settles short of where the steps lead and",
+       "/// not at the end of `range`, the call throws `InputFailed` instead of",
+       "/// returning as if the slider had moved.",
+       "\tlet first = match followed(before, &mut value, &mut wait) {",
+       "\t\tFollowed::Gone => return Ok(()),",
+       "\tfor _ in 0..wanted {",
+       "\tlet at_end = if up { settled >= max } else { settled <= min };",
+       "\t\t// at `before`; returns where it stands and how many reads it took.",
+       "\t\t// A partial pointer move past the midpoint still needs steps.",
+       "\t\t\tafter_web_drag(0.0, 30.0, 75.0, (0.0, 100.0), 1.0, || None, || Some(29.0), |_| {}),",
+       "\t\t// Without a thumb, a partial move cannot establish a linear mapping.",
+       "\t\t\tafter_web_drag(0.0, 2.0, 75.0, (0.0, 100.0), 1.0, || None, || Some(40.0), |_| {}),",
+       "\t\t\tAfterWebDrag::Unconfirmed(40.0),",
+       "\t\t\tafter_web_drag(98.0, 2.0, 75.0, (0.0, 100.0), 1.0, || None, || Some(98.0), |_| {}),",
+       "\t\t\tafter_web_drag(0.0, 2.0, 75.0, (0.0, 100.0), 1.0, || Some(0.0), || Some(10.0), |_| {}),",
+       "\t\tassert_eq!((outcome, value, steps.len()), (Ok(()), 75.0, 75));",
+       "\t\tassert_eq!(run(0.0, 7.4, 5.0, 100.0), (Ok(()), 5.0, vec![true]));",
+       "\t\tassert_eq!(run(0.0, 2.0, 5.0, 100.0), (Ok(()), 0.0, vec![true, false]));",
+       "\t\tassert_eq!(run(97.0, 100.0, 2.0, 100.0), (Ok(()), 100.0, vec![true, true]));",
+       "\t\tassert_eq!(run(40.0, 40.0, 1.0, 100.0), (Ok(()), 40.0, vec![]));",
+       "\t\tassert_eq!(run(0.2, 0.5, 0.1, 100.0).0, Ok(()));"
+      ],
+      "docs/computer-use.md": [
+       "macOS background pointer input also covers drags, mouse holds, clicks with modifiers, right-clicks, and scrolls in Electron apps, all without moving the user's pointer. During a background drag a web page reports `buttons` as 0, because the real button is up. A drag that picks up an item for drag and drop (a file, a table row, a font tile, selected text) starts a session that macOS completes from the user's real pointer as well as from the drag: on macOS 26.5 a Finder file followed the user's moving pointer into their own Finder window or onto the Desktop. Which elements start such a session is up to each application, so a background left-button drag or mouse hold runs only when it starts on a slider, scroll bar, splitter, value indicator or stepper, as the element at its start point reports through accessibility. A plain left drag whose first and last points lie on the text of one native text view, such as a TextEdit document, is made as that view's selection through accessibility instead, with no mouse event, and `drag` returns the selection read back; a press on selected text, a link or an attachment, which would pick it up, does not count, nor does right-to-left text, where the caret's side of a character depends on its run. Web page text has no such route: Chrome lets an assistive client select only editable web text, and places a point in page text only in its screen-reader mode. Anywhere else the drag or hold has no background route, so `computer.backgroundFallback` applies before anything is sent. As a backstop, a session that begins anyway sends the drag back to where it started, releases it there and throws `InputFailed`; read the target before retrying, and prefer the app's menu command or AX. It is not rerun in takeover, which could repeat a drop that landed. Drags inside a view (sliders, text selections, a web page's mouse-driven drag) are unaffected. A drag that starts on a control publishing its value (a slider, scroll bar or splitter) reads that value before and after: when it has not changed, and the path neither ended where it started nor pushed the control against the end it already sat at (for a splitter or stepper, either end), the call throws `InputFailed` saying no change was observed; read the target before retrying. A web page may take the press of a background drag and none of its moves, so when a plain left drag leaves a slider in web content where it was, or at the value under the press, the slider is stepped on with `AXIncrement` or `AXDecrement` to the value under the path's end: the first step is confirmed and gives the step size, the rest go out together, and the value is read until it settles. A slider the pointer moved is not stepped, nor one whose value is far from the one under the point pressed (a slider laid out right to left), which throws `InputFailed` instead. One drag takes at most 1000 steps; one that needs more, or whose slider settles short of where its steps lead, throws `InputFailed` naming the value it reached, and a slider that takes neither the pointer nor a step throws `InputFailed` saying no change was observed. An open menu takes the keyboard from the user's application, so a right-click or Control-click, or a click, `press()` or `perform(\"AXShowMenu\")` on a menu button or popup button, that opens one in a background application closes it before the call returns; the call then throws `InputFailed`, because the input was delivered, and lists the menu's items: inspect the target before retrying. It is never rerun in takeover, because handing focus back closes the menu again; pass `menu` instead, as below. Before a press on a menu button or popup button, its window is made key within its application, as for a background left click, so the items read enabled as they would in an active application. A mouse hold or drag with the right button or Control, or a right-click or Control-click with `count` above 1, has no background route, since its menu would stay open until the button is released or the later clicks are sent, so `computer.backgroundFallback` applies before anything is sent. So does a left-button hold, drag, or click with `count` above 1 on a menu button or popup button, whose menu opens on the first press: click the control once with `menu` instead. Drags and holds with `keys` go only once the application reports keyboard focus in the target, and refuse as keystrokes do when another window, such as a sheet attached to it, has the focus or takes it during the gesture; a drag or hold into a sheet or popover holding the focus gets only the activation, as a click into it does, so it stays open; gestures with modifiers or `keys` into Apple Screen Sharing have no background route either, as held keys there do not. Presses into an app built on Tk 8.6 or later have no background route, because that Tk places them at the user's real pointer, so `computer.backgroundFallback` applies; macOS's own Tk 8.5 takes them in the background."
+      ],
+      "packages/coding-agent/src/prompts/tools/computer.md": [
+       "  - A plain left drag on a web page's slider that the page does not follow is finished with `AXIncrement`/`AXDecrement` steps to the value under the path's end.",
+       "    A drag whose slider, scroll bar or splitter value did not move, or whose steps stopped short, throws `InputFailed`",
+       "    saying so; read the value before retrying."
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "key-menu",
