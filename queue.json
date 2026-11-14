@@ -103199,6 +103199,11 @@
     "sha": "a94d6fb37776b0488a2daa1178f5d1f6c1c39b49",
     "at": "2026-11-14T20:22:02Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "a94d6fb37776b0488a2daa1178f5d1f6c1c39b49",
+    "at": "2026-11-14T20:23:14Z",
+    "host": "goliath"
    }
   }
  },
