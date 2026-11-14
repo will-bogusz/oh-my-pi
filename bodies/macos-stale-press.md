@@ -1,6 +1,6 @@
 ## What
 
-On macOS, `press()` and a background `el.click()` now refuse, before anything is sent, a control a person could not click at that moment, and name what the window shows at the control's place instead. On the benchmark app's hover-only toolbar, `main` pressed a button that was no longer shown 10 of 10 times and reported success; this PR refuses 10 of 10 and the app logs nothing. Across the fixture matrix (AppKit, SwiftUI, Chrome, Electron and WKWebView pages, in front, covered by another app, on another Space, minimised, scrolled out of view, in a sheet, a popover and a menu) no cell that `main` pressed is refused.
+I made `press()` and a background `el.click()` on macOS refuse, before anything is sent, a control a person could not click at that moment, and name what the window shows at the control's place instead. On the benchmark app's hover-only toolbar, `main` pressed a button that was no longer shown 10 of 10 times and reported success; this PR refuses 10 of 10 and the app logs nothing. Across the fixture matrix (AppKit, SwiftUI, Chrome, Electron and WKWebView pages, in front, covered by another app, on another Space, minimised, scrolled out of view, in a sheet, a popover and a menu) no cell that `main` pressed is refused.
 
 The check asks the element's own application what a click at the element's center would reach (`AXUIElementCopyElementAtPosition` on the application, which hit-tests only that app's windows) and judges only an answer inside the element's own window:
 
@@ -67,3 +67,4 @@ Cost: a press takes 0.5 to 2 ms longer at the median (AppKit 119.2 → 121.4 ms,
 - [ ] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
