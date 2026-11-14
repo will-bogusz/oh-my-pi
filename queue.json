@@ -93176,8 +93176,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-takeover-typing-pause",
    "host": "MacBook-Pro",
    "added": "2026-11-14T18:57:16Z",
-   "updated": "2026-11-14T18:58:46Z",
-   "note": "",
+   "updated": "2026-11-14T18:58:56Z",
+   "note": "Review TypingTakeover.ReviewTakeoverPause (needs-changes at 989a208bea): fixed in ca661eed697 - presses before the tap seeded from HID idle (test the_hid_idle_time_stands_in_for_presses_before_the_tap_started), admission clock injectable (admit_takeover_with) with a lease-recheck test, posted keys excluded by a pure observed() with test, docs list secure input / held input / raise limits, fmt. Pairs: none; merges clean with #19208, macos-window-order, macos-handback-typed, macos-keys-no-press. Rust checks linux/windows/macos at diff 1cd63c8f6d. Prompt line sampled (Haiku 5.5, GPT-6.1 Sol): no behaviour difference.",
    "hold": "Main, 2026-11-14: owed in the body, each from a run: (1) switch2/switchapp1 handed back 1/10 on fix vs 0/10 in both quiet-0 runs: end states from traces, then switch2, switchapp1 and the race cell on #19208+fix1 vs #19208 alone, 20 tries each; (2) interleaved A/B of background calls on AppKit (+30 ms on the non-interleaved run); (3) the live bound cell, its returned text and the bound in seconds in body and docs.",
    "advanced": "2026-11-14T18:58:46Z"
   }
