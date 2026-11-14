@@ -93183,7 +93183,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-14T18:13:16Z",
+  "checked": "2026-11-14T19:13:31Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -103201,7 +103201,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-14T18:13:16.865367Z",
+  "at": "2026-11-14T19:13:31.845700Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -103952,6 +103952,7 @@
     "action": "wait",
     "reasons": [
      "conflicts with #19178 in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #19001 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18925 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19045 in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
@@ -103961,6 +103962,7 @@
     "paired": [],
     "blocked_by": [
      "#19178",
+     "#19001",
      "#18925",
      "#19045"
     ],
@@ -104034,6 +104036,28 @@
      "macos-window-order"
     ],
     "created": "2026-11-14T10:49:09Z"
+   },
+   {
+    "id": "macos-takeover-typing-pause",
+    "label": "macos-takeover-typing-pause",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): keep macOS takeover from taking a typing user's keys",
+    "action": "held",
+    "reasons": [
+     "held: Main, 2026-11-14: owed in the body, each from a run: (1) switch2/switchapp1 handed back 1/10 on fix vs 0/10 in both quiet-0 runs: end states from traces, then switch2, switchapp1 and the race cell on #19208+fix1 vs #19208 alone, 20 tries each; (2) interleaved A/B of background calls on AppKit (+30 ms on the non-interleaved run); (3) the live bound cell, its returned text and the bound in seconds in body and docs.",
+     "conflicts with #16553 in crates/pi-natives/src/desktop/control/intervention.rs, crates/pi-natives/src/desktop/control/macos.rs"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "#16553"
+    ],
+    "needs": [],
+    "created": "2026-11-14T18:57:16Z"
    },
    {
     "id": "macos-window-order",
@@ -104116,6 +104140,7 @@
     "action": "wait",
     "reasons": [
      "conflicts with #19178 in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #19001 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18786 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
@@ -104127,6 +104152,7 @@
     "paired": [],
     "blocked_by": [
      "#19178",
+     "#19001",
      "#18786",
      "#18789",
      "#18925",
@@ -104147,6 +104173,7 @@
     "reasons": [
      "needs #19045 (open)",
      "conflicts with #19178 in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #19001 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18786 in docs/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md",
      "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
@@ -104157,6 +104184,7 @@
     "paired": [],
     "blocked_by": [
      "#19178",
+     "#19001",
      "#18786",
      "#18789",
      "#18925"
@@ -104199,6 +104227,7 @@
     "reasons": [
      "needs browser-wait-predicate (queued)",
      "conflicts with #19178 in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #19001 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18786 in docs/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md",
      "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
@@ -104211,6 +104240,7 @@
     "paired": [],
     "blocked_by": [
      "#19178",
+     "#19001",
      "#18786",
      "#18789",
      "#18925",
@@ -104541,7 +104571,7 @@
     "action": "wait",
     "reasons": [
      "conflicts with #19178 in packages/coding-agent/src/tools/browser/tab-supervisor.ts",
-     "conflicts with #19001 in packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
+     "conflicts with #19001 in packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-supervisor.ts"
     ],
@@ -104689,6 +104719,7 @@
     "action": "wait",
     "reasons": [
      "conflicts with #19178 in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #19001 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18786 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
@@ -104700,6 +104731,7 @@
     "paired": [],
     "blocked_by": [
      "#19178",
+     "#19001",
      "#18786",
      "#18789",
      "#18925",
