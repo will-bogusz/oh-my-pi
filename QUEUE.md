@@ -1,10 +1,10 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14 00:23Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14 00:26Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-13 23:54Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 1, conflict-held 18, stacked 16, held 12, parked 2, open PRs 37; merged 339, closed 36
+**Counts:** openable now 1, conflict-held 18, stacked 16, held 12, parked 2, open PRs 37, queued since the last plan 1; merged 339, closed 36
 
 ## Openable now (1)
 
@@ -121,3 +121,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14
 | [#19188](https://github.com/can1357/oh-my-pi/pull/19188) | factory-droid-config-update-upstreams | fix(catalog): keep GPT-6 effort changes off configuration_update on Factory Droid Bedrock and Snowflake | catalog | P1 | 6h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-config-update-upstreams) |
 | [#19194](https://github.com/can1357/oh-my-pi/pull/19194) | factory-droid-capture-resilience | test(ai): keep captured Factory Droid parity cases when one case fails | other | P1 | 4h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-capture-resilience) |
 | [#19208](https://github.com/can1357/oh-my-pi/pull/19208) | macos-handback-key | fix(natives): give the user's key window back after macOS takeover and focus-guard hand-backs | computer | P1 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-handback-key) |
+
+## Queued since the last plan (1)
+
+| id | title | area | priority | age | branch |
+|---|---|---|---|---|---|
+| macos-popup-value | fix(natives): choose a Chromium select's option on macOS and close the menu it opens | computer | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-popup-value) |
