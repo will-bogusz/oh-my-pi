@@ -55840,7 +55840,7 @@
    "area": "computer",
    "priority": "P2",
    "needs": [],
-   "base": "aa5f045f98a90f5c7bbc6b091f1e97e42263194d",
+   "base": "6ec2b71cd7d80e18e1b6481f2e3d9c05f5f0c56c",
    "body": "bodies/computer-menu-subtree.md",
    "state": "open",
    "pr": 18222,
@@ -55848,9 +55848,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-menu-subtree",
    "host": "MacBook-Pro",
    "added": "2026-10-24T05:06:00Z",
-   "updated": "2026-11-13T20:03:14Z",
+   "updated": "2026-11-14T00:59:35Z",
    "note": "2026-10-29 (ComputerDocs): rebased onto main b0756921ed and pushed (e2b2d3a213); check + computer.test.ts (137 pass) on goliath; precheck has no timing FIX. Waits: its menu.items line in prompts/tools/computer.md sits next to lines #16925 (apps.open line) and #15282 (ax() line) change, so it conflicts with both until they merge; then rebase (pr-queue advance) and open.",
-   "advanced": "2026-11-13T20:03:14Z",
+   "advanced": "2026-11-14T00:59:35Z",
    "built": [
     {
      "with": "#16274",
@@ -76522,7 +76522,7 @@
    "area": "tui",
    "priority": "P2",
    "needs": [],
-   "base": "aa5f045f98a90f5c7bbc6b091f1e97e42263194d",
+   "base": "6ec2b71cd7d80e18e1b6481f2e3d9c05f5f0c56c",
    "body": "bodies/agent-identity.md",
    "state": "open",
    "pr": 18987,
@@ -76530,9 +76530,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/agent-identity",
    "host": "MacBook-Pro",
    "added": "2026-11-10T23:39:10Z",
-   "updated": "2026-11-13T20:09:57Z",
+   "updated": "2026-11-14T00:59:35Z",
    "note": "Main 2026-11-12: Will decided colours resolve from the active theme; lane AgentColors owns that one push. No other worker, no rebase of #18987 until AgentColors reports the head.",
-   "advanced": "2026-11-13T20:09:57Z",
+   "advanced": "2026-11-14T00:59:35Z",
    "built": [
     {
      "with": "#18883",
