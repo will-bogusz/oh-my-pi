@@ -92782,14 +92782,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-14T05:00:07Z",
+  "checked": "2026-11-14T05:30:57Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "macos-popup-value": {
-    "since": "2026-11-14T00:55:43Z",
-    "title": "fix(natives): choose a Chromium select's option on macOS and close the menu it opens"
-   },
    "macos-stale-press": {
     "since": "2026-11-14T05:00:07Z",
     "title": "fix(natives): refuse macOS element actions on a control a person could not click"
@@ -92880,7 +92876,8 @@
    19191,
    19194,
    19195,
-   19208
+   19208,
+   19224
   ],
   "post_merge": {
    "18632": {
@@ -96459,6 +96456,13 @@
     "kind": "openable",
     "id": "macos-move-receipt",
     "title": "fix(coding-agent): say what a macOS background move did"
+   },
+   {
+    "at": "2026-11-14T05:30:57Z",
+    "kind": "unopenable",
+    "id": "macos-popup-value",
+    "title": "fix(natives): choose a Chromium select's option on macOS and close the menu it opens",
+    "why": "opened as #19224"
    }
   ]
  },
@@ -102652,12 +102656,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-14T05:00:08.477744Z",
+  "at": "2026-11-14T05:30:57.671485Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 1,
+   "left": 7
   },
   "rows": [
    {
@@ -102926,9 +102930,11 @@
     "title": "fix(natives): close the menu a macOS background key press opens",
     "action": "keep",
     "reasons": [],
-    "note": "",
+    "note": "accepted pair with #19224: Main, 2026-11-14: built and tested, no textual conflict. popup-value says 'that is still open' (no Escape when the window list is unreadable or the menu left it); #19179 ec8a6c8d028 asserts contains(\"that is still open\"), true in either merge order. macOS desktop: main+#19179 608/0, main+#19179+popup-value 620/0 (bench-mac); trees T1/T2 (r5/trees.sh) Linux check:ts, desktop 345/333, coding-agent 201/178 pass. items() untitled-by-value change left out (follow-up for the pop-up lane, r5/combined-popup-19179.diff)",
     "over": [],
-    "paired": [],
+    "paired": [
+     "#19224"
+    ],
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-13T17:10:23Z"
@@ -102985,6 +102991,25 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-13T23:41:40Z"
+   },
+   {
+    "id": "macos-popup-value",
+    "label": "#19224",
+    "number": 19224,
+    "state": "open",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): choose a Chromium select's option on macOS and close the menu it opens",
+    "action": "keep",
+    "reasons": [],
+    "note": "accepted pair with #19179: Main, 2026-11-14: built and tested, no textual conflict. popup-value says 'that is still open' (no Escape when the window list is unreadable or the menu left it); #19179 ec8a6c8d028 asserts contains(\"that is still open\"), true in either merge order. macOS desktop: main+#19179 608/0, main+#19179+popup-value 620/0 (bench-mac); trees T1/T2 (r5/trees.sh) Linux check:ts, desktop 345/333, coding-agent 201/178 pass. items() untitled-by-value change left out (follow-up for the pop-up lane, r5/combined-popup-19179.diff)",
+    "over": [],
+    "paired": [
+     "#19179"
+    ],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-14T05:27:52Z"
    },
    {
     "id": "factory-droid-capture-resilience",
@@ -103427,25 +103452,6 @@
     ],
     "needs": [],
     "created": "2026-10-30T21:35:55Z"
-   },
-   {
-    "id": "macos-popup-value",
-    "label": "macos-popup-value",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives): choose a Chromium select's option on macOS and close the menu it opens",
-    "action": "open",
-    "reasons": [],
-    "note": "accepted pair with #19179: PopupValue, 2026-11-14: both edit ax/open_menu.rs; ours adds Opened/listed/shown_again and gates Escape in close/escape_listed, #19179 edits guard/messages/tests; the render reformat hunk is identical in both; merge-tree clean. Combined form: #19179's key-press refusal keeps its text; its InputFailed item listing skips untitled items, so a Chromium select's items list empty there; left_open_message 'still open after Escape' is untrue when the window list was unreadable (no Escape sent now)",
-    "over": [],
-    "paired": [
-     "#19179"
-    ],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-14T00:26:14Z"
    },
    {
     "id": "macos-stale-press",
@@ -104184,6 +104190,7 @@
      "conflicts with #19179 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #19195 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19208 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with #19224 in docs/tools/computer.md",
      "conflicts with #18353 in docs/computer-use.md, docs/tools/computer.md",
      "conflicts with #19034 in docs/computer-use.md",
      "conflicts with #19035 in docs/computer-use.md",
@@ -104192,7 +104199,6 @@
      "conflicts with #18222 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/tools/eval.ts",
      "conflicts with #18987 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/worker.ts",
-     "conflicts with macos-popup-value in docs/tools/computer.md",
      "conflicts with macos-stale-press in docs/computer-use.md, docs/tools/computer.md",
      "conflicts with macos-move-receipt in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
@@ -104209,6 +104215,7 @@
      "#19179",
      "#19195",
      "#19208",
+     "#19224",
      "#18353",
      "#19034",
      "#19035",
@@ -104217,7 +104224,6 @@
      "#18222",
      "#18786",
      "#18987",
-     "macos-popup-value",
      "macos-stale-press",
      "macos-move-receipt"
     ],
@@ -104245,11 +104251,11 @@
      "conflicts with #19179 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #19195 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19208 in packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with #19224 in docs/tools/computer.md",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18987 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
-     "conflicts with macos-popup-value in docs/tools/computer.md",
      "conflicts with macos-stale-press in crates/pi-natives/src/desktop/macos/ax.rs, docs/tools/computer.md",
      "conflicts with macos-move-receipt in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
@@ -104267,11 +104273,11 @@
      "#19179",
      "#19195",
      "#19208",
+     "#19224",
      "#18353",
      "#18222",
      "#18925",
      "#18987",
-     "macos-popup-value",
      "macos-stale-press",
      "macos-move-receipt"
     ],
@@ -104299,10 +104305,10 @@
      "conflicts with #19063 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19100 in docs/tools/computer.md",
      "conflicts with #19195 in crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with #19224 in docs/tools/computer.md",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md",
      "conflicts with #18925 in crates/pi-natives/src/desktop/macos/capture.rs, crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs",
-     "conflicts with macos-popup-value in docs/tools/computer.md",
      "conflicts with macos-stale-press in crates/pi-natives/src/desktop/macos/mod.rs, docs/tools/computer.md",
      "conflicts with macos-move-receipt in docs/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/test/tools/computer.test.ts"
@@ -104318,10 +104324,10 @@
      "#19063",
      "#19100",
      "#19195",
+     "#19224",
      "#18353",
      "#18222",
      "#18925",
-     "macos-popup-value",
      "macos-stale-press",
      "macos-move-receipt"
     ],
@@ -104481,10 +104487,10 @@
      "conflicts with #19025 in crates/pi-natives/src/desktop/win32/input.rs, crates/pi-natives/src/desktop/win32/mod.rs",
      "conflicts with #19062 in crates/pi-natives/src/desktop/win32/input.rs, crates/pi-natives/src/desktop/win32/mod.rs",
      "conflicts with #19100 in docs/tools/computer.md",
+     "conflicts with #19224 in docs/tools/computer.md",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md",
      "conflicts with #18987 in docs/tools/computer.md",
-     "conflicts with macos-popup-value in docs/tools/computer.md",
      "conflicts with macos-stale-press in docs/tools/computer.md",
      "conflicts with macos-move-receipt in docs/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/win32/input.rs, crates/pi-natives/src/desktop/win32/mod.rs"
@@ -104496,10 +104502,10 @@
      "#19025",
      "#19062",
      "#19100",
+     "#19224",
      "#18353",
      "#18222",
      "#18987",
-     "macos-popup-value",
      "macos-stale-press",
      "macos-move-receipt"
     ],
