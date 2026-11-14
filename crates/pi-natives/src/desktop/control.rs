@@ -251,7 +251,7 @@ pub(crate) fn take_text_unconfirmed() -> Option<String> {
 
 /// Records what the current drag found about its outcome that the caller
 /// should read: a value it was left at or set to that the drag alone does not
-/// show.
+/// show, or that nothing accessibility shows at its ends changed.
 #[cfg(target_os = "macos")]
 pub(crate) fn report_drag_note(note: String) {
 	DRAG_NOTE.set(Some(note));

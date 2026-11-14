@@ -1,13 +1,15 @@
 //! The control a background drag presses first, read before and after the
-//! drag so a drag that moved nothing is not reported as done.
+//! drag so a drag that moved nothing is not reported as done, and what any
+//! other background drag can read at its two ends, so one that changed
+//! nothing readable says so.
 
-use objc2_application_services::AXUIElement;
-use objc2_core_foundation::{CFNumber, CFRetained};
+use objc2_application_services::{AXError, AXUIElement};
+use objc2_core_foundation::{CFBoolean, CFNumber, CFRetained, CFString};
 
 use super::{
-	AxBounds, TextSurface, bounds, copy_attribute, copy_element, copy_elements, copy_string,
-	copy_strings_from_action_names, open_menu::hit_test, perform_action, probe_application,
-	text_surface,
+	AxBounds, PROBE_TIMEOUT_SECONDS, TextSurface, bounds, copy_attribute, copy_attribute_result,
+	copy_element, copy_elements, copy_string, copy_strings_from_action_names, open_menu::hit_test,
+	perform_action, probe_application, text_surface, window_id,
 };
 use crate::desktop::error::CoreResult;
 
@@ -113,6 +115,105 @@ fn number(element: &AXUIElement, attribute: &str) -> Option<f64> {
 		.ok()?
 		.as_f64()
 		.filter(|value| value.is_finite())
+}
+
+/// What accessibility shows of one element: its role, title (or
+/// description), value and frame. Two reads that are equal show no change.
+#[derive(Clone, Debug, PartialEq)]
+pub(crate) struct Seen {
+	pub(crate) role: Option<String>,
+	title:           Option<String>,
+	value:           Option<String>,
+	frame:           Option<(f64, f64, f64, f64)>,
+}
+
+/// What accessibility shows of `element`, or `None` when its application
+/// does not answer within [`PROBE_TIMEOUT_SECONDS`], which is set on the
+/// element itself: a timeout set on the application element covers only
+/// that element.
+fn seen(element: &AXUIElement) -> Option<Seen> {
+	// SAFETY: sets the messaging timeout of this one element (AXUIElement.h).
+	let _ = unsafe { element.set_messaging_timeout(PROBE_TIMEOUT_SECONDS) };
+	let role = match copy_attribute_result(element, "AXRole") {
+		Err(AXError::CannotComplete) => return None,
+		Ok(value) => value
+			.and_then(|value| value.downcast::<CFString>().ok())
+			.map(|role| role.to_string()),
+		Err(_) => None,
+	};
+	Some(Seen {
+		role,
+		title: copy_string(element, "AXTitle").or_else(|| copy_string(element, "AXDescription")),
+		value: value_text(element),
+		frame: bounds(element).map(|frame| (frame.x, frame.y, frame.width, frame.height)),
+	})
+}
+
+/// An element's `AXValue` as text, when it is a string, number or boolean.
+fn value_text(element: &AXUIElement) -> Option<String> {
+	let value = copy_attribute(element, "AXValue")?;
+	let value = match value.downcast::<CFString>() {
+		Ok(text) => return Some(text.to_string()),
+		Err(value) => value,
+	};
+	let value = match value.downcast::<CFNumber>() {
+		Ok(number) => return number.as_f64().map(|number| number.to_string()),
+		Err(value) => value,
+	};
+	value
+		.downcast::<CFBoolean>()
+		.ok()
+		.map(|flag| flag.as_bool().to_string())
+}
+
+/// The two ends of a background drag that starts on no control the drag
+/// check tracks: the element under each end, read before anything posts, so
+/// the same reads after the release show whether anything readable changed.
+/// Only elements of the window the drag goes to count: another window of the
+/// application above it would answer the hit-test instead.
+pub(crate) struct DragEnds {
+	pid:      libc::pid_t,
+	wid:      u32,
+	points:   [(f64, f64); 2],
+	elements: [Option<CFRetained<AXUIElement>>; 2],
+}
+
+impl DragEnds {
+	pub(crate) fn at(pid: libc::pid_t, wid: u32, start: (f64, f64), end: (f64, f64)) -> Self {
+		let app = probe_application(pid);
+		let ends = Self { pid, wid, points: [start, end], elements: [None, None] };
+		let elements = [ends.under(app.as_deref(), start), ends.under(app.as_deref(), end)];
+		Self { elements, ..ends }
+	}
+
+	/// The element of window `wid` under `(x, y)`.
+	fn under(
+		&self,
+		app: Option<&AXUIElement>,
+		(x, y): (f64, f64),
+	) -> Option<CFRetained<AXUIElement>> {
+		hit_test(app?, x, y).filter(|element| {
+			copy_element(element, "AXWindow").and_then(|window| window_id(&window)) == Some(self.wid)
+		})
+	}
+
+	/// What the two elements read before show now, then what is under each
+	/// end now: a value that changed, an element that moved, or another
+	/// element under an end all differ from the read before the drag.
+	pub(crate) fn read(&self) -> [Option<Seen>; 4] {
+		let app = probe_application(self.pid);
+		let under = |point| {
+			self
+				.under(app.as_deref(), point)
+				.and_then(|element| seen(&element))
+		};
+		[
+			self.elements[0].as_deref().and_then(seen),
+			self.elements[1].as_deref().and_then(seen),
+			under(self.points[0]),
+			under(self.points[1]),
+		]
+	}
 }
 
 fn thumb_distance(frame: AxBounds, thumb: AxBounds, vertical: bool, x: f64, y: f64) -> Option<f64> {

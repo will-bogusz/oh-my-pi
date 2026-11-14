@@ -2410,6 +2410,13 @@ fn background_gesture(
 				.flatten()
 				.and_then(|pressed| pressed.control());
 			let (start, end) = (path[0], path[path.len() - 1]);
+			// Any other drag: what its two ends show, read before anything posts.
+			let ends = tracked.is_none().then(|| {
+				let ends =
+					ax::drag_control::DragEnds::at(to, to_wid, (start.x, start.y), (end.x, end.y));
+				let before = ends.read();
+				(ends, before)
+			});
 			let proof =
 				prepare_press(source, pid, wid, window, button, &keys, entry_front, in_overlay, visit)?;
 			before_post()?;
@@ -2417,6 +2424,19 @@ fn background_gesture(
 			let post = guarded_keys(post, &key_guard);
 			background_drag(source, to, to_wid, window, &path, button, &keys, &post)?;
 			let Some((control, before)) = tracked else {
+				if let Some((ends, before)) = ends
+					&& ends_unchanged(&before, || ends.read(), control::settle)
+				{
+					// Each end's role: the element read there before, else what was
+					// under it.
+					let roles = [0, 1].map(|end| {
+						[&before[end], &before[end + 2]]
+							.into_iter()
+							.flatten()
+							.find_map(|seen| seen.role.as_deref())
+					});
+					control::report_drag_note(unchanged_note(window, roles));
+				}
 				return Ok(());
 			};
 			let drag = TrackedDrag {
@@ -3212,6 +3232,67 @@ fn held(
 		}
 	}
 	Followed::Moved(at)
+}
+
+/// Whether an untracked drag left its two ends as they read before it:
+/// [`nothing_changed`] over `before` and `read`, except that ends where
+/// nothing could be read before are not read again.
+fn ends_unchanged<T: PartialEq>(
+	before: &[Option<T>; 4],
+	read: impl FnMut() -> [Option<T>; 4],
+	wait: impl FnMut(Duration),
+) -> bool {
+	before.iter().all(Option::is_none) || nothing_changed(before, read, wait)
+}
+
+/// Whether a drag left everything it can read as it was: `read` gives the
+/// same as `before`, read `TRACKED_POLL` apart, `TRACKED_POLLS` times in a
+/// row, since the application may handle the drag's events after the call
+/// posted them. A change seen at any read ends the wait.
+fn nothing_changed<T: PartialEq>(
+	before: &T,
+	mut read: impl FnMut() -> T,
+	mut wait: impl FnMut(Duration),
+) -> bool {
+	for read_count in 0..TRACKED_POLLS {
+		if read_count > 0 {
+			wait(TRACKED_POLL);
+		}
+		if read() != *before {
+			return false;
+		}
+	}
+	true
+}
+
+/// The note on a drag that was sent and changed nothing accessibility shows
+/// at its ends, whose elements had `roles` (start, end; `None` where nothing
+/// was read). Not an error: a view that draws its own content shows no
+/// change even when it took the drag.
+fn unchanged_note(window: &DesktopWindow, roles: [Option<&str>; 2]) -> String {
+	let look = "look at the window (a screenshot) before relying on it or retrying";
+	if roles.iter().all(Option::is_none) {
+		return format!(
+			"the drag was sent to window {} ({}), but accessibility shows nothing at its start or \
+			 end, so whether it changed anything could not be read; {look}",
+			window.id, window.app,
+		);
+	}
+	let end = |role: Option<&str>, at: &str| match role {
+		Some(role) => format!("the {role} where it {at}"),
+		None => format!("nothing readable where it {at}"),
+	};
+	let waited = TRACKED_POLL.as_millis() * u128::from(TRACKED_POLLS - 1);
+	format!(
+		"the drag was sent to window {} ({}), and what accessibility shows at its ends did not \
+		 change: {} and {} read the same {waited} ms after the release. A view that draws its own \
+		 content, such as a canvas or a map, shows no change even when it took the drag, and the \
+		 application may also have ignored it; {look}",
+		window.id,
+		window.app,
+		end(roles[0], "started"),
+		end(roles[1], "ended"),
+	)
 }
 
 /// What a drag that left a web slider with no thumb position at `at` says:
@@ -8771,6 +8852,66 @@ mod tests {
 			after_web_drag(0.0, 2.0, (0.0, 100.0), 1.0, || Some(0.0), || Some(10.0), |_| {}),
 			AfterWebDrag::Done,
 		);
+	}
+
+	#[test]
+	fn a_drag_that_changed_nothing_readable_is_noted_after_the_whole_wait() {
+		let reads = std::cell::Cell::new(0);
+		let waits = std::cell::Cell::new(0);
+		let read = || {
+			reads.set(reads.get() + 1);
+			[Some(1), None]
+		};
+		assert!(nothing_changed(&[Some(1), None], read, |_| waits.set(waits.get() + 1)));
+		assert_eq!((reads.get(), waits.get()), (TRACKED_POLLS, TRACKED_POLLS - 1));
+	}
+
+	#[test]
+	fn a_drag_whose_ends_read_differently_is_not_noted_and_stops_reading() {
+		// A row that moved shows on the third read: no note, no further waits.
+		let reads = std::cell::Cell::new(0);
+		let read = || {
+			reads.set(reads.get() + 1);
+			if reads.get() >= 3 { "Row 2" } else { "Row 1" }
+		};
+		assert!(!nothing_changed(&"Row 1", read, |_| {}));
+		assert_eq!(reads.get(), 3);
+	}
+
+	#[test]
+	fn a_drag_with_nothing_readable_at_its_ends_is_noted_without_waiting() {
+		let reads = std::cell::Cell::new(0);
+		let waits = std::cell::Cell::new(0);
+		let read = || {
+			reads.set(reads.get() + 1);
+			[None::<u8>, None, None, None]
+		};
+		assert!(ends_unchanged(&[None, None, None, None], read, |_| waits.set(waits.get() + 1)));
+		assert_eq!((reads.get(), waits.get()), (0, 0));
+		// Something read before is polled as usual and a change ends it.
+		assert!(!ends_unchanged(
+			&[Some(1), None, Some(1), None],
+			|| [None, None, None, None],
+			|_| {}
+		));
+	}
+
+	#[test]
+	fn the_unchanged_note_names_what_was_read_or_that_nothing_could_be() {
+		let window = background_window("BenchLab");
+		let note = unchanged_note(&window, [Some("AXButton"), None]);
+		assert!(
+			note.contains(
+				"the AXButton where it started and nothing readable where it ended read the same"
+			),
+			"{note}"
+		);
+		assert!(
+			note.contains("such as a canvas or a map, shows no change even when it took the drag"),
+			"{note}"
+		);
+		let note = unchanged_note(&window, [None, None]);
+		assert!(note.contains("accessibility shows nothing at its start or end"), "{note}");
 	}
 
 	#[test]
