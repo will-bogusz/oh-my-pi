@@ -104808,5 +104808,11 @@
     "wake": ""
    }
   ]
+ },
+ "opening": {
+  "id": "macos-popup-value",
+  "token": "2be5e8d450ee44a1ba295e0ee068cef3",
+  "host": "MacBook-Pro",
+  "at": "2026-11-14T05:24:13Z"
  }
 }
