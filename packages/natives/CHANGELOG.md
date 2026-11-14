@@ -16,6 +16,7 @@
 - Reduced memory usage in shell visualization for long multi-line commands ([#18791](https://github.com/can1357/oh-my-pi/issues/18791), [#19177](https://github.com/can1357/oh-my-pi/pull/19177)).
 - Fixed the shell `cp` builtin so symlink-following options used with archive and directory-copy modes correctly override one another without disabling recursion or attribute preservation ([#19215](https://github.com/can1357/oh-my-pi/pull/19215)).
 - Fixed a built-in shell crash when `[ ]` or `test` expressions contained very long `-a`/`-o` chains; excessively deep parenthesized expressions now produce a clear error instead ([#18498](https://github.com/can1357/oh-my-pi/pull/18498)).
+- Fixed a read of a macOS popup button right after a `computer` letter key showing the option from before the key; the read now waits for the option the letters choose
 - Fixed a background `computer` key press (Space or an up or down arrow) on a macOS popup button or menu button leaving its menu open, which took your typing once omp stopped sending your keys back to your app; the menu now closes before the call returns, and holding those keys on such a control is refused before anything is sent ([#19179](https://github.com/can1357/oh-my-pi/pull/19179) by [@will-bogusz](https://github.com/will-bogusz))
 
 ## [18.20.0] - 2026-11-12

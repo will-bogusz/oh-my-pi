@@ -262,7 +262,9 @@ impl MacInput {
 		// remote screen cannot receive refuses cleanly.
 		let keys = keys_for(window, text, remote, || cached_layout_strokes(KeyLayer::Typing))?;
 		let gap = key_gap(remote);
-		match mode {
+		let types_ahead = ax::type_ahead::text_types_ahead(text);
+		let mut pending = None;
+		let delivery = match mode {
 			DeliveryMode::Background => {
 				if remote == Some(RemoteScreen::KeyEvents) {
 					let modified = modified_text(&keys);
@@ -276,13 +278,15 @@ impl MacInput {
 				let mut physical = remote_modifier_check(remote, window);
 				with_background_keyboard(&self.source, pid, wid, window, entry_front, |to, guard| {
 					element_keys(pid, element, || {
+						pending = watch_type_ahead(types_ahead, element, to);
 						let guard = || {
 							guard()?;
 							physical.as_mut().map_or(Ok(()), |check| check())
 						};
-						type_keys(&self.source, &keys, gap, guard, |event| {
+						let sent = type_keys(&self.source, &keys, gap, guard, |event| {
 							skylight::post_keyboard(to, event)
-						})
+						});
+						keys_sent(&mut pending, sent)
 					})
 				})
 			},
@@ -295,7 +299,8 @@ impl MacInput {
 					|activated| {
 						control::wait(first_key_settle(activated))?;
 						element_keys(pid, element, || {
-							if remote.is_some() {
+							pending = watch_type_ahead(types_ahead, element, pid);
+							let sent = if remote.is_some() {
 								// A remote screen may read modifiers from the keyboard
 								// state, which only bare key
 								// transitions at the HID tap move. They
@@ -314,12 +319,19 @@ impl MacInput {
 									|| skylight::require_front_window(pid, wid),
 									post_global,
 								)
-							}
+							};
+							keys_sent(&mut pending, sent)
 						})
 					},
 				)
 			},
+		};
+		// Letters that went out commit in the popup even when the call fails
+		// after them.
+		if let Some(pending) = pending {
+			pending.mark();
 		}
+		delivery
 	}
 
 	/// Presses `keys` in `window`; with an `element`, once that element holds
@@ -337,7 +349,9 @@ impl MacInput {
 		let remote = process::remote_screen(pid);
 		require_phone_screen(window, remote)?;
 		let gap = key_gap(remote);
-		match mode {
+		let types_ahead = ax::type_ahead::chord_types_ahead(keys);
+		let mut pending = None;
+		let delivery = match mode {
 			DeliveryMode::Background => {
 				let chord = chord_keys(window, keys, remote, layout_strokes)?;
 				if remote == Some(RemoteScreen::KeyEvents)
@@ -354,6 +368,7 @@ impl MacInput {
 					entry_front,
 					|to, guard| {
 						element_keys(pid, element, || {
+							pending = watch_type_ahead(types_ahead, element, to);
 							let press = || {
 								press_chord(&self.source, &chord, gap, |event| {
 									let guard = || {
@@ -363,7 +378,8 @@ impl MacInput {
 									post_guarded(event, guard, |event| skylight::post_keyboard(to, event))
 								})
 							};
-							guard_key_menu(window, keys, (pid, to), press)
+							let sent = guard_key_menu(window, keys, (pid, to), press);
+							keys_sent(&mut pending, sent)
 						})
 					},
 				)?;
@@ -387,7 +403,8 @@ impl MacInput {
 						control::wait(first_key_settle(activated))?;
 						element_keys(pid, element, || {
 							let chord = chord_keys(window, keys, remote, layout_strokes)?;
-							if remote.is_some() {
+							pending = watch_type_ahead(types_ahead, element, pid);
+							let sent = if remote.is_some() {
 								// As for typed text: a remote screen may read modifiers
 								// from the keyboard state, which only
 								// bare transitions move.
@@ -396,12 +413,19 @@ impl MacInput {
 								press_chord(&self.source, &chord, gap, |event| {
 									post_takeover_key(pid, wid, event)
 								})
-							}
+							};
+							keys_sent(&mut pending, sent)
 						})
 					},
 				)
 			},
+		};
+		// Letters that went out commit in the popup even when the call fails
+		// after them.
+		if let Some(pending) = pending {
+			pending.mark();
 		}
+		delivery
 	}
 }
 
@@ -2258,6 +2282,30 @@ fn key_menu_guarded(
 		press,
 		|before, _| settle(before),
 	)
+}
+
+/// The popup button about to take keys that type ahead (`types_ahead`):
+/// `element`, or the element of `pid` holding keyboard focus
+/// ([`ax::type_ahead::watch`]). Other keys read nothing. Once the keys went
+/// out the popup is marked, so the session's next read of it waits for the
+/// option the letters choose; the call itself returns as for any key.
+fn watch_type_ahead(
+	types_ahead: bool,
+	element: Option<&AXUIElement>,
+	pid: libc::pid_t,
+) -> Option<ax::type_ahead::Pending> {
+	types_ahead
+		.then(|| ax::type_ahead::watch(element, pid))
+		.flatten()
+}
+
+/// Notes on a watched popup (`pending`) that its keys' sending ended now, how
+/// ever it ended (`sent`), which the read's wait counts from.
+fn keys_sent<T>(pending: &mut Option<ax::type_ahead::Pending>, sent: T) -> T {
+	if let Some(pending) = pending {
+		pending.keys_sent();
+	}
+	sent
 }
 
 /// `keys` as a chord's name in errors, such as "alt+down".

@@ -1,0 +1,344 @@
+//! Letters typed on a closed popup button, and the read after them.
+//!
+//! Typing on a focused popup button chooses the first option that starts with
+//! the typed letters. `AppKit` (and `SwiftUI`'s menu pickers, which are
+//! `AppKit` popups) collects the letters and commits the choice only once the
+//! typing pauses, about 1 s after the last key; only then does the popup's
+//! `AXValue` change. A web `<select>` takes each key at once. So the keys are
+//! sent as on any control, with nothing waited for, and the popup is marked as
+//! pending; the session's next read of that popup (a tree walk that reaches
+//! it, its props or its attributes) first waits until its value differs from
+//! the one before the latest keys, or until a choice would have shown. Each
+//! session runs on its own worker thread, which holds its marks.
+
+use std::{
+	cell::RefCell,
+	time::{Duration, Instant},
+};
+
+use objc2_application_services::AXUIElement;
+use objc2_core_foundation::{CFRetained, Type};
+
+use super::{copy_element, copy_string, probe_application};
+use crate::desktop::{control, error::CoreResult, keys::KeyName};
+
+/// How long after the last key a popup's choice may take to show:
+/// `AppKit` and `SwiftUI` popups changed 1.00 to 1.03 s after a letter, web
+/// selects at once.
+const CHOICE_TIMEOUT: Duration = Duration::from_millis(1500);
+const CHOICE_POLL: Duration = Duration::from_millis(10);
+
+/// A popup button about to receive type-ahead, with its value before the keys
+/// and when their sending ended.
+pub(crate) struct Pending {
+	popup:  CFRetained<AXUIElement>,
+	before: Option<String>,
+	sent:   Option<Instant>,
+}
+
+/// A popup whose type-ahead may not show yet: its value before the latest
+/// keys, and when a choice would have shown.
+struct Mark {
+	popup:    CFRetained<AXUIElement>,
+	before:   Option<String>,
+	deadline: Instant,
+}
+
+thread_local! {
+	static MARKS: RefCell<Vec<Mark>> = const { RefCell::new(Vec::new()) };
+}
+
+/// Whether `keys` are type-ahead: printable characters other than a space
+/// (which opens the menu), with Shift at most.
+pub(crate) fn chord_types_ahead(keys: &[KeyName]) -> bool {
+	keys.iter().any(|key| matches!(key, KeyName::Char(_)))
+		&& keys.iter().all(|key| match key {
+			KeyName::Char(character) => types_ahead(*character),
+			KeyName::Shift => true,
+			_ => false,
+		})
+}
+
+/// Whether `text` is type-ahead: printable characters, none a space.
+pub(crate) fn text_types_ahead(text: &str) -> bool {
+	!text.is_empty() && text.chars().all(types_ahead)
+}
+
+const fn types_ahead(character: char) -> bool {
+	!character.is_whitespace() && !character.is_control()
+}
+
+/// The popup button about to receive type-ahead: `element`, or else the
+/// element of `pid` that holds keyboard focus, when its role is
+/// `AXPopUpButton`; `None` for anything else. Called only for keys that type
+/// ahead, so other keys read nothing.
+pub(crate) fn watch(element: Option<&AXUIElement>, pid: libc::pid_t) -> Option<Pending> {
+	let popup = if let Some(element) = element {
+		element.retain()
+	} else {
+		let app: CFRetained<AXUIElement> = probe_application(pid)?;
+		let focused: CFRetained<AXUIElement> = copy_element(&app, "AXFocusedUIElement")?;
+		// The timeout on the application does not apply to returned elements.
+		// SAFETY: The retained focused element is valid for the timeout update.
+		let _ = unsafe { focused.set_messaging_timeout(super::PROBE_TIMEOUT_SECONDS) };
+		focused
+	};
+	(copy_string(&popup, "AXRole").as_deref() == Some("AXPopUpButton")).then(|| Pending {
+		before: copy_string(&popup, "AXValue"),
+		popup,
+		sent: None,
+	})
+}
+
+impl Pending {
+	/// Notes that the keys' sending ended now, however it ended.
+	pub(crate) fn keys_sent(&mut self) {
+		self.sent = Some(Instant::now());
+	}
+
+	/// Marks the popup for the next read of it ([`settle_read`]), which waits
+	/// at most [`CHOICE_TIMEOUT`] from the last key.
+	pub(crate) fn mark(self) {
+		self.mark_at(Instant::now());
+	}
+
+	/// [`Self::mark`] at `now`. A popup already marked takes these keys'
+	/// value from before them: unchanged while its earlier letters are still
+	/// uncommitted, and their choice once they committed.
+	fn mark_at(self, now: Instant) {
+		let deadline = self.sent.unwrap_or(now) + CHOICE_TIMEOUT;
+		MARKS.with_borrow_mut(|marks| {
+			marks.retain(|mark| mark.deadline > now);
+			match marks.iter_mut().find(|mark| *mark.popup == *self.popup) {
+				Some(mark) => {
+					mark.before = self.before;
+					mark.deadline = deadline;
+				},
+				None => marks.push(Mark { popup: self.popup, before: self.before, deadline }),
+			}
+		});
+	}
+}
+
+/// Before a read of `element`: when it is a popup with pending type-ahead,
+/// waits until its value differs from the one before the keys or the choice's
+/// deadline passes, then clears the mark. A cancel stops the wait and keeps
+/// the mark for the next read. Without marks it only checks that none exist.
+pub(crate) fn settle_read(element: &AXUIElement) -> CoreResult<()> {
+	settle_read_with(
+		element,
+		Instant::now,
+		|popup| copy_string(popup, "AXValue"),
+		|left| control::wait(CHOICE_POLL.min(left)),
+	)
+}
+
+fn settle_read_with(
+	element: &AXUIElement,
+	now: impl Fn() -> Instant,
+	read: impl Fn(&AXUIElement) -> Option<String>,
+	wait: impl FnMut(Duration) -> CoreResult<()>,
+) -> CoreResult<()> {
+	let Some(mark) = MARKS.with_borrow_mut(|marks| {
+		if marks.is_empty() {
+			return None;
+		}
+		let at = now();
+		marks.retain(|mark| mark.deadline > at);
+		let index = marks.iter().position(|mark| *mark.popup == *element)?;
+		Some(marks.swap_remove(index))
+	}) else {
+		return Ok(());
+	};
+	let waited = await_change(
+		mark.before.as_deref(),
+		|| read(&mark.popup),
+		|| mark.deadline.saturating_duration_since(now()),
+		wait,
+	);
+	if waited.is_err() {
+		MARKS.with_borrow_mut(|marks| marks.push(mark));
+	}
+	waited.map(drop)
+}
+
+/// Reads the value (`read`) until it differs from `before` or no time is
+/// `left`; `wait` pauses for at most the time left, and its error (a cancel)
+/// ends the wait. Returns the value it ended on.
+fn await_change(
+	before: Option<&str>,
+	mut read: impl FnMut() -> Option<String>,
+	mut left: impl FnMut() -> Duration,
+	mut wait: impl FnMut(Duration) -> CoreResult<()>,
+) -> CoreResult<Option<String>> {
+	loop {
+		let value = read();
+		if value.as_deref() != before {
+			return Ok(value);
+		}
+		let left = left();
+		if left.is_zero() {
+			return Ok(value);
+		}
+		wait(left)?;
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use std::cell::Cell;
+
+	use super::*;
+	use crate::desktop::error::DesktopError;
+
+	#[test]
+	fn characters_with_shift_at_most_and_no_space_type_ahead() {
+		for keys in
+			[&[KeyName::Char('r')][..], &[KeyName::Shift, KeyName::Char('R')], &[KeyName::Char('7')]]
+		{
+			assert!(chord_types_ahead(keys), "{keys:?}");
+		}
+		for keys in [
+			&[KeyName::Char(' ')][..],
+			&[KeyName::Space],
+			&[KeyName::Down],
+			&[KeyName::Enter],
+			&[KeyName::Tab],
+			&[KeyName::Meta, KeyName::Char('a')],
+			&[KeyName::Alt, KeyName::Char('r')],
+			&[KeyName::Shift],
+		] {
+			assert!(!chord_types_ahead(keys), "{keys:?}");
+		}
+		assert!(text_types_ahead("Research"));
+		assert!(!text_types_ahead("Office Supplies"));
+		assert!(!text_types_ahead(""));
+	}
+
+	/// Two marks never collide with a real application's elements: the pids are
+	/// not running, and nothing reads their attributes.
+	fn popups() -> (CFRetained<AXUIElement>, CFRetained<AXUIElement>) {
+		(
+			super::super::create_application(4242).expect("element"),
+			super::super::create_application(4243).expect("element"),
+		)
+	}
+
+	/// A clock that only `wait` moves, starting at `start`.
+	fn clock(start: Instant) -> Cell<Instant> {
+		Cell::new(start)
+	}
+
+	#[test]
+	fn a_later_key_takes_its_own_value_from_before_and_the_deadline_counts_from_the_last_key() {
+		MARKS.with_borrow_mut(Vec::clear);
+		let (popup, _) = popups();
+		let start = Instant::now();
+		let pending = |before: &str| Pending {
+			popup:  popup.clone(),
+			before: Some(before.to_string()),
+			sent:   None,
+		};
+		pending("Alpha").mark_at(start);
+		MARKS.with_borrow(|marks| assert_eq!(marks[0].deadline, start + CHOICE_TIMEOUT));
+		// The first letter committed before the second key went out.
+		let key = start + Duration::from_millis(700);
+		// The call returned 0.5 s after its last key: the wait counts from the
+		// key.
+		let later = key + Duration::from_millis(500);
+		Pending { sent: Some(key), ..pending("Mediocre") }.mark_at(later);
+		MARKS.with_borrow(|marks| {
+			assert_eq!(marks.len(), 1);
+			assert_eq!(marks[0].before.as_deref(), Some("Mediocre"));
+			assert_eq!(marks[0].deadline, key + CHOICE_TIMEOUT);
+		});
+		MARKS.with_borrow_mut(Vec::clear);
+	}
+
+	#[test]
+	fn a_read_of_the_marked_popup_waits_for_its_choice_then_clears_the_mark() {
+		MARKS.with_borrow_mut(Vec::clear);
+		let (popup, other) = popups();
+		let start = Instant::now();
+		Pending { popup: popup.clone(), before: Some("Choose a team".to_string()), sent: None }
+			.mark_at(start);
+		let now = clock(start);
+		let unread =
+			|_: &AXUIElement| -> Option<String> { panic!("another element's read never waits") };
+		settle_read_with(&other, || now.get(), unread, |_| panic!("no wait")).expect("read");
+		MARKS.with_borrow(|marks| {
+			assert_eq!(marks.len(), 1, "a read of another element keeps the mark");
+		});
+		// The popup commits the letter 1 s after it was marked.
+		let commit = start + Duration::from_secs(1);
+		settle_read_with(
+			&popup,
+			|| now.get(),
+			|_| {
+				Some(
+					if now.get() >= commit {
+						"Research"
+					} else {
+						"Choose a team"
+					}
+					.to_string(),
+				)
+			},
+			|pause| {
+				now.set(now.get() + CHOICE_POLL.min(pause));
+				Ok(())
+			},
+		)
+		.expect("read");
+		assert_eq!(now.get(), commit);
+		MARKS.with_borrow(|marks| assert!(marks.is_empty()));
+		// A value that already changed is read at once, with no wait.
+		Pending { popup: popup.clone(), before: Some("Bravo".to_string()), sent: None }
+			.mark_at(now.get());
+		settle_read_with(&popup, || now.get(), |_| Some("Delta".to_string()), |_| panic!("no wait"))
+			.expect("read");
+		MARKS.with_borrow(|marks| assert!(marks.is_empty()));
+	}
+
+	#[test]
+	fn an_unchanged_popup_is_read_at_the_deadline_and_a_cancel_keeps_the_mark() {
+		MARKS.with_borrow_mut(Vec::clear);
+		let (popup, _) = popups();
+		let start = Instant::now();
+		let now = clock(start);
+		let same = |_: &AXUIElement| Some("Bravo".to_string());
+		Pending { popup: popup.clone(), before: Some("Bravo".to_string()), sent: None }
+			.mark_at(start);
+		settle_read_with(
+			&popup,
+			|| now.get(),
+			same,
+			|pause| {
+				now.set(now.get() + CHOICE_POLL.min(pause));
+				Ok(())
+			},
+		)
+		.expect("read");
+		assert_eq!(now.get(), start + CHOICE_TIMEOUT);
+		Pending { popup: popup.clone(), before: Some("Bravo".to_string()), sent: None }
+			.mark_at(now.get());
+		let waits = Cell::new(0);
+		let cancelled = settle_read_with(
+			&popup,
+			|| now.get(),
+			same,
+			|_| {
+				waits.set(waits.get() + 1);
+				Err(DesktopError::cancelled("cancelled"))
+			},
+		);
+		assert_eq!(cancelled.expect_err("cancelled").code.as_str(), "Cancelled");
+		assert_eq!(waits.get(), 1, "a cancel ends the wait at once");
+		MARKS.with_borrow(|marks| assert_eq!(marks.len(), 1, "the next read still waits"));
+		// Past its deadline the mark is dropped without a read.
+		now.set(now.get() + CHOICE_TIMEOUT);
+		settle_read_with(&popup, || now.get(), |_| panic!("no read"), |_| panic!("no wait"))
+			.expect("read");
+		MARKS.with_borrow(|marks| assert!(marks.is_empty()));
+	}
+}
