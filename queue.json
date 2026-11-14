@@ -93208,6 +93208,24 @@
    "pair_reasons": {
     "16553": "Main, 2026-11-14: combined form: intervention.rs use list keeps typing-pause's USER_QUIET and #16553's macos::ClickJournal; control/macos.rs tap callback keeps #16553's button_record block first and unchanged, then typing-pause's observed() block using #16553's own pid variable (file ~/tmp/oh-my-pi/queuetwentyone/combined-typingpause-16553.md, tree 32a1e67a7b2); whichever merges second rebases onto main"
    }
+  },
+  {
+   "id": "macos-reroute-not-a-press",
+   "branch": "will/macos-reroute-not-a-press",
+   "title": "fix(natives): count keys moved back to a macOS user's app as theirs",
+   "area": "computer",
+   "priority": "P2",
+   "needs": [],
+   "base": "7c49c11aa5bbaf3f418406583096168ad5b8c6dc",
+   "body": "bodies/macos-reroute-not-a-press.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-reroute-not-a-press",
+   "host": "MacBook-Pro",
+   "added": "2026-11-14T20:50:07Z",
+   "updated": "2026-11-14T20:50:07Z",
+   "note": ""
   }
  ],
  "watch": {
