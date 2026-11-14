@@ -41,7 +41,7 @@ How the rule judges an answer from `AXUIElementCopyElementAtPosition` on the con
 - No answer, or one in another window: not judged (covered, other Space, minimised, the same app's other window).
 - The control, a part of it, or something containing it (row, cell, group, window): passes while each step down to the control is still listed under its parent. A hidden AppKit view is no longer listed, which is how a hidden control differs from a label inside its button. A cell drawn inside a listed column passes too.
 - A covered center passes when one of four other points reaches the control; a center outside an ancestor's bounds (scrolled out of view) passes.
-- Sheet rule, checked first: a window showing a sheet takes no click outside it, yet its controls still hit-test to themselves, so a control the window draws itself is refused; controls drawn by the sheet, a popover or another process (a sandboxed Save panel) and title-bar buttons pass. It applies to web content too.
+- Sheet rule, checked first: a window showing a sheet takes no click outside it, yet its controls still hit-test to themselves, so a control the window draws itself is refused; controls drawn by the sheet, a popover or another process (a sandboxed Save panel) and title-bar buttons pass. Web content (WKWebView, Chrome, Electron) is exempt from both checks, as their accessibility answers lag the page.
 - `AXRaise`, `AXScrollToVisible` and a takeover `el.click()` are not checked.
 
 Rejected: the control's own attributes (a hidden `NSView` keeps its frame and still accepts `AXPress`); the system-wide hit-test (it answers the window on top, so every covered window would be refused); requiring the hit to be the control itself (rows, cells and groups usually answer for it).
@@ -71,7 +71,7 @@ An independent review asked for changes, and I made them: the refusal names `el.
 
 ## Risk
 
-- Limits: Safari's tab-group chevron, shown only under the pointer, is refused for `press()` and a background `el.click()`; a takeover `el.click()` is not checked and is what the refusal names, but under `computer.backgroundFallback: "refuse"` nothing reaches it. A 14-point area under a window's full-screen button is refused for a background `el.click()`, naming the button, which is what a click there hits.
+- Limits: Safari's tab-group chevron, shown only under the pointer, is refused for `press()` and a background `el.click()`; a takeover `el.click()` is not checked and is what the refusal names, but under `computer.backgroundFallback: "refuse"` nothing reaches it. A 14-point area under a window's full-screen button is refused for a background `el.click()`, naming the button, which is what a click there hits. A page button under its window's sheet is still pressed, as on `main`.
 - Not run: SwiftUI and the web targets in full screen, the web targets in a popover opened from a sheet; SwiftUI pickers and menu items (no route works on either build); GnuCash beyond its tip dialog; `bun check`.
 - Review first: `placement::require_shown`, the order of its passes.
 
@@ -80,4 +80,5 @@ An independent review asked for changes, and I made them: the refusal names `el.
 - [ ] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
 

@@ -92755,7 +92755,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-stale-press",
    "host": "MacBook-Pro",
    "added": "2026-11-14T03:42:51Z",
-   "updated": "2026-11-14T12:50:15Z",
+   "updated": "2026-11-14T12:55:41Z",
    "note": "StaleReview (needs-changes at dc9aa89) answered in 2569e5f: 1 rust-check macos+linux recorded; 2 refusal names el.click({ takeover: true }), test asserts it; 3 full screen probed (fixture 160 tries, Preview census, 0 refused), title-bar buttons exempt from the sheet rule; 4 TextEdit Save sheet census 0 judged, sheet rule now judges by the drawing window (test); 5 popover from a sheet: AppKit+SwiftUI 70 tries 0 refused (test); 6 Catalyst: Messages/Maps census 0 judged, hit-test skipped when a Catalyst press scrolls; 7 docs say the sheet rule applies to web; 8 judges_placement/click_judges_placement + test; 9 all-elements census Finder/Activity Monitor: one judged kind (14-pt group under the full-screen button), in body limits; nits: zero-sized test folded, CHANGELOG one sentence, tests merged to one per branch.",
    "rebases_after": [
     19048
