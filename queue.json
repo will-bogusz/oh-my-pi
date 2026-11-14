@@ -92440,6 +92440,26 @@
    "pair_reasons": {
     "19179": "PopupValue, 2026-11-14: both edit ax/open_menu.rs; ours adds Opened/listed/shown_again and gates Escape in close/escape_listed, #19179 edits guard/messages/tests; the render reformat hunk is identical in both; merge-tree clean. Combined form: #19179's key-press refusal keeps its text; its InputFailed item listing skips untitled items, so a Chromium select's items list empty there; left_open_message 'still open after Escape' is untrue when the window list was unreadable (no Escape sent now)"
    }
+  },
+  {
+   "id": "macos-window-order",
+   "branch": "will/macos-window-order",
+   "title": "fix(natives): put the user's key window back in front of a macOS background target",
+   "area": "computer",
+   "priority": "P1",
+   "needs": [
+    "macos-handback-key"
+   ],
+   "base": "78c730db8e9c77bf5bde8c22d693aee99b9f831d",
+   "body": "bodies/macos-window-order.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-window-order",
+   "host": "MacBook-Pro",
+   "added": "2026-11-14T01:37:23Z",
+   "updated": "2026-11-14T01:37:23Z",
+   "note": ""
   }
  ],
  "watch": {

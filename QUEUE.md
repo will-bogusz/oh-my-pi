@@ -4,7 +4,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-14 01:26Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 1, conflict-held 19, stacked 16, held 12, parked 2, open PRs 37; merged 339, closed 36
+**Counts:** openable now 1, conflict-held 19, stacked 16, held 12, parked 2, open PRs 37, queued since the last plan 1; merged 339, closed 36
 
 ## Openable now (1)
 
@@ -55,7 +55,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14
 | act-look-prompt | docs(browser): teach acting and looking in one Eval cell without sleeps | browser | P2 | 3d | settle-reads | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-act-look-prompt) |
 | observe-stable-ids | feat(browser): keep observe() ids stable across observations | browser | P2 | 3d | act-look-prompt | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-observe-stable-ids) |
 | factory-droid-1100-pin | feat(catalog): identify Factory Droid requests as droid 1.10.0 | factory-droid |  | 8h | factory-droid-171-models ([#19191](https://github.com/can1357/oh-my-pi/pull/19191)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-pin) |
-| factory-droid-1100-models | feat(catalog): add the Factory Droid models droid 1.10.0 serves | factory-droid |  | 7h | factory-droid-1100-pin | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-models) |
+| factory-droid-1100-models | feat(catalog): add the Factory Droid models droid 1.10.0 serves | factory-droid |  | 8h | factory-droid-1100-pin | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-models) |
 
 ## Held (12)
 
@@ -122,3 +122,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14
 | [#19188](https://github.com/can1357/oh-my-pi/pull/19188) | factory-droid-config-update-upstreams | fix(catalog): keep GPT-6 effort changes off configuration_update on Factory Droid Bedrock and Snowflake | catalog | P1 | 7h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-config-update-upstreams) |
 | [#19194](https://github.com/can1357/oh-my-pi/pull/19194) | factory-droid-capture-resilience | test(ai): keep captured Factory Droid parity cases when one case fails | other | P1 | 6h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-capture-resilience) |
 | [#19208](https://github.com/can1357/oh-my-pi/pull/19208) | macos-handback-key | fix(natives): give the user's key window back after macOS takeover and focus-guard hand-backs | computer | P1 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-handback-key) |
+
+## Queued since the last plan (1)
+
+| id | title | area | priority | age | branch |
+|---|---|---|---|---|---|
+| macos-window-order | fix(natives): put the user's key window back in front of a macOS background target | computer | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-window-order) |
