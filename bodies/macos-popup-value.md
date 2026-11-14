@@ -13,11 +13,11 @@ A closed Chromium `<select>` shows accessibility one child, its chosen option, w
 - The menu `setValue` opened is closed by the routine that closes a menu a background click opened, which now watches every menu window the call opened, so a menu shown again in a new window gets Escape at once; one that fades out gets none.
 - That routine posts Escape only when the app's menu window is in a window list read right before it. A menu that closed meanwhile, or an unreadable list, gets no Escape, since a stray Escape cancels a dialog or a form. A menu still open after all this fails the call.
 
-AppKit and SwiftUI pop-ups publish no options while closed and close on `AXCancel`, so their path is `main`'s.
+AppKit and SwiftUI pop-ups publish no options while closed and close on `AXCancel`; their path is `main`'s.
 
 ## Testing
 
-Each row is a macOS VM with the select's window behind a window where a simulated user types; "page keys" are key events the page itself received. `main` and this PR ran interleaved.
+Each row is a macOS VM, the select's window behind one where a simulated user types; "page keys" are key events the page received. `main` and this PR ran interleaved.
 
 | Control | `main` | This PR |
 |---|---|---|
@@ -30,7 +30,8 @@ Each row is a macOS VM with the select's window behind a window where a simulate
 Limits:
 - The one miss was a Chrome menu whose items never appeared in the accessibility tree within a second: the call refused with the option the closed select showed, closed the menu, and the user's keys went to the menu for about 1.2 s that time.
 - A Chromium choice takes 0.87 s against `main`'s 0.53 s refusal: the menu has to open, and its re-shown window takes about 250 ms to fade after Escape.
-- Every background pop-up choice, native or Chromium, still makes the target window key for about 25 ms and raises it, as on `main`.
+- Every background pop-up choice still makes the target window key for about 25 ms and raises it, as on `main`.
+- The item lists in click and key-press refusals still leave out a Chromium `<select>`'s options, which have no title.
 - Not tried: a `<select>` in WebKit (Safari, a `WKWebView`).
 
 <details><summary>Unit tests and what was not run</summary>
