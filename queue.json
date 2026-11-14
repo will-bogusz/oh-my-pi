@@ -65966,7 +65966,7 @@
    "area": "other",
    "priority": "P2",
    "needs": [],
-   "base": "b9b3cc4d69962e492197178155dd95216cd9c21b",
+   "base": "b7fe8c7f43c378faa0863e79f5509f9dde16ad9a",
    "body": "bodies/anthropic-web-search.md",
    "state": "open",
    "pr": 18125,
@@ -65974,7 +65974,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/anthropic-web-search",
    "host": "MacBook-Pro",
    "added": "2026-11-04T20:05:54Z",
-   "updated": "2026-11-11T14:02:09Z",
+   "updated": "2026-11-14T17:49:08Z",
    "note": "",
    "built": [
     {
@@ -66135,7 +66135,7 @@
    ],
    "opened": "2026-11-04T20:19:47Z",
    "readied": "2026-11-04T20:20:13Z",
-   "advanced": "2026-11-11T14:02:09Z"
+   "advanced": "2026-11-14T17:49:08Z"
   },
   {
    "id": "sec-edgar-document-urls",
