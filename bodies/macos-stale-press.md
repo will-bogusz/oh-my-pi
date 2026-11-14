@@ -33,22 +33,22 @@ Measured in a macOS 26 guest, `main` (6ec2b71) against this branch's addon, 10 t
 | Same, background `el.click()` | refused 10/10 (key-window guard) | refused 10/10 (sheet) |
 | Button removed / disabled | refused 10/10 each (stale ref / disabled) | same |
 
-False refusals: every control `main` pressed (a native button, check box and pop-up choice, a background `el.click()`, a menu item), as "pressed by `main` / pressed by this PR" over its tries. No try that `main` pressed was refused.
+False refusals: every control `main` pressed (a native button, check box and pop-up choice, a background `el.click()`, a menu item), as "accepted by `main` / accepted by this PR" over its tries (each try in the app's own log matched between the two; a page `<select>` choice is accepted on both and rarely applied, a separate issue). No try that `main` pressed was refused: 1,290 of 1,290 accepted by both.
 
 | Target is | AppKit | SwiftUI | WKWebView | Chrome | Electron |
 |---|---|---|---|---|---|
-| in front | 40 / 40 | 30 / 30 | 30 / 30 | · | · |
-| covered by another app | 40 / 40 | 30 / 30 | 40 / 40 | · | · |
-| on another Space | 20 / 20 | 20 / 20 | 20 / 20 | · | · |
-| minimised | 30 / 30 | 20 / 20 | 30 / 30 | · | · |
+| in front | 40 / 40 | 30 / 30 | 30 / 30 | 40 / 40 | 40 / 40 |
+| covered by another app | 40 / 40 | 30 / 30 | 40 / 40 | 40 / 40 | 40 / 40 |
+| on another Space | 20 / 20 | 20 / 20 | 20 / 20 | 20 / 20 | 20 / 20 |
+| minimised | 30 / 30 | 20 / 20 | 30 / 30 | 20 / 20 | 20 / 20 |
 | in full screen | 40 / 40 | · | · | · | · |
-| scrolled out of view | 40 / 40 | 30 / 30 | 40 / 40 | · | · |
-| in a sheet | 40 / 40 | 30 / 30 | 40 / 40 | · | · |
-| in a popover | 40 / 40 | 30 / 30 | 40 / 40 | · | · |
+| scrolled out of view | 40 / 40 | 30 / 30 | 40 / 40 | 30 / 30 | 30 / 30 |
+| in a sheet | 40 / 40 | 30 / 30 | 40 / 40 | 40 / 40 | 40 / 40 |
+| in a popover | 40 / 40 | 30 / 30 | 40 / 40 | 40 / 40 | 40 / 40 |
 | in a popover from a sheet | 40 / 40 | 30 / 30 | · | · | · |
-| a menu item | 10 / 10 | · | 10 / 10 | · | · |
+| a menu item | 10 / 10 | · | 10 / 10 | 10 / 10 | 10 / 10 |
 
-`·`: not applicable, or neither build could act (a SwiftUI picker has no `AXPress` on both; a background `el.click()` on another Space or a minimised window fails on both with `WindowNotFound`; a background click on a non-key window of the front app is refused on both by the key-window guard).
+`·`: not applicable, or neither build could act (a SwiftUI picker has no `AXPress` on both, and a page `<select>` opens no menu on another Space, minimised or scrolled out of view on both; a background `el.click()` on another Space or a minimised window fails on both with `WindowNotFound`; a background click on a non-key window of the front app is refused on both by the key-window guard).
 
 Read-only census of the rule on stock apps (front window, then covered by another app's window): Finder, Notes, Reminders, Calendar, Contacts, Preview, Font Book, Automator, Activity Monitor, System Settings, TextEdit, Safari, LibreOffice (start centre and a Calc document), GnuCash, TextEdit's Save sheet, Messages and Maps (Mac Catalyst), the fixture and Preview in full screen; Finder and Activity Monitor over every element with area, as a background `el.click()` sees them. 1,979 elements walked; judged: the Safari sidebar's tab-group chevron, a `go down` check box shown only while the pointer is over its row (front and covered), and in Finder and Activity Monitor a 14-point unlabelled group drawn under the window's full-screen button (`el.click()` on it is refused naming the button, which takes the click).
 
