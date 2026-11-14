@@ -92347,7 +92347,61 @@
     }
    ],
    "opened": "2026-11-13T23:41:41Z",
-   "readied": "2026-11-13T23:42:10Z"
+   "readied": "2026-11-13T23:42:10Z",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-14T00:38:43Z",
+     "reason": "Main, 2026-11-13 ~23:55Z: decided the #19208 bot-round fixes; the dropped lines are this PR's own lines replaced by them: restore_key's signature/body (conditional make-key, HandBack 4d6c08ee137), NotSent doc in types.rs/index.d.ts and worker.ts notice text widened to the refusal (4569952154), computer.test.ts string args replaced by DesktopKeyboardReturn members (4569952161); rust-check L/M/W recorded for Rust diff f182f1d203",
+     "old": "98177330dc5600fac97d6e23d8cf7d6dea0eb52b",
+     "new": "78c730db8e9c77bf5bde8c22d693aee99b9f831d",
+     "dropped": {
+      "crates/pi-natives/src/desktop/macos/skylight.rs": [
+       "\t/// Makes `key` the user's key window again. Their app's hand-back",
+       "\t/// (`kCPSNoWindows`) leaves it with no key window, which nothing outside the",
+       "\t/// app can see, so this always sends the make-key records.",
+       "\tfn restore_key(&self, key: u32) -> CoreResult<()>;",
+       "\tfn restore_key(&self, key: u32) -> CoreResult<()> {",
+       "\t\tmake_exact_window_key(self.spi, self.previous.psn, key)",
+       "\t\t\t\t\t// armed, and the click is used up only then. Either way the",
+       "\t\t\t\t\t// make-key records carry a front request for their app, so they",
+       "\t\t\t\t\t// go out only while it is still in front. Otherwise the re-check",
+       "\t\t\t\t\t// observed instead (a disarm it recorded stops the hand-backs",
+       "\t\t\t\t\t// from the next poll), or `WindowServer` refused.",
+       "\t\t\t\t\t\t\t(!own_click || !lease.lock().disarmed) && desktop.front() == Some(previous);",
+       "\t\t\t\t\t\t\tdesktop.restore_key(key)?;"
+      ],
+      "crates/pi-natives/src/desktop/types.rs": [
+       "\t/// The input monitor had not caught up with the user's last input, so",
+       "\t/// whether they chose a window is unknown, and their window was not made",
+       "\t/// key."
+      ],
+      "packages/coding-agent/src/tools/computer/worker.ts": [
+       "\t// verified key window.",
+       "\t\t\t\t\t? `handed the front back to ${front} but not its window's keyboard: the user's last input was still being read`",
+       "\t\t\t\t\t: `focus is on ${front}; the user's last input was still being read, so nothing was sent to its window`;"
+      ],
+      "packages/coding-agent/test/tools/computer.test.ts": [
+       "\tDesktopKeyboardReturn,",
+       "\t\tconst said = async (keyboard: `${DesktopKeyboardReturn}`, frontPid = 300, handedBack = true) => {",
+       "\t\t\t\tkeyboard: keyboard as DesktopKeyboardReturn,",
+       "\t\texpect(await said(\"handedBack\")).toEndWith(\"handed the keyboard back to Notes's window\");",
+       "\t\texpect(await said(\"handedBack\", 400)).toEndWith(",
+       "\t\texpect(await said(\"leftAsChosen\")).toEndWith(\"focus is on Notes, left as the user chose\");",
+       "\t\texpect(await said(\"leftAsChosen\", 400)).toEndWith(\"focus is on Mail, left as the user chose\");",
+       "\t\texpect(await said(\"notSent\")).toContain(\"not its window's keyboard\");",
+       "\t\texpect(await said(\"notSent\", 300, false)).toEndWith(",
+       "\t\t\t\"focus is on Notes; the user's last input was still being read, so nothing was sent to its window\",",
+       "\t\texpect(await said(\"frontOnly\")).toEndWith(\"handed the front back to Notes, which shows no window\");",
+       "\t\texpect(await said(\"kept\")).toEndWith(\"focus is on Notes\");"
+      ],
+      "packages/natives/native/index.d.ts": [
+       "   * The input monitor had not caught up with the user's last input, so",
+       "   * whether they chose a window is unknown, and their window was not made",
+       "   * key."
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "macos-popup-value",

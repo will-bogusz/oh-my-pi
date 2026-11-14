@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14 00:31Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14 00:38Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-13 23:54Z on goliath; groups below are from it, states from the manifest)
@@ -53,8 +53,8 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14
 | settle-reads | feat(browser): settle the preceding action before reads too | browser | P1 | 3d | observe-settle ([#19045](https://github.com/can1357/oh-my-pi/pull/19045)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-settle-reads) |
 | act-look-prompt | docs(browser): teach acting and looking in one Eval cell without sleeps | browser | P2 | 3d | settle-reads | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-act-look-prompt) |
 | observe-stable-ids | feat(browser): keep observe() ids stable across observations | browser | P2 | 3d | act-look-prompt | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-observe-stable-ids) |
-| factory-droid-1100-pin | feat(catalog): identify Factory Droid requests as droid 1.10.0 | factory-droid |  | 6h | factory-droid-171-models ([#19191](https://github.com/can1357/oh-my-pi/pull/19191)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-pin) |
-| factory-droid-1100-models | feat(catalog): add the Factory Droid models droid 1.10.0 serves | factory-droid |  | 6h | factory-droid-1100-pin | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-models) |
+| factory-droid-1100-pin | feat(catalog): identify Factory Droid requests as droid 1.10.0 | factory-droid |  | 7h | factory-droid-171-models ([#19191](https://github.com/can1357/oh-my-pi/pull/19191)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-pin) |
+| factory-droid-1100-models | feat(catalog): add the Factory Droid models droid 1.10.0 serves | factory-droid |  | 7h | factory-droid-1100-pin | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-models) |
 
 ## Held (12)
 
@@ -119,7 +119,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14
 | [#19178](https://github.com/can1357/oh-my-pi/pull/19178) | relay-restored-frame | fix(browser-relay): keep a relay tab when another extension's frame keeps omp out | browser | P1 | 7h | keep; accepted pair with #18925: Main, 2026-11-13: tab-supervisor.ts import block only, keep both lines (import { isLoopbackRelayUrl } from "./relay/daemon"; import { FOREIGN_FRAME_REFUSAL } from "./relay/protocol"); accepted pair with #19001: Main, 2026-11-13: tab-supervisor.ts only, module scope: import line keeps both names (import { FOREIGN_FRAME_REFUSAL, type HiddenFrame } from "./relay/protocol") and WorkerTabSession gains both adjacent fields (heldOut, hiddenFrames); combined form ~/tmp/oh-my-pi/RelayRestoredFrame2/combined-19001.txt | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-restored-frame) |
 | [#19180](https://github.com/can1357/oh-my-pi/pull/19180) | devin-pin-31257 | fix(catalog): identify Devin requests as CLI 3000.12.57 | catalog | P0 | 7h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-pin-31257) |
 | [#19188](https://github.com/can1357/oh-my-pi/pull/19188) | factory-droid-config-update-upstreams | fix(catalog): keep GPT-6 effort changes off configuration_update on Factory Droid Bedrock and Snowflake | catalog | P1 | 6h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-config-update-upstreams) |
-| [#19194](https://github.com/can1357/oh-my-pi/pull/19194) | factory-droid-capture-resilience | test(ai): keep captured Factory Droid parity cases when one case fails | other | P1 | 4h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-capture-resilience) |
+| [#19194](https://github.com/can1357/oh-my-pi/pull/19194) | factory-droid-capture-resilience | test(ai): keep captured Factory Droid parity cases when one case fails | other | P1 | 5h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-capture-resilience) |
 | [#19208](https://github.com/can1357/oh-my-pi/pull/19208) | macos-handback-key | fix(natives): give the user's key window back after macOS takeover and focus-guard hand-backs | computer | P1 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-handback-key) |
 
 ## Queued since the last plan (1)
