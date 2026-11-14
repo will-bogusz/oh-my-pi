@@ -73908,6 +73908,19 @@
        "\t\t\tif (quiet && !network.hasPendingRequests(since)) return;"
       ]
      }
+    },
+    {
+     "at": "2026-11-14T00:54:04Z",
+     "reason": "Main, 2026-11-14 ~01:20Z: approved combined form r3/combined-19045.txt with can1357's dialog batch (b5a6a589504): act/enrich lines now carry main's dialog policy, cookies keeps main's plain op; call-site table r3/callsites-19045-named.md: 105 calls, 0 differ in dialog/awaitNavigation vs main; goliath on eace1d38449: check:ts clean, main dialog tests 40 pass/1 skip/0 fail, browser-observe+interactions 61 pass/1 skip/0 fail",
+     "old": "2ab4a352d77770fb81294c87594feea0cb1afe50",
+     "new": "eace1d3844901762906bd559f7b26a7c5c0b7622",
+     "dropped": {
+      "packages/coding-agent/src/tools/browser/tab-worker.ts": [
+       "\t\t): Promise<T> => input(label, perOpMs, fn, { ...selectorOpts, awaitNavigation: true });",
+       "\t\t\t\t(label, fn) => input(label, actionOpMs, fn),",
+       "\t\t\tcookies: opts => documentOp(\"tab.cookies()\", quickOpMs, sig => readCookies(page, opts, sig)),"
+      ]
+     }
     }
    ]
   },
