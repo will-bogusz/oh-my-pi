@@ -58535,7 +58535,7 @@
    "area": "computer",
    "priority": "P2",
    "needs": [],
-   "base": "aa5f045f98a90f5c7bbc6b091f1e97e42263194d",
+   "base": "b7fe8c7f43c378faa0863e79f5509f9dde16ad9a",
    "body": "bodies/macos-scroll-direction.md",
    "state": "open",
    "pr": 19165,
@@ -58543,7 +58543,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-scroll-direction",
    "host": "MacBook-Pro",
    "added": "2026-10-30T21:36:10Z",
-   "updated": "2026-11-13T20:03:14Z",
+   "updated": "2026-11-14T17:46:11Z",
    "note": "FalseSuccess2 2026-11-13: rebased onto main 84f5adc as 7d8261c (report_scroll hunks and iPhone report-path tests dropped; iPhone Mirroring gets the flip through background_scroll). P1 per Main: every macOS scroll goes the wrong way on main. No needs. Opening order A (macos-drag-confirm), this, B (macos-scroll-confirm).",
    "built": [
     {
@@ -58702,7 +58702,7 @@
    ],
    "opened": "2026-11-13T13:15:56Z",
    "readied": "2026-11-13T13:16:25Z",
-   "advanced": "2026-11-13T20:03:14Z"
+   "advanced": "2026-11-14T17:46:11Z"
   },
   {
    "id": "snapcompact-text-reader",
