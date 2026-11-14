@@ -63457,6 +63457,17 @@
        "          \"FILE:@@//Cargo.lock 97d389e201b938113c59c74e4ddbbbd2496e2d6766beef98c4fbad1976530d75\","
       ]
      }
+    },
+    {
+     "at": "2026-11-14T20:19:21Z",
+     "reason": "Main, 2026-11-14 (v18.20.2 round): MODULE.bazel.lock regenerated with bun scripts/gen-bazel-lock.ts on 7c49c11aa5b after the release's version bump conflicted; dropped lines are the previous lock's Cargo.lock hash; the delta vs main equals the previous round's delta",
+     "old": "0c78912c9708a30af1411df6bfa1a8f926798c3a",
+     "new": "1dea30802e59d969431c04c51bd6f8d7517d505e",
+     "dropped": {
+      "MODULE.bazel.lock": [
+       "          \"FILE:@@//Cargo.lock bf5ba848fbbd9f57f302a2dfe06cac1497ec4da2839ca2bce88833647a7e8450\","
+      ]
+     }
     }
    ]
   },
