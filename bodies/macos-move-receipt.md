@@ -1,6 +1,6 @@
 ## What
 
-On macOS, a background `win.move()` now adds one line to the run's output: the window was sent a pointer move, the user's pointer did not move, and AppKit views and web pages have shown no hover state for such a move, so a hover-only control may still be hidden. The line ends with `{ takeover: true }` as the route when a screenshot shows the control is hidden, or, under `computer.backgroundFallback: "refuse"`, with reaching the control through accessibility or telling the user. Nothing else changes: the same event is posted, with the same options, and a takeover move (requested, or the fallback's rerun) and every other backend print nothing new.
+I made a background `win.move()` on macOS add one line to the run's output: the window was sent a pointer move, the user's pointer did not move, and AppKit views and web pages have shown no hover state for such a move, so a hover-only control may still be hidden. The line ends with `{ takeover: true }` as the route when a screenshot shows the control is hidden, or, under `computer.backgroundFallback: "refuse"`, with reaching the control through accessibility or telling the user. Nothing else changes: the same event is posted, with the same options, and a takeover move (requested, or the fallback's rerun) and every other backend print nothing new.
 
 ## Why
 
@@ -32,3 +32,4 @@ The line is model-facing text on every macOS background move, once per call (a s
 - [ ] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
