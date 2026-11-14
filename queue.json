@@ -92784,7 +92784,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-14T08:02:57Z",
+  "checked": "2026-11-14T09:04:14Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -92810,6 +92810,13 @@
     "title": "fix(ai,coding-agent): carry other models' reasoning to Claude and retry its refusal without it",
     "files": [
      "packages/ai/src/providers/pi-native-server.ts"
+    ]
+   },
+   "#18786": {
+    "since": "2026-11-14T09:04:14Z",
+    "title": "feat(agent,coding-agent): send a short browser guide with the first browser call",
+    "files": [
+     "packages/coding-agent/src/session/agent-session.ts"
     ]
    },
    "#19120": {
@@ -96518,6 +96525,15 @@
     "files": [
      "packages/stats/src/gain-aggregator.ts",
      "packages/stats/test/gain-aggregator.test.ts"
+    ]
+   },
+   {
+    "at": "2026-11-14T09:04:14Z",
+    "kind": "conflict",
+    "label": "#18786",
+    "title": "feat(agent,coding-agent): send a short browser guide with the first browser call",
+    "files": [
+     "packages/coding-agent/src/session/agent-session.ts"
     ]
    }
   ]
@@ -102861,7 +102877,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-14T08:02:58.173181Z",
+  "at": "2026-11-14T09:04:15.815669Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -103427,8 +103443,10 @@
     "area": "browser",
     "priority": "P2",
     "title": "feat(agent,coding-agent): send a short browser guide with the first browser call",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in packages/coding-agent/src/session/agent-session.ts"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -104326,6 +104344,7 @@
      "conflicts with #18222 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/prompts/tools/eval.md, packages/coding-agent/src/tools/eval.ts",
      "conflicts with macos-move-receipt in packages/coding-agent/test/tools/computer.test.ts",
+     "its need #18786 conflicts with main in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/sdk-computer-prelude-toggle.test.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
@@ -104370,7 +104389,7 @@
      "conflicts with #19165 in docs/computer-use.md",
      "conflicts with #18013 in docs/computer-use.md",
      "conflicts with #18222 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with #18786 in packages/coding-agent/src/tools/eval.ts",
+     "conflicts with #18786 in packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/tools/eval.ts",
      "conflicts with #18987 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with macos-stale-press in docs/computer-use.md, docs/tools/computer.md",
      "conflicts with macos-move-receipt in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
@@ -104540,7 +104559,7 @@
     "reasons": [
      "held: Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance",
      "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/turn-recovery.ts, packages/coding-agent/test/agent-session-retry-fallback.test.ts",
-     "conflicts with #18786 in packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with #18786 in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-advisors.ts",
      "conflicts with main in docs/advisor-watchdog.md, docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-advisors.ts, packages/coding-agent/src/session/turn-recovery.ts, packages/coding-agent/test/agent-session-retry-fallback.test.ts"
     ],
     "note": "",
