@@ -103553,6 +103553,11 @@
     "sha": "f767d2e538cf307b8e26a7896540bc47baa997b4",
     "at": "2026-11-14T23:22:36Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "f767d2e538cf307b8e26a7896540bc47baa997b4",
+    "at": "2026-11-14T23:23:07Z",
+    "host": "goliath"
    }
   }
  },
