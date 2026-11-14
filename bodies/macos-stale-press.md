@@ -19,6 +19,16 @@ In a macOS 26 guest I ran `main` against this branch, 10 tries per cell, interle
 | Button of a window showing a sheet, front / covered | success, action ran 10/10 each | refused 10/10 each |
 | Button removed / disabled | refused (stale ref / disabled) | same |
 
+In Cua Driver Bench task MB-10 (a toolbar whose buttons show only under the pointer; foreground, GPT-6.1 Sol at medium, 3 trials per build, same seeds):
+
+| Build | MB-10 done |
+|---|---|
+| v18.20.0 | 0 of 3 |
+| `main` 57263720c81 plus five other fix branches, without this fix | 0 of 3: each pressed a button no longer shown and failed the task's `overlay_visible_at_click` check; no refusal |
+| the same plus this fix and a background-move note | 3 of 3: each got this refusal at call 4, read or hovered again in the next call, and finished |
+
+The passing build also carries the move note and five other fixes, so the attribution rests on the refusal appearing at call 4 in all three passing trials and in none of the failing ones, not on the build difference alone. On a 96-run pass of our own task set on that build, 96 of 96 passed (graded and strict, no task worse than v18.20.0) and this refusal fired 0 times: those tasks never press a control a person could not click.
+
 Nothing `main` accepted was refused: 1,290 of 1,290 tries across AppKit, SwiftUI, WKWebView, Chrome and Electron, in front, covered, on another Space, minimised, scrolled out of view, and in sheets, popovers and menus. A read-only pass of the rule over real apps walked 1,979 controls. A press costs 0.5 to 2 ms more at the median.
 
 Web content and Chromium apps are not hit-tested, because Chromium answers from a cache that lags the page; a stale web control is still pressed as on `main`.
@@ -70,3 +80,4 @@ An independent review asked for changes, and I made them: the refusal names `el.
 - [ ] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
