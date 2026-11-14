@@ -59,7 +59,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14
 | macos-window-order | fix(natives): put the user's key window back in front of a macOS target after background input and takeover | computer | P1 | 16h | macos-handback-key ([#19208](https://github.com/can1357/oh-my-pi/pull/19208)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-window-order) |
 | macos-key-read-settled | fix(natives): read a macOS popup after the option its typed letters choose | computer | P1 | 7h | key-menu ([#19179](https://github.com/can1357/oh-my-pi/pull/19179)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-key-read-settled) |
 | macos-handback-typed | fix(natives): give the macOS key window back after a takeover while another program types | computer | P2 | 6h | macos-handback-key ([#19208](https://github.com/can1357/oh-my-pi/pull/19208)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-handback-typed) |
-| macos-drag-no-change-note | fix(natives): note a macOS background drag that changed nothing readable | computer | P2 | 5h | macos-drag-confirm ([#19195](https://github.com/can1357/oh-my-pi/pull/19195)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-drag-no-change-note) |
+| macos-drag-no-change-note | fix(natives): note a macOS background drag that changed nothing readable | computer | P2 | 6h | macos-drag-confirm ([#19195](https://github.com/can1357/oh-my-pi/pull/19195)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-drag-no-change-note) |
 
 ## Held (13)
 
