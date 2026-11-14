@@ -4,7 +4,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-14 03:59Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 1, conflict-held 19, stacked 17, held 12, parked 2, open PRs 37, queued since the last plan 1; merged 339, closed 36
+**Counts:** openable now 1, conflict-held 19, stacked 17, held 12, parked 2, open PRs 37, queued since the last plan 2; merged 339, closed 36
 
 ## Openable now (1)
 
@@ -54,7 +54,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14
 | settle-reads | feat(browser): settle the preceding action before reads too | browser | P1 | 3d | observe-settle ([#19045](https://github.com/can1357/oh-my-pi/pull/19045)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-settle-reads) |
 | act-look-prompt | docs(browser): teach acting and looking in one Eval cell without sleeps | browser | P2 | 3d | settle-reads | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-act-look-prompt) |
 | observe-stable-ids | feat(browser): keep observe() ids stable across observations | browser | P2 | 3d | act-look-prompt | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-observe-stable-ids) |
-| factory-droid-1100-pin | feat(catalog): identify Factory Droid requests as droid 1.10.0 | factory-droid |  | 10h | factory-droid-171-models ([#19191](https://github.com/can1357/oh-my-pi/pull/19191)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-pin) |
+| factory-droid-1100-pin | feat(catalog): identify Factory Droid requests as droid 1.10.0 | factory-droid |  | 11h | factory-droid-171-models ([#19191](https://github.com/can1357/oh-my-pi/pull/19191)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-pin) |
 | factory-droid-1100-models | feat(catalog): add the Factory Droid models droid 1.10.0 serves | factory-droid |  | 10h | factory-droid-1100-pin | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-models) |
 | macos-window-order | fix(natives): put the user's key window back in front of a macOS background target | computer | P1 | 2h | macos-handback-key ([#19208](https://github.com/can1357/oh-my-pi/pull/19208)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-window-order) |
 
@@ -124,8 +124,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14
 | [#19194](https://github.com/can1357/oh-my-pi/pull/19194) | factory-droid-capture-resilience | test(ai): keep captured Factory Droid parity cases when one case fails | other | P1 | 9h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-capture-resilience) |
 | [#19208](https://github.com/can1357/oh-my-pi/pull/19208) | macos-handback-key | fix(natives): give the user's key window back after macOS takeover and focus-guard hand-backs | computer | P1 | 4h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-handback-key) |
 
-## Queued since the last plan (1)
+## Queued since the last plan (2)
 
 | id | title | area | priority | age | branch |
 |---|---|---|---|---|---|
 | macos-stale-press | fix(natives): refuse macOS element actions on a control a person could not click | computer | P1 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-stale-press) |
+| macos-move-receipt | fix(coding-agent): say what a macOS background move did | computer | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-move-receipt) |
