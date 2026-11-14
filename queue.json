@@ -93193,13 +93193,13 @@
    "needs": [],
    "base": "7c49c11aa5bbaf3f418406583096168ad5b8c6dc",
    "body": "bodies/macos-takeover-typing-pause.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19296,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-takeover-typing-pause",
    "host": "MacBook-Pro",
    "added": "2026-11-14T18:57:16Z",
-   "updated": "2026-11-14T21:25:31Z",
+   "updated": "2026-11-14T21:30:08Z",
    "note": "Review TypingTakeover.ReviewTakeoverPause (needs-changes at 989a208bea): fixed in ca661eed697 - presses before the tap seeded from HID idle (test the_hid_idle_time_stands_in_for_presses_before_the_tap_started), admission clock injectable (admit_takeover_with) with a lease-recheck test, posted keys excluded by a pure observed() with test, docs list secure input / held input / raise limits, fmt. Pairs: none; merges clean with #19208, macos-window-order, macos-handback-typed, macos-keys-no-press. Rust checks linux/windows/macos at diff 1cd63c8f6d. Prompt line sampled (Haiku 5.5, GPT-6.1 Sol): no behaviour difference.",
    "advanced": "2026-11-14T20:15:02Z",
    "rebases_after": [
@@ -93497,7 +93497,8 @@
      "at": "2026-11-14T21:25:24Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-14T21:30:08Z"
   },
   {
    "id": "macos-reroute-not-a-press",
