@@ -92866,7 +92866,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-14T11:36:30Z",
+  "checked": "2026-11-14T12:06:36Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -93002,60 +93002,6 @@
       "addressed_by": 18658
      }
     ]
-   },
-   "18737": {
-    "title": "fix(browser): give browser calls without a timeout the Eval cell's timeout",
-    "merge_commit": "c82d63d286c91fb69ef208eacb459635e7b97715",
-    "merged_at": "2026-11-12T11:39:16Z",
-    "findings": []
-   },
-   "18743": {
-    "title": "fix(natives): return the window showing a page from macOS apps.open in a browser",
-    "merge_commit": "48b61f3516b274d1654a347fa1a107dac31fcb1b",
-    "merged_at": "2026-11-12T11:39:16Z",
-    "findings": []
-   },
-   "18751": {
-    "title": "fix(browser): run tab.run page evaluations in the page's main world",
-    "merge_commit": "3c97ff9aebebf69742d6274c49a27b53b9bb07df",
-    "merged_at": "2026-11-12T11:39:16Z",
-    "findings": []
-   },
-   "18771": {
-    "title": "feat(ai,catalog): identify Factory Droid requests as droid 1.7.1",
-    "merge_commit": "2cea068b616002848bdc54498063f481b51ed69e",
-    "merged_at": "2026-11-12T11:39:16Z",
-    "findings": []
-   },
-   "18783": {
-    "title": "fix(natives): capture a covered X11 window from its own pixels, or say it is covered",
-    "merge_commit": "fe6d2de3479aecf09dcaf591d41838367dc2b1f4",
-    "merged_at": "2026-11-12T11:39:16Z",
-    "findings": []
-   },
-   "18784": {
-    "title": "fix(natives): keep X11 takeover from taking a typing user's keys",
-    "merge_commit": "4e4ae1becfc02c90ba8991e45d79ffc6cb918adc",
-    "merged_at": "2026-11-12T11:39:16Z",
-    "findings": []
-   },
-   "18892": {
-    "title": "fix(natives): refuse macOS element actions once the ref's element reads as another control",
-    "merge_commit": "e2e98408daf189d8536b5c38245abdb0c2f1b39f",
-    "merged_at": "2026-11-12T11:39:16Z",
-    "findings": []
-   },
-   "18914": {
-    "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool",
-    "merge_commit": "9211953f02d4b5f9a9447dc6bf5532e6820d25b9",
-    "merged_at": "2026-11-12T11:39:16Z",
-    "findings": []
-   },
-   "18915": {
-    "title": "fix(natives): verify Windows value writes and notify combo selections",
-    "merge_commit": "ac8eb3c9e23b8b55fdc85ecfd25e15a079482c3e",
-    "merged_at": "2026-11-12T11:39:16Z",
-    "findings": []
    },
    "19023": {
     "title": "fix(natives): keep X11 background input out of your window after a screen lock or VT switch",
@@ -102838,7 +102784,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-14T11:06:09.510394Z",
+  "at": "2026-11-14T12:06:37.465537Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -103980,6 +103926,51 @@
     ],
     "needs": [],
     "created": "2026-11-11T09:59:13Z"
+   },
+   {
+    "id": "macos-drag-no-change-note",
+    "label": "macos-drag-no-change-note",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P2",
+    "title": "fix(natives): note a macOS background drag that changed nothing readable",
+    "action": "wait",
+    "reasons": [
+     "needs #19195 (open)",
+     "conflicts with #19048 in crates/pi-natives/src/desktop/macos/input.rs"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "#19048"
+    ],
+    "needs": [
+     "macos-drag-confirm"
+    ],
+    "created": "2026-11-14T12:00:22Z"
+   },
+   {
+    "id": "macos-handback-typed",
+    "label": "macos-handback-typed",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P2",
+    "title": "fix(natives): give the macOS key window back after a takeover while another program types",
+    "action": "wait",
+    "reasons": [
+     "needs #19208 (open)"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [
+     "macos-handback-key"
+    ],
+    "created": "2026-11-14T11:57:04Z"
    },
    {
     "id": "macos-move-receipt",

@@ -1,10 +1,10 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14 12:05Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14 12:10Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-14 11:06Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 2, conflict-held 19, stacked 18, held 13, parked 2, open PRs 36, queued since the last plan 2; merged 341, closed 36
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-14 12:06Z on goliath; groups below are from it, states from the manifest)
+**Counts:** openable now 2, conflict-held 19, stacked 20, held 13, parked 2, open PRs 36; merged 341, closed 36
 
 ## Openable now (2)
 
@@ -37,7 +37,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14
 | x11-keysym-remap | fix(natives): type characters outside the X11 keymap through temporary keycodes | computer | P2 | 2d | [#19066](https://github.com/can1357/oh-my-pi/pull/19066), [#19080](https://github.com/can1357/oh-my-pi/pull/19080), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-keysym-remap) |
 | stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 1d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 
-## Stacked (18)
+## Stacked (20)
 
 | id | title | area | priority | age | needs | branch |
 |---|---|---|---|---|---|---|
@@ -59,6 +59,8 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14
 | factory-droid-1100-models | feat(catalog): add the Factory Droid models droid 1.10.0 serves | factory-droid |  | 18h | factory-droid-1100-pin | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-models) |
 | macos-window-order | fix(natives): put the user's key window back in front of a macOS target after background input and takeover | computer | P1 | 10h | macos-handback-key ([#19208](https://github.com/can1357/oh-my-pi/pull/19208)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-window-order) |
 | macos-key-read-settled | fix(natives): read a macOS popup after the option its typed letters choose | computer | P1 | 1h | key-menu ([#19179](https://github.com/can1357/oh-my-pi/pull/19179)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-key-read-settled) |
+| macos-handback-typed | fix(natives): give the macOS key window back after a takeover while another program types | computer | P2 | 0h | macos-handback-key ([#19208](https://github.com/can1357/oh-my-pi/pull/19208)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-handback-typed) |
+| macos-drag-no-change-note | fix(natives): note a macOS background drag that changed nothing readable | computer | P2 | 0h | macos-drag-confirm ([#19195](https://github.com/can1357/oh-my-pi/pull/19195)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-drag-no-change-note) |
 
 ## Held (13)
 
@@ -125,10 +127,3 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14
 | [#19194](https://github.com/can1357/oh-my-pi/pull/19194) | factory-droid-capture-resilience | test(ai): keep captured Factory Droid parity cases when one case fails | other | P1 | 16h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-capture-resilience) |
 | [#19208](https://github.com/can1357/oh-my-pi/pull/19208) | macos-handback-key | fix(natives): give the user's key window back after macOS takeover and focus-guard hand-backs | computer | P1 | 12h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-handback-key) |
 | [#19224](https://github.com/can1357/oh-my-pi/pull/19224) | macos-popup-value | fix(natives): choose a Chromium select's option on macOS and close the menu it opens | computer | P1 | 6h | keep; accepted pair with #19179: Main, 2026-11-14: built and tested, no textual conflict. popup-value says 'that is still open' (no Escape when the window list is unreadable or the menu left it); #19179 ec8a6c8d028 asserts contains("that is still open"), true in either merge order. macOS desktop: main+#19179 608/0, main+#19179+popup-value 620/0 (bench-mac); trees T1/T2 (r5/trees.sh) Linux check:ts, desktop 345/333, coding-agent 201/178 pass. items() untitled-by-value change left out (follow-up for the pop-up lane, r5/combined-popup-19179.diff) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-popup-value) |
-
-## Queued since the last plan (2)
-
-| id | title | area | priority | age | branch |
-|---|---|---|---|---|---|
-| macos-handback-typed | fix(natives): give the macOS key window back after a takeover while another program types | computer | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-handback-typed) |
-| macos-drag-no-change-note | fix(natives): note a macOS background drag that changed nothing readable | computer | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-drag-no-change-note) |
