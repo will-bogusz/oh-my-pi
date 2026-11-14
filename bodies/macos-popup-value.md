@@ -28,10 +28,10 @@ Each row is a macOS VM, the select's window behind one where a simulated user ty
 | An option that does not exist | Chrome: refused with an empty list; AppKit: refused with the list | Chrome and AppKit: refused with the full list, menu closed, 6 of 6 |
 
 Limits:
-- The one miss was a Chrome menu whose items never appeared in the accessibility tree within a second: the call refused with the option the closed select showed, closed the menu, and the user's keys went to the menu for about 1.2 s that time.
-- A Chromium choice takes 0.87 s against `main`'s 0.53 s refusal: the menu has to open, and its re-shown window takes about 250 ms to fade after Escape.
-- Every background pop-up choice still makes the target window key for about 25 ms and raises it, as on `main`.
-- The item lists in click and key-press refusals still leave out a Chromium `<select>`'s options, which have no title.
+- The one miss: a Chrome menu's items never appeared in the accessibility tree within a second; the call refused with the closed select's option, closed the menu, and the user's keys went to it for about 1.2 s.
+- Asking for an option a Chromium pop-up lacks holds its menu, and the user's keys, for 916 ms (VM median): Chromium ignores `AXCancel`, and Escape follows a 600 ms wait.
+- A Chromium choice takes 0.87 s against `main`'s 0.53 s refusal: the menu has to open, and its re-shown window fades for ~250 ms after Escape.
+- Every background pop-up choice still makes the target window key for ~25 ms and raises it, as on `main`.
 - Not tried: a `<select>` in WebKit (Safari, a `WKWebView`).
 
 <details><summary>Unit tests and what was not run</summary>
@@ -45,3 +45,4 @@ Limits:
 - [ ] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
