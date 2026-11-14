@@ -22,9 +22,9 @@ A takeover brings its target in front of the user's keyboard, so every key they 
 - **The wait happens before the input lease**, in the worker's admission as on X11, so another session's input is not held up meanwhile; it is rechecked under the lease and again as the takeover starts, and a press in between refuses with nothing sent.
 - **Presses before the session's listener started** are covered by the HID system's idle time. It also counts input other programs post, so it can only make a session's first takeover wait (at most 5 s), never admit one early.
 
-When the person is still at it as the call's time runs out, the call fails without sending anything:
+When the person is still at it as the call's time runs out, the call fails 0.25 s before its own timeout (the `computer` call's `timeout`, 120 s by default) without sending anything; in a call given 8 s against a person typing for 10 s, this PR refused at 7.76 s with none of their keys lost, where `main` brought the target forward at once and 4 to 5 of their keys went missing from their window (3 calls each). With the default 120 s, a call against 49 s of unbroken typing waited it out and ran once they stopped, nothing lost (2 of 2).
 
-> UserIntervened: the user is still typing, clicking or holding input (last activity 0.4 s ago), so no takeover started; nothing was sent; try again once they pause
+> UserIntervened: the user is still typing, clicking or holding input (last activity 0.1 s ago), so no takeover started; nothing was sent; try again once they pause
 
 Limits, stated in `docs/computer-use.md`:
 - Someone who starts typing again once the takeover is running still puts their first key into the target before the existing stop ends the call, as on `main`.
@@ -38,7 +38,9 @@ Review first: `control/intervention.rs` (`UserInputs::pause_before_takeover`, `a
 
 On a macOS 26.5 VM, a kit test app per surface and a simulated person typing into their own front window through the VM's VNC keyboard (macOS sees it as hardware), 10 calls per cell, `main` (`fe194ec2f12`) against this branch. The person's text is scored from their own window and every key the target app logged; the agent's text from the target's state.
 
-Unchanged where nobody types: background `el.type`, click then `win.type`, and `cmd+k` on AppKit and Chrome, 10 of 10 on both builds. The HandBack takeover cells of #19208 (one and two windows, Chrome, a click on the person's other window or a third app, a click on the target, a background click that steals the front), 10 each with 6 s of quiet before the call: identical outcomes on both builds, call times within 11 ms.
+Unchanged where nobody types: background `el.type`, click then `win.type`, and `cmd+k` on AppKit and Chrome, 10 of 10 on both builds. Background calls cost nothing more: `el.type` and `el.press("cmd+k")` into an AppKit field, 20 calls each interleaved with `main`, took 642.5 and 789.0 ms against 640.5 and 786.5 ms (medians; spread 10–15 ms). The HandBack takeover cells of #19208 (one and two windows, Chrome, a click on the person's other window or a third app, a click on the target, a background click that steals the front), 10 each with 6 s of quiet before the call: identical outcomes on both builds, call times within 11 ms.
+
+With #19208 merged in, against #19208 alone, 20 tries each, the person switching while the takeover runs: the end state was the same on both trees in every try (their other window key and main, 20 of 20; the third app they picked in front, 20 of 20; and where their click races the hand-back, the same 17 and 3 split on both). In 1 of 20 tries of each switch cell, the session's first takeover waited 3.3 s for presses from before its listener started, so the person's switch came before it began; it then typed and handed back to their choice instead of failing `InputFailed`.
 
 The tool's guidance for `UserIntervened` now names the admission refusal. Haiku 5.5 and GPT-6.1 Sol, 4 one-turn samples each with `main`'s and this branch's guidance after that refusal: 16 of 16 re-read the window before anything else, none typed again.
 
