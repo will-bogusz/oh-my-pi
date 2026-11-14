@@ -93160,6 +93160,24 @@
      "host": "MacBook-Pro"
     }
    ]
+  },
+  {
+   "id": "macos-takeover-typing-pause",
+   "branch": "will/macos-takeover-typing-pause",
+   "title": "fix(natives): keep macOS takeover from taking a typing user's keys",
+   "area": "computer",
+   "priority": "P1",
+   "needs": [],
+   "base": "fe194ec2f129c74fe916109beb42fde063530e8c",
+   "body": "bodies/macos-takeover-typing-pause.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-takeover-typing-pause",
+   "host": "MacBook-Pro",
+   "added": "2026-11-14T18:57:16Z",
+   "updated": "2026-11-14T18:57:16Z",
+   "note": ""
   }
  ],
  "watch": {
