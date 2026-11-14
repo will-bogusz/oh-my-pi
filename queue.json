@@ -85846,6 +85846,26 @@
        "Window input defaults to background routes that do not move the user's pointer or deliberately activate the target. When a call's background route is unavailable, `computer.backgroundFallback` decides what happens. With `takeover` (the default) the tool reruns that one call in takeover, hands focus back to the app the user was in, and adds a line to the run output naming the reason, saying the input was delivered, and saying where focus ended, such as `click ran in takeover because window 42 (Python) uses the Tk toolkit, \u2026; the input was delivered, and focus returned to Notes`. Where focus ended is the front process macOS or Windows reports once the takeover finished; where that is unknown (Linux, or an unreadable front process) the line says focus was not confirmed. On macOS focus returns even if the user kept typing during the takeover (X11 and Windows run the rerun as plain takeover, which yields to user activity); only a third app (neither the user's app nor the target) that became active during the action keeps focus, and the output says so. With `refuse` the call throws `BackgroundUnavailable` with the reason and says the user's setting keeps the agent in the background, so no takeover happened. `refuse` also beats the model: `takeover: true`, `raise()`, an AX `raise` action, `apps.open(\u2026, { activate: true })` or `{ reveal: true }`, `control.acquire` (a grant acquired earlier is released), input to the desktop or a display target and, off macOS, `el.focus()` throw `BackgroundUnavailable` before anything is sent, naming the background route where there is one. Under `takeover`, a call that passes `takeover` itself is never rerun: `takeover: true` takes over at once and restores focus only if the user did not act during it, and `takeover: false` stays background. Takeover temporarily activates the exact target and posts real input, then restores focus and pointer position. OS activation restrictions can still refuse takeover. Desktop-root pointer helpers (`computer.click`, \u2026) always drive the user's real pointer."
       ]
      }
+    },
+    {
+     "at": "2026-11-14T00:09:31Z",
+     "reason": "Main, 2026-11-14 ~00:05Z: approved order-independent form (r3/form-19062.diff): the dropped lines are #19062's own whole-struct DesktopFocusReturn literals in two test asserts (now compare the three fields), their now-unused import, and report()'s field lines rewritten with ..Default::default(); rust-check L/M/W pass for Rust diff 5cbfb9781c; main+form, main+#19208, main+both build clean on W/L/M",
+     "old": "ba8bc21cbe22b7efabe74b085fa7a25863335b69",
+     "new": "1f0e018e81044d51330e3c23101013a2afd07239",
+     "dropped": {
+      "crates/pi-natives/src/desktop/win32/input.rs": [
+       "\t\t\t\thanded_back:  restored && self.previous != self.target,",
+       "\t\t\t\tfront_pid:    window::process_id(front),"
+      ],
+      "crates/pi-natives/src/desktop/win32/mod.rs": [
+       "\tuse crate::desktop::{",
+       "\t\tcontrol::{self, CancellationSource},",
+       "\t\ttypes::DesktopFocusReturn,",
+       "\t\t\t\tcontrol::take_focus_return(),",
+       "\t\t\t\tSome(DesktopFocusReturn { handed_back: true, previous_pid: pid, front_pid: pid }),",
+       "\t\t\tSome(DesktopFocusReturn { handed_back: false, previous_pid: pid, front_pid: pid })"
+      ]
+     }
     }
    ]
   },
