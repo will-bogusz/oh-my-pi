@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14 00:40Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14 00:42Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-13 23:54Z on goliath; groups below are from it, states from the manifest)
@@ -120,7 +120,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14
 | [#19180](https://github.com/can1357/oh-my-pi/pull/19180) | devin-pin-31257 | fix(catalog): identify Devin requests as CLI 3000.12.57 | catalog | P0 | 7h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-pin-31257) |
 | [#19188](https://github.com/can1357/oh-my-pi/pull/19188) | factory-droid-config-update-upstreams | fix(catalog): keep GPT-6 effort changes off configuration_update on Factory Droid Bedrock and Snowflake | catalog | P1 | 6h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-config-update-upstreams) |
 | [#19194](https://github.com/can1357/oh-my-pi/pull/19194) | factory-droid-capture-resilience | test(ai): keep captured Factory Droid parity cases when one case fails | other | P1 | 5h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-capture-resilience) |
-| [#19208](https://github.com/can1357/oh-my-pi/pull/19208) | macos-handback-key | fix(natives): give the user's key window back after macOS takeover and focus-guard hand-backs | computer | P1 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-handback-key) |
+| [#19208](https://github.com/can1357/oh-my-pi/pull/19208) | macos-handback-key | fix(natives): give the user's key window back after macOS takeover and focus-guard hand-backs | computer | P1 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-handback-key) |
 
 ## Queued since the last plan (1)
 
