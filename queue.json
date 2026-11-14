@@ -105820,5 +105820,11 @@
     "wake": ""
    }
   ]
+ },
+ "opening": {
+  "id": "macos-takeover-typing-pause",
+  "token": "1dd9801806bf477ea63d326ba9783ee5",
+  "host": "MacBook-Pro",
+  "at": "2026-11-14T21:15:43Z"
  }
 }
