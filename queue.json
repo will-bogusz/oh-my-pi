@@ -93183,7 +93183,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-14T19:13:31Z",
+  "checked": "2026-11-14T19:44:00Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -93280,60 +93280,6 @@
       "addressed_by": 18658
      }
     ]
-   },
-   "19023": {
-    "title": "fix(natives): keep X11 background input out of your window after a screen lock or VT switch",
-    "merge_commit": "e9daf76efb52ed7c9129cebdaa8d28556eb99ea0",
-    "merged_at": "2026-11-12T19:20:12Z",
-    "findings": []
-   },
-   "19026": {
-    "title": "fix(natives): report a setValue that reads back as a same-length mask as done, not failed",
-    "merge_commit": "e8863de13a4c0888aa0cfdbdc52c480c842e9d13",
-    "merged_at": "2026-11-12T19:20:12Z",
-    "findings": []
-   },
-   "19027": {
-    "title": "fix(natives): name the background route when takeover refuses a macOS suggestion list",
-    "merge_commit": "14bb8a76fcba145f9386c543da8520f8b924371c",
-    "merged_at": "2026-11-12T19:20:12Z",
-    "findings": []
-   },
-   "19037": {
-    "title": "fix(natives,coding-agent): stop Windows takeover typing from losing text the app had not read yet",
-    "merge_commit": "a2d9745a913d523f0007813f533d06a72e99d74c",
-    "merged_at": "2026-11-12T19:20:12Z",
-    "findings": []
-   },
-   "19044": {
-    "title": "fix(natives): refuse X11 presses outside an open popup of the app",
-    "merge_commit": "5666bef88365c64eeb73267d393843566098b264",
-    "merged_at": "2026-11-12T19:20:12Z",
-    "findings": []
-   },
-   "19046": {
-    "title": "fix(natives): let Linux menu.select walk into Qt apps' menus",
-    "merge_commit": "1228eeeb110d0e1659b8d905e8e192886d7cdf90",
-    "merged_at": "2026-11-12T19:20:12Z",
-    "findings": []
-   },
-   "19047": {
-    "title": "fix(natives): read back AT-SPI numeric setValue before reporting success",
-    "merge_commit": "4a948e50ef1bf58118baed2078a813360eff9b40",
-    "merged_at": "2026-11-12T19:20:12Z",
-    "findings": []
-   },
-   "19050": {
-    "title": "fix(natives): preserve the empty-field warning on Linux write timeouts",
-    "merge_commit": "d414acfd95508fc622ac6894746ee75239bacaf6",
-    "merged_at": "2026-11-12T19:20:12Z",
-    "findings": []
-   },
-   "19054": {
-    "title": "fix(natives): skip unused ref-check reads and recover display refs",
-    "merge_commit": "92a49399858cb2db0284cce419ebbbff2fe67ad1",
-    "merged_at": "2026-11-12T19:20:12Z",
-    "findings": []
    },
    "19094": {
     "title": "fix(coding-agent): fail a click whose frame the page removed while the button was down",
