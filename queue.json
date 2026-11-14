@@ -92443,16 +92443,23 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-13T23:54:48Z",
+  "checked": "2026-11-14T00:55:43Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "covered-fill": {
-    "since": "2026-11-13T15:53:06Z",
-    "title": "fix(coding-agent): refuse browser keys aimed at a field a modal dialog covers"
+   "macos-popup-value": {
+    "since": "2026-11-14T00:55:43Z",
+    "title": "fix(natives): choose a Chromium select's option on macOS and close the menu it opens"
    }
   },
   "conflicts": {
+   "#18925": {
+    "since": "2026-11-14T00:55:43Z",
+    "title": "feat(coding-agent): name the native windows a browser call raised on macOS",
+    "files": [
+     "packages/coding-agent/src/tools/browser/tab-worker.ts"
+    ]
+   },
    "#16611": {
     "since": "2026-11-12T01:15:20Z",
     "title": "feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio",
@@ -92532,7 +92539,6 @@
    19188,
    19191,
    19194,
-   19195,
    19208
   ],
   "post_merge": {
@@ -96110,6 +96116,28 @@
     "id": "macos-handback-key",
     "title": "fix(natives): give the user's key window back after macOS takeover and focus-guard hand-backs",
     "why": "opened as #19208"
+   },
+   {
+    "at": "2026-11-14T00:55:43Z",
+    "kind": "openable",
+    "id": "macos-popup-value",
+    "title": "fix(natives): choose a Chromium select's option on macOS and close the menu it opens"
+   },
+   {
+    "at": "2026-11-14T00:55:43Z",
+    "kind": "unopenable",
+    "id": "covered-fill",
+    "title": "fix(coding-agent): refuse browser keys aimed at a field a modal dialog covers",
+    "why": "plan: wait (conflicts with #19045 in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts; conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts)"
+   },
+   {
+    "at": "2026-11-14T00:55:43Z",
+    "kind": "conflict",
+    "label": "#18925",
+    "title": "feat(coding-agent): name the native windows a browser call raised on macOS",
+    "files": [
+     "packages/coding-agent/src/tools/browser/tab-worker.ts"
+    ]
    }
   ]
  },
@@ -102197,12 +102225,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-13T23:54:49.297925Z",
+  "at": "2026-11-14T00:55:44.022903Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 1,
-   "left": 7
+   "used": 0,
+   "left": 8
   },
   "rows": [
    {
@@ -102321,12 +102349,11 @@
     "title": "fix(natives): follow rebuilt macOS table rows without selecting a neighbour",
     "action": "keep",
     "reasons": [],
-    "note": "accepted pair with #16553: QueueFourteen, 2026-11-12 (Main's standing rule: use-list collision, opener records): only conflict is the use list in crates/pi-natives/src/desktop/macos/mod.rs: #16553 adds 'pub(super) use clicks::ClickJournal;', this entry adds is_standard_window and window_titles to the ax/capture use lines; nothing removed; combined form is both; accepted pair with #19061: QueueFifteen, 2026-11-12 (Main's standing rule: a field added beside a line the other side reshapes without changing a value): only conflict is the Registered struct in crates/pi-natives/src/desktop/ax.rs: #19048 adds 'row: Option<RowProof>,' where this entry rewrites the doc comment of 'held'; #19048 reads neither held nor fingerprint. Combined form: #19048's row field, then this entry's doc comment and 'held: Option<u64>'.; accepted pair with #19195: QueueNineteen, 2026-11-13: only conflict is adjacent #[test] fns appended at the same spot at the end of mod tests in crates/pi-natives/src/desktop/macos/input.rs (this entry's drag tests, #19048's row-action tests); nothing removed or reshaped; combined form is both sets of tests. Built as one tree with key-menu and macos-scroll-direction: macOS cargo test desktop 641 pass (bench-mac), Linux 345 pass, check:ts clean",
+    "note": "accepted pair with #16553: QueueFourteen, 2026-11-12 (Main's standing rule: use-list collision, opener records): only conflict is the use list in crates/pi-natives/src/desktop/macos/mod.rs: #16553 adds 'pub(super) use clicks::ClickJournal;', this entry adds is_standard_window and window_titles to the ax/capture use lines; nothing removed; combined form is both; accepted pair with #19061: QueueFifteen, 2026-11-12 (Main's standing rule: a field added beside a line the other side reshapes without changing a value): only conflict is the Registered struct in crates/pi-natives/src/desktop/ax.rs: #19048 adds 'row: Option<RowProof>,' where this entry rewrites the doc comment of 'held'; #19048 reads neither held nor fingerprint. Combined form: #19048's row field, then this entry's doc comment and 'held: Option<u64>'.",
     "over": [],
     "paired": [
      "#16553",
-     "#19061",
-     "#19195"
+     "#19061"
     ],
     "blocked_by": [],
     "needs": [],
@@ -102494,25 +102521,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-13T18:15:41Z"
-   },
-   {
-    "id": "macos-drag-confirm",
-    "label": "#19195",
-    "number": 19195,
-    "state": "open",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives): stop macOS background drags reporting moves that did not happen",
-    "action": "keep",
-    "reasons": [],
-    "note": "accepted pair with #19048: QueueNineteen, 2026-11-13: only conflict is adjacent #[test] fns appended at the same spot at the end of mod tests in crates/pi-natives/src/desktop/macos/input.rs (this entry's drag tests, #19048's row-action tests); nothing removed or reshaped; combined form is both sets of tests. Built as one tree with key-menu and macos-scroll-direction: macOS cargo test desktop 641 pass (bench-mac), Linux 345 pass, check:ts clean",
-    "over": [],
-    "paired": [
-     "#19048"
-    ],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-13T20:28:59Z"
    },
    {
     "id": "macos-handback-key",
@@ -102808,8 +102816,10 @@
     "area": "browser",
     "priority": "P2",
     "title": "feat(coding-agent): name the native windows a browser call raised on macOS",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
+    ],
     "note": "accepted pair with #19045: Main, 2026-11-12: only conflict is adjacent class fields in packages/coding-agent/src/tools/browser/tab-worker.ts: #18925 adds #nativeWindows?, this entry adds #actionRequestSeq? and #settling? at the same spot; nothing removed; combined form is both declarations; accepted pair with #19001: Main, 2026-11-12: accepted (HiddenOnMain's combined form). tab-worker.ts WorkerCore.#run after the finally: this branch's hinted take (if this.#unanswered === active && this.#hiddenFramesWaiting && this.#page) await this.#takeHiddenFrames(this.#page)) stays before the answered guard; in the failure branch #18925's enrichment of error (message and stack with the native notices), then this.#sendResult({ id: msg.id, ok: false, error }), so both native-window notices and the once-only hidden-frames notice ride the failure. Second to land adds one test that a failed run carries both.; accepted pair with #19178: Main, 2026-11-13: tab-supervisor.ts import block only, keep both lines (import { isLoopbackRelayUrl } from \"./relay/daemon\"; import { FOREIGN_FRAME_REFUSAL } from \"./relay/protocol\")",
     "over": [],
     "paired": [
@@ -102936,14 +102946,17 @@
     "area": "browser",
     "priority": "P1",
     "title": "fix(coding-agent): refuse browser keys aimed at a field a modal dialog covers",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with #19045 in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
+    ],
     "note": "",
-    "over": [
+    "over": [],
+    "paired": [],
+    "blocked_by": [
      "#19045"
     ],
-    "paired": [],
-    "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T02:11:47Z"
    },
@@ -102967,6 +102980,25 @@
     ],
     "needs": [],
     "created": "2026-10-30T21:35:55Z"
+   },
+   {
+    "id": "macos-popup-value",
+    "label": "macos-popup-value",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): choose a Chromium select's option on macOS and close the menu it opens",
+    "action": "open",
+    "reasons": [],
+    "note": "accepted pair with #19179: PopupValue, 2026-11-14: both edit ax/open_menu.rs; ours adds Opened/listed/shown_again and gates Escape in close/escape_listed, #19179 edits guard/messages/tests; the render reformat hunk is identical in both; merge-tree clean. Combined form: #19179's key-press refusal keeps its text; its InputFailed item listing skips untitled items, so a Chromium select's items list empty there; left_open_message 'still open after Escape' is untrue when the window list was unreadable (no Escape sent now)",
+    "over": [],
+    "paired": [
+     "#19179"
+    ],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-14T00:26:14Z"
    },
    {
     "id": "upload-stall-error-all-providers",
@@ -103030,7 +103062,6 @@
      "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19045 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with covered-fill in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
@@ -103041,8 +103072,7 @@
      "#18786",
      "#18789",
      "#18925",
-     "#19045",
-     "covered-fill"
+     "#19045"
     ],
     "needs": [],
     "created": "2026-11-10T15:45:44Z"
@@ -103062,7 +103092,6 @@
      "conflicts with #18786 in docs/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md",
      "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with covered-fill in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
@@ -103072,8 +103101,7 @@
      "#19178",
      "#18786",
      "#18789",
-     "#18925",
-     "covered-fill"
+     "#18925"
     ],
     "needs": [
      "observe-settle"
@@ -103096,7 +103124,6 @@
      "conflicts with #18789 in docs/tools/browser.md",
      "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19045 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with covered-fill in packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts",
      "its need browser-wait-predicate conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
     ],
@@ -103108,8 +103135,7 @@
      "#18786",
      "#18789",
      "#18925",
-     "#19045",
-     "covered-fill"
+     "#19045"
     ],
     "needs": [
      "browser-wait-predicate"
@@ -103192,7 +103218,6 @@
      "conflicts with #19062 in docs/computer-use.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #19100 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #19179 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
-     "conflicts with #19195 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #19208 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #18353 in docs/computer-use.md",
      "conflicts with #19034 in docs/computer-use.md",
@@ -103212,7 +103237,6 @@
      "#19062",
      "#19100",
      "#19179",
-     "#19195",
      "#19208",
      "#18353",
      "#19034",
@@ -103239,7 +103263,6 @@
      "conflicts with #19048 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with #19061 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with #19063 in crates/pi-natives/src/desktop/macos/ax.rs",
-     "conflicts with #19195 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with main in crates/pi-natives/src/desktop/macos/ax.rs"
     ],
     "note": "",
@@ -103249,8 +103272,7 @@
      "#19036",
      "#19048",
      "#19061",
-     "#19063",
-     "#19195"
+     "#19063"
     ],
     "needs": [],
     "created": "2026-11-11T09:59:13Z"
@@ -103271,6 +103293,7 @@
      "conflicts with #18786 in docs/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md",
      "conflicts with #19045 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "its need #18925 conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts"
     ],
     "note": "",
@@ -103304,7 +103327,7 @@
      "conflicts with #18786 in docs/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md",
      "conflicts with #19045 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts"
+     "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
     "over": [],
@@ -103337,9 +103360,8 @@
      "conflicts with #18786 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts",
      "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts",
      "conflicts with #19045 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/network.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with covered-fill in packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "its need r2/relay-popup-owned conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts",
-     "its need r2/page-waiting conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
+     "its need r2/relay-popup-owned conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "its need r2/page-waiting conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/dialogs.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-detach.test.ts"
     ],
     "note": "",
@@ -103350,8 +103372,7 @@
      "#19001",
      "#18786",
      "#18789",
-     "#19045",
-     "covered-fill"
+     "#19045"
     ],
     "needs": [
      "r2/relay-popup-owned",
@@ -103399,7 +103420,6 @@
      "conflicts with #19048 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19061 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs",
      "conflicts with #19063 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
-     "conflicts with #19195 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18987 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs"
@@ -103412,7 +103432,6 @@
      "#19048",
      "#19061",
      "#19063",
-     "#19195",
      "#18925",
      "#18987"
     ],
@@ -103432,7 +103451,6 @@
      "conflicts with #19025 in crates/pi-natives/src/desktop/win32/mod.rs",
      "conflicts with #19062 in crates/pi-natives/src/desktop/win32/capture.rs, crates/pi-natives/src/desktop/win32/mod.rs",
      "conflicts with #19179 in packages/coding-agent/src/prompts/tools/computer.md",
-     "conflicts with #19195 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #19208 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18222 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/win32/mod.rs, packages/coding-agent/src/prompts/tools/computer.md"
@@ -103444,7 +103462,6 @@
      "#19025",
      "#19062",
      "#19179",
-     "#19195",
      "#19208",
      "#18222"
     ],
@@ -103519,8 +103536,7 @@
      "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18925 in docs/tools/browser.md",
      "conflicts with #19045 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with covered-fill in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts"
+     "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
     "over": [],
@@ -103529,8 +103545,7 @@
      "#18786",
      "#18789",
      "#18925",
-     "#19045",
-     "covered-fill"
+     "#19045"
     ],
     "needs": [],
     "created": "2026-11-10T19:19:48Z"
@@ -103550,7 +103565,6 @@
      "conflicts with #19178 in packages/coding-agent/src/tools/browser/tab-supervisor.ts",
      "conflicts with #19001 in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18925 in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts",
-     "conflicts with covered-fill in packages/coding-agent/src/tools/browser/tern/tern-tab.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
     ],
     "note": "",
@@ -103559,8 +103573,7 @@
     "blocked_by": [
      "#19178",
      "#19001",
-     "#18925",
-     "covered-fill"
+     "#18925"
     ],
     "needs": [
      "agent-identity"
@@ -103581,7 +103594,6 @@
      "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18925 in docs/tools/browser.md",
      "conflicts with #19045 in docs/tools/browser.md",
-     "conflicts with covered-fill in packages/coding-agent/src/tools/browser/tern/tern-tab.ts",
      "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
     ],
     "note": "",
@@ -103591,8 +103603,7 @@
      "#18786",
      "#18789",
      "#18925",
-     "#19045",
-     "covered-fill"
+     "#19045"
     ],
     "needs": [],
     "created": "2026-11-11T09:27:26Z"
@@ -103646,7 +103657,6 @@
      "conflicts with #19062 in docs/computer-use.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #19100 in docs/tools/computer.md, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19179 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
-     "conflicts with #19195 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #19208 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18353 in docs/computer-use.md, docs/tools/computer.md",
      "conflicts with #19034 in docs/computer-use.md",
@@ -103656,6 +103666,7 @@
      "conflicts with #18222 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/tools/eval.ts",
      "conflicts with #18987 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/worker.ts",
+     "conflicts with macos-popup-value in docs/tools/computer.md",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -103668,7 +103679,6 @@
      "#19062",
      "#19100",
      "#19179",
-     "#19195",
      "#19208",
      "#18353",
      "#19034",
@@ -103677,7 +103687,8 @@
      "#18013",
      "#18222",
      "#18786",
-     "#18987"
+     "#18987",
+     "macos-popup-value"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -103701,12 +103712,12 @@
      "conflicts with #19063 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19100 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19179 in packages/coding-agent/src/prompts/tools/computer.md",
-     "conflicts with #19195 in crates/pi-natives/src/desktop/macos/ax.rs, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #19208 in packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18987 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
+     "conflicts with macos-popup-value in docs/tools/computer.md",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs"
     ],
@@ -103720,12 +103731,12 @@
      "#19063",
      "#19100",
      "#19179",
-     "#19195",
      "#19208",
      "#18353",
      "#18222",
      "#18925",
-     "#18987"
+     "#18987",
+     "macos-popup-value"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -103753,6 +103764,7 @@
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md",
      "conflicts with #18925 in crates/pi-natives/src/desktop/macos/capture.rs, crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with macos-popup-value in docs/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
@@ -103767,7 +103779,8 @@
      "#19100",
      "#18353",
      "#18222",
-     "#18925"
+     "#18925",
+     "macos-popup-value"
     ],
     "needs": [
      "agent-identity"
@@ -103834,7 +103847,6 @@
      "conflicts with #18786 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with covered-fill in packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts",
      "its need act-look-prompt conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
     ],
@@ -103846,8 +103858,7 @@
      "#19001",
      "#18786",
      "#18789",
-     "#18925",
-     "covered-fill"
+     "#18925"
     ],
     "needs": [
      "act-look-prompt"
@@ -103870,9 +103881,8 @@
      "conflicts with #18786 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #19045 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with covered-fill in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts",
-     "conflicts with main in packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts"
+     "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with main in packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/dialogs.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts"
     ],
     "note": "",
     "over": [],
@@ -103882,8 +103892,7 @@
      "#19001",
      "#18786",
      "#18789",
-     "#19045",
-     "covered-fill"
+     "#19045"
     ],
     "needs": [
      "r2/relay-own-only"
@@ -103932,6 +103941,7 @@
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md",
      "conflicts with #18987 in docs/tools/computer.md",
+     "conflicts with macos-popup-value in docs/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/win32/input.rs, crates/pi-natives/src/desktop/win32/mod.rs"
     ],
     "note": "",
@@ -103943,7 +103953,8 @@
      "#19100",
      "#18353",
      "#18222",
-     "#18987"
+     "#18987",
+     "macos-popup-value"
     ],
     "needs": [],
     "created": "2026-11-12T04:40:13Z"
@@ -104241,7 +104252,12 @@
     "created": "2026-11-03T01:24:37Z"
    }
   ],
-  "drafts": [],
+  "drafts": [
+   {
+    "label": "#19195",
+    "created": "2026-11-13T20:28:59Z"
+   }
+  ],
   "parked": [
    {
     "label": "#15128",
