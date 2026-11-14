@@ -87347,7 +87347,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "8c7353eb6c711b6e11bf66f67ad09cc481f31277",
+   "base": "b7fe8c7f43c378faa0863e79f5509f9dde16ad9a",
    "body": "bodies/macos-press-click-hint.md",
    "state": "open",
    "pr": 19063,
@@ -87355,7 +87355,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-press-click-hint",
    "host": "MacBook-Pro",
    "added": "2026-11-11T18:49:11Z",
-   "updated": "2026-11-14T09:46:58Z",
+   "updated": "2026-11-14T17:48:33Z",
    "note": "",
    "line_loss_overrides": [
     {
@@ -87390,7 +87390,7 @@
      }
     }
    ],
-   "advanced": "2026-11-14T09:46:58Z",
+   "advanced": "2026-11-14T17:48:33Z",
    "built": [
     {
      "with": "#18925",
