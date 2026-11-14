@@ -92533,7 +92533,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-14T01:26:31Z",
+  "checked": "2026-11-14T01:57:45Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -92622,6 +92622,7 @@
    19188,
    19191,
    19194,
+   19195,
    19208
   ],
   "post_merge": {
@@ -92938,38 +92939,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-07T01:37:29Z",
-    "kind": "released",
-    "number": 18252,
-    "title": "fix(browser): keep the tab an open successfully reattaches",
-    "tag": "v18.18.0"
-   },
-   {
-    "at": "2026-11-07T01:37:29Z",
-    "kind": "released",
-    "number": 18221,
-    "title": "fix(natives): search 64 levels deep in find()",
-    "tag": "v18.18.0"
-   },
-   {
-    "at": "2026-11-07T01:37:29Z",
-    "kind": "conflict",
-    "label": "#18353",
-    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
-    "files": [
-     "MODULE.bazel.lock"
-    ]
-   },
-   {
-    "at": "2026-11-07T01:37:29Z",
-    "kind": "conflict",
-    "label": "#18013",
-    "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "files": [
-     "MODULE.bazel.lock"
-    ]
-   },
    {
     "at": "2026-11-07T19:57:55Z",
     "kind": "conflict",
@@ -102347,12 +102316,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-14T01:26:31.765725Z",
+  "at": "2026-11-14T01:57:46.472876Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 1,
+   "left": 7
   },
   "rows": [
    {
@@ -102471,11 +102440,12 @@
     "title": "fix(natives): follow rebuilt macOS table rows without selecting a neighbour",
     "action": "keep",
     "reasons": [],
-    "note": "accepted pair with #16553: QueueFourteen, 2026-11-12 (Main's standing rule: use-list collision, opener records): only conflict is the use list in crates/pi-natives/src/desktop/macos/mod.rs: #16553 adds 'pub(super) use clicks::ClickJournal;', this entry adds is_standard_window and window_titles to the ax/capture use lines; nothing removed; combined form is both; accepted pair with #19061: QueueFifteen, 2026-11-12 (Main's standing rule: a field added beside a line the other side reshapes without changing a value): only conflict is the Registered struct in crates/pi-natives/src/desktop/ax.rs: #19048 adds 'row: Option<RowProof>,' where this entry rewrites the doc comment of 'held'; #19048 reads neither held nor fingerprint. Combined form: #19048's row field, then this entry's doc comment and 'held: Option<u64>'.",
+    "note": "accepted pair with #16553: QueueFourteen, 2026-11-12 (Main's standing rule: use-list collision, opener records): only conflict is the use list in crates/pi-natives/src/desktop/macos/mod.rs: #16553 adds 'pub(super) use clicks::ClickJournal;', this entry adds is_standard_window and window_titles to the ax/capture use lines; nothing removed; combined form is both; accepted pair with #19061: QueueFifteen, 2026-11-12 (Main's standing rule: a field added beside a line the other side reshapes without changing a value): only conflict is the Registered struct in crates/pi-natives/src/desktop/ax.rs: #19048 adds 'row: Option<RowProof>,' where this entry rewrites the doc comment of 'held'; #19048 reads neither held nor fingerprint. Combined form: #19048's row field, then this entry's doc comment and 'held: Option<u64>'.; accepted pair with #19195: QueueNineteen, 2026-11-13: only conflict is adjacent #[test] fns appended at the same spot at the end of mod tests in crates/pi-natives/src/desktop/macos/input.rs (this entry's drag tests, #19048's row-action tests); nothing removed or reshaped; combined form is both sets of tests. Built as one tree with key-menu and macos-scroll-direction: macOS cargo test desktop 641 pass (bench-mac), Linux 345 pass, check:ts clean",
     "over": [],
     "paired": [
      "#16553",
-     "#19061"
+     "#19061",
+     "#19195"
     ],
     "blocked_by": [],
     "needs": [],
@@ -102643,6 +102613,25 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-13T18:15:41Z"
+   },
+   {
+    "id": "macos-drag-confirm",
+    "label": "#19195",
+    "number": 19195,
+    "state": "open",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): stop macOS background drags reporting moves that did not happen",
+    "action": "keep",
+    "reasons": [],
+    "note": "accepted pair with #19048: QueueNineteen, 2026-11-13: only conflict is adjacent #[test] fns appended at the same spot at the end of mod tests in crates/pi-natives/src/desktop/macos/input.rs (this entry's drag tests, #19048's row-action tests); nothing removed or reshaped; combined form is both sets of tests. Built as one tree with key-menu and macos-scroll-direction: macOS cargo test desktop 641 pass (bench-mac), Linux 345 pass, check:ts clean",
+    "over": [],
+    "paired": [
+     "#19048"
+    ],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-13T20:28:59Z"
    },
    {
     "id": "macos-handback-key",
@@ -103123,6 +103112,29 @@
     "created": "2026-11-14T00:26:14Z"
    },
    {
+    "id": "macos-window-order",
+    "label": "macos-window-order",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): put the user's key window back in front of a macOS background target",
+    "action": "wait",
+    "reasons": [
+     "needs #19208 (open)"
+    ],
+    "note": "accepted pair with #16553: HandBack, 2026-11-14: textual conflict only, in with_background_watch and WindowServerDesktop (skylight.rs). Combined form keeps both sides: #16553's 'let placement = match (clicks, previous.pid) {Tap|HitTest}' first, then this entry's 'let order = previous.pid.zip(capture::stacked_windows()).and_then(|(user, stack)| window_order::EntryOrder::new(pid, user, previous_key, &stack));' (read before anything is sent; placement sends nothing); WindowServerDesktop { spi, previous, key: previous_key, placement, stopped: &stopped, order: RefCell::new(order), raises: Cell::new(0) }; struct fields key, placement, stopped, order, raises. No semantic overlap: placement feeds SwitchSignals, order feeds keep_order.",
+    "over": [],
+    "paired": [
+     "#16553"
+    ],
+    "blocked_by": [],
+    "needs": [
+     "macos-handback-key"
+    ],
+    "created": "2026-11-14T01:37:23Z"
+   },
+   {
     "id": "upload-stall-error-all-providers",
     "label": "upload-stall-error-all-providers",
     "number": null,
@@ -103307,6 +103319,7 @@
     "reasons": [
      "conflicts with #19062 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #19100 in packages/coding-agent/src/tools/computer/worker.ts",
+     "conflicts with #19195 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #19208 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #18222 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #18987 in packages/coding-agent/src/tools/computer/worker.ts",
@@ -103318,6 +103331,7 @@
     "blocked_by": [
      "#19062",
      "#19100",
+     "#19195",
      "#19208",
      "#18222",
      "#18987"
@@ -103340,6 +103354,7 @@
      "conflicts with #19062 in docs/computer-use.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #19100 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #19179 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with #19195 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #19208 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #18353 in docs/computer-use.md",
      "conflicts with #19034 in docs/computer-use.md",
@@ -103359,6 +103374,7 @@
      "#19062",
      "#19100",
      "#19179",
+     "#19195",
      "#19208",
      "#18353",
      "#19034",
@@ -103385,6 +103401,7 @@
      "conflicts with #19048 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with #19061 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with #19063 in crates/pi-natives/src/desktop/macos/ax.rs",
+     "conflicts with #19195 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with main in crates/pi-natives/src/desktop/macos/ax.rs"
     ],
     "note": "",
@@ -103394,7 +103411,8 @@
      "#19036",
      "#19048",
      "#19061",
-     "#19063"
+     "#19063",
+     "#19195"
     ],
     "needs": [],
     "created": "2026-11-11T09:59:13Z"
@@ -103541,6 +103559,7 @@
      "conflicts with #19048 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19061 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs",
      "conflicts with #19063 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with #19195 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18987 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs"
@@ -103553,6 +103572,7 @@
      "#19048",
      "#19061",
      "#19063",
+     "#19195",
      "#18925",
      "#18987"
     ],
@@ -103572,6 +103592,7 @@
      "conflicts with #19025 in crates/pi-natives/src/desktop/win32/mod.rs",
      "conflicts with #19062 in crates/pi-natives/src/desktop/win32/capture.rs, crates/pi-natives/src/desktop/win32/mod.rs",
      "conflicts with #19179 in packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with #19195 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #19208 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18222 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/win32/mod.rs, packages/coding-agent/src/prompts/tools/computer.md"
@@ -103583,6 +103604,7 @@
      "#19025",
      "#19062",
      "#19179",
+     "#19195",
      "#19208",
      "#18222"
     ],
@@ -103742,6 +103764,7 @@
      "held: Main, 2026-11-11: stays held until #18786 merges with the typed-message guide channel (design check replace); then one property on the computer prelude, drop the wrap variant, re-run its blind legs",
      "needs #18786 (open)",
      "conflicts with #19100 in packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with #19195 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19208 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18222 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/prompts/tools/eval.md, packages/coding-agent/src/tools/eval.ts",
@@ -103752,6 +103775,7 @@
     "paired": [],
     "blocked_by": [
      "#19100",
+     "#19195",
      "#19208",
      "#18222",
      "#18786"
@@ -103778,6 +103802,7 @@
      "conflicts with #19062 in docs/computer-use.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #19100 in docs/tools/computer.md, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19179 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with #19195 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19208 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18353 in docs/computer-use.md, docs/tools/computer.md",
      "conflicts with #19034 in docs/computer-use.md",
@@ -103800,6 +103825,7 @@
      "#19062",
      "#19100",
      "#19179",
+     "#19195",
      "#19208",
      "#18353",
      "#19034",
@@ -103833,6 +103859,7 @@
      "conflicts with #19063 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19100 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19179 in packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with #19195 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19208 in packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
@@ -103852,6 +103879,7 @@
      "#19063",
      "#19100",
      "#19179",
+     "#19195",
      "#19208",
      "#18353",
      "#18222",
@@ -103882,6 +103910,7 @@
      "conflicts with #19061 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19063 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19100 in docs/tools/computer.md",
+     "conflicts with #19195 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md",
      "conflicts with #18925 in crates/pi-natives/src/desktop/macos/capture.rs, crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs",
@@ -103898,6 +103927,7 @@
      "#19061",
      "#19063",
      "#19100",
+     "#19195",
      "#18353",
      "#18222",
      "#18925",
@@ -104373,12 +104403,7 @@
     "created": "2026-11-03T01:24:37Z"
    }
   ],
-  "drafts": [
-   {
-    "label": "#19195",
-    "created": "2026-11-13T20:28:59Z"
-   }
-  ],
+  "drafts": [],
   "parked": [
    {
     "label": "#15128",
