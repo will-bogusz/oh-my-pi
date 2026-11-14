@@ -78977,7 +78977,7 @@
    "area": "computer",
    "priority": "P2",
    "needs": [],
-   "base": "8c7353eb6c711b6e11bf66f67ad09cc481f31277",
+   "base": "b7fe8c7f43c378faa0863e79f5509f9dde16ad9a",
    "body": "bodies/atspi-text-first.md",
    "state": "open",
    "pr": 19035,
@@ -78985,9 +78985,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-text-first",
    "host": "MacBook-Pro",
    "added": "2026-11-11T02:21:41Z",
-   "updated": "2026-11-14T18:02:10Z",
+   "updated": "2026-11-14T18:02:13Z",
    "note": "LinuxTextFinish 2026-11-11: overlaps (no needs): code conflict with queued atspi-unanswered-app (linux/wayland/mod.rs) and atspi-walk-reads (linux/ax.rs); same files as open #18013 (merges clean) and #18784 (CHANGELOG-only conflict); reuses #18220's merged text_readback; merges clean with qt5-getall-crash (same ax.rs). Linux-only Rust diff: rust-check linux recorded at 82bde80f19; review stamped needs-changes at eb0a087bcd, findings fixed.",
-   "advanced": "2026-11-14T18:02:10Z",
+   "advanced": "2026-11-14T18:02:13Z",
    "rebases_after": [
     18914
    ],
