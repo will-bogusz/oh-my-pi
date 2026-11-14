@@ -91064,7 +91064,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "aa5f045f98a90f5c7bbc6b091f1e97e42263194d",
+   "base": "6ec2b71cd7d80e18e1b6481f2e3d9c05f5f0c56c",
    "body": "bodies/macos-drag-confirm.md",
    "state": "open",
    "pr": 19195,
@@ -91072,7 +91072,7 @@
    "worktree": null,
    "host": "MacBook-Pro",
    "added": "2026-11-13T10:32:49Z",
-   "updated": "2026-11-14T01:47:25Z",
+   "updated": "2026-11-14T01:47:34Z",
    "note": "Rule-4 probe (DragConfirm r2, 2026-11-14): Chromium/Electron range input vs ARIA slider indistinguishable via AX (all attributes + parameterised names dumped); WebKit range input exposes AXValueIndicator (thumb branch). Raw dumps: Mac ~/tmp/oh-my-pi/DragConfirm/r2/axdump-ssh.json, axdump-omp.json, probe2.json. VM tables: bench-mac ~/tmp/oh-my-pi/FalseSuccess/runs/r3-*, r4-H4-e.",
    "built": [
     {
@@ -91361,7 +91361,7 @@
    "pair_reasons": {
     "19048": "QueueNineteen, 2026-11-13: only conflict is adjacent #[test] fns appended at the same spot at the end of mod tests in crates/pi-natives/src/desktop/macos/input.rs (this entry's drag tests, #19048's row-action tests); nothing removed or reshaped; combined form is both sets of tests. Built as one tree with key-menu and macos-scroll-direction: macOS cargo test desktop 641 pass (bench-mac), Linux 345 pass, check:ts clean"
    },
-   "advanced": "2026-11-13T20:48:08Z",
+   "advanced": "2026-11-14T01:47:34Z",
    "opened": "2026-11-13T20:29:00Z",
    "readied": "2026-11-13T20:29:30Z"
   },
