@@ -93163,7 +93163,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-14T17:42:23Z",
+  "checked": "2026-11-14T18:13:16Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -93185,20 +93185,6 @@
     "title": "fix(ai,coding-agent): carry other models' reasoning to Claude and retry its refusal without it",
     "files": [
      "packages/ai/src/providers/pi-native-server.ts"
-    ]
-   },
-   "#18353": {
-    "since": "2026-11-14T17:42:23Z",
-    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
-    "files": [
-     "MODULE.bazel.lock"
-    ]
-   },
-   "#18013": {
-    "since": "2026-11-14T17:42:23Z",
-    "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "files": [
-     "MODULE.bazel.lock"
     ]
    },
    "#19120": {
@@ -103195,7 +103181,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-14T17:42:24.457526Z",
+  "at": "2026-11-14T18:13:16.865367Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -103597,10 +103583,8 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in MODULE.bazel.lock"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "accepted pair with #18013; accepted pair with #19035",
     "over": [],
     "paired": [
@@ -103747,10 +103731,8 @@
     "area": "natives",
     "priority": "P2",
     "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in MODULE.bazel.lock"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "accepted pair with #18353",
     "over": [],
     "paired": [
@@ -104163,6 +104145,27 @@
      "observe-settle"
     ],
     "created": "2026-11-10T18:56:55Z"
+   },
+   {
+    "id": "ax-number-setvalue",
+    "label": "ax-number-setvalue",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P2",
+    "title": "fix(natives): set macOS sliders and other number controls from setValue",
+    "action": "wait",
+    "reasons": [
+     "conflicts with #19061 in crates/pi-natives/src/desktop/macos/ax.rs"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "#19061"
+    ],
+    "needs": [],
+    "created": "2026-11-14T18:08:21Z"
    },
    {
     "id": "browser-wait-text-regexp",

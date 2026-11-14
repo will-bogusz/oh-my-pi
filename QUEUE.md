@@ -1,10 +1,10 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14 18:09Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14 18:16Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-14 17:42Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 1, conflict-held 19, stacked 20, held 13, parked 2, open PRs 37, queued since the last plan 1; merged 341, closed 36
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-14 18:13Z on goliath; groups below are from it, states from the manifest)
+**Counts:** openable now 1, conflict-held 20, stacked 20, held 13, parked 2, open PRs 37; merged 341, closed 36
 
 ## Openable now (1)
 
@@ -12,7 +12,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14
 |---|---|---|---|---|---|---|
 | macos-move-receipt | fix(coding-agent): say what a macOS background move did | computer | P2 | 13h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-move-receipt) |
 
-## Conflict-held (19)
+## Conflict-held (20)
 
 | id | title | area | priority | age | blocked by | branch |
 |---|---|---|---|---|---|---|
@@ -35,6 +35,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14
 | win-ax-states | fix(natives): expose Windows control state and stale-reference matches | computer | P2 | 3d | [#19036](https://github.com/can1357/oh-my-pi/pull/19036), [#19048](https://github.com/can1357/oh-my-pi/pull/19048), [#19061](https://github.com/can1357/oh-my-pi/pull/19061), [#19063](https://github.com/can1357/oh-my-pi/pull/19063), [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19258](https://github.com/can1357/oh-my-pi/pull/19258), [#18925](https://github.com/can1357/oh-my-pi/pull/18925), [#18987](https://github.com/can1357/oh-my-pi/pull/18987), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-ax-states) |
 | x11-keysym-remap | fix(natives): type characters outside the X11 keymap through temporary keycodes | computer | P2 | 3d | [#19066](https://github.com/can1357/oh-my-pi/pull/19066), [#19080](https://github.com/can1357/oh-my-pi/pull/19080), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-keysym-remap) |
 | stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 1d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
+| ax-number-setvalue | fix(natives): set macOS sliders and other number controls from setValue | computer | P2 | 0h | [#19061](https://github.com/can1357/oh-my-pi/pull/19061) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-number-setvalue) |
 
 ## Stacked (20)
 
@@ -57,7 +58,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14
 | factory-droid-1100-pin | feat(catalog): identify Factory Droid requests as droid 1.10.0 | factory-droid |  | 1d | factory-droid-171-models ([#19191](https://github.com/can1357/oh-my-pi/pull/19191)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-pin) |
 | factory-droid-1100-models | feat(catalog): add the Factory Droid models droid 1.10.0 serves | factory-droid |  | 1d | factory-droid-1100-pin | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-models) |
 | macos-window-order | fix(natives): put the user's key window back in front of a macOS target after background input and takeover | computer | P1 | 16h | macos-handback-key ([#19208](https://github.com/can1357/oh-my-pi/pull/19208)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-window-order) |
-| macos-key-read-settled | fix(natives): read a macOS popup after the option its typed letters choose | computer | P1 | 7h | key-menu ([#19179](https://github.com/can1357/oh-my-pi/pull/19179)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-key-read-settled) |
+| macos-key-read-settled | fix(natives): read a macOS popup after the option its typed letters choose | computer | P1 | 8h | key-menu ([#19179](https://github.com/can1357/oh-my-pi/pull/19179)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-key-read-settled) |
 | macos-handback-typed | fix(natives): give the macOS key window back after a takeover while another program types | computer | P2 | 6h | macos-handback-key ([#19208](https://github.com/can1357/oh-my-pi/pull/19208)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-handback-typed) |
 | macos-drag-no-change-note | fix(natives): note a macOS background drag that changed nothing readable | computer | P2 | 6h | macos-drag-confirm ([#19195](https://github.com/can1357/oh-my-pi/pull/19195)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-drag-no-change-note) |
 
@@ -98,8 +99,8 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14
 | [#17756](https://github.com/can1357/oh-my-pi/pull/17756) | iphone-mirror-pointer | fix(natives): keep background iPhone Mirroring taps reaching the phone after a takeover tap | computer | P1 | 12d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-pointer) |
 | [#19165](https://github.com/can1357/oh-my-pi/pull/19165) | macos-scroll-direction | fix(natives): scroll down for a positive dy on macOS, as on Windows and Linux | computer | P2 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-scroll-direction) |
 | [#17610](https://github.com/can1357/oh-my-pi/pull/17610) | claude-refusal-strip-retry | fix(ai,coding-agent): carry other models' reasoning to Claude and retry its refusal without it | other | P2 | 13d | rebase | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/claude-refusal-strip-retry) |
-| [#18353](https://github.com/can1357/oh-my-pi/pull/18353) | wayland-pipewire-dlopen | fix(natives): load libpipewire at runtime so released addons capture on Wayland | computer | P2 | 7d | rebase; accepted pair with #18013; accepted pair with #19035 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-pipewire-dlopen) |
-| [#18013](https://github.com/can1357/oh-my-pi/pull/18013) | wayland-ei-text | feat(natives): type text the wayland layout lacks through libei text | natives | P2 | 10d | rebase; accepted pair with #18353 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-ei-text) |
+| [#18353](https://github.com/can1357/oh-my-pi/pull/18353) | wayland-pipewire-dlopen | fix(natives): load libpipewire at runtime so released addons capture on Wayland | computer | P2 | 7d | keep; accepted pair with #18013; accepted pair with #19035 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-pipewire-dlopen) |
+| [#18013](https://github.com/can1357/oh-my-pi/pull/18013) | wayland-ei-text | feat(natives): type text the wayland layout lacks through libei text | natives | P2 | 10d | keep; accepted pair with #18353 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-ei-text) |
 | [#18125](https://github.com/can1357/oh-my-pi/pull/18125) | anthropic-web-search | fix(ai,coding-agent): keep Anthropic web search queries intact, always search, and report refusals | other | P2 | 9d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/anthropic-web-search) |
 | [#18624](https://github.com/can1357/oh-my-pi/pull/18624) | upload-stall-error | fix(ai): say whether an Anthropic request body finished uploading when its connection drops | other | P1 | 5d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/upload-stall-error) |
 | [#18786](https://github.com/can1357/oh-my-pi/pull/18786) | browser-core-first-use | feat(agent,coding-agent): send a short browser guide with the first browser call | browser | P2 | 3d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-core-first-use) |
@@ -127,9 +128,3 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14
 | [#19208](https://github.com/can1357/oh-my-pi/pull/19208) | macos-handback-key | fix(natives): give the user's key window back after macOS takeover and focus-guard hand-backs | computer | P1 | 18h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-handback-key) |
 | [#19224](https://github.com/can1357/oh-my-pi/pull/19224) | macos-popup-value | fix(natives): choose a Chromium select's option on macOS and close the menu it opens | computer | P1 | 12h | keep; accepted pair with #19179: Main, 2026-11-14: built and tested, no textual conflict. popup-value says 'that is still open' (no Escape when the window list is unreadable or the menu left it); #19179 ec8a6c8d028 asserts contains("that is still open"), true in either merge order. macOS desktop: main+#19179 608/0, main+#19179+popup-value 620/0 (bench-mac); trees T1/T2 (r5/trees.sh) Linux check:ts, desktop 345/333, coding-agent 201/178 pass. items() untitled-by-value change left out (follow-up for the pop-up lane, r5/combined-popup-19179.diff) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-popup-value) |
 | [#19258](https://github.com/can1357/oh-my-pi/pull/19258) | macos-stale-press | fix(natives): refuse macOS element actions on a control a person could not click | computer | P1 | 5h | keep; accepted pair with #19048: Main, 2026-11-14: crates/pi-natives/src/desktop/macos/mod.rs element-click closure (function body): #19048's lines verbatim (hoisted mac handle, (target, event, _aimed) destructuring and everything after the closure, aim_at_element); stale-press adds only the two-line require_shown check before locate_element_click, reusing the hoisted handle. Combined form ~/tmp/oh-my-pi/queuetwenty/r5/combined-stale-press-19048.txt; build+test proof (#19048's tests + stale-press's nine, macOS desktop + Linux check) due when stale-press opens | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-stale-press) |
-
-## Queued since the last plan (1)
-
-| id | title | area | priority | age | branch |
-|---|---|---|---|---|---|
-| ax-number-setvalue | fix(natives): set macOS sliders and other number controls from setValue | computer | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-number-setvalue) |
