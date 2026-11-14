@@ -92503,7 +92503,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "57263720c818ab3baaeb74bf415b03592b806ae0",
+   "base": "80ad1d6b2eb3dd916d863841dcae79f4f96c5612",
    "body": "bodies/macos-popup-value.md",
    "state": "open",
    "pr": 19224,
@@ -92511,7 +92511,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-popup-value",
    "host": "MacBook-Pro",
    "added": "2026-11-14T00:26:14Z",
-   "updated": "2026-11-14T06:27:43Z",
+   "updated": "2026-11-14T08:26:06Z",
    "note": "QueueTwenty/Main 2026-11-14: (a) the close-wait observer (AXObserver AXMenuClosed gate, MENU_CANCEL_TIMEOUT 100 ms only when neither the notification nor unlisting happens; observer failure keeps the 600 ms wait) is built and measured by PopupValue on a branch stacked on #19224's head: if #19224 is still open when it is measured and reviewed, it comes as a second push with its own table; if #19224 has merged, it becomes its own entry (P1, needs nothing). Basis: an Escape sent while a native menu is still listed reached the app 80/80; native menus stay listed 11-22 ms p95, up to 177 ms under load; AXMenuClosed 2-7 ms after the cancel, 80/80; Chromium hold 916 ms at 600 vs ~407 at 100. (b) The untitled-items follow-up is NOT queued: on a real Chrome (released build and branch) click/press({menu:[missing]}) already refuse with options listed by text 3/3, and the untitled-items change measured identical to released on every target (PopupValue VM); the opened menu's items carry titles, only the closed select's own child is untitled.",
    "rebases_after": [
     19179
@@ -92519,7 +92519,7 @@
    "pair_reasons": {
     "19179": "Main, 2026-11-14: built and tested, no textual conflict. popup-value says 'that is still open' (no Escape when the window list is unreadable or the menu left it); #19179 ec8a6c8d028 asserts contains(\"that is still open\"), true in either merge order. macOS desktop: main+#19179 608/0, main+#19179+popup-value 620/0 (bench-mac); trees T1/T2 (r5/trees.sh) Linux check:ts, desktop 345/333, coding-agent 201/178 pass. items() untitled-by-value change left out (follow-up for the pop-up lane, r5/combined-popup-19179.diff)"
    },
-   "advanced": "2026-11-14T06:27:11Z",
+   "advanced": "2026-11-14T08:26:06Z",
    "built": [
     {
      "with": "#18925",
