@@ -1683,6 +1683,7 @@ fn activate_for_menu(
 		&window,
 		entry_front,
 		in_overlay,
+		input::ActivatingPress::Always,
 		visit,
 	)?;
 	// The press that makes the window key waits in the application's event
