@@ -93224,8 +93224,14 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-reroute-not-a-press",
    "host": "MacBook-Pro",
    "added": "2026-11-14T20:50:07Z",
-   "updated": "2026-11-14T20:50:07Z",
-   "note": ""
+   "updated": "2026-11-14T20:50:24Z",
+   "note": "",
+   "rebases_after": [
+    16553
+   ],
+   "pair_reasons": {
+    "16553": "Main, 2026-11-14: the rule and #16553 both edit observe_user's tap callback in control/macos.rs. Combined form: #16553's button_record block first and unchanged, then the rule's foreign_input(tag, source, own, ...) using #16553's own, with input_target(kind, target, front_pid, |pid| rerouted_to(pid, event)); input_target's doc keeps both sentences (moved key; a release lands nowhere); #16553's input_target tests gain the rule's 4th argument kept. Tree 270cbd49719 (local branch will/macos-reroute-on-16553), pi-natives lib tests 1012 pass on macOS; with fix 1 too (Main's 32a1e67a7b2 + rule) 791f07e06c5, 1017 pass."
+   }
   }
  ],
  "watch": {
