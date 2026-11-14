@@ -92805,7 +92805,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-14T09:34:31Z",
+  "checked": "2026-11-14T10:35:17Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -92831,13 +92831,6 @@
     "title": "fix(ai,coding-agent): carry other models' reasoning to Claude and retry its refusal without it",
     "files": [
      "packages/ai/src/providers/pi-native-server.ts"
-    ]
-   },
-   "#18786": {
-    "since": "2026-11-14T09:04:14Z",
-    "title": "feat(agent,coding-agent): send a short browser guide with the first browser call",
-    "files": [
-     "packages/coding-agent/src/session/agent-session.ts"
     ]
    },
    "#19120": {
@@ -102772,8 +102765,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-14T10:17:08.745916Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-14T10:35:18.808265Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -104659,8 +104652,10 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with main in (branch missing on the fork)"
+    ],
     "note": "",
     "over": [],
     "paired": [],
