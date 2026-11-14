@@ -43,7 +43,7 @@ Electron 33, macOS 26.5 VM, 10 drags per cell in each of four conditions (focuse
 | range input the page moves part-way (40 of 75) | returns done at 40, 40 of 40 | returns done at 40 naming the value and the straight-line 75, 40 of 40, 0.98 s |
 | SwiftUI `Slider`, background (focused, covered, unfocused, typing) | returns done at 0, 40 of 40 | `InputFailed` naming the value it reads, 40 of 40 |
 
-Step-on costs about 1.5 s against `main`'s 0.73 s false success. The note's text is covered by unit tests only. AppKit slider: 40 of 40 on `main`, 10 of 10 on this head, 40 of 40 on the unchanged path earlier.
+Step-on costs about 1.5 s against `main`'s 0.73 s false done. The note's text is covered by unit tests only. AppKit slider: 40 of 40 on `main`, 10 of 10 on this head, 40 of 40 on the unchanged path earlier.
 
 `cargo test -p pi-natives --lib -- desktop::macos`: 367 pass; `computer.test.ts` covers the note. The part-way range input and 76-step rows were re-run on this head; the rest on the commit before. clippy and rustfmt pass via `rust-check`. Not run: the guidance change was not sampled against models.
 
