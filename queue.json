@@ -92443,7 +92443,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-14T00:55:43Z",
+  "checked": "2026-11-14T01:26:31Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -92453,13 +92453,6 @@
    }
   },
   "conflicts": {
-   "#18925": {
-    "since": "2026-11-14T00:55:43Z",
-    "title": "feat(coding-agent): name the native windows a browser call raised on macOS",
-    "files": [
-     "packages/coding-agent/src/tools/browser/tab-worker.ts"
-    ]
-   },
    "#16611": {
     "since": "2026-11-12T01:15:20Z",
     "title": "feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio",
@@ -102247,7 +102240,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-14T00:55:44.022903Z",
+  "at": "2026-11-14T01:26:31.765725Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -102838,10 +102831,8 @@
     "area": "browser",
     "priority": "P2",
     "title": "feat(coding-agent): name the native windows a browser call raised on macOS",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "accepted pair with #19045: Main, 2026-11-12: only conflict is adjacent class fields in packages/coding-agent/src/tools/browser/tab-worker.ts: #18925 adds #nativeWindows?, this entry adds #actionRequestSeq? and #settling? at the same spot; nothing removed; combined form is both declarations; accepted pair with #19001: Main, 2026-11-12: accepted (HiddenOnMain's combined form). tab-worker.ts WorkerCore.#run after the finally: this branch's hinted take (if this.#unanswered === active && this.#hiddenFramesWaiting && this.#page) await this.#takeHiddenFrames(this.#page)) stays before the answered guard; in the failure branch #18925's enrichment of error (message and stack with the native notices), then this.#sendResult({ id: msg.id, ok: false, error }), so both native-window notices and the once-only hidden-frames notice ride the failure. Second to land adds one test that a failed run carries both.; accepted pair with #19178: Main, 2026-11-13: tab-supervisor.ts import block only, keep both lines (import { isLoopbackRelayUrl } from \"./relay/daemon\"; import { FOREIGN_FRAME_REFUSAL } from \"./relay/protocol\")",
     "over": [],
     "paired": [
@@ -102970,6 +102961,7 @@
     "title": "fix(coding-agent): refuse browser keys aimed at a field a modal dialog covers",
     "action": "wait",
     "reasons": [
+     "conflicts with #18925 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19045 in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
@@ -102977,6 +102969,7 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#18925",
      "#19045"
     ],
     "needs": [],
@@ -103315,7 +103308,6 @@
      "conflicts with #18786 in docs/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md",
      "conflicts with #19045 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "its need #18925 conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts"
     ],
     "note": "",
@@ -103556,7 +103548,7 @@
     "reasons": [
      "conflicts with #18786 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
-     "conflicts with #18925 in docs/tools/browser.md",
+     "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19045 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
