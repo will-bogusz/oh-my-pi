@@ -92781,6 +92781,26 @@
    "added": "2026-11-14T04:35:48Z",
    "updated": "2026-11-14T04:41:07Z",
    "note": "MoveReview (needs-changes at 2609fd1) answered in e11ccec: 1 refuse-aware ending naming the setting, test under refuse; 2 oxfmt applied; 3 wording held to observations ('have shown', 'may still be hidden', takeover only after a screenshot shows it); docs/tools/computer.md one line; CHANGELOG tightened; behaviour NOTE answered in body (no sample set: macOS-only line, benchmark lane re-measures). QueueTwenty 2026-11-14: model sample skipped as given (macOS-only line, benchmark lane re-measures those tasks); body first sentence made first-person."
+  },
+  {
+   "id": "macos-key-read-settled",
+   "branch": "will/macos-key-read-settled",
+   "title": "fix(natives): read a macOS popup after the option its typed letters choose",
+   "area": "computer",
+   "priority": "P1",
+   "needs": [
+    "key-menu"
+   ],
+   "base": "636a981d1406fa5b18e5f619a3507db5ddef7cef",
+   "body": "bodies/macos-key-read-settled.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/home/will/.omp/main-wt/oh-my-pi/key-read-settled",
+   "host": "goliath",
+   "added": "2026-11-14T10:14:31Z",
+   "updated": "2026-11-14T10:14:31Z",
+   "note": ""
   }
  ],
  "watch": {
