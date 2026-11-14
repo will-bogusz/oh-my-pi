@@ -92546,8 +92546,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-stale-press",
    "host": "MacBook-Pro",
    "added": "2026-11-14T03:42:51Z",
-   "updated": "2026-11-14T03:42:51Z",
-   "note": ""
+   "updated": "2026-11-14T03:42:59Z",
+   "note": "",
+   "hold": "StalePress, 2026-11-14: Chrome and Electron false-refusal cells still running; body tables update after"
   }
  ],
  "watch": {
