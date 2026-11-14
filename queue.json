@@ -92965,7 +92965,43 @@
     }
    ],
    "opened": "2026-11-14T12:49:37Z",
-   "readied": "2026-11-14T12:50:15Z"
+   "readied": "2026-11-14T12:50:15Z",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-14T14:56:33Z",
+     "reason": "Main, 2026-11-14: #19258 bot fix 4573561658 approved; the dropped lines are this PR's own module doc comment in ax/placement.rs, rewritten by 564dbb71d41 (StalePress) to describe the narrowed column/non-control pass",
+     "old": "1bc84aed965f717661cd2ad7ccd679dfa1ce1408",
+     "new": "b93c71e8807ef767e3d4bfe633794b7dfa36d60d",
+     "dropped": {
+      "crates/pi-natives/src/desktop/macos/ax/placement.rs": [
+       "//! among its parent's children, and one drawn inside the frame of an element",
+       "//! still listed (a column's cell) does too; a hidden `AppKit` view is not",
+       "//! listed. Web content is not judged: an element hidden there leaves the tree,",
+       "//! while Chromium answers a hit-test from a cache that lags behind the page (a",
+       "//! visible dialog button hit-tested to the web area once), clips the frame of",
+       "//! an element scrolled out of view to a one-point strip at the scroll view's",
+       "//! edge, and `WebKit` routes a check box's label text to the text.",
+       "\t// Drawn inside a listed element, such as a column's cell; an element",
+       "\t// scrolled out of its view, which the press may scroll to; a part of the",
+       "\t// element away from its center; or web content.",
+       "\tif (app",
+       "\t\t.bounds(&hit)",
+       "\t\t.is_some_and(|inner| within(&inner, &bounds))",
+       "fn within(inner: &AxBounds, outer: &AxBounds) -> bool {",
+       "\tinner.x >= outer.x",
+       "\t\t&& inner.y >= outer.y",
+       "\t\t&& inner.x + inner.width <= outer.x + outer.width",
+       "\t\t&& inner.y + inner.height <= outer.y + outer.height",
+       "\t\t// No answer below the window at all.",
+       "\t\t// A column answers through the cells drawn inside it, which are not its",
+       "\t\t// children: here its visible part is one cell.",
+       "\t\tlet column = app.add(Some(table), \"AXColumn\", \"Name\", rect(0.0, 200.0, 200.0, 20.0));",
+       "\t\tapp.hittable.extend([table, row, cell]);",
+       "\t\tassert_eq!(app.check(column), Ok(()));"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "macos-move-receipt",
