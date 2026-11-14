@@ -17,7 +17,7 @@ That is why the line says "may still be hidden" and names takeover only after a 
 
 ## Testing
 
-Run through the computer tool in the same guest, this branch against `main`, 3 tries per cell on each of the four zones: a background move printed the line 12 of 12 on this branch and nothing on `main`; a takeover move printed nothing on either; the app logs matched between the two (no hover for the background moves, the same takeover hovers).
+Run through the computer tool in the same guest, this branch against `main`, 3 tries per cell on each of the four zones: a background move printed the line 12 of 12 on this branch and nothing on `main`; a takeover move printed nothing on either; no background move on either build produced a hover in the app's log.
 
 `bun test test/tools/computer.test.ts -t "background move"`: the default and `takeover: false` moves print the line naming `{ takeover: true }`; under `refuse` it names the setting and no takeover; a requested takeover move, a fallback rerun and a non-macOS backend print nothing new. The test fails on `main` (no line).
 
