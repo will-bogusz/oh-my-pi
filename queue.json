@@ -93199,7 +93199,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-takeover-typing-pause",
    "host": "MacBook-Pro",
    "added": "2026-11-14T18:57:16Z",
-   "updated": "2026-11-14T21:07:56Z",
+   "updated": "2026-11-14T21:15:35Z",
    "note": "Review TypingTakeover.ReviewTakeoverPause (needs-changes at 989a208bea): fixed in ca661eed697 - presses before the tap seeded from HID idle (test the_hid_idle_time_stands_in_for_presses_before_the_tap_started), admission clock injectable (admit_takeover_with) with a lease-recheck test, posted keys excluded by a pure observed() with test, docs list secure input / held input / raise limits, fmt. Pairs: none; merges clean with #19208, macos-window-order, macos-handback-typed, macos-keys-no-press. Rust checks linux/windows/macos at diff 1cd63c8f6d. Prompt line sampled (Haiku 5.5, GPT-6.1 Sol): no behaviour difference.",
    "advanced": "2026-11-14T20:15:02Z",
    "rebases_after": [
@@ -93414,6 +93414,78 @@
      "tip": "29b725e251e4aa9449e2d5177072e4838f5d2d93",
      "with_tip": "303a1d0166e725f63687436a4c941ff0c7df4180",
      "at": "2026-11-14T21:07:56Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#18353",
+     "code": "20bcd1054e3c13235f3f67b70e7ba52089ac7436",
+     "with_code": "67fa8d8a7f091496816b9da0a55b2db58cdce012",
+     "tip": "29b725e251e4aa9449e2d5177072e4838f5d2d93",
+     "with_tip": "1dea30802e59d969431c04c51bd6f8d7517d505e",
+     "at": "2026-11-14T21:15:29Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19061",
+     "code": "20bcd1054e3c13235f3f67b70e7ba52089ac7436",
+     "with_code": "11bcf21534ec11dd5ee5a195f17422c279c34173",
+     "tip": "29b725e251e4aa9449e2d5177072e4838f5d2d93",
+     "with_tip": "759e7bffcb0906d2d2b6ccb31b82d9d2017cbc63",
+     "at": "2026-11-14T21:15:34Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19080",
+     "code": "20bcd1054e3c13235f3f67b70e7ba52089ac7436",
+     "with_code": "2fc9a13b2e03bc86e294b02bf35f636fdbe36388",
+     "tip": "29b725e251e4aa9449e2d5177072e4838f5d2d93",
+     "with_tip": "1bd3c25d0cd2805afc68f9cae0a836daecf5d49b",
+     "at": "2026-11-14T21:15:34Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19195",
+     "code": "20bcd1054e3c13235f3f67b70e7ba52089ac7436",
+     "with_code": "9aae3bb4ee3ef3ed9c8e19ac83b55b56ac064184",
+     "tip": "29b725e251e4aa9449e2d5177072e4838f5d2d93",
+     "with_tip": "3f4cc033eef787b4910309f56af5634fc6e029ff",
+     "at": "2026-11-14T21:15:35Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19258",
+     "code": "20bcd1054e3c13235f3f67b70e7ba52089ac7436",
+     "with_code": "adf3b7e9359c230e6e035141e1c8032981e5ffb9",
+     "tip": "29b725e251e4aa9449e2d5177072e4838f5d2d93",
+     "with_tip": "e6e85d87cc1fd7273440d09fc7c56c21b2a9bdcc",
+     "at": "2026-11-14T21:15:35Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19045",
+     "code": "20bcd1054e3c13235f3f67b70e7ba52089ac7436",
+     "with_code": "e0065dd169bd50ec28bd80a09a11079639b75c35",
+     "tip": "29b725e251e4aa9449e2d5177072e4838f5d2d93",
+     "with_tip": "a1b7605905d7bc1ec1cafc7071ed40399a787473",
+     "at": "2026-11-14T21:15:35Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19001",
+     "code": "20bcd1054e3c13235f3f67b70e7ba52089ac7436",
+     "with_code": "a7bd75161bab74453e347debbfd5803522f33dd0",
+     "tip": "29b725e251e4aa9449e2d5177072e4838f5d2d93",
+     "with_tip": "cddeb565e15afacfb6a16904750be00dd2005cb2",
+     "at": "2026-11-14T21:15:35Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19178",
+     "code": "20bcd1054e3c13235f3f67b70e7ba52089ac7436",
+     "with_code": "0bafced28364fed966dbdbb47319cf6ab7fe74da",
+     "tip": "29b725e251e4aa9449e2d5177072e4838f5d2d93",
+     "with_tip": "6a9941533cc5793635a94982443220fd8853648e",
+     "at": "2026-11-14T21:15:35Z",
      "host": "MacBook-Pro"
     }
    ]
