@@ -92364,9 +92364,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-popup-value",
    "host": "MacBook-Pro",
    "added": "2026-11-14T00:26:14Z",
-   "updated": "2026-11-14T00:26:29Z",
+   "updated": "2026-11-14T00:31:09Z",
    "note": "",
-   "hold": "PopupValue, 2026-11-14: hold until the typing-flag check (released vs this branch, 10 each on AppKit and SwiftUI) shows no extra 'typing' flags beyond the 3-key-window phase effect",
    "rebases_after": [
     19179
    ],
