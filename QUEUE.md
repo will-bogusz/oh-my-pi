@@ -4,7 +4,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-14 19:13Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 1, conflict-held 20, stacked 20, held 14, parked 2, open PRs 37; merged 341, closed 36
+**Counts:** openable now 1, conflict-held 20, stacked 20, held 13, parked 2, open PRs 37, queued since the last plan 1; merged 341, closed 36
 
 ## Openable now (1)
 
@@ -62,7 +62,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14
 | macos-handback-typed | fix(natives): give the macOS key window back after a takeover while another program types | computer | P2 | 8h | macos-handback-key ([#19208](https://github.com/can1357/oh-my-pi/pull/19208)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-handback-typed) |
 | macos-drag-no-change-note | fix(natives): note a macOS background drag that changed nothing readable | computer | P2 | 8h | macos-drag-confirm ([#19195](https://github.com/can1357/oh-my-pi/pull/19195)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-drag-no-change-note) |
 
-## Held (14)
+## Held (13)
 
 | id | title | area | priority | age | hold | branch |
 |---|---|---|---|---|---|---|
@@ -79,7 +79,6 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14
 | win-type-insert | feat(natives): insert typed text into a focused Windows multi-line edit control | computer | P2 | 2d | Main, 2026-11-12: proposal; opens only after entry A merges and Will has seen the body | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-type-insert) |
 | ax-read-as-title-link | fix(natives): keep a macOS ref whose own label changes while its title element shows the same text | computer | P1 | 1d | Will, 2026-11-13: Main decides the approach once #19061 merges, with all the data in. Data so far: release leg 9 refusals in 93 runs (4 true catches, 5 same-control relabels, about +2 steps each, no grade changed); wording-only change closed (no step saved, 6 runs per arm); TitleTwin 0 wrong-item actions in 200 trials on stock apps, fixture same-title reuse 10/10 wrong; RelabelCases (scripted, 10 tries per case, v18.20.0 vs b42c6d20412, ~/tmp/oh-my-pi/RelabelCases/{signals,recovery}.md): Reminders count refused 10/10 -> right control 10/10; Finder rename and Calendar location still refused 10/10 (no title link); Contacts City->Street still refused 10/10. Finder and Calendar differ from Contacts in that frame, value and sibling count are unchanged, but that is not shown safe in general. A refusal that carried its parent's subtree would be an estimated 150-460 chars against the 1,300-7,400 the model re-read, and would save one of the two recovery steps (reconstructed, not run). | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-read-as-live-label) |
 | macos-keys-no-press | fix(natives): send macOS background keys to the key window without a press | computer | P1 | 9h | Will, 2026-11-14: Will's go needed before opening (proposal ~/tmp/oh-my-pi/HandBack/proposal-prevent.md) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-keys-no-press) |
-| macos-takeover-typing-pause | fix(natives): keep macOS takeover from taking a typing user's keys | computer | P1 | 1h | Main, 2026-11-14: owed in the body, each from a run: (1) switch2/switchapp1 handed back 1/10 on fix vs 0/10 in both quiet-0 runs: end states from traces, then switch2, switchapp1 and the race cell on #19208+fix1 vs #19208 alone, 20 tries each; (2) interleaved A/B of background calls on AppKit (+30 ms on the non-interleaved run); (3) the live bound cell, its returned text and the bound in seconds in body and docs. | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-takeover-typing-pause) |
 
 ## Parked (2)
 
@@ -129,3 +128,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14
 | [#19208](https://github.com/can1357/oh-my-pi/pull/19208) | macos-handback-key | fix(natives): give the user's key window back after macOS takeover and focus-guard hand-backs | computer | P1 | 20h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-handback-key) |
 | [#19224](https://github.com/can1357/oh-my-pi/pull/19224) | macos-popup-value | fix(natives): choose a Chromium select's option on macOS and close the menu it opens | computer | P1 | 14h | keep; accepted pair with #19179: Main, 2026-11-14: built and tested, no textual conflict. popup-value says 'that is still open' (no Escape when the window list is unreadable or the menu left it); #19179 ec8a6c8d028 asserts contains("that is still open"), true in either merge order. macOS desktop: main+#19179 608/0, main+#19179+popup-value 620/0 (bench-mac); trees T1/T2 (r5/trees.sh) Linux check:ts, desktop 345/333, coding-agent 201/178 pass. items() untitled-by-value change left out (follow-up for the pop-up lane, r5/combined-popup-19179.diff) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-popup-value) |
 | [#19258](https://github.com/can1357/oh-my-pi/pull/19258) | macos-stale-press | fix(natives): refuse macOS element actions on a control a person could not click | computer | P1 | 7h | keep; accepted pair with #19048: Main, 2026-11-14: crates/pi-natives/src/desktop/macos/mod.rs element-click closure (function body): #19048's lines verbatim (hoisted mac handle, (target, event, _aimed) destructuring and everything after the closure, aim_at_element); stale-press adds only the two-line require_shown check before locate_element_click, reusing the hoisted handle. Combined form ~/tmp/oh-my-pi/queuetwenty/r5/combined-stale-press-19048.txt; build+test proof (#19048's tests + stale-press's nine, macOS desktop + Linux check) due when stale-press opens | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-stale-press) |
+
+## Queued since the last plan (1)
+
+| id | title | area | priority | age | branch |
+|---|---|---|---|---|---|
+| macos-takeover-typing-pause | fix(natives): keep macOS takeover from taking a typing user's keys | computer | P1 | 1h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-takeover-typing-pause) |
