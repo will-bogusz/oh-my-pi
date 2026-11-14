@@ -91702,7 +91702,20 @@
    ],
    "advanced": "2026-11-13T17:27:22Z",
    "opened": "2026-11-13T17:10:24Z",
-   "readied": "2026-11-13T17:10:52Z"
+   "readied": "2026-11-13T17:10:52Z",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-14T05:10:58Z",
+     "reason": "Main, 2026-11-14 ~05:35Z: the one dropped line is this PR's own test assertion, replaced by the order-independent contains(\"that is still open\") so #19179 and macos-popup-value merge in either order (popup-value drops the untrue 'after Escape'). macOS desktop tests: main+#19179 608/0, main+#19179+popup-value 620/0; rust-check L+M for Rust diff 257102ffb1.",
+     "old": "91d3a4cabe1e4a608ffb123c49dd581ec5e91b1f",
+     "new": "ec8a6c8d0284b493679cdab50d938dcc6d0b4ff2",
+     "dropped": {
+      "crates/pi-natives/src/desktop/macos/input.rs": [
+       "\t\tassert!(error.message.contains(\"still open after Escape\"), \"{}\", error.message);"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "relay-restored-frame",
