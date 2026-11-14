@@ -73221,7 +73221,7 @@
    "needs": [
     "subagent-browser"
    ],
-   "base": "8c7353eb6c711b6e11bf66f67ad09cc481f31277",
+   "base": "b7fe8c7f43c378faa0863e79f5509f9dde16ad9a",
    "body": "bodies/subagent-browser-relay.md",
    "state": "open",
    "pr": 18789,
@@ -73229,9 +73229,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/subagent-browser-relay",
    "host": "MacBook-Pro",
    "added": "2026-11-10T18:40:43Z",
-   "updated": "2026-11-14T09:52:55Z",
+   "updated": "2026-11-14T17:47:16Z",
    "note": "",
-   "advanced": "2026-11-14T09:52:55Z",
+   "advanced": "2026-11-14T17:47:16Z",
    "built": [
     {
      "with": "#18676",
