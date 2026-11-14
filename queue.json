@@ -92503,7 +92503,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "972f2e1de1c828d1db7d2f9c933bc50c1a33b374",
+   "base": "b7fe8c7f43c378faa0863e79f5509f9dde16ad9a",
    "body": "bodies/macos-popup-value.md",
    "state": "open",
    "pr": 19224,
@@ -92511,7 +92511,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-popup-value",
    "host": "MacBook-Pro",
    "added": "2026-11-14T00:26:14Z",
-   "updated": "2026-11-14T17:44:02Z",
+   "updated": "2026-11-14T17:45:50Z",
    "note": "Main, 2026-11-14: roboomp body note 'this also changes the shared background-click close path' gets no top-level reply: it asks nothing and restates facts the body and CHANGELOG carry; a top-level comment notifies the maintainers.",
    "rebases_after": [
     19179
@@ -92519,7 +92519,7 @@
    "pair_reasons": {
     "19179": "Main, 2026-11-14: built and tested, no textual conflict. popup-value says 'that is still open' (no Escape when the window list is unreadable or the menu left it); #19179 ec8a6c8d028 asserts contains(\"that is still open\"), true in either merge order. macOS desktop: main+#19179 608/0, main+#19179+popup-value 620/0 (bench-mac); trees T1/T2 (r5/trees.sh) Linux check:ts, desktop 345/333, coding-agent 201/178 pass. items() untitled-by-value change left out (follow-up for the pop-up lane, r5/combined-popup-19179.diff)"
    },
-   "advanced": "2026-11-14T09:16:24Z",
+   "advanced": "2026-11-14T17:45:50Z",
    "built": [
     {
      "with": "#18925",
