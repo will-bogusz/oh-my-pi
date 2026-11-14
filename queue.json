@@ -92081,7 +92081,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-handback-key",
    "host": "MacBook-Pro",
    "added": "2026-11-13T21:56:33Z",
-   "updated": "2026-11-13T23:42:10Z",
+   "updated": "2026-11-14T00:09:54Z",
    "note": "HandBack 2026-11-13. Head 3efb12fdce0 (3 commits: takeover make-key, keyboard report field+text, guard make-key). P1 not P0: user's window left inactive (title bar, page blur/hasFocus false) and the tool said focus returned; typed keys still arrived 10/10 (Main). Combined with #19062 (win-focus-report): textual merge clean; semantic hunk: the three Windows DesktopFocusReturn literals (win32/input.rs focus report, win32/mod.rs two hand-back sites) need keyboard: None; worker.ts focusReport branches 'focus returned to'/'was handed back' stay for Windows. Textually clean with #19179 key-menu, #19165 scroll-direction, macos-drag-confirm, click-place-release, unqueued will/macos-key-divert. rust-check: macos recorded; linux+windows OWED (goliath down 2026-11-13 ~21:30Z). TS computer.test.ts 152 pass, coding-agent check clean (bench-mac). Review HandBackReview2 needs-changes -> fixed (same-app entry baseline, settled from entry, notSent text when no hand-back, 26.5-scoped comment, guard front check); docs line 129 kept (Windows example after #19062). Change 2 (window order) stacks on this branch.",
    "built": [
     {
@@ -92135,15 +92135,6 @@
      "with_code": "11bcf21534ec11dd5ee5a195f17422c279c34173",
      "tip": "3efb12fdce08e1dce286af489c807119e7354c28",
      "with_tip": "4393aec26ea00117c31a9a7d471ad5dd62ccd61e",
-     "at": "2026-11-13T23:37:44Z",
-     "host": "MacBook-Pro"
-    },
-    {
-     "with": "#19062",
-     "code": "7d530577d26a0f235ec10398202a548042fd9ade",
-     "with_code": "e330b0ff5237639267d70d77a383cafda0c31c96",
-     "tip": "3efb12fdce08e1dce286af489c807119e7354c28",
-     "with_tip": "ba8bc21cbe22b7efabe74b085fa7a25863335b69",
      "at": "2026-11-13T23:37:44Z",
      "host": "MacBook-Pro"
     },
@@ -92343,6 +92334,15 @@
      "tip": "3efb12fdce08e1dce286af489c807119e7354c28",
      "with_tip": "6ff9ece05e98ccc20f9a874782cf9ccb38ccfb35",
      "at": "2026-11-13T23:37:47Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19062",
+     "code": "7d530577d26a0f235ec10398202a548042fd9ade",
+     "with_code": "35590ab188867ee97faad2b4516b3d5929bb88b5",
+     "tip": "98177330dc5600fac97d6e23d8cf7d6dea0eb52b",
+     "with_tip": "1f0e018e81044d51330e3c23101013a2afd07239",
+     "at": "2026-11-14T00:09:48Z",
      "host": "MacBook-Pro"
     }
    ],
