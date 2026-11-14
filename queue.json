@@ -92841,8 +92841,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-handback-typed",
    "host": "MacBook-Pro",
    "added": "2026-11-14T11:57:04Z",
-   "updated": "2026-11-14T11:57:33Z",
-   "note": "HandBackTyped 2026-11-14. P2 (Main): only keystrokes posted by another process trigger it; real keyboard unaffected 10/10 in 9 cells; keys still arrive. Head 642130fe1f6, one commit on macos-handback-key 78c730db8e9; review TypedReview approve (should-fix 1 + nits addressed before measuring). rust-check: macOS recorded at 642130fe1f6; Linux record OWED (clippy queued behind goliath's cargo gate, machine saturated by another session); diff is macos/ only, so Windows is not required by the path rule. Merges cleanly with will/macos-window-order 37142503cd9 (git merge-tree, no conflict). Cmd-` hole on #19208's guard (2/40 both builds) is out of scope: repro in ~/tmp/oh-my-pi/HandBackTyped/HANDOFF.md."
+   "updated": "2026-11-14T12:12:02Z",
+   "note": "HandBackTyped 2026-11-14. P2 (Main): only keystrokes posted by another process trigger it; real keyboard unaffected 10/10 in 9 cells; keys still arrive. Head 642130fe1f6, one commit on macos-handback-key 78c730db8e9; review TypedReview approve (should-fix 1 + nits addressed before measuring). rust-check: macOS and Linux recorded at 642130fe1f6 (diff 030d8e53d3); diff is macos/ only, so Windows is not required by the path rule. Merges cleanly with will/macos-window-order 37142503cd9 (git merge-tree, no conflict). Cmd-` hole on #19208's guard (2/40 both builds) is out of scope: repro in ~/tmp/oh-my-pi/HandBackTyped/HANDOFF.md."
   },
   {
    "id": "macos-drag-no-change-note",
