@@ -93131,6 +93131,24 @@
    "added": "2026-11-14T12:00:22Z",
    "updated": "2026-11-14T12:00:27Z",
    "note": "DragConfirm r8 2026-11-14: head fe61c49af67 on #19195 7e76500ba6a. Untracked background drags (middle-button; left on a tracking role with no value) read start/end elements of the target window before/after (DragEnds, 0.5 s per-element AX timeout), note when unchanged after 560 ms. Review DragConfirm.ReviewDragNoChange needs-changes@bd3e1b6026, all 6 findings fixed (not re-reviewed). rust-check macos/linux/windows at diff 9fc60e421f. VM lease c3881734: static 0/10 moved, note branch (+645 ms); box 10/10 moved, no note. Source: MB-09 index 2 batch1 background."
+  },
+  {
+   "id": "ax-number-setvalue",
+   "branch": "will/ax-number-setvalue",
+   "title": "fix(natives): set macOS sliders and other number controls from setValue",
+   "area": "computer",
+   "priority": "P2",
+   "needs": [],
+   "base": "9e14fd419dc0d3ffa758317c8c9aaa044d22349e",
+   "body": "bodies/ax-number-setvalue.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ax-number-setvalue",
+   "host": "MacBook-Pro",
+   "added": "2026-11-14T18:08:21Z",
+   "updated": "2026-11-14T18:08:21Z",
+   "note": ""
   }
  ],
  "watch": {
