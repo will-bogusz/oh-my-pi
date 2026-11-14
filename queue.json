@@ -93547,7 +93547,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-14T22:47:59Z",
+  "checked": "2026-11-14T23:18:03Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -93690,30 +93690,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-07T23:02:57Z",
-    "kind": "merged",
-    "number": 16908,
-    "title": "fix(browser-relay): keep a tab omp drives usable when a password manager's menu opens in it",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-07T23:02:57Z",
-    "kind": "merged",
-    "number": 16223,
-    "title": "feat(natives): make a macOS background drag across native text an accessibility selection",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-07T23:02:57Z",
-    "kind": "merged",
-    "number": 15282,
-    "title": "feat(natives): show what macOS ax() elements can do",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
    {
     "at": "2026-11-08T00:34:54Z",
     "kind": "released",
