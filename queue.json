@@ -92458,8 +92458,14 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-window-order",
    "host": "MacBook-Pro",
    "added": "2026-11-14T01:37:23Z",
-   "updated": "2026-11-14T01:37:23Z",
-   "note": ""
+   "updated": "2026-11-14T01:37:43Z",
+   "note": "HandBack 2026-11-14: head 4f8d2cd973d on macos-handback-key (#19208, 78c730db8e9). Key-window-only restore (raising non-key windows took 12/520 typed keys). rust-check macos/linux/windows at 4f8d2cd973d (diff 6fbf5ac8c5). Review OrderReview2 needs-changes -> all 7 addressed (changelog dedupe, has_order/cadence/disarm tests, None when a user window is above key, still_kept re-check before raise, docs). Other overlaps: #19062 none, #19179 none, macos-drag-confirm/#19165 none, will/macos-key-divert none (textual).",
+   "rebases_after": [
+    16553
+   ],
+   "pair_reasons": {
+    "16553": "HandBack, 2026-11-14: textual conflict only, in with_background_watch and WindowServerDesktop (skylight.rs). Combined form keeps both sides: #16553's 'let placement = match (clicks, previous.pid) {Tap|HitTest}' first, then this entry's 'let order = previous.pid.zip(capture::stacked_windows()).and_then(|(user, stack)| window_order::EntryOrder::new(pid, user, previous_key, &stack));' (read before anything is sent; placement sends nothing); WindowServerDesktop { spi, previous, key: previous_key, placement, stopped: &stopped, order: RefCell::new(order), raises: Cell::new(0) }; struct fields key, placement, stopped, order, raises. No semantic overlap: placement feeds SwitchSignals, order feeds keep_order."
+   }
   }
  ],
  "watch": {
