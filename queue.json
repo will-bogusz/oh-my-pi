@@ -92509,8 +92509,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-popup-value",
    "host": "MacBook-Pro",
    "added": "2026-11-14T00:26:14Z",
-   "updated": "2026-11-14T05:28:20Z",
-   "note": "",
+   "updated": "2026-11-14T06:16:30Z",
+   "note": "QueueTwenty/Main 2026-11-14: (a) the close-wait observer (AXObserver AXMenuClosed gate, MENU_CANCEL_TIMEOUT 100 ms only when neither the notification nor unlisting happens; observer failure keeps the 600 ms wait) is built and measured by PopupValue on a branch stacked on #19224's head: if #19224 is still open when it is measured and reviewed, it comes as a second push with its own table; if #19224 has merged, it becomes its own entry (P1, needs nothing). Basis: an Escape sent while a native menu is still listed reached the app 80/80; native menus stay listed 11-22 ms p95, up to 177 ms under load; AXMenuClosed 2-7 ms after the cancel, 80/80; Chromium hold 916 ms at 600 vs ~407 at 100. (b) The untitled-items follow-up is NOT queued: on a real Chrome (released build and branch) click/press({menu:[missing]}) already refuse with options listed by text 3/3, and the untitled-items change measured identical to released on every target (PopupValue VM); the opened menu's items carry titles, only the closed select's own child is untitled.",
    "rebases_after": [
     19179
    ],
