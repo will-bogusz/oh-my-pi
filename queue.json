@@ -92364,9 +92364,15 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-popup-value",
    "host": "MacBook-Pro",
    "added": "2026-11-14T00:26:14Z",
-   "updated": "2026-11-14T00:26:26Z",
+   "updated": "2026-11-14T00:26:29Z",
    "note": "",
-   "hold": "PopupValue, 2026-11-14: hold until the typing-flag check (released vs this branch, 10 each on AppKit and SwiftUI) shows no extra 'typing' flags beyond the 3-key-window phase effect"
+   "hold": "PopupValue, 2026-11-14: hold until the typing-flag check (released vs this branch, 10 each on AppKit and SwiftUI) shows no extra 'typing' flags beyond the 3-key-window phase effect",
+   "rebases_after": [
+    19179
+   ],
+   "pair_reasons": {
+    "19179": "PopupValue, 2026-11-14: both edit ax/open_menu.rs; ours adds Opened/listed/shown_again and gates Escape in close/escape_listed, #19179 edits guard/messages/tests; the render reformat hunk is identical in both; merge-tree clean. Combined form: #19179's key-press refusal keeps its text; its InputFailed item listing skips untitled items, so a Chromium select's items list empty there; left_open_message 'still open after Escape' is untrue when the window list was unreadable (no Escape sent now)"
+   }
   }
  ],
  "watch": {
