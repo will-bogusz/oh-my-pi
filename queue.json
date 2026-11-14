@@ -92552,7 +92552,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-14T02:59:12Z",
+  "checked": "2026-11-14T03:59:46Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -102359,7 +102359,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-14T02:59:12.976779Z",
+  "at": "2026-11-14T03:59:46.939689Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -103153,6 +103153,28 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-14T00:26:14Z"
+   },
+   {
+    "id": "macos-stale-press",
+    "label": "macos-stale-press",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): refuse macOS element actions on a control a person could not click",
+    "action": "held",
+    "reasons": [
+     "held: StalePress, 2026-11-14: Chrome and Electron false-refusal cells still running; body tables update after",
+     "conflicts with #19048 in crates/pi-natives/src/desktop/macos/mod.rs"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "#19048"
+    ],
+    "needs": [],
+    "created": "2026-11-14T03:42:51Z"
    },
    {
     "id": "macos-window-order",
