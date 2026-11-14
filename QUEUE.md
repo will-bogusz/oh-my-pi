@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14 19:02Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14 19:12Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-14 18:13Z on goliath; groups below are from it, states from the manifest)
@@ -35,7 +35,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-14
 | win-ax-states | fix(natives): expose Windows control state and stale-reference matches | computer | P2 | 3d | [#19036](https://github.com/can1357/oh-my-pi/pull/19036), [#19048](https://github.com/can1357/oh-my-pi/pull/19048), [#19061](https://github.com/can1357/oh-my-pi/pull/19061), [#19063](https://github.com/can1357/oh-my-pi/pull/19063), [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19258](https://github.com/can1357/oh-my-pi/pull/19258), [#18925](https://github.com/can1357/oh-my-pi/pull/18925), [#18987](https://github.com/can1357/oh-my-pi/pull/18987), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-ax-states) |
 | x11-keysym-remap | fix(natives): type characters outside the X11 keymap through temporary keycodes | computer | P2 | 3d | [#19066](https://github.com/can1357/oh-my-pi/pull/19066), [#19080](https://github.com/can1357/oh-my-pi/pull/19080), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-keysym-remap) |
 | stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 1d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
-| ax-number-setvalue | fix(natives): set macOS sliders and other number controls from setValue | computer | P2 | 0h | [#19061](https://github.com/can1357/oh-my-pi/pull/19061) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-number-setvalue) |
+| ax-number-setvalue | fix(natives): set macOS sliders and other number controls from setValue | computer | P2 | 1h | [#19061](https://github.com/can1357/oh-my-pi/pull/19061) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-number-setvalue) |
 
 ## Stacked (20)
 
