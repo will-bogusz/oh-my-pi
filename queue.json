@@ -102382,8 +102382,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-14T03:59:46.939689Z",
-  "host": "goliath",
+  "at": "2026-11-14T04:39:48.396835Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -103185,9 +103185,8 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): refuse macOS element actions on a control a person could not click",
-    "action": "held",
+    "action": "wait",
     "reasons": [
-     "held: StalePress, 2026-11-14: Chrome and Electron false-refusal cells still running; body tables update after",
      "conflicts with #19048 in crates/pi-natives/src/desktop/macos/mod.rs"
     ],
     "note": "",
@@ -103504,6 +103503,23 @@
     ],
     "needs": [],
     "created": "2026-11-11T09:59:13Z"
+   },
+   {
+    "id": "macos-move-receipt",
+    "label": "macos-move-receipt",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P2",
+    "title": "fix(coding-agent): say what a macOS background move did",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-14T04:35:48Z"
    },
    {
     "id": "r2/relay-own-only",
@@ -103856,6 +103872,7 @@
      "conflicts with #19208 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18222 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/prompts/tools/eval.md, packages/coding-agent/src/tools/eval.ts",
+     "conflicts with macos-move-receipt in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with main in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/sdk-computer-prelude-toggle.test.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
@@ -103866,7 +103883,8 @@
      "#19195",
      "#19208",
      "#18222",
-     "#18786"
+     "#18786",
+     "macos-move-receipt"
     ],
     "needs": [
      "browser-core-first-use"
@@ -103901,6 +103919,7 @@
      "conflicts with #18786 in packages/coding-agent/src/tools/eval.ts",
      "conflicts with #18987 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with macos-popup-value in docs/tools/computer.md",
+     "conflicts with macos-move-receipt in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -103923,7 +103942,8 @@
      "#18222",
      "#18786",
      "#18987",
-     "macos-popup-value"
+     "macos-popup-value",
+     "macos-move-receipt"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -103954,6 +103974,7 @@
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18987 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
      "conflicts with macos-popup-value in docs/tools/computer.md",
+     "conflicts with macos-move-receipt in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs"
     ],
@@ -103973,7 +103994,8 @@
      "#18222",
      "#18925",
      "#18987",
-     "macos-popup-value"
+     "macos-popup-value",
+     "macos-move-receipt"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -104003,6 +104025,7 @@
      "conflicts with #18222 in docs/tools/computer.md",
      "conflicts with #18925 in crates/pi-natives/src/desktop/macos/capture.rs, crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with macos-popup-value in docs/tools/computer.md",
+     "conflicts with macos-move-receipt in docs/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
@@ -104019,7 +104042,8 @@
      "#18353",
      "#18222",
      "#18925",
-     "macos-popup-value"
+     "macos-popup-value",
+     "macos-move-receipt"
     ],
     "needs": [
      "agent-identity"
@@ -104181,6 +104205,7 @@
      "conflicts with #18222 in docs/tools/computer.md",
      "conflicts with #18987 in docs/tools/computer.md",
      "conflicts with macos-popup-value in docs/tools/computer.md",
+     "conflicts with macos-move-receipt in docs/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/win32/input.rs, crates/pi-natives/src/desktop/win32/mod.rs"
     ],
     "note": "",
@@ -104193,7 +104218,8 @@
      "#18353",
      "#18222",
      "#18987",
-     "macos-popup-value"
+     "macos-popup-value",
+     "macos-move-receipt"
     ],
     "needs": [],
     "created": "2026-11-12T04:40:13Z"
@@ -104236,10 +104262,8 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "wait",
-    "reasons": [
-     "conflicts with main in (branch missing on the fork)"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
