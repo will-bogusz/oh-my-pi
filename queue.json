@@ -91072,8 +91072,8 @@
    "worktree": null,
    "host": "MacBook-Pro",
    "added": "2026-11-13T10:32:49Z",
-   "updated": "2026-11-13T20:48:08Z",
-   "note": "Head 37bd49376ef. Touches the Drag arm of background_gesture in crates/pi-natives/src/desktop/macos/input.rs; neighbouring arms are touched by macos-scroll-direction (Scroll arm / background_scroll) and by a separate lane's key-press fix: expect adjacent-hunk rebases, no semantic overlap. Review DragConfirm.ReviewDragConfirm needs-changes at abc556586fa, all F1-F9 fixed in 37bd493 (not re-reviewed per skill). VM: DragConfirm block3 (bench-mac runs dc-main-e/dc-C-e/dc-C-a/dc-main-a).",
+   "updated": "2026-11-14T01:47:25Z",
+   "note": "Rule-4 probe (DragConfirm r2, 2026-11-14): Chromium/Electron range input vs ARIA slider indistinguishable via AX (all attributes + parameterised names dumped); WebKit range input exposes AXValueIndicator (thumb branch). Raw dumps: Mac ~/tmp/oh-my-pi/DragConfirm/r2/axdump-ssh.json, axdump-omp.json, probe2.json. VM tables: bench-mac ~/tmp/oh-my-pi/FalseSuccess/runs/r3-*, r4-H4-e.",
    "built": [
     {
      "with": "#16553",
