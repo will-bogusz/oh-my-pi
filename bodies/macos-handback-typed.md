@@ -23,8 +23,7 @@ Unchanged on both builds: nine real-keyboard cells (fast, slow, one key; two win
 
 - With posted typing, a ⌘-Tab during the hand-back ends on the user's own app in 9 of 10 tries on both builds, with identical end states (30 paired tries): that is the base's front request, unchanged here.
 - A choice another process posts that leaves no trace (no press, ⌘ released before the check, same window focused) inside the ~50 ms the monitor is waited for would be overridden; not seen in 30 posted-choice tries.
-- A real ⌘-` within a few ms of the hand-back is lost on both builds (2/40 each, never on this PR's path): #19208's own guard, tracked separately.
-- `WindowServer` never refused a rekey in these runs, so the retry (at most three requests) did not run in the VM; unit tests cover it.
+- On a real keyboard, ⌘-` during the takeover is lost or overridden in 2 of 40 tries on both builds; unchanged by this fix (none of those tries reached its path).
 
 </details>
 
