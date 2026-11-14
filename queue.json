@@ -93104,7 +93104,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-14T17:12:10Z",
+  "checked": "2026-11-14T17:42:23Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -93128,6 +93128,20 @@
      "packages/ai/src/providers/pi-native-server.ts"
     ]
    },
+   "#18353": {
+    "since": "2026-11-14T17:42:23Z",
+    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
+    "files": [
+     "MODULE.bazel.lock"
+    ]
+   },
+   "#18013": {
+    "since": "2026-11-14T17:42:23Z",
+    "title": "feat(natives): type text the wayland layout lacks through libei text",
+    "files": [
+     "MODULE.bazel.lock"
+    ]
+   },
    "#19120": {
     "since": "2026-11-14T07:02:08Z",
     "title": "fix(stats): count snapcompact compactions on the Gain tab",
@@ -93138,43 +93152,7 @@
    }
   },
   "merged_through": "2026-11-14T06:34:04Z",
-  "unreleased": {
-   "19118": {
-    "title": "fix(stats,coding-agent): keep the stats dashboard answering while Spotlight rebuilds",
-    "merge_commit": "b43ea3a1e6dda912b547e6b17dfe004a8c3d2bef",
-    "merged_at": "2026-11-13T12:51:30Z"
-   },
-   "19115": {
-    "title": "fix(stats): close Traces background jobs when they finish, so idle time and turn ends show",
-    "merge_commit": "08448c2ff1570494fd4fd93087c5f5638bf38e16",
-    "merged_at": "2026-11-13T12:51:30Z"
-   },
-   "19114": {
-    "title": "fix(stats): count every answered message in the Frustration per-model table",
-    "merge_commit": "1834c8ba28a3063cfe80d604b4f90561d13cc58c",
-    "merged_at": "2026-11-13T12:51:30Z"
-   },
-   "19094": {
-    "title": "fix(coding-agent): fail a click whose frame the page removed while the button was down",
-    "merge_commit": "193152feeab89b05972e64bca776f087985aea1c",
-    "merged_at": "2026-11-13T12:51:31Z"
-   },
-   "19181": {
-    "title": "fix(catalog): keep Gemini 4 Hydrogen in one thinking rule so a regenerated catalog starts",
-    "merge_commit": "2a4692ad38714031a2deea4db7dec62a8745a6f2",
-    "merged_at": "2026-11-13T17:32:46Z"
-   },
-   "19188": {
-    "title": "fix(catalog): keep GPT-6 effort changes off configuration_update on Factory Droid Bedrock and Snowflake",
-    "merge_commit": "ef5db597c3a60d53f4bc81a7f8431ae059f5d949",
-    "merged_at": "2026-11-14T06:34:04Z"
-   },
-   "19180": {
-    "title": "fix(catalog): identify Devin requests as CLI 3000.12.57",
-    "merge_commit": "3ec903a568069a97505c5ab1bfaf85ac9bb5ad5d",
-    "merged_at": "2026-11-14T06:34:04Z"
-   }
-  },
+  "unreleased": {},
   "ready": [
    16553,
    16611,
@@ -96648,6 +96626,73 @@
     "id": "macos-stale-press",
     "title": "fix(natives): refuse macOS element actions on a control a person could not click",
     "why": "opened as #19258"
+   },
+   {
+    "at": "2026-11-14T17:42:23Z",
+    "kind": "released",
+    "number": 19118,
+    "title": "fix(stats,coding-agent): keep the stats dashboard answering while Spotlight rebuilds",
+    "tag": "v18.20.1"
+   },
+   {
+    "at": "2026-11-14T17:42:23Z",
+    "kind": "released",
+    "number": 19115,
+    "title": "fix(stats): close Traces background jobs when they finish, so idle time and turn ends show",
+    "tag": "v18.20.1"
+   },
+   {
+    "at": "2026-11-14T17:42:23Z",
+    "kind": "released",
+    "number": 19114,
+    "title": "fix(stats): count every answered message in the Frustration per-model table",
+    "tag": "v18.20.1"
+   },
+   {
+    "at": "2026-11-14T17:42:23Z",
+    "kind": "released",
+    "number": 19094,
+    "title": "fix(coding-agent): fail a click whose frame the page removed while the button was down",
+    "tag": "v18.20.1"
+   },
+   {
+    "at": "2026-11-14T17:42:23Z",
+    "kind": "released",
+    "number": 19181,
+    "title": "fix(catalog): keep Gemini 4 Hydrogen in one thinking rule so a regenerated catalog starts",
+    "tag": "v18.20.1"
+   },
+   {
+    "at": "2026-11-14T17:42:23Z",
+    "kind": "released",
+    "number": 19188,
+    "title": "fix(catalog): keep GPT-6 effort changes off configuration_update on Factory Droid Bedrock and Snowflake",
+    "tag": "v18.20.1"
+   },
+   {
+    "at": "2026-11-14T17:42:23Z",
+    "kind": "released",
+    "number": 19180,
+    "title": "fix(catalog): identify Devin requests as CLI 3000.12.57",
+    "tag": "v18.20.1"
+   },
+   {
+    "at": "2026-11-14T17:42:23Z",
+    "kind": "conflict",
+    "label": "#18353",
+    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
+    "files": [
+     "MODULE.bazel.lock"
+    ]
+   },
+   {
+    "at": "2026-11-14T17:42:23Z",
+    "kind": "conflict",
+    "label": "#18013",
+    "title": "feat(natives): type text the wayland layout lacks through libei text",
+    "files": [
+     "MODULE.bazel.lock"
+    ]
    }
   ]
  },
@@ -103086,7 +103131,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-14T17:12:10.781787Z",
+  "at": "2026-11-14T17:42:24.457526Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -103488,8 +103533,10 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in MODULE.bazel.lock"
+    ],
     "note": "accepted pair with #18013; accepted pair with #19035",
     "over": [],
     "paired": [
@@ -103636,8 +103683,10 @@
     "area": "natives",
     "priority": "P2",
     "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in MODULE.bazel.lock"
+    ],
     "note": "accepted pair with #18353",
     "over": [],
     "paired": [
