@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed macOS takeover putting a typing user's keys into the agent's target: a takeover, the background fallback's rerun included, now waits until you have pressed no key or button anywhere for 5 s, failing `UserIntervened` with nothing sent if you are still at it near the run's timeout.
+
 ## [18.20.1] - 2026-11-14
 
 ### Breaking Changes
