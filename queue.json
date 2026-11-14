@@ -103208,8 +103208,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-14T20:14:45.940727Z",
-  "host": "goliath",
+  "at": "2026-11-14T20:31:55.314362Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -103610,10 +103610,8 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in MODULE.bazel.lock"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "accepted pair with #18013; accepted pair with #19035",
     "over": [],
     "paired": [
@@ -103760,10 +103758,8 @@
     "area": "natives",
     "priority": "P2",
     "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in MODULE.bazel.lock"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "accepted pair with #18353",
     "over": [],
     "paired": [
@@ -104056,9 +104052,8 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): keep macOS takeover from taking a typing user's keys",
-    "action": "held",
+    "action": "wait",
     "reasons": [
-     "held: Main, 2026-11-14: owed in the body, each from a run: (1) switch2/switchapp1 handed back 1/10 on fix vs 0/10 in both quiet-0 runs: end states from traces, then switch2, switchapp1 and the race cell on #19208+fix1 vs #19208 alone, 20 tries each; (2) interleaved A/B of background calls on AppKit (+30 ms on the non-interleaved run); (3) the live bound cell, its returned text and the bound in seconds in body and docs.",
      "conflicts with #16553 in crates/pi-natives/src/desktop/control/intervention.rs, crates/pi-natives/src/desktop/control/macos.rs"
     ],
     "note": "",
@@ -105224,10 +105219,8 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "wait",
-    "reasons": [
-     "conflicts with main in (branch missing on the fork)"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
