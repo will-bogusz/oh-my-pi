@@ -92802,6 +92802,26 @@
    "added": "2026-11-14T10:14:31Z",
    "updated": "2026-11-14T10:38:11Z",
    "note": "KeyMenu2 r3 2026-11-14: head b67260ce06d on key-menu 636a981d140 (#19179). Review KeyMenu2.KeyReadReview needs-changes at 159a5f5d5e; M1-M4, S2, N1-N5 fixed in the one commit; S1 (a click on the marked popup waits) and N6 stated as limits in the body. rust-check linux+macos at b67260ce06. All tables from VM blocks on the final Rust lines (b3, b4). Benchmark lane re-runs IR-01/IR-02 after this merges."
+  },
+  {
+   "id": "macos-keys-no-press",
+   "branch": "will/macos-keys-no-press",
+   "title": "fix(natives): send macOS background keys to the key window without a press",
+   "area": "computer",
+   "priority": "P1",
+   "needs": [
+    "macos-window-order"
+   ],
+   "base": "4f8d2cd973d9d02bde5f0bf1da119acff1aad94c",
+   "body": "bodies/macos-keys-no-press.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": null,
+   "host": "MacBook-Pro",
+   "added": "2026-11-14T10:49:09Z",
+   "updated": "2026-11-14T10:49:09Z",
+   "note": ""
   }
  ],
  "watch": {
