@@ -93224,8 +93224,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-reroute-not-a-press",
    "host": "MacBook-Pro",
    "added": "2026-11-14T20:50:07Z",
-   "updated": "2026-11-14T20:50:24Z",
-   "note": "",
+   "updated": "2026-11-14T20:50:39Z",
+   "note": "Review TypingTakeover.ReviewRerouteRule (needs-changes at d23777b14e): all 7 findings fixed in the rework (posted keys stay, repeats follow their press, lookup injected, lock released before the signal reads, changelog shortened, limit stated). Also conflicts with fix 1 (macos-takeover-typing-pause, queued, no PR yet) in observe_user: combined form d34d9ca5158 (local branch will/macos-reroute-on-pause) = fix 1's observed()/pressed(at) block with the rule's input_target(kind, target, front_pid, |pid| rerouted_to(pid, event)); with #16553 as well 791f07e06c5 (will/macos-reroute-on-pause-16553), lib tests 1017 pass. Record --pair <fix 1's PR> once it opens. rust-check linux/windows/macos at diff f1c7ffe5b4.",
    "rebases_after": [
     16553
    ],
