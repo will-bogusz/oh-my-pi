@@ -2,7 +2,7 @@
 
 Typing into a field on a Safari or WKWebView page whose window sat behind my own app fell back to a takeover that failed, or typed only by bringing Safari to the front, so OMP now types it in the background on the field's own focus claim and reads the field back to confirm the text landed.
 
-`el.type` into a text field of a Safari or WKWebView page covered by the person's own window reached the field 15 of 130 times on `main`, each through a takeover that brought Safari forward, and 129 of 130 with this PR, all but one in the background, with none of a typing person's keys moved or lost.
+`el.type` into a text field of a Safari or WKWebView page covered by the person's own window reached the field 15 of 130 times on `main`, each through a takeover that brought Safari forward, and 130 of 130 with this PR, all but one in the background, with none of a typing person's keys moved or lost.
 
 | `el.type` into a page field, window covered by the person's app | `main` | this PR |
 |---|---|---|

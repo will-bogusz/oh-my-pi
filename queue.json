@@ -93250,7 +93250,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-web-type-background",
    "host": "MacBook-Pro",
    "added": "2026-11-14T20:50:44Z",
-   "updated": "2026-11-14T20:51:01Z",
+   "updated": "2026-11-14T21:01:41Z",
    "note": "Review TypingTakeover.ReviewWebTypeBg (needs-changes at 2c228a57b6): each finding fixed with a test that fails on revert (FocusProof named/none/unreadable, read-back by expected kind, Return/Tab unconfirmed, wrong-recipient/iframe cells). Textually clean with fix 1 and #16553; merged trees tested: fix2 x #16553 162aebd2093 (1016 lib tests pass), fix1 + #16553 + rule + fix2 d42a3be372d (1024 pass). rust-check linux/windows/macos at diff fd6d80baa1."
   }
  ],
