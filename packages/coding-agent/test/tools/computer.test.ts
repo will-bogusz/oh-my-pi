@@ -4372,6 +4372,45 @@ describe("computer background fallback", () => {
 		]);
 	});
 
+	it("says a macOS background move left the pointer and hover state alone, and only then", async () => {
+		class MacSession extends RefusingSession {
+			override get capabilities(): DesktopCapabilities {
+				return { ...super.capabilities, backend: "quartz" };
+			}
+			override async moveMouse(
+				_target: string,
+				_x: number,
+				_y: number,
+				opts?: PointerOptions | null,
+			): Promise<void> {
+				this.sent.push(opts);
+				if (this.refuseMove && opts?.takeover !== true) throw new Error(this.refusal);
+			}
+			refuseMove = false;
+		}
+		const move = 'await (await desktop.window("42")).move(1, 2';
+		const mac = new MacSession();
+		for (const code of [`${move})`, `${move}, { takeover: false })`]) {
+			const [text, ...rest] = texts(await run(mac, code, "takeover"));
+			expect(rest, code).toEqual([]);
+			expect(text, code).toStartWith("move ran in the background: the window was sent a pointer move");
+			expect(text, code).toContain("{ takeover: true }");
+		}
+		// Under refuse, the line names no takeover, which the setting would refuse.
+		const [refused, ...more] = texts(await run(mac, `${move})`, "refuse"));
+		expect(more).toEqual([]);
+		expect(refused).toStartWith("move ran in the background: the window was sent a pointer move");
+		expect(refused).not.toContain("takeover: true");
+		expect(refused).toContain("computer.backgroundFallback setting refuses takeover");
+		// Negative controls: a takeover move, by request or by fallback, and a background move off macOS.
+		expect(texts(await run(mac, `${move}, { takeover: true })`, "takeover"))).toEqual([]);
+		mac.refuseMove = true;
+		const fellBack = texts(await run(mac, `${move})`, "takeover"));
+		expect(fellBack).toHaveLength(1);
+		expect(fellBack[0]).toStartWith("move ran in takeover because");
+		expect(texts(await run(new RefusingSession(), `${move})`, "takeover"))).toEqual([]);
+	});
+
 	it("refuses without a takeover under refuse, and tells the model so without suggesting one", async () => {
 		const native = new RefusingSession();
 		const result = await run(native, clickTarget, "refuse");

@@ -108,7 +108,7 @@ Both a selected window and `desktop` expose:
 - `zoom({ x, y, width, height }, { silent? }) -> { path, width, height, coordinateWidth, coordinateHeight, region, screenLocked? }`
 - `click(x, y, { button?, count?, modifiers?, menu?, takeover? })`
 - `doubleClick(x, y, { button?, modifiers?, takeover? })`
-- `move(x, y, { takeover? })`
+- `move(x, y, { takeover? })`: on macOS a background move posts a pointer move to the window and leaves the user's pointer where it is; its output says so, since AppKit views and web pages have shown no hover state for it
 - `drag([[x, y], ...], { button?, keys?, modifiers?, takeover? }) -> { start, length, text, focused } | undefined`: the selection when a macOS background drag was made as one (below), otherwise `undefined`
 - `scroll(x, y, { dx?, dy?, takeover? })`
 - `type(text, { takeover? })`

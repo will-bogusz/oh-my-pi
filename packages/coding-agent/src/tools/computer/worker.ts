@@ -487,6 +487,20 @@ const MENU_CONTROL_ROUTE =
 	"Its options are chosen only through that menu: use the window's menu bar with win.menu.select(...) if it has the same command, or tell the user the step needs their screen.";
 
 /**
+ * What a macOS background `move` did. It posts a pointer-moved event to the
+ * window and leaves the real pointer where it is; `AppKit` tracking areas and
+ * the pages of Chromium, Electron and `WKWebView` did not see it in testing,
+ * so a control shown only under the pointer may still be hidden. The ending
+ * names a takeover move only where the user's setting allows one.
+ */
+const BACKGROUND_MOVE_NOTICE =
+	"move ran in the background: the window was sent a pointer move and the user's pointer did not move; AppKit views and Chrome, Electron and WKWebView pages have shown no hover state for such a move, so a control shown only under the pointer may still be hidden";
+const BACKGROUND_MOVE_TAKEOVER =
+	"if a screenshot shows it is, move with { takeover: true } moves the real pointer there";
+const BACKGROUND_MOVE_REFUSED =
+	"the user's computer.backgroundFallback setting refuses takeover, so reach that control through AX or tell the user the step needs their screen";
+
+/**
  * Under `refuse`, a macOS call that opens a menu is refused before anything is
  * sent: `WindowServer` sends the user's keys to an open menu, so even one
  * closed at once costs the user about a keystroke.
@@ -1204,14 +1218,23 @@ class Win {
 		strictOptions(options, inputOptionsKeys, "move");
 		const context = this.#guardInput("move");
 		const native = pointerOptions(options);
+		let background = native.takeover !== true;
 		await sendInput(
 			this.#session,
 			context,
 			"move",
 			native.takeover,
-			fallback => this.#session.moveMouse(this.id, x, y, { ...native, ...fallback }),
+			fallback => {
+				if (fallback) background = false;
+				return this.#session.moveMouse(this.id, x, y, { ...native, ...fallback });
+			},
 			this.pid,
 		);
+		if (background && this.#session.capabilities.backend === "quartz") {
+			const ending =
+				context.snapshot.backgroundFallback === "refuse" ? BACKGROUND_MOVE_REFUSED : BACKGROUND_MOVE_TAKEOVER;
+			context.output.push({ type: "text", text: `${BACKGROUND_MOVE_NOTICE}; ${ending}` });
+		}
 	}
 
 	async drag(points: Array<[number, number]>, options?: DragOptions): Promise<AxTextSelection | undefined> {
