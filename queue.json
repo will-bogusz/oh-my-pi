@@ -92747,7 +92747,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "6ec2b71cd7d80e18e1b6481f2e3d9c05f5f0c56c",
+   "base": "20797b8941dc12c46489f696ad5d1c74b384aa93",
    "body": "bodies/macos-stale-press.md",
    "state": "queued",
    "pr": null,
@@ -92755,14 +92755,15 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-stale-press",
    "host": "MacBook-Pro",
    "added": "2026-11-14T03:42:51Z",
-   "updated": "2026-11-14T04:42:55Z",
+   "updated": "2026-11-14T10:25:23Z",
    "note": "StaleReview (needs-changes at dc9aa89) answered in 2569e5f: 1 rust-check macos+linux recorded; 2 refusal names el.click({ takeover: true }), test asserts it; 3 full screen probed (fixture 160 tries, Preview census, 0 refused), title-bar buttons exempt from the sheet rule; 4 TextEdit Save sheet census 0 judged, sheet rule now judges by the drawing window (test); 5 popover from a sheet: AppKit+SwiftUI 70 tries 0 refused (test); 6 Catalyst: Messages/Maps census 0 judged, hit-test skipped when a Catalyst press scrolls; 7 docs say the sheet rule applies to web; 8 judges_placement/click_judges_placement + test; 9 all-elements census Finder/Activity Monitor: one judged kind (14-pt group under the full-screen button), in body limits; nits: zero-sized test folded, CHANGELOG one sentence, tests merged to one per branch.",
    "rebases_after": [
     19048
    ],
    "pair_reasons": {
     "19048": "Main, 2026-11-14: crates/pi-natives/src/desktop/macos/mod.rs element-click closure (function body): #19048's lines verbatim (hoisted mac handle, (target, event, _aimed) destructuring and everything after the closure, aim_at_element); stale-press adds only the two-line require_shown check before locate_element_click, reusing the hoisted handle. Combined form ~/tmp/oh-my-pi/queuetwenty/r5/combined-stale-press-19048.txt; build+test proof (#19048's tests + stale-press's nine, macOS desktop + Linux check) due when stale-press opens"
-   }
+   },
+   "advanced": "2026-11-14T10:25:23Z"
   },
   {
    "id": "macos-move-receipt",
