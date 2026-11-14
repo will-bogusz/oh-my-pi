@@ -19,7 +19,7 @@ In an Electron window behind the user's, drags on range inputs went from 0 of 20
 
 ## Why
 
-An agent reported slider settings changed that were not: in a background drag the mouse button is up, so Chromium drops the moves. The pointer goes first because a slider built on `pointermove` is moved by it on `main`.
+An agent reported slider settings changed that were not: in a background drag the mouse button is up, so Chromium drops the moves. The pointer goes first: a slider built on `pointermove` is moved by it on `main`.
 
 Limits: a slider that ignores both pointer and `AXIncrement` fails honestly; a SwiftUI `Slider` ignores a background drag, so it fails honestly, and the same drag in takeover sets it (10 of 10); one laid out right to left, pressed on its thumb, throws `InputFailed` rather than being stepped toward the mirrored value.
 
