@@ -93547,7 +93547,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-15T07:58:14Z",
+  "checked": "2026-11-15T08:59:02Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -93690,76 +93690,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-08T08:44:06Z",
-    "kind": "merged",
-    "number": 18223,
-    "title": "fix(coding-agent): preserve eval state after late tool rejections",
-    "merged_by": "can1357",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-08T08:44:06Z",
-    "kind": "merged",
-    "number": 18220,
-    "title": "fix(natives): read back AT-SPI text writes before reporting success",
-    "merged_by": "can1357",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-08T08:44:06Z",
-    "kind": "merged",
-    "number": 18167,
-    "title": "fix(skills): find a skill created after the session started by skill:// name",
-    "merged_by": "can1357",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-08T08:44:06Z",
-    "kind": "merged",
-    "number": 17940,
-    "title": "fix(coding-agent): keep browser agents from pulling Chrome in front of your app on Linux X11",
-    "merged_by": "can1357",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-08T08:44:06Z",
-    "kind": "merged",
-    "number": 17904,
-    "title": "fix(coding-agent): stop URL reads returning bot block pages as content",
-    "merged_by": "can1357",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-08T08:44:06Z",
-    "kind": "merged",
-    "number": 17895,
-    "title": "fix(coding-agent): find named sections and other implicit roles with role/ selectors",
-    "merged_by": "can1357",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-08T08:44:06Z",
-    "kind": "merged",
-    "number": 17893,
-    "title": "fix(browser): report a relay tab's downloads where Chrome saved them",
-    "merged_by": "can1357",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-08T08:44:06Z",
-    "kind": "merged",
-    "number": 17747,
-    "title": "fix(agent,coding-agent): read the history behind an OpenAI remote compaction after a model switch",
-    "merged_by": "can1357",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-08T08:44:06Z",
-    "kind": "openable",
-    "id": "role-selectors-cdp",
-    "title": "fix(coding-agent): resolve Chromium role selectors through Chrome's accessibility tree"
-   },
    {
     "at": "2026-11-08T09:45:12Z",
     "kind": "conflict",
@@ -103545,7 +103475,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-15T07:58:15.099997Z",
+  "at": "2026-11-15T08:59:03.014463Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
