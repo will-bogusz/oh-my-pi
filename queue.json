@@ -93547,7 +93547,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-15T17:07:15Z",
+  "checked": "2026-11-15T17:37:53Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -93652,12 +93652,6 @@
     "merged_at": "2026-11-14T06:34:04Z",
     "findings": []
    },
-   "19181": {
-    "title": "fix(catalog): keep Gemini 4 Hydrogen in one thinking rule so a regenerated catalog starts",
-    "merge_commit": "2a4692ad38714031a2deea4db7dec62a8745a6f2",
-    "merged_at": "2026-11-13T17:32:46Z",
-    "findings": []
-   },
    "19188": {
     "title": "fix(catalog): keep GPT-6 effort changes off configuration_update on Factory Droid Bedrock and Snowflake",
     "merge_commit": "ef5db597c3a60d53f4bc81a7f8431ae059f5d949",
@@ -93666,62 +93660,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-08T17:24:56Z",
-    "kind": "released",
-    "number": 18223,
-    "title": "fix(coding-agent): preserve eval state after late tool rejections",
-    "tag": "v18.18.2"
-   },
-   {
-    "at": "2026-11-08T17:24:56Z",
-    "kind": "released",
-    "number": 18220,
-    "title": "fix(natives): read back AT-SPI text writes before reporting success",
-    "tag": "v18.18.2"
-   },
-   {
-    "at": "2026-11-08T17:24:56Z",
-    "kind": "released",
-    "number": 18167,
-    "title": "fix(skills): find a skill created after the session started by skill:// name",
-    "tag": "v18.18.2"
-   },
-   {
-    "at": "2026-11-08T17:24:56Z",
-    "kind": "released",
-    "number": 17940,
-    "title": "fix(coding-agent): keep browser agents from pulling Chrome in front of your app on Linux X11",
-    "tag": "v18.18.2"
-   },
-   {
-    "at": "2026-11-08T17:24:56Z",
-    "kind": "released",
-    "number": 17904,
-    "title": "fix(coding-agent): stop URL reads returning bot block pages as content",
-    "tag": "v18.18.2"
-   },
-   {
-    "at": "2026-11-08T17:24:56Z",
-    "kind": "released",
-    "number": 17895,
-    "title": "fix(coding-agent): find named sections and other implicit roles with role/ selectors",
-    "tag": "v18.18.2"
-   },
-   {
-    "at": "2026-11-08T17:24:56Z",
-    "kind": "released",
-    "number": 17893,
-    "title": "fix(browser): report a relay tab's downloads where Chrome saved them",
-    "tag": "v18.18.2"
-   },
-   {
-    "at": "2026-11-08T17:24:56Z",
-    "kind": "released",
-    "number": 17747,
-    "title": "fix(agent,coding-agent): read the history behind an OpenAI remote compaction after a model switch",
-    "tag": "v18.18.2"
-   },
    {
     "at": "2026-11-09T16:17:31Z",
     "kind": "openable",
