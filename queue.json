@@ -93547,7 +93547,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-15T00:49:59Z",
+  "checked": "2026-11-15T01:51:23Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -103545,7 +103545,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-15T00:50:00.657470Z",
+  "at": "2026-11-15T01:51:24.724397Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -104411,14 +104411,17 @@
     "title": "fix(natives): put the user's key window back in front of a macOS target after background input and takeover",
     "action": "wait",
     "reasons": [
-     "needs #19208 (open)"
+     "needs #19208 (open)",
+     "conflicts with #19296 in crates/pi-natives/src/desktop/macos/skylight.rs"
     ],
     "note": "accepted pair with #16553: HandBack, 2026-11-14: textual conflict only, in with_background_watch and WindowServerDesktop (skylight.rs). Combined form keeps both sides: #16553's 'let placement = match (clicks, previous.pid) {Tap|HitTest}' first, then this entry's 'let order = previous.pid.zip(capture::stacked_windows()).and_then(|(user, stack)| window_order::EntryOrder::new(pid, user, previous_key, &stack));' (read before anything is sent; placement sends nothing); WindowServerDesktop { spi, previous, key: previous_key, placement, stopped: &stopped, order: RefCell::new(order), raises: Cell::new(0) }; struct fields key, placement, stopped, order, raises. No semantic overlap: placement feeds SwitchSignals, order feeds keep_order.",
     "over": [],
     "paired": [
      "#16553"
     ],
-    "blocked_by": [],
+    "blocked_by": [
+     "#19296"
+    ],
     "needs": [
      "macos-handback-key"
     ],
