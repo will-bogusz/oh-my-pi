@@ -93547,7 +93547,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-15T18:38:32Z",
+  "checked": "2026-11-15T19:39:43Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -93569,6 +93569,20 @@
     "title": "fix(ai,coding-agent): carry other models' reasoning to Claude and retry its refusal without it",
     "files": [
      "packages/ai/src/providers/pi-native-server.ts"
+    ]
+   },
+   "#18786": {
+    "since": "2026-11-15T19:39:43Z",
+    "title": "feat(agent,coding-agent): send a short browser guide with the first browser call",
+    "files": [
+     "packages/coding-agent/src/prompts/tools/browser.md"
+    ]
+   },
+   "#19045": {
+    "since": "2026-11-15T19:39:43Z",
+    "title": "feat(browser): let observe() settle the effects of the preceding action",
+    "files": [
+     "packages/coding-agent/src/tools/browser/tab-worker.ts"
     ]
    },
    "#19120": {
@@ -96836,6 +96850,24 @@
     "id": "macos-takeover-typing-pause",
     "title": "fix(natives): keep macOS takeover from taking a typing user's keys",
     "why": "opened as #19296"
+   },
+   {
+    "at": "2026-11-15T19:39:43Z",
+    "kind": "conflict",
+    "label": "#18786",
+    "title": "feat(agent,coding-agent): send a short browser guide with the first browser call",
+    "files": [
+     "packages/coding-agent/src/prompts/tools/browser.md"
+    ]
+   },
+   {
+    "at": "2026-11-15T19:39:43Z",
+    "kind": "conflict",
+    "label": "#19045",
+    "title": "feat(browser): let observe() settle the effects of the preceding action",
+    "files": [
+     "packages/coding-agent/src/tools/browser/tab-worker.ts"
+    ]
    }
   ]
  },
@@ -103371,7 +103403,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-15T19:09:23.067846Z",
+  "at": "2026-11-15T19:39:44.191395Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -103977,8 +104009,10 @@
     "area": "browser",
     "priority": "P2",
     "title": "feat(agent,coding-agent): send a short browser guide with the first browser call",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in packages/coding-agent/src/prompts/tools/browser.md"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -104049,8 +104083,10 @@
     "area": "browser",
     "priority": "P2",
     "title": "feat(browser): let observe() settle the effects of the preceding action",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
+    ],
     "note": "accepted pair with #18925: Main, 2026-11-12: only conflict is adjacent class fields in packages/coding-agent/src/tools/browser/tab-worker.ts: #18925 adds #nativeWindows?, this entry adds #actionRequestSeq? and #settling? at the same spot; nothing removed; combined form is both declarations",
     "over": [],
     "paired": [
@@ -104316,7 +104352,7 @@
      "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19045 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts"
+     "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-tern-tab.test.ts"
     ],
     "note": "",
     "over": [],
@@ -104348,7 +104384,8 @@
      "conflicts with #18786 in docs/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md",
      "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts"
+     "its need #19045 conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts"
     ],
     "note": "",
     "over": [],
@@ -104403,7 +104440,7 @@
      "conflicts with #18789 in docs/tools/browser.md",
      "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19045 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "its need browser-wait-predicate conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "its need browser-wait-predicate conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-tern-tab.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
     ],
     "note": "",
@@ -104437,7 +104474,7 @@
      "conflicts with #18789 in docs/tools/browser.md",
      "conflicts with #18925 in docs/tools/browser.md",
      "conflicts with #19045 in docs/tools/browser.md",
-     "its need browser-wait-text-regexp conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
+     "its need browser-wait-text-regexp conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts, packages/coding-agent/test/tools/browser-tern-tab.test.ts"
     ],
     "note": "",
     "over": [],
@@ -105042,6 +105079,7 @@
      "conflicts with #18222 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/prompts/tools/eval.md, packages/coding-agent/src/tools/eval.ts",
      "conflicts with macos-move-receipt in packages/coding-agent/test/tools/computer.test.ts",
+     "its need #18786 conflicts with main in packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with main in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/sdk-computer-prelude-toggle.test.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
@@ -105088,7 +105126,7 @@
      "conflicts with #19165 in docs/computer-use.md",
      "conflicts with #18013 in docs/computer-use.md",
      "conflicts with #18222 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with #18786 in packages/coding-agent/src/tools/eval.ts",
+     "conflicts with #18786 in packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/tools/eval.ts",
      "conflicts with #18987 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with macos-move-receipt in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
@@ -105262,7 +105300,7 @@
     "reasons": [
      "held: Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance",
      "conflicts with #17610 in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/turn-recovery.ts, packages/coding-agent/test/agent-session-retry-fallback.test.ts",
-     "conflicts with #18786 in packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with #18786 in packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-advisors.ts",
      "conflicts with main in docs/advisor-watchdog.md, docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-advisors.ts, packages/coding-agent/src/session/turn-recovery.ts, packages/coding-agent/test/agent-session-retry-fallback.test.ts"
     ],
     "note": "",
