@@ -94591,7 +94591,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/dialog-closed-state",
    "host": "MacBook-Pro",
    "added": "2026-11-16T16:35:25Z",
-   "updated": "2026-11-16T17:37:07Z",
+   "updated": "2026-11-16T17:37:35Z",
    "note": "",
    "built": [
     {
@@ -94765,7 +94765,8 @@
      "tree": "effaf75ca3ed1d065ce10518ee62c1c9646eef10"
     }
    ],
-   "opened": "2026-11-16T17:37:07Z"
+   "opened": "2026-11-16T17:37:07Z",
+   "readied": "2026-11-16T17:37:35Z"
   }
  ],
  "watch": {
