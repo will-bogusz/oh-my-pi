@@ -94113,14 +94113,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-16T05:18:57Z",
+  "checked": "2026-11-16T06:20:09Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "ax-number-setvalue": {
-    "since": "2026-11-16T05:18:57Z",
-    "title": "fix(natives): set macOS sliders and other number controls from setValue"
-   },
    "macos-move-receipt": {
     "since": "2026-11-14T05:00:07Z",
     "title": "fix(coding-agent): say what a macOS background move did"
@@ -94204,7 +94200,8 @@
    19208,
    19224,
    19258,
-   19296
+   19296,
+   19405
   ],
   "post_merge": {
    "18632": {
@@ -97480,6 +97477,13 @@
     "files": [
      "MODULE.bazel.lock"
     ]
+   },
+   {
+    "at": "2026-11-16T06:20:09Z",
+    "kind": "unopenable",
+    "id": "ax-number-setvalue",
+    "title": "fix(natives): set macOS sliders and other number controls from setValue",
+    "why": "opened as #19405"
    }
   ]
  },
@@ -104022,12 +104026,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-16T05:18:57.977295Z",
+  "at": "2026-11-16T06:20:09.993645Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 1,
+   "left": 7
   },
   "rows": [
    {
@@ -104152,11 +104156,12 @@
     "title": "fix(natives): name a macOS control by the label its AXTitleUIElement links to",
     "action": "keep",
     "reasons": [],
-    "note": "accepted pair with #19036: Main, 2026-11-12: #19036 adds 'unread_children: 0,' to the AxProps literal in macos/ax.rs and a field to the AxProps struct in desktop/ax.rs; this entry returns that literal inside a tuple (AxProps{...}, has_own_label) and adds its own struct field (rustfmt realignment only). Combined form: this entry's tuple with 'unread_children: 0,' inside its AxProps literal; struct with both fields; accepted pair with #19048: QueueFifteen, 2026-11-12 (Main's standing rule: a field added beside a line the other side reshapes without changing a value): only conflict is the Registered struct in crates/pi-natives/src/desktop/ax.rs: #19048 adds 'row: Option<RowProof>,' where this entry rewrites the doc comment of 'held'; #19048 reads neither held nor fingerprint. Combined form: #19048's row field, then this entry's doc comment and 'held: Option<u64>'.",
+    "note": "accepted pair with #19036: Main, 2026-11-12: #19036 adds 'unread_children: 0,' to the AxProps literal in macos/ax.rs and a field to the AxProps struct in desktop/ax.rs; this entry returns that literal inside a tuple (AxProps{...}, has_own_label) and adds its own struct field (rustfmt realignment only). Combined form: this entry's tuple with 'unread_children: 0,' inside its AxProps literal; struct with both fields; accepted pair with #19048: QueueFifteen, 2026-11-12 (Main's standing rule: a field added beside a line the other side reshapes without changing a value): only conflict is the Registered struct in crates/pi-natives/src/desktop/ax.rs: #19048 adds 'row: Option<RowProof>,' where this entry rewrites the doc comment of 'held'; #19048 reads neither held nor fingerprint. Combined form: #19048's row field, then this entry's doc comment and 'held: Option<u64>'.; accepted pair with #19405: QueueTwentyTwo, 2026-11-16 (Main's standing rule: use-list collision, opener records): only conflict is the test module's use lines in crates/pi-natives/src/desktop/macos/ax.rs: this entry adds CFRetained, #19061 adds AXUIElement and CFRetained; nothing removed; combined form is #19061's lines. Built: tree 42760b6e4a8 (macOS desktop 681/0; Linux check:ts 0 errors, desktop 335/0, computer.test 166/0)",
     "over": [],
     "paired": [
      "#19036",
-     "#19048"
+     "#19048",
+     "#19405"
     ],
     "blocked_by": [],
     "needs": [],
@@ -104382,6 +104387,25 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-14T21:30:07Z"
+   },
+   {
+    "id": "ax-number-setvalue",
+    "label": "#19405",
+    "number": 19405,
+    "state": "open",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): set macOS sliders and other number controls from setValue",
+    "action": "keep",
+    "reasons": [],
+    "note": "accepted pair with #19061: QueueTwentyTwo, 2026-11-16 (Main's standing rule: use-list collision, opener records): only conflict is the test module's use lines in crates/pi-natives/src/desktop/macos/ax.rs: this entry adds CFRetained, #19061 adds AXUIElement and CFRetained; nothing removed; combined form is #19061's lines. Built: tree 42760b6e4a8 (macOS desktop 681/0; Linux check:ts 0 errors, desktop 335/0, computer.test 166/0)",
+    "over": [],
+    "paired": [
+     "#19061"
+    ],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-16T06:01:16Z"
    },
    {
     "id": "factory-droid-capture-resilience",
@@ -104772,14 +104796,16 @@
      "held: Will, 2026-11-13: Main decides the approach once #19061 merges, with all the data in. Data so far: release leg 9 refusals in 93 runs (4 true catches, 5 same-control relabels, about +2 steps each, no grade changed); wording-only change closed (no step saved, 6 runs per arm); TitleTwin 0 wrong-item actions in 200 trials on stock apps, fixture same-title reuse 10/10 wrong; RelabelCases (scripted, 10 tries per case, v18.20.0 vs b42c6d20412, ~/tmp/oh-my-pi/RelabelCases/{signals,recovery}.md): Reminders count refused 10/10 -> right control 10/10; Finder rename and Calendar location still refused 10/10 (no title link); Contacts City->Street still refused 10/10. Finder and Calendar differ from Contacts in that frame, value and sibling count are unchanged, but that is not shown safe in general. A refusal that carried its parent's subtree would be an estimated 150-460 chars against the 1,300-7,400 the model re-read, and would save one of the two recovery steps (reconstructed, not run).",
      "needs #19061 (open)",
      "conflicts with #19036 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs",
-     "conflicts with #19048 in crates/pi-natives/src/desktop/ax.rs"
+     "conflicts with #19048 in crates/pi-natives/src/desktop/ax.rs",
+     "conflicts with #19405 in crates/pi-natives/src/desktop/macos/ax.rs"
     ],
     "note": "needs #19061 (passed over): a fix should not wait on it; restack its own commits onto main without it (git rebase --onto origin/main <#19061's tip> will/ax-read-as-live-label), then pr-queue set ax-read-as-title-link --needs",
     "over": [],
     "paired": [],
     "blocked_by": [
      "#19036",
-     "#19048"
+     "#19048",
+     "#19405"
     ],
     "needs": [
      "#19061"
@@ -105021,25 +105047,6 @@
     "created": "2026-11-10T18:56:55Z"
    },
    {
-    "id": "ax-number-setvalue",
-    "label": "ax-number-setvalue",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P2",
-    "title": "fix(natives): set macOS sliders and other number controls from setValue",
-    "action": "open",
-    "reasons": [],
-    "note": "accepted pair with #19061: QueueTwentyTwo, 2026-11-16 (Main's standing rule: use-list collision, opener records): only conflict is the test module's use lines in crates/pi-natives/src/desktop/macos/ax.rs: this entry adds CFRetained, #19061 adds AXUIElement and CFRetained; nothing removed; combined form is #19061's lines. Built: tree 42760b6e4a8 (macOS desktop 681/0; Linux check:ts 0 errors, desktop 335/0, computer.test 166/0)",
-    "over": [],
-    "paired": [
-     "#19061"
-    ],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-14T18:08:21Z"
-   },
-   {
     "id": "browser-wait-text-regexp",
     "label": "browser-wait-text-regexp",
     "number": null,
@@ -105120,9 +105127,9 @@
      "conflicts with #19100 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #19195 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #19208 in packages/coding-agent/src/tools/computer/worker.ts",
+     "conflicts with #19405 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #18222 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #18987 in packages/coding-agent/src/tools/computer/worker.ts",
-     "conflicts with ax-number-setvalue in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
@@ -105133,9 +105140,9 @@
      "#19100",
      "#19195",
      "#19208",
+     "#19405",
      "#18222",
-     "#18987",
-     "ax-number-setvalue"
+     "#18987"
     ],
     "needs": [],
     "created": "2026-11-11T01:40:14Z"
@@ -105159,6 +105166,7 @@
      "conflicts with #19208 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #19258 in docs/computer-use.md",
      "conflicts with #19296 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with #19405 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #18353 in docs/computer-use.md",
      "conflicts with #19034 in docs/computer-use.md",
      "conflicts with #19035 in docs/computer-use.md",
@@ -105166,7 +105174,6 @@
      "conflicts with #18013 in docs/computer-use.md",
      "conflicts with #18222 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #18987 in docs/computer-use.md, packages/coding-agent/src/tools/computer/worker.ts",
-     "conflicts with ax-number-setvalue in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
@@ -105182,14 +105189,14 @@
      "#19208",
      "#19258",
      "#19296",
+     "#19405",
      "#18353",
      "#19034",
      "#19035",
      "#19165",
      "#18013",
      "#18222",
-     "#18987",
-     "ax-number-setvalue"
+     "#18987"
     ],
     "needs": [],
     "created": "2026-10-19T07:26:45Z"
@@ -105210,7 +105217,7 @@
      "conflicts with #19063 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with #19195 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with #19258 in crates/pi-natives/src/desktop/macos/ax.rs",
-     "conflicts with ax-number-setvalue in crates/pi-natives/src/desktop/macos/ax.rs",
+     "conflicts with #19405 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with main in crates/pi-natives/src/desktop/macos/ax.rs"
     ],
     "note": "",
@@ -105223,7 +105230,7 @@
      "#19063",
      "#19195",
      "#19258",
-     "ax-number-setvalue"
+     "#19405"
     ],
     "needs": [],
     "created": "2026-11-11T09:59:13Z"
@@ -105327,16 +105334,16 @@
     "reasons": [
      "needs macos-reroute-not-a-press (queued)",
      "conflicts with #19179 in crates/pi-natives/src/desktop/macos/input.rs",
-     "conflicts with #19035 in docs/computer-use.md",
-     "conflicts with ax-number-setvalue in crates/pi-natives/src/desktop/macos/ax.rs"
+     "conflicts with #19405 in crates/pi-natives/src/desktop/macos/ax.rs",
+     "conflicts with #19035 in docs/computer-use.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
      "#19179",
-     "#19035",
-     "ax-number-setvalue"
+     "#19405",
+     "#19035"
     ],
     "needs": [
      "macos-reroute-not-a-press"
@@ -105487,9 +105494,9 @@
      "conflicts with #19063 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19195 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19258 in crates/pi-natives/src/desktop/macos/ax.rs",
+     "conflicts with #19405 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18987 in crates/pi-natives/src/desktop/mod.rs",
-     "conflicts with ax-number-setvalue in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with main in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs"
     ],
     "note": "",
@@ -105502,9 +105509,9 @@
      "#19063",
      "#19195",
      "#19258",
+     "#19405",
      "#18925",
-     "#18987",
-     "ax-number-setvalue"
+     "#18987"
     ],
     "needs": [],
     "created": "2026-11-11T10:16:04Z"
@@ -105702,9 +105709,9 @@
      "conflicts with #19100 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19195 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19208 in packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with #19405 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18222 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/prompts/tools/eval.md, packages/coding-agent/src/tools/eval.ts",
-     "conflicts with ax-number-setvalue in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with macos-move-receipt in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with main in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/sdk-computer-prelude-toggle.test.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -105715,9 +105722,9 @@
      "#19100",
      "#19195",
      "#19208",
+     "#19405",
      "#18222",
      "#18786",
-     "ax-number-setvalue",
      "macos-move-receipt"
     ],
     "needs": [
@@ -105747,6 +105754,7 @@
      "conflicts with #19224 in docs/tools/computer.md",
      "conflicts with #19258 in docs/computer-use.md, docs/tools/computer.md",
      "conflicts with #19296 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with #19405 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18353 in docs/computer-use.md, docs/tools/computer.md",
      "conflicts with #19034 in docs/computer-use.md",
      "conflicts with #19035 in docs/computer-use.md",
@@ -105755,7 +105763,6 @@
      "conflicts with #18222 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/tools/eval.ts",
      "conflicts with #18987 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/worker.ts",
-     "conflicts with ax-number-setvalue in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with macos-move-receipt in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/test/tools/computer.test.ts"
@@ -105774,6 +105781,7 @@
      "#19224",
      "#19258",
      "#19296",
+     "#19405",
      "#18353",
      "#19034",
      "#19035",
@@ -105782,7 +105790,6 @@
      "#18222",
      "#18786",
      "#18987",
-     "ax-number-setvalue",
      "macos-move-receipt"
     ],
     "needs": [
@@ -105812,11 +105819,11 @@
      "conflicts with #19224 in docs/tools/computer.md",
      "conflicts with #19258 in crates/pi-natives/src/desktop/macos/ax.rs, docs/tools/computer.md",
      "conflicts with #19296 in packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with #19405 in crates/pi-natives/src/desktop/macos/ax.rs, docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18987 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
-     "conflicts with ax-number-setvalue in crates/pi-natives/src/desktop/macos/ax.rs, docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with macos-move-receipt in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs"
@@ -105836,11 +105843,11 @@
      "#19224",
      "#19258",
      "#19296",
+     "#19405",
      "#18353",
      "#18222",
      "#18925",
      "#18987",
-     "ax-number-setvalue",
      "macos-move-receipt"
     ],
     "needs": [
@@ -105870,10 +105877,10 @@
      "conflicts with #19224 in docs/tools/computer.md",
      "conflicts with #19258 in crates/pi-natives/src/desktop/macos/mod.rs, docs/tools/computer.md",
      "conflicts with #19296 in crates/pi-natives/src/desktop/macos/mod.rs",
+     "conflicts with #19405 in docs/tools/computer.md",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md",
      "conflicts with #18925 in crates/pi-natives/src/desktop/macos/capture.rs, crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs",
-     "conflicts with ax-number-setvalue in docs/tools/computer.md",
      "conflicts with macos-move-receipt in docs/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -105891,10 +105898,10 @@
      "#19224",
      "#19258",
      "#19296",
+     "#19405",
      "#18353",
      "#18222",
      "#18925",
-     "ax-number-setvalue",
      "macos-move-receipt"
     ],
     "needs": [
@@ -106055,10 +106062,10 @@
      "conflicts with #19100 in docs/tools/computer.md",
      "conflicts with #19224 in docs/tools/computer.md",
      "conflicts with #19258 in docs/tools/computer.md",
+     "conflicts with #19405 in docs/tools/computer.md",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md",
      "conflicts with #18987 in docs/tools/computer.md",
-     "conflicts with ax-number-setvalue in docs/tools/computer.md",
      "conflicts with macos-move-receipt in docs/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/win32/input.rs, crates/pi-natives/src/desktop/win32/mod.rs"
     ],
@@ -106071,10 +106078,10 @@
      "#19100",
      "#19224",
      "#19258",
+     "#19405",
      "#18353",
      "#18222",
      "#18987",
-     "ax-number-setvalue",
      "macos-move-receipt"
     ],
     "needs": [],
