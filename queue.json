@@ -73997,6 +73997,19 @@
        "\t\t\tcookies: opts => documentOp(\"tab.cookies()\", quickOpMs, sig => readCookies(page, opts, sig)),"
       ]
      }
+    },
+    {
+     "at": "2026-11-16T01:58:25Z",
+     "reason": "Main-approved resolution of the v18.20.3 conflict in tab-worker.ts (combined-19045.md): the 3 dropped lines are our old one-line waitForUrl/mouseMove/clickAt wrappers, now main's bodies inside our input/documentOp",
+     "old": "a1b7605905d7bc1ec1cafc7071ed40399a787473",
+     "new": "13994e5010628d6968fa557b0252870fd8d80cec",
+     "dropped": {
+      "packages/coding-agent/src/tools/browser/tab-worker.ts": [
+       "\t\t\t\treturn documentOp(\"tab.waitForUrl()\", w, sig => this.#waitForUrl(pattern, w, sig));",
+       "\t\t\tmouseMove: (x, y, opts) => input(\"tab.mouseMove()\", actionOpMs, sig => mouseMove(page, x, y, opts, sig)),",
+       "\t\t\tclickAt: (x, y, opts) => input(\"tab.clickAt()\", actionOpMs, sig => clickAt(page, x, y, opts, sig)),"
+      ]
+     }
     }
    ]
   },
