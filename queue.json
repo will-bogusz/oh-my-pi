@@ -94192,7 +94192,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-16T09:23:51Z",
+  "checked": "2026-11-16T10:25:21Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -104108,7 +104108,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-16T09:23:52.082544Z",
+  "at": "2026-11-16T10:25:22.663030Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -105572,7 +105572,7 @@
      "conflicts with #19063 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19195 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19258 in crates/pi-natives/src/desktop/macos/ax.rs",
-     "conflicts with #19405 in crates/pi-natives/src/desktop/macos/ax.rs",
+     "conflicts with #19405 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18987 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs"
@@ -105897,7 +105897,7 @@
      "conflicts with #19224 in docs/tools/computer.md",
      "conflicts with #19258 in crates/pi-natives/src/desktop/macos/ax.rs, docs/tools/computer.md",
      "conflicts with #19296 in packages/coding-agent/src/prompts/tools/computer.md",
-     "conflicts with #19405 in crates/pi-natives/src/desktop/macos/ax.rs, docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with #19405 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
@@ -105955,7 +105955,7 @@
      "conflicts with #19224 in docs/tools/computer.md",
      "conflicts with #19258 in crates/pi-natives/src/desktop/macos/mod.rs, docs/tools/computer.md",
      "conflicts with #19296 in crates/pi-natives/src/desktop/macos/mod.rs",
-     "conflicts with #19405 in docs/tools/computer.md",
+     "conflicts with #19405 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md",
      "conflicts with #18925 in crates/pi-natives/src/desktop/macos/capture.rs, crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs",
