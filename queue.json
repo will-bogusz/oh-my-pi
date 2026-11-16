@@ -103471,8 +103471,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-16T01:14:25.168385Z",
-  "host": "goliath",
+  "at": "2026-11-16T01:59:42.426276Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -103893,10 +103893,8 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in MODULE.bazel.lock"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "accepted pair with #18013; accepted pair with #19035",
     "over": [],
     "paired": [
@@ -104043,10 +104041,8 @@
     "area": "natives",
     "priority": "P2",
     "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in MODULE.bazel.lock"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "accepted pair with #18353",
     "over": [],
     "paired": [
@@ -104100,12 +104096,16 @@
     "area": "browser",
     "priority": "P2",
     "title": "feat(coding-agent): keep subagents' browser tabs out of the user's Chrome and Tern pane unless asked",
-    "action": "keep",
-    "reasons": [],
+    "action": "requeue",
+    "reasons": [
+     "conflicts with #18786 in packages/coding-agent/src/prompts/tools/browser.md"
+    ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#18786"
+    ],
     "needs": [],
     "created": "2026-11-10T22:28:45Z"
    },
@@ -104155,10 +104155,8 @@
     "area": "browser",
     "priority": "P2",
     "title": "feat(browser): let observe() settle the effects of the preceding action",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "accepted pair with #18925: Main, 2026-11-12: only conflict is adjacent class fields in packages/coding-agent/src/tools/browser/tab-worker.ts: #18925 adds #nativeWindows?, this entry adds #actionRequestSeq? and #settling? at the same spot; nothing removed; combined form is both declarations",
     "over": [],
     "paired": [
@@ -104421,7 +104419,6 @@
      "conflicts with #19178 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19001 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18786 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
-     "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19045 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-tern-tab.test.ts"
@@ -104433,7 +104430,6 @@
      "#19178",
      "#19001",
      "#18786",
-     "#18789",
      "#18925",
      "#19045"
     ],
@@ -104454,10 +104450,8 @@
      "conflicts with #19178 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19001 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18786 in docs/tools/browser.md",
-     "conflicts with #18789 in docs/tools/browser.md",
      "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "its need #19045 conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts"
+     "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
     "over": [],
@@ -104466,7 +104460,6 @@
      "#19178",
      "#19001",
      "#18786",
-     "#18789",
      "#18925"
     ],
     "needs": [
@@ -104509,7 +104502,6 @@
      "conflicts with #19178 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19001 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18786 in docs/tools/browser.md",
-     "conflicts with #18789 in docs/tools/browser.md",
      "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19045 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need browser-wait-predicate conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-tern-tab.test.ts",
@@ -104522,7 +104514,6 @@
      "#19178",
      "#19001",
      "#18786",
-     "#18789",
      "#18925",
      "#19045"
     ],
@@ -104543,7 +104534,6 @@
     "reasons": [
      "needs browser-wait-text-regexp (queued)",
      "conflicts with #18786 in docs/tools/browser.md",
-     "conflicts with #18789 in docs/tools/browser.md",
      "conflicts with #18925 in docs/tools/browser.md",
      "conflicts with #19045 in docs/tools/browser.md",
      "its need browser-wait-text-regexp conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts, packages/coding-agent/test/tools/browser-tern-tab.test.ts"
@@ -104553,7 +104543,6 @@
     "paired": [],
     "blocked_by": [
      "#18786",
-     "#18789",
      "#18925",
      "#19045"
     ],
@@ -104805,7 +104794,6 @@
      "conflicts with #19178 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19001 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "conflicts with #18786 in docs/tools/browser.md",
-     "conflicts with #18789 in docs/tools/browser.md",
      "conflicts with #19045 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts"
     ],
@@ -104816,7 +104804,6 @@
      "#19178",
      "#19001",
      "#18786",
-     "#18789",
      "#19045"
     ],
     "needs": [
@@ -104838,7 +104825,6 @@
      "conflicts with #19178 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19001 in packages/browser-relay/extension/background.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "conflicts with #18786 in docs/tools/browser.md",
-     "conflicts with #18789 in docs/tools/browser.md",
      "conflicts with #19045 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
@@ -104849,7 +104835,6 @@
      "#19178",
      "#19001",
      "#18786",
-     "#18789",
      "#19045"
     ],
     "needs": [
@@ -104871,7 +104856,6 @@
      "conflicts with #19178 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-detach.test.ts",
      "conflicts with #19001 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
      "conflicts with #18786 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts",
-     "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/tools/browser.ts",
      "conflicts with #19045 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/network.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need r2/relay-popup-owned conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need r2/page-waiting conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/dialogs.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
@@ -104884,7 +104868,6 @@
      "#19178",
      "#19001",
      "#18786",
-     "#18789",
      "#19045"
     ],
     "needs": [
@@ -105025,7 +105008,6 @@
     "reasons": [
      "needs settle-reads (queued)",
      "conflicts with #18786 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
-     "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18925 in docs/tools/browser.md",
      "its need settle-reads conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/prompts/tools/browser.md"
@@ -105035,7 +105017,6 @@
     "paired": [],
     "blocked_by": [
      "#18786",
-     "#18789",
      "#18925"
     ],
     "needs": [
@@ -105056,7 +105037,6 @@
      "conflicts with #19178 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19001 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18786 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
-     "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19045 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts"
@@ -105068,7 +105048,6 @@
      "#19178",
      "#19001",
      "#18786",
-     "#18789",
      "#18925",
      "#19045"
     ],
@@ -105116,7 +105095,6 @@
     "action": "wait",
     "reasons": [
      "conflicts with #18786 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
-     "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18925 in docs/tools/browser.md",
      "conflicts with #19045 in docs/tools/browser.md",
      "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
@@ -105126,7 +105104,6 @@
     "paired": [],
     "blocked_by": [
      "#18786",
-     "#18789",
      "#18925",
      "#19045"
     ],
@@ -105399,7 +105376,6 @@
      "conflicts with #19178 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19001 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18786 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
-     "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need act-look-prompt conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tern/tern-tab.ts, packages/coding-agent/test/tools/browser-tern-tab.test.ts"
@@ -105411,7 +105387,6 @@
      "#19178",
      "#19001",
      "#18786",
-     "#18789",
      "#18925"
     ],
     "needs": [
@@ -105433,7 +105408,6 @@
      "conflicts with #19178 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19001 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18786 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
-     "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #19045 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/dialogs.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts"
@@ -105445,7 +105419,6 @@
      "#19178",
      "#19001",
      "#18786",
-     "#18789",
      "#19045"
     ],
     "needs": [
@@ -105555,10 +105528,8 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "wait",
-    "reasons": [
-     "conflicts with main in (branch missing on the fork)"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
