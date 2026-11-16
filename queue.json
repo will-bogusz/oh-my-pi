@@ -94585,13 +94585,13 @@
    "needs": [],
    "base": "6f03614d761366972e80e84e25d1418ed678d2c7",
    "body": "bodies/dialog-closed-state.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19481,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/dialog-closed-state",
    "host": "MacBook-Pro",
    "added": "2026-11-16T16:35:25Z",
-   "updated": "2026-11-16T17:32:56Z",
+   "updated": "2026-11-16T17:37:07Z",
    "note": "",
    "built": [
     {
@@ -94764,7 +94764,8 @@
      "host": "MacBook-Pro",
      "tree": "effaf75ca3ed1d065ce10518ee62c1c9646eef10"
     }
-   ]
+   ],
+   "opened": "2026-11-16T17:37:07Z"
   }
  ],
  "watch": {
