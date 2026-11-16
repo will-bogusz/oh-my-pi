@@ -63479,6 +63479,18 @@
        "          \"FILE:@@//Cargo.lock 3dae679a44eaafe5264635c8d59566d9f65f24762374b4df86e050fa853e8c26\","
       ]
      }
+    },
+    {
+     "at": "2026-11-16T06:21:07Z",
+     "reason": "Main standing approval: MODULE.bazel.lock regenerated with scripts/gen-bazel-lock.ts on the tree rebased onto 0730879325b (main's pi-natives TTS crate bump); dropped lines are the old Cargo.lock/Cargo.toml hash lines, delta vs main identical to the previously pushed one",
+     "old": "88f33d917147cfe122b4e6b23e2cea44c741a0d4",
+     "new": "41c0a4793f7656cea685856df93b53e3dda89327",
+     "dropped": {
+      "MODULE.bazel.lock": [
+       "          \"FILE:@@//Cargo.lock 97ea34106131224eaef36b177516a030ab3bf130055e650aba99a7b33bd7b947\",",
+       "          \"FILE:@@//crates/pi-natives/Cargo.toml 088f80c649f65a3e498f42a57b1b9dd81ffcd2d605392072a0d7f2252376434c\","
+      ]
+     }
     }
    ]
   },
