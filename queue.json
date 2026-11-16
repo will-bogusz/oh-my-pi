@@ -63468,6 +63468,17 @@
        "          \"FILE:@@//Cargo.lock bf5ba848fbbd9f57f302a2dfe06cac1497ec4da2839ca2bce88833647a7e8450\","
       ]
      }
+    },
+    {
+     "at": "2026-11-16T01:45:41Z",
+     "reason": "Main standing approval: MODULE.bazel.lock regenerated with scripts/gen-bazel-lock.ts on the tree rebased onto v18.20.3; dropped lines are the old Cargo.lock hash and the old reis BUILD line, delta vs main identical to the previously pushed one",
+     "old": "1dea30802e59d969431c04c51bd6f8d7517d505e",
+     "new": "88f33d917147cfe122b4e6b23e2cea44c741a0d4",
+     "dropped": {
+      "MODULE.bazel.lock": [
+       "          \"FILE:@@//Cargo.lock 3dae679a44eaafe5264635c8d59566d9f65f24762374b4df86e050fa853e8c26\","
+      ]
+     }
     }
    ]
   },
