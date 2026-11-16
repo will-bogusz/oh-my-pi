@@ -95056,7 +95056,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-16T20:04:44Z",
+  "checked": "2026-11-16T21:36:22Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -95080,6 +95080,20 @@
     "title": "fix(ai,coding-agent): carry other models' reasoning to Claude and retry its refusal without it",
     "files": [
      "packages/ai/src/providers/pi-native-server.ts"
+    ]
+   },
+   "#18353": {
+    "since": "2026-11-16T21:36:22Z",
+    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
+    "files": [
+     "MODULE.bazel.lock"
+    ]
+   },
+   "#18013": {
+    "since": "2026-11-16T21:36:22Z",
+    "title": "feat(natives): type text the wayland layout lacks through libei text",
+    "files": [
+     "MODULE.bazel.lock"
     ]
    },
    "#19120": {
@@ -95106,6 +95120,7 @@
    18624,
    18786,
    18789,
+   18925,
    18987,
    19001,
    19025,
@@ -98383,6 +98398,24 @@
     "id": "dialog-closed-state",
     "title": "fix(browser): forget a dialog the user or another client answered",
     "why": "opened as #19481"
+   },
+   {
+    "at": "2026-11-16T21:36:22Z",
+    "kind": "conflict",
+    "label": "#18353",
+    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
+    "files": [
+     "MODULE.bazel.lock"
+    ]
+   },
+   {
+    "at": "2026-11-16T21:36:22Z",
+    "kind": "conflict",
+    "label": "#18013",
+    "title": "feat(natives): type text the wayland layout lacks through libei text",
+    "files": [
+     "MODULE.bazel.lock"
+    ]
    }
   ]
  },
@@ -105022,12 +105055,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-16T20:04:45.683242Z",
+  "at": "2026-11-16T21:36:23.437890Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 1,
+   "left": 7
   },
   "rows": [
    {
@@ -105279,9 +105312,10 @@
     "title": "fix(browser-relay): keep a relay tab when another extension's frame keeps omp out",
     "action": "keep",
     "reasons": [],
-    "note": "accepted pair with #19001: Main, 2026-11-13: tab-supervisor.ts only, module scope: import line keeps both names (import { FOREIGN_FRAME_REFUSAL, type HiddenFrame } from \"./relay/protocol\") and WorkerTabSession gains both adjacent fields (heldOut, hiddenFrames); combined form ~/tmp/oh-my-pi/RelayRestoredFrame2/combined-19001.txt",
+    "note": "accepted pair with #18925: Main, 2026-11-13: tab-supervisor.ts import block only, keep both lines (import { isLoopbackRelayUrl } from \"./relay/daemon\"; import { FOREIGN_FRAME_REFUSAL } from \"./relay/protocol\"); accepted pair with #19001: Main, 2026-11-13: tab-supervisor.ts only, module scope: import line keeps both names (import { FOREIGN_FRAME_REFUSAL, type HiddenFrame } from \"./relay/protocol\") and WorkerTabSession gains both adjacent fields (heldOut, hiddenFrames); combined form ~/tmp/oh-my-pi/RelayRestoredFrame2/combined-19001.txt",
     "over": [],
     "paired": [
+     "#18925",
      "#19001"
     ],
     "blocked_by": [],
@@ -105480,8 +105514,10 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in MODULE.bazel.lock"
+    ],
     "note": "accepted pair with #18013; accepted pair with #19035",
     "over": [],
     "paired": [
@@ -105502,9 +105538,10 @@
     "title": "fix(browser-relay): say what the relay hid in a driven tab",
     "action": "keep",
     "reasons": [],
-    "note": "accepted pair with #19178: Main, 2026-11-13: tab-supervisor.ts only, module scope: import line keeps both names (import { FOREIGN_FRAME_REFUSAL, type HiddenFrame } from \"./relay/protocol\") and WorkerTabSession gains both adjacent fields (heldOut, hiddenFrames); combined form ~/tmp/oh-my-pi/RelayRestoredFrame2/combined-19001.txt",
+    "note": "accepted pair with #18925: Main, 2026-11-12: accepted (HiddenOnMain's combined form). tab-worker.ts WorkerCore.#run after the finally: this branch's hinted take (if this.#unanswered === active && this.#hiddenFramesWaiting && this.#page) await this.#takeHiddenFrames(this.#page)) stays before the answered guard; in the failure branch #18925's enrichment of error (message and stack with the native notices), then this.#sendResult({ id: msg.id, ok: false, error }), so both native-window notices and the once-only hidden-frames notice ride the failure. Second to land adds one test that a failed run carries both.; accepted pair with #19178: Main, 2026-11-13: tab-supervisor.ts only, module scope: import line keeps both names (import { FOREIGN_FRAME_REFUSAL, type HiddenFrame } from \"./relay/protocol\") and WorkerTabSession gains both adjacent fields (heldOut, hiddenFrames); combined form ~/tmp/oh-my-pi/RelayRestoredFrame2/combined-19001.txt",
     "over": [],
     "paired": [
+     "#18925",
      "#19178"
     ],
     "blocked_by": [],
@@ -105627,8 +105664,10 @@
     "area": "natives",
     "priority": "P2",
     "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in MODULE.bazel.lock"
+    ],
     "note": "accepted pair with #18353",
     "over": [],
     "paired": [
@@ -105690,6 +105729,27 @@
     "created": "2026-11-10T22:28:45Z"
    },
    {
+    "id": "r2/native-window-report",
+    "label": "#18925",
+    "number": 18925,
+    "state": "open",
+    "area": "browser",
+    "priority": "P2",
+    "title": "feat(coding-agent): name the native windows a browser call raised on macOS",
+    "action": "keep",
+    "reasons": [],
+    "note": "accepted pair with #19045: Main, 2026-11-16: tab-worker.ts WorkerCore field list only: keep both, #18925 `#nativeWindows?: NativeWindowWatch` (with its doc line) first, then #19045 `#actionRequestSeq?`/`#actionGeneration`/`#settling?`; accepted pair with #19001: Main, 2026-11-16: imports keep both (tab-protocol.ts `import type { FrontTabSource } from \"./native-windows\"` + `import type { HiddenFrame } from \"./relay/protocol\"`; tab-supervisor.ts daemon line + HiddenFrame, or `{ FOREIGN_FRAME_REFUSAL, type HiddenFrame }` with #19178). tab-worker.ts #run end: #18925 `nativeNotices` block first, then #19001 comment and `if (this.#unanswered === active && this.#hiddenFramesWaiting && this.#page) await this.#takeHiddenFrames(this.#page)` unchanged, so their answered check runs after our await (a crash/detach answering the run during native sampling is seen) and frames the relay hid during sampling still go out with the result. Failure send: `const error = errorPayload(failure.error)`, notices appended to error.message/error.stack, then `this.#sendResult({ id: msg.id, ok: false, error })`.; accepted pair with #19178: Main, 2026-11-16: tab-supervisor.ts imports only: keep both, `import { isLoopbackRelayUrl } from \"./relay/daemon\"` and #19178 `import { FOREIGN_FRAME_REFUSAL } from \"./relay/protocol\"` (with #19001 too: `import { FOREIGN_FRAME_REFUSAL, type HiddenFrame } from \"./relay/protocol\"`)",
+    "over": [],
+    "paired": [
+     "#19045",
+     "#19001",
+     "#19178"
+    ],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-11T16:51:01Z"
+   },
+   {
     "id": "agent-identity",
     "label": "#18987",
     "number": 18987,
@@ -105716,9 +105776,11 @@
     "title": "feat(browser): let observe() settle the effects of the preceding action",
     "action": "keep",
     "reasons": [],
-    "note": "",
+    "note": "accepted pair with #18925: Main, 2026-11-12: only conflict is adjacent class fields in packages/coding-agent/src/tools/browser/tab-worker.ts: #18925 adds #nativeWindows?, this entry adds #actionRequestSeq? and #settling? at the same spot; nothing removed; combined form is both declarations",
     "over": [],
-    "paired": [],
+    "paired": [
+     "#18925"
+    ],
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-12T16:39:36Z"
@@ -105809,6 +105871,7 @@
      "conflicts with #19481 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19178 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19001 in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #18925 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19045 in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
@@ -105819,6 +105882,7 @@
      "#19481",
      "#19178",
      "#19001",
+     "#18925",
      "#19045"
     ],
     "needs": [],
@@ -105980,6 +106044,7 @@
      "conflicts with #19001 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18786 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
+     "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19045 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-tern-tab.test.ts"
     ],
@@ -105992,6 +106057,7 @@
      "#19001",
      "#18786",
      "#18789",
+     "#18925",
      "#19045"
     ],
     "needs": [],
@@ -106013,6 +106079,7 @@
      "conflicts with #19001 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18786 in docs/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md",
+     "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
@@ -106023,7 +106090,8 @@
      "#19178",
      "#19001",
      "#18786",
-     "#18789"
+     "#18789",
+     "#18925"
     ],
     "needs": [
      "observe-settle"
@@ -106046,6 +106114,7 @@
      "conflicts with #19001 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18786 in docs/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md",
+     "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19045 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need browser-wait-predicate conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-tern-tab.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
@@ -106059,6 +106128,7 @@
      "#19001",
      "#18786",
      "#18789",
+     "#18925",
      "#19045"
     ],
     "needs": [
@@ -106079,6 +106149,7 @@
      "needs browser-wait-text-regexp (queued)",
      "conflicts with #18786 in docs/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md",
+     "conflicts with #18925 in docs/tools/browser.md",
      "conflicts with #19045 in docs/tools/browser.md",
      "its need browser-wait-text-regexp conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts, packages/coding-agent/test/tools/browser-tern-tab.test.ts"
     ],
@@ -106088,6 +106159,7 @@
     "blocked_by": [
      "#18786",
      "#18789",
+     "#18925",
      "#19045"
     ],
     "needs": [
@@ -106340,9 +106412,8 @@
     "area": "browser",
     "priority": "P2",
     "title": "fix(browser): attach only the relay tabs omp opened or borrowed",
-    "action": "held",
+    "action": "wait",
     "reasons": [
-     "held: Main, 2026-11-16: back to draft until a real front-tab signal exists; its fix lane measured in headed Chrome 157 (omp's browser tool on ee197cf6751, 10 of 10) that tabs omp drives report visibilityState 'visible' in the background through focus emulation, so 'background-tab pickers are not named' does not hold and a user's front-tab picker would be named to the model. No reply on Codex 4588052789 until then; do not flip back to ready without that signal. (parked with #18925)",
      "needs #18925 (open)",
      "conflicts with #19481 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19178 in packages/coding-agent/src/tools/browser/tab-worker.ts",
@@ -106376,9 +106447,8 @@
     "area": "browser",
     "priority": "P2",
     "title": "fix(browser): own popups omp's relay tabs open and keep them behind the user's selection",
-    "action": "held",
+    "action": "wait",
     "reasons": [
-     "held: Main, 2026-11-16: back to draft until a real front-tab signal exists; its fix lane measured in headed Chrome 157 (omp's browser tool on ee197cf6751, 10 of 10) that tabs omp drives report visibilityState 'visible' in the background through focus emulation, so 'background-tab pickers are not named' does not hold and a user's front-tab picker would be named to the model. No reply on Codex 4588052789 until then; do not flip back to ready without that signal. (parked with #18925)",
      "needs r2/relay-own-only (queued)",
      "conflicts with #19481 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19178 in packages/coding-agent/src/tools/browser/tab-worker.ts",
@@ -106412,9 +106482,8 @@
     "area": "browser",
     "priority": "P2",
     "title": "fix(browser): release relay tabs from Chrome's debugger between turns",
-    "action": "held",
+    "action": "wait",
     "reasons": [
-     "held: Main, 2026-11-16: back to draft until a real front-tab signal exists; its fix lane measured in headed Chrome 157 (omp's browser tool on ee197cf6751, 10 of 10) that tabs omp drives report visibilityState 'visible' in the background through focus emulation, so 'background-tab pickers are not named' does not hold and a user's front-tab picker would be named to the model. No reply on Codex 4588052789 until then; do not flip back to ready without that signal. (parked with #18925)",
      "needs r2/relay-popup-owned (queued), r2/page-waiting (queued)",
      "conflicts with #19481 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19178 in packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-detach.test.ts",
@@ -106455,6 +106524,7 @@
     "reasons": [
      "conflicts with #19178 in packages/coding-agent/src/tools/browser/tab-supervisor.ts",
      "conflicts with #19001 in packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts",
+     "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-supervisor.ts"
     ],
     "note": "",
@@ -106462,7 +106532,8 @@
     "paired": [],
     "blocked_by": [
      "#19178",
-     "#19001"
+     "#19001",
+     "#18925"
     ],
     "needs": [],
     "created": "2026-11-11T07:04:56Z"
@@ -106484,6 +106555,7 @@
      "conflicts with #19195 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19258 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with #19405 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18987 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs"
     ],
@@ -106498,6 +106570,7 @@
      "#19195",
      "#19258",
      "#19405",
+     "#18925",
      "#18987"
     ],
     "needs": [],
@@ -106574,6 +106647,7 @@
      "needs settle-reads (queued)",
      "conflicts with #18786 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
+     "conflicts with #18925 in docs/tools/browser.md",
      "its need settle-reads conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/prompts/tools/browser.md"
     ],
@@ -106582,7 +106656,8 @@
     "paired": [],
     "blocked_by": [
      "#18786",
-     "#18789"
+     "#18789",
+     "#18925"
     ],
     "needs": [
      "settle-reads"
@@ -106604,6 +106679,7 @@
      "conflicts with #19001 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18786 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
+     "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19045 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
@@ -106616,6 +106692,7 @@
      "#19001",
      "#18786",
      "#18789",
+     "#18925",
      "#19045"
     ],
     "needs": [],
@@ -106635,6 +106712,7 @@
      "needs #18987 (open)",
      "conflicts with #19178 in packages/coding-agent/src/tools/browser/tab-supervisor.ts",
      "conflicts with #19001 in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #18925 in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
     ],
     "note": "",
@@ -106642,7 +106720,8 @@
     "paired": [],
     "blocked_by": [
      "#19178",
-     "#19001"
+     "#19001",
+     "#18925"
     ],
     "needs": [
      "agent-identity"
@@ -106661,6 +106740,7 @@
     "reasons": [
      "conflicts with #18786 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
+     "conflicts with #18925 in docs/tools/browser.md",
      "conflicts with #19045 in docs/tools/browser.md",
      "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
     ],
@@ -106670,6 +106750,7 @@
     "blocked_by": [
      "#18786",
      "#18789",
+     "#18925",
      "#19045"
     ],
     "needs": [],
@@ -106803,6 +106884,7 @@
      "conflicts with #19405 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18987 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
      "conflicts with macos-move-receipt in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
@@ -106826,6 +106908,7 @@
      "#19405",
      "#18353",
      "#18222",
+     "#18925",
      "#18987",
      "macos-move-receipt"
     ],
@@ -106859,6 +106942,7 @@
      "conflicts with #19405 in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md",
+     "conflicts with #18925 in crates/pi-natives/src/desktop/macos/capture.rs, crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with macos-move-receipt in docs/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -106879,6 +106963,7 @@
      "#19405",
      "#18353",
      "#18222",
+     "#18925",
      "macos-move-receipt"
     ],
     "needs": [
@@ -106946,6 +107031,7 @@
      "conflicts with #19001 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #18786 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
+     "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need act-look-prompt conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tern/tern-tab.ts, packages/coding-agent/test/tools/browser-tern-tab.test.ts"
     ],
@@ -106957,7 +107043,8 @@
      "#19178",
      "#19001",
      "#18786",
-     "#18789"
+     "#18789",
+     "#18925"
     ],
     "needs": [
      "act-look-prompt"
@@ -106972,9 +107059,8 @@
     "area": "browser",
     "priority": "P2",
     "title": "feat(coding-agent): make a browser dialog or held file chooser one pending state that page calls fail fast on",
-    "action": "held",
+    "action": "wait",
     "reasons": [
-     "held: Main, 2026-11-16: back to draft until a real front-tab signal exists; its fix lane measured in headed Chrome 157 (omp's browser tool on ee197cf6751, 10 of 10) that tabs omp drives report visibilityState 'visible' in the background through focus emulation, so 'background-tab pickers are not named' does not hold and a user's front-tab picker would be named to the model. No reply on Codex 4588052789 until then; do not flip back to ready without that signal. (parked with #18925)",
      "needs r2/relay-own-only (queued)",
      "conflicts with #19481 in packages/coding-agent/src/tools/browser/dialogs.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts",
      "conflicts with #19178 in packages/coding-agent/src/tools/browser/tab-worker.ts",
@@ -107368,10 +107454,6 @@
    },
    {
     "label": "#15130",
-    "wake": ""
-   },
-   {
-    "label": "#18925",
     "wake": ""
    }
   ]
