@@ -2956,9 +2956,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/r2-relay-own-only",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-11-16T16:26:38Z",
-   "note": "r2 restack 2026-10-18 (RelayTriage, TRIAGE.md in ~/tmp/oh-my-pi/relay-r2): stacked on call-deadline, bg-input, native-window-report for shared lines (code needs none of them); the live Testing table predates the rebase onto #16119, rerun before open 2026-11-02 (QueueRestructure): after Brit's merge round, a rebase must keep main's 1c45a9113ce (relay timeout typed by class; detach-report wait only in user-driven browsers), a47a579ff17 (acquireBrowser startRelay:false for a kept tab's close), 49a19f8ec19 (PI_BROWSER_RELAY_KEEP_FRONT=0 opt-out of the front-app hold: any new SkyLight/front-app call must honor it), 89833d37f43 (cancelled press releases on a sentinel off-page point; tab-worker click guard).",
-   "hold": "Main, 2026-11-16: back to draft until a real front-tab signal exists; its fix lane measured in headed Chrome 157 (omp's browser tool on ee197cf6751, 10 of 10) that tabs omp drives report visibilityState 'visible' in the background through focus emulation, so 'background-tab pickers are not named' does not hold and a user's front-tab picker would be named to the model. No reply on Codex 4588052789 until then; do not flip back to ready without that signal. (parked with #18925)"
+   "updated": "2026-11-16T21:01:02Z",
+   "note": "r2 restack 2026-10-18 (RelayTriage, TRIAGE.md in ~/tmp/oh-my-pi/relay-r2): stacked on call-deadline, bg-input, native-window-report for shared lines (code needs none of them); the live Testing table predates the rebase onto #16119, rerun before open 2026-11-02 (QueueRestructure): after Brit's merge round, a rebase must keep main's 1c45a9113ce (relay timeout typed by class; detach-report wait only in user-driven browsers), a47a579ff17 (acquireBrowser startRelay:false for a kept tab's close), 49a19f8ec19 (PI_BROWSER_RELAY_KEEP_FRONT=0 opt-out of the front-app hold: any new SkyLight/front-app call must honor it), 89833d37f43 (cancelled press releases on a sentinel off-page point; tab-worker click guard)."
   },
   {
    "id": "r2/page-waiting",
@@ -2979,9 +2978,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/r2-page-waiting",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-11-16T16:26:38Z",
-   "note": "r2 restack 2026-10-18 (RelayTriage, TRIAGE.md in ~/tmp/oh-my-pi/relay-r2): true need #15508 (print-hold DialogStop) via own-only's base; holds an unfilled chooser, reversing main's 7d50d3d815 per Will's 2026-10-12 hold-and-ask; carries the tab.id(n) fix moved from turn-end; visible relay run predates #16119, rerun before open 2026-11-02 (QueueRestructure): after Brit's merge round, a rebase must keep main's 1c45a9113ce (relay timeout typed by class; detach-report wait only in user-driven browsers), a47a579ff17 (acquireBrowser startRelay:false for a kept tab's close), 49a19f8ec19 (PI_BROWSER_RELAY_KEEP_FRONT=0 opt-out of the front-app hold: any new SkyLight/front-app call must honor it), 89833d37f43 (cancelled press releases on a sentinel off-page point; tab-worker click guard).",
-   "hold": "Main, 2026-11-16: back to draft until a real front-tab signal exists; its fix lane measured in headed Chrome 157 (omp's browser tool on ee197cf6751, 10 of 10) that tabs omp drives report visibilityState 'visible' in the background through focus emulation, so 'background-tab pickers are not named' does not hold and a user's front-tab picker would be named to the model. No reply on Codex 4588052789 until then; do not flip back to ready without that signal. (parked with #18925)"
+   "updated": "2026-11-16T21:01:02Z",
+   "note": "r2 restack 2026-10-18 (RelayTriage, TRIAGE.md in ~/tmp/oh-my-pi/relay-r2): true need #15508 (print-hold DialogStop) via own-only's base; holds an unfilled chooser, reversing main's 7d50d3d815 per Will's 2026-10-12 hold-and-ask; carries the tab.id(n) fix moved from turn-end; visible relay run predates #16119, rerun before open 2026-11-02 (QueueRestructure): after Brit's merge round, a rebase must keep main's 1c45a9113ce (relay timeout typed by class; detach-report wait only in user-driven browsers), a47a579ff17 (acquireBrowser startRelay:false for a kept tab's close), 49a19f8ec19 (PI_BROWSER_RELAY_KEEP_FRONT=0 opt-out of the front-app hold: any new SkyLight/front-app call must honor it), 89833d37f43 (cancelled press releases on a sentinel off-page point; tab-worker click guard)."
   },
   {
    "id": "r2/webmcp-native",
@@ -3733,9 +3731,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/r2-relay-turn-end-detach",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-11-16T16:26:38Z",
-   "note": "r2 restack 2026-10-18 (RelayTriage, TRIAGE.md in ~/tmp/oh-my-pi/relay-r2): reshaped onto main's #16037 recovery (awaitWorkerRecovery, one next-call notice); tab.id fix moved to page-waiting; 54 ms reattach and macOS bar 5/5->0/5 figures are from earlier builds, rerun before open 2026-11-02 (QueueRestructure): after Brit's merge round, a rebase must keep main's 1c45a9113ce (relay timeout typed by class; detach-report wait only in user-driven browsers), a47a579ff17 (acquireBrowser startRelay:false for a kept tab's close), 49a19f8ec19 (PI_BROWSER_RELAY_KEEP_FRONT=0 opt-out of the front-app hold: any new SkyLight/front-app call must honor it), 89833d37f43 (cancelled press releases on a sentinel off-page point; tab-worker click guard).",
-   "hold": "Main, 2026-11-16: back to draft until a real front-tab signal exists; its fix lane measured in headed Chrome 157 (omp's browser tool on ee197cf6751, 10 of 10) that tabs omp drives report visibilityState 'visible' in the background through focus emulation, so 'background-tab pickers are not named' does not hold and a user's front-tab picker would be named to the model. No reply on Codex 4588052789 until then; do not flip back to ready without that signal. (parked with #18925)"
+   "updated": "2026-11-16T21:01:02Z",
+   "note": "r2 restack 2026-10-18 (RelayTriage, TRIAGE.md in ~/tmp/oh-my-pi/relay-r2): reshaped onto main's #16037 recovery (awaitWorkerRecovery, one next-call notice); tab.id fix moved to page-waiting; 54 ms reattach and macOS bar 5/5->0/5 figures are from earlier builds, rerun before open 2026-11-02 (QueueRestructure): after Brit's merge round, a rebase must keep main's 1c45a9113ce (relay timeout typed by class; detach-report wait only in user-driven browsers), a47a579ff17 (acquireBrowser startRelay:false for a kept tab's close), 49a19f8ec19 (PI_BROWSER_RELAY_KEEP_FRONT=0 opt-out of the front-app hold: any new SkyLight/front-app call must honor it), 89833d37f43 (cancelled press releases on a sentinel off-page point; tab-worker click guard)."
   },
   {
    "id": "ax-stale-refind",
@@ -3794,7 +3791,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/r2-native-window-report",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-11-16T21:00:03Z",
+   "updated": "2026-11-16T21:01:02Z",
    "note": "r2 restack 2026-10-18 (RelayTriage, TRIAGE.md in ~/tmp/oh-my-pi/relay-r2): sits on main + #15508 head 5ccf9eac6b (adjacent print-hold lines) 2026-11-02 (QueueRestructure): after Brit's merge round, a rebase must keep main's 1c45a9113ce (relay timeout typed by class; detach-report wait only in user-driven browsers), a47a579ff17 (acquireBrowser startRelay:false for a kept tab's close), 49a19f8ec19 (PI_BROWSER_RELAY_KEEP_FRONT=0 opt-out of the front-app hold: any new SkyLight/front-app call must honor it), 89833d37f43 (cancelled press releases on a sentinel off-page point; tab-worker click guard). | Main 2026-11-12: accepted pair relay-hidden-frames <-> #18925 (record with set --pair once both open). Combined form at tab-worker.ts WorkerCore.#run failure branch: #18925 enrichment of `error` (message and stack with the native notices), then `this.#sendResult({ id: msg.id, ok: false, error })`, so both native-window notices and the once-only hidden-frames notice ride the failure. Second to land adds one test that a failed run carries both.\n2026-11-16 QueueTwentyFive: head f22538688c3 (FrontTabSignal's tab-list fix) built with 30 open ready PRs in 3 trees on goliath (check:ts 0 errors; browser files 1069/1061/1061 pass, 0 fail; cargo test pi-natives desktop 344/314/314 pass); the macOS-only worker tests ran at this code in FrontTabSignal's macOS VM (60 pass), not rebuilt on bench-mac; combined form with #19001 checked on goliath (1069 pass) and bench-mac (185 pass incl. the native-notice failure test).",
    "advanced": "2026-11-16T20:44:42Z",
    "built": [
@@ -4390,19 +4387,6 @@
      "ref": "/Users/viathebrink/tmp/oh-my-pi/queue-restructure-20261102/design-checks/18925.md"
     }
    ],
-   "parked": {
-    "at": "2026-11-16T16:26:38Z",
-    "why": "Main, 2026-11-16: back to draft until a real front-tab signal exists; its fix lane measured in headed Chrome 157 (omp's browser tool on ee197cf6751, 10 of 10) that tabs omp drives report visibilityState 'visible' in the background through focus emulation, so 'background-tab pickers are not named' does not hold and a user's front-tab picker would be named to the model. No reply on Codex 4588052789 until then; do not flip back to ready without that signal.",
-    "roots": [
-     18925
-    ],
-    "bundle": [
-     "r2/relay-own-only",
-     "r2/page-waiting",
-     "r2/relay-turn-end-detach",
-     "r2/relay-popup-owned"
-    ]
-   },
    "rebases_after": [
     19045,
     19178,
@@ -4513,7 +4497,8 @@
       ]
      }
     }
-   ]
+   ],
+   "unparked": "2026-11-16T21:01:02Z"
   },
   {
    "id": "test-ownership-lock",
@@ -4582,9 +4567,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/r2-relay-popup-owned",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-11-16T16:26:38Z",
-   "note": "Main 2026-11-12: acceptance now includes RelayFrameRace's popup-adoption cell (stand-in vault, adopt ok 7/10 on main and on relay-frame-race, failures 'Selected tab is not ready'; probe ~/tmp/oh-my-pi/RelayFrameRace/): 10/10 after the restack onto relay-frame-race, or explained. | Main 2026-11-12: with real signed-in 1Password on main, adopting a page-opened popup succeeds 4/10 ('Selected tab is not ready'); the restack is checked against VaultSignedIn's popup cell, not only the stand-in. | Main 2026-11-12: against real signed-in 1Password on Chrome 157, head 7cfd98ac978 adopted the popup 10/10 with a frame drawn every time, where main failed all 6 frame-drawn tries (HiddenOnMain's block, run on the entry's own base). This is the measured reason #18925, which the chain waits on, belongs on the ask list.",
-   "hold": "Main, 2026-11-16: back to draft until a real front-tab signal exists; its fix lane measured in headed Chrome 157 (omp's browser tool on ee197cf6751, 10 of 10) that tabs omp drives report visibilityState 'visible' in the background through focus emulation, so 'background-tab pickers are not named' does not hold and a user's front-tab picker would be named to the model. No reply on Codex 4588052789 until then; do not flip back to ready without that signal. (parked with #18925)"
+   "updated": "2026-11-16T21:01:02Z",
+   "note": "Main 2026-11-12: acceptance now includes RelayFrameRace's popup-adoption cell (stand-in vault, adopt ok 7/10 on main and on relay-frame-race, failures 'Selected tab is not ready'; probe ~/tmp/oh-my-pi/RelayFrameRace/): 10/10 after the restack onto relay-frame-race, or explained. | Main 2026-11-12: with real signed-in 1Password on main, adopting a page-opened popup succeeds 4/10 ('Selected tab is not ready'); the restack is checked against VaultSignedIn's popup cell, not only the stand-in. | Main 2026-11-12: against real signed-in 1Password on Chrome 157, head 7cfd98ac978 adopted the popup 10/10 with a frame drawn every time, where main failed all 6 frame-drawn tries (HiddenOnMain's block, run on the entry's own base). This is the measured reason #18925, which the chain waits on, belongs on the ask list."
   },
   {
    "id": "browser-text-page",
