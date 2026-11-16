@@ -58124,7 +58124,7 @@
    "area": "computer",
    "priority": "P2",
    "needs": [],
-   "base": "90935366da0c368a437da4343ae748b03a2ffe97",
+   "base": "15a96938984aceb878d85befcb540ef1bac7db42",
    "body": "bodies/iphone-mirror-key-gap.md",
    "state": "open",
    "pr": 17897,
@@ -58132,7 +58132,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/iphone-mirror-key-gap",
    "host": "MacBook-Pro",
    "added": "2026-10-30T21:15:44Z",
-   "updated": "2026-11-16T01:40:25Z",
+   "updated": "2026-11-16T15:08:21Z",
    "note": "",
    "built": [
     {
@@ -58233,7 +58233,7 @@
      "tree": "91b54a3c61655e10eb8e95bc1a11f335eff2bb2f"
     }
    ],
-   "advanced": "2026-11-16T01:40:25Z",
+   "advanced": "2026-11-16T15:08:21Z",
    "opened": "2026-11-03T02:19:44Z",
    "readied": "2026-11-03T02:20:04Z"
   },
