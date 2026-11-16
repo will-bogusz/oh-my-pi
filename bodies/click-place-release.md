@@ -2,7 +2,7 @@
 
 I found that clicking in my own app could leave the omp background target in front: a menu-bar drag, a resize or selection ending over the target, or a click just before the session's first action, every time. This places each click from the event itself, so my app comes back unless I picked the target.
 
-Guard A/B, macOS 26.5 VM, n=10; the replacement cells ran before the disabled-tap flag was added (that flag has two unit tests only): trials where my app ended in front, or the target stayed when picked; a trial counts when the target came forward 0-250 ms after my last button event (timed by a guest tap).
+Guard A/B, macOS 26.5 VM, n=10: my app in front afterwards, or the target kept when picked; a trial counts when the target came forward 0-250 ms after my last button event. Builds: `main` 679691a781, previous head cacd8a129d, this PR 5817854bd4.
 
 | Case | Picked the target? | `main` | previous head of this PR | this PR |
 |---|---|---|---|---|
@@ -17,7 +17,7 @@ Guard A/B, macOS 26.5 VM, n=10; the replacement cells ran before the disabled-ta
 | remote tool posting at the HID tap: click in my app | no | 10/10 | 10/10 | 10/10 |
 | remote tool posting at the session tap: click in my app | no | 9/9 | 10/10 | 10/10 |
 | remote tool posting at the HID tap: click on the target | yes | 10/10 | 10/10 | 10/10 |
-| remote tool posting at the session tap: click on the target | yes | 0/10 | 0/10 | 0/10 |
+| remote tool posting at the session tap: click on the target | yes | 0/10 | 0/10 | 0/10, fixed below |
 | my app's middle click swallowed by a remapper at the HID tap | no | 10/10 | 10/10 | 10/10 |
 | my app's middle click swallowed by a remapper at the session tap | no | 10/10 | 10/10 | **10/10** |
 | click in my app while its main thread is blocked | no | 0/10 | 0/10 | 0/10 |
@@ -27,30 +27,71 @@ Guard A/B, macOS 26.5 VM, n=10; the replacement cells ran before the disabled-ta
 | no event-listening access: blocked app | no | 0/10 | 0/10 | 0/10 |
 | no event-listening access: Dock pick | yes | 10/10 | 10/10 | 10/10 |
 
-A press goes where `WindowServer` routed it (`kCGEventTargetUnixProcessID`, read by `main`'s annotated user-input tap, which now also takes releases). A release keeps its press's place unless the drag pasteboard changed meanwhile (a real drop), and then goes to the owner of the window it was released over. No accessibility query takes part.
+After Codex's first review, n=10: `main` f680ea91b1, previous head cacd8a129d, 320154a644 (rebased), f85976a6bb.
+
+| Case | Picked the target? | `main` | previous head | 320154a644 | this PR |
+|---|---|---|---|---|---|
+| remote tool posting at the session tap: click on the target, a second after a click of mine | yes | 0/10 | 0/10 | 0/10 | **10/10** |
+| click in my app's own Open panel (TextEdit, drawn out of process) | no | 10/10 | 10/10 | 0/10 | 10/10 |
+| target started from my terminal: I click its window | yes | | | 10/10 | 10/10 |
+| target started from my terminal, sandboxed: I click in its own Open panel | yes | | | 10/10 | 10/10 |
+| click in another regular app: my app is not put back | it picked that app | | | 10/10 | 10/10 |
+| drag across my app's menu bar | no | | | | 10/10 |
+| resize ending over the target | no | | | | 10/10 |
+| text selection ending over the target | no | | | | 10/10 |
+| click in my app just before the session's first action | no | | | | 10/10 |
+
+After Codex's second review, n=10: `main` f680ea91b1, ba8d2789f4, this PR (4560880467, rebased as 4350f38c5f).
+
+| Case | Picked the target? | `main` | ba8d2789f4 | this PR |
+|---|---|---|---|---|
+| click in my app whose press a slower tap ahead of omp's delivers 170 ms late, after its release | no | | 8/10 | **10/10** |
+| remote tool posting at the session tap: click on the target, a second after a click of mine | yes | | | 10/10 |
+| my app's middle click swallowed by a remapper at the session tap | no | | | 10/10 |
+| Dock pick just before the session's first action | yes | | | 10/10 |
+| another regular app started from my terminal: I click it, my terminal is not put back | it picked that app | | | 10/10 |
+| drag and drop from my app onto its emoji picker | no | 0/10 | | **9/10** |
+| click on my app's emoji picker | no | 0/10 | | 0/10 |
+
+A press goes where `WindowServer` routed it (`kCGEventTargetUnixProcessID`). A release keeps its press's place unless the drag pasteboard changed (a real drop); then it goes to the owner of the window under it.
 
 ## Why
 
-`main` hit-tests the pointer after the event: that blocks, fails in a busy app and misplaces releases over the menu bar or past the window edge; any such answer counts as a click elsewhere, so the target stays. The previous head kept that hit-test behind a tap.
+`main` hit-tests the pointer after the event: that blocks, fails in a busy app and misplaces releases over the menu bar or past the window edge.
 
-- A click is unknown, counted as outside the user's app, until the tap has seen as many presses and releases as the HID counters. If the tap still trails after 50 ms without button events, the missed click counts as the user's (a remapper swallowed it, no app got it), unless macOS had disabled the tap: then it stays unknown.
-- A click from before the session's tap counts as the user's. Remote and remapping tools posting at the HID or session tap count as the user; omp's own posts and posts to a pid do not.
+- A click is unknown until the tap has seen as many button events as the HID counters. One still missing after 50 ms idle counts as the user's (a remapper swallowed it), unless macOS had disabled the tap.
+- A click from before the session's tap counts as the user's. Tools posting at the HID or session tap count as the user; omp's own posts and posts to a pid do not.
+- Session-tap posts never reach the HID counters: the events they skipped join every reading, dated by delivery.
+- `WindowServer` routes a click in a sandboxed app's Open panel to `openAndSavePanelService`. A press routed to a non-regular process counts for the app macOS holds responsible for it, only while my app and the target have different responsible processes.
 - Without event-listening access, `main`'s hit-test runs unchanged.
 
 ## Testing
 
-- The A/B above: fixture apps, VNC pointer input; no-access rows with `kTCCServiceListenEvent` denied, counted raw.
-- A Dock pick 0-600 ms before the first action was never undone (0 of 75, all arms).
-- `cargo test -p pi-natives --lib -- desktop::`: 561 pass; each placement rule's test fails with the rule removed. `rust-check` passes on macOS and Linux.
+- Fixture apps, VNC input; no-access rows with `kTCCServiceListenEvent` denied.
+- A build with one piece removed scores 0/10 on its row: the session-tap post dated by the HID state, or the panel mapping without the shared-host check.
+- A Dock pick 0-600 ms before the first action was never undone (0 of 75).
+- `cargo test -p pi-natives --lib -- desktop::`: 618 pass, each rule's test failing without it. `rust-check` passes on macOS and Linux.
 
 ## Risk
 
-- Blocked or stopped app: this decides to send the target back but macOS cannot raise the app, so the call returns the usual "input may already have been delivered, but restoration failed" error; `main` and the previous head return ok.
-- Unchanged failures in every arm: a remote tool's session-tap click on the target (those posts never reach the HID counters), and a no-access menu-bar drag.
-- Open from review: `UserSwitchWatch::observe` records no click when a reading flips to elsewhere on unchanged counters (the session-tap pick above); the session-tap wording is probed only for clicks in the user's app.
+- Blocked or stopped app: the target is sent back but macOS cannot raise the app, so the call returns "restoration failed".
+
+## Limits
+
+- If a drag-release owner lookup outlasts the delivery window, its press can expire before the lookup returns, so dropping onto the target can count as staying in my app and let the focus guard restore the target I selected.
+
+- My app and the target sharing a responsible process (target started from my terminal): nothing is mapped, so a click in my app's out-of-process panel counts as elsewhere.
+- My app's emoji picker belongs to CharacterPalette, which macOS holds responsible for itself: a click on it counts as elsewhere, as on `main`.
+- A press a remapper swallowed stays owed, so a remote tool's next session-tap press of that button is not counted.
+- A press in the instant the tap starts reads as in my app until the tap delivers it; if the tap delivered it before the record began, that reading is not corrected.
+- A press the tap has not delivered after 50 ms without a button event counts as mine, also once it arrives: a target it picked is sent back.
+- A press of mine the tap has not delivered yet, from the press until 50 ms after my last button event, may be my click on the target: a target that comes forward then stays in front for the rest of that call, and its later steps stop as if I had gone to it.
+- A remote tool's session-tap press still queued when my press of the same button is counted stands in for mine until mine arrives.
 
 ---
 
 - [ ] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution
+
+
