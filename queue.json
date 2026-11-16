@@ -76575,7 +76575,7 @@
    "area": "tui",
    "priority": "P2",
    "needs": [],
-   "base": "7c49c11aa5bbaf3f418406583096168ad5b8c6dc",
+   "base": "90935366da0c368a437da4343ae748b03a2ffe97",
    "body": "bodies/agent-identity.md",
    "state": "open",
    "pr": 18987,
@@ -76583,9 +76583,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/agent-identity",
    "host": "MacBook-Pro",
    "added": "2026-11-10T23:39:10Z",
-   "updated": "2026-11-14T20:14:32Z",
+   "updated": "2026-11-16T01:36:07Z",
    "note": "Main 2026-11-12: Will decided colours resolve from the active theme; lane AgentColors owns that one push. No other worker, no rebase of #18987 until AgentColors reports the head.",
-   "advanced": "2026-11-14T20:14:32Z",
+   "advanced": "2026-11-16T01:36:07Z",
    "built": [
     {
      "with": "#18883",
