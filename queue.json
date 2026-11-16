@@ -63821,6 +63821,17 @@
        "          \"FILE:@@//crates/pi-natives/Cargo.toml 1fd8837b6fefad894a5e6b95cd104dbd9632e34203068f9d6989818c5eef1ba1\","
       ]
      }
+    },
+    {
+     "at": "2026-11-16T21:50:44Z",
+     "reason": "v18.22.0 round: MODULE.bazel.lock regenerated on main's lock (gen-bazel-lock); dropped lines are the old lock's input-hash lines, delta otherwise identical (lockcmp2)",
+     "old": "a39af140677b1f9580c1862726a07d0d7f6f66c7",
+     "new": "23b965e05596254b375236fc489abcd964b15450",
+     "dropped": {
+      "MODULE.bazel.lock": [
+       "          \"FILE:@@//Cargo.lock f349aad6bb32a18618efd76814b8953398c84d136767e752f37e8105f1e314c1\","
+      ]
+     }
     }
    ]
   },
