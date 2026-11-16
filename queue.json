@@ -93826,6 +93826,91 @@
        "\t\tassert!(unread.message.contains(\"could not be read back\"), \"{}\", unread.message);"
       ]
      }
+    },
+    {
+     "at": "2026-11-16T12:57:42Z",
+     "reason": "QueueTwentyThree 2026-11-16 round 3: the dropped lines (macos/ax.rs 65, docs/tools/computer.md 1, worker.ts 2) are the ones the approved round-3 fix 4293410dc39 removes on purpose; every lost line is a removal in that commit (multiset check, list in queuetwentythree/lost-lines-round3.txt)",
+     "old": "6e3faf247fac6a95f82ff938f1e35cad433e25e4",
+     "new": "36387009d82430da2147f64fb3288f566c136db5",
+     "dropped": {
+      "crates/pi-natives/src/desktop/macos/ax.rs": [
+       "\twrite_number(&mut LiveNumber { element, deadline: Instant::now() + NUMBER_SETTLE }, target)",
+       "\t/// Waits one read-back interval; `false` once the settle time is over.",
+       "\tfn wait(&mut self) -> bool;",
+       "\telement:  &'a AXUIElement,",
+       "\tdeadline: Instant,",
+       "\tfn wait(&mut self) -> bool {",
+       "\t\tif Instant::now() >= self.deadline {",
+       "\t\tcontrol::settle(Duration::from_millis(25));",
+       "\t\ttrue",
+       "\t\tfield.write(&target.number()),",
+       "\t\tif !field.wait() {",
+       "\t\t\treturn Err(number_readback_error(",
+       "\t/// A whole target read back as an integer must be exactly it; otherwise",
+       "\t\t\tSelf::Whole(value) if !actual.is_float_type() => actual.as_i64() == Some(value),",
+       "\t\t\t_ => number_reached(self.as_f64(), actual),",
+       "\t\t\tSelf::Whole(value) => value.fmt(f),",
+       "\t\t\tSelf::Real(value) => value.fmt(f),",
+       "/// the refusal naming what the control reads.",
+       "\tif !current.is_float_type()",
+       "\t\t&& let Ok(value) = text.parse::<i64>()",
+       "\t\treturn Ok(NumberTarget::Whole(value));",
+       "\t\t.parse::<f64>()",
+       "\t\t.filter(|value| value.is_finite())",
+       "\t\t.map(NumberTarget::Real)",
+       "\t\t\t\t \\\"0.5\\\"; it reads {} now; nothing was written\",",
+       "\t\t\t\tstringify_number(current),",
+       "/// Whether `actual` holds `target`: within a few `f64` ulps of it, with no",
+       "/// absolute floor, so an unchanged 0 never passes for 5e-8; or, for a",
+       "/// floating-point number, exactly `target` rounded to `f32`, which is what a",
+       "/// control keeping its value in a `Float` reads back (0.3 as",
+       "/// 0.30000001192092896) whether it publishes a `float` or a `double`. That",
+       "/// rounding counts only where `f32` can hold the target: not past its range,",
+       "/// and not a nonzero target that underflows to 0. An integer-valued control is",
+       "/// held to the first rule.",
+       "\t(read - target).abs() <= target.abs() * 4.0 * f64::EPSILON",
+       "\t\t|| (actual.is_float_type()",
+       "\t\t\t&& rounded.is_finite()",
+       "\t\t\t&& (rounded != 0.0 || target == 0.0)",
+       "\t\t\t&& read == f64::from(rounded))",
+       "/// A read-back that is not the written number: the value the control reached,",
+       "/// and its range bound where that explains it.",
+       "fn number_readback_error(",
+       ") -> DesktopError {",
+       "\t\treturn DesktopError::ax_failed(format!(",
+       "\t\t\t.filter(|bound| bound.as_f64().is_some_and(|bound| past(wanted, bound)))",
+       "\t\tKeyDestination, KeyFocus, NodeRead, NodeValues, NumberField, NumberTarget, ROLE, TITLE,",
+       "\t\tTextField, TextSurface, VALUE, ValueKind, WindowContent, ax_result, content_owner,",
+       "\t\tcreate_system_wide, element_action_result, focused_window, is_outside_windows,",
+       "\t\tmay_borrow_focus, menu_window, not_settable, number_reached, parse_number, perform_choosing,",
+       "\t\tselect_attached, standard_window_subrole, stringify_number, stringify_value,",
+       "\t\ttakes_inserted_text, target_window, value_kind, window_records_of, write_number,",
+       "\t\tassert_eq!(parse_number(\"1e2\", &real).unwrap(), NumberTarget::Real(100.0));",
+       "\t\tfor text in [\"seventy-five\", \"\", \"75%\", \"NaN\", \"inf\", \"hunter2 secret\"] {",
+       "\t\t\tlet error = parse_number(text, &real).unwrap_err();",
+       "\t\t\t\t \\\"0.5\\\"; it reads 12.5 now; nothing was written\"",
+       "\t/// then on) and waits at most `waits` intervals.",
+       "\t\twaits:       usize,",
+       "\t\t\t\twaits: 20,",
+       "\t\t\tlet left = self.waits > 0;",
+       "\t\t\tself.waits = self.waits.saturating_sub(1);",
+       "\t\t\tleft",
+       "\t\t\tfield.waits = 3;",
+       "\t\t\tassert_eq!((field.read.get(), field.confirmed.get()), (4, 0));",
+       "\t\trounded.waits = 0;",
+       "\t\tfraction.waits = 0;"
+      ],
+      "docs/tools/computer.md": [
+       "On macOS, `setValue` on a control whose `AXValue` is a number (a slider, stepper or level indicator) writes the text as a number and reads it back; text that is not a number is refused before a write, naming the value the control reads. A value the control clamped to its range, rounded or did not take throws `AxFailed` naming the value it now reads, and the range bound when the written value passed it. A control whose value is not settable but that offers `AXIncrement` or `AXDecrement` (a SwiftUI `Slider`) is refused naming those actions, which `perform` takes as written; nothing is sent. `setValue` takes a string or a finite number on every platform; a number is written as its decimal text."
+      ],
+      "packages/coding-agent/src/tools/computer/worker.ts": [
+       "/** A value control (a slider) reads its value as a number, so a finite number is written as its decimal text. */",
+       "\tif (typeof value === \"number\" && Number.isFinite(value)) return String(value);"
+      ],
+      "packages/coding-agent/test/tools/computer.test.ts": [
+       "\t\texpect(native.values).toEqual([\"75\", \"-2.5\", \" 007 \", \"75\"]);"
+      ]
+     }
     }
    ]
   },
