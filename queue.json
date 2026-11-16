@@ -94770,7 +94770,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-16T18:02:50Z",
+  "checked": "2026-11-16T19:03:25Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -94873,28 +94873,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-09T18:19:00Z",
-    "kind": "unopenable",
-    "id": "role-selectors-cdp",
-    "title": "fix(coding-agent): resolve Chromium role selectors through Chrome's accessibility tree",
-    "why": "opened as #18632"
-   },
-   {
-    "at": "2026-11-09T18:49:39Z",
-    "kind": "openable",
-    "id": "gtk4-atspi-bounds",
-    "title": "fix(natives): find GTK4 app elements on X11 and stop marking them disabled"
-   },
-   {
-    "at": "2026-11-09T18:49:39Z",
-    "kind": "conflict",
-    "label": "#18013",
-    "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "files": [
-     "MODULE.bazel.lock"
-    ]
-   },
    {
     "at": "2026-11-09T19:51:24Z",
     "kind": "unopenable",
@@ -104773,12 +104751,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-16T18:02:51.699975Z",
+  "at": "2026-11-16T19:03:26.014077Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 1,
-   "left": 7
+   "used": 0,
+   "left": 8
   },
   "rows": [
    {
