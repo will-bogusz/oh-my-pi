@@ -107381,5 +107381,11 @@
     "wake": ""
    }
   ]
+ },
+ "opening": {
+  "id": "r2/native-window-report",
+  "token": "066d15060694481d9d85957432304c9a",
+  "host": "MacBook-Pro",
+  "at": "2026-11-16T20:46:01Z"
  }
 }
