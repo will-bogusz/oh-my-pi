@@ -93547,7 +93547,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-15T23:43:34Z",
+  "checked": "2026-11-16T00:43:43Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -103403,7 +103403,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-15T23:43:35.036336Z",
+  "at": "2026-11-16T00:43:43.915292Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -105330,7 +105330,7 @@
      "conflicts with #18789 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md",
      "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need act-look-prompt conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with main in packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
+     "conflicts with main in packages/coding-agent/src/tools/browser/tern/tern-tab.ts, packages/coding-agent/test/tools/browser-tern-tab.test.ts"
     ],
     "note": "",
     "over": [],
