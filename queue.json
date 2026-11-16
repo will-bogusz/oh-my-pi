@@ -63491,6 +63491,18 @@
        "          \"FILE:@@//crates/pi-natives/Cargo.toml 088f80c649f65a3e498f42a57b1b9dd81ffcd2d605392072a0d7f2252376434c\","
       ]
      }
+    },
+    {
+     "at": "2026-11-16T16:11:29Z",
+     "reason": "MODULE.bazel.lock regenerated with bun scripts/gen-bazel-lock.ts on main 6f03614d761 (v18.21.0); only the Cargo.lock/Cargo.toml hash lines differ from main's; non-lock lines identical to 41c0a4793f7 (standing approval)",
+     "old": "41c0a4793f7656cea685856df93b53e3dda89327",
+     "new": "a39af140677b1f9580c1862726a07d0d7f6f66c7",
+     "dropped": {
+      "MODULE.bazel.lock": [
+       "          \"FILE:@@//Cargo.lock d140bc96421d831aece4ddde97c7b91dec25b91d00218c2b24f86a4200632bea\",",
+       "          \"FILE:@@//crates/pi-natives/Cargo.toml 1fd8837b6fefad894a5e6b95cd104dbd9632e34203068f9d6989818c5eef1ba1\","
+      ]
+     }
     }
    ]
   },
