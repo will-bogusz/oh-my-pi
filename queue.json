@@ -93417,7 +93417,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-move-receipt",
    "host": "MacBook-Pro",
    "added": "2026-11-14T04:35:48Z",
-   "updated": "2026-11-16T17:29:05Z",
+   "updated": "2026-11-16T17:32:56Z",
    "note": "MoveReview (needs-changes at 2609fd1) answered in e11ccec: 1 refuse-aware ending naming the setting, test under refuse; 2 oxfmt applied; 3 wording held to observations ('have shown', 'may still be hidden', takeover only after a screenshot shows it); docs/tools/computer.md one line; CHANGELOG tightened; behaviour NOTE answered in body (no sample set: macOS-only line, benchmark lane re-measures). QueueTwenty 2026-11-14: model sample skipped as given (macOS-only line, benchmark lane re-measures those tasks); body first sentence made first-person.",
    "built": [
     {
@@ -93579,6 +93579,16 @@
      "at": "2026-11-16T17:29:05Z",
      "host": "MacBook-Pro",
      "tree": "5a33fa7df66dfda4172afa95bc7bba4d64bf1508"
+    },
+    {
+     "with": "#19001",
+     "code": "05145ab015d076092b280c47969cbf3ddea1a6d4",
+     "with_code": "d78550cc7898d904a23a46bc3021ed827893f2dc",
+     "tip": "e11ccec5ac9e3184c8b597d987271187896a50eb",
+     "with_tip": "d976a2c40226d152b40a05b9154b6e18b9f2cc75",
+     "at": "2026-11-16T17:32:55Z",
+     "host": "MacBook-Pro",
+     "tree": "effaf75ca3ed1d065ce10518ee62c1c9646eef10"
     }
    ]
   },
@@ -94581,7 +94591,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/dialog-closed-state",
    "host": "MacBook-Pro",
    "added": "2026-11-16T16:35:25Z",
-   "updated": "2026-11-16T17:29:05Z",
+   "updated": "2026-11-16T17:32:56Z",
    "note": "",
    "built": [
     {
@@ -94743,6 +94753,16 @@
      "at": "2026-11-16T17:29:04Z",
      "host": "MacBook-Pro",
      "tree": "5a33fa7df66dfda4172afa95bc7bba4d64bf1508"
+    },
+    {
+     "with": "#19001",
+     "code": "28847a90b541dbc8de5e25ad8d559298d6ba95f5",
+     "with_code": "d78550cc7898d904a23a46bc3021ed827893f2dc",
+     "tip": "09f8ccf6f980a7cc5e53d7ab1739e64088e0722c",
+     "with_tip": "d976a2c40226d152b40a05b9154b6e18b9f2cc75",
+     "at": "2026-11-16T17:32:55Z",
+     "host": "MacBook-Pro",
+     "tree": "effaf75ca3ed1d065ce10518ee62c1c9646eef10"
     }
    ]
   }
