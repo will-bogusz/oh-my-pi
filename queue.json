@@ -77445,7 +77445,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "90935366da0c368a437da4343ae748b03a2ffe97",
+   "base": "15a96938984aceb878d85befcb540ef1bac7db42",
    "body": "bodies/computer-run-failure-output.md",
    "state": "open",
    "pr": 19100,
@@ -77453,9 +77453,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-run-failure-output",
    "host": "MacBook-Pro",
    "added": "2026-11-11T00:07:07Z",
-   "updated": "2026-11-16T01:39:25Z",
+   "updated": "2026-11-16T15:08:12Z",
    "note": "",
-   "advanced": "2026-11-16T01:39:25Z",
+   "advanced": "2026-11-16T15:08:12Z",
    "built": [
     {
      "with": "#18624",
