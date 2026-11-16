@@ -53,17 +53,20 @@ After Codex's second review, n=10: `main` f680ea91b1, ba8d2789f4, this PR (45608
 | drag and drop from my app onto its emoji picker | no | 0/10 | | **9/10** |
 | click on my app's emoji picker | no | 0/10 | | 0/10 |
 
-A press goes where `WindowServer` routed it (`kCGEventTargetUnixProcessID`). A release keeps its press's place unless the drag pasteboard changed (a real drop); then it goes to the owner of the window under it.
-
 ## Why
 
-`main` hit-tests the pointer after the event: that blocks, fails in a busy app and misplaces releases over the menu bar or past the window edge.
+`main` hit-tests the pointer after the event: that blocks, fails in a busy app and misplaces releases over the menu bar or past the window edge. A press goes where `WindowServer` routed it (`kCGEventTargetUnixProcessID`). A release keeps its press's place unless the drag pasteboard changed (a real drop); then it goes to the owner of the window under it.
 
 - A click is unknown until the tap has seen as many button events as the HID counters. One still missing after 50 ms idle counts as the user's (a remapper swallowed it), unless macOS had disabled the tap.
 - A click from before the session's tap counts as the user's. Tools posting at the HID or session tap count as the user; omp's own posts and posts to a pid do not.
+- Without event-listening access, `main`'s hit-test runs unchanged.
+
+<details><summary>Remote tools' session-tap posts and out-of-process panels</summary>
+
 - Session-tap posts never reach the HID counters: the events they skipped join every reading, dated by delivery.
 - `WindowServer` routes a click in a sandboxed app's Open panel to `openAndSavePanelService`. A press routed to a non-regular process counts for the app macOS holds responsible for it, only while my app and the target have different responsible processes.
-- Without event-listening access, `main`'s hit-test runs unchanged.
+
+</details>
 
 ## Testing
 
@@ -78,22 +81,24 @@ A press goes where `WindowServer` routed it (`kCGEventTargetUnixProcessID`). A r
 
 ## Limits
 
-- If a drag-release owner lookup outlasts the delivery window, its press can expire before the lookup returns, so dropping onto the target can count as staying in my app and let the focus guard restore the target I selected.
-- A press the tap delivers only after my app has begun the drag (its callback running tens of milliseconds late) reads my drop as a plain release: a target that drop brought forward is sent back once, and the call's later steps continue in the background.
-
-- My app and the target sharing a responsible process (target started from my terminal): nothing is mapped, so a click in my app's out-of-process panel counts as elsewhere.
-- My app's emoji picker belongs to CharacterPalette, which macOS holds responsible for itself: a click on it counts as elsewhere, as on `main`.
-- A press a remapper swallowed stays owed, so a remote tool's next session-tap press of that button is not counted.
-- A press in the instant the tap starts reads as in my app until the tap delivers it; if the tap delivered it before the record began, that reading is not corrected.
-- A press the tap has not delivered after 50 ms without a button event counts as mine, also once it arrives: a target it picked is sent back.
-- A press of mine the tap has not delivered yet, from the press until 50 ms after my last button event, may be my click on the target: a target that comes forward then stays in front for the rest of that call, and its later steps stop as if I had gone to it.
-- A remote tool's session-tap press still queued when my press of the same button is counted stands in for mine until mine arrives.
+| Limit | What happens |
+|---|---|
+| A drag release whose window-owner lookup outlasts the delivery window | its press expires first, so a drop on the target counts as staying in my app and the guard restores the target I picked |
+| A press the tap delivers only after my app has begun the drag (its callback running tens of milliseconds late) | my drop reads as a plain release: a target the drop brought forward is sent back once, and the call's later steps continue in the background |
+| My app and the target share a responsible process (target started from my terminal) | nothing is mapped, so a click in my app's out-of-process panel counts as elsewhere |
+| My app's emoji picker, which belongs to CharacterPalette, a process macOS holds responsible for itself | a click on it counts as elsewhere, as on `main` |
+| A press a remapper swallowed | it stays owed, so a remote tool's next session-tap press of that button is not counted |
+| A press in the instant the tap starts | it reads as in my app until the tap delivers it; if the tap delivered it before the record began, that reading is not corrected |
+| A press the tap has not delivered after 50 ms without a button event | it counts as mine, also once it arrives: a target it picked is sent back |
+| A press of mine the tap has not delivered yet, from the press until 50 ms after my last button event | it may be my click on the target: a target that comes forward then stays in front for the rest of that call, and its later steps stop as if I had gone to it |
+| A remote tool's session-tap press still queued when my press of the same button is counted | it stands in for mine until mine arrives |
 
 ---
 
 - [ ] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution
+
 
 
 
