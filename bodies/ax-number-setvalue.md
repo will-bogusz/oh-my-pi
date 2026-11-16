@@ -27,7 +27,7 @@ Limits: a control without a settable value or step actions keeps today's refusal
 
 ## Testing
 
-macOS 26.5 VM, `main` and this branch interleaved per try, app state as truth. Following the refusal's own `el.perform("AXIncrement")` moved the SwiftUI slider 0 to 10 in 10 of 10. `cargo test -p pi-natives --lib -- desktop::macos`: 360 pass (372 merged with #19195); `computer.test.ts`: 152 pass; clippy and rustfmt via `rust-check` on macOS and Linux. The new unit tests do not compile on `main`, and the worker test's number cases fail there.
+macOS 26.5 VM, `main` and this branch interleaved per try, app state as truth. Following the refusal's own `el.perform("AXIncrement")` moved the SwiftUI slider 0 to 10 in 10 of 10. `cargo test -p pi-natives --lib -- desktop::macos`: 362 pass (374 merged with #19195); `computer.test.ts`: 152 pass; clippy and rustfmt via `rust-check` on macOS and Linux. The new unit tests do not compile on `main`, and the worker test's number cases fail there.
 
 Model sample, the tool's documentation plus "set slider e7 to 75", 20 runs each: Haiku 5.5 (low) wrote `setValue(75)` in 16 and GPT-6.1 Sol (low) in 6, each refused on `main`; given the new step refusal as the previous result, 10 of 10 of each wrote a runnable `perform("AXIncrement")`.
 
@@ -36,3 +36,4 @@ Model sample, the tool's documentation plus "set slider e7 to 75", 20 runs each:
 - [ ] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
