@@ -34,10 +34,12 @@ Limits:
 | whole text past 2^53 to a floating-point control | refused when the nearest double prints otherwise (`"9007199254740993"`); an earlier revision wrote it and reported done |
 | 16- to 19-digit text whose double prints differently | refused, even where the double holds the value (2^60 prints as `1152921504606847000`) |
 | number argument whose JavaScript decimal Rust prints differently at a rounding tie | refused the same way: 49 of 1,077,923 sampled, all of 16 or 17 significant digits |
+| integer range bounds past 2^53 | when the target and the control's bound round to the same double, a clamp is still reported as not reached with the value read, but without "(its maximum is …)" |
+| text and date writes to a removed control | still reported as an unreadable value (`AxFailed`), not `StaleRef`; only the number read-back changed |
 
 ## Testing
 
-macOS 26.5 VM, `main` and this branch interleaved per try, app state as truth. Following the refusal's own `el.perform("AXIncrement")` moved the SwiftUI slider 0 to 10 in 10 of 10. `cargo test -p pi-natives --lib -- desktop::macos`: 367 pass; Linux `desktop::`: 308 pass; `computer.test.ts`: 152 pass; clippy and rustfmt via `rust-check` on macOS and Linux. The new unit tests do not compile on `main`, and the worker test's number cases fail there.
+macOS 26.5 VM, `main` and this branch interleaved per try, app state as truth. Following the refusal's own `el.perform("AXIncrement")` moved the SwiftUI slider 0 to 10 in 10 of 10. `cargo test -p pi-natives --lib -- desktop::macos`: 368 pass; Linux `desktop::`: 308 pass; `computer.test.ts`: 152 pass; clippy and rustfmt via `rust-check` on macOS and Linux. The new unit tests do not compile on `main`, and the worker test's number cases fail there.
 
 | This head, unfocused, a person typing (0 keys lost), 10 tries each | result |
 |---|---|
@@ -47,6 +49,8 @@ macOS 26.5 VM, `main` and this branch interleaved per try, app state as truth. F
 | `"73"` on a slider that snaps to multiples of 5 | reported `the control now reads 75`, 10 of 10 |
 | `"075"`, `"75.0"` on the AppKit slider; `"0.50"` on a 0-to-1 slider | landed, 10 of 10 each |
 | `"1.0000000000000001"`, `"9007199254740993.5"` on an integer slider; `"9007199254740993"` on the AppKit slider | refused before any write, control untouched, 10 of 10 each |
+| a slider that rebuilds itself after a write, `"75"` | `StaleRef: the number 75 was sent, but the control no longer exists after the write…`, at once (534 ms median, against 537.5 ms for a landed write), 10 of 10; the new slider read 75 |
+| the same slider rebuilt with its old value (the write ignored) | `StaleRef: e76 destroyed; e95 is the one element in the window with the role, labels and value e76 was read with…`, 10 of 10 |
 | median call time | 549-562 ms landed, 1030 ms clamped, 514-517 ms refused, within 13 ms of the earlier run |
 
 <details><summary>Model sample</summary>
