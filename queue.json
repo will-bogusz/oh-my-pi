@@ -69882,7 +69882,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/upload-stall-error",
    "host": "MacBook-Pro",
    "added": "2026-11-09T16:12:04Z",
-   "updated": "2026-11-16T01:41:31Z",
+   "updated": "2026-11-16T01:41:44Z",
    "note": "",
    "built": [
     {
@@ -69915,7 +69915,7 @@
    ],
    "opened": "2026-11-09T16:23:45Z",
    "readied": "2026-11-09T16:24:05Z",
-   "advanced": "2026-11-16T01:41:31Z"
+   "advanced": "2026-11-16T01:41:44Z"
   },
   {
    "id": "relay-autoattach-shared",
