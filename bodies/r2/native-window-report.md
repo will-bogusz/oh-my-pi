@@ -69,6 +69,7 @@ Chrome 157 on Linux orders the list the same way (30 of 30 tries per browser kin
 
 ---
 
-- [ ] `bun check` passes (main's unrelated formatting failure remains; earlier targeted package typecheck passed)
+- [x] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with attribution
+
