@@ -4222,7 +4222,108 @@
     "19045": "Main, 2026-11-16: tab-worker.ts WorkerCore field list only: keep both, #18925 `#nativeWindows?: NativeWindowWatch` (with its doc line) first, then #19045 `#actionRequestSeq?`/`#actionGeneration`/`#settling?`",
     "19178": "Main, 2026-11-16: tab-supervisor.ts imports only: keep both, `import { isLoopbackRelayUrl } from \"./relay/daemon\"` and #19178 `import { FOREIGN_FRAME_REFUSAL } from \"./relay/protocol\"` (with #19001 too: `import { FOREIGN_FRAME_REFUSAL, type HiddenFrame } from \"./relay/protocol\"`)",
     "19001": "Main, 2026-11-16: imports keep both (tab-protocol.ts `import type { FrontTabSource } from \"./native-windows\"` + `import type { HiddenFrame } from \"./relay/protocol\"`; tab-supervisor.ts daemon line + HiddenFrame, or `{ FOREIGN_FRAME_REFUSAL, type HiddenFrame }` with #19178). tab-worker.ts #run end: #18925 `nativeNotices` block first, then #19001 comment and `if (this.#unanswered === active && this.#hiddenFramesWaiting && this.#page) await this.#takeHiddenFrames(this.#page)` unchanged, so their answered check runs after our await (a crash/detach answering the run during native sampling is seen) and frames the relay hid during sampling still go out with the result. Failure send: `const error = errorPayload(failure.error)`, notices appended to error.message/error.stack, then `this.#sendResult({ id: msg.id, ok: false, error })`."
-   }
+   },
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-16T20:44:36Z",
+     "reason": "QueueTwentyFive, Main-approved 2026-11-16: 79 lines (native-windows.ts 34, browser-native-windows.test.ts 30, tab-supervisor.ts 7, tab-protocol.ts 4, tab-worker.ts 3, docs/tools/browser.md 1) are deleted on purpose by the head commit 'name native windows only while the browser lists the tab in front' (page visibilityState answer and showsWindows payload replaced by the browser tab list / frontTab); list in queuetwentyfive/lost-lines-18925.txt",
+     "old": "ee197cf6751f0ee456a504e94c430a3f7ac41f67",
+     "new": "f22538688c35f1cc16f6e55e0bc032ffef38068d",
+     "dropped": {
+      "docs/tools/browser.md": [
+       "- Native windows (macOS, visible managed/spawned browsers and a loopback relay): when a call raises a window over its tab that no page call can reach (a `<select>` menu or colour/date picker, a print, save, sign-in, passkey or permission sheet or bubble), its result says so with the window's id: `computer.window(id)` when the computer tool lists it, else a pointer to `computer.screenshot()`. Only new windows the tab's own browser draws over the tab's window count, and only while the page is the one showing there. Geometry and visibility are read in an isolated world, and a known browser pid restricts the window match to that process. Connected (`app.cdp_url`) browsers and remote relays are excluded. A normal window matching a browser page target (such as an OAuth popup) is not a native dialog; when page frames cannot be read, normal-window candidates are suppressed. Ambiguous overlaps, macOS-owned prompts (Touch ID, keychain), and the page's own JavaScript dialogs are not named. A window that shows within 2 s after the call returned is named by the next call. Failed calls carry the same lines; a call when nothing appeared adds nothing."
+      ],
+      "packages/coding-agent/src/tools/browser/native-windows.ts": [
+       "import { withTimeout } from \"@oh-my-pi/pi-utils\";",
+       "/** The tab's window frame, and whether the page is the one showing in it (not a background tab, not minimised). */",
+       "interface TabView extends Frame {",
+       "\tvisible: boolean;",
+       "export async function readTabFrame(page: Pick<Page, \"mainFrame\">): Promise<TabView | undefined> {",
+       "\t\t\t\tdocument: { visibilityState: string };",
+       "\t\t\treturn {",
+       "\t\t\t\tx: view.screenX,",
+       "\t\t\t\ty: view.screenY,",
+       "\t\t\t\twidth: view.outerWidth,",
+       "\t\t\t\theight: view.outerHeight,",
+       "\t\t\t\tvisible: view.document.visibilityState === \"visible\",",
+       " * own window, that were never on screen before count, and only while the page is the one showing in that window: a",
+       " * background tab shares its window with the tab in front, whose menus are not its own. One that shows within the",
+       " * tail after a call returned is named by the next call. macOS only, and only for browsers that show windows; a call",
+       " * when nothing appeared adds nothing. System-owned prompts (Touch ID, keychain) are not reported: nothing on screen",
+       " * ties them to the tab.",
+       "\treadonly #readFrame: () => Promise<TabView | undefined>;",
+       "\t/** The tab's own window, once its frame named exactly one while the page showed. */",
+       "\t/** Whether the page showed in its window at the last read; a dialog-stopped page keeps the previous answer. */",
+       "\t#visible = false;",
+       "\t\treadFrame: () => Promise<TabView | undefined>,",
+       "\t/** Remembers what is on screen; `pageStopped` skips reading the page, which a dialog keeps from answering. */",
+       "\t\tif (!pageDialog) this.#visible = frame?.visible ?? false;",
+       "\t\tconst stopped = this.#pageStopped;",
+       "\t\tconst frame = stopped ? undefined : await this.#readFrame();",
+       "\t\tif (!stopped) this.#visible = frame?.visible ?? false;",
+       "\t * The tab's window: one ordinary window at its current visible frame. A retained window must still match that",
+       "\t * frame, since the user can drag a tab into another window. Without a frame, only a retained on-screen id survives.",
+       "\t#findTab(roster: DesktopRosterWindow[], frame: TabView | undefined): void {",
+       "\t\tif (!frame?.visible) {",
+       "\t\tconst matches = roster.filter(",
+       "\t/** The windows in `roster` never seen before that the tab's browser raised over the tab while the page showed. */",
+       "\t\tif (!tab || !this.#visible) return [];"
+      ],
+      "packages/coding-agent/src/tools/browser/tab-protocol.ts": [
+       "\t\t\t/** The browser draws its windows on the user's screen (a visible launch), so a call can raise native ones. */",
+       "\t\t\tshowsWindows?: boolean;",
+       "\t\t\t * The browser draws its windows on the user's screen, so a call can raise native ones. Unset for a headless",
+       "\t\t\t * browser, whose recycled tabs attach too."
+      ],
+      "packages/coding-agent/src/tools/browser/tab-supervisor.ts": [
+       "/** Whether the browser draws its windows on the user's screen; a headless one keeps that through a tab's recycle. */",
+       "export function browserShowsWindows(kind: PuppeteerBrowserKind): boolean {",
+       "\tif (kind.kind === \"relay\") return isLoopbackRelayUrl(kind.cdpUrl);",
+       "\t// A connected endpoint may be remote or headless; its geometry cannot identify a local window.",
+       "\treturn kind.kind !== \"connected\" && (kind.kind !== \"headless\" || !kind.headless);",
+       "\t\t\tshowsWindows: browserShowsWindows(browser.kind),",
+       "\t\tshowsWindows: browserShowsWindows(tab.browser.kind),"
+      ],
+      "packages/coding-agent/src/tools/browser/tab-worker.ts": [
+       "import { NativeWindowWatch, readBrowserPageFrames, readTabFrame } from \"./native-windows\";",
+       "\t\t\t// Only a browser that draws its windows on the user's screen raises native ones.",
+       "\t\t\tif (payload.showsWindows && process.platform === \"darwin\") {"
+      ],
+      "packages/coding-agent/test/tools/browser-native-windows.test.ts": [
+       "import { NativeWindowWatch, readTabFrame } from \"@oh-my-pi/pi-coding-agent/tools/browser/native-windows\";",
+       "import { browserShowsWindows } from \"@oh-my-pi/pi-coding-agent/tools/browser/tab-supervisor\";",
+       "const FRAME = { x: TAB_WINDOW.x, y: TAB_WINDOW.y, width: TAB_WINDOW.width, height: TAB_WINDOW.height, visible: true };",
+       "const HIDDEN = { ...FRAME, visible: false };",
+       "/** A watch reading `rosters` in turn; the last supplied frame stays current. */",
+       "function watchWith(rosters: DesktopRosterWindow[][], frames: (typeof FRAME)[] = []): NativeWindowWatch {",
+       "describe(\"browsers that show windows\", () => {",
+       "\ttest(\"leaves headless and unidentified CDP browsers out, including recycled tabs\", () => {",
+       "\t\texpect(browserShowsWindows({ kind: \"headless\", headless: true })).toBe(false);",
+       "\t\texpect(browserShowsWindows({ kind: \"headless\", headless: false })).toBe(true);",
+       "\t\texpect(browserShowsWindows({ kind: \"connected\", cdpUrl: \"http://127.0.0.1:9222\" })).toBe(false);",
+       "\t\texpect(browserShowsWindows({ kind: \"connected\", cdpUrl: \"https://remote.example\" })).toBe(false);",
+       "\t\texpect(browserShowsWindows({ kind: \"relay\", cdpUrl: \"http://127.0.0.1:9224\" })).toBe(true);",
+       "\t\texpect(browserShowsWindows({ kind: \"relay\", cdpUrl: \"https://remote.example\" })).toBe(false);",
+       "\t\texpect(browserShowsWindows({ kind: \"spawned\", path: \"/Applications/App.app\" })).toBe(true);",
+       "\ttest(\"ignores page overrides of window geometry and visibility\", async () => {",
+       "\t\t\t\t\tObject.defineProperty(document, \"visibilityState\", { value: \"hidden\" });",
+       "\t\t\t\tasync () => ({ ...parent, visible: true }),",
+       "\t\t\t\t\t\tshowsWindows: true,",
+       "\ttest(\"rechecks visibility after the call instead of attributing the newly selected tab's picker\", async () => {",
+       "\t\tconst rosters = [[TAB_WINDOW], [TAB_WINDOW], [TAB_WINDOW], [picker, TAB_WINDOW]];",
+       "\t\tframe = HIDDEN;",
+       "\ttest(\"rechecks visibility when a delayed picker is sampled\", async () => {",
+       "\t\t\tconst rosters = [[TAB_WINDOW], [TAB_WINDOW], [picker, TAB_WINDOW], [picker, TAB_WINDOW], [picker, TAB_WINDOW]];",
+       "\t\t// The tab in front of it (the user's, or another session's) opens a <select> menu during this tab's call.",
+       "\t\tconst watch = watchWith([[TAB_WINDOW], [TAB_WINDOW], [TAB_WINDOW], [menu, TAB_WINDOW]], [FRAME, HIDDEN]);",
+       "\ttest(\"does not take another app's window at the tab's frame while the page is hidden\", async () => {",
+       "\t\t// The browser's window is on another Space; a maximised window of the user's app has the same frame.",
+       "\t\tconst watch = watchWith([[other], [other], [other, TAB_WINDOW], [other, TAB_WINDOW, sheet]], [HIDDEN, FRAME]);",
+       "\t\t// Back on screen, the browser's window and the other app's share the frame: neither is taken as the tab's."
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "test-ownership-lock",
