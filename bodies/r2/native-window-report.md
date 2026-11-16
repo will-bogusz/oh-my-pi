@@ -2,48 +2,73 @@
 
 I wanted the browser tool to tell the agent when its click opened something on screen the page can't answer, like a `<select>` menu, a colour picker or a passkey sheet, and hand it that window for the computer tool.
 
-On macOS, visible managed/spawned browsers and a loopback relay now name native windows raised over the tab, with the id `computer.window(id)` takes. A window appearing within 2 s after a call returns is named by the next call; failed calls carry the same notices. Connected CDP endpoints and remote relays are excluded.
+Visible managed/spawned browsers and a loopback relay on macOS name new native windows over the tab with their `computer.window(id)` handle, but only while the browser's own tab list shows that tab in front of its window. Windows appearing within 2 s after a call return are named by the next call. Failed calls carry notices, except timed-out or cancelled calls, which skip sampling to preserve the existing cleanup grace. Headless browsers, connected CDP endpoints and remote relays are excluded.
 
-| pre-review visible Chrome checks; n=5 managed + 5 relay per arm | on screen | named before | named here, and `computer.window(id)` is that window |
+| Pre-review visible Chrome checks; 5 managed + 5 relay per arm | On screen | Named before | Named here, correct handle |
 |---|---|---|---|
-| `<select>`, colour input, date `showPicker()` | menu or picker 30/30 | 0/30 | 30/30 |
-| notification or geolocation permission | bubble 16/20 (Chrome stopped asking the 5th time) | 0/16 | 16/16 |
-| passkey `credentials.create()` | sheet 10/10, takes focus from the user's app on both | 0/10 | 10/10 |
+| `<select>`, colour input, date picker | 30/30 | 0/30 | 30/30 |
+| notification/geolocation permission | 16/20; prompts stopped appearing on the fifth attempt | 0/16 | 16/16 |
+| passkey | 10/10 | 0/10 | 10/10 |
 | plain button, `fill` | nothing | 0/20 | 0/20 |
-| `confirm()` | Chrome's dialog 10/10 | 0/10 (`tab.dialog()` reports it) | 0/10, left to `tab.dialog()` |
-| another app's window opening over the tab during each call | 100/100 | 0/100 | 0/100 |
+| `confirm()` | 10/10 | 0/10 | 0/10; left to `tab.dialog()` |
+| another app's window over the tab | 100/100 | 0/100 | 0/100 |
 
 ## Why
 
-Before, these windows appear while the call reports success. Read `roster.rs`, `native-windows.ts`, then `tab-worker.ts`.
-
-- The tab's current frame and visibility come from an isolated world, rechecked at the after-call and tail samples. A known browser pid restricts matching; ambiguous matches and popups overlapping another browser window are suppressed.
-- Windows are sampled in one window-server pass. Only never-seen windows of the tab's browser count; macOS-owned prompts and the page's own JavaScript dialogs remain outside this report. Normal-window candidates matching browser page targets (such as OAuth popups) are excluded; an unreadable page-frame probe suppresses normal-window reports.
-- The report is always on for supported visible browsers. Pre-review measurements added 27–35 ms median per call; headless and connected-CDP calls skip it.
-
-Non-goals: answering windows; Linux and Windows. Untested: a user's window opening inside the tab's frame mid-call; `print()`. Merged #18838 disables printing in omp's Chrome profile, not attached browsers.
-
-Known limits: a picker in a background tab isn't named. Native tooltip windows may meet the popup geometry filter and be reported as panels/pickers even when their text is in the DOM; distinguishing those needs native role metadata beyond this roster. Tooltip behavior has not been reproduced in the headless-only review checks.
-
-## Testing
-
-`bun test packages/coding-agent/test/tools/browser-native-windows.test.ts` on bench-mac exercises real isolated headless Chrome plus fake rosters: 26 tests pass, including page-global overrides, page-backed popups, tab moves, visibility switches, overlapping windows, and unterminated stdout. Behavior regressions fail before their fixes; page-global overrides also disprove the claimed main-world exposure in the pinned Puppeteer patch. `bun check --no-script -p packages/coding-agent/tsconfig.json` passes.
+These windows can appear while the browser call reports success. The page cannot say whether its tab is in front: omp focus-emulates every tab it drives, so a background page's `document.visibilityState` stays "visible", and reading it named the user's own `<select>` menu in the front tab to the agent in every try below where the agent's tab had been shown. The browser's tab list says it instead: the relay extension's active flag, or the order of Chrome's `/json/list`. Managed browser handles now carry Chrome's pid, so their window match is limited to Chrome's process.
 
 <details>
-<summary>Earlier visible-browser evidence</summary>
+<summary>How the window and the front tab are found</summary>
 
-macOS 26 VM, Chrome for Testing 150, TextEdit frontmost; arms `af86757741` and pre-review `c43fc6560d`. Calls waited 700 ms after clicks so TextEdit's window showed mid-call; its windows were never named (0/100). Without the wait, permission bubbles and passkey sheets were mostly named by the next call. Switching to another tab before a call changed false menu reports from 5/5 to 0/5; menus were still named with TextEdit covering Chrome (15/15).
+Matching the tab's isolated-world frame against the window roster adds a notice without answering the window; ambiguous ownership and page-backed popups are suppressed.
 
-The original 18 fake-roster tests passed, as did `cargo test -p pi-natives --lib` (904 tests) and `bun check` on that revision. No Linux/Windows live check; this report is macOS-only.
+The relay's `/json/list` marks the extension's active tab. Chrome's own list orders pages by when each was last shown (`DevToolsHttpHandler::RespondToJsonList` sorts on `WebContents::GetLastActiveTimeTicks()`) and a never-shown page by its creation, so a tab counts as in front only while no page of its window is listed before it and, unless it is alone there, it is known to have been shown:
+
+- omp opened it in front;
+- its page reports the place of one browser window off the screen origin, which a page learns only while shown (`RenderWidgetHostImpl::SendScreenRects` skips hidden widgets);
+- or a read saw it overtake a tab of its window.
+
+The list read takes 0.2–0.4 ms after the frame read.
 
 </details>
 
+## Testing
+
+`bun test packages/coding-agent/test/tools/browser-native-windows.test.ts packages/coding-agent/test/tools/browser-profile-cleanup.test.ts`: 60 pass in the macOS VM, 57 pass and 3 macOS-only skips on Linux; 13 fail with the old answer and without the pid. Neighbouring browser suites: 347 pass.
+
+In a macOS 26.5 VM with Chrome for Testing 150, the agent's tab sat behind the user's tab in the same window, and the user's clicks were real input over VNC:
+
+| The user opens a `<select>` in the front tab | Before | After |
+|---|---|---|
+| managed browser, during an agent call | 21/21 named | 0/10 |
+| managed, during a call that clicks into the agent's tab | 10/10 | 0/10 |
+| managed, 0.3 s after a call returns | 20/20 | 0/10 |
+| managed, agent's tab shown and then hidden | 3/3 | 0/10 |
+| relay tab, during a call / one that clicks into it / after it | 10/10 each | 0/10 each |
+| relay, agent's tab never shown since it opened | 0/35 | 0/10 |
+| spawned Chromium, during a call / after it | not measured | 0/10 / 0/10 |
+| headless agent beside the user's Chrome | not measured | 0/10 |
+| control: the agent's own tab in front opens its menu | 10/10 named | managed 10/10, relay 10/10, spawned 10/10 after the user shows its tab once; 0/3 while a tab opened behind it ranks first |
+
+Chrome 157 on Linux orders the list the same way (30 of 30 tries per browser kind).
+
+## Limits
+
+| Limit | What happens |
+|---|---|
+| Linux and Windows; answering the window | not supported |
+| the tab list cannot be read | nothing is named |
+| a tab opened in the background of the agent's window | it ranks first until a tab there is shown, so the agent's own windows go unnamed meanwhile |
+| a spawned Chromium, which opens the agent's tab in the background | its windows are named once the user has shown that tab; in a window at the screen origin, only after one call has seen another tab of the window in front and a later call the agent's tab again |
+| the agent's own `<select>` menu, which often shows after its call has returned (about 30 ms after the click in a managed browser) | the next call names it |
+| an unreadable page-frame probe | ordinary-window notices are suppressed |
+| tooltips, autofill and save-password surfaces | can be wrongly named as a select menu or picker, because the roster has no native roles |
+| restarting the 4,096-id seen set | an old window can be wrongly reported as new |
+| user activity in the watched tab; `print()` | untested |
+| a tab change while the window is fully covered or minimised; Chrome's split view | unmeasured: Chrome may not move a tab up its list there |
+
 ---
 
-- [ ] `bun check` passes (main's unrelated formatting failure remains; targeted package typecheck passes)
+- [ ] `bun check` passes (main's unrelated formatting failure remains; earlier targeted package typecheck passed)
 - [x] Tested locally
-- [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
-
-
-
-
+- [x] CHANGELOG updated with attribution
