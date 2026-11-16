@@ -1,10 +1,10 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-16 23:43Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-16 23:46Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-16 22:06Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 1, conflict-held 20, stacked 21, held 12, parked 2, open PRs 23; merged 358, closed 37
+**Counts:** openable now 1, conflict-held 20, stacked 21, held 11, parked 2, open PRs 23, queued since the last plan 1; merged 358, closed 37
 
 ## Openable now (1)
 
@@ -63,7 +63,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-16
 | macos-drag-no-change-note | fix(natives): note a macOS background drag that changed nothing readable | computer | P2 | 2d | macos-drag-confirm ([#19195](https://github.com/can1357/oh-my-pi/pull/19195)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-drag-no-change-note) |
 | macos-web-type-background | fix(natives): type into a background macOS web page field without a takeover | computer | P2 | 2d | macos-reroute-not-a-press | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-web-type-background) |
 
-## Held (12)
+## Held (11)
 
 | id | title | area | priority | age | hold | branch |
 |---|---|---|---|---|---|---|
@@ -78,7 +78,6 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-16
 | browser-cursor | feat(browser): draw the acting agent's cursor in OMP-driven tabs | browser | P2 | 6d | Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-cursor) |
 | desktop-cursor | feat(coding-agent,natives): show each agent's cursor where its computer input lands on macOS | coding-agent | P2 | 5d | Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check \| Main 2026-11-12: before it opens, the waiting-key-chord case with the cursor actually drawn (20 trials at a 20 s deadline; CursorDemo's cursor-on arm never drew one, and an early run on the combined tree returned 'Cancelled, input may be partial' 11/11, unexplained), on the polished branch will/desktop-cursor-polish. | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/desktop-cursor) |
 | win-type-insert | feat(natives): insert typed text into a focused Windows multi-line edit control | computer | P2 | 4d | Main, 2026-11-12: proposal; opens only after entry A merges and Will has seen the body | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-type-insert) |
-| macos-keys-no-press | fix(natives): send macOS background keys to the key window without a press | computer | P1 | 2d | Will, 2026-11-14: Will's go needed before opening (proposal ~/tmp/oh-my-pi/HandBack/proposal-prevent.md) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-keys-no-press) |
 
 ## Parked (2)
 
@@ -114,3 +113,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-16
 | [#19258](https://github.com/can1357/oh-my-pi/pull/19258) | macos-stale-press | fix(natives): refuse macOS element actions on a control a person could not click | computer | P1 | 2d | keep; accepted pair with #19048: Main, 2026-11-14: crates/pi-natives/src/desktop/macos/mod.rs element-click closure (function body): #19048's lines verbatim (hoisted mac handle, (target, event, _aimed) destructuring and everything after the closure, aim_at_element); stale-press adds only the two-line require_shown check before locate_element_click, reusing the hoisted handle. Combined form ~/tmp/oh-my-pi/queuetwenty/r5/combined-stale-press-19048.txt; build+test proof (#19048's tests + stale-press's nine, macOS desktop + Linux check) due when stale-press opens | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-stale-press) |
 | [#19405](https://github.com/can1357/oh-my-pi/pull/19405) | ax-number-setvalue | fix(natives): set macOS sliders and other number controls from setValue | computer | P1 | 17h | keep; accepted pair with #19061: QueueTwentyTwo, 2026-11-16 (Main's standing rule: use-list collision, opener records): only conflict is the test module's use lines in crates/pi-natives/src/desktop/macos/ax.rs: this entry adds CFRetained, #19061 adds AXUIElement and CFRetained; nothing removed; combined form is #19061's lines. Built: tree 42760b6e4a8 (macOS desktop 681/0; Linux check:ts 0 errors, desktop 335/0, computer.test 166/0) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/ax-number-setvalue) |
 | [#19296](https://github.com/can1357/oh-my-pi/pull/19296) | macos-takeover-typing-pause | fix(natives): keep macOS takeover from taking a typing user's keys | computer | P1 | 2d | keep; accepted pair with #16553: Main, 2026-11-14: combined form: intervention.rs use list keeps typing-pause's USER_QUIET and #16553's macos::ClickJournal; control/macos.rs tap callback keeps #16553's button_record block first and unchanged, then typing-pause's observed() block using #16553's own pid variable (file ~/tmp/oh-my-pi/queuetwentyone/combined-typingpause-16553.md, tree 32a1e67a7b2); whichever merges second rebases onto main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-takeover-typing-pause) |
+
+## Queued since the last plan (1)
+
+| id | title | area | priority | age | branch |
+|---|---|---|---|---|---|
+| macos-keys-no-press | fix(natives): send macOS background keys to the key window without a press | computer | P2 | 2d | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-keys-no-press) |
