@@ -22,11 +22,11 @@ Dialogs omp answers itself (`tab.handleDialog`, `tab.setDialogs`, auto-accepted 
 
 - `bun test packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts`: the new "forgets a confirm that the user or another client answered" (a second CDP client answers) fails without the fix and passes with it; the existing handleDialog test still gets `true`, `"Ada"` and policy `false`.
 - That file with `browser-interactions` and `browser-attach` on Linux, headless Chrome: 117 pass, 1 skip. `bun run check:ts` passes.
-- The table: omp's browser tool driven against Chrome 157 on Linux, 10 tries per cell, headed under Xvfb for the click.
+- The table: omp's browser tool driven against Chrome 157 on Linux, 10 tries per cell, headed under Xvfb for the click. A confirm inside a cross-site (out-of-process) iframe reports its open and close on the page's own session, and is forgotten the same way: 10/10.
 
 ## Limits
 
-A dialog whose events arrive on another CDP session than the page's main frame (an out-of-process iframe) is not cleared by this. Tern keeps its own held-dialog state, which is not changed or measured here. Chrome did not close a pending confirm when its tab was hidden with CDP attached (0/10), so a tab switch alone does not trigger the stale state.
+After a prerendered page activates, the worker's listeners stay on the session it started with, so a close there is missed as before (from reading the code; not measured). Tern keeps its own held-dialog state, which is not changed or measured here. Chrome did not close a pending confirm when its tab was hidden with CDP attached (0/10), so a tab switch alone does not trigger the stale state.
 
 ---
 
