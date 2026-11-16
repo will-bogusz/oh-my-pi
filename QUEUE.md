@@ -3,17 +3,16 @@
 Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-16 16:22Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-16 16:15Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 2, conflict-held 19, stacked 21, held 13, parked 2, open PRs 39; merged 341, closed 36
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-16 16:20Z on goliath; groups below are from it, states from the manifest)
+**Counts:** openable now 1, conflict-held 20, stacked 21, held 13, parked 2, open PRs 39; merged 341, closed 36
 
-## Openable now (2)
+## Openable now (1)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
-| stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 3d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 | macos-move-receipt | fix(coding-agent): say what a macOS background move did | computer | P2 | 2d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-move-receipt) |
 
-## Conflict-held (19)
+## Conflict-held (20)
 
 | id | title | area | priority | age | blocked by | branch |
 |---|---|---|---|---|---|---|
@@ -35,6 +34,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-16
 | macos-ax-cancel-before-send | fix(natives): send no macOS AX action once its run is cancelled | natives | P2 | 5d | [#19036](https://github.com/can1357/oh-my-pi/pull/19036), [#19048](https://github.com/can1357/oh-my-pi/pull/19048), [#19061](https://github.com/can1357/oh-my-pi/pull/19061), [#19063](https://github.com/can1357/oh-my-pi/pull/19063), [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19258](https://github.com/can1357/oh-my-pi/pull/19258), [#19405](https://github.com/can1357/oh-my-pi/pull/19405), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-ax-cancel-before-send) |
 | win-ax-states | fix(natives): expose Windows control state and stale-reference matches | computer | P2 | 5d | [#19036](https://github.com/can1357/oh-my-pi/pull/19036), [#19048](https://github.com/can1357/oh-my-pi/pull/19048), [#19061](https://github.com/can1357/oh-my-pi/pull/19061), [#19063](https://github.com/can1357/oh-my-pi/pull/19063), [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19258](https://github.com/can1357/oh-my-pi/pull/19258), [#19405](https://github.com/can1357/oh-my-pi/pull/19405), [#18925](https://github.com/can1357/oh-my-pi/pull/18925), [#18987](https://github.com/can1357/oh-my-pi/pull/18987), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-ax-states) |
 | x11-keysym-remap | fix(natives): type characters outside the X11 keymap through temporary keycodes | computer | P2 | 5d | [#19066](https://github.com/can1357/oh-my-pi/pull/19066), [#19080](https://github.com/can1357/oh-my-pi/pull/19080), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-keysym-remap) |
+| stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 3d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 | macos-reroute-not-a-press | fix(natives): count keys moved back to a macOS user's app as theirs | computer | P2 | 1d | [#19048](https://github.com/can1357/oh-my-pi/pull/19048), [#19296](https://github.com/can1357/oh-my-pi/pull/19296) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-reroute-not-a-press) |
 
 ## Stacked (21)
