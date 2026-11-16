@@ -36898,6 +36898,22 @@
        "\t\tif foreign(tag, source, own)"
       ]
      }
+    },
+    {
+     "at": "2026-11-16T16:22:23Z",
+     "reason": "Codex 4587630185 fix f5422b354ba (Main approved) rewrites the journal idle-block doc comment and the test's None expectation; all 6 lines the guard counts in clicks.rs are removed by that commit on purpose (checked against its diff); list: queuetwentyfour/lost-lines-16553.txt",
+     "old": "9d0b213b4c5446634e70e1207da04a4ba1a1caaf",
+     "new": "31ffd5024833b421d556397fc932e14d5ae07796",
+     "dropped": {
+      "crates/pi-natives/src/desktop/macos/clicks.rs": [
+       "\t/// still has not delivered is lost: the record starts again. What it",
+       "\t/// missed counts as in the user's app, since a tool that swallows a",
+       "\t/// button before the session's tap, as remappers do, delivers it to no",
+       "\t/// app; after macOS disabled the tap it is unknown, as those events",
+       "\t/// reached apps.",
+       "\t\tassert_eq!(session.reading(true).placed, None);"
+      ]
+     }
     }
    ]
   },
