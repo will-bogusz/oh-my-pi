@@ -72893,6 +72893,17 @@
        "\t\t\texpect(guidance?.includes(\"`app: { relay: false }` for a throwaway managed browser\") ?? false).toBe(onRelay);"
       ]
      }
+    },
+    {
+     "at": "2026-11-16T02:05:12Z",
+     "reason": "Main-approved resolution of the v18.20.3 conflict in prompts/tools/browser.md (combined-18786.md): the dropped line is our old interaction line, now the union with main's mouseMove/clickAt/waitForUrl signatures",
+     "old": "ea44a3ed97318c3f99368cf8a7e73600d12eb5ed",
+     "new": "84a56fcf04199314638184b9e8ddb82aef96be13",
+     "dropped": {
+      "packages/coding-agent/src/prompts/tools/browser.md": [
+       "interaction: click(selector, {button?, count?}) dblclick hover focus check uncheck type(selector, text) fill(selector, text) press(key, {selector?}) keyDown keyUp mouseMove mouseDown mouseUp clickAt(x, y) wheel scroll(dx, dy) drag(from, to) highlight scrollIntoView select(selector, \u2026values) uploadFile(selector, \u2026paths)"
+      ]
+     }
     }
    ]
   },
