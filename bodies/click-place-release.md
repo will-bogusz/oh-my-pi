@@ -79,6 +79,7 @@ A press goes where `WindowServer` routed it (`kCGEventTargetUnixProcessID`). A r
 ## Limits
 
 - If a drag-release owner lookup outlasts the delivery window, its press can expire before the lookup returns, so dropping onto the target can count as staying in my app and let the focus guard restore the target I selected.
+- A press the tap delivers only after my app has begun the drag (its callback running tens of milliseconds late) reads my drop as a plain release: a target that drop brought forward is sent back once, and the call's later steps continue in the background.
 
 - My app and the target sharing a responsible process (target started from my terminal): nothing is mapped, so a click in my app's out-of-process panel counts as elsewhere.
 - My app's emoji picker belongs to CharacterPalette, which macOS holds responsible for itself: a click on it counts as elsewhere, as on `main`.
@@ -93,5 +94,6 @@ A press goes where `WindowServer` routed it (`kCGEventTargetUnixProcessID`). A r
 - [ ] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution
+
 
 
