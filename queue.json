@@ -94424,10 +94424,14 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-16T16:31:29Z",
+  "checked": "2026-11-16T17:01:47Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
+   "dialog-closed-state": {
+    "since": "2026-11-16T17:01:47Z",
+    "title": "fix(browser): forget a dialog the user or another client answered"
+   },
    "macos-move-receipt": {
     "since": "2026-11-14T05:00:07Z",
     "title": "fix(coding-agent): say what a macOS background move did"
@@ -94526,13 +94530,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-09T16:48:00Z",
-    "kind": "unopenable",
-    "id": "upload-stall-error",
-    "title": "fix(ai): say whether an Anthropic request body finished uploading when its connection drops",
-    "why": "opened as #18624"
-   },
    {
     "at": "2026-11-09T18:19:00Z",
     "kind": "unopenable",
@@ -97781,6 +97778,12 @@
     "files": [
      "MODULE.bazel.lock"
     ]
+   },
+   {
+    "at": "2026-11-16T17:01:47Z",
+    "kind": "openable",
+    "id": "dialog-closed-state",
+    "title": "fix(browser): forget a dialog the user or another client answered"
    }
   ]
  },
@@ -104420,8 +104423,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-16T16:36:25.111217Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-16T17:01:48.112406Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -106501,8 +106504,10 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with main in (branch missing on the fork)"
+    ],
     "note": "",
     "over": [],
     "paired": [],
