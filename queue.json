@@ -94966,7 +94966,20 @@
     }
    ],
    "opened": "2026-11-17T03:54:30Z",
-   "readied": "2026-11-17T03:54:54Z"
+   "readied": "2026-11-17T03:54:54Z",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-17T19:30:56Z",
+     "reason": "QueueThirtyOne final-head text fix (Main go): computer.md line 44 now also says menu: is refused under refuse",
+     "old": "8f0f48f03bf4d1b86ba33ce07a27f541db28d116",
+     "new": "0beab5c36a440aa3c605eab8375e07f66fcb94a3",
+     "dropped": {
+      "packages/coding-agent/src/prompts/tools/computer.md": [
+       "    for it. To choose an option, use `menu:`."
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "macos-keys-no-press",
