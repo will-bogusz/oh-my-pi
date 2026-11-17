@@ -95098,7 +95098,7 @@
    "needs": [
     "macos-reroute-not-a-press"
    ],
-   "base": "7c49c11aa5bbaf3f418406583096168ad5b8c6dc",
+   "base": "5edae5aa59216855335b891f2c929ae083245f86",
    "body": "bodies/macos-web-type-background.md",
    "state": "queued",
    "pr": null,
@@ -95106,7 +95106,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-web-type-background",
    "host": "MacBook-Pro",
    "added": "2026-11-14T20:50:44Z",
-   "updated": "2026-11-17T02:46:06Z",
+   "updated": "2026-11-17T02:55:25Z",
    "note": "MacLockWaits 2026-11-17: head 82a12571c8b on base 7c49c11aa5b. Self-focus proof and ancestry share the focus wait's deadline (enablement::budget per request, ancestry only when AXFocused is true); last answer in time decides; read-back every request bounded by time left of 1 s, cancel -> unconfirmed, element timeout restored; prompt states the unconfirmed exception; coding-agent CHANGELOG Fixed line. Reviews m4 MacLockWaitsReview + MacLockWaitsReview2 approve finding 3. rust-check macos/linux/windows at Rust diff b431ff573c. Not VM re-measured (tables from 521fdb3ad7b)."
   },
   {
