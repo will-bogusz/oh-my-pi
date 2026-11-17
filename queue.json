@@ -97523,7 +97523,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/account-switch-reason",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:19:21Z",
-   "updated": "2026-11-17T22:35:35Z",
+   "updated": "2026-11-17T22:54:22Z",
    "note": "Will, 2026-11-17: go-ahead to open",
    "kind": "proposal",
    "built": [
@@ -97555,24 +97555,6 @@
      "host": "MacBook-Pro"
     },
     {
-     "with": "#19513",
-     "code": "7dddacdfab1bbea036ab45d87704946d57787679",
-     "with_code": "49da0eefa5cd2d2653e00ae6de4a0d94dfc21f13",
-     "tip": "2c7c797eeb2e0eeca143cf8c1cbf66e282c73438",
-     "with_tip": "6b9f2cdcfd08e89639e1bfa955661601e70e2525",
-     "at": "2026-11-17T21:52:38Z",
-     "host": "MacBook-Pro"
-    },
-    {
-     "with": "#19516",
-     "code": "7dddacdfab1bbea036ab45d87704946d57787679",
-     "with_code": "e0d04259b3a1b34c6b652badd5104175329b8566",
-     "tip": "2c7c797eeb2e0eeca143cf8c1cbf66e282c73438",
-     "with_tip": "ff8424bcab2403c9fa8f8b026dc99d6b99ac7fb1",
-     "at": "2026-11-17T21:52:39Z",
-     "host": "MacBook-Pro"
-    },
-    {
      "with": "#19542",
      "code": "7dddacdfab1bbea036ab45d87704946d57787679",
      "with_code": "a85b6219a212dacf367a081c40744214f9cb326e",
@@ -97588,6 +97570,33 @@
      "tip": "2c7c797eeb2e0eeca143cf8c1cbf66e282c73438",
      "with_tip": "31cf61cebac4032268bb24a466a3971058db50e4",
      "at": "2026-11-17T21:52:39Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19513",
+     "code": "7dddacdfab1bbea036ab45d87704946d57787679",
+     "with_code": "58756d46d0aaa29d1bfd113ddd35ea5f4d7583d5",
+     "tip": "2c7c797eeb2e0eeca143cf8c1cbf66e282c73438",
+     "with_tip": "b318ff4225ac17579fa7ea14fc44aa6f535ee171",
+     "at": "2026-11-17T22:54:17Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19516",
+     "code": "7dddacdfab1bbea036ab45d87704946d57787679",
+     "with_code": "c35eb84674f684815047cf2878df282dd722c7f3",
+     "tip": "2c7c797eeb2e0eeca143cf8c1cbf66e282c73438",
+     "with_tip": "f0c8da3fd45354c11cd53f093fdcb854d61689db",
+     "at": "2026-11-17T22:54:22Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19592",
+     "code": "7dddacdfab1bbea036ab45d87704946d57787679",
+     "with_code": "2de31525408f5bd840a7993c119c6a71d310a52b",
+     "tip": "2c7c797eeb2e0eeca143cf8c1cbf66e282c73438",
+     "with_tip": "bbc606e53aac36298daa70e428e6c6f598fec211",
+     "at": "2026-11-17T22:54:22Z",
      "host": "MacBook-Pro"
     }
    ]
