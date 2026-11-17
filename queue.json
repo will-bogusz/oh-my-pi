@@ -82258,7 +82258,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-select-objects",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:27:26Z",
-   "updated": "2026-11-17T04:15:37Z",
+   "updated": "2026-11-17T04:15:59Z",
    "note": "",
    "advanced": "2026-11-17T03:26:59Z",
    "line_loss_overrides": [
@@ -82327,7 +82327,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-11-17T04:15:37Z"
+   "opened": "2026-11-17T04:15:37Z",
+   "readied": "2026-11-17T04:15:59Z"
   },
   {
    "id": "win-screen-locked",
