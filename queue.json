@@ -75300,7 +75300,28 @@
      "host": "MacBook-Pro"
     }
    ],
-   "advanced": "2026-11-17T23:12:00Z"
+   "advanced": "2026-11-17T23:12:00Z",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-17T23:37:48Z",
+     "reason": "Main, 2026-11-18: folded the no-preceding-action and batched-read tests into the settled-read test; every behaviour kept as a row",
+     "old": "297eb6fc26f164f71a65bedb008ac56bad45d929",
+     "new": "d0859f047c741882a043201d4d602f99b0313499",
+     "dropped": {
+      "packages/coding-agent/test/tools/browser-observe.test.ts": [
+       "\t\t\"read a fetch the click started once it answers, not the loading state\",",
+       "\t\t\t\t\t\treturn reads;",
+       "\t\t\t\texpect(result).toEqual([\"Detail\", \"Detail\", \"Detail\"]);",
+       "\t\t\"do not wait when no action came before them, even with a request in flight\",",
+       "\t\t\t\t\t\treturn [await tab.text(\"#pane\"), ${READ_PANE}];",
+       "\t\t\t\texpect(result).toEqual([\"Empty\", [\"Empty\", \"early\"]]);",
+       "\t\t\"settle reads issued together once, for all of them\",",
+       "\t\t\t\t\t`${latency(800)} await tab.click(\"#load\"); return await Promise.all([tab.text(\"#pane\"), tab.text(\"#pane\")]);`,",
+       "\t\t\t\texpect(result).toEqual([\"Detail\", \"Detail\"]);"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "act-look-prompt",
