@@ -94142,8 +94142,8 @@
    "worktree": "/home/will/.omp/main-wt/oh-my-pi/key-read-settled",
    "host": "goliath",
    "added": "2026-11-14T10:14:31Z",
-   "updated": "2026-11-17T03:24:17Z",
-   "note": "KeyMenu2 r4 2026-11-17: head d4e02a09386 on main 1bdbf6d242d. No wait under the input lease: an element action other than keys/typing on a popup with pending type-ahead pins EntryFront and waits before the lease (VM: menu click 100 ms after a letter ends on the menu item 20/20 vs the letter 20/20 on main; lease ~727 ms as main); reads under the lease return at once. Web pop-ups not watched; a refused first key marks nothing. Reviews: KeyMenuReview (Astra) and KeyMenuReviewSol needs-changes at c1ad0fa, all fixed; KeyMenu2.KeyReadFollowup needs-changes at 1df86fe then ready at d4e02a0. rust-check linux, windows, macos at d4e02a0. Not run: model sample for the prompt line (no model runs).",
+   "updated": "2026-11-17T03:24:23Z",
+   "note": "KeyMenu2 r4 2026-11-17: head d4e02a09386 on main 1bdbf6d242d. No wait under the input lease: an element action other than keys/typing on a popup with pending type-ahead pins EntryFront and waits before the lease (VM: menu click 100 ms after a letter ends on the menu item 20/20 vs the letter 20/20 on main; lease ~727 ms as main); reads under the lease return at once. Web pop-ups not watched; a refused first key marks nothing. Reviews: KeyMenuReview (Astra) and KeyMenuReviewSol needs-changes at c1ad0fa, all fixed; KeyMenu2.KeyReadFollowup needs-changes at 1df86fe then ready at d4e02a0. rust-check linux, windows, macos at d4e02a0. Not run: model sample for the prompt line (no model runs). Text-only amend e3e11216dfa (KeyMenu2, 2026-11-17): prompt line describes the letter effect only and points to menu:; docs:155 typing advice dropped; body adds Main sample (advising wording: Sol 4 of 15 wrong, main 0). Rust diff unchanged (69ba7a2054).",
    "advanced": "2026-11-17T00:50:21Z"
   },
   {
