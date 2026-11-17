@@ -1,0 +1,1 @@
+{{#if chooser}}a file chooser ({{#if folder}}a folder{{else if multiple}}one or more files{{else}}one file{{/if}}{{#if accept}}, accepting {{accept}}{{/if}}){{else}}{{#if alert}}an{{else}}a{{/if}} {{type}}({{message}}){{/if}}

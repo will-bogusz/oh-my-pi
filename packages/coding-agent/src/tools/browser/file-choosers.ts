@@ -1,8 +1,11 @@
 import type { Protocol } from "devtools-protocol";
 import * as fs from "node:fs/promises";
-import { truncate, untilAborted } from "@oh-my-pi/pi-utils";
+import { prompt, truncate, untilAborted } from "@oh-my-pi/pi-utils";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import type { CDPSession, Page } from "puppeteer-core";
+import chooserNotice from "../../prompts/tools/browser-file-chooser-notice.md" with { type: "text" };
+import folderRequired from "../../prompts/tools/browser-file-folder-required.md" with { type: "text" };
+import pickerRefusal from "../../prompts/tools/browser-file-picker-refusal.md" with { type: "text" };
 import { DialogStop } from "./dialog-stop";
 import { type DialogState, describeAnswer, describeWaiting } from "./dialogs";
 
@@ -275,15 +278,13 @@ export class FileChooserCatcher {
 	/** Refuse files a caught chooser cannot take: a File System Access picker, or more than its input accepts. */
 	async check(chooser: CaughtFileChooser, absolutePaths: string[], label: string): Promise<void> {
 		if (chooser.backendNodeId === undefined) {
-			throw new ToolError(
-				`${label} opened a File System Access picker (showOpenFilePicker), which automation cannot fill; upload through the page's <input type=file> or drop zone instead`,
-			);
+			throw new ToolError(prompt.render(pickerRefusal, { label }).trim());
 		}
 		const input = await chooser.input;
 		if (input?.webkitdirectory) {
 			const isFolder =
 				absolutePaths.length === 1 && (await fs.stat(absolutePaths[0]!).catch(() => null))?.isDirectory();
-			if (!isFolder) throw new ToolError(`${label}: the file chooser picks a folder; give one folder path`);
+			if (!isFolder) throw new ToolError(prompt.render(folderRequired, { label }).trim());
 		} else if (absolutePaths.length > 1 && !chooser.multiple) {
 			throw new ToolError("Multiple file uploads only work with <input type=file multiple>");
 		}
@@ -330,12 +331,17 @@ export class FileChooserCatcher {
 	}
 
 	async #describe(chooser: CaughtFileChooser): Promise<string> {
-		const when = chooser.betweenCalls ? "after the previous browser call returned" : "during this call";
 		if (chooser.backendNodeId === undefined) {
-			return `The page opened a File System Access file picker ${when}. omp cannot fill those pickers, so Chrome cancelled it (the page got an AbortError) and no dialog appeared on screen. Use the page's <input type=file> or drop zone with tab.uploadFile(selector, path) instead.`;
+			return prompt.render(chooserNotice, { picker: true, previous: chooser.betweenCalls }).trim();
 		}
 		const state = chooserState(chooser, await chooser.input);
-		return `The page opened ${describeWaiting(state)} ${when}. omp is holding it, so no file dialog appeared on screen; the page is waiting for files. ${describeAnswer(state)}`;
+		return prompt
+			.render(chooserNotice, {
+				previous: chooser.betweenCalls,
+				waiting: describeWaiting(state),
+				answer: describeAnswer(state),
+			})
+			.trim();
 	}
 
 	readonly #onOpened = (event: Protocol.Page.FileChooserOpenedEvent): void => {

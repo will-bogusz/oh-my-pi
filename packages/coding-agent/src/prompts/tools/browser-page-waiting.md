@@ -1,0 +1,1 @@
+{{#if label}}{{#if opened}}{{label}}: the page opened {{waiting}} and waits on it.{{else}}{{label}} cannot run: the page is waiting on {{waiting}}.{{/if}}{{else}}The page is waiting on {{waiting}}.{{/if}} {{answer}}

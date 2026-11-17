@@ -1,4 +1,4 @@
-import { untilAborted } from "@oh-my-pi/pi-utils";
+import { prompt, untilAborted } from "@oh-my-pi/pi-utils";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import type {
 	ElementHandle,
@@ -11,6 +11,7 @@ import type {
 	Page,
 	Realm,
 } from "puppeteer-core";
+import uploadStillWaiting from "../../prompts/tools/browser-upload-still-waiting.md" with { type: "text" };
 import { ToolAbortError, throwIfAborted } from "../tool-errors";
 import type { CaughtFileChooser, FileChooserCatcher } from "./file-choosers";
 import { splitKeyCombo, ternKey } from "./tern/keys";
@@ -1675,9 +1676,7 @@ export async function prepareElementUpload(
 	const keepWaiting = async (error: unknown): Promise<unknown> => {
 		settled = true;
 		if (!(await choosers.holdIfWaiting(chooser)) || !(error instanceof ToolError)) return error;
-		return new ToolError(
-			`${error.message}. The file chooser is still waiting: answer it with tab.handleDialog({ accept: true, files: [...] }) or cancel it with tab.handleDialog({ accept: false }).`,
-		);
+		return new ToolError(prompt.render(uploadStillWaiting, { error: error.message }).trim());
 	};
 	try {
 		await choosers.check(chooser, absolutePaths, label);

@@ -1,5 +1,8 @@
 import type { Dialog, Frame, Page } from "puppeteer-core";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
+import { prompt } from "@oh-my-pi/pi-utils";
+import dialogAnswer from "../../prompts/tools/browser-dialog-answer.md" with { type: "text" };
+import dialogWaiting from "../../prompts/tools/browser-dialog-waiting.md" with { type: "text" };
 
 /** Automatic JavaScript-dialog policy. */
 export type DialogPolicy = "accept" | "dismiss";
@@ -27,26 +30,29 @@ export class PageWaitError extends ToolError {}
 
 /** How to answer what the page waits on, for errors and notices. */
 export function describeAnswer(state: DialogState): string {
-	switch (state.type) {
-		case "file-chooser":
-			return `Answer it with tab.handleDialog({ accept: true, files: ${state.folder ? "[folderPath]" : "[path, ...]"} }) or cancel it with tab.handleDialog({ accept: false }).`;
-		case "prompt":
-			return 'Answer it with tab.handleDialog({ accept: true, text: "..." }) or tab.handleDialog({ accept: false }).';
-		case "alert":
-			return "Close it with tab.handleDialog({ accept: true }).";
-		default:
-			return "Answer it with tab.handleDialog({ accept: true }) or tab.handleDialog({ accept: false }).";
-	}
+	return prompt
+		.render(dialogAnswer, {
+			chooser: state.type === "file-chooser",
+			folder: state.folder,
+			prompt: state.type === "prompt",
+			alert: state.type === "alert",
+		})
+		.trim();
 }
 
 /** What the page waits on, in a phrase: `a confirm("Delete?")` or `a file chooser (one file, accepting "image/*")`. */
 export function describeWaiting(state: DialogState): string {
-	if (state.type === "file-chooser") {
-		const what = state.folder ? "a folder" : state.multiple ? "one or more files" : "one file";
-		const accept = state.accept ? `, accepting ${JSON.stringify(state.accept)}` : "";
-		return `a file chooser (${what}${accept})`;
-	}
-	return `${state.type === "alert" ? "an" : "a"} ${state.type}(${JSON.stringify(state.message?.slice(0, 80) ?? "")})`;
+	return prompt
+		.render(dialogWaiting, {
+			chooser: state.type === "file-chooser",
+			folder: state.folder,
+			multiple: state.multiple,
+			accept: state.accept ? JSON.stringify(state.accept) : undefined,
+			alert: state.type === "alert",
+			type: String(state.type),
+			message: JSON.stringify(state.message?.slice(0, 80) ?? ""),
+		})
+		.trim();
 }
 
 /**

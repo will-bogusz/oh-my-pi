@@ -3,7 +3,7 @@ import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 
-import { formatBytes, isRecord, postmortem, Snowflake, untilAborted, withTimeout } from "@oh-my-pi/pi-utils";
+import { formatBytes, isRecord, postmortem, prompt, Snowflake, untilAborted, withTimeout } from "@oh-my-pi/pi-utils";
 import type { HTMLElement } from "@oh-my-pi/pi-utils/dom";
 import type {
 	Accessibility,
@@ -25,6 +25,13 @@ import type {
 	Target,
 } from "puppeteer-core";
 import { stringifyFunction } from "puppeteer-core/internal/util/Function.js";
+import dialogDismissed from "../../prompts/tools/browser-dialog-dismissed.md" with { type: "text" };
+import dialogFilesInapplicable from "../../prompts/tools/browser-dialog-files-inapplicable.md" with { type: "text" };
+import chooserFilesRequired from "../../prompts/tools/browser-file-chooser-files-required.md" with { type: "text" };
+import chooserMissing from "../../prompts/tools/browser-file-chooser-missing.md" with { type: "text" };
+import handleInvalidated from "../../prompts/tools/browser-handle-invalidated.md" with { type: "text" };
+import pageWaiting from "../../prompts/tools/browser-page-waiting.md" with { type: "text" };
+import gotoTimeout from "../../prompts/tools/browser-goto-timeout.md" with { type: "text" };
 import { JsRuntime, type RuntimeHooks } from "../../eval/js/shared/runtime";
 import { resizeImage } from "../../utils/image-resize";
 import { resolveToCwd } from "../path-utils";
@@ -618,10 +625,7 @@ export type ActionableHandle = InteractionHandle & ElementQueryHelpers & { fill(
  * handle action rejects with a named error before the cell budget instead of
  * hanging on puppeteer's protocol timeout.
  */
-export type HandleOpGuard = <T>(
-	label: string,
-	fn: (signal: AbortSignal) => Promise<T>,
-) => Promise<T>;
+export type HandleOpGuard = <T>(label: string, fn: (signal: AbortSignal) => Promise<T>) => Promise<T>;
 
 /**
  * Every `ElementHandle` method that dispatches input, pointer/touch, drag, or navigation
@@ -703,10 +707,7 @@ async function runGuardedHandleAction<T>(
 	invalidate?: () => Promise<void>,
 ): Promise<T> {
 	if (state.invalidatedBy) {
-		throw new ToolError(
-			`${label} cannot run: this handle was invalidated after ${state.invalidatedBy}; ` +
-				"run tab.observe() or tab.ariaSnapshot() to resolve a fresh handle",
-		);
+		throw new ToolError(prompt.render(handleInvalidated, { label, reason: state.invalidatedBy }).trim());
 	}
 	throwIfAborted(signal);
 	const pending = action();
@@ -1164,17 +1165,15 @@ export function toActionableHandle(
 		const original = originals.interactive[method];
 		if (!original) continue;
 		methods[method] = (...args) =>
-			guard(
-				`handle.${method}()`,
-				signal =>
-					runGuardedHandleAction(
-						enriched,
-						originals,
-						`handle.${method}()`,
-						signal,
-						() => (method === "press" ? original(args[0], args[1], signal) : original(...args)),
-						invalidate,
-					),
+			guard(`handle.${method}()`, signal =>
+				runGuardedHandleAction(
+					enriched,
+					originals,
+					`handle.${method}()`,
+					signal,
+					() => (method === "press" ? original(args[0], args[1], signal) : original(...args)),
+					invalidate,
+				),
 			);
 	}
 	// An element handle a read returns gets the same guards, so a child resolved before the page started waiting
@@ -1216,36 +1215,30 @@ export function toActionableHandle(
 			),
 		);
 	enriched.click = options =>
-		guard<void>(
-			"handle.click()",
-			signal =>
-				runGuardedHandleAction(
-					enriched,
-					originals,
-					"handle.click()",
-					signal,
-					() =>
-						clickElement(enriched, "handle.click()", signal, {
-							button: options?.button,
-							count: options?.count,
-						}),
-					invalidate,
-				),
-			"answers",
+		guard<void>("handle.click()", signal =>
+			runGuardedHandleAction(
+				enriched,
+				originals,
+				"handle.click()",
+				signal,
+				() =>
+					clickElement(enriched, "handle.click()", signal, {
+						button: options?.button,
+						count: options?.count,
+					}),
+				invalidate,
+			),
 		);
 	enriched.dblclick = () =>
-		guard<void>(
-			"handle.dblclick()",
-			signal =>
-				runGuardedHandleAction(
-					enriched,
-					originals,
-					"handle.dblclick()",
-					signal,
-					() => clickElement(enriched, "handle.dblclick()", signal, { count: 2 }),
-					invalidate,
-				),
-			"answers",
+		guard<void>("handle.dblclick()", signal =>
+			runGuardedHandleAction(
+				enriched,
+				originals,
+				"handle.dblclick()",
+				signal,
+				() => clickElement(enriched, "handle.dblclick()", signal, { count: 2 }),
+				invalidate,
+			),
 		);
 	enriched.hover = () =>
 		guard<void>("handle.hover()", signal =>
@@ -2682,7 +2675,7 @@ export class WorkerCore {
 					// gets "No dialog is showing" and the page stays stopped. Dismiss it here, as the reset would.
 					if (dialog?.open) void this.#dialogs?.handle({ accept: false }).catch(() => undefined);
 					const dialogNote = dialog?.open
-						? `; the page was waiting on ${describeWaiting(dialog)}, which omp dismissed so the tab can recover`
+						? prompt.render(dialogDismissed, { waiting: describeWaiting(dialog) }).trim()
 						: "";
 					const pageErrorCount = this.#consoleCapture.errorCountSince(runErrorStartSeq);
 					const pageErrorNote =
@@ -2808,7 +2801,10 @@ export class WorkerCore {
 			for (const notice of nativeNotices) output.pushText(`${notice}\n`);
 			// A dialog the call's last input opened ends that input as delivered; the result says what waits, once.
 			const dialog = this.#dialogs?.takeUnreported();
-			if (dialog) output.pushText(`The page is waiting on ${describeWaiting(dialog)}. ${describeAnswer(dialog)}\n`);
+			if (dialog)
+				output.pushText(
+					`${prompt.render(pageWaiting, { waiting: describeWaiting(dialog), answer: describeAnswer(dialog) }).trim()}\n`,
+				);
 			if (this.#unanswered !== active) return;
 			this.#unanswered = null;
 			this.#sendResult({
@@ -2939,7 +2935,9 @@ export class WorkerCore {
 				const waiting = await this.#pageWaitsOn();
 				if (waiting) {
 					throw new PageWaitError(
-						`${label} cannot run: the page is waiting on ${describeWaiting(waiting)}. ${describeAnswer(waiting)}`,
+						prompt
+							.render(pageWaiting, { label, waiting: describeWaiting(waiting), answer: describeAnswer(waiting) })
+							.trim(),
 					);
 				}
 			}
@@ -2968,7 +2966,14 @@ export class WorkerCore {
 							return opts?.whenWaiting ? opts.whenWaiting() : (undefined as T);
 						}
 						const error = new PageWaitError(
-							`${label}: the page opened ${describeWaiting(state)} and waits on it. ${describeAnswer(state)}`,
+							prompt
+								.render(pageWaiting, {
+									label,
+									opened: true,
+									waiting: describeWaiting(state),
+									answer: describeAnswer(state),
+								})
+								.trim(),
 						);
 						interruptAc.abort(error);
 						throw error;
@@ -3218,7 +3223,7 @@ export class WorkerCore {
 								// later op on this page and cascades into more opaque timeouts.
 								await this.#stopLoading();
 								throw new NavigationTimeoutError(
-									`tab.goto(${JSON.stringify(url)}) timed out after ${budgetBound}ms; pending navigation stopped — retry with a longer tool timeout or waitUntil:"domcontentloaded"`,
+									prompt.render(gotoTimeout, { url: JSON.stringify(url), timeout: budgetBound }).trim(),
 								);
 							}
 							throw err;
@@ -3425,7 +3430,10 @@ export class WorkerCore {
 				documentOp(
 					"tab.evaluate()",
 					INF,
-					sig => untilAborted(sig, () => evaluateInRealm(page.mainFrame().mainRealm(), fn as PageFunction, args, false, sig)),
+					sig =>
+						untilAborted(sig, () =>
+							evaluateInRealm(page.mainFrame().mainRealm(), fn as PageFunction, args, false, sig),
+						),
 					{ pageWait: "input" },
 				) as never,
 			scrollIntoView: selector =>
@@ -3502,7 +3510,10 @@ export class WorkerCore {
 					untilAborted(sig, async () => enrich(await this.#resolveAriaRef(id))),
 				),
 			cookies: opts =>
-				op("tab.cookies()", quickOpMs, sig => readCookies(page, opts, sig), { awaitNavigation: true, pageWait: "reads" }),
+				op("tab.cookies()", quickOpMs, sig => readCookies(page, opts, sig), {
+					awaitNavigation: true,
+					pageWait: "reads",
+				}),
 			setCookies: (...cookies) => op("tab.setCookies()", actionOpMs, sig => setPageCookies(page, cookies, sig)),
 			clearCookies: opts => op("tab.clearCookies()", actionOpMs, sig => clearPageCookies(page, opts, sig)),
 			storage: (kind, opts) => documentOp("tab.storage()", quickOpMs, sig => readStorage(page, kind, opts, sig)),
@@ -3882,10 +3893,15 @@ export class WorkerCore {
 			// Raw pointer input runs at once, as on main: sent the moment a new document had parsed, a click did not
 			// reach it.
 			clickAt: (x, y, opts) =>
-				input("tab.clickAt()", actionOpMs, async sig => {
-					const point = this.#pointerSpace.toViewport({ x, y, css: opts?.css }, page.viewport() ?? undefined);
-					await clickAt(page, point.x, point.y, opts, sig);
-				}, { pageWait: "input" }),
+				input(
+					"tab.clickAt()",
+					actionOpMs,
+					async sig => {
+						const point = this.#pointerSpace.toViewport({ x, y, css: opts?.css }, page.viewport() ?? undefined);
+						await clickAt(page, point.x, point.y, opts, sig);
+					},
+					{ pageWait: "input" },
+				),
 			wheel: (deltaX, deltaY) => input("tab.wheel()", actionOpMs, sig => wheel(page, deltaX, deltaY, sig)),
 			highlight: (selector, opts) =>
 				documentOp(
@@ -4581,7 +4597,9 @@ export class WorkerCore {
 		if (dialog.open) {
 			if (opts.files !== undefined) {
 				throw new ToolError(
-					`tab.handleDialog(): the page is waiting on ${describeWaiting(dialog)}, not a file chooser, so files do not apply. ${describeAnswer(dialog)}`,
+					prompt
+						.render(dialogFilesInapplicable, { waiting: describeWaiting(dialog), answer: describeAnswer(dialog) })
+						.trim(),
 				);
 			}
 			await untilAborted(signal, () => dialogs.handle(opts));
@@ -4593,7 +4611,7 @@ export class WorkerCore {
 			throw new ToolError(
 				opts.files === undefined
 					? "tab.handleDialog() found nothing waiting: no JavaScript dialog and no held file chooser"
-					: "No file chooser is waiting. Use tab.uploadFile(selector, ...paths) on the file input, the control that opens its chooser, or its drop zone.",
+					: prompt.render(chooserMissing, {}).trim(),
 			);
 		}
 		if (!opts.accept) {
@@ -4601,9 +4619,7 @@ export class WorkerCore {
 			return;
 		}
 		if (!opts.files?.length) {
-			throw new ToolError(
-				"tab.handleDialog(): a file chooser is waiting; pass files: [path, ...] to fill it, or accept: false to cancel it",
-			);
+			throw new ToolError(prompt.render(chooserFilesRequired, {}).trim());
 		}
 		const absolute = opts.files.map(filePath => resolveToCwd(filePath, session.cwd));
 		// Through the tab's upload route, as `tab.uploadFile` fills a chooser: a browser that cannot read omp's paths

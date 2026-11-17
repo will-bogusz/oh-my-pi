@@ -18,9 +18,10 @@ import { AsyncLocalStorage } from "node:async_hooks";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { isRecord, logger, Snowflake, untilAborted } from "@oh-my-pi/pi-utils";
+import { isRecord, logger, prompt, Snowflake, untilAborted } from "@oh-my-pi/pi-utils";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import { JsRuntime } from "../../../eval/js/shared/runtime";
+import chooserRefusal from "../../../prompts/tools/browser-tern-chooser-refusal.md" with { type: "text" };
 import { resizeImage } from "../../../utils/image-resize";
 import { resolveToCwd } from "../../path-utils";
 import { ToolAbortError, throwIfAborted } from "../../tool-errors";
@@ -3219,9 +3220,7 @@ export class TernTab implements InProcessRunTab {
 	/** Accept or dismiss the held dialog. Tern holds no file chooser, so `files` has nothing to answer. */
 	async handleDialog(opts: { accept: boolean; text?: string; files?: string[] }): Promise<void> {
 		if (opts.files !== undefined) {
-			throw new ToolError(
-				"tab.handleDialog({ files }) answers a file chooser omp holds, which the Tern backend does not; use tab.uploadFile(selector, ...paths)",
-			);
+			throw new ToolError(prompt.render(chooserRefusal, {}).trim());
 		}
 		try {
 			await this.#op("dialog", {
