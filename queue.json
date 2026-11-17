@@ -96370,14 +96370,15 @@
    "needs": [],
    "base": "baf60290fde5e9eea4edb30bff07695877682ba9",
    "body": "bodies/docs-reclaim-drift.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19586,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/docs-reclaim-drift",
    "host": "MacBook-Pro",
    "added": "2026-11-17T20:54:14Z",
-   "updated": "2026-11-17T20:54:14Z",
-   "note": ""
+   "updated": "2026-11-17T20:58:21Z",
+   "note": "",
+   "opened": "2026-11-17T20:58:21Z"
   },
   {
    "id": "image-eviction-notice",
