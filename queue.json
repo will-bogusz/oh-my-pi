@@ -58763,7 +58763,40 @@
    ],
    "advanced": "2026-11-16T21:05:06Z",
    "opened": "2026-11-02T03:27:34Z",
-   "readied": "2026-11-02T03:27:55Z"
+   "readied": "2026-11-02T03:27:55Z",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-17T04:03:46Z",
+     "reason": "BritPointer17756's fix for Brit's change request: the Shift primer runs only on the first tap/scroll after a takeover pointer call",
+     "old": "5fa26ba5481db59442c67c224e6eb42cf2131d83",
+     "new": "02c153e5cb6a1e80b9000e2c423386bf7423ac85",
+     "dropped": {
+      "crates/pi-natives/src/desktop/macos/input.rs": [
+       "/// first aims it with a lone release, which taps nothing. Taps and scrolls are",
+       "/// primed first ([`prime_reports`]); other events take the ordinary route.",
+       "\t\t\tprimed(wid, before_post, prime, || {",
+       "\t\tPointerEvent::Scroll { x, y, dx, dy } => primed(wid, before_post, prime, || {",
+       "/// Runs `send` once `before_post` passes and `prime` has gone out; a cancel",
+       "/// during priming stops the call before any pointer event.",
+       "\tprime().map_err(|error| {",
+       "\t\tDesktopError::new(",
+       "\tfn iphone_mirroring_taps_are_primed_once_per_call_and_never_after_a_refusal() {",
+       "\t\tprimed(42, check, prime, || {",
+       "\t\t\treport_taps(2, check, |event_type, _| {",
+       "\t\tlet error = primed(42, refused, prime, || -> CoreResult<()> { panic!(\"no pointer input\") })",
+       "\t\t// A failed primer retains its code, names the pointer operation and",
+       "\t\t// window, and sends no pointer input. BackgroundUnavailable still",
+       "\t\t// permits the configured takeover fallback; UserIntervened never does.",
+       "\t\tlet failing = || Err(DesktopError::background_unavailable(\"the keys cannot reach it\"));",
+       "\t\tlet error = primed(42, check, failing, || -> CoreResult<()> { panic!(\"no pointer input\") })",
+       "\t\t\t\t.contains(\"pointer input could not prime window 42 with Shift\")",
+       "\t\tassert!(error.message.ends_with(\"the keys cannot reach it\"));",
+       "\t\tlet error = primed(42, check, refused, || -> CoreResult<()> { panic!(\"no pointer input\") })",
+       "\t\t\t\t|| -> CoreResult<()> { panic!(\"no pointer input\") },"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "iphone-mirror-scroll-distance",
