@@ -87793,7 +87793,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-keysym-remap",
    "host": "MacBook-Pro",
    "added": "2026-11-11T13:55:21Z",
-   "updated": "2026-11-17T04:02:47Z",
+   "updated": "2026-11-17T04:06:49Z",
    "note": "LinuxGrabs, 2026-11-17: head 719b46266b0 (local branch, on main 1bdbf6d242d): grab only for keymap reads/writes; rebind owns old+new keysym until the write lands; close returns restore failures; over-capacity text refused before any key (MPX warm-up deferred after bind). Linux/macOS/Windows rust-check recorded. Sol reviews: round 1 findings fixed; round 2 (b)(c) closed, MPX warm-up finding fixed.",
    "line_loss_overrides": [
     {
@@ -87840,15 +87840,6 @@
    ],
    "advanced": "2026-11-17T03:19:19Z",
    "built": [
-    {
-     "with": "#17756",
-     "code": "6d4331bc3c7625d0229fade13237280aba610203",
-     "with_code": "00b33a7b015bc7730a8a6926657f2a3f49039187",
-     "tip": "719b46266b0c47af26e0011a7d1a784104e4cb23",
-     "with_tip": "5fa26ba5481db59442c67c224e6eb42cf2131d83",
-     "at": "2026-11-17T04:01:27Z",
-     "host": "MacBook-Pro"
-    },
     {
      "with": "#19195",
      "code": "6d4331bc3c7625d0229fade13237280aba610203",
@@ -87901,6 +87892,15 @@
      "tip": "719b46266b0c47af26e0011a7d1a784104e4cb23",
      "with_tip": "8f0f48f03bf4d1b86ba33ce07a27f541db28d116",
      "at": "2026-11-17T04:02:42Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#17756",
+     "code": "6d4331bc3c7625d0229fade13237280aba610203",
+     "with_code": "0d8ce0853d7a35698937e2f28ecfef19e265c94e",
+     "tip": "719b46266b0c47af26e0011a7d1a784104e4cb23",
+     "with_tip": "02c153e5cb6a1e80b9000e2c423386bf7423ac85",
+     "at": "2026-11-17T04:06:45Z",
      "host": "MacBook-Pro"
     }
    ]
