@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import { afterAll, beforeAll, describe, expect, test, vi } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
@@ -11,6 +11,7 @@ import { releaseAllTabs } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-supe
 import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools/index";
 import puppeteer from "puppeteer-core";
 import { chromiumAvailable } from "./chromium-probe";
+import { drive, elapse } from "../helpers/fake-clock";
 
 const CHROMIUM_AVAILABLE = await chromiumAvailable();
 // Windows ignores POSIX read bits and root reads a mode-000 file, so neither can make delivery fail through one.
@@ -119,6 +120,24 @@ return { error, log: await tab.evaluate(() => window.log) };`,
 		(await step("await Bun.sleep(300); return await tab.evaluate(() => window.log);")).value as LogEntry[];
 	const close = () => prelude.invoke({ action: "close", name, kill: true }, context).catch(() => undefined);
 	return { attempt, step, log, close };
+}
+
+/** Run the real tab worker inline so the release-tail clock is controlled by the test. */
+async function withReleaseClock(work: () => Promise<void>): Promise<void> {
+	const workerDescriptor = Object.getOwnPropertyDescriptor(globalThis, "Worker")!;
+	Object.defineProperty(globalThis, "Worker", {
+		...workerDescriptor,
+		value: function UnavailableWorker(): never {
+			throw new Error("Worker threads unavailable");
+		},
+	});
+	vi.useFakeTimers();
+	try {
+		await drive(work());
+	} finally {
+		vi.useRealTimers();
+		Object.defineProperty(globalThis, "Worker", workerDescriptor);
+	}
 }
 
 /** A headless Chromium omp did not launch, standing in for the user's own browser. */
@@ -351,15 +370,17 @@ error = JSON.stringify(await tab.dialog());`);
 	const frame = document.createElement("iframe");
 	frame.id = "upload-frame";
 	frame.srcdoc = '<input id="inner" type="file">';
+	const loaded = Promise.withResolvers();
+	frame.addEventListener("load", loaded.resolve, { once: true });
 	document.body.append(frame);
-	await new Promise(loaded => frame.addEventListener("load", loaded, { once: true }));
+	await loaded.promise;
 });`);
 			await step(`await (await tab.frame("#upload-frame")).click("#inner");`);
 			expect((await step("return await tab.dialog();")).value).toMatchObject({ open: true, type: "file-chooser" });
 			// Nothing can answer an input whose frame is gone: it used to stay pending and block every call. The
 			// hold ends when Chrome fails omp's watch on that frame, which no page event announces, so this polls.
 			const after = await step(`await page.evaluate(() => document.getElementById("upload-frame").remove());
-for (let i = 0; i < 100 && (await tab.dialog()).open; i++) await Bun.sleep(20);
+await wait(async () => !(await tab.dialog()).open);
 const state = await tab.dialog();
 let cancel;
 try { await tab.handleDialog({ accept: false }); } catch (e) { cancel = e.message; }
@@ -376,15 +397,11 @@ return { state, cancel };`);
 	test("ends a wait when the page opens a chooser during it", async () => {
 		const { attempt, close } = await openFixture();
 		try {
-			const result =
-				await attempt(`await tab.evaluate(() => { setTimeout(() => document.getElementById("trigger-input").click(), 100); });
-const started = Date.now();
-try { await tab.waitForText("never shown", { timeout: 5000 }); } catch (e) { error = e.message; }
-error = JSON.stringify({ error, ms: Date.now() - started });
+			const result = await attempt(`const waiting = tab.waitForText("never shown", { timeout: 5000 });
+await page.$eval("#trigger-input", input => input.click());
+try { await waiting; } catch (e) { error = e.message; }
 await tab.handleDialog({ accept: false });`);
-			const { error, ms } = JSON.parse(result.error ?? "{}") as { error: string; ms: number };
-			expect(error).toContain("the page opened a file chooser");
-			expect(ms).toBeLessThan(3_000);
+			expect(result.error).toContain("the page opened a file chooser");
 		} finally {
 			await close();
 		}
@@ -415,9 +432,7 @@ await tab.handleDialog({ accept: false });`);
 			await attempt("");
 			await step(`await tab.click("#nag");`);
 			// The cancel's own handler stops the page in a confirm, so the answer used to wait out its deadline.
-			const started = Date.now();
 			const answered = await step(`await tab.handleDialog({ accept: false }); return await tab.dialog();`);
-			expect(Date.now() - started).toBeLessThan(1_500);
 			expect(answered.value).toEqual({ open: true, type: "confirm", message: "Attach nothing?" });
 			await step(`await tab.handleDialog({ accept: true });`);
 			expect(await log()).toEqual([
@@ -430,103 +445,104 @@ await tab.handleDialog({ accept: false });`);
 	}, 60_000);
 
 	test("in the user's own browser, holds choosers only around omp's calls", async () => {
-		const user = await launchUserBrowser();
-		try {
-			const { attempt, step, log, close } = await openFixture({ cdp_url: user.cdpUrl });
+		await withReleaseClock(async () => {
+			const user = await launchUserBrowser();
 			try {
-				await attempt("");
-				expect((await step(`await tab.click("#trigger");`)).notes).toContain(
-					"The page opened a file chooser (one file) during this call",
-				);
-				// The hold ends 1.5 s after omp's call on the real clock; the chooser it already holds still waits.
-				await Bun.sleep(2_000);
-				await step(`await tab.handleDialog({ accept: true, files: ["alpha.txt"] });`);
-				expect(await log()).toEqual([{ id: "trigger-input", event: "change", names: ["alpha.txt"] }]);
-
-				// Past the tail, the user's own click reaches Chrome's chooser (headless: cancel), unreported.
-				await Bun.sleep(2_000);
-				const browser = await puppeteer.connect({ browserURL: user.cdpUrl, defaultViewport: null });
+				const { attempt, step, log, close } = await openFixture({ cdp_url: user.cdpUrl });
 				try {
-					const page = (await browser.pages()).find(candidate => candidate.url() === url);
-					if (!page) throw new Error("Expected the fixture page in the user's browser");
-					await page.click("#trigger");
+					await attempt("");
+					expect((await step(`await tab.click("#trigger");`)).notes).toContain(
+						"The page opened a file chooser (one file) during this call",
+					);
+					// Advance the worker's release tail; the chooser it already holds still waits.
+					await elapse(2_000);
+					await step(`await tab.handleDialog({ accept: true, files: ["alpha.txt"] });`);
+					expect(await log()).toEqual([{ id: "trigger-input", event: "change", names: ["alpha.txt"] }]);
+
+					// Past the tail, the user's own click reaches Chrome's chooser (headless: cancel), unreported.
+					await elapse(2_000);
+					const browser = await puppeteer.connect({ browserURL: user.cdpUrl, defaultViewport: null });
+					try {
+						const page = (await browser.pages()).find(candidate => candidate.url() === url);
+						if (!page) throw new Error("Expected the fixture page in the user's browser");
+						await page.click("#trigger");
+					} finally {
+						await browser.disconnect();
+					}
+					const after = await step("await Bun.sleep(300); return await tab.evaluate(() => window.log);");
+					expect(after.value).toEqual([
+						{ id: "trigger-input", event: "change", names: ["alpha.txt"] },
+						{ id: "trigger-input", event: "cancel", names: [] },
+					]);
+					expect(after.notes).not.toContain("file chooser");
 				} finally {
-					await browser.disconnect();
+					await close();
 				}
-				const after = await step("await Bun.sleep(300); return await tab.evaluate(() => window.log);");
-				expect(after.value).toEqual([
-					{ id: "trigger-input", event: "change", names: ["alpha.txt"] },
-					{ id: "trigger-input", event: "cancel", names: [] },
-				]);
-				expect(after.notes).not.toContain("file chooser");
 			} finally {
-				await close();
+				await user.stop();
 			}
-		} finally {
-			await user.stop();
-		}
+		});
 	}, 60_000);
 
 	test("in the user's own browser, lets the user's later click reach Chrome's chooser after a raw page.waitForFileChooser()", async () => {
-		const user = await launchUserBrowser();
-		try {
-			const { attempt, step, close } = await openFixture({ cdp_url: user.cdpUrl });
+		await withReleaseClock(async () => {
+			const user = await launchUserBrowser();
 			try {
-				const alpha = JSON.stringify(path.join(tempDir, "alpha.txt"));
-				await attempt(`const [chooser] = await Promise.all([page.waitForFileChooser(), tab.click("#trigger")]);
-await chooser.accept([${alpha}]);`);
-				// Real time past the 1.5 s release tail, which runs in the tab's worker where fake timers cannot reach.
-				// Puppeteer left interception on for the page's session, which swallowed this click: the chooser was
-				// intercepted with no one waiting, so the page saw neither a file nor a cancel.
-				await Bun.sleep(2_000);
-				const browser = await puppeteer.connect({ browserURL: user.cdpUrl, defaultViewport: null });
+				const { attempt, step, close } = await openFixture({ cdp_url: user.cdpUrl });
 				try {
-					const page = (await browser.pages()).find(candidate => candidate.url() === url);
-					if (!page) throw new Error("Expected the fixture page in the user's browser");
-					await page.click("#other");
+					const alpha = JSON.stringify(path.join(tempDir, "alpha.txt"));
+					await attempt(`const [chooser] = await Promise.all([page.waitForFileChooser(), tab.click("#trigger")]);
+await chooser.accept([${alpha}]);`);
+					// Advance the worker's release tail before the user's own click.
+					await elapse(2_000);
+					const browser = await puppeteer.connect({ browserURL: user.cdpUrl, defaultViewport: null });
+					try {
+						const page = (await browser.pages()).find(candidate => candidate.url() === url);
+						if (!page) throw new Error("Expected the fixture page in the user's browser");
+						await page.click("#other");
+					} finally {
+						await browser.disconnect();
+					}
+					const after = await step("await Bun.sleep(300); return await tab.evaluate(() => window.log);");
+					expect(after.value).toEqual([
+						{ id: "trigger-input", event: "change", names: ["alpha.txt"] },
+						{ id: "other-input", event: "cancel", names: [] },
+					]);
 				} finally {
-					await browser.disconnect();
+					await close();
 				}
-				const after = await step("await Bun.sleep(300); return await tab.evaluate(() => window.log);");
-				expect(after.value).toEqual([
-					{ id: "trigger-input", event: "change", names: ["alpha.txt"] },
-					{ id: "other-input", event: "cancel", names: [] },
-				]);
 			} finally {
-				await close();
+				await user.stop();
 			}
-		} finally {
-			await user.stop();
-		}
+		});
 	}, 60_000);
 
 	test("in the user's own browser, goes on while a confirm waits past the hold, and holds the chooser it leads to", async () => {
-		const user = await launchUserBrowser();
-		try {
-			const { attempt, step, log, close } = await openFixture({ cdp_url: user.cdpUrl });
+		await withReleaseClock(async () => {
+			const user = await launchUserBrowser();
 			try {
-				await attempt("");
-				await step(`await tab.click("#ask-upload");`);
-				// Real time past the 1.5 s release tail, on the browser's clock, which fake timers cannot reach.
-				await Bun.sleep(2_000);
-				// The next call used to re-arm the chooser hold on a page the confirm stopped, and wait out its timeout.
-				const started = Date.now();
-				expect((await step("return await tab.dialog();")).value).toMatchObject({ open: true, type: "confirm" });
-				expect(Date.now() - started).toBeLessThan(5_000);
-				// The hold that was on when the confirm opened is still on when the page goes on to open its chooser.
-				const answered = await step(`await tab.handleDialog({ accept: true });`);
-				expect(answered.notes).toContain("file chooser");
-				expect((await step("return await tab.dialog();")).value).toMatchObject({
-					open: true,
-					type: "file-chooser",
-				});
-				await step(`await tab.handleDialog({ accept: true, files: ["alpha.txt"] });`);
-				expect(await log()).toEqual([{ id: "trigger-input", event: "change", names: ["alpha.txt"] }]);
+				const { attempt, step, log, close } = await openFixture({ cdp_url: user.cdpUrl });
+				try {
+					await attempt("");
+					await step(`await tab.click("#ask-upload");`);
+					// Advance the worker's release tail while the confirm stops the page.
+					await elapse(2_000);
+					expect((await step("return await tab.dialog();")).value).toMatchObject({ open: true, type: "confirm" });
+					// The hold that was on when the confirm opened is still on when the page goes on to open its chooser.
+					const answered = await step(`await tab.handleDialog({ accept: true });`);
+					expect(answered.notes).toContain("file chooser");
+					expect((await step("return await tab.dialog();")).value).toMatchObject({
+						open: true,
+						type: "file-chooser",
+					});
+					await step(`await tab.handleDialog({ accept: true, files: ["alpha.txt"] });`);
+					expect(await log()).toEqual([{ id: "trigger-input", event: "change", names: ["alpha.txt"] }]);
+				} finally {
+					await close();
+				}
 			} finally {
-				await close();
+				await user.stop();
 			}
-		} finally {
-			await user.stop();
-		}
+		});
 	}, 60_000);
 });

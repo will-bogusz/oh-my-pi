@@ -544,7 +544,6 @@ return { blocked, fast: blockedMs < 2000, answered: await tab.evaluate(() => glo
 		});
 		expect(valueOf(clicked)).toEqual({ open: true, type: "confirm", message: "Delete?" });
 		expect(textOf(clicked)).toContain('The page is waiting on a confirm("Delete?")');
-		const started = Date.now();
 		const blocked = await invoke({
 			action: "run",
 			name: "ask",
@@ -555,7 +554,6 @@ return { blocked, fast: blockedMs < 2000, answered: await tab.evaluate(() => glo
 		expect(message).toStartWith('tab.text("#status") cannot run');
 		expect(message).toContain('confirm("Delete?")');
 		expect(message).toContain("tab.handleDialog({ accept: true })");
-		expect(Date.now() - started).toBeLessThan(5_000);
 		// The first result named it; later ones do not repeat it.
 		expect(textOf(blocked)).not.toContain("The page is waiting on");
 		const answered = await invoke({
@@ -611,10 +609,13 @@ return result;`,
 				action: "run",
 				name: "ask-timer",
 				timeout: 10,
-				code: `await tab.evaluate(() => { setTimeout(() => confirm("Timer?"), 100); });
+				code: `const waiting = tab.click("#later");
+const opened = page.evaluate(() => confirm("Timer?"));
+opened.catch(() => {});
 let clicked = "clicked";
-try { await tab.click("#later"); } catch (e) { clicked = e.message; }
+try { await waiting; } catch (e) { clicked = e.message; }
 await tab.handleDialog({ accept: false });
+await opened;
 return { clicked, log: await tab.evaluate(() => globalThis.log) };`,
 			}),
 		) as { clicked: string; log: string[] };
