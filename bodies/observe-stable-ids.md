@@ -2,7 +2,7 @@
 
 I made an element keep its `observe()` id while it stays on the page, so an id from an earlier look can no longer click whatever element took its number.
 
-`observe()` numbered from 1 on every call. After a list re-rendered, `tab.id(1)` from the previous look named a different button, and the click landed there with no error. On Chromium and Tern tabs an element now keeps its id across observations while it stays in its document; once it is removed or the page navigates, its id fails as stale and is not handed to another element. cmux ids are cmux's own refs and are unchanged.
+`observe()` numbered from 1 on every call. After a list re-rendered, `tab.id(1)` from the previous look named a different button, and the click landed there with no error. On Chromium tabs and Tern tabs without native DOM reads an element now keeps its id across observations while it stays in its document; once it is removed or the page navigates, its id fails as stale and is not handed to another element. A Tern with native DOM reads still renumbers from 1 on each observe, as on `main`, and the prompt tells the model to re-observe there. cmux ids are cmux's own refs and are unchanged.
 
 | | main | this PR |
 |---|---|---|
@@ -30,4 +30,5 @@ Rejected: re-attaching an id to a "same" element by role, name and position afte
 - [x] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
 
