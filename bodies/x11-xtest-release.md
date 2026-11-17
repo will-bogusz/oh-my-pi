@@ -40,7 +40,7 @@ Xvfb on Ubuntu 24.04 (glibc 2.39); omp's own `X11Input` in a holder process on t
 | Xvfb stopped for 1 s across the SIGKILL, Shift held: still down | 10 / 10 | 0 / 10 |
 | Watcher SIGKILLed between calls, then holder SIGKILLed holding Shift | 10 / 10 | 0 / 10 |
 
-Every try of those cells here sent exactly one release.
+Every try of those cells sent exactly one release.
 
 <details><summary>The other cells, 10 tries each</summary>
 
@@ -73,3 +73,4 @@ The watcher is an extra X client for the session; it starts on the first pressin
 - [ ] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
