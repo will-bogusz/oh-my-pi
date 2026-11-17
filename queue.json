@@ -96453,6 +96453,24 @@
    "updated": "2026-11-17T21:01:33Z",
    "note": "",
    "hold": "Will, 2026-11-17: P2; held until Will's go-ahead"
+  },
+  {
+   "id": "reset-spend-log",
+   "branch": "will/reset-spend-log",
+   "title": "feat(coding-agent): log every saved-reset spend attempt at info",
+   "area": "coding-agent",
+   "priority": null,
+   "needs": [],
+   "base": "1abafe8e71cae521f995e2203055ce840b859da4",
+   "body": "bodies/reset-spend-log.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/reset-spend-log",
+   "host": "MacBook-Pro",
+   "added": "2026-11-17T21:02:20Z",
+   "updated": "2026-11-17T21:02:20Z",
+   "note": ""
   }
  ],
  "watch": {
