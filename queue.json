@@ -96940,13 +96940,13 @@
    "needs": [],
    "base": "baf60290fde5e9eea4edb30bff07695877682ba9",
    "body": "bodies/broker-shutdown-refresh-save.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19599,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/broker-shutdown-refresh-save",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:03:11Z",
-   "updated": "2026-11-17T22:53:51Z",
+   "updated": "2026-11-17T23:04:13Z",
    "note": "",
    "tests_over_override": {
     "reason": "ReviewBrokerShutdown, 2026-11-17: one regression test; the exit race exists only in a spawned omp auth-broker serve process, so its lines are process and fixture setup",
@@ -97025,7 +97025,8 @@
      "at": "2026-11-17T22:53:51Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-17T23:04:13Z"
   },
   {
    "id": "logger-console-level",
