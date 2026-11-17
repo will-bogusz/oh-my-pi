@@ -96324,6 +96324,24 @@
    "added": "2026-11-17T20:34:09Z",
    "updated": "2026-11-17T20:34:09Z",
    "note": ""
+  },
+  {
+   "id": "devin-gemini-promo-prices",
+   "branch": "will/devin-gemini-promo-prices",
+   "title": "fix(catalog): switch Devin's Gemini promo prices to list when each promo ends",
+   "area": "catalog",
+   "priority": null,
+   "needs": [],
+   "base": "baf60290fde5e9eea4edb30bff07695877682ba9",
+   "body": "bodies/devin-gemini-promo-prices.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-gemini-promo-prices",
+   "host": "MacBook-Pro",
+   "added": "2026-11-17T20:51:19Z",
+   "updated": "2026-11-17T20:51:19Z",
+   "note": ""
   }
  ],
  "watch": {
