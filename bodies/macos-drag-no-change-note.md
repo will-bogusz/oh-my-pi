@@ -22,7 +22,7 @@ The call still returns either way: a drawing surface changes nothing accessibili
 
 On that VM, a small AppKit window stood behind the person's front window, with a button "Box" that a middle-button drag moves, a label "Static" that ignores one, and a view "Slow" whose accessibility getters each sleep 25 ms. In the hover rows a second OMP process moves the pointer in an empty corner of the same window in a loop, and its longest call overlapping the drag shows how long the drag kept the input lease. The harness keeps a call's return value, not its note, so the note's text is pinned by unit tests; the watch shows in call time, about 560 ms more on "Static" than on "Box".
 
-`cargo test -p pi-natives --lib -- desktop::macos desktop::tests` passes on macOS (370). The fake-clock test of `nothing_changed` pins reads 40 ms apart from the watch's start, even 650 ms after the release, and a slow reader cut off at 700 ms with no note; the others pin the early stop and the unreadable ends (no wait). Clippy and rustfmt are clean on macOS, Linux and Windows.
+`cargo test -p pi-natives --lib -- desktop::macos desktop::tests` passes on macOS on #19195's current head (399). The fake-clock test of `nothing_changed` pins reads 40 ms apart from the watch's start, even 650 ms after the release, and a slow reader cut off at 700 ms with no note; the others pin the early stop and the unreadable ends (no wait). Clippy and rustfmt are clean on macOS, Linux and Windows.
 
 ## Risk
 
