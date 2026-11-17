@@ -80498,7 +80498,7 @@
    "branch": "will/x11-xtest-release",
    "title": "fix(natives): release X11 XTest keys and buttons a killed omp held",
    "area": "computer",
-   "priority": "P1",
+   "priority": "P2",
    "needs": [],
    "base": "1bdbf6d242d99ca62bdf2feeff4519ff992f647d",
    "body": "bodies/x11-xtest-release.md",
@@ -80508,7 +80508,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-xtest-release",
    "host": "MacBook-Pro",
    "added": "2026-11-11T02:31:05Z",
-   "updated": "2026-11-17T06:33:25Z",
+   "updated": "2026-11-17T06:48:12Z",
    "note": "",
    "rebases_after": [
     18222,
