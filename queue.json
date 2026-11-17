@@ -96541,7 +96541,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/fable-shared-wall-block",
    "host": "MacBook-Pro",
    "added": "2026-11-17T20:59:40Z",
-   "updated": "2026-11-17T21:18:47Z",
+   "updated": "2026-11-17T21:52:18Z",
    "note": "",
    "built": [
     {
@@ -96569,6 +96569,15 @@
      "tip": "c988a1018d1b722e87e8cc2c4ef7f8ba4d161709",
      "with_tip": "1937c58ba6816443049e7f8d587632369ad1de01",
      "at": "2026-11-17T21:18:47Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "account-switch-reason",
+     "code": "403a3fdeeaaeea2b6227088ae2dfefe8c56f1321",
+     "with_code": "7dddacdfab1bbea036ab45d87704946d57787679",
+     "tip": "c988a1018d1b722e87e8cc2c4ef7f8ba4d161709",
+     "with_tip": "2c7c797eeb2e0eeca143cf8c1cbf66e282c73438",
+     "at": "2026-11-17T21:52:13Z",
      "host": "MacBook-Pro"
     }
    ]
