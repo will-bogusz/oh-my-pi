@@ -43,7 +43,7 @@ On a macOS 26.5 VM, the kit's WKWebView app and the same page in Safari, `main` 
 | Person typing: `el.type` on Electron | 10 of 10, 831 ms | 10 of 10, 833 ms (a first run: 2.2 s, one `InputFailed` as focus left the window; not seen again) |
 | App merely not front: `type`, click then `type`, `cmd+k` on AppKit, Chrome, Safari, WKWebView | 10 of 10 each; Safari's `type` 5 times through a takeover | 10 of 10 each, all in the background |
 
-The deadlines in the table above came after those runs; a field that answers in time gets the same reads and waits (from the code, not re-measured). Seven mutations of the rule each fail a new test in `ax::tests` or `input::tests`, which also pin the read-back's cut-off and cancel and that the walk waits for `AXFocused`. `cargo test -p pi-natives --lib -- desktop::macos desktop::tests` passes on macOS (362).
+The deadlines in the table above came after those runs; a field that answers in time gets the same reads and waits (from the code, not re-measured). Seven mutations of the rule each fail a new test in `ax::tests` or `input::tests`, which also pin the read-back's cut-off and cancel and that the walk waits for `AXFocused`. On top of the key-reroute fix, `cargo test -p pi-natives --lib -- desktop::macos desktop::control desktop::tests` passes on macOS (493).
 
 ---
 
