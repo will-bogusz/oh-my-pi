@@ -94204,13 +94204,13 @@
    "needs": [],
    "base": "1bdbf6d242d99ca62bdf2feeff4519ff992f647d",
    "body": "bodies/macos-window-order.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19532,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-window-order",
    "host": "MacBook-Pro",
    "added": "2026-11-14T01:37:23Z",
-   "updated": "2026-11-17T07:08:32Z",
+   "updated": "2026-11-17T07:14:28Z",
    "note": "QueueTwentySeven 2026-11-16: rebased locally onto main as 14e0989d3bd (clean). HandBack 2026-11-14: head 37142503cd9 (amended): takeover hand-back also raises the user's key window (with_foreground, hand_back_keeps_order). rust-check macos/linux/windows at 37142503cd9 (diff d9e990b339). Review TakeoverOrderReview needs-changes -> fixed (cause wording, same-app test, doubled error text, docs/changelog/title). Earlier: key-window-only restore, OrderReview2 7/7. Overlaps: #16553 pair recorded; #19062/#19179/drag-confirm/scroll-direction none.",
    "rebases_after": [
     16553,
@@ -94303,7 +94303,8 @@
      "at": "2026-11-17T07:08:32Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-17T07:14:28Z"
   },
   {
    "id": "macos-stale-press",
