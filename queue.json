@@ -96751,7 +96751,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/fable-shared-wall-block",
    "host": "MacBook-Pro",
    "added": "2026-11-17T20:59:40Z",
-   "updated": "2026-11-17T23:07:54Z",
+   "updated": "2026-11-17T23:09:35Z",
    "note": "",
    "built": [
     {
@@ -96800,7 +96800,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-11-17T23:07:54Z"
+   "opened": "2026-11-17T23:07:54Z",
+   "readied": "2026-11-17T23:09:35Z"
   },
   {
    "id": "broker-wire-forward-compat",
