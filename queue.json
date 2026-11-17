@@ -97697,8 +97697,19 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-still-capture",
    "host": "MacBook-Pro",
    "added": "2026-11-17T23:02:30Z",
-   "updated": "2026-11-17T23:02:30Z",
-   "note": ""
+   "updated": "2026-11-17T23:16:50Z",
+   "note": "",
+   "built": [
+    {
+     "with": "wayland-share-picker-deadline",
+     "code": "0c5f9b647dd33fe374b1ed3525689be59dd7ae6c",
+     "with_code": "78cf60f47fa33bd00a18756a7efedcbc8683f34c",
+     "tip": "7090c3fd0e0fbeecae98b48e65744ce33596f427",
+     "with_tip": "905e43e26452b231517c5e8043a1b21a9da241a0",
+     "at": "2026-11-17T23:16:45Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   }
  ],
  "watch": {
