@@ -2,7 +2,7 @@
 
 When OMP changed a pop-up button in an app behind mine while I kept typing in my own window, it sometimes stopped with "the user pressed a key or clicked" in that app, though every key I typed stayed in my window, so a key OMP itself moves back to my app now counts as typed there, not in the agent's target.
 
-With a simulated person typing in their own front window, a background `setValue` on an AppKit pop-up button stopped falsely in 3 of 40 calls on `main` and in 0 of 40 with this PR; the option was applied in every other call, and the person lost no key on either build.
+With a simulated person typing in their own front window, a background `setValue` on an AppKit pop-up button stopped falsely in 3 of 40 calls on `main` and in 0 of 40 with this PR, and the person lost no key on either build.
 
 | Person typing in their own window, AppKit pop-up `setValue("Two")`, window covered or merely behind (10 calls each) | `main` | this PR |
 |---|---|---|
@@ -21,23 +21,24 @@ Pressing the pop-up opens its menu, which takes the keyboard, so macOS addresses
 
 Limit: the listener decides just before the target's tap does, so a change of keyboard holder in that instant can count one key on the wrong side.
 
-Review first: `macos/key_reroute.rs` (`Registry::landing`, `Landing::resolve`, `rerouted_to`, `key_of`), then `control/macos.rs` (`input_target`).
+Review first: `macos/key_reroute.rs` (`Registry::landing`, `Landing::resolve`, `rerouted_to`, `key_of`), then `control/macos.rs` (`input_target`). Rebased after #16553 and `760422a2052`: `observe_user` is `main`'s, releases still never reach `pressed` or `record`, and `input_target` asks the reroute lookup about key presses alone.
 
 ## Testing
 
-On a macOS 26.5 VM, `main` (`fe194ec2f12`) against this change, builds interleaved per call; the simulated person types through the VM's VNC keyboard (macOS sees hardware), scored from their own window and every key the target app logged.
+On a macOS 26.5 VM, `main` (`fe194ec2f12`) against this change before that rebase, builds interleaved per call; the simulated person types through the VM's VNC keyboard (macOS sees hardware), scored from their own window and every key the target app logged.
 
 | 10 calls each | `main` | this PR |
 |---|---|---|
 | The person clicks the target (a Chrome page behind their window) 1.2 s into a background `el.type` of 150 characters | stopped 10 of 10 (`UserIntervened`), about 50 characters sent | stopped 10 of 10, the same |
 | The person types into the target while a takeover `el.type` has it in front | stopped 10 of 10, their keys in the target | stopped 10 of 10, the same |
-| Person typing in their own window, `el.type` into a Safari page field, with the macOS takeover pause and background typing into WebKit fields also applied (both queued) | 4 stopped with `UserIntervened` | 0 stopped, all typed in the background |
+| Person typing in their own window, `el.type` into a Safari page field, with the macOS takeover pause (now on `main`) and background typing into WebKit fields (queued, stacked on this) also applied | 4 stopped with `UserIntervened` | 0 stopped, all typed in the background |
 | Same into a WKWebView field | 0 stopped | 0 stopped |
 
-Eight mutations of the rule each fail one of `desktop::macos::key_reroute::tests::the_monitor_reads_a_press_landing_where_the_targets_tap_sends_it` (the registry's answer equals where the target's tap sends the same key in each state), `the_monitor_reads_a_repeat_landing_where_its_press_went`, and `desktop::control::macos::tests::a_key_the_focus_guard_moves_back_lands_in_the_users_app` (the listener's wiring). Full `pi-natives` lib tests pass on macOS (997) and the desktop tests on Linux (308).
+Eight mutations of the rule each fail one of `desktop::macos::key_reroute::tests::the_monitor_reads_a_press_landing_where_the_targets_tap_sends_it` (the registry's answer equals where the target's tap sends the same key in each state), `the_monitor_reads_a_repeat_landing_where_its_press_went`, and `desktop::control::macos::tests::a_key_the_focus_guard_moves_back_lands_in_the_users_app` (the listener's wiring). After the rebase, `cargo test -p pi-natives --lib -- desktop::macos desktop::control desktop::tests` passes on macOS (486); clippy and rustfmt are clean on macOS, Linux and Windows.
 
 ---
 
 - [ ] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
