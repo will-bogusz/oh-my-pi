@@ -108722,5 +108722,11 @@
     "wake": ""
    }
   ]
+ },
+ "opening": {
+  "id": "browser-wait-predicate",
+  "token": "246fb6339f404d9ea12ca8b33f8fd83e",
+  "host": "MacBook-Pro",
+  "at": "2026-11-17T09:35:24Z"
  }
 }
