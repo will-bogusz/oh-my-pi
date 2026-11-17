@@ -75856,7 +75856,45 @@
    "updated": "2026-11-17T03:15:44Z",
    "note": "",
    "advanced": "2026-11-17T02:58:29Z",
-   "kind": "proposal"
+   "kind": "proposal",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-17T03:27:34Z",
+     "reason": "BrowserRebase's rebase onto 1bdbf6d, Main-approved combined form (~/tmp/oh-my-pi/BrowserRebase/combined-browser-action-outcome.md)",
+     "old": "1b749fc4332bbe0aa17e3e5c4e2d437a51b1201a",
+     "new": "0f091a79b80e59f9e16d65c491224dfa27f1b0b6",
+     "dropped": {
+      "docs/tools/browser.md": [
+       "- Action outcomes (Chromium): `goto`, `click`, `fill`, `type`, `press` and `select`, on a tab, a frame or an element, print one line into the cell output: `navigated to <url>` when the frame's document or URL changed, `page changed` when its DOM (open shadow roots included) or a form value changed, `no change yet` when nothing changed while the DOM stayed quiet for 80 ms (300 ms at most). Style and class changes on the focused or hovered element do not count. A field whose value differs from what was filled or typed adds `(field now shows \"\u2026\")` (never for password fields), and a dialog the action left open prints `dialog pending: <type> \"<message>\"`; both quote at most 80 characters. The probe runs in the frame's isolated world. It adds 80 to 300 ms to an action that does not navigate (about 90 ms typical; a page that never goes quiet pays the 300 ms and prints `page changed`) and nothing measurable to a navigation. On a page too busy to answer, each probe gives up after 400 ms and no line is printed."
+      ],
+      "packages/coding-agent/src/prompts/tools/browser.md": [
+       "  - In Chromium, `goto`, `click`, `fill`, `type`, `press`, and `select` (tab, frame, and element forms) print one line saying what they did: `navigated to <url>`, `page changed`, or `no change yet`. `no change yet` means nothing changed within about 300 ms, not that the action failed; a slower render can still follow, so look before repeating the action. A fill or type whose value the page rewrote also prints the field's value, and a dialog left open prints `dialog pending`."
+      ],
+      "packages/coding-agent/src/tools/browser/action-outcome.ts": [
+       "\t/** Hash of every form control's value and checked state, shadow roots included. */",
+       "// document and every open shadow root. A style or class change on the focused element or the innermost hovered one",
+       "// (focus rings, hover and pressed states) does not count; every other node, text and attribute change does. Field",
+       "// values are hashed in the page, so only the read-back value of the field the action typed into leaves it.",
+       " p = globalThis.__ompActionOutcome = {document: String(Math.random()), mutations: 0, changed: performance.now(), roots: [document]};",
+       "   if (e.shadowRoot && !p.roots.includes(e.shadowRoot)) {",
+       "    p.roots.push(e.shadowRoot);",
+       "  let fields = 0;",
+       "  for (const root of p.roots) for (const e of root.querySelectorAll('input,textarea,select')) {",
+       "   for (const c of String(e.value) + (e.checked ? '\\\\u0001' : '\\\\u0000')) fields = (Math.imul(fields, 31) + c.charCodeAt(0)) | 0;",
+       "\tawait hooks.navigation?.().catch(() => undefined);"
+      ],
+      "packages/coding-agent/src/tools/browser/tab-worker.ts": [
+       " * hanging on puppeteer's protocol timeout. With `outcome`, what the action did to",
+       " * the page is printed into the cell output.",
+       "\t\t\t\t(label, fn, outcome) =>",
+       "\t\t\t\t\top(label, actionOpMs, fn, outcome && { outcome: { ...outcome, frame: handle.frame } }),"
+      ],
+      "packages/coding-agent/test/tools/browser-action-outcome.test.ts": [
+       "\tawait run(`var t = await browser.open({ app: { relay: false, tern: false } });`);"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "eval-assign-echo",
