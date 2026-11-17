@@ -97269,7 +97269,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-window-crop-clip",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:09:14Z",
-   "updated": "2026-11-17T21:56:48Z",
+   "updated": "2026-11-17T22:24:12Z",
    "note": "",
    "built": [
     {
@@ -97296,15 +97296,6 @@
      "with_code": "a7c281050ab1f367593f3fb318f816ec27be20f4",
      "tip": "7bdc7d9c68b3a24508098f9131ee1fbe9a01f8db",
      "with_tip": "1bd1fbbdc15c7667bbf647612ea3c71199c85497",
-     "at": "2026-11-17T21:56:47Z",
-     "host": "MacBook-Pro"
-    },
-    {
-     "with": "#19504",
-     "code": "ef68b761dcc0bbf3f11d2fc6c951acdade939113",
-     "with_code": "e41fbf6b9a34a8290bfb3b95be76b15e0fbe30da",
-     "tip": "7bdc7d9c68b3a24508098f9131ee1fbe9a01f8db",
-     "with_tip": "e01f4c4530a38eb4f259737574dd9557dac1ab72",
      "at": "2026-11-17T21:56:47Z",
      "host": "MacBook-Pro"
     },
@@ -97342,6 +97333,15 @@
      "tip": "7bdc7d9c68b3a24508098f9131ee1fbe9a01f8db",
      "with_tip": "7bab9f11e73eddfda911430ba197267509ae95f0",
      "at": "2026-11-17T21:56:48Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19504",
+     "code": "ef68b761dcc0bbf3f11d2fc6c951acdade939113",
+     "with_code": "f07da370727d1df506bc6648cb72075f148d1db9",
+     "tip": "7bdc7d9c68b3a24508098f9131ee1fbe9a01f8db",
+     "with_tip": "8e5d7026e6bb8d0f9786f415e9b8c2d355418cec",
+     "at": "2026-11-17T22:24:06Z",
      "host": "MacBook-Pro"
     }
    ]
