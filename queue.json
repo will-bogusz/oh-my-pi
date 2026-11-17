@@ -96691,12 +96691,23 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/broker-client-startup-retry",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:08:05Z",
-   "updated": "2026-11-17T21:09:48Z",
+   "updated": "2026-11-17T21:19:06Z",
    "note": "review 1b457113ab needs-changes: (1) deadline now one AbortSignal across requests+backoff, test: never-answering broker case (hangs on main); (2) exhaustion test rewritten, fails on main; (3) retries scoped to startup via retryUnreachableBroker, test row: runtime switch fails after one request. Final-head review pass still owed per workflow.",
    "tests_over_override": {
     "reason": "BrokerClientStartupRetry, 2026-11-17: four distinct branches (retry succeeds; non-transient answer fails at once; retry off for runtime switch; deadline cancels an in-flight request), each failing or pinning main's outcome; over by 8 lines of imports and server setup",
     "at": "2026-11-17T21:09:43Z"
-   }
+   },
+   "built": [
+    {
+     "with": "#19513",
+     "code": "f3d8f949ae0d35be25ea54320c5b15539386c10e",
+     "with_code": "49da0eefa5cd2d2653e00ae6de4a0d94dfc21f13",
+     "tip": "1937c58ba6816443049e7f8d587632369ad1de01",
+     "with_tip": "6b9f2cdcfd08e89639e1bfa955661601e70e2525",
+     "at": "2026-11-17T21:19:01Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "wayland-window-crop-clip",
