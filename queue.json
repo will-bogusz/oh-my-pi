@@ -96956,7 +96956,7 @@
    "branch": "will/logger-console-level",
    "title": "fix(utils): apply OMP_LOG_LEVEL to the console transport",
    "area": "other",
-   "priority": null,
+   "priority": "P2",
    "needs": [],
    "base": "baf60290fde5e9eea4edb30bff07695877682ba9",
    "body": "bodies/logger-console-level.md",
@@ -96966,7 +96966,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/logger-console-level",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:03:30Z",
-   "updated": "2026-11-17T21:35:58Z",
+   "updated": "2026-11-17T22:35:31Z",
    "note": "Will, 2026-11-17: go-ahead to open"
   },
   {
