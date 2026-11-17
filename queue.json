@@ -94199,10 +94199,8 @@
    "title": "fix(natives): put the user's key window back in front of a macOS target after background input and takeover",
    "area": "computer",
    "priority": "P1",
-   "needs": [
-    "macos-handback-key"
-   ],
-   "base": "bf9a9fbd40e96766d528a9f19a603e53e8c0b5a1",
+   "needs": [],
+   "base": "1bdbf6d242d99ca62bdf2feeff4519ff992f647d",
    "body": "bodies/macos-window-order.md",
    "state": "queued",
    "pr": null,
@@ -94210,7 +94208,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-window-order",
    "host": "MacBook-Pro",
    "added": "2026-11-14T01:37:23Z",
-   "updated": "2026-11-17T00:47:32Z",
+   "updated": "2026-11-17T05:57:32Z",
    "note": "QueueTwentySeven 2026-11-16: rebased locally onto main as 14e0989d3bd (clean). HandBack 2026-11-14: head 37142503cd9 (amended): takeover hand-back also raises the user's key window (with_foreground, hand_back_keeps_order). rust-check macos/linux/windows at 37142503cd9 (diff d9e990b339). Review TakeoverOrderReview needs-changes -> fixed (cause wording, same-app test, doubled error text, docs/changelog/title). Earlier: key-window-only restore, OrderReview2 7/7. Overlaps: #16553 pair recorded; #19062/#19179/drag-confirm/scroll-direction none.",
    "rebases_after": [
     16553,
