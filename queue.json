@@ -96175,14 +96175,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-17T06:48:16Z",
+  "checked": "2026-11-17T07:16:01Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "macos-window-order": {
-    "since": "2026-11-17T06:15:33Z",
-    "title": "fix(natives): put the user's key window back in front of a macOS target after background input and takeover"
-   },
    "browser-wait-predicate": {
     "since": "2026-11-17T05:15:42Z",
     "title": "feat(browser): add waitForFunction to tabs and frames"
@@ -96386,7 +96382,8 @@
    19519,
    19521,
    19524,
-   19531
+   19531,
+   19532
   ],
   "post_merge": {
    "16553": {
@@ -100072,6 +100069,13 @@
     "id": "x11-xtest-release",
     "title": "fix(natives): release X11 XTest keys and buttons a killed omp held",
     "why": "opened as #19531"
+   },
+   {
+    "at": "2026-11-17T07:16:01Z",
+    "kind": "unopenable",
+    "id": "macos-window-order",
+    "title": "fix(natives): put the user's key window back in front of a macOS target after background input and takeover",
+    "why": "opened as #19532"
    }
   ]
  },
@@ -107268,12 +107272,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-17T07:08:36.477688Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-17T07:16:02.493471Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 1,
-   "left": 7
+   "used": 2,
+   "left": 6
   },
   "rows": [
    {
@@ -107504,6 +107508,23 @@
     "created": "2026-11-17T05:21:31Z"
    },
    {
+    "id": "macos-window-order",
+    "label": "#19532",
+    "number": 19532,
+    "state": "open",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): put the user's key window back in front of a macOS target after background input and takeover",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-17T07:14:26Z"
+   },
+   {
     "id": "browser-select-objects",
     "label": "#19518",
     "number": 19518,
@@ -107559,23 +107580,6 @@
     ],
     "needs": [],
     "created": "2026-10-30T21:35:55Z"
-   },
-   {
-    "id": "macos-window-order",
-    "label": "macos-window-order",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives): put the user's key window back in front of a macOS target after background input and takeover",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-14T01:37:23Z"
    },
    {
     "id": "browser-wait-predicate",
@@ -107699,8 +107703,8 @@
      "conflicts with #19504 in docs/computer-use.md",
      "conflicts with #19509 in packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #19516 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with #19532 in docs/computer-use.md",
      "conflicts with #19531 in docs/computer-use.md",
-     "conflicts with macos-window-order in docs/computer-use.md",
      "conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
@@ -107713,8 +107717,8 @@
      "#19504",
      "#19509",
      "#19516",
-     "#19531",
-     "macos-window-order"
+     "#19532",
+     "#19531"
     ],
     "needs": [],
     "created": "2026-10-19T07:26:45Z"
@@ -107731,7 +107735,7 @@
     "reasons": [
      "conflicts with #19195 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with #19516 in crates/pi-natives/src/desktop/macos/ax.rs",
-     "conflicts with macos-window-order in crates/pi-natives/src/desktop/macos/ax.rs",
+     "conflicts with #19532 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with main in crates/pi-natives/src/desktop/macos/ax.rs"
     ],
     "note": "",
@@ -107740,7 +107744,7 @@
     "blocked_by": [
      "#19195",
      "#19516",
-     "macos-window-order"
+     "#19532"
     ],
     "needs": [],
     "created": "2026-11-11T09:59:13Z"
@@ -107782,9 +107786,9 @@
     "title": "fix(natives): send macOS background keys to the key window without a press",
     "action": "wait",
     "reasons": [
-     "needs macos-window-order (queued)",
+     "needs #19532 (open)",
      "conflicts with #17756 in crates/pi-natives/src/desktop/macos/input.rs",
-     "conflicts with macos-window-order in docs/computer-use.md",
+     "conflicts with #19532 in docs/computer-use.md",
      "conflicts with main in docs/computer-use.md"
     ],
     "note": "",
@@ -107792,7 +107796,7 @@
     "paired": [],
     "blocked_by": [
      "#17756",
-     "macos-window-order"
+     "#19532"
     ],
     "needs": [
      "macos-window-order"
@@ -107815,8 +107819,8 @@
      "conflicts with #19515 in docs/computer-use.md",
      "conflicts with #19504 in docs/computer-use.md",
      "conflicts with #19516 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/macos/input.rs, docs/computer-use.md",
+     "conflicts with #19532 in crates/pi-natives/src/desktop/macos/ax.rs, docs/computer-use.md",
      "conflicts with #19531 in docs/computer-use.md",
-     "conflicts with macos-window-order in crates/pi-natives/src/desktop/macos/ax.rs, docs/computer-use.md",
      "conflicts with main in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/macos/input.rs, docs/computer-use.md"
     ],
     "note": "",
@@ -107828,8 +107832,8 @@
      "#19515",
      "#19504",
      "#19516",
-     "#19531",
-     "macos-window-order"
+     "#19532",
+     "#19531"
     ],
     "needs": [
      "macos-reroute-not-a-press"
@@ -107905,8 +107909,8 @@
      "needs r2/relay-popup-owned (queued), r2/page-waiting (queued)",
      "conflicts with #16611 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #19524 in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts, packages/coding-agent/test/tools/browser-interactions.test.ts",
+     "conflicts with #19532 in crates/pi-natives/src/desktop/macos/capture.rs",
      "conflicts with #19518 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts, packages/coding-agent/test/tools/browser-interactions.test.ts",
-     "conflicts with macos-window-order in crates/pi-natives/src/desktop/macos/capture.rs",
      "conflicts with browser-wait-predicate in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts",
      "its need r2/relay-popup-owned conflicts with main in crates/pi-natives/src/desktop/roster.rs, docs/tools/browser.md, packages/browser-relay/extension/background.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/native-windows.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-native-windows.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts, packages/natives/native/desktop.js",
      "its need r2/page-waiting conflicts with main in crates/pi-natives/src/desktop/roster.rs, docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/dialogs.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/native-windows.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-native-windows.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts, packages/natives/native/desktop.js"
@@ -107917,8 +107921,8 @@
     "blocked_by": [
      "#16611",
      "#19524",
+     "#19532",
      "#19518",
-     "macos-window-order",
      "browser-wait-predicate"
     ],
     "needs": [
@@ -107962,7 +107966,7 @@
      "conflicts with #19521 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #19516 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19519 in crates/pi-natives/src/desktop/mod.rs",
-     "conflicts with macos-window-order in crates/pi-natives/src/desktop/macos/ax.rs",
+     "conflicts with #19532 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with main in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs"
     ],
     "note": "",
@@ -107973,7 +107977,7 @@
      "#19521",
      "#19516",
      "#19519",
-     "macos-window-order"
+     "#19532"
     ],
     "needs": [],
     "created": "2026-11-11T10:16:04Z"
@@ -108130,8 +108134,8 @@
      "conflicts with #19504 in docs/computer-use.md",
      "conflicts with #19509 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19516 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with #19532 in docs/computer-use.md",
      "conflicts with #19531 in docs/computer-use.md, docs/tools/computer.md",
-     "conflicts with macos-window-order in docs/computer-use.md",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -108145,8 +108149,8 @@
      "#19504",
      "#19509",
      "#19516",
-     "#19531",
-     "macos-window-order"
+     "#19532",
+     "#19531"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -108169,8 +108173,8 @@
      "conflicts with #19509 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19516 in crates/pi-natives/src/desktop/backend.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #19519 in crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with #19532 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with #19531 in docs/tools/computer.md",
-     "conflicts with macos-window-order in crates/pi-natives/src/desktop/macos/ax.rs",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md"
     ],
@@ -108183,8 +108187,8 @@
      "#19509",
      "#19516",
      "#19519",
-     "#19531",
-     "macos-window-order"
+     "#19532",
+     "#19531"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -108208,8 +108212,8 @@
      "conflicts with #19509 in docs/tools/computer.md",
      "conflicts with #19516 in crates/pi-natives/src/desktop/backend.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19519 in crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with #19532 in crates/pi-natives/src/desktop/macos/capture.rs, crates/pi-natives/src/desktop/macos/mod.rs",
      "conflicts with #19531 in docs/tools/computer.md",
-     "conflicts with macos-window-order in crates/pi-natives/src/desktop/macos/capture.rs, crates/pi-natives/src/desktop/macos/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
@@ -108222,8 +108226,8 @@
      "#19509",
      "#19516",
      "#19519",
-     "#19531",
-     "macos-window-order"
+     "#19532",
+     "#19531"
     ],
     "needs": [],
     "created": "2026-11-11T00:21:12Z"
@@ -108416,8 +108420,10 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with main in (branch missing on the fork)"
+    ],
     "note": "",
     "over": [],
     "paired": [],
