@@ -4,9 +4,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 
 **Opening:** not paused
 **Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-11-17 22:49Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 16, conflict-held 18, stacked 13, held 7, parked 3, open PRs 17, queued since the last plan 1; merged 381, closed 41
+**Counts:** openable now 15, conflict-held 18, stacked 13, held 7, parked 3, open PRs 18, queued since the last plan 1; merged 381, closed 41
 
-## Openable now (16)
+## Openable now (15)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
@@ -19,7 +19,6 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 | devin-image-budgets | fix(catalog): carry Devin's measured image limits | catalog |  | 2h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-image-budgets) |
 | image-eviction-notice | fix(coding-agent): mark images the provider image limit evicts in place | other |  | 2h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/image-eviction-notice) |
 | usage-state-per-model | fix(coding-agent): judge omp usage policy state by account-wide windows | broker | P2 | 2h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/usage-state-per-model) |
-| fable-shared-wall-block | fix(ai): heal Claude tier blocks a shared weekly wall caused from single-window usage reports | broker | P1 | 2h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/fable-shared-wall-block) |
 | broker-wire-forward-compat | fix(ai): read auth-broker responses that carry fields a newer broker adds | broker | P2 | 2h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-wire-forward-compat) |
 | reset-spend-log | feat(coding-agent): log every saved-reset spend attempt at info | coding-agent | P2 | 2h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-spend-log) |
 | logger-console-level | fix(utils): apply OMP_LOG_LEVEL to the console transport | other | P2 | 2h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/logger-console-level) |
@@ -88,7 +87,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 | [#15130](https://github.com/can1357/oh-my-pi/pull/15130) | reset-before-reserve | feat(coding-agent): opt in to spending a blocked account's saved reset before a reserve-only backup | broker | P2 | 6d | Will, 2026-11-02: account broker redesign, on hold since 2026-11-02 | not checked or kept fresh | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-before-reserve) |
 | [#16611](https://github.com/can1357/oh-my-pi/pull/16611) | read-audio-transcripts | feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio | catalog | P2 | 3h | Will, 2026-11-17: parked as draft, not maintained for now; revisit later | not checked or kept fresh | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-audio-transcripts) |
 
-## Open PRs (17)
+## Open PRs (18)
 
 | PR | id | title | area | rank | open | plan | branch |
 |---|---|---|---|---|---|---|---|
@@ -104,6 +103,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 | [#19516](https://github.com/can1357/oh-my-pi/pull/19516) | macos-key-read-settled | fix(natives): read a macOS popup after the option its typed letters choose | computer | P1 | 19h | keep; accepted pair with #19195: Main, 2026-11-17: adjacent thread_local statics in desktop/control.rs; combined = both statics (DRAG_NOTE then INPUT_HELD), then input_held() unchanged | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-key-read-settled) |
 | [#19504](https://github.com/can1357/oh-my-pi/pull/19504) | macos-handback-typed | fix(natives): give the macOS key window back after a takeover while another program types | computer | P1 | 21h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-handback-typed) |
 | [#19586](https://github.com/can1357/oh-my-pi/pull/19586) | docs-reclaim-drift | docs(auth-gateway): describe reclaim moving warm pins back | auth | P0 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/docs-reclaim-drift) |
+| [#19600](https://github.com/can1357/oh-my-pi/pull/19600) | fable-shared-wall-block | fix(ai): heal Claude tier blocks a shared weekly wall caused from single-window usage reports | broker | P1 | 2h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/fable-shared-wall-block) |
 | [#19599](https://github.com/can1357/oh-my-pi/pull/19599) | broker-shutdown-refresh-save | fix(coding-agent): let auth-broker serve save an in-flight refresh before exit | broker | P1 | 2h | open; tests-over: ReviewBrokerShutdown, 2026-11-17: one regression test; the exit race exists only in a spawned omp auth-broker serve process, so its lines are process and fixture setup | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-shutdown-refresh-save) |
 | [#19592](https://github.com/can1357/oh-my-pi/pull/19592) | broker-version-skew | feat(ai,coding-agent): exchanged omp versions between auth-broker clients and the broker | auth-broker | P2 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-version-skew) |
 | [#19590](https://github.com/can1357/oh-my-pi/pull/19590) | broker-refresh-failure-loud | fix(ai): warn when a broker refresh failure outlasts the access token | broker | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-refresh-failure-loud) |
