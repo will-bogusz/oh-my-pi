@@ -107450,6 +107450,11 @@
     "sha": "3a437bc98ccbdb7155bb6f3e0488fdbdb6b1fece",
     "at": "2026-11-17T20:31:54Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "3a437bc98ccbdb7155bb6f3e0488fdbdb6b1fece",
+    "at": "2026-11-17T20:33:12Z",
+    "host": "goliath"
    }
   }
  },
