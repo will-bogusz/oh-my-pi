@@ -40937,7 +40937,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/compaction-trigger",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:41:41Z",
-   "updated": "2026-11-17T01:26:52Z",
+   "updated": "2026-11-17T01:28:46Z",
    "note": "stacked on #16587 head 98ef1f55dc (2026-10-22, its runIdleCompaction line resolved as inLogContext(...runIdleCompaction(thresholdTokens))). After #16587 merges, pr-queue advance compaction-trigger replays its own commits onto main.",
    "built": [
     {
