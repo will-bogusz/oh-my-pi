@@ -19,7 +19,7 @@ The Wayland portal names the shared monitor only when a capture opens a ScreenCa
 - `desktop/types.rs`: `display_count: Option<u32>`; the "no backend" capabilities keep `Some(0)`.
 - `linux/wayland/mod.rs`: `None` until a capture fills `self.displays`.
 - `linux/x11/mod.rs`, `macos/mod.rs`, `win32/mod.rs`: `Some(count)`, unchanged values.
-- `packages/natives/native/index.d.ts` regenerated; `test/desktop.test.ts` accepts `number | undefined`.
+- `packages/natives/native/index.d.ts` regenerated; `test/desktop.test.ts` now expects no `displayCount` on a fresh Wayland session and a number on every other backend; `docs/tools/computer.md` says the count is absent on Wayland until the first capture.
 
 Rejected: reporting `1` before the first capture. The portal can share any monitor, or several, and the number would be a guess.
 
@@ -29,7 +29,7 @@ Rejected: reporting `1` before the first capture. The portal can share any monit
 - `display_count_is_unknown_until_the_first_capture` (`linux/wayland/mod.rs`): `None` with no displays, `Some(1)` once one is recorded. On `main` it doesn't compile, since the field is a plain `u32`.
 - `cargo test -p pi-natives --lib -- wayland` on Linux; `scripts/rust-check` clippy and rustfmt on Linux, macOS and Windows.
 
-Not run: `bun test packages/natives/test/desktop.test.ts` on a desktop; the edit only widens the expected type.
+Not run: `bun test packages/natives/test/desktop.test.ts` on a Wayland desktop. On headless Linux it covers only the "every other backend" side.
 
 ---
 
