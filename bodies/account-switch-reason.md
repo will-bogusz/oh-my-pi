@@ -1,6 +1,6 @@
 ## What
 
-<!-- Will: confirm own-words -->
+
 When omp moves my session to another Claude or Codex account, I want to see which rule did it, instead of asking an agent to dig through the session file.
 
 | Surface | `main` | This PR |
@@ -45,3 +45,4 @@ Related: #19312 logs every multi-account resolve at debug level with its source 
 - [ ] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
