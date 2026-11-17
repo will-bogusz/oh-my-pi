@@ -105608,7 +105608,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-17T00:43:22.063612Z",
+  "at": "2026-11-17T00:47:42.162498Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -105970,10 +105970,8 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): put the user's key window back in front of a macOS target after background input and takeover",
-    "action": "wait",
-    "reasons": [
-     "conflicts with main in crates/pi-natives/src/desktop/macos/skylight.rs"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "accepted pair with #16553: HandBack, 2026-11-14: textual conflict only, in with_background_watch and WindowServerDesktop (skylight.rs). Combined form keeps both sides: #16553's 'let placement = match (clicks, previous.pid) {Tap|HitTest}' first, then this entry's 'let order = previous.pid.zip(capture::stacked_windows()).and_then(|(user, stack)| window_order::EntryOrder::new(pid, user, previous_key, &stack));' (read before anything is sent; placement sends nothing); WindowServerDesktop { spi, previous, key: previous_key, placement, stopped: &stopped, order: RefCell::new(order), raises: Cell::new(0) }; struct fields key, placement, stopped, order, raises. No semantic overlap: placement feeds SwitchSignals, order feeds keep_order.",
     "over": [],
     "paired": [
@@ -106179,6 +106177,7 @@
      "conflicts with #18013 in docs/computer-use.md",
      "conflicts with #18222 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with macos-key-read-settled in docs/computer-use.md",
+     "conflicts with macos-window-order in docs/computer-use.md",
      "conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
@@ -106190,7 +106189,8 @@
      "#18353",
      "#18013",
      "#18222",
-     "macos-key-read-settled"
+     "macos-key-read-settled",
+     "macos-window-order"
     ],
     "needs": [],
     "created": "2026-10-19T07:26:45Z"
@@ -106269,14 +106269,15 @@
     "reasons": [
      "needs macos-window-order (queued)",
      "conflicts with #17756 in crates/pi-natives/src/desktop/macos/input.rs",
-     "its need macos-window-order conflicts with main in crates/pi-natives/src/desktop/macos/skylight.rs",
+     "conflicts with macos-window-order in docs/computer-use.md",
      "conflicts with main in docs/computer-use.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#17756"
+     "#17756",
+     "macos-window-order"
     ],
     "needs": [
      "macos-window-order"
@@ -106311,6 +106312,7 @@
     "action": "wait",
     "reasons": [
      "conflicts with #18925 in crates/pi-natives/src/desktop/macos/mod.rs",
+     "conflicts with macos-window-order in crates/pi-natives/src/desktop/macos/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/control/macos.rs, crates/pi-natives/src/desktop/macos/mod.rs"
     ],
     "note": "accepted pair with #16553: Main, 2026-11-14: the rule and #16553 both edit observe_user's tap callback in control/macos.rs. Combined form: #16553's button_record block first and unchanged, then the rule's foreign_input(tag, source, own, ...) using #16553's own, with input_target(kind, target, front_pid, |pid| rerouted_to(pid, event)); input_target's doc keeps both sentences (moved key; a release lands nowhere); #16553's input_target tests gain the rule's 4th argument kept. Tree 270cbd49719 (local branch will/macos-reroute-on-16553), pi-natives lib tests 1012 pass on macOS; with fix 1 too (Main's 32a1e67a7b2 + rule) 791f07e06c5, 1017 pass.",
@@ -106319,7 +106321,8 @@
      "#16553"
     ],
     "blocked_by": [
-     "#18925"
+     "#18925",
+     "macos-window-order"
     ],
     "needs": [],
     "created": "2026-11-14T20:50:07Z"
@@ -106337,6 +106340,7 @@
      "needs macos-reroute-not-a-press (queued)",
      "conflicts with #19195 in docs/computer-use.md",
      "conflicts with macos-key-read-settled in crates/pi-natives/src/desktop/macos/input.rs",
+     "conflicts with macos-window-order in docs/computer-use.md",
      "conflicts with macos-handback-typed in docs/computer-use.md",
      "its need macos-reroute-not-a-press conflicts with main in crates/pi-natives/src/desktop/control/macos.rs, crates/pi-natives/src/desktop/macos/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/macos/input.rs, docs/computer-use.md"
@@ -106347,6 +106351,7 @@
     "blocked_by": [
      "#19195",
      "macos-key-read-settled",
+     "macos-window-order",
      "macos-handback-typed"
     ],
     "needs": [
@@ -106689,6 +106694,7 @@
      "conflicts with #18222 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/tools/eval.ts",
      "conflicts with macos-key-read-settled in docs/computer-use.md",
+     "conflicts with macos-window-order in docs/computer-use.md",
      "conflicts with macos-handback-typed in docs/computer-use.md",
      "conflicts with macos-move-receipt in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
@@ -106705,6 +106711,7 @@
      "#18222",
      "#18786",
      "macos-key-read-settled",
+     "macos-window-order",
      "macos-handback-typed",
      "macos-move-receipt"
     ],
@@ -106768,6 +106775,7 @@
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md",
      "conflicts with #18925 in crates/pi-natives/src/desktop/macos/capture.rs, crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with macos-window-order in crates/pi-natives/src/desktop/macos/capture.rs, crates/pi-natives/src/desktop/macos/mod.rs",
      "conflicts with macos-move-receipt in docs/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -106781,6 +106789,7 @@
      "#18353",
      "#18222",
      "#18925",
+     "macos-window-order",
      "macos-move-receipt"
     ],
     "needs": [],
