@@ -87789,13 +87789,13 @@
    "needs": [],
    "base": "1bdbf6d242d99ca62bdf2feeff4519ff992f647d",
    "body": "bodies/x11-keysym-remap.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19519,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-keysym-remap",
    "host": "MacBook-Pro",
    "added": "2026-11-11T13:55:21Z",
-   "updated": "2026-11-17T04:16:23Z",
+   "updated": "2026-11-17T04:19:40Z",
    "note": "LinuxGrabs, 2026-11-17: head 719b46266b0 (local branch, on main 1bdbf6d242d): grab only for keymap reads/writes; rebind owns old+new keysym until the write lands; close returns restore failures; over-capacity text refused before any key (MPX warm-up deferred after bind). Linux/macOS/Windows rust-check recorded. Sol reviews: round 1 findings fixed; round 2 (b)(c) closed, MPX warm-up finding fixed.",
    "line_loss_overrides": [
     {
@@ -87905,7 +87905,8 @@
      "at": "2026-11-17T04:16:19Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-17T04:19:40Z"
   },
   {
    "id": "macos-ax-linked-label",
