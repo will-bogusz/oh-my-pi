@@ -37216,6 +37216,17 @@
        "\t\tassert_eq!(session.reading(true).placed, None);"
       ]
      }
+    },
+    {
+     "at": "2026-11-17T01:09:28Z",
+     "reason": "recorded #19296 pair form (Main 2026-11-14) against main's code: main replaced the tap callback's foreign_input(...) test with observed(...), so #16553's button_record block now precedes main's observed() block using its own pid",
+     "old": "025f862db65bde1ed30997099b9dce8b202f686d",
+     "new": "709f0e7e03b44e4017e8a5f6c88635ab4d04becf",
+     "dropped": {
+      "crates/pi-natives/src/desktop/control/macos.rs": [
+       "\t\tif foreign_input(tag, source, own, kind, point)"
+      ]
+     }
     }
    ]
   },
