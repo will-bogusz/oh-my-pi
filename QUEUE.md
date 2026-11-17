@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17 22:01Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17 22:02Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-11-17 21:42Z on MacBook-Pro; groups below are from it, states from the manifest)
@@ -21,7 +21,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 | usage-state-per-model | fix(coding-agent): judge omp usage policy state by account-wide windows | broker |  | 1h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/usage-state-per-model) |
 | fable-shared-wall-block | fix(ai): heal Claude tier blocks a shared weekly wall caused from single-window usage reports | broker |  | 1h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/fable-shared-wall-block) |
 | broker-wire-forward-compat | fix(ai): read auth-broker responses that carry fields a newer broker adds | broker |  | 1h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-wire-forward-compat) |
-| reset-spend-log | feat(coding-agent): log every saved-reset spend attempt at info | coding-agent |  | 0h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-spend-log) |
+| reset-spend-log | feat(coding-agent): log every saved-reset spend attempt at info | coding-agent |  | 1h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-spend-log) |
 | broker-shutdown-refresh-save | fix(coding-agent): let auth-broker serve save an in-flight refresh before exit | broker |  | 0h | next-hour; tests-over: ReviewBrokerShutdown, 2026-11-17: one regression test; the exit race exists only in a spawned omp auth-broker serve process, so its lines are process and fixture setup | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-shutdown-refresh-save) |
 | logger-console-level | fix(utils): apply OMP_LOG_LEVEL to the console transport | other |  | 0h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/logger-console-level) |
 | broker-version-skew | feat(ai,coding-agent): exchanged omp versions between auth-broker clients and the broker | auth-broker | P2 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-version-skew) |
