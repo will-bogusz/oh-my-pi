@@ -79309,6 +79309,48 @@
        "\t\t\tassert!(unread > 0);"
       ]
      }
+    },
+    {
+     "at": "2026-11-17T00:17:27Z",
+     "reason": "recorded #19061 pair form (Main 2026-11-12): main's AxProps now carries read_as_fingerprint and its rustfmt alignment; the 32 lines are this branch's old alignment of the same fields plus unread_children realigned",
+     "old": "581c7faf59597a6a754b89ad2a04647e6d2e0cd3",
+     "new": "5af131c69274200ee4ba032568e9ccab44291c69",
+     "dropped": {
+      "crates/pi-natives/src/desktop/ax.rs": [
+       "\tpub role:            String,",
+       "\tpub native_role:     String,",
+       "\tpub title:           Option<String>,",
+       "\tpub value:           Option<String>,",
+       "\tpub description:     Option<String>,",
+       "\tpub enabled:         bool,",
+       "\tpub focused:         bool,",
+       "\tpub bounds:          Option<AxBounds>,",
+       "\tpub actions:         Vec<String>,",
+       "\tpub child_count:     u32,",
+       "\tpub identity:        Option<u64>,",
+       "\tpub partial:         bool,",
+       "\tpub label_complete:  bool,",
+       "\tpub selected:        bool,",
+       "\tpub role_name:       Option<String>,",
+       "\tpub unread_children: u32,",
+       "\t\t\trole:            role.into(),",
+       "\t\t\tnative_role:     role.into(),",
+       "\t\t\ttitle:           title.map(str::to_string),",
+       "\t\t\tvalue:           None,",
+       "\t\t\tdescription:     None,",
+       "\t\t\tenabled:         true,",
+       "\t\t\tfocused:         false,",
+       "\t\t\tbounds:          None,",
+       "\t\t\tactions:         Vec::new(),",
+       "\t\t\tchild_count:     0,",
+       "\t\t\tidentity:        Some(test_identity((role, title))),",
+       "\t\t\tpartial:         false,",
+       "\t\t\tlabel_complete:  true,",
+       "\t\t\tselected:        false,",
+       "\t\t\trole_name:       None,",
+       "\t\t\tunread_children: 0,"
+      ]
+     }
     }
    ],
    "advanced": "2026-11-17T00:16:27Z",
