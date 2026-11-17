@@ -96606,6 +96606,24 @@
    "added": "2026-11-17T21:08:05Z",
    "updated": "2026-11-17T21:08:05Z",
    "note": ""
+  },
+  {
+   "id": "wayland-window-crop-clip",
+   "branch": "will/wayland-window-crop-clip",
+   "title": "fix(natives): capture the visible part of a Linux window partly off its monitor",
+   "area": "natives",
+   "priority": "P2",
+   "needs": [],
+   "base": "baf60290fde5e9eea4edb30bff07695877682ba9",
+   "body": "bodies/wayland-window-crop-clip.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-window-crop-clip",
+   "host": "MacBook-Pro",
+   "added": "2026-11-17T21:09:14Z",
+   "updated": "2026-11-17T21:09:14Z",
+   "note": ""
   }
  ],
  "watch": {
