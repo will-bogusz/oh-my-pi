@@ -1,21 +1,22 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17 06:30Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17 06:31Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-17 06:15Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 4, conflict-held 16, stacked 14, held 11, parked 2, open PRs 14; merged 376, closed 37
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-17 06:29Z on MacBook-Pro; groups below are from it, states from the manifest)
+**Counts:** openable now 5, conflict-held 15, stacked 14, held 11, parked 2, open PRs 14; merged 376, closed 37
 
-## Openable now (4)
+## Openable now (5)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
 | browser-wait-predicate | feat(browser): add waitForFunction to tabs and frames | browser | P1 | 6d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-wait-predicate) |
 | x11-xtest-release | fix(natives): release X11 XTest keys and buttons a killed omp held | computer | P1 | 6d | open; accepted pair with #19519: Main, 2026-11-17: adjacent unions in x11/mod.rs (mod lines), input.rs use list, X11Input::new fields and foreground_keys_after (watch_releases() then Keymap::xtest); in send_xtest #19519's text_mapping.pressed(keycode) moves into xtest's restructured send_xtest at the same point (after the request is sent, before check(), key presses only), no new logic. Combined form: merge 7b0d2ff0b68, ~/tmp/oh-my-pi/queuethirty/xpair-combined.md | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-xtest-release) |
+| stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 4d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 | factory-droid-1100-pin | feat(catalog): identify Factory Droid requests as droid 1.10.0 | factory-droid |  | 3d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-pin) |
 | macos-window-order | fix(natives): put the user's key window back in front of a macOS target after background input and takeover | computer | P1 | 3d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-window-order) |
 
-## Conflict-held (16)
+## Conflict-held (15)
 
 | id | title | area | priority | age | blocked by | branch |
 |---|---|---|---|---|---|---|
@@ -34,7 +35,6 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 | win-minimised-windows | fix(natives,coding-agent): show a minimized Windows app's window from apps.open instead of launching it again | computer | P2 | 5d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19509](https://github.com/can1357/oh-my-pi/pull/19509), [#19516](https://github.com/can1357/oh-my-pi/pull/19516), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-minimised-windows) |
 | macos-ax-cancel-before-send | fix(natives): send no macOS AX action once its run is cancelled | natives | P2 | 5d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19516](https://github.com/can1357/oh-my-pi/pull/19516), macos-window-order, main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-ax-cancel-before-send) |
 | win-ax-states | fix(natives): expose Windows control state and stale-reference matches | computer | P2 | 5d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19521](https://github.com/can1357/oh-my-pi/pull/19521), [#19516](https://github.com/can1357/oh-my-pi/pull/19516), [#19519](https://github.com/can1357/oh-my-pi/pull/19519), macos-window-order, main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-ax-states) |
-| stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 4d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 
 ## Stacked (14)
 
