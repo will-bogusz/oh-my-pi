@@ -96794,10 +96794,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/deadline-ranking",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:17:58Z",
-   "updated": "2026-11-17T21:34:08Z",
-   "note": "",
-   "kind": "proposal",
-   "hold": "Will, 2026-11-17: P2 proposal; held until Will's go-ahead"
+   "updated": "2026-11-17T21:35:41Z",
+   "note": "Will, 2026-11-17: go-ahead to open",
+   "kind": "proposal"
   },
   {
    "id": "account-switch-reason",
