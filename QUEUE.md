@@ -4,7 +4,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-16 23:57Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 4, conflict-held 20, stacked 19, held 11, parked 2, open PRs 15; merged 366, closed 37
+**Counts:** openable now 4, conflict-held 19, stacked 19, held 12, parked 2, open PRs 15; merged 366, closed 37
 
 ## Openable now (4)
 
@@ -15,7 +15,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 | macos-move-receipt | fix(coding-agent): say what a macOS background move did | computer | P2 | 2d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-move-receipt) |
 | macos-handback-typed | fix(natives): give the macOS key window back after a takeover while another program types | computer | P2 | 2d | open; advance first | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-handback-typed) |
 
-## Conflict-held (20)
+## Conflict-held (19)
 
 | id | title | area | priority | age | blocked by | branch |
 |---|---|---|---|---|---|---|
@@ -30,7 +30,6 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 | browser-action-outcome | feat(browser): print what each browser action did to the page | browser | P2 | 6d | [#19001](https://github.com/can1357/oh-my-pi/pull/19001), [#18786](https://github.com/can1357/oh-my-pi/pull/18786), [#18789](https://github.com/can1357/oh-my-pi/pull/18789), [#18925](https://github.com/can1357/oh-my-pi/pull/18925), [#19045](https://github.com/can1357/oh-my-pi/pull/19045), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-action-outcome) |
 | computer-filter-types | fix(computer): say window and element filters take text when given a RegExp | computer | P2 | 5d | [#19100](https://github.com/can1357/oh-my-pi/pull/19100), [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19405](https://github.com/can1357/oh-my-pi/pull/19405), [#18222](https://github.com/can1357/oh-my-pi/pull/18222), [#18987](https://github.com/can1357/oh-my-pi/pull/18987), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-filter-types) |
 | covered-fill | fix(coding-agent): refuse browser keys aimed at a field a modal dialog covers | browser | P1 | 5d | [#19001](https://github.com/can1357/oh-my-pi/pull/19001), [#18925](https://github.com/can1357/oh-my-pi/pull/18925), [#19045](https://github.com/can1357/oh-my-pi/pull/19045), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/covered-fill) |
-| x11-xtest-release | fix(natives): release X11 XTest keys and buttons a killed omp held | computer | P1 | 5d | [#18222](https://github.com/can1357/oh-my-pi/pull/18222), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-xtest-release) |
 | relay-print-preview-error | fix(coding-agent,browser-relay): fail a browser call a print preview holds in an attached browser within seconds | browser | P2 | 5d | [#19001](https://github.com/can1357/oh-my-pi/pull/19001), [#18925](https://github.com/can1357/oh-my-pi/pull/18925), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-print-preview-error) |
 | win-minimised-windows | fix(natives,coding-agent): show a minimized Windows app's window from apps.open instead of launching it again | computer | P2 | 5d | [#19179](https://github.com/can1357/oh-my-pi/pull/19179), [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19296](https://github.com/can1357/oh-my-pi/pull/19296), [#18222](https://github.com/can1357/oh-my-pi/pull/18222), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-minimised-windows) |
 | browser-select-objects | feat(browser): accept explicit dropdown option selectors | browser | P2 | 5d | [#18786](https://github.com/can1357/oh-my-pi/pull/18786), [#18789](https://github.com/can1357/oh-my-pi/pull/18789), [#18925](https://github.com/can1357/oh-my-pi/pull/18925), [#19045](https://github.com/can1357/oh-my-pi/pull/19045), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-select-objects) |
@@ -64,7 +63,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 | macos-drag-no-change-note | fix(natives): note a macOS background drag that changed nothing readable | computer | P2 | 2d | macos-drag-confirm ([#19195](https://github.com/can1357/oh-my-pi/pull/19195)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-drag-no-change-note) |
 | macos-web-type-background | fix(natives): type into a background macOS web page field without a takeover | computer | P2 | 2d | macos-reroute-not-a-press | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-web-type-background) |
 
-## Held (11)
+## Held (12)
 
 | id | title | area | priority | age | hold | branch |
 |---|---|---|---|---|---|---|
@@ -78,6 +77,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 | computer-guide-first-use | feat(coding-agent): send the computer guide with the first computer call | computer | P2 | 6d | Main, 2026-11-11: stays held until #18786 merges with the typed-message guide channel (design check replace); then one property on the computer prelude, drop the wrap variant, re-run its blind legs | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-guide-first-use) |
 | browser-cursor | feat(browser): draw the acting agent's cursor in OMP-driven tabs | browser | P2 | 6d | Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-cursor) |
 | desktop-cursor | feat(coding-agent,natives): show each agent's cursor where its computer input lands on macOS | coding-agent | P2 | 6d | Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check \| Main 2026-11-12: before it opens, the waiting-key-chord case with the cursor actually drawn (20 trials at a 20 s deadline; CursorDemo's cursor-on arm never drew one, and an early run on the combined tree returned 'Cancelled, input may be partial' 11/11, unexplained), on the polished branch will/desktop-cursor-polish. | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/desktop-cursor) |
+| x11-xtest-release | fix(natives): release X11 XTest keys and buttons a killed omp held | computer | P1 | 5d | Main, 2026-11-17: opens only on Main's word; XtestRelease is measuring the release watcher's fork cost from an omp-sized process; then it takes its turn after macos-window-order and macos-key-read-settled | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-xtest-release) |
 | win-type-insert | feat(natives): insert typed text into a focused Windows multi-line edit control | computer | P2 | 4d | Main, 2026-11-12: proposal; opens only after entry A merges and Will has seen the body | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-type-insert) |
 
 ## Parked (2)
