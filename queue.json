@@ -96434,6 +96434,24 @@
    "added": "2026-11-17T20:59:40Z",
    "updated": "2026-11-17T20:59:40Z",
    "note": ""
+  },
+  {
+   "id": "broker-wire-forward-compat",
+   "branch": "will/broker-wire-forward-compat",
+   "title": "fix(ai): read auth-broker responses that carry fields a newer broker adds",
+   "area": "broker",
+   "priority": null,
+   "needs": [],
+   "base": "baf60290fde5e9eea4edb30bff07695877682ba9",
+   "body": "bodies/broker-wire-forward-compat.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/broker-wire-forward-compat",
+   "host": "MacBook-Pro",
+   "added": "2026-11-17T21:01:16Z",
+   "updated": "2026-11-17T21:01:16Z",
+   "note": ""
   }
  ],
  "watch": {
