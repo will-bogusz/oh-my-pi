@@ -80502,13 +80502,13 @@
    "needs": [],
    "base": "1bdbf6d242d99ca62bdf2feeff4519ff992f647d",
    "body": "bodies/x11-xtest-release.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19531,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-xtest-release",
    "host": "MacBook-Pro",
    "added": "2026-11-11T02:31:05Z",
-   "updated": "2026-11-17T06:29:07Z",
+   "updated": "2026-11-17T06:33:00Z",
    "note": "",
    "rebases_after": [
     18222,
@@ -80591,7 +80591,8 @@
      "at": "2026-11-17T06:29:06Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-17T06:33:00Z"
   },
   {
    "id": "x11-takeover-keyboard-state",
