@@ -80349,7 +80349,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "6dd7ddf5feab54da3c82b460ee390a7d09aeabaa",
+   "base": "1bdbf6d242d99ca62bdf2feeff4519ff992f647d",
    "body": "bodies/x11-xtest-release.md",
    "state": "queued",
    "pr": null,
@@ -80357,15 +80357,14 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-xtest-release",
    "host": "MacBook-Pro",
    "added": "2026-11-11T02:31:05Z",
-   "updated": "2026-11-17T00:36:44Z",
+   "updated": "2026-11-17T03:42:15Z",
    "note": "",
    "rebases_after": [
     18222
    ],
    "pair_reasons": {
     "18222": "Main, 2026-11-17: docs only, adjacent lines in docs/computer-use.md and docs/tools/computer.md: #18222 inserts its named-menu paragraph / sub-bullet right before the holdKeys line this entry edits. Combined form: in both files #18222's new menu line first, then this entry's holdKeys line, nothing else changed (~/tmp/oh-my-pi/XtestRelease/docs-18222-pair.md). Not to open until Main says (watcher fork-cost measurement pending)."
-   },
-   "hold": "Main, 2026-11-17: opens only on Main's word; XtestRelease is measuring the release watcher's fork cost from an omp-sized process; then it takes its turn after macos-window-order and macos-key-read-settled"
+   }
   },
   {
    "id": "x11-takeover-keyboard-state",
