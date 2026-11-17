@@ -95084,7 +95084,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-reroute-not-a-press",
    "host": "MacBook-Pro",
    "added": "2026-11-14T20:50:07Z",
-   "updated": "2026-11-17T03:14:16Z",
+   "updated": "2026-11-17T03:18:14Z",
    "note": "MacLockWaits 2026-11-17: taken over from Main; rebased onto main 1bdbf6d242d as 5edae5aa592 over #16553 and Brit's 760422a2052 (releases stay out of last_press). Combined observe_user = main's + input_target(.., |pid| rerouted_to(pid, event)); Main approved the form. Earlier review TypingTakeover.ReviewRerouteRule needs-changes at d23777b14e, all 7 fixed (not re-reviewed). macOS desktop tests 486 pass; rust-check macos/linux/windows at Rust diff 15cd8383fc. VM tables measured before the rebase (fe194ec2f12).",
    "rebases_after": [
     16553
@@ -95105,7 +95105,8 @@
       ]
      }
     }
-   ]
+   ],
+   "advanced": "2026-11-17T03:18:14Z"
   },
   {
    "id": "macos-web-type-background",
