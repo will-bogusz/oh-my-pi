@@ -87440,7 +87440,7 @@
    "area": "computer",
    "priority": "P2",
    "needs": [],
-   "base": "f2ee6ba9b3e00b379c7c12b9d99ef6369fd08f3f",
+   "base": "1bdbf6d242d99ca62bdf2feeff4519ff992f647d",
    "body": "bodies/x11-keysym-remap.md",
    "state": "queued",
    "pr": null,
@@ -87448,8 +87448,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-keysym-remap",
    "host": "MacBook-Pro",
    "added": "2026-11-11T13:55:21Z",
-   "updated": "2026-11-11T13:55:21Z",
-   "note": ""
+   "updated": "2026-11-17T03:17:28Z",
+   "note": "LinuxGrabs, 2026-11-17: rebased onto main 1bdbf6d242d (local branch in ~/.omp/main-wt/oh-my-pi/x11-keysym-remap, heads 9ee9f945428 feature + 6f3571eee1d grab fix; fork branch still the old 509c34a737e, not pushed). Grab held only for keymap reads/writes (probe in body); MPX press counted at the EV_KEY write; body states the 500 ms run-wait limit with its measured worst case. Linux rust-check recorded; Astra review findings fixed."
   },
   {
    "id": "macos-ax-linked-label",
