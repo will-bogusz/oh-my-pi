@@ -1,6 +1,6 @@
 ## What
 
-<!-- Will: confirm own-words -->
+
 I want Fable to stop drawing on an account before it burns that account's last Fable quota for the week, without also holding Opus back on the same account.
 
 An account policy can now give one usage limit its own reserve. `reservePctByLimit` maps a limit `id`, as `omp usage --json` lists it, to a percentage; every other limit keeps the account's `reservePct`:
@@ -56,3 +56,4 @@ Related: #14074 and #19323 shrink a reserve as a window's reset nears; this sets
 - [ ] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
