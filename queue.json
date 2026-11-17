@@ -96378,6 +96378,24 @@
    "added": "2026-11-17T20:54:14Z",
    "updated": "2026-11-17T20:54:14Z",
    "note": ""
+  },
+  {
+   "id": "image-eviction-notice",
+   "branch": "will/image-eviction-notice",
+   "title": "fix(coding-agent): mark images the provider image limit evicts in place",
+   "area": "other",
+   "priority": null,
+   "needs": [],
+   "base": "baf60290fde5e9eea4edb30bff07695877682ba9",
+   "body": "bodies/image-eviction-notice.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/image-eviction-notice",
+   "host": "MacBook-Pro",
+   "added": "2026-11-17T20:57:09Z",
+   "updated": "2026-11-17T20:57:09Z",
+   "note": ""
   }
  ],
  "watch": {
