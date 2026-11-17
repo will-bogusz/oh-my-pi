@@ -96485,11 +96485,11 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-input-refusal",
    "host": "MacBook-Pro",
    "added": "2026-11-17T20:29:55Z",
-   "updated": "2026-11-17T23:50:32Z",
+   "updated": "2026-11-17T23:50:43Z",
    "note": "",
    "tests_over_override": {
-    "reason": "OmarchyFixes, 2026-11-17: one test going through all 8 gated input arms; each request is an arm no other test reaches",
-    "at": "2026-11-17T20:29:58Z"
+    "reason": "OmarchyFixes, 2026-11-18: one test going through the 9 refused input requests with control held elsewhere; each request is an arm no other test reaches",
+    "at": "2026-11-17T23:50:43Z"
    }
   },
   {
