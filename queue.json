@@ -97255,6 +97255,25 @@
        "\t\t\t\t{ install_id: \"relayed-install\", version: null },"
       ]
      }
+    },
+    {
+     "at": "2026-11-17T23:18:11Z",
+     "reason": "VersionSkewBotRound, 2026-11-17: final-review fixes restore the signal argument and move the relay test onto RemoteAuthCredentialStore on purpose",
+     "old": "bbc606e53aac36298daa70e428e6c6f598fec211",
+     "new": "ffe74eace28cb6d0678e4efed2b6dea3961228bd",
+     "dropped": {
+      "packages/ai/src/auth-broker/client.ts": [
+       "\t\topts: { relayed?: boolean; signal?: AbortSignal } = {},"
+      ],
+      "packages/ai/test/auth-broker-wire.test.ts": [
+       "\t\t\t// caller's under the gateway's own install id; only the sender's own report",
+       "\t\t\tconst versionRow = () => db.query(\"SELECT version FROM clients WHERE install_id = ?\").get(getInstallId());",
+       "\t\t\tawait skewed.reportClientUsage({ installId: getInstallId(), app: \"omp\", entries: [entry] }, { relayed: true });",
+       "\t\t\texpect(versionRow()).toEqual({ version: null });",
+       "\t\t\tawait skewed.reportClientUsage({ installId: getInstallId(), entries: [entry] });",
+       "\t\t\texpect(versionRow()).toEqual({ version: VERSION });"
+      ]
+     }
     }
    ],
    "advanced": "2026-11-17T22:38:35Z"
