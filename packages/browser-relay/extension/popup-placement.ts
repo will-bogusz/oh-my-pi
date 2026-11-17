@@ -34,10 +34,10 @@ export class PopupPlacement {
 	#displacedTab = new Map<number, Displaced>();
 	/** Popups from tabs omp drives that the user has not selected since. */
 	#popups = new Set<number>();
-	/** Each tab's window, from Chrome's tab creation and attach events. */
+	/** Each tab's window, from Chrome's tab creation and attach events, else looked up once. */
 	#windowOf = new Map<number, number>();
-	/** Windows of Chrome's `popup` type, from its window creation events. */
-	#popupTypeWindows = new Set<number>();
+	/** Each window's type (`normal`, `popup`, …), from Chrome's window creation events, else looked up once. */
+	#windowTypes = new Map<number, string>();
 	/** The focused window; `undefined` until this worker has seen where focus is. */
 	#focused: number | undefined;
 	/** For each window, the window that had focus before Chrome focused it (`undefined`: not known). */
@@ -116,7 +116,7 @@ export class PopupPlacement {
 
 	/** Chrome created window `windowId` of `type` (`normal`, `popup`, …). */
 	windowCreated(windowId: number, type: string | undefined): void {
-		if (type === "popup") this.#popupTypeWindows.add(windowId);
+		if (type !== undefined) this.#windowTypes.set(windowId, type);
 	}
 
 	removed(tabId: number): void {
@@ -130,7 +130,7 @@ export class PopupPlacement {
 		this.#generation.delete(windowId);
 		this.#focusedBefore.delete(windowId);
 		this.#awaitingFocus.delete(windowId);
-		this.#popupTypeWindows.delete(windowId);
+		this.#windowTypes.delete(windowId);
 		if (this.#beforeNone === windowId) this.#beforeNone = undefined;
 	}
 
@@ -146,8 +146,8 @@ export class PopupPlacement {
 		if (!tab) return;
 		const window = await this.#chrome.getWindow(tab.windowId);
 		this.#windowOf.set(tabId, tab.windowId);
+		if (window.type !== undefined) this.#windowTypes.set(tab.windowId, window.type);
 		if (window.type === "popup") {
-			this.#popupTypeWindows.add(tab.windowId);
 			// Chrome cannot move a tab out of a popup window, refuses bounds that put one mostly off screen, and
 			// stops rendering a minimized one. It stays where Chrome put it; once the user's window has focus
 			// back it sits behind it, and omp's focus emulation keeps it rendering there.
@@ -156,7 +156,9 @@ export class PopupPlacement {
 			// focuses a window (the popup has the focus), so it only picks which of Chrome's windows is in front.
 			if (this.#focused === tab.windowId) {
 				if (!window.focused) return;
-				const before = this.#pastPopupWindows(this.#focusedBefore.get(tab.windowId));
+				const before = await this.#pastPopupWindows(this.#focusedBefore.get(tab.windowId));
+				// The user moved focus while this looked up a popup's window.
+				if (this.#focused !== tab.windowId) return;
 				if (before === undefined) {
 					// Chrome had focus before this worker saw any focus change: a Chrome that just started can report
 					// neither its focus nor, at the hello, a focused window. The normal window focused last goes in
@@ -169,7 +171,9 @@ export class PopupPlacement {
 			} else {
 				const current = this.#lastFocused();
 				if (current === undefined || current === NO_WINDOW || this.#focusedBefore.has(tab.windowId)) return;
-				const back = this.#pastPopupWindows(current);
+				const back = await this.#pastPopupWindows(current);
+				// The user moved focus, or Chrome reported the popup's, while this looked up a popup's window.
+				if (this.#lastFocused() !== current || this.#focusedBefore.has(tab.windowId)) return;
 				if (back === undefined || back === NO_WINDOW) return;
 				// Chrome has not reported the popup's focus yet: a new window takes a moment to show.
 				if (window.focused) await this.#chrome.focusWindow(back);
@@ -195,14 +199,27 @@ export class PopupPlacement {
 	/**
 	 * `windowId`, or, when it is one of omp's popup windows, the window focused before it, followed back the same
 	 * way: several popup windows can each take focus before the first is put back. `NO_WINDOW` when the chain
-	 * loops. Popup windows are known from Chrome's events, so this asks Chrome nothing.
+	 * loops. Popup windows are known from Chrome's events; a popup or window whose event this worker did not see
+	 * is looked up once and remembered, so Chrome is asked nothing once every popup's window is known.
 	 */
-	#pastPopupWindows(windowId: number | undefined): number | undefined {
+	async #pastPopupWindows(windowId: number | undefined): Promise<number | undefined> {
 		if (windowId === undefined || windowId === NO_WINDOW) return windowId;
 		const popupWindows = new Set<number>();
 		for (const popup of this.#popups) {
-			const window = this.#windowOf.get(popup);
-			if (window !== undefined && this.#popupTypeWindows.has(window)) popupWindows.add(window);
+			let window = this.#windowOf.get(popup);
+			if (window === undefined) {
+				window = (await this.#chrome.getTab(popup))?.windowId;
+				if (window === undefined) continue;
+				this.#windowOf.set(popup, window);
+			}
+			let type = this.#windowTypes.get(window);
+			if (type === undefined) {
+				// The window may have closed meanwhile.
+				type = (await this.#chrome.getWindow(window).catch(() => undefined))?.type;
+				if (type === undefined) continue;
+				this.#windowTypes.set(window, type);
+			}
+			if (type === "popup") popupWindows.add(window);
 		}
 		const seen = new Set<number>();
 		let current: number | undefined = windowId;

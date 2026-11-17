@@ -10,7 +10,6 @@
 
 - Fixed omp never learning which other extension's frame the extension emptied and hid in a tab omp drives: the extension now reports the frame's page and that page's own title, checked by loading the page from the tab itself ([#19001](https://github.com/can1357/oh-my-pi/pull/19001) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed the relay attaching Chrome's debugger to every tab of your browser whenever omp connected; only tabs omp opened or borrowed are attached ([#15554](https://github.com/can1357/oh-my-pi/pull/15554) by [@will-bogusz](https://github.com/will-bogusz))
-- Fixed the relay attaching Chrome's debugger to every tab of your browser whenever omp connected; only tabs omp opened or borrowed are attached ([#15554](https://github.com/can1357/oh-my-pi/pull/15554) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed popups and `target=_blank` tabs from omp's tabs taking your selected tab or keyboard focus: the extension reports which tab opened one (new `webNavigation` permission; reinstall and reload it) ([#15590](https://github.com/can1357/oh-my-pi/pull/15590) by [@will-bogusz](https://github.com/will-bogusz))
 
 ## [18.18.2] - 2026-11-08
@@ -36,21 +35,6 @@
 - Updated Bun engine requirement to ≥1.4.4
 
 ## [18.13.0] - 2026-10-26
-### Fixed
-
-- Fixed the relay attaching Chrome's debugger to every tab of your browser whenever omp connected; only tabs omp opened or borrowed are attached ([#15554](https://github.com/can1357/oh-my-pi/pull/15554) by [@will-bogusz](https://github.com/will-bogusz))
-
-## [18.12.2] - 2026-10-18
-### Breaking Changes
-
-- CDP clients other than omp connecting to the relay must open a tab with `Target.createTarget` or claim a listed one with `OMP.claimTarget { targetId }` before attaching it; `Target.setAutoAttach` no longer attaches every tab and `Target.attachToTarget` on an unclaimed tab is refused ([#15554](https://github.com/can1357/oh-my-pi/pull/15554) by [@will-bogusz](https://github.com/will-bogusz))
-
-### Fixed
-
-- Fixed the relay attaching Chrome's debugger to every tab of your browser whenever omp connected; only tabs omp opened or borrowed are attached ([#15554](https://github.com/can1357/oh-my-pi/pull/15554) by [@will-bogusz](https://github.com/will-bogusz))
-- Fixed popups and `target=_blank` tabs from omp's tabs taking your selected tab or keyboard focus: the extension reports which tab opened one (new `webNavigation` permission; reinstall and reload it) ([#15590](https://github.com/can1357/oh-my-pi/pull/15590) by [@will-bogusz](https://github.com/will-bogusz))
-
-## [18.12.2] - 2026-10-18
 
 ### Added
 

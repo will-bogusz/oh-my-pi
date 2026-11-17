@@ -319,6 +319,19 @@ describe("PopupPlacement", () => {
 		expect(chrome.calls).toEqual(["focus 1"]);
 	});
 
+	it("gives focus back past an earlier popup window whose events this worker has not seen", async () => {
+		const { chrome, placement } = setup();
+		// Popup 3's window and tab events never reached this worker; popup 5's did.
+		chrome.tabs.set(3, { active: true, windowId: 7 });
+		chrome.windows.set(7, { type: "popup", focused: false });
+		placement.opened(3);
+		placement.focusChanged(7);
+		popupWindow(chrome, placement, true, 5, 8);
+		placement.focusChanged(8);
+		await placement.background(5);
+		expect(chrome.calls).toEqual(["focus 1"]);
+	});
+
 	it("forgets a closed window's selection", async () => {
 		const { chrome, placement } = setup();
 		placement.windowRemoved(1);
