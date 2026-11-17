@@ -18,8 +18,9 @@ Reading order: `extension/background.ts` → `popup-placement.ts` → `relay/bri
 
 - **Provenance from Chrome, not timing.** A popup goes to its opener's owners only when Chrome names the opener; a guess from `Page.windowOpen` timing attached a tab the user opened at the same moment.
 - **Each popup undoes only what it displaced**, and only while the window's selection count is unchanged, so a tab the user picked meanwhile is never overridden; chained popups resolve to the user's tab.
-- **Popup windows stay where Chrome put them.** A minimized one stops rendering (omp's screenshot and click timed out), and Chrome refuses to move one off screen. If it took the focus from one of the user's Chrome windows, focus goes back there, past any popup windows that took it in between (also across a brief no-focus report on Linux); from another app, nothing is focused.
-- **Focus emulation on popups and their own popups**, as for omp's own background tabs, so an unselected popup renders and takes input; a popup's popup is owned even before omp has attached to the first. Stale reports expire on tab close, reconnect, or after 10 s.
+- **Popup windows stay where Chrome put them.** A minimized one stops rendering (omp's screenshot and click timed out), and Chrome refuses to move one off screen. If it took the focus from one of the user's Chrome windows, focus goes back there, past any popup windows that took it in between (also across a brief no-focus report on Linux); from another app, nothing is focused. The extension knows which windows are omp's popup windows from Chrome's window and tab events, so putting one back asks Chrome only about that popup, plus once about any earlier popup whose events it did not see.
+- **Focus emulation on popups and their own popups**, as for omp's own background tabs, so an unselected popup renders and takes input; a popup's popup is owned even before omp has attached to the first.
+- **Bounded reports.** The relay takes a report only when both ids are non-negative integers and the opener is a tab a client owns, ignores a repeat for the same popup and opener, and asks the extension to put each popup back once. At most 32 reports wait for their tab at once; one waits at most 10 s and is dropped on use, tab close or reconnect. A popup past that cap stays in front, not owned.
 <details><summary>Maintenance and the known limit</summary>
 
 - **Maintenance.** One new extension permission (`webNavigation`); CHANGELOG and README say to reinstall. An older extension sends no reports and is never asked to background anything.
@@ -55,19 +56,20 @@ An instrumented build showed Chrome activating before any extension call (n=15);
 
 <details><summary>Regression tests (each fails with its fix reverted)</summary>
 
-- `browser-relay-popup-placement.test.ts` (fake Chrome): user switches mid-lookup, chained popups in both orders, focus handed back before/after Chrome reports it and before any focus was known, every case where the user moved on; each fails with its guard removed.
+- `browser-relay-popup-placement.test.ts` (fake Chrome): user switches mid-lookup, chained popups and popup windows in both orders, focus handed back before/after Chrome reports it and before any focus was known, every case where the user moved on; each fails with its guard removed, and the two chained-popup-window cases fail when the window's creation event is not delivered.
 - `browser-relay-tab-isolation.test.ts` (real extension): `_blank`, `window.open`, sized popup and a cross-site frame's link are owned, put back, then screenshotted, clicked and typed into with the user's tab and focus unchanged; fails with the old minimize or without focus emulation.
 - `browser-relay-bridge.test.ts`: provenance in both orders, departed owner, older extension, stale reports; each fails without the fix.
 
 </details>
 
-- The `browser-relay-*` files (popup placement included) and `browser-background-input`: 237 pass; `bun check` passes. Without this change, the five popup tests in `browser-relay-bridge` and `browser-relay-tab-isolation` fail.
+- Every `browser-relay-*` file (popup placement included) and `browser-open-lease`: 294 pass; `check:types`, oxlint and oxfmt pass. Without this change, the five popup tests in `browser-relay-bridge` and `browser-relay-tab-isolation` fail.
 
 ---
 
 - [x] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
 
 
 
