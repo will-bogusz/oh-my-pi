@@ -55,7 +55,7 @@ selectors: CSS, or Puppeteer aria/… text/… xpath/… pierce/… label/… pl
 - `route` is declarative: matching requests are aborted or fulfilled from its options; it takes no handler.
   - Watching traffic: `requests()` lists metadata; `request(id)` adds request and response bodies.
 - Navigation and re-renders invalidate observed ids and refs: re-observe, then act in the same cell. `pushState(url)`: SPA navigation without a document load.
-- Act and look in one cell: end a cell that acts with `await tab.observe()`. On Chromium it first waits for the navigation, requests and DOM updates the actions started, so the result shows without another call.
+- Act and look in one cell: end a cell that acts with `await tab.observe()`. On Chromium it first waits, for at most 3 s, for the navigation, requests and DOM updates the actions started, then returns the page as it is, which may still be loading: check that the result shows the outcome before relying on it.
 - No dialog policy: alerts and beforeunload prompts auto-accept; confirms and prompts stay pending for `handleDialog`, and page calls fail naming them until answered.
 - `emulate` merges device/viewport, geolocation, offline/network, media, headers/auth, UA, timezone/locale, and CPU overrides.
 - `devices()` lists valid device names.
@@ -177,7 +177,7 @@ Lifetime:
 const tab = await browser.open({ name: "docs", url: "https://example.com" });
 const observed = await tab.observe();
 await tab.id(observed.elements[0].id).click();
-const after = await tab.observe(); // the page once the click has settled
+const after = await tab.observe(); // the page after the click, settled for at most 3 s
 const title = await tab.run(async ({ tab }, suffix) => (await tab.title()) + suffix, { args: ["!"] });
 await tab.close();
 ```
@@ -199,7 +199,7 @@ await tab.close()
 - NEVER alter the page with scripts to make a step look done (inserting controls, writing app state, revealing hidden elements).
 - When a step cannot be done through the page, say so.
 - When the user asks you to change the page with a script, do it.
-- On Chromium tabs, the next look or read after an action waits for the page to settle (navigation, requests the action started, DOM quiet), so fixed sleeps are not needed for that; on Tern and cmux, and for content the page renders later on its own timer, wait for text or an element the page has already shown you, or read first, then wait (`waitForText`/`waitForSelector`), never a fixed sleep.
+- On Chromium tabs, the next look or read after an action waits at most 3 s for the page to settle (navigation, requests the action started, DOM quiet), so fixed sleeps are not needed for that; on Tern and cmux, for a page still loading after that, and for content the page renders later on its own timer, wait for text or an element the page has already shown you, or read first, then wait (`waitForText`/`waitForSelector`), never a fixed sleep.
 - `tab.run` has full Bun/Node and tool-bridge access; it is not sandboxed.
 - Relay and CDP actions operate on real user sessions.
 </critical>
