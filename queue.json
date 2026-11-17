@@ -96680,7 +96680,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/usage-state-per-model",
    "host": "MacBook-Pro",
    "added": "2026-11-17T20:59:31Z",
-   "updated": "2026-11-17T22:54:12Z",
+   "updated": "2026-11-17T23:34:46Z",
    "note": "",
    "built": [
     {
@@ -96738,21 +96738,39 @@
      "host": "MacBook-Pro"
     },
     {
-     "with": "#19592",
-     "code": "e722ab5a95190315178281c067d3336af4ce453e",
-     "with_code": "2de31525408f5bd840a7993c119c6a71d310a52b",
-     "tip": "2383399c38c22fa6ba5581478a3993bdc704260c",
-     "with_tip": "bbc606e53aac36298daa70e428e6c6f598fec211",
-     "at": "2026-11-17T22:54:11Z",
-     "host": "MacBook-Pro"
-    },
-    {
      "with": "#19513",
      "code": "e722ab5a95190315178281c067d3336af4ce453e",
      "with_code": "58756d46d0aaa29d1bfd113ddd35ea5f4d7583d5",
      "tip": "2383399c38c22fa6ba5581478a3993bdc704260c",
      "with_tip": "b318ff4225ac17579fa7ea14fc44aa6f535ee171",
      "at": "2026-11-17T22:54:11Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19598",
+     "code": "e722ab5a95190315178281c067d3336af4ce453e",
+     "with_code": "6264a3652cb9e53dc3e3730c6b248b5c798700c7",
+     "tip": "2383399c38c22fa6ba5581478a3993bdc704260c",
+     "with_tip": "42eea7e9e6d490c27231d04099e02e8f1dabe8f5",
+     "at": "2026-11-17T23:34:41Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19599",
+     "code": "e722ab5a95190315178281c067d3336af4ce453e",
+     "with_code": "5a958e04e26a24517a7c17df1374be5845ae7a5e",
+     "tip": "2383399c38c22fa6ba5581478a3993bdc704260c",
+     "with_tip": "478f38ebe93d732ad35b60c71f03d5e00c665228",
+     "at": "2026-11-17T23:34:45Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19592",
+     "code": "e722ab5a95190315178281c067d3336af4ce453e",
+     "with_code": "8392c922c234ea7d1826f17a99c3caf7c8ee65c7",
+     "tip": "2383399c38c22fa6ba5581478a3993bdc704260c",
+     "with_tip": "ffe74eace28cb6d0678e4efed2b6dea3961228bd",
+     "at": "2026-11-17T23:34:46Z",
      "host": "MacBook-Pro"
     }
    ]

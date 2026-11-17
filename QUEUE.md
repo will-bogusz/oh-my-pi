@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17 23:33Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17 23:34Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 4 of 8 ready events used in the hour before the last plan, 4 left (plan of 2026-11-17 23:09Z on MacBook-Pro; groups below are from it, states from the manifest)
@@ -14,7 +14,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 | stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 4d | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 | factory-droid-1100-pin | feat(catalog): identify Factory Droid requests as droid 1.10.0 | factory-droid |  | 4d | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-pin) |
 | wayland-input-refusal | fix(natives): refuse every Wayland input call at once when no input route exists | natives | P2 | 3h | next-hour; tests-over: OmarchyFixes, 2026-11-17: one test going through all 8 gated input arms; each request is an arm no other test reaches | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-input-refusal) |
-| wayland-display-count | fix(natives): report the Wayland display count as unknown before the first capture | natives | P2 | 2h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-display-count) |
+| wayland-display-count | fix(natives): report the Wayland display count as unknown before the first capture | natives | P2 | 3h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-display-count) |
 | devin-image-budgets | fix(catalog): carry Devin's measured image limits | catalog |  | 2h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-image-budgets) |
 | image-eviction-notice | fix(coding-agent): mark images the provider image limit evicts in place | other |  | 2h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/image-eviction-notice) |
 | usage-state-per-model | fix(coding-agent): judge omp usage policy state by account-wide windows | broker | P2 | 2h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/usage-state-per-model) |
