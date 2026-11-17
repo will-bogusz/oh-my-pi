@@ -80508,7 +80508,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-xtest-release",
    "host": "MacBook-Pro",
    "added": "2026-11-11T02:31:05Z",
-   "updated": "2026-11-17T06:33:00Z",
+   "updated": "2026-11-17T06:33:25Z",
    "note": "",
    "rebases_after": [
     18222,
@@ -80592,7 +80592,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-11-17T06:33:00Z"
+   "opened": "2026-11-17T06:33:00Z",
+   "readied": "2026-11-17T06:33:25Z"
   },
   {
    "id": "x11-takeover-keyboard-state",
