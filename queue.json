@@ -96864,13 +96864,13 @@
    "needs": [],
    "base": "1abafe8e71cae521f995e2203055ce840b859da4",
    "body": "bodies/broker-version-skew.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19592,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/broker-version-skew",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:04:06Z",
-   "updated": "2026-11-17T21:51:36Z",
+   "updated": "2026-11-17T22:07:17Z",
    "note": "Will, 2026-11-17: go-ahead to open",
    "kind": "proposal",
    "built": [
@@ -96991,7 +96991,8 @@
      "at": "2026-11-17T21:51:35Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-17T22:07:17Z"
   },
   {
    "id": "broker-refresh-failure-loud",
