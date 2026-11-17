@@ -87742,7 +87742,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-keysym-remap",
    "host": "MacBook-Pro",
    "added": "2026-11-11T13:55:21Z",
-   "updated": "2026-11-17T03:57:21Z",
+   "updated": "2026-11-17T04:01:32Z",
    "note": "LinuxGrabs, 2026-11-17: head 719b46266b0 (local branch, on main 1bdbf6d242d): grab only for keymap reads/writes; rebind owns old+new keysym until the write lands; close returns restore failures; over-capacity text refused before any key (MPX warm-up deferred after bind). Linux/macOS/Windows rust-check recorded. Sol reviews: round 1 findings fixed; round 2 (b)(c) closed, MPX warm-up finding fixed.",
    "line_loss_overrides": [
     {
@@ -87787,7 +87787,63 @@
      }
     }
    ],
-   "advanced": "2026-11-17T03:19:19Z"
+   "advanced": "2026-11-17T03:19:19Z",
+   "built": [
+    {
+     "with": "#17756",
+     "code": "6d4331bc3c7625d0229fade13237280aba610203",
+     "with_code": "00b33a7b015bc7730a8a6926657f2a3f49039187",
+     "tip": "719b46266b0c47af26e0011a7d1a784104e4cb23",
+     "with_tip": "5fa26ba5481db59442c67c224e6eb42cf2131d83",
+     "at": "2026-11-17T04:01:27Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19195",
+     "code": "6d4331bc3c7625d0229fade13237280aba610203",
+     "with_code": "9cb775e8f735e281467b990231772a3c6b7fa35b",
+     "tip": "719b46266b0c47af26e0011a7d1a784104e4cb23",
+     "with_tip": "008596298a587cdeb99733695dfa5ec5a06fdbfa",
+     "at": "2026-11-17T04:01:31Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#17897",
+     "code": "6d4331bc3c7625d0229fade13237280aba610203",
+     "with_code": "2bbb547591ae156ccac7af195b43202e415d1bd2",
+     "tip": "719b46266b0c47af26e0011a7d1a784104e4cb23",
+     "with_tip": "1630d69fc76fc75c713722e3bb2742c2db302bab",
+     "at": "2026-11-17T04:01:31Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19504",
+     "code": "6d4331bc3c7625d0229fade13237280aba610203",
+     "with_code": "e41fbf6b9a34a8290bfb3b95be76b15e0fbe30da",
+     "tip": "719b46266b0c47af26e0011a7d1a784104e4cb23",
+     "with_tip": "e01f4c4530a38eb4f259737574dd9557dac1ab72",
+     "at": "2026-11-17T04:01:31Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19515",
+     "code": "6d4331bc3c7625d0229fade13237280aba610203",
+     "with_code": "659168553fb0799f6edfa9b006a04b8709d521dd",
+     "tip": "719b46266b0c47af26e0011a7d1a784104e4cb23",
+     "with_tip": "af0b9bc40129722fe54b88f2d70d79a526db9255",
+     "at": "2026-11-17T04:01:31Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "atspi-walk-reads",
+     "code": "6d4331bc3c7625d0229fade13237280aba610203",
+     "with_code": "dbf2d593cf4a3314564fca87e95cda96dbc587e4",
+     "tip": "719b46266b0c47af26e0011a7d1a784104e4cb23",
+     "with_tip": "90d9086bde6a6020ac89df78294beedb885448de",
+     "at": "2026-11-17T04:01:32Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "macos-ax-linked-label",
