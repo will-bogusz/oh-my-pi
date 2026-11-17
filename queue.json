@@ -94020,7 +94020,26 @@
    ],
    "opened": "2026-11-17T02:12:20Z",
    "readied": "2026-11-17T02:12:46Z",
-   "advanced": "2026-11-17T02:32:40Z"
+   "advanced": "2026-11-17T02:32:40Z",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-17T02:50:56Z",
+     "reason": "top commit moves the two note literals into src/prompts/tools/computer-background-move.md (template rule, Brit 806893f6cb4); text byte-identical",
+     "old": "f165cf676b480604eeeabbfbe1118f4e07e94a9a",
+     "new": "bcdbaf1c3f8dd3d2d0f29c21de40f3accd3ff174",
+     "dropped": {
+      "packages/coding-agent/src/tools/computer/worker.ts": [
+       "const BACKGROUND_MOVE_HOVER =",
+       "\t\"move ran in the background, which gives the app no hover, and a takeover move's hover ends before it returns; to press a control shown only on hover, click it with { takeover: true }\";",
+       "const BACKGROUND_MOVE_HOVER_REFUSED =",
+       "\t\"move ran in the background, which gives the app no hover; the user's setting refuses takeover, so press a control shown only on hover through AX or tell the user the step needs their screen\";",
+       "\t\t\tconst text =",
+       "\t\t\t\tcontext.snapshot.backgroundFallback === \"refuse\" ? BACKGROUND_MOVE_HOVER_REFUSED : BACKGROUND_MOVE_HOVER;",
+       "\t\t\tcontext.output.push({ type: \"text\", text });"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "macos-key-read-settled",
