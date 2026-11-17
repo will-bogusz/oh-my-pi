@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17 03:11Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17 03:14Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-17 02:53Z on MacBook-Pro; groups below are from it, states from the manifest)
@@ -94,5 +94,5 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 | [#19513](https://github.com/can1357/oh-my-pi/pull/19513) | upload-stall-error-all-providers | fix(ai,agent): say how far a request body uploaded when any provider's connection drops | other | P1 | 7d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/upload-stall-error-all-providers) |
 | [#19100](https://github.com/can1357/oh-my-pi/pull/19100) | computer-run-failure-output | fix(computer): retain output and screenshots when a run fails | computer | P1 | 4d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-run-failure-output) |
 | [#19195](https://github.com/can1357/oh-my-pi/pull/19195) | macos-drag-confirm | fix(natives): stop macOS background drags reporting moves that did not happen | computer | P1 | 3d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-drag-confirm) |
-| [#19509](https://github.com/can1357/oh-my-pi/pull/19509) | macos-move-receipt-r2 | fix(coding-agent): say once that a macOS background move gives no hover | computer | P1 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-move-receipt-r2) |
+| [#19509](https://github.com/can1357/oh-my-pi/pull/19509) | macos-move-receipt-r2 | fix(coding-agent): say once that a macOS background move gives no hover | computer | P1 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-move-receipt-r2) |
 | [#19504](https://github.com/can1357/oh-my-pi/pull/19504) | macos-handback-typed | fix(natives): give the macOS key window back after a takeover while another program types | computer | P1 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-handback-typed) |
