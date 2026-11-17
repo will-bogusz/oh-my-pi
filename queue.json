@@ -95091,7 +95091,21 @@
    ],
    "pair_reasons": {
     "16553": "Main, 2026-11-14: the rule and #16553 both edit observe_user's tap callback in control/macos.rs. Combined form: #16553's button_record block first and unchanged, then the rule's foreign_input(tag, source, own, ...) using #16553's own, with input_target(kind, target, front_pid, |pid| rerouted_to(pid, event)); input_target's doc keeps both sentences (moved key; a release lands nowhere); #16553's input_target tests gain the rule's 4th argument kept. Tree 270cbd49719 (local branch will/macos-reroute-on-16553), pi-natives lib tests 1012 pass on macOS; with fix 1 too (Main's 32a1e67a7b2 + rule) 791f07e06c5, 1017 pass."
-   }
+   },
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-17T03:18:04Z",
+     "reason": "rebased over Brit's 760422a2052 observe_user (Main-approved combined form); the call keeps rerouted_to in the new if-let shape",
+     "old": "a94d6fb37776b0488a2daa1178f5d1f6c1c39b49",
+     "new": "5edae5aa59216855335b891f2c929ae083245f86",
+     "dropped": {
+      "crates/pi-natives/src/desktop/control/macos.rs": [
+       "/// a rule.",
+       "\t\t\t&& let Some(pid) = input_target(kind, target, front_pid, |pid| rerouted_to(pid, event))"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "macos-web-type-background",
