@@ -7,7 +7,7 @@ On Chromium, a JavaScript dialog the page leaves open and a file chooser omp hol
 - Choosers are held instead of opening the OS file dialog: for the tab's life in browsers omp launched, and in connected and relay browsers only during omp's calls and 1.5 s after, so the user's own upload clicks still get Chrome's picker. File System Access pickers are cancelled with a notice.
 - Alerts in connected and relay browsers stay open for the user instead of being accepted. Managed browsers and beforeunload are unchanged.
 - A call that times out behind a dialog dismisses it, so the tab recovers instead of being killed.
-- A held chooser's `<input>` is read and watched in an isolated world of its own (freed with its document), so a page that replaced `addEventListener` or the input's getters cannot keep a filled chooser reported as waiting or change its filter; `accept` is cut to 200 characters. A chooser whose frame or document goes away is let go.
+- A held chooser's `<input>` is read and watched in its own isolated world, so a page that replaced `addEventListener` or the input's getters cannot keep a filled chooser waiting or change its filter; `accept` is cut to 200 characters, and a chooser whose frame goes away is let go.
 
 Printing is disabled in omp's own Chrome profile by merged #18838; attached browsers retain their print settings, and printing is not a pending dialog state here. Tern rejects `files`; cmux still rejects dialog calls. Also fixed: `tab.id(n)` called an element stale in a later run once an earlier run had used it (the deadline wrapper here bound the cached handle to the run that first used it).
 
