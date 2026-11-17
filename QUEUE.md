@@ -3,10 +3,10 @@
 Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17 22:07Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-11-17 21:42Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 17, conflict-held 18, stacked 13, held 7, parked 3, open PRs 14, queued since the last plan 2; merged 381, closed 41
+**Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-17 22:04Z on MacBook-Pro; groups below are from it, states from the manifest)
+**Counts:** openable now 18, conflict-held 18, stacked 13, held 7, parked 3, open PRs 14, queued since the last plan 1; merged 381, closed 41
 
-## Openable now (17)
+## Openable now (18)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
@@ -27,6 +27,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 | broker-client-startup-retry | fix(ai): retry the initial auth-broker snapshot through a broker restart | broker |  | 0h | open; tests-over: BrokerClientStartupRetry, 2026-11-17: four distinct branches (retry succeeds; non-transient answer fails at once; retry off for runtime switch; deadline cancels an in-flight request), each failing or pinning main's outcome; over by 8 lines of imports and server setup | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-client-startup-retry) |
 | wayland-window-crop-clip | fix(natives): capture the visible part of a Linux window partly off its monitor | natives | P2 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-window-crop-clip) |
 | account-switch-reason | feat(ai,coding-agent): record why a session's OAuth account switched | auth |  | 0h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/account-switch-reason) |
+| qt-filler-windows | fix(natives): list Qt windows built from a bare QWidget on Wayland | natives | P2 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/qt-filler-windows) |
 
 ## Conflict-held (18)
 
@@ -45,7 +46,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 | relay-print-preview-error | fix(coding-agent,browser-relay): fail a browser call a print preview holds in an attached browser within seconds | browser | P2 | 6d | [#19542](https://github.com/can1357/oh-my-pi/pull/19542) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-print-preview-error) |
 | win-minimised-windows | fix(natives,coding-agent): show a minimized Windows app's window from apps.open instead of launching it again | computer | P2 | 6d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19516](https://github.com/can1357/oh-my-pi/pull/19516), wayland-display-count, main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-minimised-windows) |
 | macos-ax-cancel-before-send | fix(natives): send no macOS AX action once its run is cancelled | natives | P2 | 6d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19516](https://github.com/can1357/oh-my-pi/pull/19516), [#19532](https://github.com/can1357/oh-my-pi/pull/19532), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-ax-cancel-before-send) |
-| win-ax-states | fix(natives): expose Windows control state and stale-reference matches | computer | P2 | 6d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19516](https://github.com/can1357/oh-my-pi/pull/19516), [#19519](https://github.com/can1357/oh-my-pi/pull/19519), [#19532](https://github.com/can1357/oh-my-pi/pull/19532), wayland-input-refusal, wayland-window-crop-clip, main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-ax-states) |
+| win-ax-states | fix(natives): expose Windows control state and stale-reference matches | computer | P2 | 6d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19516](https://github.com/can1357/oh-my-pi/pull/19516), [#19519](https://github.com/can1357/oh-my-pi/pull/19519), [#19532](https://github.com/can1357/oh-my-pi/pull/19532), qt-filler-windows, wayland-input-refusal, wayland-window-crop-clip, main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-ax-states) |
 | macos-web-type-background | fix(natives): type into a background macOS web page field without a takeover | computer | P2 | 3d | [#17756](https://github.com/can1357/oh-my-pi/pull/17756), [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#17897](https://github.com/can1357/oh-my-pi/pull/17897), [#19504](https://github.com/can1357/oh-my-pi/pull/19504), [#19516](https://github.com/can1357/oh-my-pi/pull/19516), [#19532](https://github.com/can1357/oh-my-pi/pull/19532), [#19531](https://github.com/can1357/oh-my-pi/pull/19531), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-web-type-background) |
 | reserve-per-model-family | feat(ai): reserve per usage limit in account policies | broker |  | 0h | usage-state-per-model | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reserve-per-model-family) |
 | deadline-ranking | feat(ai): rank an account priority by quota deadline | ai/auth |  | 0h | account-switch-reason | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/deadline-ranking) |
@@ -108,9 +109,8 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 | [#19592](https://github.com/can1357/oh-my-pi/pull/19592) | broker-version-skew | feat(ai,coding-agent): exchanged omp versions between auth-broker clients and the broker | auth-broker | P2 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-version-skew) |
 | [#19590](https://github.com/can1357/oh-my-pi/pull/19590) | broker-refresh-failure-loud | fix(ai): warn when a broker refresh failure outlasts the access token | broker | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-refresh-failure-loud) |
 
-## Queued since the last plan (2)
+## Queued since the last plan (1)
 
 | id | title | area | priority | age | branch |
 |---|---|---|---|---|---|
-| qt-filler-windows | fix(natives): list Qt windows built from a bare QWidget on Wayland | natives | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/qt-filler-windows) |
 | wayland-share-picker-deadline | fix(natives): wait for the Wayland screen-share picker until the call's deadline | natives | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-share-picker-deadline) |

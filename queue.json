@@ -108649,12 +108649,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-17T21:42:43.800255Z",
+  "at": "2026-11-17T22:04:39.751598Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 2,
-   "left": 6
+   "used": 1,
+   "left": 7
   },
   "rows": [
    {
@@ -109139,6 +109139,23 @@
     "created": "2026-11-14T20:50:44Z"
    },
    {
+    "id": "qt-filler-windows",
+    "label": "qt-filler-windows",
+    "number": null,
+    "state": "queued",
+    "area": "natives",
+    "priority": "P2",
+    "title": "fix(natives): list Qt windows built from a bare QWidget on Wayland",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-17T21:55:55Z"
+   },
+   {
     "id": "r2/relay-own-only",
     "label": "r2/relay-own-only",
     "number": null,
@@ -109307,6 +109324,7 @@
      "conflicts with #19516 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19519 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19532 in crates/pi-natives/src/desktop/macos/ax.rs",
+     "conflicts with qt-filler-windows in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with wayland-input-refusal in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with wayland-window-crop-clip in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs"
@@ -109319,6 +109337,7 @@
      "#19516",
      "#19519",
      "#19532",
+     "qt-filler-windows",
      "wayland-input-refusal",
      "wayland-window-crop-clip"
     ],
