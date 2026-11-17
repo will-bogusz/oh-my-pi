@@ -87449,7 +87449,50 @@
    "host": "MacBook-Pro",
    "added": "2026-11-11T13:55:21Z",
    "updated": "2026-11-17T03:17:28Z",
-   "note": "LinuxGrabs, 2026-11-17: rebased onto main 1bdbf6d242d (local branch in ~/.omp/main-wt/oh-my-pi/x11-keysym-remap, heads 9ee9f945428 feature + 6f3571eee1d grab fix; fork branch still the old 509c34a737e, not pushed). Grab held only for keymap reads/writes (probe in body); MPX press counted at the EV_KEY write; body states the 500 ms run-wait limit with its measured worst case. Linux rust-check recorded; Astra review findings fixed."
+   "note": "LinuxGrabs, 2026-11-17: rebased onto main 1bdbf6d242d (local branch in ~/.omp/main-wt/oh-my-pi/x11-keysym-remap, heads 9ee9f945428 feature + 6f3571eee1d grab fix; fork branch still the old 509c34a737e, not pushed). Grab held only for keymap reads/writes (probe in body); MPX press counted at the EV_KEY write; body states the 500 ms run-wait limit with its measured worst case. Linux rust-check recorded; Astra review findings fixed.",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-17T03:19:12Z",
+     "reason": "LinuxGrabs' rebase onto 1bdbf6d (MPX press at the EV_KEY write; grab only around keymap reads/writes), reviewed by the lane",
+     "old": "509c34a737ed39fbc4a6f7aaea211a80df2bfd69",
+     "new": "b690634c0cec0ef959892b26116a0e93ed5eb44b",
+     "dropped": {
+      "crates/pi-natives/src/desktop/linux/x11/input.rs": [
+       "\t\t\t\tthis.deliver_planned(plan, keys.duration(), None)",
+       "\t\t\tSome(window) => this.send_key_steps(window, steps, duration),",
+       "\t\t\tNone => this.xtest_steps(steps, duration),",
+       "\t\tself.with_planned_keys(keys, |this, plan| this.deliver_planned(plan, keys.duration(), None))",
+       "\t\t\tthis.deliver_planned(plan, keys.duration(), Some(window))"
+      ],
+      "crates/pi-natives/src/desktop/linux/x11/mpx.rs": [
+       "\t\t\tlet result = keyboard.device.key(step.keycode, step.press);"
+      ],
+      "crates/pi-natives/src/desktop/linux/x11/remap_tests.rs": [
+       "\tlet mut input = X11Input::new(Arc::clone(&conn), root).unwrap();"
+      ],
+      "crates/pi-natives/src/desktop/linux/x11/text_mapping.rs": [
+       "\tfn native(&self, map: &Keymap, symbol: u32) -> bool {",
+       "\t\twidth != 0",
+       "\t\t\t&& map",
+       "\t\t\t\t.keysyms",
+       "\t\t\t\t.any(|(index, row)| {",
+       "\t\t\t\t\trow.iter().take(2).any(|&candidate| candidate == symbol)",
+       "\t\t\t\t\t\t&& !self.bound.iter().any(|binding| {",
+       "\t\t\t\t\t\t\tusize::from(binding.code) == code",
+       "\t\t\t\t\t\t\t\t&& row_matches(map, binding.code, binding.symbol)",
+       "\t\tlet _grab = ServerGrab::new(&conn)?;",
+       "\t\tlet result = segments(text, capacity, |symbol| !self.native(&fresh, symbol));",
+       "\t\t\tlet required = symbols(text, |symbol| !self.native(&fresh, symbol));",
+       "fn symbols(text: &str, mut dynamic: impl FnMut(u32) -> bool) -> Vec<u32> {",
+       "\tfor ch in text.chars() {",
+       "\t\tif dynamic(symbol) && !result.contains(&symbol) {",
+       "\t\t\tresult.push(symbol);",
+       "\tlet mut required = Vec::new();",
+       "\t\t\trequired.push(symbol);"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "macos-ax-linked-label",
