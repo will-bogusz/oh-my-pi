@@ -5,7 +5,7 @@ Drive real browser tabs; start with `const tab = await browser.open({ name, url 
 - Python: same names and awaits; keyword arguments become the trailing options object (`await browser.open(name=…, url=…)`).
 - `timeout`: seconds on `open`, `close`, `run` (default 30, clamped to 1–300, capped by `tools.maxTimeout` when set); milliseconds on `waitFor*`.
 - A `run` without `timeout`, and each direct helper call such as `tab.evaluate(…)`, gets the Eval cell's `timeout` when that is longer; for long page work, raise the cell's `timeout`.
-- `goto`, `click`, `fill`, `type`, `press`, `select` (Chromium, tab/frame/element): print `navigated to <url>`, `page changed`, or `no change yet`. `no change yet` means nothing changed within about 300 ms, not that the action failed; a slower render can still follow, so look before repeating the action. A fill or type whose value the page rewrote also prints the field's value, and a dialog left open prints `dialog pending`.
+- `goto`, `click`, `fill`, `type`, `press`, `select` (Chromium, tab/frame/element): print `navigated to <url>`, `page changed`, or `no change yet`. `no change yet` means nothing changed before the DOM had stayed quiet for 80 ms (300 ms at most), not that the action failed; a slower render can still follow, so look before repeating the action. A fill or type whose value the page rewrote also prints the field's value, and a dialog left open prints `dialog pending`.
 
 ```
 await browser.open({name, url, app, argv, target, viewport, wait_until, dialogs, allowed_domains, init_scripts, downloads, user_agent, insecure, headed, timeout, persist}) → BrowserTab

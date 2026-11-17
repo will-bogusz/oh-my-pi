@@ -37,13 +37,17 @@ const QUIET_MS = 80;
 const QUIET_CAP_MS = 300;
 /** Longest value or dialog message the line quotes. */
 const QUOTE_MAX_CHARS = 80;
+/** Form controls a probe compares, in document then shadow-root order; later ones go uncompared. */
+const FIELDS_MAX = 500;
+/** Leading characters of each control's value the probe hashes, besides the value's length. */
+const FIELD_HASH_CHARS = 256;
 
 interface Probe {
 	url: string;
 	/** Identity of the document the probe was installed in. */
 	document: string;
 	mutations: number;
-	/** Hash of every form control's value and checked state, shadow roots included. */
+	/** Hash of the first {@link FIELDS_MAX} form controls' values and checked states, shadow roots included. */
 	fields: number;
 	/**
 	 * Value of the field the action's last input event went to, else of the focused field (a keystroke the field
@@ -55,19 +59,22 @@ interface Probe {
 }
 
 // Runs in the frame's isolated world, so page scripts can neither see nor overwrite the probe. It watches the
-// document and every open shadow root. A style or class change on the focused element or the innermost hovered one
-// (focus rings, hover and pressed states) does not count; every other node, text and attribute change does. Field
-// values are hashed in the page, so only the read-back value of the field the action typed into leaves it.
+// document and every open shadow root still in it; a root whose host left the document is dropped at the next probe.
+// A style or class change on the focused element or the innermost hovered one (focus rings, hover and pressed
+// states) does not count, nor does a change to a node no longer in the document; every other node, text and
+// attribute change does. Field values are hashed in the page, so only the read-back value of the field the action
+// typed into leaves it. Each probe hashes at most FIELDS_MAX controls and FIELD_HASH_CHARS of each value.
 const INSTALL = `const install = () => {
  let p = globalThis.__ompActionOutcome;
  if (p) return p;
- p = globalThis.__ompActionOutcome = {document: String(Math.random()), mutations: 0, changed: performance.now(), roots: [document]};
+ p = globalThis.__ompActionOutcome = {document: String(Math.random()), mutations: 0, changed: performance.now(), roots: new Set([document])};
  const options = {subtree: true, childList: true, characterData: true, attributes: true};
  const observer = new MutationObserver(records => {
   const now = performance.now();
   for (const r of records) {
    if (r.type === 'childList') for (const node of r.addedNodes) adopt(node);
    const t = r.target;
+   if (!t.isConnected) continue;
    if (r.type === 'attributes' && (r.attributeName === 'style' || r.attributeName === 'class')
     && (t === document.activeElement || (t.matches(':hover') && !t.querySelector(':hover')))) continue;
    p.mutations++;
@@ -77,8 +84,8 @@ const INSTALL = `const install = () => {
  const adopt = node => {
   if (node.nodeType !== 1 && node.nodeType !== 11) return;
   for (const e of [node, ...node.querySelectorAll('*')]) {
-   if (e.shadowRoot && !p.roots.includes(e.shadowRoot)) {
-    p.roots.push(e.shadowRoot);
+   if (e.shadowRoot && !p.roots.has(e.shadowRoot)) {
+    p.roots.add(e.shadowRoot);
     observer.observe(e.shadowRoot, options);
     adopt(e.shadowRoot);
    }
@@ -88,9 +95,16 @@ const INSTALL = `const install = () => {
  if (document.documentElement) adopt(document.documentElement);
  document.addEventListener('input', e => { p.input = e.composedPath()[0]; }, true);
  p.snapshot = () => {
-  let fields = 0;
-  for (const root of p.roots) for (const e of root.querySelectorAll('input,textarea,select')) {
-   for (const c of String(e.value) + (e.checked ? '\\u0001' : '\\u0000')) fields = (Math.imul(fields, 31) + c.charCodeAt(0)) | 0;
+  let fields = 0, n = 0;
+  for (const root of p.roots) {
+   if (root !== document && !root.host.isConnected) { p.roots.delete(root); continue; }
+   if (n >= ${FIELDS_MAX}) continue;
+   for (const e of root.querySelectorAll('input,textarea,select')) {
+    if (n++ >= ${FIELDS_MAX}) break;
+    const v = String(e.value);
+    fields = (Math.imul(fields, 31) + v.length * 2 + (e.checked ? 1 : 0)) | 0;
+    for (let i = 0; i < v.length && i < ${FIELD_HASH_CHARS}; i++) fields = (Math.imul(fields, 31) + v.charCodeAt(i)) | 0;
+   }
   }
   const f = p.input ?? document.activeElement;
   const value = f && 'value' in f && f.type !== 'password' ? String(f.value) : undefined;
