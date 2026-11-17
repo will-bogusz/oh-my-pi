@@ -108926,7 +108926,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-17T22:31:09.613262Z",
+  "at": "2026-11-17T22:49:40.772045Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -109020,6 +109020,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-17T21:39:00Z"
+   },
+   {
+    "id": "wayland-window-crop-clip",
+    "label": "#19596",
+    "number": 19596,
+    "state": "open",
+    "area": "natives",
+    "priority": "P0",
+    "title": "fix(natives): capture the visible part of a Linux window partly off its monitor",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-17T22:34:51Z"
    },
    {
     "id": "docs-reclaim-drift",
@@ -109181,6 +109198,57 @@
     "created": "2026-11-17T22:07:16Z"
    },
    {
+    "id": "broker-client-startup-retry",
+    "label": "broker-client-startup-retry",
+    "number": null,
+    "state": "queued",
+    "area": "broker",
+    "priority": "P1",
+    "title": "fix(ai): retry the initial auth-broker snapshot through a broker restart",
+    "action": "open",
+    "reasons": [],
+    "note": "tests-over: BrokerClientStartupRetry, 2026-11-17: four distinct branches (retry succeeds; non-transient answer fails at once; retry off for runtime switch; deadline cancels an in-flight request), each failing or pinning main's outcome; over by 8 lines of imports and server setup",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-17T21:08:05Z"
+   },
+   {
+    "id": "broker-shutdown-refresh-save",
+    "label": "broker-shutdown-refresh-save",
+    "number": null,
+    "state": "queued",
+    "area": "broker",
+    "priority": "P1",
+    "title": "fix(coding-agent): let auth-broker serve save an in-flight refresh before exit",
+    "action": "open",
+    "reasons": [],
+    "note": "tests-over: ReviewBrokerShutdown, 2026-11-17: one regression test; the exit race exists only in a spawned omp auth-broker serve process, so its lines are process and fixture setup",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-17T21:03:11Z"
+   },
+   {
+    "id": "fable-shared-wall-block",
+    "label": "fable-shared-wall-block",
+    "number": null,
+    "state": "queued",
+    "area": "broker",
+    "priority": "P1",
+    "title": "fix(ai): heal Claude tier blocks a shared weekly wall caused from single-window usage reports",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-17T20:59:40Z"
+   },
+   {
     "id": "iphone-mirror-scroll-distance",
     "label": "iphone-mirror-scroll-distance",
     "number": null,
@@ -109217,6 +109285,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-10T18:56:55Z"
+   },
+   {
+    "id": "broker-wire-forward-compat",
+    "label": "broker-wire-forward-compat",
+    "number": null,
+    "state": "queued",
+    "area": "broker",
+    "priority": "P2",
+    "title": "fix(ai): read auth-broker responses that carry fields a newer broker adds",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-17T21:01:16Z"
    },
    {
     "id": "browser-wait-text-regexp",
@@ -109296,6 +109381,7 @@
     "reasons": [
      "conflicts with #19100 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #19195 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
+     "conflicts with #19596 in docs/computer-use.md",
      "conflicts with #19504 in docs/computer-use.md",
      "conflicts with #19516 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #19532 in docs/computer-use.md",
@@ -109308,6 +109394,7 @@
     "blocked_by": [
      "#19100",
      "#19195",
+     "#19596",
      "#19504",
      "#19516",
      "#19532",
@@ -109315,6 +109402,23 @@
     ],
     "needs": [],
     "created": "2026-10-19T07:26:45Z"
+   },
+   {
+    "id": "logger-console-level",
+    "label": "logger-console-level",
+    "number": null,
+    "state": "queued",
+    "area": "other",
+    "priority": "P2",
+    "title": "fix(utils): apply OMP_LOG_LEVEL to the console transport",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-17T21:03:30Z"
    },
    {
     "id": "macos-ax-cancel-before-send",
@@ -109411,6 +109515,7 @@
      "conflicts with #17756 in crates/pi-natives/src/desktop/macos/input.rs",
      "conflicts with #19195 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/macos/input.rs, docs/computer-use.md",
      "conflicts with #17897 in crates/pi-natives/src/desktop/macos/input.rs",
+     "conflicts with #19596 in docs/computer-use.md",
      "conflicts with #19504 in docs/computer-use.md",
      "conflicts with #19516 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/macos/input.rs, docs/computer-use.md",
      "conflicts with #19532 in crates/pi-natives/src/desktop/macos/ax.rs, docs/computer-use.md",
@@ -109424,6 +109529,7 @@
      "#17756",
      "#19195",
      "#17897",
+     "#19596",
      "#19504",
      "#19516",
      "#19532",
@@ -109440,7 +109546,7 @@
     "area": "natives",
     "priority": "P2",
     "title": "fix(natives): list Qt windows built from a bare QWidget on Wayland",
-    "action": "open",
+    "action": "next-hour",
     "reasons": [],
     "note": "",
     "over": [],
@@ -109554,6 +109660,23 @@
     "created": "2026-11-11T07:04:56Z"
    },
    {
+    "id": "usage-state-per-model",
+    "label": "usage-state-per-model",
+    "number": null,
+    "state": "queued",
+    "area": "broker",
+    "priority": "P2",
+    "title": "fix(coding-agent): judge omp usage policy state by account-wide windows",
+    "action": "next-hour",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-17T20:59:31Z"
+   },
+   {
     "id": "wayland-display-count",
     "label": "wayland-display-count",
     "number": null,
@@ -109561,7 +109684,7 @@
     "area": "natives",
     "priority": "P2",
     "title": "fix(natives): report the Wayland display count as unknown before the first capture",
-    "action": "open",
+    "action": "next-hour",
     "reasons": [],
     "note": "",
     "over": [],
@@ -109578,7 +109701,7 @@
     "area": "natives",
     "priority": "P2",
     "title": "fix(natives): refuse every Wayland input call at once when no input route exists",
-    "action": "open",
+    "action": "next-hour",
     "reasons": [],
     "note": "tests-over: OmarchyFixes, 2026-11-17: one test going through all 8 gated input arms; each request is an arm no other test reaches",
     "over": [],
@@ -109595,7 +109718,7 @@
     "area": "natives",
     "priority": "P2",
     "title": "fix(natives): wait for the Wayland screen-share picker until the call's deadline",
-    "action": "open",
+    "action": "next-hour",
     "reasons": [],
     "note": "",
     "over": [],
@@ -109603,23 +109726,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-17T22:04:45Z"
-   },
-   {
-    "id": "wayland-window-crop-clip",
-    "label": "wayland-window-crop-clip",
-    "number": null,
-    "state": "queued",
-    "area": "natives",
-    "priority": "P2",
-    "title": "fix(natives): capture the visible part of a Linux window partly off its monitor",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-17T21:09:14Z"
    },
    {
     "id": "win-ax-states",
@@ -109632,12 +109738,12 @@
     "action": "wait",
     "reasons": [
      "conflicts with #19195 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with #19596 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19516 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19519 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19532 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with qt-filler-windows in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with wayland-input-refusal in crates/pi-natives/src/desktop/mod.rs",
-     "conflicts with wayland-window-crop-clip in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs"
     ],
     "note": "",
@@ -109645,12 +109751,12 @@
     "paired": [],
     "blocked_by": [
      "#19195",
+     "#19596",
      "#19516",
      "#19519",
      "#19532",
      "qt-filler-windows",
-     "wayland-input-refusal",
-     "wayland-window-crop-clip"
+     "wayland-input-refusal"
     ],
     "needs": [],
     "created": "2026-11-11T10:16:04Z"
@@ -109707,6 +109813,23 @@
      "settle-reads"
     ],
     "created": "2026-11-10T18:57:06Z"
+   },
+   {
+    "id": "account-switch-reason",
+    "label": "account-switch-reason",
+    "number": null,
+    "state": "queued",
+    "area": "auth",
+    "priority": "P2",
+    "title": "feat(ai,coding-agent): record why a session's OAuth account switched",
+    "action": "next-hour",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-17T21:19:21Z"
    },
    {
     "id": "browser-action-outcome",
@@ -109796,11 +109919,11 @@
      "needs computer-ui-quiet (queued)",
      "conflicts with #19100 in docs/tools/computer.md, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19195 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with #19596 in docs/computer-use.md",
      "conflicts with #19504 in docs/computer-use.md",
      "conflicts with #19516 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #19532 in docs/computer-use.md",
      "conflicts with #19531 in docs/computer-use.md, docs/tools/computer.md",
-     "conflicts with wayland-window-crop-clip in docs/computer-use.md",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -109810,11 +109933,11 @@
     "blocked_by": [
      "#19100",
      "#19195",
+     "#19596",
      "#19504",
      "#19516",
      "#19532",
-     "#19531",
-     "wayland-window-crop-clip"
+     "#19531"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -109834,12 +109957,12 @@
      "needs computer-ui-quiet (queued)",
      "conflicts with #19100 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19195 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with #19596 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19516 in crates/pi-natives/src/desktop/backend.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #19519 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19532 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with wayland-input-refusal in crates/pi-natives/src/desktop/mod.rs",
-     "conflicts with wayland-window-crop-clip in crates/pi-natives/src/desktop/mod.rs",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md"
     ],
@@ -109849,17 +109972,38 @@
     "blocked_by": [
      "#19100",
      "#19195",
+     "#19596",
      "#19516",
      "#19519",
      "#19532",
      "#19531",
-     "wayland-input-refusal",
-     "wayland-window-crop-clip"
+     "wayland-input-refusal"
     ],
     "needs": [
      "computer-ui-quiet"
     ],
     "created": "2026-10-13T21:47:19Z"
+   },
+   {
+    "id": "deadline-ranking",
+    "label": "deadline-ranking",
+    "number": null,
+    "state": "queued",
+    "area": "ai/auth",
+    "priority": "P2",
+    "title": "feat(ai): rank an account priority by quota deadline",
+    "action": "wait",
+    "reasons": [
+     "conflicts with account-switch-reason in packages/ai/test/auth-storage-account-reclaim.test.ts"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "account-switch-reason"
+    ],
+    "needs": [],
+    "created": "2026-11-17T21:17:58Z"
    },
    {
     "id": "desktop-cursor",
@@ -109874,13 +110018,13 @@
      "held: Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check | Main 2026-11-12: before it opens, the waiting-key-chord case with the cursor actually drawn (20 trials at a 20 s deadline; CursorDemo's cursor-on arm never drew one, and an early run on the combined tree returned 'Cancelled, input may be partial' 11/11, unexplained), on the polished branch will/desktop-cursor-polish.",
      "conflicts with #19100 in docs/tools/computer.md",
      "conflicts with #19195 in crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/types.rs, packages/natives/native/index.d.ts",
+     "conflicts with #19596 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19516 in crates/pi-natives/src/desktop/backend.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19519 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19532 in crates/pi-natives/src/desktop/macos/capture.rs, crates/pi-natives/src/desktop/macos/mod.rs",
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with wayland-display-count in crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/types.rs, packages/natives/native/index.d.ts",
      "conflicts with wayland-input-refusal in crates/pi-natives/src/desktop/mod.rs",
-     "conflicts with wayland-window-crop-clip in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
@@ -109889,13 +110033,13 @@
     "blocked_by": [
      "#19100",
      "#19195",
+     "#19596",
      "#19516",
      "#19519",
      "#19532",
      "#19531",
      "wayland-display-count",
-     "wayland-input-refusal",
-     "wayland-window-crop-clip"
+     "wayland-input-refusal"
     ],
     "needs": [],
     "created": "2026-11-11T00:21:12Z"
@@ -109930,12 +110074,15 @@
     "action": "held",
     "reasons": [
      "held: Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance",
+     "conflicts with account-switch-reason in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in docs/advisor-watchdog.md, docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-advisors.ts, packages/coding-agent/src/session/turn-recovery.ts, packages/coding-agent/test/agent-session-retry-fallback.test.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "account-switch-reason"
+    ],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
    },
@@ -109996,6 +110143,65 @@
     "created": "2026-10-13T21:47:19Z"
    },
    {
+    "id": "reserve-per-model-family",
+    "label": "reserve-per-model-family",
+    "number": null,
+    "state": "queued",
+    "area": "broker",
+    "priority": "P2",
+    "title": "feat(ai): reserve per usage limit in account policies",
+    "action": "wait",
+    "reasons": [
+     "conflicts with usage-state-per-model in packages/coding-agent/src/cli/usage-cli.ts"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "usage-state-per-model"
+    ],
+    "needs": [],
+    "created": "2026-11-17T21:13:06Z"
+   },
+   {
+    "id": "reset-consent-per-account",
+    "label": "reset-consent-per-account",
+    "number": null,
+    "state": "queued",
+    "area": "broker",
+    "priority": "P2",
+    "title": "feat(ai,coding-agent): let an account policy decide its own saved-reset spending",
+    "action": "wait",
+    "reasons": [
+     "conflicts with usage-state-per-model in packages/coding-agent/src/cli/usage-cli.ts"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "usage-state-per-model"
+    ],
+    "needs": [],
+    "created": "2026-11-17T21:24:43Z"
+   },
+   {
+    "id": "reset-spend-log",
+    "label": "reset-spend-log",
+    "number": null,
+    "state": "queued",
+    "area": "coding-agent",
+    "priority": "P2",
+    "title": "feat(coding-agent): log every saved-reset spend attempt at info",
+    "action": "next-hour",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-17T21:02:20Z"
+   },
+   {
     "id": "win-type-insert",
     "label": "win-type-insert",
     "number": null,
@@ -110021,57 +110227,6 @@
     ],
     "needs": [],
     "created": "2026-11-12T04:40:13Z"
-   },
-   {
-    "id": "broker-client-startup-retry",
-    "label": "broker-client-startup-retry",
-    "number": null,
-    "state": "queued",
-    "area": "broker",
-    "priority": null,
-    "title": "fix(ai): retry the initial auth-broker snapshot through a broker restart",
-    "action": "next-hour",
-    "reasons": [],
-    "note": "tests-over: BrokerClientStartupRetry, 2026-11-17: four distinct branches (retry succeeds; non-transient answer fails at once; retry off for runtime switch; deadline cancels an in-flight request), each failing or pinning main's outcome; over by 8 lines of imports and server setup",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-17T21:08:05Z"
-   },
-   {
-    "id": "broker-shutdown-refresh-save",
-    "label": "broker-shutdown-refresh-save",
-    "number": null,
-    "state": "queued",
-    "area": "broker",
-    "priority": null,
-    "title": "fix(coding-agent): let auth-broker serve save an in-flight refresh before exit",
-    "action": "next-hour",
-    "reasons": [],
-    "note": "tests-over: ReviewBrokerShutdown, 2026-11-17: one regression test; the exit race exists only in a spawned omp auth-broker serve process, so its lines are process and fixture setup",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-17T21:03:11Z"
-   },
-   {
-    "id": "broker-wire-forward-compat",
-    "label": "broker-wire-forward-compat",
-    "number": null,
-    "state": "queued",
-    "area": "broker",
-    "priority": null,
-    "title": "fix(ai): read auth-broker responses that carry fields a newer broker adds",
-    "action": "next-hour",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-17T21:01:16Z"
    },
    {
     "id": "devin-gemini-promo-prices",
@@ -110118,6 +110273,8 @@
     "action": "wait",
     "reasons": [
      "needs token-count-policy (queued), wire-delta-count (queued)",
+     "conflicts with account-switch-reason in packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with reset-spend-log in packages/coding-agent/src/session/agent-session.ts",
      "its need token-count-policy conflicts with main in packages/catalog/src/compat/rules/classes/anthropic.kdl, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/session/session-stats.ts, packages/coding-agent/test/context-fits-model.test.ts",
      "its need wire-delta-count conflicts with main in packages/agent/src/tokenizer.ts, packages/agent/test/tokenizer.test.ts, packages/ai/src/providers/factory-droid.ts, packages/ai/src/providers/transform-messages.ts, packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with main in packages/agent/src/agent.ts, packages/ai/src/providers/factory-droid/gemini.ts, packages/ai/src/providers/google-gemini-cli.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/context-view.ts, packages/coding-agent/test/modes/context-view.test.ts, packages/tui/src/status-line/context-usage.ts, packages/tui/test/context-usage.test.ts"
@@ -110125,29 +110282,15 @@
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "account-switch-reason",
+     "reset-spend-log"
+    ],
     "needs": [
      "token-count-policy",
      "wire-delta-count"
     ],
     "created": "2026-11-03T01:54:17Z"
-   },
-   {
-    "id": "fable-shared-wall-block",
-    "label": "fable-shared-wall-block",
-    "number": null,
-    "state": "queued",
-    "area": "broker",
-    "priority": null,
-    "title": "fix(ai): heal Claude tier blocks a shared weekly wall caused from single-window usage reports",
-    "action": "next-hour",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-17T20:59:40Z"
    },
    {
     "id": "image-eviction-notice",
@@ -110165,23 +110308,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-17T20:57:09Z"
-   },
-   {
-    "id": "logger-console-level",
-    "label": "logger-console-level",
-    "number": null,
-    "state": "queued",
-    "area": "other",
-    "priority": null,
-    "title": "fix(utils): apply OMP_LOG_LEVEL to the console transport",
-    "action": "next-hour",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-17T21:03:30Z"
    },
    {
     "id": "stats-live-appends",
@@ -110220,23 +110346,6 @@
     "created": "2026-10-31T21:07:28Z"
    },
    {
-    "id": "usage-state-per-model",
-    "label": "usage-state-per-model",
-    "number": null,
-    "state": "queued",
-    "area": "broker",
-    "priority": null,
-    "title": "fix(coding-agent): judge omp usage policy state by account-wide windows",
-    "action": "next-hour",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-17T20:59:31Z"
-   },
-   {
     "id": "wire-delta-count",
     "label": "wire-delta-count",
     "number": null,
@@ -110256,23 +110365,6 @@
     "created": "2026-11-03T01:33:54Z"
    },
    {
-    "id": "account-switch-reason",
-    "label": "account-switch-reason",
-    "number": null,
-    "state": "queued",
-    "area": "auth",
-    "priority": null,
-    "title": "feat(ai,coding-agent): record why a session's OAuth account switched",
-    "action": "next-hour",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-17T21:19:21Z"
-   },
-   {
     "id": "compaction-trigger",
     "label": "compaction-trigger",
     "number": null,
@@ -110283,37 +110375,18 @@
     "action": "wait",
     "reasons": [
      "conflicts with account-switch-reason in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with reset-spend-log in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/tui/src/chat/compaction-summary-message.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "account-switch-reason"
+     "account-switch-reason",
+     "reset-spend-log"
     ],
     "needs": [],
     "created": "2026-10-20T23:41:41Z"
-   },
-   {
-    "id": "deadline-ranking",
-    "label": "deadline-ranking",
-    "number": null,
-    "state": "queued",
-    "area": "ai/auth",
-    "priority": null,
-    "title": "feat(ai): rank an account priority by quota deadline",
-    "action": "wait",
-    "reasons": [
-     "conflicts with account-switch-reason in packages/ai/test/auth-storage-account-reclaim.test.ts"
-    ],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [
-     "account-switch-reason"
-    ],
-    "needs": [],
-    "created": "2026-11-17T21:17:58Z"
    },
    {
     "id": "devin-billed-cost",
@@ -110394,65 +110467,6 @@
      "token-count-policy"
     ],
     "created": "2026-11-03T01:29:02Z"
-   },
-   {
-    "id": "reserve-per-model-family",
-    "label": "reserve-per-model-family",
-    "number": null,
-    "state": "queued",
-    "area": "broker",
-    "priority": null,
-    "title": "feat(ai): reserve per usage limit in account policies",
-    "action": "wait",
-    "reasons": [
-     "conflicts with usage-state-per-model in packages/coding-agent/src/cli/usage-cli.ts"
-    ],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [
-     "usage-state-per-model"
-    ],
-    "needs": [],
-    "created": "2026-11-17T21:13:06Z"
-   },
-   {
-    "id": "reset-consent-per-account",
-    "label": "reset-consent-per-account",
-    "number": null,
-    "state": "queued",
-    "area": "broker",
-    "priority": null,
-    "title": "feat(ai,coding-agent): let an account policy decide its own saved-reset spending",
-    "action": "wait",
-    "reasons": [
-     "conflicts with usage-state-per-model in packages/coding-agent/src/cli/usage-cli.ts"
-    ],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [
-     "usage-state-per-model"
-    ],
-    "needs": [],
-    "created": "2026-11-17T21:24:43Z"
-   },
-   {
-    "id": "reset-spend-log",
-    "label": "reset-spend-log",
-    "number": null,
-    "state": "queued",
-    "area": "coding-agent",
-    "priority": null,
-    "title": "feat(coding-agent): log every saved-reset spend attempt at info",
-    "action": "next-hour",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-17T21:02:20Z"
    },
    {
     "id": "token-count-policy",
