@@ -62,13 +62,14 @@ An instrumented build showed Chrome activating before any extension call (n=15);
 
 </details>
 
-- Every `browser-relay-*` file (popup placement included) and `browser-open-lease`: 294 pass; `check:types`, oxlint and oxfmt pass. Without this change, the five popup tests in `browser-relay-bridge` and `browser-relay-tab-isolation` fail.
+- On the rebased head, 321 tests pass, including the real-extension popup, password-manager, unchanged main dialog/WebKit and relay CLI cases; `bun run check:ts` and queue precheck pass. Re-run: `bun test packages/coding-agent/test/tools/browser-{relay*,nav-frames-dialogs,webkit-dialogs}.test.ts packages/coding-agent/test/cli/browser-relay-cli.test.ts`. Without this change, the five popup tests in `browser-relay-bridge` and `browser-relay-tab-isolation` fail.
 
 ---
 
-- [x] `bun check` passes
+- [x] `bun run check:ts` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
 
 
 
