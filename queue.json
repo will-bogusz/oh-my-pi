@@ -96709,8 +96709,46 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/reset-spend-log",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:02:20Z",
-   "updated": "2026-11-17T21:02:40Z",
-   "note": "Review ResetSpendLog.ReviewResetSpendLog at 608d234 needs-changes: #2 (CLI fence throw unlogged) fixed in code, no test (marker-write failure is input nobody sends); #1 (two concurrent unfenced in-process redeems coalesce into one POST yet log two resets) declined: only reachable for /usage reset racing an auto spend on the same account within the redeem's 15 s; auto vs auto is serialized by the reset fence"
+   "updated": "2026-11-17T21:52:50Z",
+   "note": "Review ResetSpendLog.ReviewResetSpendLog at 608d234 needs-changes: #2 (CLI fence throw unlogged) fixed in code, no test (marker-write failure is input nobody sends); #1 (two concurrent unfenced in-process redeems coalesce into one POST yet log two resets) declined: only reachable for /usage reset racing an auto spend on the same account within the redeem's 15 s; auto vs auto is serialized by the reset fence",
+   "built": [
+    {
+     "with": "#19100",
+     "code": "5db6d6936bd3d1790629915de85d1abb7a58a3d8",
+     "with_code": "3ae504df11c843d0ea57da6070ab51ea1a77ea67",
+     "tip": "31cf61cebac4032268bb24a466a3971058db50e4",
+     "with_tip": "4c97eb50a792c97c2b83722f908fb92ab40f3529",
+     "at": "2026-11-17T21:52:45Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19195",
+     "code": "5db6d6936bd3d1790629915de85d1abb7a58a3d8",
+     "with_code": "a6537b230b0aca2d167690b2dd7419dc03c04fb0",
+     "tip": "31cf61cebac4032268bb24a466a3971058db50e4",
+     "with_tip": "4deabb0e95fcf29a451415b62795427a4173fa6a",
+     "at": "2026-11-17T21:52:49Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19516",
+     "code": "5db6d6936bd3d1790629915de85d1abb7a58a3d8",
+     "with_code": "e0d04259b3a1b34c6b652badd5104175329b8566",
+     "tip": "31cf61cebac4032268bb24a466a3971058db50e4",
+     "with_tip": "ff8424bcab2403c9fa8f8b026dc99d6b99ac7fb1",
+     "at": "2026-11-17T21:52:49Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19542",
+     "code": "5db6d6936bd3d1790629915de85d1abb7a58a3d8",
+     "with_code": "a85b6219a212dacf367a081c40744214f9cb326e",
+     "tip": "31cf61cebac4032268bb24a466a3971058db50e4",
+     "with_tip": "1134016fe1f3b306978e9bf7eea5bce1c3780b50",
+     "at": "2026-11-17T21:52:49Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "broker-shutdown-refresh-save",
