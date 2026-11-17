@@ -1780,7 +1780,7 @@ pub(super) fn make_key_in_background(
 	activate_in_background(source, pid, wid, context)?;
 	still_behind_user(pid, wid, visit)?;
 	let is_key =
-		|| key_without_press(wid, ax::focused_window_id(pid), || ax::window_content(pid, window));
+		|| key_without_press(wid, &ax::key_focus(pid), || ax::focused_window_draws_own(pid, wid));
 	if !needs_press(press, focus_in_overlay, is_key) {
 		return Ok(true);
 	}
@@ -1823,16 +1823,15 @@ pub(super) enum ActivatingPress {
 }
 
 /// Whether keys for window `wid` can go out without the activating press:
-/// its application reports it as the focused window (`focused`), and it
-/// draws its own content. A window another process draws (`content`), a
-/// system Open or Save panel or its sheet, keeps the press, since that
-/// process reports focus only once the panel is key ([`key_process`]).
-fn key_without_press(
-	wid: u32,
-	focused: Option<u32>,
-	content: impl FnOnce() -> ax::WindowContent,
-) -> bool {
-	focused == Some(wid) && matches!(content(), ax::WindowContent::Own)
+/// its application reports it as the focused window (`focus`), and it draws
+/// its own content, which the focused element mapping to `wid` itself proves
+/// without reading the window's children, as in [`key_process`]. Otherwise
+/// `own_content` reads a bounded number of them; whatever they do not prove
+/// keeps the press, as a window another process draws, a system Open or Save
+/// panel or its sheet, needs it: that process reports focus only once the
+/// panel is key.
+fn key_without_press(wid: u32, focus: &ax::KeyFocus, own_content: impl FnOnce() -> bool) -> bool {
+	focus.window == ax::FocusedWindow::Id(wid) && (focus.element_maps_to(wid) || own_content())
 }
 
 /// Whether [`make_key_in_background`] posts the activating press for
@@ -6831,17 +6830,20 @@ mod tests {
 		// The press lets the application order its window over the user's;
 		// keys reach the key window through the activation event alone.
 		assert!(!needs_press(ActivatingPress::UnlessKey, false, || true));
-		assert!(key_without_press(7, Some(7), || ax::WindowContent::Own));
+		let unread = || -> bool { panic!("the focused element proves it") };
+		assert!(key_without_press(7, &focus_in(ax::FocusedWindow::Id(7), Some(7)), unread));
+		let no_element = focus_in(ax::FocusedWindow::Id(7), None);
+		assert!(key_without_press(7, &no_element, || true));
 	}
 
 	#[test]
 	fn keys_into_a_panel_another_process_draws_keep_the_activating_press() {
 		// TextEdit's Save sheet is focused, but openAndSavePanelService draws it
 		// and takes focus only once the sheet is key.
-		let panel = || ax::WindowContent::Remote { pid: 900, window: 41 };
-		assert!(!key_without_press(7, Some(7), panel));
-		assert!(!key_without_press(7, Some(8), || ax::WindowContent::Own));
-		assert!(!key_without_press(7, None, || ax::WindowContent::Own));
+		// Its children prove no content of TextEdit's own.
+		assert!(!key_without_press(7, &focus_in(ax::FocusedWindow::Id(7), None), || false));
+		assert!(!key_without_press(7, &focus_in(ax::FocusedWindow::Id(8), Some(8)), || true));
+		assert!(!key_without_press(7, &focus_in(ax::FocusedWindow::Unreported, None), || true));
 	}
 
 	#[test]

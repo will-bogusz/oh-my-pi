@@ -596,6 +596,79 @@ pub(super) fn window_content(pid: libc::pid_t, window: &DesktopWindow) -> Window
 	)
 }
 
+/// Most children of a window [`focused_window_draws_own`] reads. A window
+/// that draws its own content maps its first child, its close button or the
+/// view under its title bar, to itself.
+const MAX_CONTENT_CHILDREN: CFIndex = 16;
+
+/// Whether `pid`'s focused window is `wid` and one of its first
+/// [`MAX_CONTENT_CHILDREN`] children shows that `pid` draws it, so that a
+/// window with thousands of direct children costs no more to read here than
+/// one with a few. Unlike [`window_content`], it answers `false` whenever
+/// nothing proves it: another focused window, a failed read, no children, or
+/// children that map to no window or to one whose owner cannot be read.
+pub(super) fn focused_window_draws_own(pid: libc::pid_t, wid: u32) -> bool {
+	let Some(window) = probe_application(pid).and_then(|app| copy_element(&app, "AXFocusedWindow"))
+	else {
+		return false;
+	};
+	window_id(&window) == Some(wid)
+		&& shows_own_content(
+			pid,
+			wid,
+			copy_children_prefix(&window, MAX_CONTENT_CHILDREN)
+				.iter()
+				.map(|child| window_id(child)),
+			skylight::window_owner_pid,
+		)
+}
+
+/// Whether one of a window's `children`, as the window ids they map to, is
+/// in window `wid` itself or in another window `owner_of` says process `pid`
+/// owns: the cases where [`content_owner`] proves [`WindowContent::Own`],
+/// without its answer for children that prove nothing.
+fn shows_own_content(
+	pid: libc::pid_t,
+	wid: u32,
+	children: impl IntoIterator<Item = Option<u32>>,
+	owner_of: impl Fn(u32) -> Option<libc::pid_t>,
+) -> bool {
+	children
+		.into_iter()
+		.flatten()
+		.any(|id| id == wid || owner_of(id).is_some_and(|owner| owner == pid))
+}
+
+/// The first `max` of `element`'s `AXChildren`, read with
+/// `AXUIElementCopyAttributeValues` so that no more than `max` cross from
+/// the application, which may still build the whole list to answer; none when
+/// the read fails.
+fn copy_children_prefix(element: &AXUIElement, max: CFIndex) -> Vec<CFRetained<AXUIElement>> {
+	let mut output: *const CFArray = ptr::null();
+	// SAFETY: `output` is writable and receives a create-rule retained CFArray
+	// on success.
+	let error = unsafe {
+		element.copy_attribute_values(
+			&CFString::from_static_str("AXChildren"),
+			0,
+			max,
+			NonNull::from(&mut output),
+		)
+	};
+	let Some(pointer) = NonNull::new(output.cast_mut()).filter(|_| error == AXError::Success) else {
+		return Vec::new();
+	};
+	// SAFETY: The successful copy call returned this array at +1 retain count.
+	let array: CFRetained<CFArray> = unsafe { CFRetained::from_raw(pointer) };
+	// SAFETY: AXChildren is a CFArray of CFTypes; each is checked to be an
+	// AXUIElement below.
+	let array = unsafe { CFRetained::cast_unchecked::<CFArray<CFType>>(array) };
+	array
+		.iter()
+		.filter_map(|value| value.downcast::<AXUIElement>().ok())
+		.collect()
+}
+
 /// Window `wid`'s accessibility element: the application's `focused` window
 /// when that is `wid`, which spares the search through its windows and
 /// sheets, else what `find` finds.
@@ -2749,8 +2822,8 @@ mod tests {
 		WindowContent, ax_result, content_owner, create_system_wide, element_action_result,
 		focused_window, is_outside_windows, may_borrow_focus, menu_window, perform_choosing,
 		replace_utf16_selection, replace_whole_value, required_string, secure_subrole,
-		select_attached, standard_window_subrole, stringify_value, takes_inserted_text,
-		target_window, window_records_of,
+		select_attached, shows_own_content, standard_window_subrole, stringify_value,
+		takes_inserted_text, target_window, window_records_of,
 	};
 	use crate::desktop::error::{CoreResult, ErrorCode};
 
@@ -3786,6 +3859,17 @@ mod tests {
 		assert_eq!(content_owner(7581, 561, [Some(554), Some(559)], owners), WindowContent::Own);
 		assert_eq!(content_owner(7581, 554, [Some(999)], owners), WindowContent::Own);
 		assert_eq!(content_owner(7581, 554, [None, None], owners), WindowContent::Own);
+		// Skipping the activating press takes proof: a child in the window or in
+		// another window of the process, never the default answer above.
+		let own = |wid, children: &[Option<u32>]| {
+			shows_own_content(7581, wid, children.iter().copied(), owners)
+		};
+		assert!(own(543, &[Some(556), Some(543)]));
+		assert!(own(561, &[Some(554)]));
+		assert!(!own(554, &[Some(556)]));
+		assert!(!own(554, &[Some(999)]), "an owner that cannot be read proves nothing");
+		assert!(!own(554, &[None, None]));
+		assert!(!own(554, &[]));
 	}
 
 	#[test]
