@@ -97281,13 +97281,13 @@
    "needs": [],
    "base": "baf60290fde5e9eea4edb30bff07695877682ba9",
    "body": "bodies/broker-client-startup-retry.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19598,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/broker-client-startup-retry",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:08:05Z",
-   "updated": "2026-11-17T22:53:42Z",
+   "updated": "2026-11-17T23:00:36Z",
    "note": "review 1b457113ab needs-changes: (1) deadline now one AbortSignal across requests+backoff, test: never-answering broker case (hangs on main); (2) exhaustion test rewritten, fails on main; (3) retries scoped to startup via retryUnreachableBroker, test row: runtime switch fails after one request. Final-head review pass still owed per workflow.",
    "tests_over_override": {
     "reason": "BrokerClientStartupRetry, 2026-11-17: four distinct branches (retry succeeds; non-transient answer fails at once; retry off for runtime switch; deadline cancels an in-flight request), each failing or pinning main's outcome; over by 8 lines of imports and server setup",
@@ -97393,7 +97393,8 @@
      "at": "2026-11-17T22:53:41Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-17T23:00:36Z"
   },
   {
    "id": "wayland-window-crop-clip",
