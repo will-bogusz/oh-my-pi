@@ -12,6 +12,7 @@ Shape of the fix:
 - One page-side test, `pageTextMatches` in `queries.ts`, serves all three backends (Chromium's isolated world, cmux by source, Tern's kit embeds it). A pattern reaches the page as `source` and `flags`, so every backend answers alike and a reused global or sticky pattern is tested from the start each poll. A value is a pattern when its class tag says `RegExp`, so one from the run's runtime counts too.
 - The pattern runs in the page, not omp: in omp's tab worker (in-process on cmux) a backtracking match is synchronous and ran past the deadline, `/a*a*b/` on 10,000 characters for 46 s in Bun. Each poll's page call is raced against the wait's remaining budget on every backend, so the wait ends at its timeout. Limit: the page stays busy until the match ends, so the tab's next call waits too.
 - The prompt now teaches the string/`RegExp` contract and that `exact` is string-only.
+- On a Tern with native DOM reads, a string `waitForText` can run up to 5 s past its requested timeout (reply grace, clamped to the cell budget).
 
 ## Testing
 
