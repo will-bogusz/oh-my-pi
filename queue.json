@@ -107988,7 +107988,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-17T21:13:38.630085Z",
+  "at": "2026-11-17T21:19:46.632668Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -108237,17 +108237,12 @@
     "area": "browser",
     "priority": "P1",
     "title": "feat(browser): settle the preceding action before reads too",
-    "action": "wait",
-    "reasons": [
-     "conflicts with #19542 in packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#19542"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-10T18:56:55Z"
    },
@@ -108476,13 +108471,15 @@
     "action": "wait",
     "reasons": [
      "conflicts with #19542 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with settle-reads in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, crates/pi-natives/src/desktop/macos/roster.rs, crates/pi-natives/src/desktop/roster.rs, packages/natives/native/desktop.d.ts, packages/natives/native/desktop.js, packages/natives/native/index.d.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#19542"
+     "#19542",
+     "settle-reads"
     ],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
@@ -108499,6 +108496,7 @@
     "reasons": [
      "needs r2/relay-own-only (queued)",
      "conflicts with #19542 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with settle-reads in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need r2/relay-own-only conflicts with main in crates/pi-natives/src/desktop/roster.rs, docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/native-windows.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-native-windows.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts, packages/natives/native/desktop.js",
      "conflicts with main in packages/browser-relay/extension/background.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt"
     ],
@@ -108506,7 +108504,8 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#19542"
+     "#19542",
+     "settle-reads"
     ],
     "needs": [
      "r2/relay-own-only"
@@ -108526,6 +108525,7 @@
      "needs r2/relay-popup-owned (queued), r2/page-waiting (queued)",
      "conflicts with #19532 in crates/pi-natives/src/desktop/macos/capture.rs",
      "conflicts with #19542 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts",
+     "conflicts with settle-reads in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts",
      "its need r2/relay-popup-owned conflicts with main in crates/pi-natives/src/desktop/roster.rs, docs/tools/browser.md, packages/browser-relay/extension/background.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/native-windows.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-native-windows.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts, packages/natives/native/desktop.js",
      "its need r2/page-waiting conflicts with main in crates/pi-natives/src/desktop/roster.rs, docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/dialogs.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/native-windows.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-native-windows.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts, packages/natives/native/desktop.js"
     ],
@@ -108534,7 +108534,8 @@
     "paired": [],
     "blocked_by": [
      "#19532",
-     "#19542"
+     "#19542",
+     "settle-reads"
     ],
     "needs": [
      "r2/relay-popup-owned",
@@ -108684,14 +108685,15 @@
     "reasons": [
      "needs settle-reads (queued)",
      "conflicts with #19542 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-observe.test.ts",
-     "its need settle-reads conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with main in docs/tools/browser.md"
+     "conflicts with settle-reads in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-observe.test.ts",
+     "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#19542"
+     "#19542",
+     "settle-reads"
     ],
     "needs": [
      "settle-reads"
@@ -108728,13 +108730,15 @@
     "action": "wait",
     "reasons": [
      "conflicts with #19542 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with settle-reads in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#19542"
+     "#19542",
+     "settle-reads"
     ],
     "needs": [],
     "created": "2026-11-10T19:19:48Z"
@@ -108751,13 +108755,15 @@
     "reasons": [
      "held: Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check",
      "conflicts with #19542 in packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts",
+     "conflicts with settle-reads in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#19542"
+     "#19542",
+     "settle-reads"
     ],
     "needs": [],
     "created": "2026-11-10T23:39:37Z"
@@ -108956,6 +108962,7 @@
     "reasons": [
      "needs act-look-prompt (queued)",
      "conflicts with #19542 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts, packages/coding-agent/test/tools/browser-observe.test.ts, packages/coding-agent/test/tools/browser-tern-tab.test.ts",
+     "conflicts with settle-reads in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-observe.test.ts",
      "its need act-look-prompt conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/network.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-observe.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tern/tern-tab.ts, packages/coding-agent/test/tools/browser-tern-tab.test.ts"
     ],
@@ -108963,7 +108970,8 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#19542"
+     "#19542",
+     "settle-reads"
     ],
     "needs": [
      "act-look-prompt"
@@ -108982,6 +108990,7 @@
     "reasons": [
      "needs r2/relay-own-only (queued)",
      "conflicts with #19542 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts",
+     "conflicts with settle-reads in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts",
      "its need r2/relay-own-only conflicts with main in crates/pi-natives/src/desktop/roster.rs, docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/native-windows.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-native-windows.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts, packages/natives/native/desktop.js",
      "conflicts with main in packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/dialogs.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts"
     ],
@@ -108989,7 +108998,8 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#19542"
+     "#19542",
+     "settle-reads"
     ],
     "needs": [
      "r2/relay-own-only"
@@ -109101,7 +109111,7 @@
     "area": "catalog",
     "priority": null,
     "title": "fix(catalog): switch Devin's Gemini promo prices to list when each promo ends",
-    "action": "open",
+    "action": "next-hour",
     "reasons": [],
     "note": "",
     "over": [],
@@ -109278,6 +109288,25 @@
     "created": "2026-11-03T01:33:54Z"
    },
    {
+    "id": "account-switch-reason",
+    "label": "account-switch-reason",
+    "number": null,
+    "state": "queued",
+    "area": "auth",
+    "priority": null,
+    "title": "feat(ai,coding-agent): record why a session's OAuth account switched",
+    "action": "held",
+    "reasons": [
+     "held: Will, 2026-11-17: P2 proposal; held until Will's go-ahead"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-17T21:19:21Z"
+   },
+   {
     "id": "compaction-trigger",
     "label": "compaction-trigger",
     "number": null,
@@ -109295,6 +109324,25 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-20T23:41:41Z"
+   },
+   {
+    "id": "deadline-ranking",
+    "label": "deadline-ranking",
+    "number": null,
+    "state": "queued",
+    "area": "ai/auth",
+    "priority": null,
+    "title": "feat(ai): rank an account priority by quota deadline",
+    "action": "held",
+    "reasons": [
+     "held: Will, 2026-11-17: P2 proposal; held until Will's go-ahead"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-17T21:17:58Z"
    },
    {
     "id": "devin-billed-cost",
