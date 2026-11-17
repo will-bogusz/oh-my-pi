@@ -32,7 +32,7 @@ Agents act mid-cell and end the cell with a look, so a returned value is dropped
 
 `no change yet` claims only what was seen, since a wrong "no change" invites a repeated click. Its 4 misses were one case: a wizard still in its timed "Preparing…" stage from the previous navigation rendered after the line, and the click itself did nothing. Waiting 1.5 to 4 s for that on every no-op action costs more than `waitForText` does when such content matters. The 2 wrong `page changed` lines were DOM replacements with identical text.
 
-Not in this PR: cmux and Tern tabs print nothing, and a click that opens a confirm synchronously still times out as on `main`. There is no setting to turn the line off; the default is the maintainer's call.
+Not in this PR: cmux and Tern tabs print nothing. A click that opens a confirm returns as on `main` and prints `dialog pending: confirm "…"`, without waiting on a navigation the dialog holds up. There is no setting to turn the line off; the default is the maintainer's call.
 
 <details><summary>What the probe counts and what leaves the page</summary>
 
@@ -70,4 +70,5 @@ The earlier build printed the same lines without `yet`, ignored every style and 
 - [x] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
 
