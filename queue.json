@@ -107321,8 +107321,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-17T18:02:51.997308Z",
-  "host": "goliath",
+  "at": "2026-11-17T19:09:38.827858Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -107572,12 +107572,15 @@
     "title": "feat(browser): settle the preceding action before reads too",
     "action": "wait",
     "reasons": [
+     "conflicts with #19542 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#19542"
+    ],
     "needs": [],
     "created": "2026-11-10T18:56:55Z"
    },
@@ -107958,7 +107961,7 @@
     "action": "wait",
     "reasons": [
      "needs settle-reads (queued)",
-     "conflicts with #19542 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #19542 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-observe.test.ts",
      "its need settle-reads conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in docs/tools/browser.md"
     ],
@@ -107983,7 +107986,7 @@
     "title": "feat(browser): print what each browser action did to the page",
     "action": "wait",
     "reasons": [
-     "conflicts with #19542 in docs/tools/browser.md",
+     "conflicts with #19542 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
@@ -108202,7 +108205,7 @@
     "action": "wait",
     "reasons": [
      "needs act-look-prompt (queued)",
-     "conflicts with #19542 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts, packages/coding-agent/test/tools/browser-tern-tab.test.ts",
+     "conflicts with #19542 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts, packages/coding-agent/test/tools/browser-observe.test.ts, packages/coding-agent/test/tools/browser-tern-tab.test.ts",
      "its need act-look-prompt conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/network.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-observe.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tern/tern-tab.ts, packages/coding-agent/test/tools/browser-tern-tab.test.ts"
     ],
@@ -108327,10 +108330,8 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "wait",
-    "reasons": [
-     "conflicts with main in (branch missing on the fork)"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
