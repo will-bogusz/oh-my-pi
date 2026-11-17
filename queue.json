@@ -96416,6 +96416,24 @@
    "added": "2026-11-17T20:59:31Z",
    "updated": "2026-11-17T20:59:31Z",
    "note": ""
+  },
+  {
+   "id": "fable-shared-wall-block",
+   "branch": "will/fable-shared-wall-block",
+   "title": "fix(ai): heal Claude tier blocks a shared weekly wall caused from single-window usage reports",
+   "area": "broker",
+   "priority": null,
+   "needs": [],
+   "base": "1abafe8e71cae521f995e2203055ce840b859da4",
+   "body": "bodies/fable-shared-wall-block.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/fable-shared-wall-block",
+   "host": "MacBook-Pro",
+   "added": "2026-11-17T20:59:40Z",
+   "updated": "2026-11-17T20:59:40Z",
+   "note": ""
   }
  ],
  "watch": {
