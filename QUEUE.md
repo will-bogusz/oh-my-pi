@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17 22:28Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17 22:30Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-11-17 22:08Z on MacBook-Pro; groups below are from it, states from the manifest)
@@ -13,7 +13,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 | settle-reads | feat(browser): settle the preceding action before reads too | browser | P1 | 7d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-settle-reads) |
 | stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 4d | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 | factory-droid-1100-pin | feat(catalog): identify Factory Droid requests as droid 1.10.0 | factory-droid |  | 4d | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-pin) |
-| wayland-input-refusal | fix(natives): refuse every Wayland input call at once when no input route exists | natives | P2 | 1h | open; tests-over: OmarchyFixes, 2026-11-17: one test going through all 8 gated input arms; each request is an arm no other test reaches | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-input-refusal) |
+| wayland-input-refusal | fix(natives): refuse every Wayland input call at once when no input route exists | natives | P2 | 2h | open; tests-over: OmarchyFixes, 2026-11-17: one test going through all 8 gated input arms; each request is an arm no other test reaches | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-input-refusal) |
 | wayland-display-count | fix(natives): report the Wayland display count as unknown before the first capture | natives | P2 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-display-count) |
 | devin-gemini-promo-prices | fix(catalog): switch Devin's Gemini promo prices to list when each promo ends | catalog |  | 1h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-gemini-promo-prices) |
 | devin-image-budgets | fix(catalog): carry Devin's measured image limits | catalog |  | 1h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-image-budgets) |

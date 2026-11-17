@@ -58698,8 +58698,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/iphone-mirror-pointer",
    "host": "MacBook-Pro",
    "added": "2026-10-30T21:35:47Z",
-   "updated": "2026-11-17T20:49:20Z",
-   "note": "",
+   "updated": "2026-11-17T22:30:09Z",
+   "note": "next push: input.rs primed() doc comment (~3496-3499) says a cancel keeps the mark; a cancel noticed after a successful primer clears it first (SolFinal17756 P3; body fixed 2026-11-17)",
    "built": [
     {
      "with": "iphone-mirror-not-showing",
