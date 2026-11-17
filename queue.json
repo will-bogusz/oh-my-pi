@@ -106203,6 +106203,11 @@
     "sha": "e80e614c236d36c9a3782494cf6d1de7acd3c0a2",
     "at": "2026-11-17T03:19:36Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "e80e614c236d36c9a3782494cf6d1de7acd3c0a2",
+    "at": "2026-11-17T03:21:01Z",
+    "host": "goliath"
    }
   },
   "38fdf1a94edd56c714b9c957f3f8b7299d6d0419": {
