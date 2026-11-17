@@ -95049,6 +95049,28 @@
        "    for it. To choose an option, use `menu:`."
       ]
      }
+    },
+    {
+     "at": "2026-11-17T22:39:39Z",
+     "reason": "KeyMenu2 fix 4523c71d4b1 for SolFinal19516 (Main go): failed AX reads no longer end the wait; test asserts MARKS without expiry",
+     "old": "ff8424bcab2403c9fa8f8b026dc99d6b99ac7fb1",
+     "new": "f0c8da3fd45354c11cd53f093fdcb854d61689db",
+     "dropped": {
+      "crates/pi-natives/src/desktop/macos/ax/type_ahead.rs": [
+       "/// waits until its value differs from the one before the keys or the choice's",
+       "/// deadline passes, then clears the mark. A cancel stops the wait and keeps",
+       "/// the mark for the next read. Without marks it only checks that none exist.",
+       "/// A read made while the call holds the input lease (an element click finding",
+       "/// its point, a refusal naming the element) never waits, since that would",
+       "/// keep every other session's input out: it reads at once and keeps the mark.",
+       "/// ends the wait. Returns the value it ended on.",
+       "\t\tif value.as_deref() != before {",
+       "\t\tassert!(pending(&popup), \"the next read of the popup waits for its choice\");",
+       "\t\tassert!(!pending(&other));",
+       "\t\t// The popup is not running, so its value reads as changed: the read",
+       "\t\t// after the call settles and clears the mark."
+      ]
+     }
     }
    ]
   },

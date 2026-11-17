@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17 22:38Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17 22:39Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-11-17 22:31Z on MacBook-Pro; groups below are from it, states from the manifest)
@@ -107,5 +107,5 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 | [#19504](https://github.com/can1357/oh-my-pi/pull/19504) | macos-handback-typed | fix(natives): give the macOS key window back after a takeover while another program types | computer | P1 | 20h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-handback-typed) |
 | [#19586](https://github.com/can1357/oh-my-pi/pull/19586) | docs-reclaim-drift | docs(auth-gateway): describe reclaim moving warm pins back | auth | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/docs-reclaim-drift) |
 | [#19592](https://github.com/can1357/oh-my-pi/pull/19592) | broker-version-skew | feat(ai,coding-agent): exchanged omp versions between auth-broker clients and the broker | auth-broker | P2 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-version-skew) |
-| [#19590](https://github.com/can1357/oh-my-pi/pull/19590) | broker-refresh-failure-loud | fix(ai): warn when a broker refresh failure outlasts the access token | broker | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-refresh-failure-loud) |
+| [#19590](https://github.com/can1357/oh-my-pi/pull/19590) | broker-refresh-failure-loud | fix(ai): warn when a broker refresh failure outlasts the access token | broker | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-refresh-failure-loud) |
 | [#19596](https://github.com/can1357/oh-my-pi/pull/19596) | wayland-window-crop-clip | fix(natives): capture the visible part of a Linux window partly off its monitor | natives | P2 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-window-crop-clip) |
