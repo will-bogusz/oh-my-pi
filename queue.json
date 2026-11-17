@@ -96733,18 +96733,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/fable-shared-wall-block",
    "host": "MacBook-Pro",
    "added": "2026-11-17T20:59:40Z",
-   "updated": "2026-11-17T22:35:07Z",
+   "updated": "2026-11-17T22:54:00Z",
    "note": "",
    "built": [
-    {
-     "with": "#19513",
-     "code": "403a3fdeeaaeea2b6227088ae2dfefe8c56f1321",
-     "with_code": "49da0eefa5cd2d2653e00ae6de4a0d94dfc21f13",
-     "tip": "c988a1018d1b722e87e8cc2c4ef7f8ba4d161709",
-     "with_tip": "6b9f2cdcfd08e89639e1bfa955661601e70e2525",
-     "at": "2026-11-17T21:18:41Z",
-     "host": "MacBook-Pro"
-    },
     {
      "with": "broker-refresh-failure-loud",
      "code": "403a3fdeeaaeea2b6227088ae2dfefe8c56f1321",
@@ -96770,6 +96761,24 @@
      "tip": "c988a1018d1b722e87e8cc2c4ef7f8ba4d161709",
      "with_tip": "2c7c797eeb2e0eeca143cf8c1cbf66e282c73438",
      "at": "2026-11-17T21:52:13Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19513",
+     "code": "403a3fdeeaaeea2b6227088ae2dfefe8c56f1321",
+     "with_code": "58756d46d0aaa29d1bfd113ddd35ea5f4d7583d5",
+     "tip": "c988a1018d1b722e87e8cc2c4ef7f8ba4d161709",
+     "with_tip": "b318ff4225ac17579fa7ea14fc44aa6f535ee171",
+     "at": "2026-11-17T22:53:55Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19592",
+     "code": "403a3fdeeaaeea2b6227088ae2dfefe8c56f1321",
+     "with_code": "2de31525408f5bd840a7993c119c6a71d310a52b",
+     "tip": "c988a1018d1b722e87e8cc2c4ef7f8ba4d161709",
+     "with_tip": "bbc606e53aac36298daa70e428e6c6f598fec211",
+     "at": "2026-11-17T22:54:00Z",
      "host": "MacBook-Pro"
     }
    ]
