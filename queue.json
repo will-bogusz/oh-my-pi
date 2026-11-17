@@ -107622,5 +107622,11 @@
     "wake": ""
    }
   ]
+ },
+ "opening": {
+  "id": "macos-reroute-not-a-press",
+  "token": "e5898557c7f3478f9befafb2bfd96989",
+  "host": "MacBook-Pro",
+  "at": "2026-11-17T03:25:38Z"
  }
 }
