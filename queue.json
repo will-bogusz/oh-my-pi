@@ -110125,5 +110125,11 @@
     "wake": ""
    }
   ]
+ },
+ "opening": {
+  "id": "devin-gemini-promo-prices",
+  "token": "2b69575ef55f492c995222206fac2d8a",
+  "host": "MacBook-Pro",
+  "at": "2026-11-17T21:57:11Z"
  }
 }
