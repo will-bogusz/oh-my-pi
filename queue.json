@@ -93833,7 +93833,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "bf9a9fbd40e96766d528a9f19a603e53e8c0b5a1",
+   "base": "1bdbf6d242d99ca62bdf2feeff4519ff992f647d",
    "body": "bodies/macos-move-receipt-r2.md",
    "state": "open",
    "pr": 19509,
@@ -93841,7 +93841,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/move-receipt2",
    "host": "MacBook-Pro",
    "added": "2026-11-14T04:35:48Z",
-   "updated": "2026-11-17T02:43:17Z",
+   "updated": "2026-11-17T02:51:03Z",
    "note": "MoveReview (needs-changes at 2609fd1) answered in e11ccec: 1 refuse-aware ending naming the setting, test under refuse; 2 oxfmt applied; 3 wording held to observations ('have shown', 'may still be hidden', takeover only after a screenshot shows it); docs/tools/computer.md one line; CHANGELOG tightened; behaviour NOTE answered in body (no sample set: macOS-only line, benchmark lane re-measures). QueueTwenty 2026-11-14: model sample skipped as given (macOS-only line, benchmark lane re-measures those tasks); body first sentence made first-person.",
    "built": [
     {
@@ -94020,7 +94020,7 @@
    ],
    "opened": "2026-11-17T02:12:20Z",
    "readied": "2026-11-17T02:12:46Z",
-   "advanced": "2026-11-17T02:32:40Z",
+   "advanced": "2026-11-17T02:51:03Z",
    "line_loss_overrides": [
     {
      "at": "2026-11-17T02:50:56Z",
