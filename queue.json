@@ -96376,9 +96376,10 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/docs-reclaim-drift",
    "host": "MacBook-Pro",
    "added": "2026-11-17T20:54:14Z",
-   "updated": "2026-11-17T20:58:21Z",
+   "updated": "2026-11-17T20:58:45Z",
    "note": "",
-   "opened": "2026-11-17T20:58:21Z"
+   "opened": "2026-11-17T20:58:21Z",
+   "readied": "2026-11-17T20:58:44Z"
   },
   {
    "id": "image-eviction-notice",
