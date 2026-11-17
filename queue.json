@@ -106927,12 +106927,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-17T03:28:01.608974Z",
+  "at": "2026-11-17T04:02:51.408807Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 1,
-   "left": 7
+   "used": 2,
+   "left": 6
   },
   "rows": [
    {
@@ -106979,9 +106979,11 @@
     "title": "fix(natives): stop macOS background drags reporting moves that did not happen",
     "action": "keep",
     "reasons": [],
-    "note": "",
+    "note": "accepted pair with #19516: Main, 2026-11-17: adjacent thread_local statics in desktop/control.rs; combined = both statics (DRAG_NOTE then INPUT_HELD), then input_held() unchanged",
     "over": [],
-    "paired": [],
+    "paired": [
+     "#19516"
+    ],
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-13T20:28:59Z"
@@ -107021,6 +107023,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-21T06:07:03Z"
+   },
+   {
+    "id": "macos-reroute-not-a-press",
+    "label": "#19515",
+    "number": 19515,
+    "state": "open",
+    "area": "computer",
+    "priority": "P0",
+    "title": "fix(natives): count keys moved back to a macOS user's app as theirs",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-17T03:47:16Z"
    },
    {
     "id": "macos-handback-typed",
@@ -107072,6 +107091,25 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-17T02:58:47Z"
+   },
+   {
+    "id": "macos-key-read-settled",
+    "label": "#19516",
+    "number": 19516,
+    "state": "open",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): read a macOS popup after the option its typed letters choose",
+    "action": "keep",
+    "reasons": [],
+    "note": "accepted pair with #19195: Main, 2026-11-17: adjacent thread_local statics in desktop/control.rs; combined = both statics (DRAG_NOTE then INPUT_HELD), then input_held() unchanged",
+    "over": [],
+    "paired": [
+     "#19195"
+    ],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-17T03:54:29Z"
    },
    {
     "id": "atspi-walk-reads",
@@ -107129,25 +107167,6 @@
     "created": "2026-10-30T21:35:55Z"
    },
    {
-    "id": "macos-key-read-settled",
-    "label": "macos-key-read-settled",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives): read a macOS popup after the option its typed letters choose",
-    "action": "open",
-    "reasons": [],
-    "note": "accepted pair with #19195: Main, 2026-11-17: adjacent thread_local statics in desktop/control.rs; combined = both statics (DRAG_NOTE then INPUT_HELD), then input_held() unchanged",
-    "over": [],
-    "paired": [
-     "#19195"
-    ],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-14T10:14:31Z"
-   },
-   {
     "id": "macos-window-order",
     "label": "macos-window-order",
     "number": null,
@@ -107174,19 +107193,22 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): release X11 XTest keys and buttons a killed omp held",
-    "action": "held",
+    "action": "wait",
     "reasons": [
-     "held: Main, 2026-11-17: opens only on Main's word; XtestRelease is measuring the release watcher's fork cost from an omp-sized process; then it takes its turn after macos-window-order and macos-key-read-settled",
+     "conflicts with #19100 in docs/tools/computer.md",
+     "conflicts with #19515 in docs/computer-use.md",
      "conflicts with #19509 in docs/tools/computer.md",
-     "conflicts with macos-key-read-settled in docs/computer-use.md",
+     "conflicts with #19516 in docs/computer-use.md",
      "conflicts with main in crates/pi-natives/src/desktop/linux/x11/input.rs, docs/computer-use.md, docs/tools/computer.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#19100",
+     "#19515",
      "#19509",
-     "macos-key-read-settled"
+     "#19516"
     ],
     "needs": [],
     "created": "2026-11-11T02:31:05Z"
@@ -107319,9 +107341,10 @@
     "reasons": [
      "conflicts with #19100 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #19195 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
+     "conflicts with #19515 in docs/computer-use.md",
      "conflicts with #19504 in docs/computer-use.md",
      "conflicts with #19509 in packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
-     "conflicts with macos-key-read-settled in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with #19516 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
@@ -107330,9 +107353,10 @@
     "blocked_by": [
      "#19100",
      "#19195",
+     "#19515",
      "#19504",
      "#19509",
-     "macos-key-read-settled"
+     "#19516"
     ],
     "needs": [],
     "created": "2026-10-19T07:26:45Z"
@@ -107348,7 +107372,7 @@
     "action": "wait",
     "reasons": [
      "conflicts with #19195 in crates/pi-natives/src/desktop/macos/ax.rs",
-     "conflicts with macos-key-read-settled in crates/pi-natives/src/desktop/macos/ax.rs",
+     "conflicts with #19516 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with main in crates/pi-natives/src/desktop/macos/ax.rs"
     ],
     "note": "",
@@ -107356,7 +107380,7 @@
     "paired": [],
     "blocked_by": [
      "#19195",
-     "macos-key-read-settled"
+     "#19516"
     ],
     "needs": [],
     "created": "2026-11-11T09:59:13Z"
@@ -107372,14 +107396,14 @@
     "action": "wait",
     "reasons": [
      "needs #19195 (open)",
-     "conflicts with macos-key-read-settled in crates/pi-natives/src/desktop/control.rs, crates/pi-natives/src/desktop/macos/input.rs",
+     "conflicts with #19516 in crates/pi-natives/src/desktop/control.rs, crates/pi-natives/src/desktop/macos/input.rs",
      "conflicts with main in crates/pi-natives/src/desktop/macos/ax/drag_control.rs, crates/pi-natives/src/desktop/macos/input.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "macos-key-read-settled"
+     "#19516"
     ],
     "needs": [
      "macos-drag-confirm"
@@ -107413,23 +107437,6 @@
     "created": "2026-11-14T10:49:09Z"
    },
    {
-    "id": "macos-reroute-not-a-press",
-    "label": "macos-reroute-not-a-press",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P2",
-    "title": "fix(natives): count keys moved back to a macOS user's app as theirs",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-14T20:50:07Z"
-   },
-   {
     "id": "macos-web-type-background",
     "label": "macos-web-type-background",
     "number": null,
@@ -107439,11 +107446,11 @@
     "title": "fix(natives): type into a background macOS web page field without a takeover",
     "action": "wait",
     "reasons": [
-     "needs macos-reroute-not-a-press (queued)",
+     "needs #19515 (open)",
      "conflicts with #19195 in docs/computer-use.md",
+     "conflicts with #19515 in docs/computer-use.md",
      "conflicts with #19504 in docs/computer-use.md",
-     "conflicts with macos-key-read-settled in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/macos/input.rs, docs/computer-use.md",
-     "conflicts with macos-reroute-not-a-press in docs/computer-use.md",
+     "conflicts with #19516 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/macos/input.rs, docs/computer-use.md",
      "conflicts with main in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/macos/input.rs, docs/computer-use.md"
     ],
     "note": "",
@@ -107451,9 +107458,9 @@
     "paired": [],
     "blocked_by": [
      "#19195",
+     "#19515",
      "#19504",
-     "macos-key-read-settled",
-     "macos-reroute-not-a-press"
+     "#19516"
     ],
     "needs": [
      "macos-reroute-not-a-press"
@@ -107573,8 +107580,8 @@
     "action": "wait",
     "reasons": [
      "conflicts with #19195 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with #19516 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with atspi-walk-reads in crates/pi-natives/src/desktop/linux/ax.rs",
-     "conflicts with macos-key-read-settled in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs"
     ],
     "note": "",
@@ -107582,8 +107589,8 @@
     "paired": [],
     "blocked_by": [
      "#19195",
-     "atspi-walk-reads",
-     "macos-key-read-settled"
+     "#19516",
+     "atspi-walk-reads"
     ],
     "needs": [],
     "created": "2026-11-11T10:16:04Z"
@@ -107600,7 +107607,7 @@
     "reasons": [
      "conflicts with #19195 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #19509 in packages/coding-agent/src/prompts/tools/computer.md",
-     "conflicts with macos-key-read-settled in packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with #19516 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/win32/capture.rs, crates/pi-natives/src/desktop/win32/mod.rs, packages/coding-agent/src/prompts/tools/computer.md"
     ],
     "note": "",
@@ -107609,7 +107616,7 @@
     "blocked_by": [
      "#19195",
      "#19509",
-     "macos-key-read-settled"
+     "#19516"
     ],
     "needs": [],
     "created": "2026-11-11T09:06:32Z"
@@ -107764,10 +107771,10 @@
      "needs computer-ui-quiet (queued)",
      "conflicts with #19100 in docs/tools/computer.md, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19195 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with #19515 in docs/computer-use.md",
      "conflicts with #19504 in docs/computer-use.md",
      "conflicts with #19509 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with macos-key-read-settled in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
-     "conflicts with macos-reroute-not-a-press in docs/computer-use.md",
+     "conflicts with #19516 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -107777,10 +107784,10 @@
     "blocked_by": [
      "#19100",
      "#19195",
+     "#19515",
      "#19504",
      "#19509",
-     "macos-key-read-settled",
-     "macos-reroute-not-a-press"
+     "#19516"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -107798,10 +107805,11 @@
     "action": "wait",
     "reasons": [
      "needs computer-ui-quiet (queued)",
-     "conflicts with #19100 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with #19100 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19195 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19509 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with macos-key-read-settled in crates/pi-natives/src/desktop/backend.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with #19516 in crates/pi-natives/src/desktop/backend.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with x11-keysym-remap in crates/pi-natives/src/desktop/mod.rs",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md"
     ],
@@ -107812,7 +107820,8 @@
      "#19100",
      "#19195",
      "#19509",
-     "macos-key-read-settled"
+     "#19516",
+     "x11-keysym-remap"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -107832,9 +107841,10 @@
      "held: Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check | Main 2026-11-12: before it opens, the waiting-key-chord case with the cursor actually drawn (20 trials at a 20 s deadline; CursorDemo's cursor-on arm never drew one, and an early run on the combined tree returned 'Cancelled, input may be partial' 11/11, unexplained), on the polished branch will/desktop-cursor-polish.",
      "conflicts with #19100 in docs/tools/computer.md",
      "conflicts with #19195 in crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with #19515 in crates/pi-natives/src/desktop/macos/mod.rs",
      "conflicts with #19509 in docs/tools/computer.md",
-     "conflicts with macos-key-read-settled in crates/pi-natives/src/desktop/backend.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
-     "conflicts with macos-reroute-not-a-press in crates/pi-natives/src/desktop/macos/mod.rs",
+     "conflicts with #19516 in crates/pi-natives/src/desktop/backend.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with x11-keysym-remap in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
@@ -107843,9 +107853,10 @@
     "blocked_by": [
      "#19100",
      "#19195",
+     "#19515",
      "#19509",
-     "macos-key-read-settled",
-     "macos-reroute-not-a-press"
+     "#19516",
+     "x11-keysym-remap"
     ],
     "needs": [],
     "created": "2026-11-11T00:21:12Z"
@@ -108027,7 +108038,7 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "next-hour",
+    "action": "open",
     "reasons": [],
     "note": "",
     "over": [],
