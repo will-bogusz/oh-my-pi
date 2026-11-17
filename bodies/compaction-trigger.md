@@ -12,27 +12,27 @@ this PR:  ──── 📷 snap-compacted · threshold · 41K→40K · Ctrl+O �
 ctrl+o:   Trigger: threshold 45,000 · provider count 40,561 · local estimate 46,083
 ```
 
-That compaction fired with the provider's count under its threshold: the local estimate crossed 45,000, not the 40,561 tokens the provider billed. Nothing in the session said so before.
+The local estimate crossed 45,000, not the 40,561 tokens the provider billed; nothing in the session said so before.
 
 | `compaction` entry field | Set on |
 |---|---|
 | `trigger` | every compaction: `threshold`, `overflow`, `idle`, `incomplete` (length stop), `manual` (`/compact`, `/handoff`, SDK `compact()`), `new_context` |
 | `thresholdTokens` | threshold decisions (the resolved trigger point) and idle (`compaction.idleThresholdTokens`) |
-| `providerContextTokens`, `estimatedContextTokens` | threshold decisions (post-turn, mid-run, pre-prompt): the provider-reported count and the local estimate whose larger value was compared |
+| `providerContextTokens`, `estimatedContextTokens` | threshold decisions (post-turn, mid-run, pre-prompt): the provider-usage count and the local estimate whose larger value was compared |
+| `providerContextEstimated` | pre-prompt decisions, whose provider-usage number is the last usage plus an estimate of later messages (or a local count when no usage exists); ctrl+o shows it as `usage estimate` instead of `provider count` |
 
 ## Why
 
-The entry records the method and `tokensBefore`, not why it ran, and `tokensBefore` is not always the number compared: 5 of the 33 show it below the threshold. The decision only reaches a debug log line, so telling a threshold compaction from an overflow or a `/compact`, or the provider's count from the local estimate (snapcompact frames priced high on DeepSeek fired compactions at 167–204k provider tokens against a 300k setting), meant joining logs to transcripts by time.
+The entry records the method and `tokensBefore`, not why it ran, and `tokensBefore` is not always the number compared (5 of the 33 are below the threshold). The decision only reached a debug log line, so telling a threshold compaction from an overflow or a `/compact`, or the provider's count from the local estimate, meant joining logs to transcripts by time.
 
 Decisions:
 - Flat fields, like `method` and `tokensAfter`; the anonymizer already keeps `trigger` and `thresholdTokens` and now keeps the two counts.
 - The threshold is captured where the decision compared it, so a model or settings change before the commit cannot rewrite it.
 - Overflow and length-stop recoveries record only the trigger: there was no threshold comparison.
 - A snapcompact dead-end rescue carries the rebuilt entry's trigger over.
-- The text sent to the model is unchanged. So is the RPC wire contract: the trigger rides on the open `CompactionSummaryMessage` record, as `warning` does, instead of regenerating the Go, Python and Rust SDKs.
-- A session id on the log line instead would still leave the answer outside the session.
+- The text sent to the model and the RPC wire contract are unchanged: the trigger rides on the open `CompactionSummaryMessage` record, as `warning` does.
 
-**Cost:** 107 bytes per compaction entry, nothing on other entries; no new work per turn (each decision site already had both counts).
+**Cost:** 107 bytes per compaction entry, nothing on other entries; no new work per turn.
 
 Non-goals: when compaction fires, what `tokensBefore` means.
 
@@ -40,7 +40,7 @@ Related: #10841 asks for the trigger on compaction telemetry spans.
 
 ## Testing
 
-Live from this branch on Linux, Claude Haiku 5.5 (low), `compaction.thresholdTokens: 45000`, five sessions (two with `methodOrder: [remote]`, three with `[snapcompact]`, the last on this head): chunked reads of a large file, a 60 KB pasted prompt, more reads. I compared what the transcript alone suggests (threshold known exactly, provider count from the last assistant turn) with the recorded fields:
+Live from this branch on Linux, Claude Haiku 5.5 (low), `compaction.thresholdTokens: 45000`, five sessions (two `methodOrder: [remote]`, three `[snapcompact]`): chunked reads of a large file, a 60 KB pasted prompt, more reads. What the transcript alone suggests (provider count from the last assistant turn) against the recorded fields:
 
 | question | from the transcript | from the entry |
 |---|---|---|
@@ -71,3 +71,4 @@ Not run live: the idle timer and overflow recovery (tests above), and `/compact`
 - [x] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
