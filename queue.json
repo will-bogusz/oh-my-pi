@@ -96677,13 +96677,13 @@
    "needs": [],
    "base": "baf60290fde5e9eea4edb30bff07695877682ba9",
    "body": "bodies/broker-refresh-failure-loud.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19590,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/broker-refresh-failure-loud",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:06:15Z",
-   "updated": "2026-11-17T21:18:57Z",
+   "updated": "2026-11-17T21:39:01Z",
    "note": "",
    "built": [
     {
@@ -96704,7 +96704,8 @@
      "at": "2026-11-17T21:18:56Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-17T21:39:01Z"
   },
   {
    "id": "broker-client-startup-retry",
