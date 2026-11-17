@@ -12,7 +12,7 @@ With a `<dialog>` open over the page, `fill`, `type` and `press` on a field behi
 | no modal: a field under a banner, a board under a HUD, a field whose focus handler opens a picker over it | keys go where focus went | unchanged |
 | `click`, `dblclick`, `check` | already refused | unchanged |
 
-The guard preserves ordinary focus behavior under banners, HUDs and picker overlays; only a modal dialog's cover or a disabled key target is refused. Tab, handle and frame calls use the same decision, and Tern's page kit applies it too. `drag` refuses a covered on-screen endpoint.
+The guard preserves ordinary focus behavior under banners, HUDs and picker overlays; only a modal dialog's cover or a disabled key target is refused. Tab, handle and frame calls use the same decision, and on Tern tabs without native DOM reads the page kit applies it too; a Tern with native DOM reads resolves `press` as `main` does. `drag` refuses a covered on-screen endpoint.
 
 Not changed: `select`, `uploadFile` and radio `uncheck` set the named element's value directly; `focus` sends no input; `hover` is untouched; a field hidden by `inert` or `display:none` is out of scope. cmux sets values on the element itself and its `click` has no hit test either.
 
@@ -51,3 +51,4 @@ Only a modal's cover is refused: under any other layer focus reaches the field, 
 - [x] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
