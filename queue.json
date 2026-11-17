@@ -95191,8 +95191,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-web-type-background",
    "host": "MacBook-Pro",
    "added": "2026-11-14T20:50:44Z",
-   "updated": "2026-11-17T03:06:46Z",
-   "note": "MacLockWaits 2026-11-17: head 82a12571c8b on base 7c49c11aa5b. Self-focus proof and ancestry share the focus wait's deadline (enablement::budget per request, ancestry only when AXFocused is true); last answer in time decides; read-back every request bounded by time left of 1 s, cancel -> unconfirmed, element timeout restored; prompt states the unconfirmed exception; coding-agent CHANGELOG Fixed line. Reviews m4 MacLockWaitsReview + MacLockWaitsReview2 approve finding 3. rust-check macos/linux/windows at Rust diff b431ff573c. Not VM re-measured (tables from 521fdb3ad7b)."
+   "updated": "2026-11-17T03:22:55Z",
+   "note": "MacLockWaits 2026-11-17: head b7dca541890 restacked on macos-reroute-not-a-press 5edae5aa592 (conflicts: main's guard_key_menu inside element_keys(.., false, |_|), test imports, docs paragraph = main's Linux text + web sentences; CHANGELOG lines under [Unreleased]). Self-focus proof + ancestry share the focus wait's deadline; last answer in time decides; read-back bounded by time left of 1 s, cancel -> unconfirmed; prompt states the exception. Reviews: m4 MacLockWaitsReview needs-changes (b755d59d56b), MacLockWaitsReview2 ready (2e601284694), stamped. macOS desktop tests 493; rust-check all three at d4db9d5224. VM tables from 521fdb3ad7b, not re-measured."
   },
   {
    "id": "dialog-closed-state",
