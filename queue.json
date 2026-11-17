@@ -72298,6 +72298,33 @@
        "\t\texpect(fake.requests[sent]?.op).toMatchObject({ function: \"(n) => window.paid === n\", args: [7] });"
       ]
      }
+    },
+    {
+     "at": "2026-11-17T19:07:57Z",
+     "reason": "QueueThirtyOne fix 2c764ef6ff3 for 5 roboomp findings (Main go): lines replaced by documentOp, polling guard, cmux inline fn, options object",
+     "old": "05c06ac9897dd453fe92cdcc2499f51aaaaea425",
+     "new": "3dfcc48b3db1e82f4341fa838ca88a7bc47f2cd8",
+     "dropped": {
+      "packages/coding-agent/src/tools/browser/cmux/cmux-tab.ts": [
+       "\t\tconst expression = `(0, eval)(${JSON.stringify(`(${String(fn)}\\n)`)})`;",
+       "\t\tconst call = `(${PREDICATE_CALL_SOURCE})(${expression}, ${JSON.stringify(args)})`;",
+       "\t\t// The daemon evaluates synchronously: a Promise is handed to the envelope, which reports it, not judged here.",
+       "\t\tconst script = serializeEvalWithEnvelope(",
+       "\t\t\t[],"
+      ],
+      "packages/coding-agent/src/tools/browser/queries.ts": [
+       "\t/** Poll interval in ms (default 100, floor 10). */",
+       "\t\t{ timeout: opts.timeout, interval: Math.max(10, opts.polling ?? 100), signal: opts.signal },"
+      ],
+      "packages/coding-agent/src/tools/browser/tab-worker.ts": [
+       "\t\t\t\treturn act(\"tab.waitForFunction()\", w, sig =>"
+      ],
+      "packages/coding-agent/src/tools/browser/tern/tern-tab.ts": [
+       "\t\tcallSource = false,",
+       "\t\t\tif (callSource) return await this.#eval(fn, args, \"page\", frame);",
+       "\t\t\tconst answer = (await this.#evalUser(label, source, args, frame, true)) as PredicateAnswer | undefined;"
+      ]
+     }
     }
    ],
    "built": [
