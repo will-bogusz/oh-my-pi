@@ -3,7 +3,7 @@
 Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17 20:46Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-17 20:44Z on MacBook-Pro; groups below are from it, states from the manifest)
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-17 20:45Z on MacBook-Pro; groups below are from it, states from the manifest)
 **Counts:** openable now 4, conflict-held 16, stacked 13, held 11, parked 3, open PRs 11; merged 381, closed 37
 
 ## Openable now (4)
