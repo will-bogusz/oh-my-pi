@@ -94202,7 +94202,7 @@
    "worktree": null,
    "host": "MacBook-Pro",
    "added": "2026-11-14T12:00:22Z",
-   "updated": "2026-11-17T02:55:29Z",
+   "updated": "2026-11-17T02:57:42Z",
    "note": "MacLockWaits 2026-11-17: head f6c3de1bd99 on base 4b455fe06b7. Watch of an untracked drag's ends moved out of the input lease (Worker::execute after drop(lease)), scheduled from its own start: 15 reads 40 ms apart, every AX request bounded by the time left of 700 ms; before-read under the lease bounded at 500 ms; cancel on entry and before accepting -> no note. Reviews m4 MacLockWaitsReview (needs-changes, fixed), reviewer DragWatchTiming approve on f6c3de1bd99. VM lease dc87c75f (fs-mac deleted): Static/Box unchanged outcomes; other session's hover wait 1.9 s -> 1.3 s, slow-AX app 5 s InputBusy -> 1.25 s. rust-check macos 91931431ef; linux/windows pending on goliath rc-goliath2."
   },
   {

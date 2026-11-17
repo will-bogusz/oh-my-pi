@@ -4,7 +4,7 @@ A middle-button drag I sent to an app that ignored it came back as done, so noth
 
 On macOS, a background drag that starts on no slider, scroll bar or splitter, such as a middle-button drag, was sent and returned done with nothing read. In a Cua Driver Bench re-measure, a background middle-button drag in BenchLab's reorder task (MB-09, background) returned success and moved nothing. Such a drag now reads what accessibility shows at its two ends before and after, and when nothing there changed its result carries a note saying so and how long after the release its last read ended.
 
-| Background middle-button drag, macOS 26.5 VM (drags per arm: previous / this) | This entry's previous head (`341a3c341f6`, watch under the lease) | This head |
+| Background middle-button drag, macOS 26.5 VM (drags per arm: previous / this) | This entry's previous head (`341a3c341f6`, watch under the lease) | This change (`f6c3de1bd99`, before restacking on #19195's current head) |
 |---|---|---|
 | On "Static", which ignores it (10 / 5 drags) | 0 moved, call 1324-1401 ms | 0 moved, call 1252-1319 ms |
 | On "Box", which it moves (10 / 5) | all moved, 684-701 ms | all moved, 691-705 ms |
