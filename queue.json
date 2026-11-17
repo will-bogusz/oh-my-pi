@@ -96492,7 +96492,7 @@
    "area": "catalog",
    "priority": "P1",
    "needs": [],
-   "base": "baf60290fde5e9eea4edb30bff07695877682ba9",
+   "base": "9cb7eaee6128ecf6b5b084700e342062218bee75",
    "body": "bodies/devin-gemini-promo-prices.md",
    "state": "open",
    "pr": 19601,
@@ -96500,10 +96500,11 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-gemini-promo-prices",
    "host": "MacBook-Pro",
    "added": "2026-11-17T20:51:19Z",
-   "updated": "2026-11-17T23:13:49Z",
+   "updated": "2026-11-17T23:18:58Z",
    "note": "Main for Will, 2026-11-17: P1 estimate, Carbon's list-price card must merge before 2026-11-24 16:00Z",
    "opened": "2026-11-17T23:13:22Z",
-   "readied": "2026-11-17T23:13:49Z"
+   "readied": "2026-11-17T23:13:49Z",
+   "advanced": "2026-11-17T23:18:58Z"
   },
   {
    "id": "devin-image-budgets",
