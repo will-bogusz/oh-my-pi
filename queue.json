@@ -81777,7 +81777,29 @@
    "added": "2026-11-11T07:04:56Z",
    "updated": "2026-11-17T02:56:11Z",
    "note": "Split out of #18838 (print-pref) at 0f5aa8ea5c with rounds 1-3 fixes; off main (its print-preview.ts comment names seedOwnedProfilePreferences from #18838; docs line 85 conflicts with #18838). Codex findings on #18838: (1) r4534637360 P1 print-preview.ts reuse the central timeout utility for bounded probes [fixed 156b3a509f]; (2) r4534637366 P1 relay-detach test replace the embedded Promise constructor [fixed 156b3a509f]; (3) r4534637376 P2 print-preview.ts use an intrinsic promise for the held-page probe [fixed 156b3a509f]; (4) r4534737688 P1 tab-worker.ts probe before a run timeout starts recovery [fixed 4b6bf8429f]; (5) r4534821357 P1 tab-worker.ts let the final print-preview probe finish [fixed 0f5aa8ea5c]; (6) r4534899898 P2 tab-supervisor.ts probe headed shared browsers that predate the preference [Not fixed yet].",
-   "advanced": "2026-11-17T02:56:11Z"
+   "advanced": "2026-11-17T02:56:11Z",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-17T03:27:11Z",
+     "reason": "BrowserRebase's rebase onto 1bdbf6d, Main-approved combined form (~/tmp/oh-my-pi/BrowserRebase/combined-relay-print-preview-error.md)",
+     "old": "e1c2dc2b034d81f5a5e20a03ce0c598b2b76dd0c",
+     "new": "67f6918805b797412d1d950fd95e5f190199adac",
+     "dropped": {
+      "packages/coding-agent/src/tools/browser/print-preview.ts": [
+       "import { withTimeout } from \"@oh-my-pi/pi-utils\";",
+       "export const PRINT_PREVIEW_OPEN_MESSAGE =",
+       "\t\"The page called window.print() and Chrome's print preview is holding it, so this call stalled: clicks, typing \" +",
+       "\t\"and most evaluations wait until the preview closes. Ask the user to switch to this tab in Chrome and press Cancel \" +",
+       "\t\"in its print preview, or navigate this tab to another URL, which closes the preview and loses the page's state. \" +",
+       "\t\"Input this call sent may land once the preview closes.\";"
+      ],
+      "packages/coding-agent/test/tools/browser-relay-detach.test.ts": [
+       "\t\t\tawait invoke({ action: \"open\", app: { cdp_url: cdpUrl, target: caseId }, timeout: 20 });",
+       "\t\t\t\tawait invoke({ action: \"open\", url: `${site.url}login`, timeout: 20 });"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "win-minimised-windows",
