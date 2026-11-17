@@ -3786,7 +3786,7 @@
    "needs": [],
    "base": "bf9a9fbd40e96766d528a9f19a603e53e8c0b5a1",
    "body": "bodies/r2/native-window-report.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18925,
    "closed_prs": [
     15575
@@ -3794,7 +3794,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/r2-native-window-report",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-11-17T01:10:14Z",
+   "updated": "2026-11-17T02:43:06Z",
    "note": "r2 restack 2026-10-18 (RelayTriage, TRIAGE.md in ~/tmp/oh-my-pi/relay-r2): sits on main + #15508 head 5ccf9eac6b (adjacent print-hold lines) 2026-11-02 (QueueRestructure): after Brit's merge round, a rebase must keep main's 1c45a9113ce (relay timeout typed by class; detach-report wait only in user-driven browsers), a47a579ff17 (acquireBrowser startRelay:false for a kept tab's close), 49a19f8ec19 (PI_BROWSER_RELAY_KEEP_FRONT=0 opt-out of the front-app hold: any new SkyLight/front-app call must honor it), 89833d37f43 (cancelled press releases on a sentinel off-page point; tab-worker click guard). | Main 2026-11-12: accepted pair relay-hidden-frames <-> #18925 (record with set --pair once both open). Combined form at tab-worker.ts WorkerCore.#run failure branch: #18925 enrichment of `error` (message and stack with the native notices), then `this.#sendResult({ id: msg.id, ok: false, error })`, so both native-window notices and the once-only hidden-frames notice ride the failure. Second to land adds one test that a failed run carries both.\n2026-11-16 QueueTwentyFive: head f22538688c3 (FrontTabSignal's tab-list fix) built with 30 open ready PRs in 3 trees on goliath (check:ts 0 errors; browser files 1069/1061/1061 pass, 0 fail; cargo test pi-natives desktop 344/314/314 pass); the macOS-only worker tests ran at this code in FrontTabSignal's macOS VM (60 pass), not rebuilt on bench-mac; combined form with #19001 checked on goliath (1069 pass) and bench-mac (185 pass incl. the native-notice failure test).",
    "advanced": "2026-11-17T01:10:14Z",
    "built": [
@@ -4512,7 +4512,8 @@
      }
     }
    ],
-   "unparked": "2026-11-16T21:01:02Z"
+   "unparked": "2026-11-16T21:01:02Z",
+   "merged_by": "pr"
   },
   {
    "id": "test-ownership-lock",
@@ -37132,13 +37133,13 @@
    "needs": [],
    "base": "bf9a9fbd40e96766d528a9f19a603e53e8c0b5a1",
    "body": "bodies/click-place-release.md",
-   "state": "open",
+   "state": "merged",
    "pr": 16553,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/click-place-release",
    "host": "MacBook-Pro",
    "added": "2026-10-20T20:11:57Z",
-   "updated": "2026-11-17T01:09:35Z",
+   "updated": "2026-11-17T02:43:06Z",
    "note": "Main, 2026-11-17: style(natives): rustfmt intervention.rs rides as its own last commit: rust-check checks whole touched files, and bare origin/main at bf9a9fbd40e has the same four rustfmt diffs from 2ab3845f78a; the PR has a real code conflict to clear. Drop that commit if main formats those lines first. Codex budget spent: its pass on the new head gets replies only, findings to Main first. ",
    "built": [
     {
@@ -37242,7 +37243,8 @@
       ]
      }
     }
-   ]
+   ],
+   "merged_by": "pr"
   },
   {
    "id": "eval-py-await-tool",
@@ -56185,13 +56187,13 @@
    "needs": [],
    "base": "c8c2d44b875b8c1404d38028dff1d6a5d5133b6c",
    "body": "bodies/computer-menu-subtree.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18222,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-menu-subtree",
    "host": "MacBook-Pro",
    "added": "2026-10-24T05:06:00Z",
-   "updated": "2026-11-16T21:12:32Z",
+   "updated": "2026-11-17T02:43:06Z",
    "note": "2026-10-29 (ComputerDocs): rebased onto main b0756921ed and pushed (e2b2d3a213); check + computer.test.ts (137 pass) on goliath; precheck has no timing FIX. Waits: its menu.items line in prompts/tools/computer.md sits next to lines #16925 (apps.open line) and #15282 (ax() line) change, so it conflicts with both until they merge; then rebase (pr-queue advance) and open.",
    "advanced": "2026-11-16T21:12:32Z",
    "built": [
@@ -56346,7 +56348,8 @@
     }
    ],
    "opened": "2026-11-05T19:41:06Z",
-   "readied": "2026-11-05T19:41:28Z"
+   "readied": "2026-11-05T19:41:28Z",
+   "merged_by": "pr"
   },
   {
    "id": "computer-window-wait",
@@ -59799,13 +59802,13 @@
    "needs": [],
    "base": "b9b3cc4d69962e492197178155dd95216cd9c21b",
    "body": "bodies/claude-refusal-strip-retry.md",
-   "state": "open",
+   "state": "merged",
    "pr": 17610,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/claude-refusal-strip-retry",
    "host": "MacBook-Pro",
    "added": "2026-10-31T21:44:06Z",
-   "updated": "2026-11-11T14:05:09Z",
+   "updated": "2026-11-17T02:43:06Z",
    "note": "",
    "built": [
     {
@@ -59982,7 +59985,8 @@
    ],
    "opened": "2026-10-31T21:57:20Z",
    "readied": "2026-10-31T21:57:58Z",
-   "advanced": "2026-11-11T14:05:09Z"
+   "advanced": "2026-11-11T14:05:09Z",
+   "merged_by": "pr"
   },
   {
    "id": "date-reminder-journal",
@@ -63698,13 +63702,13 @@
    "needs": [],
    "base": "c8c2d44b875b8c1404d38028dff1d6a5d5133b6c",
    "body": "bodies/wayland-pipewire-dlopen.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18353,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-pipewire-dlopen",
    "host": "MacBook-Pro",
    "added": "2026-11-03T05:43:31Z",
-   "updated": "2026-11-16T21:50:50Z",
+   "updated": "2026-11-17T02:43:06Z",
    "note": "",
    "advanced": "2026-11-16T21:50:50Z",
    "built": [
@@ -63859,7 +63863,8 @@
       ]
      }
     }
-   ]
+   ],
+   "merged_by": "pr"
   },
   {
    "id": "gtk4-atspi-bounds",
@@ -64344,13 +64349,13 @@
    "needs": [],
    "base": "c8c2d44b875b8c1404d38028dff1d6a5d5133b6c",
    "body": "bodies/wayland-ei-text.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18013,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-ei-text",
    "host": "MacBook-Pro",
    "added": "2026-11-03T06:23:33Z",
-   "updated": "2026-11-16T21:50:24Z",
+   "updated": "2026-11-17T02:43:06Z",
    "note": "Main, 2026-11-11: accepted pair with #18783 (one-line adjacent Cargo.toml dependency edit: #18783's x11rb render feature next to this PR's reis line); not requeued; whichever merges second takes the one-line rebase.",
    "advanced": "2026-11-16T21:50:24Z",
    "built": [
@@ -64569,7 +64574,8 @@
       ]
      }
     }
-   ]
+   ],
+   "merged_by": "pr"
   },
   {
    "id": "apps-open-tilde",
@@ -66458,13 +66464,13 @@
    "needs": [],
    "base": "c8c2d44b875b8c1404d38028dff1d6a5d5133b6c",
    "body": "bodies/anthropic-web-search.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18125,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/anthropic-web-search",
    "host": "MacBook-Pro",
    "added": "2026-11-04T20:05:54Z",
-   "updated": "2026-11-16T21:13:34Z",
+   "updated": "2026-11-17T02:43:06Z",
    "note": "",
    "built": [
     {
@@ -66625,7 +66631,8 @@
    ],
    "opened": "2026-11-04T20:19:47Z",
    "readied": "2026-11-04T20:20:13Z",
-   "advanced": "2026-11-16T21:13:34Z"
+   "advanced": "2026-11-16T21:13:34Z",
+   "merged_by": "pr"
   },
   {
    "id": "sec-edgar-document-urls",
@@ -70314,13 +70321,13 @@
    "needs": [],
    "base": "b590067ecda6712d796074b13d5877ec4538c53a",
    "body": "bodies/upload-stall-error.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18624,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/upload-stall-error",
    "host": "MacBook-Pro",
    "added": "2026-11-09T16:12:04Z",
-   "updated": "2026-11-16T21:05:32Z",
+   "updated": "2026-11-17T02:43:06Z",
    "note": "",
    "built": [
     {
@@ -70353,7 +70360,8 @@
    ],
    "opened": "2026-11-09T16:23:45Z",
    "readied": "2026-11-09T16:24:05Z",
-   "advanced": "2026-11-16T21:05:32Z"
+   "advanced": "2026-11-16T21:05:32Z",
+   "merged_by": "pr"
   },
   {
    "id": "relay-autoattach-shared",
@@ -73050,13 +73058,13 @@
    "needs": [],
    "base": "c8c2d44b875b8c1404d38028dff1d6a5d5133b6c",
    "body": "bodies/browser-core-first-use.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18786,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-core-first-use",
    "host": "MacBook-Pro",
    "added": "2026-11-10T18:04:09Z",
-   "updated": "2026-11-16T21:34:01Z",
+   "updated": "2026-11-17T02:43:06Z",
    "note": "",
    "advanced": "2026-11-16T21:34:01Z",
    "built": [
@@ -73498,7 +73506,8 @@
       ]
      }
     }
-   ]
+   ],
+   "merged_by": "pr"
   },
   {
    "id": "browser-honest-completion",
@@ -73903,13 +73912,13 @@
    ],
    "base": "c8c2d44b875b8c1404d38028dff1d6a5d5133b6c",
    "body": "bodies/subagent-browser-relay.md",
-   "state": "open",
+   "state": "merged",
    "pr": 18789,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/subagent-browser-relay",
    "host": "MacBook-Pro",
    "added": "2026-11-10T18:40:43Z",
-   "updated": "2026-11-16T21:13:55Z",
+   "updated": "2026-11-17T02:43:06Z",
    "note": "",
    "advanced": "2026-11-16T21:13:55Z",
    "built": [
@@ -74120,7 +74129,8 @@
       ]
      }
     }
-   ]
+   ],
+   "merged_by": "pr"
   },
   {
    "id": "devin-pin-31243",
@@ -93820,7 +93830,7 @@
    "branch": "will/macos-move-receipt-r2",
    "title": "fix(coding-agent): say once that a macOS background move gives no hover",
    "area": "computer",
-   "priority": "P2",
+   "priority": "P1",
    "needs": [],
    "base": "bf9a9fbd40e96766d528a9f19a603e53e8c0b5a1",
    "body": "bodies/macos-move-receipt-r2.md",
@@ -93830,7 +93840,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/move-receipt2",
    "host": "MacBook-Pro",
    "added": "2026-11-14T04:35:48Z",
-   "updated": "2026-11-17T02:32:40Z",
+   "updated": "2026-11-17T02:43:06Z",
    "note": "MoveReview (needs-changes at 2609fd1) answered in e11ccec: 1 refuse-aware ending naming the setting, test under refuse; 2 oxfmt applied; 3 wording held to observations ('have shown', 'may still be hidden', takeover only after a screenshot shows it); docs/tools/computer.md one line; CHANGELOG tightened; behaviour NOTE answered in body (no sample set: macOS-only line, benchmark lane re-measures). QueueTwenty 2026-11-14: model sample skipped as given (macOS-only line, benchmark lane re-measures those tasks); body first sentence made first-person.",
    "built": [
     {
@@ -94057,7 +94067,7 @@
    "branch": "will/macos-handback-typed",
    "title": "fix(natives): give the macOS key window back after a takeover while another program types",
    "area": "computer",
-   "priority": "P2",
+   "priority": "P1",
    "needs": [
     "macos-handback-key"
    ],
@@ -94069,7 +94079,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-handback-typed",
    "host": "MacBook-Pro",
    "added": "2026-11-14T11:57:04Z",
-   "updated": "2026-11-17T02:32:16Z",
+   "updated": "2026-11-17T02:43:06Z",
    "note": "QueueTwentySeven 2026-11-16: rebased locally onto main as 372f93ca576 (clean). HandBackTyped 2026-11-14. P2 (Main): only keystrokes posted by another process trigger it; real keyboard unaffected 10/10 in 9 cells; keys still arrive. Head 642130fe1f6, one commit on macos-handback-key 78c730db8e9; review TypedReview approve (should-fix 1 + nits addressed before measuring). rust-check: macOS and Linux recorded at 642130fe1f6 (diff 030d8e53d3); diff is macos/ only, so Windows is not required by the path rule. Merges cleanly with will/macos-window-order 37142503cd9 (git merge-tree, no conflict). Cmd-` hole on #19208's guard (2/40 both builds) is out of scope: repro in ~/tmp/oh-my-pi/HandBackTyped/HANDOFF.md.",
    "advanced": "2026-11-17T02:32:16Z",
    "built": [
