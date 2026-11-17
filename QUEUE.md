@@ -4,7 +4,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 
 **Opening:** not paused
 **Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-11-17 21:42Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 18, conflict-held 18, stacked 13, held 7, parked 3, open PRs 13, queued since the last plan 1; merged 381, closed 41
+**Counts:** openable now 18, conflict-held 18, stacked 13, held 7, parked 3, open PRs 13, queued since the last plan 2; merged 381, closed 41
 
 ## Openable now (18)
 
@@ -108,8 +108,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 | [#19586](https://github.com/can1357/oh-my-pi/pull/19586) | docs-reclaim-drift | docs(auth-gateway): describe reclaim moving warm pins back | auth | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/docs-reclaim-drift) |
 | [#19590](https://github.com/can1357/oh-my-pi/pull/19590) | broker-refresh-failure-loud | fix(ai): warn when a broker refresh failure outlasts the access token | broker | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-refresh-failure-loud) |
 
-## Queued since the last plan (1)
+## Queued since the last plan (2)
 
 | id | title | area | priority | age | branch |
 |---|---|---|---|---|---|
 | qt-filler-windows | fix(natives): list Qt windows built from a bare QWidget on Wayland | natives | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/qt-filler-windows) |
+| wayland-share-picker-deadline | fix(natives): wait for the Wayland screen-share picker until the call's deadline | natives | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-share-picker-deadline) |
