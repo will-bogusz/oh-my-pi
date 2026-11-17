@@ -45473,7 +45473,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/read-audio-transcripts",
    "host": "MacBook-Pro",
    "added": "2026-10-21T03:04:56Z",
-   "updated": "2026-11-11T14:10:55Z",
+   "updated": "2026-11-17T19:22:18Z",
    "note": "",
    "built": [
     {
@@ -45948,7 +45948,15 @@
    ],
    "opened": "2026-10-21T06:07:04Z",
    "readied": "2026-10-21T06:08:01Z",
-   "advanced": "2026-11-11T14:10:55Z"
+   "advanced": "2026-11-11T14:10:55Z",
+   "parked": {
+    "at": "2026-11-17T19:22:18Z",
+    "why": "Will, 2026-11-17: parked as draft, not maintained for now; revisit later",
+    "roots": [
+     16611
+    ],
+    "bundle": []
+   }
   },
   {
    "id": "read-heif-images",
