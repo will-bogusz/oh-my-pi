@@ -65742,9 +65742,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-walk-reads",
    "host": "MacBook-Pro",
    "added": "2026-11-03T09:05:24Z",
-   "updated": "2026-11-17T02:49:50Z",
+   "updated": "2026-11-17T03:19:46Z",
    "note": "LinuxGrabs, 2026-11-17: rebased onto main 1bdbf6d242d as one commit 6e14a2ffdba (local branch in ~/.omp/main-wt/oh-my-pi/atspi-walk-reads; fork branch still the old 35a9e15702d, not pushed), carrying #19036's bounded child reads (from trial 3f71f7f3588). Measured as 7c83575f996 on bf9a9fbd40e (same Rust diff) on a goliath box vs main; raw data ~/tmp/oh-my-pi/LinuxGrabs/bench*.jsonl. Linux rust-check recorded; Astra review: code ready, body placeholders since filled.",
-   "advanced": "2026-11-12T13:25:41Z",
+   "advanced": "2026-11-17T03:19:46Z",
    "line_loss_overrides": [
     {
      "at": "2026-11-12T13:25:34Z",
