@@ -10,6 +10,8 @@ The unscoped wait reads `document.body.innerText`, which leaves unrendered text 
 
 Shape of the fix: `pageTextMatches` in `queries.ts`, the page-side test Chromium, cmux and the Tern kit run for `waitForText`, finds no text when the element or a flat-tree ancestor (through open slots and shadow hosts) is `display: none`, else reads its `innerText`. Rendered text is unchanged, `opacity: 0` included. Semantic delta: a scoped wait on `title`, a `<script>` blob or a closed `<dialog>` no longer matches. Chromium runs the style check in the isolated world (a page replacing `getComputedStyle` still timed out on its hidden element), Tern in its kit's. Known limits: cmux has no isolated world, so a page replacing `getComputedStyle` can make hidden text count there; content slotted into a closed shadow root is not followed.
 
+On a Tern with native DOM reads a string still matches text under `visibility: hidden`; its native string wait is unchanged. The kit's RegExp path does not match that text.
+
 ## Testing
 
 - `bun test test/tools/browser-queries.test.ts`, "waits for scoped text only in an element the page renders", on real headless Chromium: scoped waits time out on a `display: none` element, its xpath `text()` node, a child of a hidden wrapper, an element in a hidden shadow slot, and one inside a hidden shadow host; a shown element and its `text()` node resolve; Tern's kit agrees. `browser-cmux-page-text.test.ts` checks cmux. With the source reverted both fail. `browser-tern-tab.test.ts` and `bun run check:ts` pass.
