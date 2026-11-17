@@ -72131,7 +72131,56 @@
    "added": "2026-11-10T15:45:44Z",
    "updated": "2026-11-17T02:58:01Z",
    "note": "",
-   "advanced": "2026-11-17T02:58:01Z"
+   "advanced": "2026-11-17T02:58:01Z",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-17T03:26:36Z",
+     "reason": "BrowserRebase's rebase onto 1bdbf6d, Main-approved combined form (~/tmp/oh-my-pi/BrowserRebase/combined-browser-wait-predicate.md)",
+     "old": "6028dca5ced8aa23ddf29656873311f756935e84",
+     "new": "ea04e0f0970970e3c0601b74b5f26aad423dd85c",
+     "dropped": {
+      "docs/tools/browser.md": [
+       "- Waiting: `waitFor(selector, { timeout? })`, `waitForSelector(selector, { timeout?, visible?, hidden? })`, `waitForUrl(stringOrRegExp, { timeout? })`, `waitForText(text, { timeout?, selector?, exact? })`, `waitForFunction(fnOrExpression, { timeout?, polling? }, ...args)`.",
+       "- `waitForFunction` evaluates a function (called with `args`) or a string holding an expression or a function in the page's main world, where `tab.evaluate` runs and page globals live (`frame.evaluate` uses an isolated world), every `polling` ms (100 by default; 200 on cmux) until it returns a truthy value, and resolves with that value, or with `true` when the value cannot be copied out of the page (a node, a function, a cyclic object). It polls on a timer, so it also runs in background tabs, and a predicate that throws fails the wait; on Chromium tabs a navigation in between is waited out. A function cannot see the cell's variables. `waitFor` and `waitForSelector` given a function or a number of milliseconds say which of these to use instead."
+      ],
+      "packages/coding-agent/src/prompts/tools/browser.md": [
+       "  - Waiting: `waitFor`, `waitForSelector`, `waitForUrl`, `waitForText`, `waitForFunction`. They resolve as soon as the condition holds; after a click or navigation, wait for the expected text, URL, or selector instead of a fixed sleep.",
+       "  - Frames: `frames()` lists the frame tree; `frame(selectorOrNameOrUrl)` returns a scoped handle with `click`, `fill`, `type`, `press`, `text`, `html`, `value`, `attr`, `count`, `isVisible`, `ariaSnapshot`, `evaluate`, `waitFor`, `waitForSelector`, `waitForFunction`, and `screenshot`."
+      ],
+      "packages/coding-agent/src/tools/browser/aria/aria-snapshot.ts": [
+       "\t\t\t`${call}(fn) waits for a selector string, not a function. To wait until a condition holds, use ${owner}.waitForFunction(fn, { timeout }).`,",
+       "\t\t\t`${call}(${selector}) waits for a selector string, not a number of milliseconds. Wait for what should change instead: ${owner}.waitForSelector(selector) or ${owner}.waitForFunction(fn), with { timeout } in ms.`,"
+      ],
+      "packages/coding-agent/src/tools/browser/cmux/cmux-tab.ts": [
+       "import { DEFAULT_STYLE_PROPERTIES, isFunctionSource } from \"../queries\";",
+       "\t/** Poll a page predicate until it is truthy; a string holding a function is called with `args`. */",
+       "\t\tconst script = typeof fn === \"string\" && isFunctionSource(fn) ? `(${fn}\\n)(...${JSON.stringify(args)})` : fn;",
+       "\t\t\tconst value =",
+       "\t\t\t\ttypeof script === \"string\" ? await this.#evalScript<unknown>(script) : await this.evaluate(script, ...args);"
+      ],
+      "packages/coding-agent/src/tools/browser/frames.ts": [
+       "import { type AriaSnapshotOptions, assertWaitSelector, buildAriaSnapshotScript } from \"./aria/aria-snapshot\";"
+      ],
+      "packages/coding-agent/src/tools/browser/queries.ts": [
+       "\tconst script = `(async () => {",
+       "\tconst value = await ${call};",
+       "\tif (typeof value !== \"object\" && typeof value !== \"function\") return { held: true, value };",
+       "})()`;",
+       "\t\t\tlet answer: { held: boolean; value?: unknown };"
+      ],
+      "packages/coding-agent/src/tools/browser/tern/tern-tab.ts": [
+       "import { DEFAULT_STYLE_PROPERTIES, isFunctionSource } from \"../queries\";",
+       "\t\tconst callSource = typeof fn === \"string\" && isFunctionSource(fn);",
+       "\t\t\tconst value = await this.#evalUser(label, fn, args, frame, callSource);"
+      ],
+      "packages/coding-agent/test/tools/browser-tern-tab.test.ts": [
+       "\t\t// A string holding a function is sent as the function, called with the extra arguments.",
+       "\t\tawait rejectionOf(frame.waitForFunction(\"(n) => window.paid === n\", { timeout: 50, polling: 10 }, 7));",
+       "\t\texpect(fake.requests[sent]?.op).toMatchObject({ function: \"(n) => window.paid === n\", args: [7] });"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "computer-input-lease-wait",
