@@ -1,8 +1,6 @@
 ## What
 
-Typing into a field on a Safari or WKWebView page whose window sat behind my own app fell back to a takeover that failed, or typed only by bringing Safari to the front, so OMP now types it in the background on the field's own focus claim and reads the field back to confirm the text landed.
-
-`el.type` into a text field of a Safari or WKWebView page covered by the person's own window reached the field 15 of 130 times on `main`, each through a takeover that brought Safari forward, and 130 of 130 with this PR, all but one in the background, with none of a typing person's keys moved or lost.
+Typing into a field on a Safari or WKWebView page whose window sat behind my own app fell back to a takeover that failed, or typed only by bringing Safari forward. OMP now types it in the background on the field's own focus claim and reads the field back: with the page under a person's window, `el.type` reached the field 130 of 130 times (all but one in the background) against 15 of 130 on `main`, none of their keys moved or lost.
 
 | `el.type` into a page field, window covered by the person's app | `main` | this PR |
 |---|---|---|
@@ -16,21 +14,28 @@ Typing into a field on a Safari or WKWebView page whose window sat behind my own
 
 ## Why
 
-`el.type` sends keys only once the application names the element as focused. A WebKit view in an app that is not active names none at all, even after `AXFocused` moved the page's focus to the field, so the background route always refused and the takeover failed the same check (Safari typed only once brought forward). Keys sent to the window do reach the field: a click then `win.type` already worked.
+`el.type` sends keys only once the application names the element as focused. A WebKit view in an app that is not active names none, even after `AXFocused` moved the page's focus to the field. Keys sent to the window do reach the field: a click then `win.type` already worked.
 
-- **When the field's own claim counts.** Only when the application names no element through the whole 250 ms focus wait, and only for web content reporting `AXFocused` itself. An app naming another element (Chrome its web area) or not answering still refuses.
-- **Read-back is the proof.** The text is read back for up to 1 s with AX insertion's verdict (`text_readback`); when the field does not show it, cannot be read, or the text holds Return or Tab, the call succeeds with "type sent the text but could not confirm it arrived: …" (`control::report_text_unconfirmed`, as on Windows). A secure field's value is never quoted.
+- **When the field's own claim counts.** Only when the app's last answer in the 250 ms focus wait is that it names no element (an earlier answer is superseded: the focus request moves focus during the wait), and only for web content reporting `AXFocused` itself. An app whose last answer names another element (Chrome its web area) or does not come still refuses.
+- **Read-back is the proof.** The text is read back with AX insertion's verdict (`text_readback`), each read given what is left of 1 s. A field that does not show it by then or cannot be read, text holding Return or Tab, or a cancel first gives "type sent the text but could not confirm it arrived: …" (`control::report_text_unconfirmed`, as on Windows). A secure field's value is never quoted.
 - **Chords unchanged:** `el.press` has no read-back, so it still needs the app to name the element.
 
-It needs the rule counting keys moved back to the person's app as theirs: with the macOS takeover pause also in and without that rule, 4 of 10 Safari calls with a person typing stopped with `UserIntervened` (0 of 10 with it).
+It needs the rule counting keys moved back to the person's app as theirs: without it, 4 of 10 Safari calls with a person typing stopped with `UserIntervened` (0 of 10 with it).
 
-Limits: the claim is taken at the call's start, so text a page moves on as you type (split code inputs) is reported unconfirmed; after typing into a page's password field, WebKit keeps macOS secure input on while that field holds the page's focus, so OMP's Escape stop and typing detection see no keys until focus leaves it.
+| With the input lease held | Bounded by |
+|---|---|
+| Self-focus proof and its walk up to the web area (walked only when `AXFocused` is true) | the 250 ms focus wait: each request gets the time left, cancellation checked between requests; the app's own focus read keeps its timeout, and an AX call in flight is not cut short |
+| Read-back after the last key | what is left of 1 s per request; a cancel ends it, reported unconfirmed |
+| Two reads of the field before the first key | the element's 2 s timeout each |
+| The keys | the text's length |
 
-Review first: `macos/ax.rs` (`focus_proof`, `web_self_focused`, `TypedReadback`), then `macos/input.rs` (`keys_after_focus`, `window_type`).
+So the route as a whole has no fixed bound. Limits: the claim is taken at the call's start, so text a page moves on as you type (split code inputs) is reported unconfirmed; after typing into a page's password field, WebKit keeps macOS secure input on while that field holds the page's focus, so OMP's Escape stop and typing detection see no keys until focus leaves it.
+
+Review first: `macos/ax.rs` (`holds_keyboard_focus`, `focus_proof`, `TypedReadback`), then `macos/input.rs` (`keys_after_focus`, `window_type`).
 
 ## Testing
 
-On a macOS 26.5 VM, the kit's WKWebView app and the same page in Safari, `main` (`fe194ec2f12`) against this change. A simulated person types into their own front window through the VM's VNC keyboard, scored from their window and the page's key log; field cells run with nobody typing, scored from the page's state.
+On a macOS 26.5 VM, the kit's WKWebView app and the same page in Safari, `main` (`fe194ec2f12`) against this change at `521fdb3ad7b`; a simulated person types into their own front window through the VM's VNC keyboard.
 
 | Unchanged, 10 calls per cell | `main` | this PR |
 |---|---|---|
@@ -38,7 +43,7 @@ On a macOS 26.5 VM, the kit's WKWebView app and the same page in Safari, `main` 
 | Person typing: `el.type` on Electron | 10 of 10, 831 ms | 10 of 10, 833 ms (a first run: 2.2 s, one `InputFailed` as focus left the window; not seen again) |
 | App merely not front: `type`, click then `type`, `cmd+k` on AppKit, Chrome, Safari, WKWebView | 10 of 10 each; Safari's `type` 5 times through a takeover | 10 of 10 each, all in the background |
 
-Seven mutations of the rule each fail at least one new test in `desktop::macos::ax::tests` and `desktop::macos::input::tests`. Full `pi-natives` lib tests pass on macOS (1001) and the desktop tests on Linux (308).
+The deadlines in the table above came after those runs; a field that answers in time gets the same reads and waits (from the code, not re-measured). Seven mutations of the rule each fail a new test in `ax::tests` or `input::tests`, which also pin the read-back's cut-off and cancel and that the walk waits for `AXFocused`. `cargo test -p pi-natives --lib -- desktop::macos desktop::tests` passes on macOS (362).
 
 ---
 
