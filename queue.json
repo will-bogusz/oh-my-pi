@@ -94059,13 +94059,13 @@
    ],
    "base": "bf9a9fbd40e96766d528a9f19a603e53e8c0b5a1",
    "body": "bodies/macos-handback-typed.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19504,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-handback-typed",
    "host": "MacBook-Pro",
    "added": "2026-11-14T11:57:04Z",
-   "updated": "2026-11-17T01:41:09Z",
+   "updated": "2026-11-17T01:43:48Z",
    "note": "QueueTwentySeven 2026-11-16: rebased locally onto main as 372f93ca576 (clean). HandBackTyped 2026-11-14. P2 (Main): only keystrokes posted by another process trigger it; real keyboard unaffected 10/10 in 9 cells; keys still arrive. Head 642130fe1f6, one commit on macos-handback-key 78c730db8e9; review TypedReview approve (should-fix 1 + nits addressed before measuring). rust-check: macOS and Linux recorded at 642130fe1f6 (diff 030d8e53d3); diff is macos/ only, so Windows is not required by the path rule. Merges cleanly with will/macos-window-order 37142503cd9 (git merge-tree, no conflict). Cmd-` hole on #19208's guard (2/40 both builds) is out of scope: repro in ~/tmp/oh-my-pi/HandBackTyped/HANDOFF.md.",
    "advanced": "2026-11-17T01:24:32Z",
    "built": [
@@ -94132,7 +94132,8 @@
      "at": "2026-11-17T01:41:08Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-17T01:43:48Z"
   },
   {
    "id": "macos-drag-no-change-note",

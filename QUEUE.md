@@ -4,9 +4,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-17 01:40Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 5, conflict-held 21, stacked 16, held 12, parked 2, open PRs 15; merged 366, closed 37
+**Counts:** openable now 4, conflict-held 21, stacked 16, held 12, parked 2, open PRs 16; merged 366, closed 37
 
-## Openable now (5)
+## Openable now (4)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
@@ -14,7 +14,6 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 | macos-window-order | fix(natives): put the user's key window back in front of a macOS target after background input and takeover | computer | P1 | 3d | open; accepted pair with #16553: HandBack, 2026-11-14: textual conflict only, in with_background_watch and WindowServerDesktop (skylight.rs). Combined form keeps both sides: #16553's 'let placement = match (clicks, previous.pid) {Tap\|HitTest}' first, then this entry's 'let order = previous.pid.zip(capture::stacked_windows()).and_then(\|(user, stack)\| window_order::EntryOrder::new(pid, user, previous_key, &stack));' (read before anything is sent; placement sends nothing); WindowServerDesktop { spi, previous, key: previous_key, placement, stopped: &stopped, order: RefCell::new(order), raises: Cell::new(0) }; struct fields key, placement, stopped, order, raises. No semantic overlap: placement feeds SwitchSignals, order feeds keep_order. | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-window-order) |
 | macos-move-receipt | fix(coding-agent): say what a macOS background move did | computer | P2 | 2d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-move-receipt) |
 | macos-key-read-settled | fix(natives): read a macOS popup after the option its typed letters choose | computer | P1 | 2d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-key-read-settled) |
-| macos-handback-typed | fix(natives): give the macOS key window back after a takeover while another program types | computer | P2 | 2d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-handback-typed) |
 
 ## Conflict-held (21)
 
@@ -87,7 +86,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 | [#15128](https://github.com/can1357/oh-my-pi/pull/15128) | reset-restore-longest-wait | feat(coding-agent): restore the blocked account whose reset buys the most time | broker | P2 | 5d | Will, 2026-11-02: account broker redesign, on hold since 2026-11-02 | not checked or kept fresh | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-restore-longest-wait) |
 | [#15130](https://github.com/can1357/oh-my-pi/pull/15130) | reset-before-reserve | feat(coding-agent): opt in to spending a blocked account's saved reset before a reserve-only backup | broker | P2 | 5d | Will, 2026-11-02: account broker redesign, on hold since 2026-11-02 | not checked or kept fresh | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-before-reserve) |
 
-## Open PRs (15)
+## Open PRs (16)
 
 | PR | id | title | area | rank | open | plan | branch |
 |---|---|---|---|---|---|---|---|
@@ -106,3 +105,4 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 | [#18789](https://github.com/can1357/oh-my-pi/pull/18789) | subagent-browser-relay | feat(coding-agent): keep subagents' browser tabs out of the user's Chrome and Tern pane unless asked | browser | P2 | 6d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/subagent-browser-relay) |
 | [#19100](https://github.com/can1357/oh-my-pi/pull/19100) | computer-run-failure-output | fix(computer): retain output and screenshots when a run fails | computer | P1 | 4d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-run-failure-output) |
 | [#19195](https://github.com/can1357/oh-my-pi/pull/19195) | macos-drag-confirm | fix(natives): stop macOS background drags reporting moves that did not happen | computer | P1 | 3d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-drag-confirm) |
+| [#19504](https://github.com/can1357/oh-my-pi/pull/19504) | macos-handback-typed | fix(natives): give the macOS key window back after a takeover while another program types | computer | P2 | 2d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-handback-typed) |
