@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17 06:04Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17 06:14Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 3 of 8 ready events used in the hour before the last plan, 5 left (plan of 2026-11-17 05:15Z on goliath; groups below are from it, states from the manifest)
@@ -82,7 +82,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 
 | PR | id | title | area | rank | open | plan | branch |
 |---|---|---|---|---|---|---|---|
-| [#16611](https://github.com/can1357/oh-my-pi/pull/16611) | read-audio-transcripts | feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio | catalog | P2 | 26d | rebase | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-audio-transcripts) |
+| [#16611](https://github.com/can1357/oh-my-pi/pull/16611) | read-audio-transcripts | feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio | catalog | P2 | 27d | rebase | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-audio-transcripts) |
 | [#17897](https://github.com/can1357/oh-my-pi/pull/17897) | iphone-mirror-key-gap | perf(natives): type on iPhone Mirroring twice as fast | computer | P2 | 14d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-key-gap) |
 | [#17756](https://github.com/can1357/oh-my-pi/pull/17756) | iphone-mirror-pointer | fix(natives): keep background iPhone Mirroring taps reaching the phone after a takeover tap | computer | P1 | 15d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-pointer) |
 | [#19521](https://github.com/can1357/oh-my-pi/pull/19521) | atspi-walk-reads | fix(natives): read each AT-SPI element in two concurrent rounds | computer | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-walk-reads) |
@@ -92,7 +92,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 | [#19518](https://github.com/can1357/oh-my-pi/pull/19518) | browser-select-objects | feat(browser): accept explicit dropdown option selectors | browser | P1 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-select-objects) |
 | [#19519](https://github.com/can1357/oh-my-pi/pull/19519) | x11-keysym-remap | fix(natives): type characters outside the X11 keymap through temporary keycodes | computer | P1 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-keysym-remap) |
 | [#19195](https://github.com/can1357/oh-my-pi/pull/19195) | macos-drag-confirm | fix(natives): stop macOS background drags reporting moves that did not happen | computer | P1 | 3d | keep; accepted pair with #19516: Main, 2026-11-17: adjacent thread_local statics in desktop/control.rs; combined = both statics (DRAG_NOTE then INPUT_HELD), then input_held() unchanged | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-drag-confirm) |
-| [#19509](https://github.com/can1357/oh-my-pi/pull/19509) | macos-move-receipt-r2 | fix(coding-agent): say once that a macOS background move gives no hover | computer | P1 | 3h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-move-receipt-r2) |
+| [#19509](https://github.com/can1357/oh-my-pi/pull/19509) | macos-move-receipt-r2 | fix(coding-agent): say once that a macOS background move gives no hover | computer | P1 | 4h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-move-receipt-r2) |
 | [#19516](https://github.com/can1357/oh-my-pi/pull/19516) | macos-key-read-settled | fix(natives): read a macOS popup after the option its typed letters choose | computer | P1 | 2h | keep; accepted pair with #19195: Main, 2026-11-17: adjacent thread_local statics in desktop/control.rs; combined = both statics (DRAG_NOTE then INPUT_HELD), then input_held() unchanged | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-key-read-settled) |
 | [#19504](https://github.com/can1357/oh-my-pi/pull/19504) | macos-handback-typed | fix(natives): give the macOS key window back after a takeover while another program types | computer | P1 | 4h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-handback-typed) |
 | [#19515](https://github.com/can1357/oh-my-pi/pull/19515) | macos-reroute-not-a-press | fix(natives): count keys moved back to a macOS user's app as theirs | computer | P0 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-reroute-not-a-press) |
