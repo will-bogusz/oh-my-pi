@@ -80043,7 +80043,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/covered-fill",
    "host": "MacBook-Pro",
    "added": "2026-11-11T02:11:47Z",
-   "updated": "2026-11-17T05:21:32Z",
+   "updated": "2026-11-17T05:21:55Z",
    "note": "",
    "advanced": "2026-11-17T03:23:25Z",
    "line_loss_overrides": [
@@ -80106,7 +80106,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-11-17T05:21:32Z"
+   "opened": "2026-11-17T05:21:32Z",
+   "readied": "2026-11-17T05:21:54Z"
   },
   {
    "id": "atspi-text-first",
