@@ -29,9 +29,9 @@ A GTK 3 `TreeView` of 100,000 rows × 2 columns, same guest, three alternating p
 
 Re-run on Linux at `630392e7f0f`: `cargo test -p pi-natives --lib desktop::linux` (133 passed; 35 ignored that each need their own X server), `cargo test -p pi-natives --lib desktop::ax` (48 passed), and Linux `rust-check` passed.
 
-`an_element_is_read_in_two_rounds_and_only_on_its_interfaces` holds peer-to-peer D-Bus replies until every expected call arrives, and the reader signals each time it waits, so a read that waits on one reply mid-round fails the test instead of hanging. It requires `ChildCount` in round one and the bounded `GetChildAtIndex` in round two, and checks skipped interfaces and the unknown-interface fallback.
+`an_element_is_read_in_two_rounds_and_only_on_its_interfaces` holds D-Bus replies until a round's calls all arrive; the reader signals when it waits, so a read waiting mid-round fails rather than hangs. It requires `ChildCount` in round one and the bounded `GetChildAtIndex` in round two, and checks skipped interfaces and the unknown-interface fallback.
 
-Not run: `bun check` (no TypeScript changes).
+Not run: `bun check` (no TypeScript change).
 
 ---
 
