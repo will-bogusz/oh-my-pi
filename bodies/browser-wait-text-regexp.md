@@ -2,7 +2,7 @@
 
 I made `tab.waitForText` accept a `RegExp` the way `tab.waitForUrl` already does, because agents pass one and got a JavaScript `TypeError` instead of a wait.
 
-`tab.waitForText(/Total: \$\d+/)` now waits until the pattern matches the page's trimmed text (or the `selector` element's) on Chromium, Tern and cmux. A string waits as before, and `exact` still applies to strings only. On `main` a pattern threw `TypeError: Argument to String.prototype.includes cannot be a RegExp` on Chromium and cmux, and on Tern it reached the page as `{}` and failed there. A timed-out pattern is named by its source: `tab.waitForText(/never appears/g) timed out after 150ms`, where `main` wrote `tab.waitForText({})`.
+`tab.waitForText(/Total: \$\d+/)` waits for the pattern in the page's trimmed text (or the `selector` element's) on Chromium, Tern and cmux. Strings behave as before; `exact` is string-only. On `main`, a pattern throws `TypeError: Argument to String.prototype.includes cannot be a RegExp` on Chromium and cmux, or reaches Tern as `{}`. Timeouts now name the pattern instead of `{}`.
 
 ## Why
 
