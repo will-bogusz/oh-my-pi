@@ -8,7 +8,7 @@ I made a scoped `waitForText` ignore an element the page does not render, becaus
 
 The unscoped wait reads `document.body.innerText`, which leaves unrendered text out; the scoped one read the element's `innerText`, which for an unrendered element returns `textContent`. A probe found this; no recorded run used the scoped form.
 
-Shape of the fix: `pageTextMatches` in `queries.ts`, the page-side test Chromium, cmux and the Tern kit run for `waitForText`, finds no text when the element or a flat-tree ancestor (through open slots and shadow hosts) is `display: none`, else reads its `innerText`. Rendered text is unchanged, `opacity: 0` included. Semantic delta: a scoped wait on `title`, a `<script>` blob or a closed `<dialog>` no longer matches. Chromium runs the style check in the isolated world (a page replacing `getComputedStyle` still timed out on its hidden element), Tern in its kit's. Known limits: cmux has no isolated world, so a page replacing `getComputedStyle` can make hidden text count there; content slotted into a closed shadow root is not followed.
+`pageTextMatches` serves Chromium, cmux and the Tern kit: a scoped element or flat-tree ancestor (through open slots and shadow hosts) with `display: none` has no text; otherwise it reads `innerText`. `opacity: 0` is unchanged. A scoped wait on `title`, `<script>` or closed `<dialog>` no longer matches. Chromium and Tern's kit check styles in an isolated world; cmux has none, so page scripts can tamper with that check. Content slotted into a closed shadow root is not followed.
 
 On a Tern with native DOM reads a string still matches text under `visibility: hidden`; its native string wait is unchanged. The kit's RegExp path does not match that text.
 
