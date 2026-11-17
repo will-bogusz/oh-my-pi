@@ -107830,7 +107830,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-17T21:08:56.446161Z",
+  "at": "2026-11-17T21:10:19.214646Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -108440,6 +108440,23 @@
     "created": "2026-11-17T20:29:55Z"
    },
    {
+    "id": "wayland-window-crop-clip",
+    "label": "wayland-window-crop-clip",
+    "number": null,
+    "state": "queued",
+    "area": "natives",
+    "priority": "P2",
+    "title": "fix(natives): capture the visible part of a Linux window partly off its monitor",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-17T21:09:14Z"
+   },
+   {
     "id": "win-ax-states",
     "label": "win-ax-states",
     "number": null,
@@ -108454,6 +108471,7 @@
      "conflicts with #19519 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19532 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with wayland-input-refusal in crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with wayland-window-crop-clip in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs"
     ],
     "note": "",
@@ -108464,7 +108482,8 @@
      "#19516",
      "#19519",
      "#19532",
-     "wayland-input-refusal"
+     "wayland-input-refusal",
+     "wayland-window-crop-clip"
     ],
     "needs": [],
     "created": "2026-11-11T10:16:04Z"
@@ -108628,6 +108647,7 @@
      "conflicts with #19516 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #19532 in docs/computer-use.md",
      "conflicts with #19531 in docs/computer-use.md, docs/tools/computer.md",
+     "conflicts with wayland-window-crop-clip in docs/computer-use.md",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -108640,7 +108660,8 @@
      "#19504",
      "#19516",
      "#19532",
-     "#19531"
+     "#19531",
+     "wayland-window-crop-clip"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -108665,6 +108686,7 @@
      "conflicts with #19532 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with wayland-input-refusal in crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with wayland-window-crop-clip in crates/pi-natives/src/desktop/mod.rs",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md"
     ],
@@ -108678,7 +108700,8 @@
      "#19519",
      "#19532",
      "#19531",
-     "wayland-input-refusal"
+     "wayland-input-refusal",
+     "wayland-window-crop-clip"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -108704,6 +108727,7 @@
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with wayland-display-count in crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/types.rs, packages/natives/native/index.d.ts",
      "conflicts with wayland-input-refusal in crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with wayland-window-crop-clip in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
@@ -108717,7 +108741,8 @@
      "#19532",
      "#19531",
      "wayland-display-count",
-     "wayland-input-refusal"
+     "wayland-input-refusal",
+     "wayland-window-crop-clip"
     ],
     "needs": [],
     "created": "2026-11-11T00:21:12Z"
@@ -108850,7 +108875,7 @@
     "title": "fix(ai): retry the initial auth-broker snapshot through a broker restart",
     "action": "open",
     "reasons": [],
-    "note": "",
+    "note": "tests-over: BrokerClientStartupRetry, 2026-11-17: four distinct branches (retry succeeds; non-transient answer fails at once; retry off for runtime switch; deadline cancels an in-flight request), each failing or pinning main's outcome; over by 8 lines of imports and server setup",
     "over": [],
     "paired": [],
     "blocked_by": [],
@@ -108935,7 +108960,7 @@
     "area": "catalog",
     "priority": null,
     "title": "fix(catalog): carry Devin's measured image limits",
-    "action": "open",
+    "action": "next-hour",
     "reasons": [],
     "note": "",
     "over": [],
