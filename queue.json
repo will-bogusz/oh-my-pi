@@ -97162,8 +97162,82 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-window-crop-clip",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:09:14Z",
-   "updated": "2026-11-17T21:09:14Z",
-   "note": ""
+   "updated": "2026-11-17T21:56:48Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#17756",
+     "code": "ef68b761dcc0bbf3f11d2fc6c951acdade939113",
+     "with_code": "deb21ab1d8736576bddf8ff817335896e1a392cf",
+     "tip": "7bdc7d9c68b3a24508098f9131ee1fbe9a01f8db",
+     "with_tip": "ec62cc55e7f96d135637ac73735fd3c810e411f2",
+     "at": "2026-11-17T21:56:42Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19195",
+     "code": "ef68b761dcc0bbf3f11d2fc6c951acdade939113",
+     "with_code": "a6537b230b0aca2d167690b2dd7419dc03c04fb0",
+     "tip": "7bdc7d9c68b3a24508098f9131ee1fbe9a01f8db",
+     "with_tip": "4deabb0e95fcf29a451415b62795427a4173fa6a",
+     "at": "2026-11-17T21:56:47Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#17897",
+     "code": "ef68b761dcc0bbf3f11d2fc6c951acdade939113",
+     "with_code": "a7c281050ab1f367593f3fb318f816ec27be20f4",
+     "tip": "7bdc7d9c68b3a24508098f9131ee1fbe9a01f8db",
+     "with_tip": "1bd1fbbdc15c7667bbf647612ea3c71199c85497",
+     "at": "2026-11-17T21:56:47Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19504",
+     "code": "ef68b761dcc0bbf3f11d2fc6c951acdade939113",
+     "with_code": "e41fbf6b9a34a8290bfb3b95be76b15e0fbe30da",
+     "tip": "7bdc7d9c68b3a24508098f9131ee1fbe9a01f8db",
+     "with_tip": "e01f4c4530a38eb4f259737574dd9557dac1ab72",
+     "at": "2026-11-17T21:56:47Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19516",
+     "code": "ef68b761dcc0bbf3f11d2fc6c951acdade939113",
+     "with_code": "e0d04259b3a1b34c6b652badd5104175329b8566",
+     "tip": "7bdc7d9c68b3a24508098f9131ee1fbe9a01f8db",
+     "with_tip": "ff8424bcab2403c9fa8f8b026dc99d6b99ac7fb1",
+     "at": "2026-11-17T21:56:47Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19519",
+     "code": "ef68b761dcc0bbf3f11d2fc6c951acdade939113",
+     "with_code": "10f2f0166cf201563e33349758382bd628db9ba6",
+     "tip": "7bdc7d9c68b3a24508098f9131ee1fbe9a01f8db",
+     "with_tip": "11100c5f055edcd3362cfec4b0f0effcb553e81a",
+     "at": "2026-11-17T21:56:47Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19532",
+     "code": "ef68b761dcc0bbf3f11d2fc6c951acdade939113",
+     "with_code": "20fb8b9ff954b92f5cafa67a2bd140ea7b65619d",
+     "tip": "7bdc7d9c68b3a24508098f9131ee1fbe9a01f8db",
+     "with_tip": "d92ae5387e1ba7dc344d5e8f5b0d6382e70a42f9",
+     "at": "2026-11-17T21:56:47Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19531",
+     "code": "ef68b761dcc0bbf3f11d2fc6c951acdade939113",
+     "with_code": "b29b5594e7a215aba02e35a191b07a5f66090d4d",
+     "tip": "7bdc7d9c68b3a24508098f9131ee1fbe9a01f8db",
+     "with_tip": "7bab9f11e73eddfda911430ba197267509ae95f0",
+     "at": "2026-11-17T21:56:48Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "reserve-per-model-family",
