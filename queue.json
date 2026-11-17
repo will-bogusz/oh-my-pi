@@ -94065,9 +94065,74 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-handback-typed",
    "host": "MacBook-Pro",
    "added": "2026-11-14T11:57:04Z",
-   "updated": "2026-11-17T01:24:32Z",
+   "updated": "2026-11-17T01:41:09Z",
    "note": "QueueTwentySeven 2026-11-16: rebased locally onto main as 372f93ca576 (clean). HandBackTyped 2026-11-14. P2 (Main): only keystrokes posted by another process trigger it; real keyboard unaffected 10/10 in 9 cells; keys still arrive. Head 642130fe1f6, one commit on macos-handback-key 78c730db8e9; review TypedReview approve (should-fix 1 + nits addressed before measuring). rust-check: macOS and Linux recorded at 642130fe1f6 (diff 030d8e53d3); diff is macos/ only, so Windows is not required by the path rule. Merges cleanly with will/macos-window-order 37142503cd9 (git merge-tree, no conflict). Cmd-` hole on #19208's guard (2/40 both builds) is out of scope: repro in ~/tmp/oh-my-pi/HandBackTyped/HANDOFF.md.",
-   "advanced": "2026-11-17T01:24:32Z"
+   "advanced": "2026-11-17T01:24:32Z",
+   "built": [
+    {
+     "with": "#16553",
+     "code": "82fd33d07d86e97c81038ccb3a9b3326205821e3",
+     "with_code": "409694d5dcccf71902ea78a7dd988025c022f741",
+     "tip": "4d1fdf3637b3357526ad162980090856cf00ab49",
+     "with_tip": "709f0e7e03b44e4017e8a5f6c88635ab4d04becf",
+     "at": "2026-11-17T01:41:03Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#17756",
+     "code": "82fd33d07d86e97c81038ccb3a9b3326205821e3",
+     "with_code": "00b33a7b015bc7730a8a6926657f2a3f49039187",
+     "tip": "4d1fdf3637b3357526ad162980090856cf00ab49",
+     "with_tip": "5fa26ba5481db59442c67c224e6eb42cf2131d83",
+     "at": "2026-11-17T01:41:08Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19195",
+     "code": "82fd33d07d86e97c81038ccb3a9b3326205821e3",
+     "with_code": "9cb775e8f735e281467b990231772a3c6b7fa35b",
+     "tip": "4d1fdf3637b3357526ad162980090856cf00ab49",
+     "with_tip": "008596298a587cdeb99733695dfa5ec5a06fdbfa",
+     "at": "2026-11-17T01:41:08Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#18353",
+     "code": "82fd33d07d86e97c81038ccb3a9b3326205821e3",
+     "with_code": "4304b41e58fa46c6374b9ce7d7908ded9c3a86da",
+     "tip": "4d1fdf3637b3357526ad162980090856cf00ab49",
+     "with_tip": "23b965e05596254b375236fc489abcd964b15450",
+     "at": "2026-11-17T01:41:08Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#17897",
+     "code": "82fd33d07d86e97c81038ccb3a9b3326205821e3",
+     "with_code": "2bbb547591ae156ccac7af195b43202e415d1bd2",
+     "tip": "4d1fdf3637b3357526ad162980090856cf00ab49",
+     "with_tip": "1630d69fc76fc75c713722e3bb2742c2db302bab",
+     "at": "2026-11-17T01:41:08Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#18925",
+     "code": "82fd33d07d86e97c81038ccb3a9b3326205821e3",
+     "with_code": "1dfc94a799f720d006701ad4a030fea1c7fa6623",
+     "tip": "4d1fdf3637b3357526ad162980090856cf00ab49",
+     "with_tip": "7051fe7a9be208366b77a3304a7042c87bfcbf76",
+     "at": "2026-11-17T01:41:08Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#18013",
+     "code": "82fd33d07d86e97c81038ccb3a9b3326205821e3",
+     "with_code": "9cd638e0c21435bad5026a484e0fabd42105f1a8",
+     "tip": "4d1fdf3637b3357526ad162980090856cf00ab49",
+     "with_tip": "3ec50caa88f95599b99951b701bcffdd0dbe3c24",
+     "at": "2026-11-17T01:41:08Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "macos-drag-no-change-note",
