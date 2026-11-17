@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17 01:45Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17 01:46Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-17 01:40Z on goliath; groups below are from it, states from the manifest)
@@ -110,4 +110,4 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 
 | id | title | area | priority | age | branch |
 |---|---|---|---|---|---|
-| macos-move-receipt-r2 | fix(coding-agent): say what a macOS background move did | computer | P2 | 2d | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-move-receipt-r2) |
+| macos-move-receipt-r2 | fix(coding-agent): say once that a macOS background move gives no hover | computer | P2 | 2d | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-move-receipt-r2) |
