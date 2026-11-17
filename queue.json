@@ -96813,7 +96813,7 @@
    "branch": "will/reset-spend-log",
    "title": "feat(coding-agent): log every saved-reset spend attempt at info",
    "area": "coding-agent",
-   "priority": null,
+   "priority": "P2",
    "needs": [],
    "base": "1abafe8e71cae521f995e2203055ce840b859da4",
    "body": "bodies/reset-spend-log.md",
@@ -96823,7 +96823,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/reset-spend-log",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:02:20Z",
-   "updated": "2026-11-17T21:52:50Z",
+   "updated": "2026-11-17T22:35:23Z",
    "note": "Review ResetSpendLog.ReviewResetSpendLog at 608d234 needs-changes: #2 (CLI fence throw unlogged) fixed in code, no test (marker-write failure is input nobody sends); #1 (two concurrent unfenced in-process redeems coalesce into one POST yet log two resets) declined: only reachable for /usage reset racing an auto spend on the same account within the redeem's 15 s; auto vs auto is serialized by the reset fence",
    "built": [
     {
