@@ -96358,8 +96358,46 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-image-budgets",
    "host": "MacBook-Pro",
    "added": "2026-11-17T20:52:57Z",
-   "updated": "2026-11-17T21:15:13Z",
-   "note": ""
+   "updated": "2026-11-17T21:15:32Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#19100",
+     "code": "3fe30b0598cc37ba2f311425b40685c97b113705",
+     "with_code": "3ae504df11c843d0ea57da6070ab51ea1a77ea67",
+     "tip": "2737dec265bcd011e6c1d775b8d99b3b2aaa43c3",
+     "with_tip": "4c97eb50a792c97c2b83722f908fb92ab40f3529",
+     "at": "2026-11-17T21:15:27Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19195",
+     "code": "3fe30b0598cc37ba2f311425b40685c97b113705",
+     "with_code": "a6537b230b0aca2d167690b2dd7419dc03c04fb0",
+     "tip": "2737dec265bcd011e6c1d775b8d99b3b2aaa43c3",
+     "with_tip": "4deabb0e95fcf29a451415b62795427a4173fa6a",
+     "at": "2026-11-17T21:15:31Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19516",
+     "code": "3fe30b0598cc37ba2f311425b40685c97b113705",
+     "with_code": "e0d04259b3a1b34c6b652badd5104175329b8566",
+     "tip": "2737dec265bcd011e6c1d775b8d99b3b2aaa43c3",
+     "with_tip": "ff8424bcab2403c9fa8f8b026dc99d6b99ac7fb1",
+     "at": "2026-11-17T21:15:31Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19542",
+     "code": "3fe30b0598cc37ba2f311425b40685c97b113705",
+     "with_code": "06053baf57d69134bf8a0bfb6ed33c82a28c268a",
+     "tip": "2737dec265bcd011e6c1d775b8d99b3b2aaa43c3",
+     "with_tip": "25df0f51e23f1b900ec6c52d3f23106a74d7154e",
+     "at": "2026-11-17T21:15:32Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "docs-reclaim-drift",
