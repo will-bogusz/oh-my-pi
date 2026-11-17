@@ -107649,7 +107649,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-17T20:59:10.700689Z",
+  "at": "2026-11-17T21:00:57.247155Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -107726,6 +107726,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-03T02:19:43Z"
+   },
+   {
+    "id": "docs-reclaim-drift",
+    "label": "#19586",
+    "number": 19586,
+    "state": "open",
+    "area": "auth",
+    "priority": "P0",
+    "title": "docs(auth-gateway): describe reclaim moving warm pins back",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-17T20:58:20Z"
    },
    {
     "id": "macos-handback-typed",
@@ -107851,23 +107868,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-17T09:37:09Z"
-   },
-   {
-    "id": "docs-reclaim-drift",
-    "label": "#19586",
-    "number": 19586,
-    "state": "open",
-    "area": "auth",
-    "priority": null,
-    "title": "docs(auth-gateway): describe reclaim moving warm pins back",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-17T20:58:20Z"
    },
    {
     "id": "iphone-mirror-scroll-distance",
@@ -108700,6 +108700,23 @@
     "created": "2026-11-03T01:54:17Z"
    },
    {
+    "id": "fable-shared-wall-block",
+    "label": "fable-shared-wall-block",
+    "number": null,
+    "state": "queued",
+    "area": "broker",
+    "priority": null,
+    "title": "fix(ai): heal Claude tier blocks a shared weekly wall caused from single-window usage reports",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-17T20:59:40Z"
+   },
+   {
     "id": "image-eviction-notice",
     "label": "image-eviction-notice",
     "number": null,
@@ -108751,6 +108768,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-31T21:07:28Z"
+   },
+   {
+    "id": "usage-state-per-model",
+    "label": "usage-state-per-model",
+    "number": null,
+    "state": "queued",
+    "area": "broker",
+    "priority": null,
+    "title": "fix(coding-agent): judge omp usage policy state by account-wide windows",
+    "action": "next-hour",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-17T20:59:31Z"
    },
    {
     "id": "wire-delta-count",
@@ -108839,7 +108873,7 @@
     "area": "factory-droid",
     "priority": null,
     "title": "feat(catalog): identify Factory Droid requests as droid 1.10.0",
-    "action": "open",
+    "action": "next-hour",
     "reasons": [],
     "note": "",
     "over": [],
