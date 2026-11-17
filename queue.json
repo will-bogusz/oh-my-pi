@@ -96814,13 +96814,13 @@
    "needs": [],
    "base": "baf60290fde5e9eea4edb30bff07695877682ba9",
    "body": "bodies/broker-wire-forward-compat.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19602,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/broker-wire-forward-compat",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:01:16Z",
-   "updated": "2026-11-17T22:54:42Z",
+   "updated": "2026-11-17T23:18:05Z",
    "note": "Will, 2026-11-17: go-ahead to open",
    "built": [
     {
@@ -96868,7 +96868,8 @@
      "at": "2026-11-17T22:54:41Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-17T23:18:05Z"
   },
   {
    "id": "reset-spend-log",
