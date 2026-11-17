@@ -2,7 +2,7 @@
 
 When my shared weekly Claude limit ran out, a Fable 429 left that account blocked for Fable for two more days even after `/usage` showed the weekly window had room again, so Fable requests on my other account had nowhere to fail over to; this lets the same usage report that lifts the account-wide block lift the Fable one too.
 
-A Fable or Mythos 429 can come from the shared weekly window rather than the Fable meter. omp then stores a `tier:fable` block that ends at the shared window's reset. When `/usage` answers with only that weekly window (no 5-hour row and no marker saying none is running), `main` already lifts the account-wide block if the window has room and its reset matches the stored deadline (#19090). It never offered the tier scope on such a report, so the Fable block stayed until its clock ran out.
+A Fable or Mythos 429 can come from the shared weekly window rather than the Fable meter; omp then stores a `tier:fable` block ending at that window's reset. When `/usage` returns only the weekly window (no 5-hour row, no marker saying none runs), `main` lifts the account-wide block if the window has room and its reset matches the stored deadline (#19090), but never offered the tier scope, so the Fable block held until its clock ran out.
 
 | On a report carrying only the shared weekly window, with room | `main` | This PR |
 |---|---|---|
@@ -11,17 +11,15 @@ A Fable or Mythos 429 can come from the shared weekly window rather than the Fab
 | Same tier block, Fable row exhausted | kept | kept |
 | Tier block whose deadline doesn't match that window's reset (the 5-hour wall may hold it) | kept | kept |
 
-Reading order: `claudeRankingStrategy.healableBlockScopes` in `packages/ai/src/usage/claude.ts` builds the tier scopes before the coverage check and returns them with the account-wide scope under `resetMatchRequired`. `CredentialBlocks.reconcile` in `packages/ai/src/auth/blocks.ts` is unchanged.
-
 ## Why
 
-In a pool of two Claude accounts, one hit its shared weekly limit (100%) with Fable at 80%. An earlier 429 and then a Fable 429 wrote both blocks with the same deadline, the weekly reset two days out. Hours later the weekly window recovered, a single-window report lifted the account-wide block, and the Fable block stayed. The next Fable 429 on the other account found no free sibling and the turn stopped.
+In a pool of two Claude accounts, one hit its shared weekly limit with Fable at 80%. Its account-wide and Fable blocks got the same deadline, the weekly reset two days out. Hours later the weekly window recovered; a single-window report lifted the account-wide block and the Fable block stayed, so the other account's next Fable 429 found no free sibling.
 
-The tier scope keeps every guard the account-wide one has: only a shared window's reset is matched against the deadline (60 s tolerance), a report from rate-limit headers never heals, and the tier's own weekly row must have room. A block from the missing 5-hour window has that window's deadline and won't match; where the Fable meter resets with the weekly window, its own row decides.
+The tier scope keeps the account-wide scope's guards: only a shared window's reset is matched against the deadline (60 s tolerance), a report from rate-limit headers never heals, and the tier's own weekly row must have room. A block from the missing 5-hour window has that window's deadline and won't match; where the Fable meter resets with the weekly window, its own row decides.
 
-Decision: I considered writing the account-wide block instead of the tier block when the report at 429 time shows the shared window spent. That changes which scope a 429 writes and needs the report inside `blockScope`. Healing by the same deadline match is the smaller change and leaves the scope a 429 writes as it is on `main`.
+Decision: writing the account-wide block instead when the report at 429 time shows the shared window spent would change which scope a 429 writes and need the report inside `blockScope`; matching the deadline is the smaller change. Only `claudeRankingStrategy.healableBlockScopes` changes.
 
-Non-goals: reports with no shared window, or with both, behave as on `main`. Complete reports already heal tier blocks.
+Non-goals: reports with no shared window or with both behave as on `main`; complete reports already heal tier blocks.
 
 Related: #10978, #13348.
 
