@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17 22:11Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17 22:14Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-11-17 22:08Z on MacBook-Pro; groups below are from it, states from the manifest)
@@ -49,7 +49,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 | macos-ax-cancel-before-send | fix(natives): send no macOS AX action once its run is cancelled | natives | P2 | 6d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19516](https://github.com/can1357/oh-my-pi/pull/19516), [#19532](https://github.com/can1357/oh-my-pi/pull/19532), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-ax-cancel-before-send) |
 | win-ax-states | fix(natives): expose Windows control state and stale-reference matches | computer | P2 | 6d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19516](https://github.com/can1357/oh-my-pi/pull/19516), [#19519](https://github.com/can1357/oh-my-pi/pull/19519), [#19532](https://github.com/can1357/oh-my-pi/pull/19532), qt-filler-windows, wayland-input-refusal, wayland-window-crop-clip, main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-ax-states) |
 | macos-web-type-background | fix(natives): type into a background macOS web page field without a takeover | computer | P2 | 3d | [#17756](https://github.com/can1357/oh-my-pi/pull/17756), [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#17897](https://github.com/can1357/oh-my-pi/pull/17897), [#19504](https://github.com/can1357/oh-my-pi/pull/19504), [#19516](https://github.com/can1357/oh-my-pi/pull/19516), [#19532](https://github.com/can1357/oh-my-pi/pull/19532), [#19531](https://github.com/can1357/oh-my-pi/pull/19531), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-web-type-background) |
-| reserve-per-model-family | feat(ai): reserve per usage limit in account policies | broker |  | 0h | usage-state-per-model | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reserve-per-model-family) |
+| reserve-per-model-family | feat(ai): reserve per usage limit in account policies | broker |  | 1h | usage-state-per-model | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reserve-per-model-family) |
 | deadline-ranking | feat(ai): rank an account priority by quota deadline | ai/auth |  | 0h | account-switch-reason | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/deadline-ranking) |
 | reset-consent-per-account | feat(ai,coding-agent): let an account policy decide its own saved-reset spending | broker |  | 0h | usage-state-per-model | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-consent-per-account) |
 
