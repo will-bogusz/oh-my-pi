@@ -96360,6 +96360,24 @@
    "added": "2026-11-17T20:52:57Z",
    "updated": "2026-11-17T20:52:57Z",
    "note": ""
+  },
+  {
+   "id": "docs-reclaim-drift",
+   "branch": "will/docs-reclaim-drift",
+   "title": "docs(auth-gateway): describe reclaim moving warm pins back",
+   "area": "auth",
+   "priority": null,
+   "needs": [],
+   "base": "baf60290fde5e9eea4edb30bff07695877682ba9",
+   "body": "bodies/docs-reclaim-drift.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/docs-reclaim-drift",
+   "host": "MacBook-Pro",
+   "added": "2026-11-17T20:54:14Z",
+   "updated": "2026-11-17T20:54:14Z",
+   "note": ""
   }
  ],
  "watch": {
