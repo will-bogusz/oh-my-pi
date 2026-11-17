@@ -110662,5 +110662,11 @@
     "wake": ""
    }
   ]
+ },
+ "opening": {
+  "id": "image-eviction-notice",
+  "token": "a375e2e86e2a4a719e2d1581120ea611",
+  "host": "MacBook-Pro",
+  "at": "2026-11-17T23:23:37Z"
  }
 }
