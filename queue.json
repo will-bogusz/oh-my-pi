@@ -96490,7 +96490,7 @@
    "branch": "will/devin-gemini-promo-prices",
    "title": "fix(catalog): switch Devin's Gemini promo prices to list when each promo ends",
    "area": "catalog",
-   "priority": null,
+   "priority": "P1",
    "needs": [],
    "base": "baf60290fde5e9eea4edb30bff07695877682ba9",
    "body": "bodies/devin-gemini-promo-prices.md",
@@ -96500,8 +96500,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-gemini-promo-prices",
    "host": "MacBook-Pro",
    "added": "2026-11-17T20:51:19Z",
-   "updated": "2026-11-17T21:12:39Z",
-   "note": ""
+   "updated": "2026-11-17T22:53:26Z",
+   "note": "Main for Will, 2026-11-17: P1 estimate, Carbon's list-price card must merge before 2026-11-24 16:00Z"
   },
   {
    "id": "devin-image-budgets",
