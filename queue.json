@@ -94377,13 +94377,13 @@
    ],
    "base": "1bdbf6d242d99ca62bdf2feeff4519ff992f647d",
    "body": "bodies/macos-key-read-settled.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19516,
    "closed_prs": [],
    "worktree": "/home/will/.omp/main-wt/oh-my-pi/key-read-settled",
    "host": "goliath",
    "added": "2026-11-14T10:14:31Z",
-   "updated": "2026-11-17T03:51:27Z",
+   "updated": "2026-11-17T03:54:30Z",
    "note": "Main, 2026-11-17: review stamp at d4e02a0 stands; e3e11216dfa is a text-only amend whose text Main's model-sample rerun checked (Haiku/Sol 0 wrong, ~/tmp/oh-my-pi/KeyReadSample/)",
    "advanced": "2026-11-17T00:50:21Z",
    "rebases_after": [
@@ -94456,7 +94456,8 @@
      "at": "2026-11-17T03:51:22Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-17T03:54:30Z"
   },
   {
    "id": "macos-keys-no-press",
