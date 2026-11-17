@@ -65765,7 +65765,7 @@
    "branch": "will/atspi-walk-reads",
    "title": "fix(natives): read each AT-SPI element in two concurrent rounds",
    "area": "computer",
-   "priority": "P1",
+   "priority": "P0",
    "needs": [],
    "base": "1bdbf6d242d99ca62bdf2feeff4519ff992f647d",
    "body": "bodies/atspi-walk-reads.md",
@@ -65775,7 +65775,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-walk-reads",
    "host": "MacBook-Pro",
    "added": "2026-11-03T09:05:24Z",
-   "updated": "2026-11-17T04:39:43Z",
+   "updated": "2026-11-17T04:47:55Z",
    "note": "LinuxGrabs, 2026-11-17: rebased onto main 1bdbf6d242d as one commit 6e14a2ffdba (local branch in ~/.omp/main-wt/oh-my-pi/atspi-walk-reads; fork branch still the old 35a9e15702d, not pushed), carrying #19036's bounded child reads (from trial 3f71f7f3588). Measured as 7c83575f996 on bf9a9fbd40e (same Rust diff) on a goliath box vs main; raw data ~/tmp/oh-my-pi/LinuxGrabs/bench*.jsonl. Linux rust-check recorded; Astra review: code ready, body placeholders since filled.",
    "advanced": "2026-11-17T03:19:46Z",
    "line_loss_overrides": [
@@ -82261,7 +82261,7 @@
    "branch": "will/browser-select-objects",
    "title": "feat(browser): accept explicit dropdown option selectors",
    "area": "browser",
-   "priority": "P2",
+   "priority": "P1",
    "needs": [],
    "base": "1bdbf6d242d99ca62bdf2feeff4519ff992f647d",
    "body": "bodies/browser-select-objects.md",
@@ -82271,7 +82271,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-select-objects",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:27:26Z",
-   "updated": "2026-11-17T04:15:59Z",
+   "updated": "2026-11-17T04:47:55Z",
    "note": "",
    "advanced": "2026-11-17T03:26:59Z",
    "line_loss_overrides": [
@@ -87798,7 +87798,7 @@
    "branch": "will/x11-keysym-remap",
    "title": "fix(natives): type characters outside the X11 keymap through temporary keycodes",
    "area": "computer",
-   "priority": "P2",
+   "priority": "P1",
    "needs": [],
    "base": "1bdbf6d242d99ca62bdf2feeff4519ff992f647d",
    "body": "bodies/x11-keysym-remap.md",
@@ -87808,7 +87808,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-keysym-remap",
    "host": "MacBook-Pro",
    "added": "2026-11-11T13:55:21Z",
-   "updated": "2026-11-17T04:20:12Z",
+   "updated": "2026-11-17T04:47:55Z",
    "note": "LinuxGrabs, 2026-11-17: head 719b46266b0 (local branch, on main 1bdbf6d242d): grab only for keymap reads/writes; rebind owns old+new keysym until the write lands; close returns restore failures; over-capacity text refused before any key (MPX warm-up deferred after bind). Linux/macOS/Windows rust-check recorded. Sol reviews: round 1 findings fixed; round 2 (b)(c) closed, MPX warm-up finding fixed.",
    "line_loss_overrides": [
     {
@@ -95659,7 +95659,7 @@
    "branch": "will/macos-reroute-not-a-press",
    "title": "fix(natives): count keys moved back to a macOS user's app as theirs",
    "area": "computer",
-   "priority": "P2",
+   "priority": "P0",
    "needs": [],
    "base": "1bdbf6d242d99ca62bdf2feeff4519ff992f647d",
    "body": "bodies/macos-reroute-not-a-press.md",
@@ -95669,7 +95669,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-reroute-not-a-press",
    "host": "MacBook-Pro",
    "added": "2026-11-14T20:50:07Z",
-   "updated": "2026-11-17T03:58:13Z",
+   "updated": "2026-11-17T04:47:55Z",
    "note": "MacLockWaits 2026-11-17: taken over from Main; rebased onto main 1bdbf6d242d as 5edae5aa592 over #16553 and Brit's 760422a2052 (releases stay out of last_press). Combined observe_user = main's + input_target(.., |pid| rerouted_to(pid, event)); Main approved the form. Earlier review TypingTakeover.ReviewRerouteRule needs-changes at d23777b14e, all 7 fixed (not re-reviewed). macOS desktop tests 486 pass; rust-check macos/linux/windows at Rust diff 15cd8383fc. VM tables measured before the rebase (fe194ec2f12).",
    "rebases_after": [
     16553
