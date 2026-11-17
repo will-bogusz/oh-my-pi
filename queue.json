@@ -70484,7 +70484,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/upload-stall-error-all-providers",
    "host": "MacBook-Pro",
    "added": "2026-11-09T18:20:14Z",
-   "updated": "2026-11-17T02:58:48Z",
+   "updated": "2026-11-17T02:59:13Z",
    "note": "",
    "advanced": "2026-11-17T02:57:11Z",
    "line_loss_overrides": [
@@ -70501,7 +70501,8 @@
      }
     }
    ],
-   "opened": "2026-11-17T02:58:48Z"
+   "opened": "2026-11-17T02:58:48Z",
+   "readied": "2026-11-17T02:59:13Z"
   },
   {
    "id": "wayland-libei-env-race",
