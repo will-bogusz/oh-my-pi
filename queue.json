@@ -93446,7 +93446,7 @@
    "needs": [
     "macos-handback-key"
    ],
-   "base": "78c730db8e9c77bf5bde8c22d693aee99b9f831d",
+   "base": "da62490735ca74a8730ecc428d5ed46c81f5eff9",
    "body": "bodies/macos-window-order.md",
    "state": "queued",
    "pr": null,
@@ -93454,14 +93454,15 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-window-order",
    "host": "MacBook-Pro",
    "added": "2026-11-14T01:37:23Z",
-   "updated": "2026-11-14T07:56:04Z",
+   "updated": "2026-11-17T00:03:24Z",
    "note": "HandBack 2026-11-14: head 37142503cd9 (amended): takeover hand-back also raises the user's key window (with_foreground, hand_back_keeps_order). rust-check macos/linux/windows at 37142503cd9 (diff d9e990b339). Review TakeoverOrderReview needs-changes -> fixed (cause wording, same-app test, doubled error text, docs/changelog/title). Earlier: key-window-only restore, OrderReview2 7/7. Overlaps: #16553 pair recorded; #19062/#19179/drag-confirm/scroll-direction none.",
    "rebases_after": [
     16553
    ],
    "pair_reasons": {
     "16553": "HandBack, 2026-11-14: textual conflict only, in with_background_watch and WindowServerDesktop (skylight.rs). Combined form keeps both sides: #16553's 'let placement = match (clicks, previous.pid) {Tap|HitTest}' first, then this entry's 'let order = previous.pid.zip(capture::stacked_windows()).and_then(|(user, stack)| window_order::EntryOrder::new(pid, user, previous_key, &stack));' (read before anything is sent; placement sends nothing); WindowServerDesktop { spi, previous, key: previous_key, placement, stopped: &stopped, order: RefCell::new(order), raises: Cell::new(0) }; struct fields key, placement, stopped, order, raises. No semantic overlap: placement feeds SwitchSignals, order feeds keep_order."
-   }
+   },
+   "advanced": "2026-11-17T00:03:24Z"
   },
   {
    "id": "macos-stale-press",
