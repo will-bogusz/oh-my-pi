@@ -65723,13 +65723,8 @@
    "title": "fix(natives): read each AT-SPI element in two concurrent rounds",
    "area": "computer",
    "priority": "P1",
-   "needs": [
-    "atspi-action-names",
-    "atspi-unanswered-app",
-    "gtk4-atspi-bounds",
-    "atspi-huge-children"
-   ],
-   "base": "9f728bd56e170453c927d5b162cebe9b308e63ce",
+   "needs": [],
+   "base": "bf9a9fbd40e96766d528a9f19a603e53e8c0b5a1",
    "body": "bodies/atspi-walk-reads.md",
    "state": "queued",
    "pr": null,
@@ -65737,8 +65732,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-walk-reads",
    "host": "MacBook-Pro",
    "added": "2026-11-03T09:05:24Z",
-   "updated": "2026-11-12T16:11:23Z",
-   "note": "Main, 2026-11-12: needs #19036 (atspi-huge-children), not a pair: a PR opened now would diff against main's whole-children reader while its numbers come from the trial tree. Prepared head: trial 3f71f7f3588 (walk-reads merged onto #19036 68d568296ae: round two starts #19036's bounded index reads beside text/bounds/actions; walk passes remaining budget into read_node; round test expects GetChildAtIndex(0) for ChildCount=1; Linux 107 pass, desktop::ax 47; scratch queuefifteen/WalkRecheck). Re-measured on that trial vs #19036's head, same goliath guest, 8 alternating pairs after a warmup, ax::query limit 5000, dbus-monitor calls: Kate 1.545->0.660 s (57%), Dolphin 0.894->0.380 (57%), Writer GTK3 3.128->1.586 (49%), Writer KF5 3.881->1.943 (50%), disjoint ranges, calls/element unchanged (10.66->9.63, 10.52->9.19, 10.71->10.35, 11.88->11.55). When #19036 merges: rebase, re-run the four-app table against main, update body, open. Earlier: Main-approved combined reader uses main's cancellable/answered request bound, ChildCount in round 1 before children in round 2.",
+   "updated": "2026-11-17T02:31:07Z",
+   "note": "LinuxGrabs, 2026-11-17: rebased onto main bf9a9fbd40e as one commit 7c83575f996 (local branch in ~/.omp/main-wt/oh-my-pi/atspi-walk-reads; fork branch still the old 35a9e15702d, not pushed) carrying the bounded #19036 child reads from trial 3f71f7f3588. Remeasured on goliath box vs current main (bench.jsonl in ~/tmp/oh-my-pi/LinuxGrabs). Linux rust-check recorded; Astra review: code ready, body placeholders fixed.",
    "advanced": "2026-11-12T13:25:41Z",
    "line_loss_overrides": [
     {
