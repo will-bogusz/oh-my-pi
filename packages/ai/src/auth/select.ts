@@ -18,6 +18,7 @@ import {
 import type { AccountPolicies } from "./policy";
 import { authCredentialEquals, type CredentialPool } from "./pool";
 import {
+	compareDeadlines,
 	orderUsageRankedCandidates,
 	planPriority,
 	type ApiKeyCandidate,
@@ -44,6 +45,7 @@ import {
 	normalizeUsageFraction,
 	remainingUsageFraction,
 	scopedUsageLimits,
+	usableQuotaDeadline,
 	usageResetAtMs,
 	windowRequiredDrain,
 } from "./usage-report";
@@ -491,6 +493,17 @@ export class CredentialSelector {
 			);
 		});
 
+		// One order per priority: it ranks by deadline only when every account of that priority opts
+		// in, so a priority mixing both keeps the required-drain order and the comparator stays total.
+		const deadlinePriorities = new Map<number, boolean>();
+		for (const idx of args.order) {
+			const selection = args.credentials[idx];
+			if (!selection) continue;
+			const policy = this.#deps.policies.forCredential(args.provider, selection.credential);
+			const priority = policy?.priority === undefined || !Number.isFinite(policy.priority) ? 0 : policy.priority;
+			deadlinePriorities.set(priority, (deadlinePriorities.get(priority) ?? true) && policy?.rankBy === "deadline");
+		}
+
 		for (let orderPos = 0; orderPos < usageResults.length; orderPos += 1) {
 			const result = usageResults[orderPos];
 			if (!result) continue;
@@ -519,11 +532,14 @@ export class CredentialSelector {
 				strategy === undefined ? remainingFraction !== undefined : primary !== undefined || secondary !== undefined;
 			const primaryUncapped = primary === undefined && secondary !== undefined;
 			const policy = this.#deps.policies.forCredential(args.provider, selection.credential);
+			const accountPriority =
+				policy?.priority === undefined || !Number.isFinite(policy.priority) ? 0 : policy.priority;
 			const reservePct = policy?.reservePct ?? args.defaultReservePct;
 			const reserveFraction =
 				reservePct === undefined || !Number.isFinite(reservePct)
 					? undefined
 					: Math.max(0, Math.min(1, reservePct / 100));
+			const deadlineWindow = secondary ?? primary;
 			ranked.push({
 				selection,
 				usage,
@@ -535,7 +551,7 @@ export class CredentialSelector {
 					remainingFraction !== undefined &&
 					isWithinUsageReserve(remainingFraction, reserveFraction),
 				reserveMeasured: reserveFraction !== undefined && remainingFraction !== undefined,
-				accountPriority: policy?.priority === undefined || !Number.isFinite(policy.priority) ? 0 : policy.priority,
+				accountPriority,
 				allowanceSpent: remainingFraction === 0,
 				reclaimReady:
 					!blocked &&
@@ -552,6 +568,18 @@ export class CredentialSelector {
 				primaryRequiredDrain:
 					strategy === undefined ? 0 : windowRequiredDrain(primary, nowMs, strategy.windowDefaults.primaryMs),
 				orderPos,
+				deadlineMs: !deadlinePriorities.get(accountPriority)
+					? undefined
+					: usage && strategy && deadlineWindow
+						? usableQuotaDeadline(
+								usage,
+								deadlineWindow,
+								nowMs,
+								deadlineWindow === secondary
+									? strategy.windowDefaults.secondaryMs
+									: strategy.windowDefaults.primaryMs,
+							)
+						: Number.POSITIVE_INFINITY,
 			});
 		}
 		return orderUsageRankedCandidates(ranked, args.planGate !== undefined);
@@ -744,8 +772,9 @@ export class CredentialSelector {
 		// A warm automatic pin normally wins. Three policies may evict it, each only
 		// while a sibling is confirmed better: reserve (sibling measured outside
 		// reserve), spent allowance (unblocked sibling with allowance left), and
-		// opt-in reclaim (the sibling ranking picks next has higher priority and is
-		// measured at or above its `reclaimAbovePct`).
+		// opt-in reclaim (the sibling ranking picks next is measured at or above its
+		// `reclaimAbovePct` and has higher priority, or the same deadline-ranked
+		// priority and quota that expires sooner).
 		const automaticPinWouldBeEvicted = (excludePreflightFailures: boolean): boolean => {
 			if (sessionPinIsExplicit || preferredCandidate === undefined) return false;
 			const rankedWinner = candidates.find(
@@ -754,11 +783,18 @@ export class CredentialSelector {
 					!(excludePreflightFailures && preflightFailures.has(candidate)) &&
 					!this.#deps.blocks.isBlocked(provider, providerKey, candidate.selection.index, blockScopes),
 			);
-			if (
-				rankedWinner?.reclaimReady === true &&
-				(rankedWinner.accountPriority ?? 0) > (preferredCandidate.accountPriority ?? 0)
-			) {
-				return true;
+			if (rankedWinner?.reclaimReady === true) {
+				const winnerPriority = rankedWinner.accountPriority ?? 0;
+				const pinPriority = preferredCandidate.accountPriority ?? 0;
+				if (winnerPriority > pinPriority) return true;
+				if (
+					winnerPriority === pinPriority &&
+					rankedWinner.deadlineMs !== undefined &&
+					preferredCandidate.deadlineMs !== undefined &&
+					compareDeadlines(rankedWinner.deadlineMs, preferredCandidate.deadlineMs) < 0
+				) {
+					return true;
+				}
 			}
 			return candidates.some(candidate => {
 				if (candidate === preferredCandidate) return false;

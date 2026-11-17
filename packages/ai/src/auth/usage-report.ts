@@ -281,3 +281,29 @@ export function windowRequiredDrain(limit: UsageLimit | undefined, nowMs: number
 	const remainingHours = Math.max(remainingMs, 60_000) / (60 * 60 * 1000);
 	return headroom / remainingHours;
 }
+
+/**
+ * When the quota a window still holds stops counting: the window's reset, or sooner the expiry
+ * of a saved reset that clears the window and can be spent before the limit is hit, because
+ * spending it refunds everything used until then. A window without a future reset clock starts
+ * its full duration at the next request, as in {@link windowRequiredDrain}.
+ */
+export function usableQuotaDeadline(
+	report: UsageReport,
+	limit: UsageLimit,
+	nowMs: number,
+	fallbackDurationMs: number,
+): number {
+	const resetAt = windowResetAt(limit.window);
+	let deadline =
+		resetAt !== undefined && resetAt > nowMs ? resetAt : nowMs + (limit.window?.durationMs ?? fallbackDurationMs);
+	for (const credit of report.resetCredits?.credits ?? []) {
+		if ((credit.status ?? "available") !== "available" || credit.usable === false || credit.requiresLimit === true) {
+			continue;
+		}
+		if (credit.clears !== undefined && !credit.clears.includes(limit.id)) continue;
+		const expiresAt = credit.expiresAt === undefined ? Number.NaN : Date.parse(credit.expiresAt);
+		if (expiresAt > nowMs && expiresAt < deadline) deadline = expiresAt;
+	}
+	return deadline;
+}

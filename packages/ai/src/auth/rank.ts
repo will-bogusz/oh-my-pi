@@ -29,6 +29,11 @@ export type UsageCandidate<T extends AuthCredential> = {
 	accountPriority?: number;
 	/** Present after policy-aware ranking: unblocked and measured at or above its `reclaimAbovePct`. */
 	reclaimReady?: boolean;
+	/**
+	 * Present after policy-aware ranking when the account's priority ranks by deadline: when its
+	 * usable quota for this request expires (`Infinity` when unknown).
+	 */
+	deadlineMs?: number;
 };
 
 /** OAuth credential eligible for usage ranking. */
@@ -70,6 +75,12 @@ const USAGE_RANKING_METRIC_EPSILON = 1e-9;
  */
 const PRIMARY_WINDOW_HOT_FRACTION = 0.85;
 
+/**
+ * Deadlines this close are a tie: providers report reset times relative to the fetch, so one
+ * account's reset jitters by seconds between reports and must not reorder equal resets.
+ */
+const DEADLINE_TIE_MS = 60_000;
+
 /** Rank accounts by model-plan eligibility when a plan gate applies. */
 export function planPriority(gate: PlanGate | undefined, report: UsageReport | null): number {
 	if (!gate) return 0;
@@ -83,6 +94,12 @@ function compareUsageRankingMetric(left: number, right: number): number {
 	const delta = left - right;
 	const tolerance = Math.max(USAGE_RANKING_METRIC_EPSILON, Math.max(Math.abs(left), Math.abs(right)) * 0.000001);
 	return Math.abs(delta) <= tolerance ? 0 : delta;
+}
+
+/** Compare two quota deadlines, earliest first; resets within {@link DEADLINE_TIE_MS} tie. */
+export function compareDeadlines(left: number, right: number): number {
+	if (left === right || Math.abs(left - right) <= DEADLINE_TIE_MS) return 0;
+	return left - right;
 }
 
 function compareUsageRankedCandidatePriority(
@@ -121,6 +138,13 @@ function compareUsageRankedCandidatePriority(
 	const leftMeasured = left.usageMeasured;
 	const rightMeasured = right.usageMeasured;
 	if (leftMeasured !== rightMeasured) return leftMeasured ? -1 : 1;
+	// A priority whose accounts all rank by deadline serves the one whose usable quota expires
+	// first. Deadlines are fixed times, so the order holds while usage grows and changes only
+	// when a window resets, a saved reset expires, or an account hits one of the guards above.
+	if (left.deadlineMs !== undefined && right.deadlineMs !== undefined) {
+		const deadline = compareDeadlines(left.deadlineMs, right.deadlineMs);
+		if (deadline !== 0) return deadline;
+	}
 	// Required drain, descending: the account whose remaining quota must
 	// burn fastest to avoid expiring unused at its reset comes first, so
 	// staggered resets land at ~100% utilization instead of stranding
@@ -160,5 +184,6 @@ export function orderUsageRankedCandidates<T extends AuthCredential>(
 		allowanceSpent: candidate.allowanceSpent,
 		accountPriority: candidate.accountPriority,
 		reclaimReady: candidate.reclaimReady,
+		deadlineMs: candidate.deadlineMs,
 	}));
 }

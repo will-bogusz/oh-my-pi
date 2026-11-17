@@ -42,16 +42,27 @@ const usage = new Map<string, UsageReport>();
 const base = Date.now();
 let clock = 0;
 
-/** Report for `accountId` with its 5h window at `fiveUsed` and weekly window at `weekUsed`. */
-function setUsage(provider: Provider, accountId: string, fiveUsed: number, weekUsed: number): void {
+/**
+ * Report for `accountId` with its 5h window at `fiveUsed` and weekly window at `weekUsed`,
+ * resetting in `extra.weekResetsIn` (5 days by default), plus any further rows and saved resets.
+ */
+function setUsage(
+	provider: Provider,
+	accountId: string,
+	fiveUsed: number,
+	weekUsed: number,
+	extra: { weekResetsIn?: number; limits?: UsageLimit[]; resetCredits?: UsageReport["resetCredits"] } = {},
+): void {
 	const exhausted = fiveUsed >= 1 || weekUsed >= 1;
 	usage.set(accountId, {
 		provider,
 		fetchedAt: Date.now(),
 		limits: [
 			limit(provider, "5h", fiveUsed, Date.now() + 3 * HOUR),
-			limit(provider, "7d", weekUsed, Date.now() + 5 * 24 * HOUR),
+			limit(provider, "7d", weekUsed, Date.now() + (extra.weekResetsIn ?? 5 * 24 * HOUR)),
+			...(extra.limits ?? []),
 		],
+		...(extra.resetCredits ? { resetCredits: extra.resetCredits } : {}),
 		metadata: {
 			accountId,
 			...(provider === "openai-codex" ? { allowed: !exhausted, limitReached: exhausted } : {}),
@@ -88,8 +99,13 @@ async function setup(provider: Provider, policies: AuthAccountPolicies, accounts
 	return auth;
 }
 
-async function next(auth: AuthStorage, provider: Provider, session: string): Promise<string | undefined> {
-	return (await auth.keys.get(provider, session))?.replace(/^api-/, "");
+async function next(
+	auth: AuthStorage,
+	provider: Provider,
+	session: string,
+	modelId?: string,
+): Promise<string | undefined> {
+	return (await auth.keys.get(provider, session, modelId ? { modelId } : undefined))?.replace(/^api-/, "");
 }
 
 async function advance(auth: AuthStorage, provider: Provider, ms: number): Promise<void> {
@@ -295,5 +311,88 @@ describe("accountPolicies reclaimAbovePct", () => {
 		setUsage(A, "b", 0.86, 0.1);
 		setUsage(A, "c", 0, 0.1);
 		expect(await next(auth, A, "S1")).toBe("b");
+	});
+});
+
+describe("accountPolicies rankBy deadline", () => {
+	const A = "anthropic" as const;
+	const DAY = 24 * HOUR;
+	const deadline = (account: string, extra: Partial<AuthAccountPolicies[number]> = {}) => ({
+		provider: A,
+		account: { accountId: account },
+		priority: 10,
+		rankBy: "deadline" as const,
+		...extra,
+	});
+
+	/** Claude's model-scoped weekly row that meters Fable, resetting in `resetsIn`. */
+	function fableWeek(used: number, resetsIn: number): UsageLimit {
+		return {
+			...limit(A, "7d", used, Date.now() + resetsIn),
+			id: "anthropic:7d:fable",
+			scope: { provider: A, windowId: "7d", tier: "fable" },
+		};
+	}
+
+	/** A's Fable quota expires in a day though its shared week runs six; all of B's resets in three. */
+	function fableExpiresFirstOnA(): void {
+		setUsage(A, "a", 0.1, 0.1, { weekResetsIn: 6 * DAY, limits: [fableWeek(0.8, DAY)] });
+		setUsage(A, "b", 0.1, 0.1, { weekResetsIn: 3 * DAY, limits: [fableWeek(0.1, 3 * DAY)] });
+	}
+
+	test("serves each model family from the account whose quota for it expires first", async () => {
+		const auth = await setup(A, [deadline("a"), deadline("b")], ["a", "b"]);
+		fableExpiresFirstOnA();
+		expect(await next(auth, A, "S1", "claude-fable-5")).toBe("a");
+		expect(await next(auth, A, "S2", "claude-opus-4-5")).toBe("b");
+	});
+
+	test("keeps required-drain order in a priority where one account does not rank by deadline", async () => {
+		const auth = await setup(A, [deadline("a"), deadline("b", { rankBy: undefined })], ["a", "b"]);
+		fableExpiresFirstOnA();
+		expect(await next(auth, A, "S1", "claude-fable-5")).toBe("b");
+	});
+
+	test("counts a saved reset that clears the week and expires before it", async () => {
+		const auth = await setup(A, [deadline("a"), deadline("b")], ["a", "b"]);
+		setUsage(A, "a", 0.1, 0.5, {
+			resetCredits: {
+				availableCount: 1,
+				credits: [
+					{
+						id: "reset-a",
+						status: "available",
+						usable: true,
+						requiresLimit: false,
+						clears: ["anthropic:7d"],
+						expiresAt: new Date(Date.now() + DAY).toISOString(),
+					},
+				],
+			},
+		});
+		setUsage(A, "b", 0.1, 0.5, { weekResetsIn: 3 * DAY });
+		expect(await next(auth, A, "S1")).toBe("a");
+	});
+
+	test("reclaims a warm session for the account whose quota expires first, and holds it there", async () => {
+		const reclaim = { reservePct: 15, reclaimAbovePct: 40 };
+		const auth = await setup(A, [deadline("a", reclaim), deadline("b", reclaim)], ["a", "b"]);
+		setUsage(A, "a", 0.3, 0.5, { weekResetsIn: 2 * DAY });
+		setUsage(A, "b", 0.1, 0.1, { weekResetsIn: 4 * DAY });
+		expect(await next(auth, A, "S1")).toBe("a");
+		// A's 5h window runs into its reserve: the session leaves for B.
+		await advance(auth, A, 10 * MIN);
+		setUsage(A, "a", 0.9, 0.5, { weekResetsIn: 2 * DAY });
+		expect(await next(auth, A, "S1")).toBe("b");
+		// A's 5h window resets: A is above its reclaim line and its week still ends first.
+		await advance(auth, A, 10 * MIN);
+		setUsage(A, "a", 0, 0.5, { weekResetsIn: 2 * DAY });
+		setUsage(A, "b", 0.2, 0.15, { weekResetsIn: 4 * DAY });
+		expect(await next(auth, A, "S1")).toBe("a");
+		// B is above its own reclaim line too, but its week ends later: the session stays.
+		for (let step = 0; step < 3; step += 1) {
+			await advance(auth, A, 10 * MIN);
+			expect(await next(auth, A, "S1")).toBe("a");
+		}
 	});
 });

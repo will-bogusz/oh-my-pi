@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Accounts of one priority that all set `rankBy: deadline` in `auth.accountPolicies` serve first the one whose quota for the requested model expires first, saved resets included; with `reclaimAbovePct`, running sessions follow
+
 ## [18.22.1] - 2026-11-17
 
 ### Added

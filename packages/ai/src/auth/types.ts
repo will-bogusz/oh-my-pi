@@ -55,6 +55,13 @@ export interface AuthAccountSelector {
 	readonly orgId?: string;
 }
 
+/**
+ * How a priority's accounts are ordered once blocks, plan, allowance, reserve and the hot short
+ * window have been applied: `drain` (default) by the headroom per hour each must burn before its
+ * reset, `deadline` by when each account's usable quota expires, earliest first.
+ */
+export type AuthAccountRankBy = "drain" | "deadline";
+
 /** Priority and reserve policy for a provider account. */
 export interface AuthAccountPolicy {
 	readonly provider: string;
@@ -65,6 +72,8 @@ export interface AuthAccountPolicy {
 	readonly reservePct?: number;
 	/** Remaining quota percentage, above the reserve, at which this account takes back lower-priority warm pins. */
 	readonly reclaimAbovePct?: number;
+	/** Order within this account's priority; applies only when every account of that priority sets `deadline`. */
+	readonly rankBy?: AuthAccountRankBy;
 }
 
 /** Read-only set of per-account routing policies. */
