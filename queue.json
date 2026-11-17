@@ -109560,5 +109560,11 @@
     "wake": ""
    }
   ]
+ },
+ "opening": {
+  "id": "broker-client-startup-retry",
+  "token": "b81daab275a14fe9b8e06d92c6fb96fa",
+  "host": "MacBook-Pro",
+  "at": "2026-11-17T21:39:42Z"
  }
 }
