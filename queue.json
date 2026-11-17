@@ -96588,8 +96588,46 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/broker-wire-forward-compat",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:01:16Z",
-   "updated": "2026-11-17T21:35:54Z",
-   "note": "Will, 2026-11-17: go-ahead to open"
+   "updated": "2026-11-17T21:52:08Z",
+   "note": "Will, 2026-11-17: go-ahead to open",
+   "built": [
+    {
+     "with": "#19590",
+     "code": "0b2d8911dad63a1dc250c53bf81061eb0ba54bf5",
+     "with_code": "c49f10493f27cb00c119846d41c8b95332278c13",
+     "tip": "afd42125ba98395b4d5a66a3d2c14464cc57625a",
+     "with_tip": "552f4e3cb3ab42e6e067cefa04100c64a37b7abf",
+     "at": "2026-11-17T21:52:03Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19513",
+     "code": "0b2d8911dad63a1dc250c53bf81061eb0ba54bf5",
+     "with_code": "49da0eefa5cd2d2653e00ae6de4a0d94dfc21f13",
+     "tip": "afd42125ba98395b4d5a66a3d2c14464cc57625a",
+     "with_tip": "6b9f2cdcfd08e89639e1bfa955661601e70e2525",
+     "at": "2026-11-17T21:52:07Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "fable-shared-wall-block",
+     "code": "0b2d8911dad63a1dc250c53bf81061eb0ba54bf5",
+     "with_code": "403a3fdeeaaeea2b6227088ae2dfefe8c56f1321",
+     "tip": "afd42125ba98395b4d5a66a3d2c14464cc57625a",
+     "with_tip": "c988a1018d1b722e87e8cc2c4ef7f8ba4d161709",
+     "at": "2026-11-17T21:52:07Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "account-switch-reason",
+     "code": "0b2d8911dad63a1dc250c53bf81061eb0ba54bf5",
+     "with_code": "7dddacdfab1bbea036ab45d87704946d57787679",
+     "tip": "afd42125ba98395b4d5a66a3d2c14464cc57625a",
+     "with_tip": "2c7c797eeb2e0eeca143cf8c1cbf66e282c73438",
+     "at": "2026-11-17T21:52:07Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "reset-spend-log",
