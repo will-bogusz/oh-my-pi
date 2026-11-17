@@ -400,8 +400,8 @@ const SETTLE_QUIET_MS = 150;
 /** Poll cadence while requests started by an action are still in flight. */
 const SETTLE_POLL_MS = 50;
 /**
- * Most observed ids a tab keeps beyond the latest observation's own, so a long-lived page that keeps
- * rendering new nodes does not grow them without bound; the least recently observed go first.
+ * Most observed ids a tab keeps (more only when the latest observation alone lists more), so a long-lived page
+ * that keeps rendering new nodes does not grow them without bound; the least recently observed go first.
  */
 const OBSERVED_ID_LIMIT = 5_000;
 
@@ -4308,14 +4308,16 @@ export class WorkerCore {
 	}
 
 	/**
-	 * Retire the least recently observed ids past {@link OBSERVED_ID_LIMIT}, never one of the `latest`
-	 * ids the observation that just ran listed (they are the newest entries).
+	 * Keep the ids of the {@link OBSERVED_ID_LIMIT} most recently observed elements, or all of the `latest`
+	 * observation's when it listed more (they are the newest entries), and retire the rest.
 	 */
 	#retireOldElementIds(latest: number): void {
-		const excess = this.#observedElements.size - Math.max(OBSERVED_ID_LIMIT, latest);
-		if (excess <= 0) return;
-		const oldest = [...this.#observedElements.keys()].slice(0, excess);
-		for (const id of oldest) this.#forgetElement(id);
+		let excess = this.#observedElements.size - Math.max(OBSERVED_ID_LIMIT, latest);
+		// The map runs from the least to the most recently observed; deleting the entry being visited is safe.
+		for (const id of this.#observedElements.keys()) {
+			if (excess-- <= 0) break;
+			this.#forgetElement(id);
+		}
 	}
 
 	/** Best-effort `Page.stopLoading` so an abandoned navigation cannot stall later ops. */

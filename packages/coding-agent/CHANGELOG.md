@@ -21,8 +21,6 @@
 - Named-menu reads now include exposed nested commands with their full paths, avoiding a separate read for each submenu ([#18222](https://github.com/can1357/oh-my-pi/pull/18222) by [@will-bogusz](https://github.com/will-bogusz))
 - Browser reads on Chromium tabs (`text`, `html`, `value`, `evaluate`, `screenshot`, `url` and the other tab, frame and element reads) wait the same way after an action, so `click()` then `text()` reads the result instead of the loading state
 - The browser tool steers agents to act and look in one Eval cell, ending it with `tab.observe()`, and to drop fixed sleeps after actions on Chromium tabs, where the next look or read now waits for the page; for later content it asks agents to read before choosing what text or element to wait for
-- The browser tool steers agents to act and look in one Eval cell, ending it with `tab.observe()`, and to drop fixed sleeps after actions on Chromium tabs, where the next look or read now waits for the page
-- Browser `tab.observe()` ids on Chromium and Tern tabs stay with their element across observations instead of restarting at 1, so an id from an earlier look no longer clicks whichever element now holds that number; a removed element's id fails as stale
 - Browser `tab.observe()` ids on Chromium tabs and Tern tabs without native DOM reads stay with their element across observations instead of restarting at 1, so an id from an earlier look no longer clicks whichever element now holds that number; a removed element's id fails as stale
 
 ### Fixed
