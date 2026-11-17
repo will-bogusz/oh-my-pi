@@ -70485,7 +70485,21 @@
    "added": "2026-11-09T18:20:14Z",
    "updated": "2026-11-17T02:46:41Z",
    "note": "",
-   "advanced": "2026-11-17T02:46:41Z"
+   "advanced": "2026-11-17T02:46:41Z",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-17T02:53:49Z",
+     "reason": "39b34f3c991 replaces the any-3xx redirect check with the fetch standard's redirect statuses (SmallTextFixes' fix)",
+     "old": "4749082247f9d3f42df82259941adc512e7f0832",
+     "new": "39b34f3c991f0c5610d7566c732ac9e151ba3c56",
+     "dropped": {
+      "packages/ai/src/utils/upload-progress-fetch.ts": [
+       " * without it, and credentials are dropped when the location leaves the origin.",
+       "\t\tif (!follow || response.status < 300 || response.status >= 400 || location === null) return response;"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "wayland-libei-env-race",
