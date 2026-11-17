@@ -1,9 +1,9 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17 07:46Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17 07:48Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-11-17 07:16Z on goliath; groups below are from it, states from the manifest)
+**Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-17 07:46Z on goliath; groups below are from it, states from the manifest)
 **Counts:** openable now 2, conflict-held 16, stacked 14, held 11, parked 2, open PRs 16; merged 376, closed 37
 
 ## Openable now (2)
@@ -95,4 +95,4 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 | [#19509](https://github.com/can1357/oh-my-pi/pull/19509) | macos-move-receipt-r2 | fix(coding-agent): say once that a macOS background move gives no hover | computer | P1 | 5h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-move-receipt-r2) |
 | [#19516](https://github.com/can1357/oh-my-pi/pull/19516) | macos-key-read-settled | fix(natives): read a macOS popup after the option its typed letters choose | computer | P1 | 3h | keep; accepted pair with #19195: Main, 2026-11-17: adjacent thread_local statics in desktop/control.rs; combined = both statics (DRAG_NOTE then INPUT_HELD), then input_held() unchanged | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-key-read-settled) |
 | [#19504](https://github.com/can1357/oh-my-pi/pull/19504) | macos-handback-typed | fix(natives): give the macOS key window back after a takeover while another program types | computer | P1 | 6h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-handback-typed) |
-| [#19515](https://github.com/can1357/oh-my-pi/pull/19515) | macos-reroute-not-a-press | fix(natives): count keys moved back to a macOS user's app as theirs | computer | P0 | 3h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-reroute-not-a-press) |
+| [#19515](https://github.com/can1357/oh-my-pi/pull/19515) | macos-reroute-not-a-press | fix(natives): count keys moved back to a macOS user's app as theirs | computer | P0 | 4h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-reroute-not-a-press) |

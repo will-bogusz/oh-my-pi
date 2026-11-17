@@ -107279,12 +107279,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-17T07:16:02.493471Z",
+  "at": "2026-11-17T07:46:23.321709Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 2,
-   "left": 6
+   "used": 1,
+   "left": 7
   },
   "rows": [
    {
@@ -107768,6 +107768,7 @@
     "reasons": [
      "needs #19195 (open)",
      "conflicts with #17756 in crates/pi-natives/src/desktop/macos/input.rs",
+     "conflicts with #17897 in crates/pi-natives/src/desktop/macos/input.rs",
      "conflicts with #19516 in crates/pi-natives/src/desktop/control.rs, crates/pi-natives/src/desktop/macos/input.rs",
      "conflicts with main in crates/pi-natives/src/desktop/macos/ax/drag_control.rs, crates/pi-natives/src/desktop/macos/input.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md"
     ],
@@ -107776,6 +107777,7 @@
     "paired": [],
     "blocked_by": [
      "#17756",
+     "#17897",
      "#19516"
     ],
     "needs": [
@@ -107823,6 +107825,7 @@
      "needs #19515 (open)",
      "conflicts with #17756 in crates/pi-natives/src/desktop/macos/input.rs",
      "conflicts with #19195 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/macos/input.rs, docs/computer-use.md",
+     "conflicts with #17897 in crates/pi-natives/src/desktop/macos/input.rs",
      "conflicts with #19515 in docs/computer-use.md",
      "conflicts with #19504 in docs/computer-use.md",
      "conflicts with #19516 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/macos/input.rs, docs/computer-use.md",
@@ -107836,6 +107839,7 @@
     "blocked_by": [
      "#17756",
      "#19195",
+     "#17897",
      "#19515",
      "#19504",
      "#19516",
