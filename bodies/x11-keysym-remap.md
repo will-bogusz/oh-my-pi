@@ -6,7 +6,7 @@ Typing `héllo wörld ✓` into a GTK 3, Qt 5, Qt 6 or Chromium field: refused 4
 
 ## Why
 
-X11 typing presses keys, so `Keymap::plan_text` (`linux/x11/keymap.rs`) refused a whole text when one character had no keycode. xdotool's answer is to bind the missing keysym to an unused keycode and restore it later; `TextMapping` (`linux/x11/text_mapping.rs`) does that. Bindings are kept after the call and reused, and restored when the session closes; a later call may take a row over once its last key is 500 ms old. The X server grab covers only keymap reads and writes: another X client now waits under 2 ms however long the text (91 ms for a million characters before).
+X11 typing presses keys, so `Keymap::plan_text` (`linux/x11/keymap.rs`) refused a whole text when one character had no keycode. xdotool binds the missing keysym to an unused keycode and restores it later; `TextMapping` (`linux/x11/text_mapping.rs`) does that. Bindings are kept after the call and reused, and restored when the session closes; a later call may take a row over once its last key is 500 ms old. The X server grab covers only keymap reads and writes: another X client now waits under 2 ms however long the text (91 ms for a million characters before).
 
 Limits:
 
