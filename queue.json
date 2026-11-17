@@ -72240,7 +72240,7 @@
    "area": "browser",
    "priority": "P2",
    "needs": [],
-   "base": "0cf28c73241a432215a820f564851df013e9433e",
+   "base": "0c96ab9e5a496c76760e927a3b63a69d594f4d59",
    "body": "bodies/browser-wait-predicate.md",
    "state": "open",
    "pr": 19542,
@@ -72248,9 +72248,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-wait-predicate",
    "host": "MacBook-Pro",
    "added": "2026-11-10T15:45:44Z",
-   "updated": "2026-11-17T17:51:19Z",
+   "updated": "2026-11-17T19:08:04Z",
    "note": "",
-   "advanced": "2026-11-17T17:51:19Z",
+   "advanced": "2026-11-17T19:08:04Z",
    "line_loss_overrides": [
     {
      "at": "2026-11-17T03:26:36Z",
