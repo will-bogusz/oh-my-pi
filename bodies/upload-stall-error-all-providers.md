@@ -22,7 +22,7 @@ How: `transportFetch` and the cowork transport's `fetch` fallback send a body of
 
 Decisions:
 - **1 MB threshold:** a smaller body fits in the socket buffers and would always read "written", so it keeps Bun's own handling.
-- **Only socket-close errors are wrapped:** Bun pulls a chunk even for a refused connect, so connect failures, aborts and timeouts keep their errors. The new text matches every transient pattern the old did; remote compaction matched only the old wording, so it accepts the new error too.
+- **Only socket-close errors are wrapped:** Bun pulls a chunk even for a refused connect, so connect failures, aborts and timeouts keep their errors. The new text matches every transient pattern the old did; remote compaction now accepts it too.
 - **Redirects:** Bun cannot replay a streamed body, so 301/302/303/307/308 are followed here with fetch's method rules (307/308 resend the body, 303 and a POST's 301/302 become a GET, credentials dropped across origins); any other 3xx (a 300 with `Location`) is returned unfollowed.
 - Proxies (forward and CONNECT) checked; `Request` inputs and a caller's own `fetch` untouched; size is after compression.
 - **Websockets:** a failed Codex websocket send falls back to SSE, whose error is the one surfaced.
