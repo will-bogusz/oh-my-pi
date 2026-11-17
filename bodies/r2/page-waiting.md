@@ -15,11 +15,13 @@ Printing is disabled in omp's own Chrome profile by merged #18838; attached brow
 
 `uploadFile` now takes its chooser through the tab's catcher instead of a chooser wait of its own (`pagesAwaitingChooser`); the paths and contents routes, the route check's own deadline and the refusal of folders on the contents route stay. #15915 already stopped `uploadFile` swallowing later choosers; this PR reverses its cancel of a chooser `uploadFile` did not fill (7d50d3d815): a chooser whose delivery failed stays held and answerable. `handleDialog({ files })` uses the tab's route and staging, folder refusal included.
 
-On `main` a `confirm()` stops the page's script, so the click that opened it waits out the cell, the tab is reset from a fresh session that cannot see the dialog, and then killed. In a relay tab that is the user's Chrome, and an `alert()` there is accepted before the user sees it. A chooser click raises the macOS Open panel on the user's screen or is cancelled, and the model is told nothing.
+`main` already lets the click that opens a confirm or prompt return and rejects page calls while it waits. This change extends that pending state to held file choosers, preserves it across tab, frame and handle calls, and leaves alerts in connected and relay browsers for the user. A chooser click no longer raises the Open panel on the user's screen or disappears without a notice.
 
 ## Testing
 
-Headless Chrome for Testing on macOS; `user-` cases drive a separate Chromium through `cdp_url`. Base: the same tree without this change; n = 5 per arm.
+- Rebased onto current main: 345 tests pass, including the unchanged main dialog/closed-dialog and WebKit cases, cookie reads waiting for a requested navigation, held-chooser isolation, and the relay suite. `bun run check:ts` and queue precheck pass. Re-run: `bun test packages/coding-agent/test/tools/browser-{nav-frames-dialogs,upload-chooser,upload-contents,open-lease,relay*,webkit-dialogs}.test.ts`.
+
+Earlier prototype evidence, before main gained its current confirm/prompt race: headless Chrome for Testing on macOS; `user-` cases drive a separate Chromium through a CDP endpoint. Base: the prototype tree without this change; n = 5 per arm.
 
 | case | arm | n | result |
 |---|---|---|---|
@@ -49,7 +51,6 @@ Headless Chrome for Testing on macOS; `user-` cases drive a separate Chromium th
 <details><summary>Regression and prototype evidence</summary>
 
 - On the tree without this change, 26 of its tests fail: 12 in `browser-nav-frames-dialogs.test.ts`, 12 in `browser-upload-chooser.test.ts` (one is main's chooser-cancel test, now expecting the hold) and 2 in `browser-upload-contents.test.ts`; the `tab.id(n)` test fails with its fix reverted. With the input read in the page's own world, the chooser test on a page that replaced `addEventListener` fails on the 200-character `accept`, and the same page probed without that check kept the chooser reported as waiting after Puppeteer filled it. Without letting go on a failed watch, a chooser whose iframe was removed stays pending and `handleDialog({ accept: false })` fails.
-- `browser-nav-frames-dialogs`, `browser-upload-chooser`, `browser-upload-contents`, `browser-open-lease` and every `browser-relay-*` suite: 315 pass; `check:types`, oxlint and oxfmt pass. The alert auto-accept test in `browser-nav-frames-dialogs` fails now and then on this host, as before this round of fixes (2/6 and 1/6 runs).
 - `handleDialog({ files })` vs a separate `tab.chooseFiles()`, 15 runs each on gpt-5.6-luna: both 15/15, but with `chooseFiles` the model read `dialog()` as closed while a chooser waited.
 - Visible relay run of the prototype (macOS VM, CfT 150, before #16119 opened omp's own relay tabs in the background): no Open panel, focus stays in the front app, uploads answered (3/3); `main` shows the panel and reports nothing (2/2).
 
@@ -57,9 +58,10 @@ Headless Chrome for Testing on macOS; `user-` cases drive a separate Chromium th
 
 ---
 
-- [x] `bun check` passes
+- [x] `bun run check:ts` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
 
 
 
