@@ -105606,6 +105606,13 @@
     "at": "2026-11-17T00:45:46Z",
     "host": "Wills-MacBook-Pro"
    }
+  },
+  "0aed273190383246d50a7c8f00f4ff816570d2dd": {
+   "linux": {
+    "sha": "18eb4acd8787c3b090f079cb76f7e6d10bba6c96",
+    "at": "2026-11-17T00:54:12Z",
+    "host": "goliath"
+   }
   }
  },
  "plan": {
