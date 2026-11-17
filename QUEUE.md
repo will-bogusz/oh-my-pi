@@ -4,7 +4,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 
 **Opening:** not paused
 **Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-17 21:27Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 15, conflict-held 15, stacked 13, held 11, parked 3, open PRs 12, queued since the last plan 3; merged 381, closed 41
+**Counts:** openable now 15, conflict-held 15, stacked 13, held 10, parked 3, open PRs 12, queued since the last plan 4; merged 381, closed 41
 
 ## Openable now (15)
 
@@ -64,7 +64,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 | macos-keys-no-press | fix(natives): send macOS background keys to the key window without a press | computer | P2 | 3d | macos-window-order ([#19532](https://github.com/can1357/oh-my-pi/pull/19532)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-keys-no-press) |
 | macos-drag-no-change-note | fix(natives): note a macOS background drag that changed nothing readable | computer | P2 | 3d | macos-drag-confirm ([#19195](https://github.com/can1357/oh-my-pi/pull/19195)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-drag-no-change-note) |
 
-## Held (11)
+## Held (10)
 
 | id | title | area | priority | age | hold | branch |
 |---|---|---|---|---|---|---|
@@ -78,7 +78,6 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 | broker-wire-forward-compat | fix(ai): read auth-broker responses that carry fields a newer broker adds | broker |  | 0h | Will, 2026-11-17: P2; held until Will's go-ahead | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-wire-forward-compat) |
 | logger-console-level | fix(utils): apply OMP_LOG_LEVEL to the console transport | other |  | 0h | Will, 2026-11-17: P2; held until Will's go-ahead | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/logger-console-level) |
 | broker-version-skew | feat(ai,coding-agent): exchanged omp versions between auth-broker clients and the broker | auth-broker | P2 | 0h | Will, 2026-11-17: P2 proposal; held until Will's go-ahead | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-version-skew) |
-| account-switch-reason | feat(ai,coding-agent): record why a session's OAuth account switched | auth |  | 0h | Will, 2026-11-17: P2 proposal; held until Will's go-ahead | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/account-switch-reason) |
 
 ## Parked (3)
 
@@ -105,10 +104,11 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 | [#19504](https://github.com/can1357/oh-my-pi/pull/19504) | macos-handback-typed | fix(natives): give the macOS key window back after a takeover while another program types | computer | P1 | 19h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-handback-typed) |
 | [#19586](https://github.com/can1357/oh-my-pi/pull/19586) | docs-reclaim-drift | docs(auth-gateway): describe reclaim moving warm pins back | auth | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/docs-reclaim-drift) |
 
-## Queued since the last plan (3)
+## Queued since the last plan (4)
 
 | id | title | area | priority | age | branch |
 |---|---|---|---|---|---|
 | reserve-per-model-family | feat(ai): reserve per usage limit in account policies | broker |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reserve-per-model-family) |
 | deadline-ranking | feat(ai): rank an account priority by quota deadline | ai/auth |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/deadline-ranking) |
+| account-switch-reason | feat(ai,coding-agent): record why a session's OAuth account switched | auth |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/account-switch-reason) |
 | reset-consent-per-account | feat(ai,coding-agent): let an account policy decide its own saved-reset spending | broker |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-consent-per-account) |
