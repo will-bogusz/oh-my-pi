@@ -10,7 +10,7 @@ I made an element keep its `observe()` id while it stays on the page, so an id f
 | Beta's old id | resolves to a neighbour | `Element id 2 is stale` |
 | id after a navigation | `Unknown element id` | `Element id N is stale`, numbering continues |
 
-IDs name the original node in its original document, never a replacement with a matching role or label. Releasing a cached handle does not make its still-live element stale. Chromium retains the 5,000 most recently observed elements beyond the latest listing; evicted ids fail stale rather than being recycled. Tern uses per-document identity; cmux keeps its own refs.
+IDs name the original node in its original document, never a replacement with a matching role or label. Releasing a cached handle does not make its still-live element stale. A Chromium tab keeps the ids of the 5,000 most recently observed elements, or of all the latest listing's when it lists more; eviction walks only the ids it retires, and an evicted id fails stale rather than being recycled. The prompt and docs say both. Tern uses per-document identity: its kit's id map holds only elements still connected (each observe drops the rest), so it is bounded by the live DOM. With the kit on a 20,000-button page in headless Chromium (not Tern's WKWebView), that pruning pass cost 1–2 ms per observe against 72 ms for observe's own walk. cmux keeps its own refs.
 
 ## Why
 
@@ -30,3 +30,4 @@ Rejected: re-attaching an id to a "same" element by role, name and position afte
 - [x] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
