@@ -1,6 +1,6 @@
 ## What
 
-When omp drops images to fit a provider's image limit, the model now gets a short note where they were instead of a message that silently has fewer images.
+I made omp leave a short note where it drops images to fit a provider's image limit, so the model knows they're missing instead of reading the message as whole.
 
 | What the model receives after a drop | `main` | This PR |
 |---|---|---|
