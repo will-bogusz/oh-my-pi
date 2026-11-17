@@ -96686,6 +96686,24 @@
    "note": "",
    "kind": "proposal",
    "hold": "Will, 2026-11-17: P2 proposal; held until Will's go-ahead"
+  },
+  {
+   "id": "deadline-ranking",
+   "branch": "will/deadline-ranking",
+   "title": "feat(ai): rank an account priority by quota deadline",
+   "area": "ai/auth",
+   "priority": null,
+   "needs": [],
+   "base": "baf60290fde5e9eea4edb30bff07695877682ba9",
+   "body": "bodies/deadline-ranking.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/deadline-ranking",
+   "host": "MacBook-Pro",
+   "added": "2026-11-17T21:17:58Z",
+   "updated": "2026-11-17T21:17:58Z",
+   "note": ""
   }
  ],
  "watch": {
