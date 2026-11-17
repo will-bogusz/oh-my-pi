@@ -105778,6 +105778,11 @@
     "sha": "dbb1b0cb6428a485739fca92c789000c048d3ce3",
     "at": "2026-11-17T02:09:43Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "dbb1b0cb6428a485739fca92c789000c048d3ce3",
+    "at": "2026-11-17T02:16:16Z",
+    "host": "goliath"
    }
   },
   "f4574ac73f7b731628551e51659e3ffd55a65c14": {
