@@ -95072,8 +95072,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-web-type-background",
    "host": "MacBook-Pro",
    "added": "2026-11-14T20:50:44Z",
-   "updated": "2026-11-17T01:58:57Z",
-   "note": "Review TypingTakeover.ReviewWebTypeBg (needs-changes at 2c228a57b6): each finding fixed with a test that fails on revert (FocusProof named/none/unreadable, read-back by expected kind, Return/Tab unconfirmed, wrong-recipient/iframe cells). Textually clean with fix 1 and #16553; merged trees tested: fix2 x #16553 162aebd2093 (1016 lib tests pass), fix1 + #16553 + rule + fix2 d42a3be372d (1024 pass). rust-check linux/windows/macos at diff fd6d80baa1."
+   "updated": "2026-11-17T02:46:06Z",
+   "note": "MacLockWaits 2026-11-17: head 82a12571c8b on base 7c49c11aa5b. Self-focus proof and ancestry share the focus wait's deadline (enablement::budget per request, ancestry only when AXFocused is true); last answer in time decides; read-back every request bounded by time left of 1 s, cancel -> unconfirmed, element timeout restored; prompt states the unconfirmed exception; coding-agent CHANGELOG Fixed line. Reviews m4 MacLockWaitsReview + MacLockWaitsReview2 approve finding 3. rust-check macos/linux/windows at Rust diff b431ff573c. Not VM re-measured (tables from 521fdb3ad7b)."
   },
   {
    "id": "dialog-closed-state",
