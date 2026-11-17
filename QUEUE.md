@@ -3,7 +3,7 @@
 Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17 03:15Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-17 02:53Z on MacBook-Pro; groups below are from it, states from the manifest)
+**Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-17 03:14Z on MacBook-Pro; groups below are from it, states from the manifest)
 **Counts:** openable now 3, conflict-held 22, stacked 14, held 12, parked 2, open PRs 8; merged 376, closed 37
 
 ## Openable now (3)
@@ -91,7 +91,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 | [#16611](https://github.com/can1357/oh-my-pi/pull/16611) | read-audio-transcripts | feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio | catalog | P2 | 26d | rebase | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-audio-transcripts) |
 | [#17897](https://github.com/can1357/oh-my-pi/pull/17897) | iphone-mirror-key-gap | perf(natives): type on iPhone Mirroring twice as fast | computer | P2 | 14d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-key-gap) |
 | [#17756](https://github.com/can1357/oh-my-pi/pull/17756) | iphone-mirror-pointer | fix(natives): keep background iPhone Mirroring taps reaching the phone after a takeover tap | computer | P1 | 14d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-pointer) |
-| [#19513](https://github.com/can1357/oh-my-pi/pull/19513) | upload-stall-error-all-providers | fix(ai,agent): say how far a request body uploaded when any provider's connection drops | other | P1 | 7d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/upload-stall-error-all-providers) |
+| [#19513](https://github.com/can1357/oh-my-pi/pull/19513) | upload-stall-error-all-providers | fix(ai,agent): say how far a request body uploaded when any provider's connection drops | other | P1 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/upload-stall-error-all-providers) |
 | [#19100](https://github.com/can1357/oh-my-pi/pull/19100) | computer-run-failure-output | fix(computer): retain output and screenshots when a run fails | computer | P1 | 4d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-run-failure-output) |
 | [#19195](https://github.com/can1357/oh-my-pi/pull/19195) | macos-drag-confirm | fix(natives): stop macOS background drags reporting moves that did not happen | computer | P1 | 3d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-drag-confirm) |
 | [#19509](https://github.com/can1357/oh-my-pi/pull/19509) | macos-move-receipt-r2 | fix(coding-agent): say once that a macOS background move gives no hover | computer | P1 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-move-receipt-r2) |
