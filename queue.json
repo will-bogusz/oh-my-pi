@@ -96292,7 +96292,7 @@
    "area": "natives",
    "priority": "P2",
    "needs": [],
-   "base": "6425ef0e8d2fea1915e351a9f325d9eadb3139d9",
+   "base": "276169d5168bbbb8196ca090661296fb5a23721a",
    "body": "bodies/wayland-input-refusal.md",
    "state": "queued",
    "pr": null,
@@ -96300,7 +96300,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-input-refusal",
    "host": "MacBook-Pro",
    "added": "2026-11-17T20:29:55Z",
-   "updated": "2026-11-17T20:29:55Z",
+   "updated": "2026-11-17T21:13:29Z",
    "note": "",
    "tests_over_override": {
     "reason": "OmarchyFixes, 2026-11-17: one test going through all 8 gated input arms; each request is an arm no other test reaches",
