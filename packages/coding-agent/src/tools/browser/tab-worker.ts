@@ -2174,6 +2174,18 @@ export class WorkerCore {
 		this.#transport.send({ type: "result", ...result, ...(hiddenFrames.length > 0 ? { hiddenFrames } : {}) });
 	}
 
+	/**
+	 * The relay keeps a popup this page opens behind the user's selection, where Chromium stops rendering it;
+	 * focus emulation keeps it rendering and taking input, as for the page itself. Puppeteer reports a popup's
+	 * own popups on the popup, so each one gets this handler too.
+	 */
+	readonly #onRelayPopup = (popup: Page | null): void => {
+		if (!popup) return;
+		popup.on("popup", this.#onRelayPopup);
+		// The popup may close before the command lands; there is nothing to keep rendering then.
+		void popup.emulateFocusedPage(true).catch(() => undefined);
+	};
+
 	constructor(transport: Transport, isolated: boolean) {
 		this.#transport = transport;
 		this.#isolated = isolated;
@@ -2355,6 +2367,7 @@ export class WorkerCore {
 				// this connection's session (on the relay, with the bridge's last session).
 				await this.#page.emulateFocusedPage(true);
 			}
+			if (payload.mode === "attach" && payload.relay === true) this.#page.on("popup", this.#onRelayPopup);
 			this.#webmcp = new WebMcpController(this.#page);
 			// Nobody else drives a browser omp launched, so its tabs hold every file chooser; the user's own browser only
 			// while omp acts, so the page's upload buttons still work for the user.

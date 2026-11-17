@@ -98,13 +98,22 @@ declare const chrome: {
 		onUpdated: ChromeEvent<(tabId: number, changeInfo: ChromeTabChangeInfo, tab: ChromeTab) => void>;
 		onActivated: ChromeEvent<(info: { tabId: number; windowId: number }) => void>;
 		onRemoved: ChromeEvent<(tabId: number, removeInfo: { windowId: number }) => void>;
+		onAttached: ChromeEvent<(tabId: number, attachInfo: { newWindowId: number; newPosition: number }) => void>;
 	};
 	tabGroups: {
 		query(queryInfo: { title?: string; windowId?: number }): Promise<Array<{ id: number; windowId: number; title?: string }>>;
 		update(groupId: number, updateProperties: { title?: string; color?: string; collapsed?: boolean }): Promise<unknown>;
 	};
 	windows: {
+		get(windowId: number): Promise<{ id?: number; type?: string; state?: string; focused: boolean }>;
+		getLastFocused(queryOptions?: { windowTypes?: string[] }): Promise<{ id?: number; focused: boolean }>;
 		update(windowId: number, updateInfo: { focused?: boolean }): Promise<unknown>;
+		onCreated: ChromeEvent<(window: { id?: number; type?: string }) => void>;
+		onFocusChanged: ChromeEvent<(windowId: number) => void>;
+		onRemoved: ChromeEvent<(windowId: number) => void>;
+	};
+	webNavigation: {
+		onCreatedNavigationTarget: ChromeEvent<(details: { sourceTabId: number; tabId: number; url: string }) => void>;
 	};
 	debugger: {
 		attach(target: ChromeDebuggerSession, requiredVersion: string): Promise<void>;

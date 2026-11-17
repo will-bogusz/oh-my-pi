@@ -143,7 +143,17 @@ async function launchRelayFixture(
 								: route === "/framed"
 									? // Another site (localhost, not 127.0.0.1), so Chrome runs the frame in its own process and session.
 										`<title>Framed</title><iframe src="http://localhost:${url.port}/download"></iframe>`
-									: "<title>Human sentinel</title><h1>Keep me</h1>";
+									: route === "/opener"
+										? `<title>Opener</title><a id="link" target="_blank" href="/popup?k=link">link</a>
+<button id="open" onclick="window.open('/popup?k=open')">open</button>
+<button id="window" onclick="window.open('/popup?k=window', '', 'width=300,height=300')">window</button>
+<iframe src="http://localhost:${new URL(request.url).port}/frame"></iframe>`
+										: route === "/frame"
+											? `<a id="frame" target="_blank" href="http://127.0.0.1:${new URL(request.url).port}/popup?k=frame">frame</a>`
+											: route === "/popup"
+												? `<title>Popup</title><button id="b" onclick="this.textContent='clicked'">b</button><input id="i">
+<button id="nest" onclick="window.open('/popup?k=nested')">nest</button>`
+												: "<title>Human sentinel</title><h1>Keep me</h1>";
 			return new Response(html, { headers: { "Content-Type": "text/html" } });
 		},
 	});
@@ -518,6 +528,146 @@ describe.skipIf(!CHROMIUM_AVAILABLE)("relay tab ownership", () => {
 			expect(read.returnValue).toBe("Human sentinel");
 		} finally {
 			for (const name of names) await releaseTab(name).catch(() => undefined);
+			await releaseBrowser(relay, { kill: false });
+			await fixture.close();
+		}
+	}, 60_000);
+
+	it("owns popups omp's tab opens and keeps them behind the user's selection", async () => {
+		const fixture = await launchRelayFixture();
+		const human = await fixture.browser.newPage();
+		const humanUrl = `${fixture.origin}/human`;
+		await human.goto(humanUrl);
+		await human.bringToFront();
+		const relay = await acquireBrowser({ kind: "relay", cdpUrl: fixture.cdpUrl }, { cwd: process.cwd() });
+		const name = `relay-popups-${process.pid}`;
+		try {
+			await acquireTab(name, relay, { url: `${fixture.origin}/opener`, timeoutMs: 15_000 });
+			// A blank tab the user opens by hand stays theirs.
+			await fixture.browser.newPage();
+			await human.bringToFront();
+			const humanTabId = await chromeTabIdOf(fixture, humanUrl);
+			const blankTabId = await chromeTabIdOf(fixture, "about:blank");
+			// Headless Chrome reports every window focused, so this holds the user's focus fixed; the visible run checks it.
+			const userWindowFocused = () =>
+				fixture.inExtension(
+					`chrome.tabs.get(${humanTabId}).then(tab => chrome.windows.get(tab.windowId)).then(window => window.focused)`,
+				);
+			const focusedBefore = await userWindowFocused();
+			// The last opens from a cross-site frame, which Chrome runs in its own process.
+			const outOfProcess = await runInTab(name, {
+				code: `const frame = page.frames().find(frame => frame.url().includes("/frame"));
+return frame.client !== page.mainFrame().client;`,
+				timeoutMs: 10_000,
+				session,
+			});
+			expect(outOfProcess.returnValue).toBeTrue();
+			for (const key of ["link", "open", "window", "frame"]) {
+				const click =
+					key === "frame"
+						? `await page.frames().find(frame => frame.url().includes("/frame")).click("#frame");`
+						: `await tab.click("#${key}");`;
+				const opened = await runInTab(name, {
+					code: `const popup = Promise.withResolvers();
+page.once("popup", popup.resolve);
+${click}
+const got = await popup.promise;
+await got.waitForFunction(() => location.search === "?k=${key}");
+return got.url();`,
+					timeoutMs: 10_000,
+					session,
+				});
+				expect(opened.returnValue).toBe(`${fixture.origin}/popup?k=${key}`);
+				const popupTabId = await chromeTabIdOf(fixture, `${fixture.origin}/popup?k=${key}`);
+				expect(await relayAttached(fixture, popupTabId)).toBeTrue();
+				// Wait for the relay's selection change; a popup window stays where Chrome put it, not minimized.
+				const expected =
+					key === "window" ? { window: "popup", state: "normal" } : { active: false, window: "normal" };
+				const placement = await fixture.inExtension(`(async () => {
+					const { promise, resolve, reject } = Promise.withResolvers();
+					const expected = ${JSON.stringify(expected)};
+					const inspect = async () => {
+						const tab = await chrome.tabs.get(${popupTabId});
+						const window = await chrome.windows.get(tab.windowId);
+						const placement = { active: tab.active, window: window.type, state: window.state };
+						if (Object.entries(expected).every(([field, value]) => placement[field] === value)) {
+							chrome.tabs.onActivated.removeListener(changed);
+							resolve(placement);
+						}
+					};
+					const changed = () => {
+						void inspect().catch(error => {
+							chrome.tabs.onActivated.removeListener(changed);
+							reject(error);
+						});
+					};
+					chrome.tabs.onActivated.addListener(changed);
+					changed();
+					return promise;
+				})()`);
+				expect(placement).toMatchObject(expected);
+				// Where it was put, the popup still renders and takes pointer and keyboard input.
+				const driven = await runInTab(name, {
+					code: `const got = (await page.browser().pages()).find(p => p.url().endsWith("?k=${key}"));
+const shot = await got.screenshot();
+await got.click("#b");
+await got.type("#i", "typed");
+return { visible: await got.evaluate(() => document.visibilityState), shot: shot.length > 0,
+	button: await got.$eval("#b", b => b.textContent), input: await got.$eval("#i", i => i.value) };`,
+					timeoutMs: 10_000,
+					session,
+				});
+				expect(driven.returnValue).toEqual({ visible: "visible", shot: true, button: "clicked", input: "typed" });
+				expect(await chromeTab(fixture, humanTabId)).toEqual({ active: true });
+				expect(await userWindowFocused()).toBe(focusedBefore);
+				expect(
+					await fixture.inExtension(`chrome.tabs.get(${popupTabId}).then(async tab => {
+						const window = await chrome.windows.get(tab.windowId);
+						return { active: tab.active, window: window.type, state: window.state };
+					})`),
+				).toMatchObject(expected);
+			}
+			expect(await relayAttached(fixture, blankTabId)).toBeFalse();
+		} finally {
+			await releaseTab(name).catch(() => undefined);
+			await releaseBrowser(relay, { kill: false });
+			await fixture.close();
+		}
+	}, 60_000);
+
+	it("keeps a popup's own popup rendering and taking input behind the user's selection", async () => {
+		const fixture = await launchRelayFixture();
+		const human = await fixture.browser.newPage();
+		const humanUrl = `${fixture.origin}/human`;
+		await human.goto(humanUrl);
+		await human.bringToFront();
+		const relay = await acquireBrowser({ kind: "relay", cdpUrl: fixture.cdpUrl }, { cwd: process.cwd() });
+		const name = `relay-nested-popup-${process.pid}`;
+		try {
+			await acquireTab(name, relay, { url: `${fixture.origin}/opener`, timeoutMs: 15_000 });
+			const humanTabId = await chromeTabIdOf(fixture, humanUrl);
+			const driven = await runInTab(name, {
+				code: `const child = Promise.withResolvers();
+page.once("popup", child.resolve);
+await tab.click("#open");
+const popup = await child.promise;
+await popup.waitForSelector("#nest");
+const grandchild = Promise.withResolvers();
+popup.once("popup", grandchild.resolve);
+await popup.click("#nest");
+const got = await grandchild.promise;
+await got.waitForFunction(() => location.search === "?k=nested");
+await got.click("#b");
+await got.type("#i", "typed");
+return { focus: await got.evaluate(() => document.hasFocus()), visible: await got.evaluate(() => document.visibilityState),
+	button: await got.$eval("#b", b => b.textContent), input: await got.$eval("#i", i => i.value) };`,
+				timeoutMs: 15_000,
+				session,
+			});
+			expect(driven.returnValue).toEqual({ focus: true, visible: "visible", button: "clicked", input: "typed" });
+			expect(await chromeTab(fixture, humanTabId)).toEqual({ active: true });
+		} finally {
+			await releaseTab(name).catch(() => undefined);
 			await releaseBrowser(relay, { kill: false });
 			await fixture.close();
 		}
