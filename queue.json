@@ -107019,12 +107019,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-17T04:27:15.965298Z",
+  "at": "2026-11-17T04:40:10.443225Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 4,
-   "left": 4
+   "used": 5,
+   "left": 3
   },
   "rows": [
    {
@@ -107221,6 +107221,23 @@
     "created": "2026-11-17T04:19:37Z"
    },
    {
+    "id": "atspi-walk-reads",
+    "label": "#19521",
+    "number": 19521,
+    "state": "open",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): read each AT-SPI element in two concurrent rounds",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-17T04:39:20Z"
+   },
+   {
     "id": "browser-select-objects",
     "label": "#19518",
     "number": 19518,
@@ -107236,23 +107253,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-17T04:15:36Z"
-   },
-   {
-    "id": "atspi-walk-reads",
-    "label": "atspi-walk-reads",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives): read each AT-SPI element in two concurrent rounds",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-03T09:05:24Z"
    },
    {
     "id": "covered-fill",
@@ -107321,23 +107321,12 @@
     "title": "fix(natives): release X11 XTest keys and buttons a killed omp held",
     "action": "wait",
     "reasons": [
-     "conflicts with #19100 in docs/tools/computer.md",
-     "conflicts with #19195 in docs/computer-use.md",
-     "conflicts with #19515 in docs/computer-use.md",
-     "conflicts with #19509 in docs/tools/computer.md",
-     "conflicts with #19516 in docs/computer-use.md",
-     "conflicts with #19519 in crates/pi-natives/src/desktop/linux/x11/input.rs, crates/pi-natives/src/desktop/linux/x11/mod.rs",
-     "conflicts with main in crates/pi-natives/src/desktop/linux/x11/input.rs, docs/computer-use.md, docs/tools/computer.md"
+     "conflicts with #19519 in crates/pi-natives/src/desktop/linux/x11/input.rs, crates/pi-natives/src/desktop/linux/x11/mod.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#19100",
-     "#19195",
-     "#19515",
-     "#19509",
-     "#19516",
      "#19519"
     ],
     "needs": [],
@@ -107726,7 +107715,7 @@
      "conflicts with #19195 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19516 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19519 in crates/pi-natives/src/desktop/mod.rs",
-     "conflicts with atspi-walk-reads in crates/pi-natives/src/desktop/linux/ax.rs",
+     "conflicts with #19521 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with main in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs"
     ],
     "note": "",
@@ -107736,7 +107725,7 @@
      "#19195",
      "#19516",
      "#19519",
-     "atspi-walk-reads"
+     "#19521"
     ],
     "needs": [],
     "created": "2026-11-11T10:16:04Z"
@@ -107806,6 +107795,7 @@
     "title": "feat(browser): print what each browser action did to the page",
     "action": "wait",
     "reasons": [
+     "conflicts with #19518 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with covered-fill in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with browser-wait-predicate in docs/tools/browser.md"
     ],
@@ -107813,6 +107803,7 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#19518",
      "covered-fill",
      "browser-wait-predicate"
     ],
