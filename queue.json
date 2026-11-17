@@ -107605,12 +107605,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-17T20:54:57.675338Z",
+  "at": "2026-11-17T20:59:10.700689Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 1,
+   "left": 7
   },
   "rows": [
    {
@@ -107807,6 +107807,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-17T09:37:09Z"
+   },
+   {
+    "id": "docs-reclaim-drift",
+    "label": "#19586",
+    "number": 19586,
+    "state": "open",
+    "area": "auth",
+    "priority": null,
+    "title": "docs(auth-gateway): describe reclaim moving warm pins back",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-17T20:58:20Z"
    },
    {
     "id": "iphone-mirror-scroll-distance",
@@ -108639,6 +108656,23 @@
     "created": "2026-11-03T01:54:17Z"
    },
    {
+    "id": "image-eviction-notice",
+    "label": "image-eviction-notice",
+    "number": null,
+    "state": "queued",
+    "area": "other",
+    "priority": null,
+    "title": "fix(coding-agent): mark images the provider image limit evicts in place",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-17T20:57:09Z"
+   },
+   {
     "id": "stats-live-appends",
     "label": "stats-live-appends",
     "number": null,
@@ -108673,23 +108707,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-10-31T21:07:28Z"
-   },
-   {
-    "id": "docs-reclaim-drift",
-    "label": "docs-reclaim-drift",
-    "number": null,
-    "state": "queued",
-    "area": "auth",
-    "priority": null,
-    "title": "docs(auth-gateway): describe reclaim moving warm pins back",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-17T20:54:14Z"
    },
    {
     "id": "wire-delta-count",
