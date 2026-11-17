@@ -65742,7 +65742,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-walk-reads",
    "host": "MacBook-Pro",
    "added": "2026-11-03T09:05:24Z",
-   "updated": "2026-11-17T03:38:20Z",
+   "updated": "2026-11-17T04:01:21Z",
    "note": "LinuxGrabs, 2026-11-17: rebased onto main 1bdbf6d242d as one commit 6e14a2ffdba (local branch in ~/.omp/main-wt/oh-my-pi/atspi-walk-reads; fork branch still the old 35a9e15702d, not pushed), carrying #19036's bounded child reads (from trial 3f71f7f3588). Measured as 7c83575f996 on bf9a9fbd40e (same Rust diff) on a goliath box vs main; raw data ~/tmp/oh-my-pi/LinuxGrabs/bench*.jsonl. Linux rust-check recorded; Astra review: code ready, body placeholders since filled.",
    "advanced": "2026-11-17T03:19:46Z",
    "line_loss_overrides": [
@@ -65844,12 +65844,21 @@
    ],
    "built": [
     {
+     "with": "macos-reroute-not-a-press",
+     "code": "dbf2d593cf4a3314564fca87e95cda96dbc587e4",
+     "with_code": "2d99602bd4c01e6c5042d0a1982c2eb5ea7f3481",
+     "tip": "90d9086bde6a6020ac89df78294beedb885448de",
+     "with_tip": "5edae5aa59216855335b891f2c929ae083245f86",
+     "at": "2026-11-17T03:38:20Z",
+     "host": "MacBook-Pro"
+    },
+    {
      "with": "#17756",
      "code": "dbf2d593cf4a3314564fca87e95cda96dbc587e4",
      "with_code": "00b33a7b015bc7730a8a6926657f2a3f49039187",
      "tip": "90d9086bde6a6020ac89df78294beedb885448de",
      "with_tip": "5fa26ba5481db59442c67c224e6eb42cf2131d83",
-     "at": "2026-11-17T03:38:15Z",
+     "at": "2026-11-17T04:01:10Z",
      "host": "MacBook-Pro"
     },
     {
@@ -65858,7 +65867,7 @@
      "with_code": "9cb775e8f735e281467b990231772a3c6b7fa35b",
      "tip": "90d9086bde6a6020ac89df78294beedb885448de",
      "with_tip": "008596298a587cdeb99733695dfa5ec5a06fdbfa",
-     "at": "2026-11-17T03:38:19Z",
+     "at": "2026-11-17T04:01:19Z",
      "host": "MacBook-Pro"
     },
     {
@@ -65867,7 +65876,7 @@
      "with_code": "2bbb547591ae156ccac7af195b43202e415d1bd2",
      "tip": "90d9086bde6a6020ac89df78294beedb885448de",
      "with_tip": "1630d69fc76fc75c713722e3bb2742c2db302bab",
-     "at": "2026-11-17T03:38:20Z",
+     "at": "2026-11-17T04:01:19Z",
      "host": "MacBook-Pro"
     },
     {
@@ -65876,16 +65885,25 @@
      "with_code": "e41fbf6b9a34a8290bfb3b95be76b15e0fbe30da",
      "tip": "90d9086bde6a6020ac89df78294beedb885448de",
      "with_tip": "e01f4c4530a38eb4f259737574dd9557dac1ab72",
-     "at": "2026-11-17T03:38:20Z",
+     "at": "2026-11-17T04:01:19Z",
      "host": "MacBook-Pro"
     },
     {
-     "with": "macos-reroute-not-a-press",
+     "with": "#19515",
      "code": "dbf2d593cf4a3314564fca87e95cda96dbc587e4",
-     "with_code": "2d99602bd4c01e6c5042d0a1982c2eb5ea7f3481",
+     "with_code": "659168553fb0799f6edfa9b006a04b8709d521dd",
      "tip": "90d9086bde6a6020ac89df78294beedb885448de",
-     "with_tip": "5edae5aa59216855335b891f2c929ae083245f86",
-     "at": "2026-11-17T03:38:20Z",
+     "with_tip": "af0b9bc40129722fe54b88f2d70d79a526db9255",
+     "at": "2026-11-17T04:01:20Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "x11-keysym-remap",
+     "code": "dbf2d593cf4a3314564fca87e95cda96dbc587e4",
+     "with_code": "6d4331bc3c7625d0229fade13237280aba610203",
+     "tip": "90d9086bde6a6020ac89df78294beedb885448de",
+     "with_tip": "719b46266b0c47af26e0011a7d1a784104e4cb23",
+     "at": "2026-11-17T04:01:20Z",
      "host": "MacBook-Pro"
     }
    ]
