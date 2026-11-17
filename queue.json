@@ -96342,6 +96342,24 @@
    "added": "2026-11-17T20:51:19Z",
    "updated": "2026-11-17T20:51:19Z",
    "note": ""
+  },
+  {
+   "id": "devin-image-budgets",
+   "branch": "will/devin-image-budgets",
+   "title": "fix(catalog): carry Devin's measured image limits",
+   "area": "catalog",
+   "priority": null,
+   "needs": [],
+   "base": "baf60290fde5e9eea4edb30bff07695877682ba9",
+   "body": "bodies/devin-image-budgets.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-image-budgets",
+   "host": "MacBook-Pro",
+   "added": "2026-11-17T20:52:57Z",
+   "updated": "2026-11-17T20:52:57Z",
+   "note": ""
   }
  ],
  "watch": {
