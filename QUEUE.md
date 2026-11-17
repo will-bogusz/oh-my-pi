@@ -4,7 +4,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 
 **Opening:** not paused
 **Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-17 21:00Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 9, conflict-held 16, stacked 13, held 9, parked 3, open PRs 12, queued since the last plan 3; merged 381, closed 41
+**Counts:** openable now 9, conflict-held 16, stacked 13, held 10, parked 3, open PRs 12, queued since the last plan 2; merged 381, closed 41
 
 ## Openable now (9)
 
@@ -59,7 +59,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 | macos-keys-no-press | fix(natives): send macOS background keys to the key window without a press | computer | P2 | 3d | macos-window-order ([#19532](https://github.com/can1357/oh-my-pi/pull/19532)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-keys-no-press) |
 | macos-drag-no-change-note | fix(natives): note a macOS background drag that changed nothing readable | computer | P2 | 3d | macos-drag-confirm ([#19195](https://github.com/can1357/oh-my-pi/pull/19195)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-drag-no-change-note) |
 
-## Held (9)
+## Held (10)
 
 | id | title | area | priority | age | hold | branch |
 |---|---|---|---|---|---|---|
@@ -72,6 +72,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 | win-type-insert | feat(natives): insert typed text into a focused Windows multi-line edit control | computer | P2 | 5d | Main, 2026-11-12: proposal; opens only after entry A merges and Will has seen the body | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-type-insert) |
 | broker-wire-forward-compat | fix(ai): read auth-broker responses that carry fields a newer broker adds | broker |  | 0h | Will, 2026-11-17: P2; held until Will's go-ahead | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-wire-forward-compat) |
 | logger-console-level | fix(utils): apply OMP_LOG_LEVEL to the console transport | other |  | 0h | Will, 2026-11-17: P2; held until Will's go-ahead | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/logger-console-level) |
+| broker-version-skew | feat(ai,coding-agent): exchanged omp versions between auth-broker clients and the broker | auth-broker | P2 | 0h | Will, 2026-11-17: P2 proposal; held until Will's go-ahead | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-version-skew) |
 
 ## Parked (3)
 
@@ -98,10 +99,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 | [#19504](https://github.com/can1357/oh-my-pi/pull/19504) | macos-handback-typed | fix(natives): give the macOS key window back after a takeover while another program types | computer | P1 | 19h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-handback-typed) |
 | [#19586](https://github.com/can1357/oh-my-pi/pull/19586) | docs-reclaim-drift | docs(auth-gateway): describe reclaim moving warm pins back | auth | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/docs-reclaim-drift) |
 
-## Queued since the last plan (3)
+## Queued since the last plan (2)
 
 | id | title | area | priority | age | branch |
 |---|---|---|---|---|---|
 | reset-spend-log | feat(coding-agent): log every saved-reset spend attempt at info | coding-agent |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-spend-log) |
 | broker-shutdown-refresh-save | fix(coding-agent): let auth-broker serve save an in-flight refresh before exit | broker |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-shutdown-refresh-save) |
-| broker-version-skew | feat(ai,coding-agent): exchanged omp versions between auth-broker clients and the broker | auth-broker | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-version-skew) |
