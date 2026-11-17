@@ -95150,7 +95150,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-reroute-not-a-press",
    "host": "MacBook-Pro",
    "added": "2026-11-14T20:50:07Z",
-   "updated": "2026-11-17T03:18:14Z",
+   "updated": "2026-11-17T03:24:57Z",
    "note": "MacLockWaits 2026-11-17: taken over from Main; rebased onto main 1bdbf6d242d as 5edae5aa592 over #16553 and Brit's 760422a2052 (releases stay out of last_press). Combined observe_user = main's + input_target(.., |pid| rerouted_to(pid, event)); Main approved the form. Earlier review TypingTakeover.ReviewRerouteRule needs-changes at d23777b14e, all 7 fixed (not re-reviewed). macOS desktop tests 486 pass; rust-check macos/linux/windows at Rust diff 15cd8383fc. VM tables measured before the rebase (fe194ec2f12).",
    "rebases_after": [
     16553
@@ -95172,7 +95172,45 @@
      }
     }
    ],
-   "advanced": "2026-11-17T03:18:14Z"
+   "advanced": "2026-11-17T03:18:14Z",
+   "built": [
+    {
+     "with": "#17756",
+     "code": "2d99602bd4c01e6c5042d0a1982c2eb5ea7f3481",
+     "with_code": "00b33a7b015bc7730a8a6926657f2a3f49039187",
+     "tip": "5edae5aa59216855335b891f2c929ae083245f86",
+     "with_tip": "5fa26ba5481db59442c67c224e6eb42cf2131d83",
+     "at": "2026-11-17T03:24:51Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19195",
+     "code": "2d99602bd4c01e6c5042d0a1982c2eb5ea7f3481",
+     "with_code": "9cb775e8f735e281467b990231772a3c6b7fa35b",
+     "tip": "5edae5aa59216855335b891f2c929ae083245f86",
+     "with_tip": "008596298a587cdeb99733695dfa5ec5a06fdbfa",
+     "at": "2026-11-17T03:24:56Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#17897",
+     "code": "2d99602bd4c01e6c5042d0a1982c2eb5ea7f3481",
+     "with_code": "2bbb547591ae156ccac7af195b43202e415d1bd2",
+     "tip": "5edae5aa59216855335b891f2c929ae083245f86",
+     "with_tip": "1630d69fc76fc75c713722e3bb2742c2db302bab",
+     "at": "2026-11-17T03:24:56Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19504",
+     "code": "2d99602bd4c01e6c5042d0a1982c2eb5ea7f3481",
+     "with_code": "e41fbf6b9a34a8290bfb3b95be76b15e0fbe30da",
+     "tip": "5edae5aa59216855335b891f2c929ae083245f86",
+     "with_tip": "e01f4c4530a38eb4f259737574dd9557dac1ab72",
+     "at": "2026-11-17T03:24:56Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "macos-web-type-background",
