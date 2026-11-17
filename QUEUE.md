@@ -1,10 +1,10 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17 20:58Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17 20:59Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-17 20:54Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 6, conflict-held 16, stacked 13, held 7, parked 3, open PRs 12, queued since the last plan 1; merged 381, closed 41
+**Counts:** openable now 6, conflict-held 16, stacked 13, held 7, parked 3, open PRs 12, queued since the last plan 2; merged 381, closed 41
 
 ## Openable now (6)
 
@@ -93,8 +93,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 | [#19504](https://github.com/can1357/oh-my-pi/pull/19504) | macos-handback-typed | fix(natives): give the macOS key window back after a takeover while another program types | computer | P1 | 19h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-handback-typed) |
 | [#19586](https://github.com/can1357/oh-my-pi/pull/19586) | docs-reclaim-drift | docs(auth-gateway): describe reclaim moving warm pins back | auth |  | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/docs-reclaim-drift) |
 
-## Queued since the last plan (1)
+## Queued since the last plan (2)
 
 | id | title | area | priority | age | branch |
 |---|---|---|---|---|---|
 | image-eviction-notice | fix(coding-agent): mark images the provider image limit evicts in place | other |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/image-eviction-notice) |
+| usage-state-per-model | fix(coding-agent): judge omp usage policy state by account-wide windows | broker |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/usage-state-per-model) |

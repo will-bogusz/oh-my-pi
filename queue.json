@@ -96398,6 +96398,24 @@
    "added": "2026-11-17T20:57:09Z",
    "updated": "2026-11-17T20:58:53Z",
    "note": ""
+  },
+  {
+   "id": "usage-state-per-model",
+   "branch": "will/usage-state-per-model",
+   "title": "fix(coding-agent): judge omp usage policy state by account-wide windows",
+   "area": "broker",
+   "priority": null,
+   "needs": [],
+   "base": "baf60290fde5e9eea4edb30bff07695877682ba9",
+   "body": "bodies/usage-state-per-model.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/usage-state-per-model",
+   "host": "MacBook-Pro",
+   "added": "2026-11-17T20:59:31Z",
+   "updated": "2026-11-17T20:59:31Z",
+   "note": ""
   }
  ],
  "watch": {
