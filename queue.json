@@ -108992,12 +108992,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-17T22:49:40.772045Z",
+  "at": "2026-11-17T23:09:52.518215Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 2,
-   "left": 6
+   "used": 4,
+   "left": 4
   },
   "rows": [
    {
@@ -109211,6 +109211,57 @@
     "created": "2026-11-17T07:14:26Z"
    },
    {
+    "id": "broker-client-startup-retry",
+    "label": "#19598",
+    "number": 19598,
+    "state": "open",
+    "area": "broker",
+    "priority": "P1",
+    "title": "fix(ai): retry the initial auth-broker snapshot through a broker restart",
+    "action": "keep",
+    "reasons": [],
+    "note": "tests-over: BrokerClientStartupRetry, 2026-11-17: four distinct branches (retry succeeds; non-transient answer fails at once; retry off for runtime switch; deadline cancels an in-flight request), each failing or pinning main's outcome; over by 8 lines of imports and server setup",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-17T23:00:35Z"
+   },
+   {
+    "id": "broker-shutdown-refresh-save",
+    "label": "#19599",
+    "number": 19599,
+    "state": "open",
+    "area": "broker",
+    "priority": "P1",
+    "title": "fix(coding-agent): let auth-broker serve save an in-flight refresh before exit",
+    "action": "keep",
+    "reasons": [],
+    "note": "tests-over: ReviewBrokerShutdown, 2026-11-17: one regression test; the exit race exists only in a spawned omp auth-broker serve process, so its lines are process and fixture setup",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-17T23:04:12Z"
+   },
+   {
+    "id": "fable-shared-wall-block",
+    "label": "#19600",
+    "number": 19600,
+    "state": "open",
+    "area": "broker",
+    "priority": "P1",
+    "title": "fix(ai): heal Claude tier blocks a shared weekly wall caused from single-window usage reports",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-17T23:07:49Z"
+   },
+   {
     "id": "x11-xtest-release",
     "label": "#19531",
     "number": 19531,
@@ -109264,47 +109315,13 @@
     "created": "2026-11-17T22:07:16Z"
    },
    {
-    "id": "broker-client-startup-retry",
-    "label": "broker-client-startup-retry",
+    "id": "devin-gemini-promo-prices",
+    "label": "devin-gemini-promo-prices",
     "number": null,
     "state": "queued",
-    "area": "broker",
+    "area": "catalog",
     "priority": "P1",
-    "title": "fix(ai): retry the initial auth-broker snapshot through a broker restart",
-    "action": "open",
-    "reasons": [],
-    "note": "tests-over: BrokerClientStartupRetry, 2026-11-17: four distinct branches (retry succeeds; non-transient answer fails at once; retry off for runtime switch; deadline cancels an in-flight request), each failing or pinning main's outcome; over by 8 lines of imports and server setup",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-17T21:08:05Z"
-   },
-   {
-    "id": "broker-shutdown-refresh-save",
-    "label": "broker-shutdown-refresh-save",
-    "number": null,
-    "state": "queued",
-    "area": "broker",
-    "priority": "P1",
-    "title": "fix(coding-agent): let auth-broker serve save an in-flight refresh before exit",
-    "action": "open",
-    "reasons": [],
-    "note": "tests-over: ReviewBrokerShutdown, 2026-11-17: one regression test; the exit race exists only in a spawned omp auth-broker serve process, so its lines are process and fixture setup",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-17T21:03:11Z"
-   },
-   {
-    "id": "fable-shared-wall-block",
-    "label": "fable-shared-wall-block",
-    "number": null,
-    "state": "queued",
-    "area": "broker",
-    "priority": "P1",
-    "title": "fix(ai): heal Claude tier blocks a shared weekly wall caused from single-window usage reports",
+    "title": "fix(catalog): switch Devin's Gemini promo prices to list when each promo ends",
     "action": "open",
     "reasons": [],
     "note": "",
@@ -109312,7 +109329,7 @@
     "paired": [],
     "blocked_by": [],
     "needs": [],
-    "created": "2026-11-17T20:59:40Z"
+    "created": "2026-11-17T20:51:19Z"
    },
    {
     "id": "iphone-mirror-scroll-distance",
@@ -109334,6 +109351,23 @@
     ],
     "needs": [],
     "created": "2026-10-30T21:35:55Z"
+   },
+   {
+    "id": "wayland-still-capture",
+    "label": "wayland-still-capture",
+    "number": null,
+    "state": "queued",
+    "area": "natives",
+    "priority": "P1",
+    "title": "fix(natives): keep the Wayland ScreenCast stream open between screenshots",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-17T23:02:30Z"
    },
    {
     "id": "settle-reads",
@@ -109477,7 +109511,7 @@
     "area": "other",
     "priority": "P2",
     "title": "fix(utils): apply OMP_LOG_LEVEL to the console transport",
-    "action": "open",
+    "action": "next-hour",
     "reasons": [],
     "note": "",
     "over": [],
@@ -109784,12 +109818,16 @@
     "area": "natives",
     "priority": "P2",
     "title": "fix(natives): wait for the Wayland screen-share picker until the call's deadline",
-    "action": "next-hour",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with wayland-still-capture in crates/pi-natives/src/desktop/linux/wayland/capture.rs"
+    ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "wayland-still-capture"
+    ],
     "needs": [],
     "created": "2026-11-17T22:04:45Z"
    },
@@ -110120,7 +110158,7 @@
     "title": "feat(coding-agent): search the web through a Factory Droid login (web/factory)",
     "action": "wait",
     "reasons": [
-     "conflicts with main in docs/tools/web_search.md, packages/catalog/src/discovery/factory-droid.ts, packages/coding-agent/src/web/search/providers/utils.ts, packages/coding-agent/test/web/search/default-chain.test.ts"
+     "conflicts with main in docs/tools/web_search.md, packages/catalog/src/discovery/factory-droid.ts, packages/coding-agent/src/web/scrapers/types.ts, packages/coding-agent/src/web/search/providers/utils.ts, packages/coding-agent/test/web/search/default-chain.test.ts"
     ],
     "note": "",
     "over": [],
@@ -110218,7 +110256,8 @@
     "title": "feat(ai): reserve per usage limit in account policies",
     "action": "wait",
     "reasons": [
-     "conflicts with usage-state-per-model in packages/coding-agent/src/cli/usage-cli.ts"
+     "conflicts with usage-state-per-model in packages/coding-agent/src/cli/usage-cli.ts",
+     "conflicts with main in packages/ai/src/auth/health.ts"
     ],
     "note": "",
     "over": [],
@@ -110293,23 +110332,6 @@
     ],
     "needs": [],
     "created": "2026-11-12T04:40:13Z"
-   },
-   {
-    "id": "devin-gemini-promo-prices",
-    "label": "devin-gemini-promo-prices",
-    "number": null,
-    "state": "queued",
-    "area": "catalog",
-    "priority": null,
-    "title": "fix(catalog): switch Devin's Gemini promo prices to list when each promo ends",
-    "action": "next-hour",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-17T20:51:19Z"
    },
    {
     "id": "devin-image-budgets",
