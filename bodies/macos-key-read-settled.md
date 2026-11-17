@@ -31,7 +31,7 @@ The wait sits on the read, not on the key: blocking each key until its choice sh
 
 ## Testing
 
-Trials in a macOS 26 VM: a fixture app with an AppKit pop-up and a SwiftUI picker (Alpha, Bravo, Delta, Mediocre, Medium, Zulu), Chrome and Electron selects, the app's own selection log as truth; this PR and its base alternating per try, 10 tries per cell.
+macOS 26 VM: a fixture's AppKit pop-up and SwiftUI picker (Alpha, Bravo, Delta, Mediocre, Medium, Zulu), Chrome and Electron selects, the app's own log as truth; this PR and its base alternating, 10 tries per cell.
 
 **press(letter) then ax() in the same cell: the control's line shows the new option**
 | control | mode | base: shows new | fix: shows new | base press / ax ms | fix press / ax ms | errors |
@@ -45,7 +45,7 @@ Trials in a macOS 26 VM: a fixture app with an AppKit pop-up and a SwiftUI picke
 | electron | bg | 10/10 | 10/10 | 601 / 21 | 599 / 22 |  |
 | electron | fg | 10/10 | 10/10 | 77 / 10 | 75 / 10 |  |
 
-**a letter, 1.2 s with no read, a second letter, then ax(): shows the second choice**
+**a letter, 1.2 s, a second letter, then ax(): shows the second choice**
 | control | base | fix | base / fix ax ms |
 |---|---|---|---|
 | popup | 0/10 | 10/10 | 26 / 495 |
@@ -63,7 +63,7 @@ Trials in a macOS 26 VM: a fixture app with an AppKit pop-up and a SwiftUI picke
 | picker | fg | three | Mediocre 10/10 | Mediocre 10/10 | 10/10 | [1] / [1] | 1801 / 1800 |
 | picker | fg | typed | Mediocre 10/10 | Mediocre 10/10 | 10/10 | [1] / [1] | 617 / 616 |
 
-**a letter, then el.click() on the pop-up 100 ms after the letter's call, plain or with `menu: ["Zulu"]` (main / this PR, 10 tries each, background)**
+**a letter, then el.click() 100 ms after its call, plain or with `menu: ["Zulu"]` (main / this PR, background)**
 | control | click | ends on | call ok | call ms | input lease held, ms |
 |---|---|---|---|---|---|
 | popup | plain | letter 10 / letter 10 | 0 / 0 (menu closed, items listed) | 734 / 1113 | 731 / 726 |
@@ -71,9 +71,9 @@ Trials in a macOS 26 VM: a fixture app with an AppKit pop-up and a SwiftUI picke
 | picker | plain | letter 10 / letter 10 | 0 / 0 (menu closed, items listed) | 736 / 1117 | 735 / 727 |
 | picker | menu Zulu | letter 10 / Zulu 10 | 10 / 10 | 734 / 1117 | 732 / 729 |
 
-At 600 ms, after the choice showed, both end on Zulu 20 of 20 in the same time. Rerun against main: the read shows the new option 20 of 20 (Chrome and Electron 20 of 20 on both), `m`, `e`, `d` end on Mediocre 20 of 20, a letter, Tab and typing within 6 ms.
+At 600 ms both end on Zulu 20 of 20 in the same time. Rerun against main: read 20 of 20 (Chrome, Electron 20 of 20 on both), `m`, `e`, `d` on Mediocre 20 of 20, letter, Tab and typing within 6 ms.
 
-**a letter that changes nothing, then ax(): value shown, errors, time of the read**
+**a letter that changes nothing, then ax(): value shown, read time**
 | control | mode | letter | base shown | fix shown | ok base / fix | base ax ms | fix ax ms (min-median-max) |
 |---|---|---|---|---|---|---|---|
 | popup | bg | nomatch | ['Bravo'] | ['Bravo'] | 10/10 / 10/10 | 14 | 992-996-999 |
@@ -101,7 +101,7 @@ At 600 ms, after the choice showed, both end on Zulu 20 of 20 in the same time. 
 | fg | type16 | 544 (542-553), n=10 | 540 (536-560), n=10 |
 | fg | other_window | 29 (25-32), n=10 | 28 (28-31), n=10 |
 
-**type("<full title>") to the closed, focused control in the background, typist in front (fix)**
+**type("<title>") to the closed, focused control, background, typist in front (fix)**
 | control | title | n | ends on title | app changes per try | menus seen | typist keys lost | Probe lost key status | Probe still in front | call ms |
 |---|---|---|---|---|---|---|---|---|---|
 | popup | Medium | 5 | 5 | [2] | 0 | 0 of 100 | 0 | 5/5 | 668 |
@@ -109,8 +109,11 @@ At 600 ms, after the choice showed, both end on Zulu 20 of 20 in the same time. 
 | picker | Medium | 5 | 5 | [1] | 0 | 0 of 100 | 0 | 5/5 | 658 |
 | picker | Zulu | 5 | 5 | [1] | 0 | 0 of 100 | 0 | 5/5 | 624 |
 
-Unit tests: `cargo test -p pi-natives --lib -- type_ahead element_action refused_first` (an element action waits with the lease free and the front app pinned; a read under the lease neither waits nor clears the mark; a refused first key marks nothing; web pop-ups are not watched).
+Unit tests: `cargo test -p pi-natives --lib -- type_ahead element_action refused_first` (waits with the lease free and the front app pinned; no wait under the lease; a refused first key marks nothing; web pop-ups unwatched).
+
+The prompt line only describes what a letter does and points to `menu:`. In a 60-call sample (Haiku 5.5, GPT-6.1 Sol), an earlier wording advising typing moved Sol from the menu (13 of 15 on main) to typing (14 of 15), 4 of 15 wrong ("US Legal" typed as `USLegal`) against 0 on main.
 
 Limits: Chrome and Electron in front can return about 20 ms after the key, and a read then was stale 1 to 2 of 10 on the base, an accessibility lag this change leaves alone. In an `ax()` of the whole window, elements read before the pop-up are read before its wait. An element click, `press()`, `perform()` or `setValue` on the pop-up within 1.5 s of the letter waits for its choice before taking the input lease: about 0.4 s more 100 ms after the letter's call, with the lease held for the click alone as on main.
+
 
 
