@@ -96283,6 +96283,28 @@
    "readied": "2026-11-16T17:37:35Z",
    "advanced": "2026-11-16T21:04:42Z",
    "merged_by": "pr"
+  },
+  {
+   "id": "wayland-input-refusal",
+   "branch": "will/wayland-input-refusal",
+   "title": "fix(natives): refuse every Wayland input call at once when no input route exists",
+   "area": "natives",
+   "priority": "P2",
+   "needs": [],
+   "base": "6425ef0e8d2fea1915e351a9f325d9eadb3139d9",
+   "body": "bodies/wayland-input-refusal.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-input-refusal",
+   "host": "MacBook-Pro",
+   "added": "2026-11-17T20:29:55Z",
+   "updated": "2026-11-17T20:29:55Z",
+   "note": "",
+   "tests_over_override": {
+    "reason": "OmarchyFixes, 2026-11-17: one test going through all 8 gated input arms; each request is an arm no other test reaches",
+    "at": "2026-11-17T20:29:58Z"
+   }
   }
  ],
  "watch": {
