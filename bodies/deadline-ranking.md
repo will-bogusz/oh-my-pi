@@ -1,6 +1,6 @@
 ## What
 
-I want omp to max out whichever account's limits expire soonest, per model, so a plan's quota isn't left unused when its week resets. <!-- Will: confirm own-words -->
+I want omp to max out whichever account's limits expire soonest, per model, so a plan's quota isn't left unused when its week resets.
 
 This adds an opt-in `rankBy` field to `auth.accountPolicies`. When every account at one priority sets `rankBy: deadline`, omp uses first the account at that priority whose usable quota for the requested model expires first. Today it orders them by required drain.
 
@@ -62,3 +62,4 @@ Not run: live accounts (that needs two subscriptions whose weeks reset at differ
 - [x] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
