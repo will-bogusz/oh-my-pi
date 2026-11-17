@@ -97272,13 +97272,13 @@
    "needs": [],
    "base": "baf60290fde5e9eea4edb30bff07695877682ba9",
    "body": "bodies/wayland-window-crop-clip.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19596,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-window-crop-clip",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:09:14Z",
-   "updated": "2026-11-17T22:24:12Z",
+   "updated": "2026-11-17T22:34:52Z",
    "note": "",
    "built": [
     {
@@ -97353,7 +97353,8 @@
      "at": "2026-11-17T22:24:06Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-17T22:34:52Z"
   },
   {
    "id": "reserve-per-model-family",
