@@ -110188,11 +110188,5 @@
     "wake": ""
    }
   ]
- },
- "opening": {
-  "id": "broker-version-skew",
-  "token": "b4a74fd97aac4abca812148a49ebcd26",
-  "host": "MacBook-Pro",
-  "at": "2026-11-17T22:07:49Z"
  }
 }
