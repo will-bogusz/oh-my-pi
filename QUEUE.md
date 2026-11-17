@@ -1,19 +1,20 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17 08:41Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17 08:43Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-17 08:16Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 2, conflict-held 16, stacked 14, held 11, parked 2, open PRs 16; merged 376, closed 37
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-17 08:42Z on MacBook-Pro; groups below are from it, states from the manifest)
+**Counts:** openable now 3, conflict-held 15, stacked 14, held 11, parked 2, open PRs 16; merged 376, closed 37
 
-## Openable now (2)
+## Openable now (3)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
 | browser-wait-predicate | feat(browser): add waitForFunction to tabs and frames | browser | P1 | 6d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-wait-predicate) |
+| stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 4d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 | factory-droid-1100-pin | feat(catalog): identify Factory Droid requests as droid 1.10.0 | factory-droid |  | 3d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-pin) |
 
-## Conflict-held (16)
+## Conflict-held (15)
 
 | id | title | area | priority | age | blocked by | branch |
 |---|---|---|---|---|---|---|
@@ -32,7 +33,6 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 | win-minimised-windows | fix(natives,coding-agent): show a minimized Windows app's window from apps.open instead of launching it again | computer | P2 | 5d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19509](https://github.com/can1357/oh-my-pi/pull/19509), [#19516](https://github.com/can1357/oh-my-pi/pull/19516), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-minimised-windows) |
 | macos-ax-cancel-before-send | fix(natives): send no macOS AX action once its run is cancelled | natives | P2 | 5d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19516](https://github.com/can1357/oh-my-pi/pull/19516), [#19532](https://github.com/can1357/oh-my-pi/pull/19532), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-ax-cancel-before-send) |
 | win-ax-states | fix(natives): expose Windows control state and stale-reference matches | computer | P2 | 5d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19521](https://github.com/can1357/oh-my-pi/pull/19521), [#19516](https://github.com/can1357/oh-my-pi/pull/19516), [#19519](https://github.com/can1357/oh-my-pi/pull/19519), [#19532](https://github.com/can1357/oh-my-pi/pull/19532), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-ax-states) |
-| stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 4d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 
 ## Stacked (14)
 
