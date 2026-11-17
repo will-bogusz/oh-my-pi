@@ -1,6 +1,6 @@
 import type { Protocol } from "devtools-protocol";
 import * as fs from "node:fs/promises";
-import { untilAborted } from "@oh-my-pi/pi-utils";
+import { truncate, untilAborted } from "@oh-my-pi/pi-utils";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import type { CDPSession, Page } from "puppeteer-core";
 import { DialogStop } from "./dialog-stop";
@@ -10,6 +10,10 @@ import { type DialogState, describeAnswer, describeWaiting } from "./dialogs";
 const DESCRIBE_TIMEOUT_MS = 500;
 /** Longest an input waits for the page to have asked for any chooser it opened. */
 const SYNC_TIMEOUT_MS = 250;
+/** Longest `accept` filter a chooser reports; the page sets it, and every call it blocks prints it. */
+const ACCEPT_MAX_CHARS = 200;
+/** The isolated world each caught chooser's input is read and watched in, out of reach of page globals. */
+const WORLD_NAME = "omp-file-chooser";
 
 interface InputDescription {
 	accept: string;
@@ -65,6 +69,8 @@ export class FileChooserCatcher {
 	#inCall = false;
 	/** Choosers an answer is filling now: their late held report is not a new wait for the answering call. */
 	readonly #answering = new Set<CaughtFileChooser>();
+	/** Each caught chooser's isolated world, made on first use; see {@link #onInput}. */
+	readonly #worlds = new WeakMap<CaughtFileChooser, Promise<number>>();
 
 	private constructor(session: CDPSession) {
 		this.#session = session;
@@ -226,7 +232,7 @@ export class FileChooserCatcher {
 		const backendNodeId = chooser.backendNodeId;
 		if (backendNodeId === undefined) return false;
 		// Bounded like the input's description: a page stopped in a dialog answers nothing.
-		const check = this.#onInput(backendNodeId, undefined, async objectId => {
+		const check = this.#onInput(chooser, backendNodeId, undefined, async objectId => {
 			const { result } = await this.#session.send("Runtime.callFunctionOn", {
 				objectId,
 				functionDeclaration: "function () { return this.localName === 'input' && this.type === 'file'; }",
@@ -299,7 +305,7 @@ export class FileChooserCatcher {
 		const held = this.#held;
 		if (held?.backendNodeId === undefined) return;
 		this.#held = undefined;
-		await this.#onInput(held.backendNodeId, signal, async objectId => {
+		await this.#onInput(held, held.backendNodeId, signal, async objectId => {
 			await this.#session.send("Runtime.callFunctionOn", {
 				objectId,
 				functionDeclaration: "function () { this.dispatchEvent(new Event('cancel', { bubbles: true })); }",
@@ -339,8 +345,9 @@ export class FileChooserCatcher {
 			frameId: event.frameId,
 			multiple: event.mode === "selectMultiple",
 			betweenCalls: false,
-			input: backendNodeId === undefined ? Promise.resolve(undefined) : this.#readInput(backendNodeId),
+			input: Promise.resolve(undefined),
 		};
+		if (backendNodeId !== undefined) chooser.input = this.#readInput(chooser, backendNodeId);
 		if (this.#claim?.(chooser) || this.#rawWaits > 0) return;
 		this.#unreported.push(chooser);
 		if (backendNodeId === undefined) return;
@@ -364,7 +371,7 @@ export class FileChooserCatcher {
 	 */
 	#holdUntilAnswered(chooser: CaughtFileChooser, backendNodeId: number): void {
 		this.#held = chooser;
-		void this.#onInput(backendNodeId, undefined, objectId =>
+		void this.#onInput(chooser, backendNodeId, undefined, objectId =>
 			this.#session.send("Runtime.callFunctionOn", {
 				objectId,
 				functionDeclaration:
@@ -379,27 +386,49 @@ export class FileChooserCatcher {
 		);
 	}
 
-	/** The input's `accept` filter and folder flag, bounded so a page stopped in a dialog cannot hold it up. */
-	#readInput(backendNodeId: number): Promise<InputDescription | undefined> {
-		const read = this.#onInput(backendNodeId, undefined, async objectId => {
+	/**
+	 * The input's `accept` filter (at most {@link ACCEPT_MAX_CHARS} characters) and folder flag, bounded so a page
+	 * stopped in a dialog cannot hold it up.
+	 */
+	#readInput(chooser: CaughtFileChooser, backendNodeId: number): Promise<InputDescription | undefined> {
+		const read = this.#onInput(chooser, backendNodeId, undefined, async objectId => {
 			const { result } = await this.#session.send("Runtime.callFunctionOn", {
 				objectId,
-				functionDeclaration:
-					"function () { return { accept: this.accept || '', webkitdirectory: !!this.webkitdirectory }; }",
+				functionDeclaration: `function () { return { accept: String(this.accept).slice(0, ${ACCEPT_MAX_CHARS + 1}), webkitdirectory: this.webkitdirectory === true }; }`,
 				returnByValue: true,
 			});
-			return result.value as InputDescription;
+			const value: unknown = result.value;
+			if (typeof value !== "object" || value === null) return undefined;
+			const { accept, webkitdirectory } = value as Record<string, unknown>;
+			return {
+				accept: typeof accept === "string" ? truncate(accept, ACCEPT_MAX_CHARS) : "",
+				webkitdirectory: webkitdirectory === true,
+			};
 		}).catch(() => undefined);
 		return Promise.race([read, Bun.sleep(DESCRIBE_TIMEOUT_MS).then(() => undefined)]);
 	}
 
-	/** Run `use` on the input's remote object, then release it. */
+	/**
+	 * Run `use` on the chooser's input, resolved in an isolated world made for that chooser (freed with its
+	 * document), so a page that replaced `Promise`, `addEventListener` or the input's getters cannot fake or block
+	 * what omp reads and waits on. Then release it.
+	 */
 	async #onInput<T>(
+		chooser: CaughtFileChooser,
 		backendNodeId: number,
 		signal: AbortSignal | undefined,
 		use: (objectId: string) => Promise<T>,
 	): Promise<T> {
-		const { object } = await untilAborted(signal, () => this.#session.send("DOM.resolveNode", { backendNodeId }));
+		const world =
+			this.#worlds.get(chooser) ??
+			this.#session
+				.send("Page.createIsolatedWorld", { frameId: chooser.frameId, worldName: WORLD_NAME })
+				.then(created => created.executionContextId);
+		this.#worlds.set(chooser, world);
+		const executionContextId = await untilAborted(signal, () => world);
+		const { object } = await untilAborted(signal, () =>
+			this.#session.send("DOM.resolveNode", { backendNodeId, executionContextId }),
+		);
 		const objectId = object.objectId;
 		if (!objectId) throw new ToolError("The file chooser's input is gone");
 		try {

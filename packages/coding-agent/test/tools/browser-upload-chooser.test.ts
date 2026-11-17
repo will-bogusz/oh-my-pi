@@ -323,6 +323,27 @@ error = JSON.stringify(await tab.dialog());`);
 		}
 	}, 60_000);
 
+	test("lets go of a held chooser on a page that replaced addEventListener, and cuts its accept filter to 200 characters", async () => {
+		const { attempt, step, close } = await openFixture();
+		try {
+			await attempt("");
+			// omp's watch for the input's answer ran on the page's globals: this page kept it waiting forever.
+			await step(`await tab.evaluate(() => {
+	EventTarget.prototype.addEventListener = () => {};
+	document.getElementById("trigger-input").setAttribute("accept", ".a,".repeat(300));
+});`);
+			await step(`await tab.click("#trigger");`);
+			const held = (await step("return await tab.dialog();")).value as { open: boolean; accept?: string };
+			expect(held).toMatchObject({ open: true, type: "file-chooser" });
+			expect(held.accept).toBe(`${".a,".repeat(300).slice(0, 199)}…`);
+			const alpha = JSON.stringify(path.join(tempDir, "alpha.txt"));
+			await step(`const input = await page.$("#trigger-input"); await input.uploadFile(${alpha});`);
+			expect((await step("return await tab.dialog();")).value).toEqual({ open: false });
+		} finally {
+			await close();
+		}
+	}, 60_000);
+
 	test("ends a wait when the page opens a chooser during it", async () => {
 		const { attempt, close } = await openFixture();
 		try {
