@@ -96923,7 +96923,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/reset-spend-log",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:02:20Z",
-   "updated": "2026-11-17T22:54:32Z",
+   "updated": "2026-11-17T23:35:05Z",
    "note": "Review ResetSpendLog.ReviewResetSpendLog at 608d234 needs-changes: #2 (CLI fence throw unlogged) fixed in code, no test (marker-write failure is input nobody sends); #1 (two concurrent unfenced in-process redeems coalesce into one POST yet log two resets) declined: only reachable for /usage reset racing an auto spend on the same account within the redeem's 15 s; auto vs auto is serialized by the reset fence",
    "built": [
     {
@@ -96963,12 +96963,30 @@
      "host": "MacBook-Pro"
     },
     {
+     "with": "#19598",
+     "code": "5db6d6936bd3d1790629915de85d1abb7a58a3d8",
+     "with_code": "6264a3652cb9e53dc3e3730c6b248b5c798700c7",
+     "tip": "31cf61cebac4032268bb24a466a3971058db50e4",
+     "with_tip": "42eea7e9e6d490c27231d04099e02e8f1dabe8f5",
+     "at": "2026-11-17T23:35:00Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19599",
+     "code": "5db6d6936bd3d1790629915de85d1abb7a58a3d8",
+     "with_code": "5a958e04e26a24517a7c17df1374be5845ae7a5e",
+     "tip": "31cf61cebac4032268bb24a466a3971058db50e4",
+     "with_tip": "478f38ebe93d732ad35b60c71f03d5e00c665228",
+     "at": "2026-11-17T23:35:04Z",
+     "host": "MacBook-Pro"
+    },
+    {
      "with": "#19592",
      "code": "5db6d6936bd3d1790629915de85d1abb7a58a3d8",
-     "with_code": "2de31525408f5bd840a7993c119c6a71d310a52b",
+     "with_code": "8392c922c234ea7d1826f17a99c3caf7c8ee65c7",
      "tip": "31cf61cebac4032268bb24a466a3971058db50e4",
-     "with_tip": "bbc606e53aac36298daa70e428e6c6f598fec211",
-     "at": "2026-11-17T22:54:32Z",
+     "with_tip": "ffe74eace28cb6d0678e4efed2b6dea3961228bd",
+     "at": "2026-11-17T23:35:04Z",
      "host": "MacBook-Pro"
     }
    ]
