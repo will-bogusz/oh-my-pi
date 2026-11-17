@@ -53,12 +53,13 @@ Nothing raised, nothing changes: 250 background actions on six apps while a simu
 | Second window of mine the target covered | Stays behind the target (above) |
 | Another background app's windows the target covered | Stay behind; `AXRaise` from outside that app leaves the order as it is |
 | My key window behind another window of mine at entry | Nothing raised; target stays in front, as on `main` (10 of 10, no keys elsewhere, key window key at the end 10 of 10) |
-| I bring another of my windows in front of my key window, pick one with a click, or click into a floating panel of my app, during the call | Left alone, also while the guard is looking my window up for the raise |
+| I bring another of my windows in front of my key window, pick one with a click, or click into a floating panel of my app, during the call | Left alone, also while the guard is looking my window up for the raise, except a choice made during the guard's last stacking read (about 0.15 ms, any window count) or before its `AXRaise` reaches my app: that gets one raise of my old key window |
 | Target's own windows | Never moved: a sheet or menu it opened stays above its parent |
 | Target keeps ordering itself in front | Raised at most three times during the call; the last poll raises once more and, if the target is still in front, the call throws `InputFailed` naming my window ("… the input was sent to the target"), after the usual "input may already have been delivered … inspect the desktop" |
 | Key window accessibility no longer lists | Dropped silently |
 | Target shows in front before the raise | 13 to 49 ms median by app and input (max 70), from the input to the next check plus macOS drawing the raise; 12 to 14 ms with the first version's 1 ms checks |
 | Read-back of a raise | Runs under the input lease, as the guard does on `main`: at most 18 ms of scheduled waits during the action's 500 ms settle, and 40 ms on the last pass, which follows the settle and runs only when the target is in front then (the original entry: 40 ms on every pass) |
+| Asking my app which window is key before a raise | Its focused window only, under the input lease, only when a raise is about to go out: at most 0.5 s if my app does not answer (517 ms measured against a stopped app); unreadable or no window means unknown, and nothing is raised |
 | Takeover hand-back | Raises my key window once, unless I switched, clicked or used a shortcut after the hand-back's request, another window of mine was in front of the key window at entry, or the target is in my own app |
 
 <details><summary>How the order was measured and why once a poll</summary>
@@ -105,8 +106,10 @@ The hand-back's takeover situations, first version → this head, 10 tries each 
 
 The guard keys on stacking, not overlap, so my window beside the target costs the same as over it. In the theft check, 44 and 40 targets that took the front were sent back (first version → this head); an earlier run of `main` against the first version gave p50 533 → 533 ms with 39 and 42. The check's per-action window misattributed the last key of each burst on the first version's arm (2,750 of 3,000 counted, all 3,000 in my app's log). `window_order`'s tests and `the_guard_asks_again_after_a_refusal_for_typing_but_not_for_a_switch` cover the planner, the read-back and the once-a-poll passes.
 
+I switch to my other window 10 to 55 ms into a background click, 20 tries, previous head → this head: the window I picked is key at the end 17 → 20 and in front of my first window 17 → 19; the one left behind it while key is unexplained (1 of 20). The target stays above the window I picked in all 20 on both: a pick of mine ends the keeping.
+
 </details>
 
 ## Risk
 
-Review first: `keep` in `window_order.rs`, `stacked_down_to` in `capture.rs` and the order pass in `guard_focus`. A switch of mine is honoured unless it lands in the microseconds between the last check and `AXRaise`.
+Review first: `keep` in `window_order.rs`, `stacked_down_to` in `capture.rs` and the order pass in `guard_focus`. A switch of mine is honoured unless it lands during the last stacking read or before `AXRaise` reaches my app.
