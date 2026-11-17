@@ -4496,6 +4496,17 @@
        "\t\t// Back on screen, the browser's window and the other app's share the frame: neither is taken as the tab's."
       ]
      }
+    },
+    {
+     "at": "2026-11-17T01:10:08Z",
+     "reason": "recorded #19001 pair form (Main 2026-11-12/16): the failure result now goes through main's #sendResult, which #19001 introduced, instead of this branch's direct transport.send",
+     "old": "54e50b429797a4672a58ec5ca7dca1ce99acd080",
+     "new": "7051fe7a9be208366b77a3304a7042c87bfcbf76",
+     "dropped": {
+      "packages/coding-agent/src/tools/browser/tab-worker.ts": [
+       "\t\t\tthis.#transport.send({ type: \"result\", id: msg.id, ok: false, error });"
+      ]
+     }
     }
    ],
    "unparked": "2026-11-16T21:01:02Z"
