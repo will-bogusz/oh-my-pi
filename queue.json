@@ -80441,13 +80441,15 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-xtest-release",
    "host": "MacBook-Pro",
    "added": "2026-11-11T02:31:05Z",
-   "updated": "2026-11-17T03:42:15Z",
+   "updated": "2026-11-17T04:42:45Z",
    "note": "",
    "rebases_after": [
-    18222
+    18222,
+    19519
    ],
    "pair_reasons": {
-    "18222": "Main, 2026-11-17: docs only, adjacent lines in docs/computer-use.md and docs/tools/computer.md: #18222 inserts its named-menu paragraph / sub-bullet right before the holdKeys line this entry edits. Combined form: in both files #18222's new menu line first, then this entry's holdKeys line, nothing else changed (~/tmp/oh-my-pi/XtestRelease/docs-18222-pair.md). Not to open until Main says (watcher fork-cost measurement pending)."
+    "18222": "Main, 2026-11-17: docs only, adjacent lines in docs/computer-use.md and docs/tools/computer.md: #18222 inserts its named-menu paragraph / sub-bullet right before the holdKeys line this entry edits. Combined form: in both files #18222's new menu line first, then this entry's holdKeys line, nothing else changed (~/tmp/oh-my-pi/XtestRelease/docs-18222-pair.md). Not to open until Main says (watcher fork-cost measurement pending).",
+    "19519": "Main, 2026-11-17: adjacent unions in x11/mod.rs (mod lines), input.rs use list, X11Input::new fields and foreground_keys_after (watch_releases() then Keymap::xtest); in send_xtest #19519's text_mapping.pressed(keycode) moves into xtest's restructured send_xtest at the same point (after the request is sent, before check(), key presses only), no new logic. Combined form: merge 7b0d2ff0b68, ~/tmp/oh-my-pi/queuethirty/xpair-combined.md"
    }
   },
   {
