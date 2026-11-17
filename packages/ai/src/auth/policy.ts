@@ -111,7 +111,16 @@ export class AccountPolicies {
 		}
 	}
 
-	validateUsageCapability(provider: string, canFetchUsage: boolean): void {
+	validateUsageCapability(provider: string, canFetchUsage: boolean, hasRankingStrategy: boolean): void {
+		// Deadlines come from the usage windows a ranking strategy identifies.
+		const deadlineIndex = hasRankingStrategy
+			? -1
+			: this.#accountPolicies.findIndex(policy => policy.provider === provider && policy.rankBy === "deadline");
+		if (deadlineIndex !== -1) {
+			throw new AIError.ConfigurationError(
+				`auth.accountPolicies[${deadlineIndex}].rankBy "deadline" is not supported for ${provider}, which has no usage ranking`,
+			);
+		}
 		if (canFetchUsage) return;
 		for (const field of ["reservePct", "reclaimAbovePct", "rankBy"] as const) {
 			const policyIndex = this.#accountPolicies.findIndex(

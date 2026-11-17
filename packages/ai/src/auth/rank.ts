@@ -76,10 +76,11 @@ const USAGE_RANKING_METRIC_EPSILON = 1e-9;
 const PRIMARY_WINDOW_HOT_FRACTION = 0.85;
 
 /**
- * Deadlines this close are a tie: providers report reset times relative to the fetch, so one
- * account's reset jitters by seconds between reports and must not reorder equal resets.
+ * Deadline resolution. Providers report reset times relative to the fetch, so one account's
+ * reset jitters by seconds between reports: ranking compares deadlines by the minute (a total
+ * order), and reclaim moves a warm session only for a deadline at least this much sooner.
  */
-const DEADLINE_TIE_MS = 60_000;
+const DEADLINE_RESOLUTION_MS = 60_000;
 
 /** Rank accounts by model-plan eligibility when a plan gate applies. */
 export function planPriority(gate: PlanGate | undefined, report: UsageReport | null): number {
@@ -96,10 +97,17 @@ function compareUsageRankingMetric(left: number, right: number): number {
 	return Math.abs(delta) <= tolerance ? 0 : delta;
 }
 
-/** Compare two quota deadlines, earliest first; resets within {@link DEADLINE_TIE_MS} tie. */
-export function compareDeadlines(left: number, right: number): number {
-	if (left === right || Math.abs(left - right) <= DEADLINE_TIE_MS) return 0;
-	return left - right;
+/** Compare two quota deadlines by the minute, earliest first. */
+function compareDeadlines(left: number, right: number): number {
+	if (left === right) return 0;
+	const leftMinute = Math.floor(left / DEADLINE_RESOLUTION_MS);
+	const rightMinute = Math.floor(right / DEADLINE_RESOLUTION_MS);
+	return leftMinute === rightMinute ? 0 : leftMinute < rightMinute ? -1 : 1;
+}
+
+/** Whether a known deadline is sooner than another known one by more than report jitter. */
+export function expiresSooner(deadline: number, than: number): boolean {
+	return Number.isFinite(deadline) && Number.isFinite(than) && deadline < than - DEADLINE_RESOLUTION_MS;
 }
 
 function compareUsageRankedCandidatePriority(

@@ -18,7 +18,7 @@ import {
 import type { AccountPolicies } from "./policy";
 import { authCredentialEquals, type CredentialPool } from "./pool";
 import {
-	compareDeadlines,
+	expiresSooner,
 	orderUsageRankedCandidates,
 	planPriority,
 	type ApiKeyCandidate,
@@ -572,7 +572,9 @@ export class CredentialSelector {
 					? undefined
 					: usage && strategy && deadlineWindow
 						? usableQuotaDeadline(
+								strategy,
 								usage,
+								args.rankingContext,
 								deadlineWindow,
 								nowMs,
 								deadlineWindow === secondary
@@ -625,11 +627,15 @@ export class CredentialSelector {
 		// Ranking and preflight both await provider work; preserve the row each
 		// selection started with even if a peer reorders the live pool.
 		const credentialIds = this.#deps.pool.entries(provider).map(entry => entry.id);
-		this.#deps.policies.validateUsageCapability(provider, this.#deps.usage.canFetchOAuthUsage(provider));
+		const strategy = this.#deps.strategies(provider);
+		this.#deps.policies.validateUsageCapability(
+			provider,
+			this.#deps.usage.canFetchOAuthUsage(provider),
+			strategy !== undefined,
+		);
 
 		const providerKey = providerTypeKey(provider, "oauth");
 		const order = this.#getCredentialOrder(providerKey, sessionId, credentials.length);
-		const strategy = this.#deps.strategies(provider);
 		const rankingContext: CredentialRankingContext = {
 			modelId: options?.modelId,
 		};
@@ -791,7 +797,7 @@ export class CredentialSelector {
 					winnerPriority === pinPriority &&
 					rankedWinner.deadlineMs !== undefined &&
 					preferredCandidate.deadlineMs !== undefined &&
-					compareDeadlines(rankedWinner.deadlineMs, preferredCandidate.deadlineMs) < 0
+					expiresSooner(rankedWinner.deadlineMs, preferredCandidate.deadlineMs)
 				) {
 					return true;
 				}

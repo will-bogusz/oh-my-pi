@@ -283,27 +283,49 @@ export function windowRequiredDrain(limit: UsageLimit | undefined, nowMs: number
 }
 
 /**
- * When the quota a window still holds stops counting: the window's reset, or sooner the expiry
- * of a saved reset that clears the window and can be spent before the limit is hit, because
- * spending it refunds everything used until then. A window without a future reset clock starts
- * its full duration at the next request, as in {@link windowRequiredDrain}.
+ * When an account's usable quota for a request expires: the earliest deadline among the windows
+ * gating the request ({@link reserveUsageLimits}) of the same kind as `rankedWindow`, the one the
+ * strategy ranks by (Claude's weekly windows, the Fable one included for a Fable request). A
+ * window's deadline is its reset, or sooner the expiry of an available saved reset that lists the
+ * window in `clears` and can be spent before the limit is hit, since spending it refunds everything
+ * used until then. Picked by time, never by usage, so it moves only when a window resets or a saved
+ * reset expires. A window without a future reset clock starts its full duration at the next
+ * request, as in {@link windowRequiredDrain}.
  */
 export function usableQuotaDeadline(
+	strategy: CredentialRankingStrategy,
 	report: UsageReport,
-	limit: UsageLimit,
+	rankingContext: CredentialRankingContext,
+	rankedWindow: UsageLimit,
 	nowMs: number,
 	fallbackDurationMs: number,
 ): number {
-	const resetAt = windowResetAt(limit.window);
-	let deadline =
-		resetAt !== undefined && resetAt > nowMs ? resetAt : nowMs + (limit.window?.durationMs ?? fallbackDurationMs);
-	for (const credit of report.resetCredits?.credits ?? []) {
-		if ((credit.status ?? "available") !== "available" || credit.usable === false || credit.requiresLimit === true) {
-			continue;
+	const kind = rankedWindow.window?.id ?? rankedWindow.scope.windowId;
+	const windows = [
+		rankedWindow,
+		...reserveUsageLimits(strategy, report, rankingContext).filter(
+			limit => limit !== rankedWindow && kind !== undefined && (limit.window?.id ?? limit.scope.windowId) === kind,
+		),
+	];
+	let deadline = Number.POSITIVE_INFINITY;
+	for (const limit of windows) {
+		const resetAt = windowResetAt(limit.window);
+		deadline = Math.min(
+			deadline,
+			resetAt !== undefined && resetAt > nowMs ? resetAt : nowMs + (limit.window?.durationMs ?? fallbackDurationMs),
+		);
+		for (const credit of report.resetCredits?.credits ?? []) {
+			if (
+				(credit.status ?? "available") !== "available" ||
+				credit.usable === false ||
+				credit.requiresLimit === true
+			) {
+				continue;
+			}
+			if (!credit.clears?.includes(limit.id)) continue;
+			const expiresAt = credit.expiresAt === undefined ? Number.NaN : Date.parse(credit.expiresAt);
+			if (expiresAt > nowMs && expiresAt < deadline) deadline = expiresAt;
 		}
-		if (credit.clears !== undefined && !credit.clears.includes(limit.id)) continue;
-		const expiresAt = credit.expiresAt === undefined ? Number.NaN : Date.parse(credit.expiresAt);
-		if (expiresAt > nowMs && expiresAt < deadline) deadline = expiresAt;
 	}
 	return deadline;
 }

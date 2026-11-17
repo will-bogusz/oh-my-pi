@@ -345,6 +345,10 @@ describe("accountPolicies rankBy deadline", () => {
 		fableExpiresFirstOnA();
 		expect(await next(auth, A, "S1", "claude-fable-5")).toBe("a");
 		expect(await next(auth, A, "S2", "claude-opus-4-5")).toBe("b");
+		// More use on A moves no reset, so its Fable quota still expires first.
+		await advance(auth, A, 10 * MIN);
+		setUsage(A, "a", 0.1, 0.15, { weekResetsIn: 6 * DAY, limits: [fableWeek(0.85, DAY)] });
+		expect(await next(auth, A, "S3", "claude-fable-5")).toBe("a");
 	});
 
 	test("keeps required-drain order in a priority where one account does not rank by deadline", async () => {
@@ -353,7 +357,7 @@ describe("accountPolicies rankBy deadline", () => {
 		expect(await next(auth, A, "S1", "claude-fable-5")).toBe("b");
 	});
 
-	test("counts a saved reset that clears the week and expires before it", async () => {
+	test("counts a saved reset that clears the week and expires before it, and no reset that names no window", async () => {
 		const auth = await setup(A, [deadline("a"), deadline("b")], ["a", "b"]);
 		setUsage(A, "a", 0.1, 0.5, {
 			resetCredits: {
@@ -370,7 +374,15 @@ describe("accountPolicies rankBy deadline", () => {
 				],
 			},
 		});
-		setUsage(A, "b", 0.1, 0.5, { weekResetsIn: 3 * DAY });
+		setUsage(A, "b", 0.1, 0.5, {
+			weekResetsIn: 3 * DAY,
+			resetCredits: {
+				availableCount: 1,
+				credits: [
+					{ id: "reset-b", status: "available", expiresAt: new Date(Date.now() + 12 * HOUR).toISOString() },
+				],
+			},
+		});
 		expect(await next(auth, A, "S1")).toBe("a");
 	});
 
@@ -394,5 +406,9 @@ describe("accountPolicies rankBy deadline", () => {
 			await advance(auth, A, 10 * MIN);
 			expect(await next(auth, A, "S1")).toBe("a");
 		}
+		// A's usage report goes missing: an unknown deadline is no reason to move.
+		usage.delete("a");
+		await advance(auth, A, 10 * MIN);
+		expect(await next(auth, A, "S1")).toBe("a");
 	});
 });
