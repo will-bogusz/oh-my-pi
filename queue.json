@@ -58803,6 +58803,26 @@
        "\t\t\t\t|| -> CoreResult<()> { panic!(\"no pointer input\") },"
       ]
      }
+    },
+    {
+     "at": "2026-11-17T19:33:43Z",
+     "reason": "BritPointer17756 final-head fix 6b79d6848a6 (Main: one push): primer failure handling rewritten",
+     "old": "02c153e5cb6a1e80b9000e2c423386bf7423ac85",
+     "new": "6b79d6848a6dcfa3cd8ab86cd75925ff50b6b9d2",
+     "dropped": {
+      "crates/pi-natives/src/desktop/macos/input.rs": [
+       "/// (`awaiting`). The mark clears once `prime` has pressed Shift or the key",
+       "/// route refused it; a refused primer still sends, as `main` did. Any other",
+       "/// primer failure keeps the mark, and it or a cancel stops the call before any",
+       "/// pointer event.",
+       "\t\t\t&& error.code != ErrorCode::BackgroundUnavailable",
+       "\t\t// A primer the key route refuses still taps, and is not retried.",
+       "\t\tlet unroutable = || Err(DesktopError::background_unavailable(\"the keys cannot reach it\"));",
+       "\t\tprimed(&mut awaiting, (7, 42), check, unroutable, tap).unwrap();",
+       "\t\tassert!(!awaiting.contains(&(7, 42)));",
+       "\t\t// Any other primer failure keeps its code, sends no pointer input, and"
+      ]
+     }
     }
    ]
   },
