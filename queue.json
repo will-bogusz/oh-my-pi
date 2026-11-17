@@ -110585,5 +110585,11 @@
     "wake": ""
    }
   ]
+ },
+ "opening": {
+  "id": "broker-wire-forward-compat",
+  "token": "1da218893f594ea48447c45f5cbd70d6",
+  "host": "MacBook-Pro",
+  "at": "2026-11-17T23:14:04Z"
  }
 }
