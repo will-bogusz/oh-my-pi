@@ -97107,7 +97107,53 @@
     }
    ],
    "opened": "2026-11-17T22:07:17Z",
-   "readied": "2026-11-17T22:07:54Z"
+   "readied": "2026-11-17T22:07:54Z",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-17T22:38:29Z",
+     "reason": "VersionSkewBotRound, 2026-11-17: roboomp r4606459490 fix replaces the install-id match and drops the x-omp-install-id header on purpose",
+     "old": "2a4c7337c40929aa59eb2c8ba78d21fda50b563e",
+     "new": "bbc606e53aac36298daa70e428e6c6f598fec211",
+     "dropped": {
+      "docs/auth-broker-gateway.md": [
+       "Every client request carries `x-omp-version` and `x-omp-install-id`, and every broker response carries `OMP-Auth-Broker-Version`. A client logs one warning each time the broker version it sees changes to one unlike its own; nothing is refused. The broker logs the client version on `snapshot served` and `stream opened`, and stores it on the client's `clients` row when that client posts its own `/v1/usage/observed` report (a gateway relaying another install's report leaves that row's version untouched)."
+      ],
+      "packages/ai/src/auth-broker/client.ts": [
+       "import { getInstallId, logger, readSseEvents, VERSION } from \"@oh-my-pi/pi-utils\";",
+       "\tAUTH_BROKER_CLIENT_INSTALL_ID_HEADER,",
+       "\treadonly #identityHeaders: Record<string, string>;",
+       "\t\tthis.#identityHeaders = {",
+       "\t\t\t[AUTH_BROKER_CLIENT_INSTALL_ID_HEADER]: getInstallId(),",
+       "\t\t\t...this.#identityHeaders,",
+       "\t\tconst headers: Record<string, string> = { ...this.#identityHeaders, Accept: \"application/json\", ...opts.headers };"
+      ],
+      "packages/ai/src/auth-broker/server.ts": [
+       "\tAUTH_BROKER_CLIENT_INSTALL_ID_HEADER,",
+       "\t\t\t\t\t// The identity headers name the sending process. An auth-gateway relays",
+       "\t\t\t\t\t// reports for other installs, so the version lands only on the sender's own row.",
+       "\t\t\t\t\tconst sentByReporter = req.headers.get(AUTH_BROKER_CLIENT_INSTALL_ID_HEADER) === report.installId;",
+       "\t\t\t\t\tconst reporterVersion = sentByReporter ? clientVersion(req) : undefined;"
+      ],
+      "packages/ai/src/auth-broker/types.ts": [
+       "/** Request header carrying the client's omp version on every broker request. */",
+       " * Request header carrying the client's install id on every broker request; the",
+       " * same header pi-native clients send the auth-gateway for usage attribution.",
+       "export const AUTH_BROKER_CLIENT_INSTALL_ID_HEADER = \"x-omp-install-id\";"
+      ],
+      "packages/ai/src/usage.ts": [
+       "\t/** omp version of the reporting install, when the report came from that install itself. */"
+      ],
+      "packages/ai/test/auth-broker-wire.test.ts": [
+       "\t\t\t// A gateway relays other installs' usage over its own connection; only the",
+       "\t\t\t// sender's own row may take the sender's version.",
+       "\t\t\tawait skewed.reportClientUsage({ installId: \"relayed-install\", entries: [entry] });",
+       "\t\t\t\tdb.query(\"SELECT install_id, version FROM clients ORDER BY install_id = 'relayed-install'\").all(),",
+       "\t\t\t\t{ install_id: getInstallId(), version: VERSION },",
+       "\t\t\t\t{ install_id: \"relayed-install\", version: null },"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "broker-refresh-failure-loud",
