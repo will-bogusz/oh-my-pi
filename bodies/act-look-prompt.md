@@ -1,10 +1,10 @@
 ## What
 
-I changed the browser prompt to teach act-then-look in one cell and to stop agents padding cells with fixed sleeps, now that the look and the reads after an action wait for the page on Chromium.
+I changed the browser prompt to teach act-then-look in one cell and to stop agents padding cells with fixed sleeps, now that the look and the reads after an action wait for the page on Chromium, for at most 3 s.
 
 For later timer-driven content, the line now says to wait for text or an element the page has already shown, or read first and then choose a wait target. This replaces the open-ended "wait for it", which led agents to guess text that was not on that page.
 
-The examples end their action with `await tab.observe()`. Chromium's automatic settle and the explicit condition waits for Tern, cmux and later timer-driven content remain distinct.
+The examples end their action with `await tab.observe()`. Chromium's automatic settle and the explicit condition waits for Tern, cmux and later timer-driven content remain distinct. The settle is best-effort: past 3 s the look returns the page as it is, possibly still loading, so the prompt says so and tells the model to check that the result shows the outcome, and lists a page still loading after that among the cases for an explicit wait. That sentence came after the runs below and was not measured.
 
 ## Why
 
@@ -45,3 +45,4 @@ The blind comparison above is the evidence for the wording change; a rendering o
 - [ ] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated (queued, attribution added on opening)
+
