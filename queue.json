@@ -79225,7 +79225,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "da62490735ca74a8730ecc428d5ed46c81f5eff9",
+   "base": "45f720e85870a304d8fbccf0e32316ff5ec37213",
    "body": "bodies/atspi-huge-children.md",
    "state": "open",
    "pr": 19036,
@@ -79233,7 +79233,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-huge-children",
    "host": "MacBook-Pro",
    "added": "2026-11-11T01:54:02Z",
-   "updated": "2026-11-16T23:55:16Z",
+   "updated": "2026-11-17T00:16:27Z",
    "note": "Overlaps (same functions, textual conflicts): atspi-unanswered-app (P0; read_props/walk_node/find_focused/children get request()/timeouts), atspi-walk-reads (reads GetChildren in round 1 beside the element's fields and drops ChildCount: on rebase, read ChildCount in round 1 and GetChildren/by-index after it), computer-rich-text (linux/ax.rs, ax.rs, backend.rs). Rust records linux/macos/windows at 8a6acdf497.",
    "line_loss_overrides": [
     {
@@ -79311,7 +79311,7 @@
      }
     }
    ],
-   "advanced": "2026-11-16T23:55:16Z",
+   "advanced": "2026-11-17T00:16:27Z",
    "built": [
     {
      "with": "#18925",
