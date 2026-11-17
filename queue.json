@@ -108008,7 +108008,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-17T21:19:46.632668Z",
+  "at": "2026-11-17T21:27:56.739904Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -109465,6 +109465,28 @@
     ],
     "needs": [],
     "created": "2026-11-17T21:13:06Z"
+   },
+   {
+    "id": "reset-consent-per-account",
+    "label": "reset-consent-per-account",
+    "number": null,
+    "state": "queued",
+    "area": "broker",
+    "priority": null,
+    "title": "feat(ai,coding-agent): let an account policy decide its own saved-reset spending",
+    "action": "held",
+    "reasons": [
+     "held: Will, 2026-11-17: P2 proposal; held until Will's go-ahead",
+     "conflicts with usage-state-per-model in packages/coding-agent/src/cli/usage-cli.ts"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "usage-state-per-model"
+    ],
+    "needs": [],
+    "created": "2026-11-17T21:24:43Z"
    },
    {
     "id": "reset-spend-log",
