@@ -24,7 +24,7 @@ await tab.click('#next');
 
 A fill or type whose value the page rewrote adds `(field now shows "…")`, never for a password field, and a dialog left open prints `dialog pending: confirm "…"`. Return values are unchanged; when the page cannot be probed, nothing is printed.
 
-**Cost:** +81 ms median per action (p90 85 ms), about 1 ms for a navigation, 5 to 10 tokens per line. A page that never goes quiet pays the 300 ms cap and prints `page changed`.
+**Cost:** +81 ms median per action (p90 85 ms), about 1 ms for a navigation, 5 to 10 tokens per line. One probe on a page with 1,000 shadow roots each holding a 200,000-character textarea takes 8 ms (550 ms before the hash was bounded). A page that never goes quiet pays the 300 ms cap and prints `page changed`.
 
 ## Why
 
@@ -36,7 +36,7 @@ Not in this PR: cmux and Tern tabs print nothing, and a click that opens a confi
 
 <details><summary>What the probe counts and what leaves the page</summary>
 
-The probe runs in the frame's isolated world, so page scripts can neither see nor change it. It watches the document and every open shadow root. Style and class changes count, except on the focused element or the innermost hovered one (focus rings, hover and pressed states), so a modal or menu shown by a class reads as a change. Form values are hashed in the page; only the value of the field the action wrote leaves it, for the read-back, and quoted values and dialog messages stop at 80 characters. After the action the worker polls the page until the DOM has been quiet for 80 ms, so a hidden tab's throttled timers do not stretch it, and each probe call gives up after 400 ms.
+The probe runs in the frame's isolated world, so page scripts can neither see nor change it. It watches the document and every open shadow root still in it; a root whose host left the document is dropped at the next probe, and changes to detached nodes do not count. Style and class changes count, except on the focused element or the innermost hovered one (focus rings, hover and pressed states), so a modal or menu shown by a class reads as a change. Form values are hashed in the page, for the first 500 controls (document first, then shadow roots) and by each value's length and first 256 characters, so a probe's hashing is bounded however large the page; a change past that, keeping the value's length, is missed. Only the value of the field the action wrote leaves the page, for the read-back, and quoted values and dialog messages stop at 80 characters. After the action the worker polls the page until the DOM has been quiet for 80 ms, so a hidden tab's throttled timers do not stretch it, and each probe call gives up after 400 ms.
 
 </details>
 
@@ -45,8 +45,6 @@ The probe runs in the frame's isolated world, so page scripts can neither see no
 `packages/coding-agent/test/tools/browser-action-outcome.test.ts` covers every action form, renders on a page timer, style, class and shadow-root changes, read-back on fields that truncate, uppercase, move focus or hold a password, frames, a dialog, and that the page cannot see the probe: 6 of 6 pass, and with `main`'s `src` 6 of 6 fail. The rest of `test/tools/browser-*.test.ts` passes except `browser-screenshot-background`, which fails the same way on `main` on this host.
 
 The 102 actions are navigations, in-place changes and deliberate no-ops on six bench task pages, each line compared with an independent look 1 s later, `main` and this head interleaved.
-
-Model runs on headless Chrome for Testing; ratios are geometric means of per-task ratios, 95% bootstrap intervals, small samples. The earlier-build runs were not blind: the model could read the arm's name in its working directory (`outcome-print`). The two Haiku legs on this head ran in a neutral directory from a neutrally named copy of each tree; a scan of all the model was sent found no arm name.
 
 | model, tasks x runs per arm | build | steps | tokens | look-only cells | pass `main` / PR |
 |---|---|---|---|---|---|
@@ -57,9 +55,11 @@ Model runs on headless Chrome for Testing; ratios are geometric means of per-tas
 | Claude Haiku 5.5 medium, 4 x 4, blind | this head | 1.17 [0.99, 1.37] | **1.19** [1.02, 1.39] | 62 -> 73 | 15/16 / 16/16 |
 | Claude Haiku 5.5 medium, 4 x 4, blind | this head | 1.07 [0.91, 1.25] | 1.04 [0.88, 1.22] | 66 -> 67 | 16/16 / 14/16 |
 
-The product configurator, where Haiku lost most, is reported apart: Sol took 1.04x its mean steps there (same median) and Opus 6 against 7 (median). Opus's one failed run, on `main`, was a harness artefact. All Opus runs were taken on a quiet host.
+<details><summary>How the model runs were taken, the earlier build, and Haiku on this head</summary>
 
-<details><summary>The earlier build, and Haiku on this head</summary>
+Model runs on headless Chrome for Testing; ratios are geometric means of per-task ratios, 95% bootstrap intervals, small samples. The earlier-build runs were not blind: the model could read the arm's name in its working directory (`outcome-print`). The two Haiku legs on this head ran in a neutral directory from a neutrally named copy of each tree; a scan of all the model was sent found no arm name.
+
+The product configurator, where Haiku lost most, is reported apart: Sol took 1.04x its mean steps there (same median) and Opus 6 against 7 (median). Opus's one failed run, on `main`, was a harness artefact. All Opus runs were taken on a quiet host.
 
 The earlier build printed the same lines without `yet`, ignored every style and class change and read back the focused field. On this head the product configurator showed no gain on Sol either (1.04x mean steps, same median), and the blind Sol leg's upper bound only just clears 1.0. It cost Haiku most (1.26x and 1.21x the median steps). Part of that is a correct line: Haiku often clicks a colour's caption, which does nothing, then reads `no change yet` and spends cells finding the swatch, but some long runs never saw that line. The PR's two FAILs in the second leg fetched Chrome's `/json/list` themselves, which the bench grader counts as a browser bypass. In the same leg the code with no prompt line took 1.00x [0.88, 1.15] the steps and the earlier prompt wording 1.11x [0.96, 1.30], so no wording made a measurable difference. Wall time: Sol 1.03x [0.90, 1.17]; Haiku 1.11x [0.92, 1.32] and 1.13x [0.98, 1.31], on a shared host.
 
@@ -70,3 +70,4 @@ The earlier build printed the same lines without `yet`, ignored every style and 
 - [x] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
