@@ -13,8 +13,6 @@ Printing is disabled in omp's own Chrome profile by merged #18838; attached brow
 
 ## Why
 
-`uploadFile` now takes its chooser through the tab's catcher instead of a chooser wait of its own (`pagesAwaitingChooser`); the paths and contents routes, the route check's own deadline and the refusal of folders on the contents route stay. #15915 already stopped `uploadFile` swallowing later choosers; this PR reverses its cancel of a chooser `uploadFile` did not fill (7d50d3d815): a chooser whose delivery failed stays held and answerable. `handleDialog({ files })` uses the tab's route and staging, folder refusal included.
-
 `main` already lets the click that opens a confirm or prompt return and rejects page calls while it waits. This change extends that pending state to held file choosers, preserves it across tab, frame and handle calls, and leaves alerts in connected and relay browsers for the user. A chooser click no longer raises the Open panel on the user's screen or disappears without a notice.
 
 ## Testing
@@ -48,7 +46,9 @@ Earlier prototype evidence, before main gained its current confirm/prompt race: 
 | picker | base | 5 | page gets AbortError 5/5; notice in result 0/5 |
 | picker | after | 5 | page gets AbortError 5/5; notice in result 5/5 |
 
-<details><summary>Regression and prototype evidence</summary>
+<details><summary>Implementation, regression and prototype evidence</summary>
+
+`uploadFile` now takes its chooser through the tab's catcher instead of a chooser wait of its own (`pagesAwaitingChooser`); the paths and contents routes, the route check's own deadline and the refusal of folders on the contents route stay. #15915 already stopped `uploadFile` swallowing later choosers; this PR reverses its cancel of a chooser `uploadFile` did not fill (7d50d3d815): a chooser whose delivery failed stays held and answerable. `handleDialog({ files })` uses the tab's route and staging, folder refusal included.
 
 - On the tree without this change, 26 of its tests fail: 12 in `browser-nav-frames-dialogs.test.ts`, 12 in `browser-upload-chooser.test.ts` (one is main's chooser-cancel test, now expecting the hold) and 2 in `browser-upload-contents.test.ts`; the `tab.id(n)` test fails with its fix reverted. With the input read in the page's own world, the chooser test on a page that replaced `addEventListener` fails on the 200-character `accept`, and the same page probed without that check kept the chooser reported as waiting after Puppeteer filled it. Without letting go on a failed watch, a chooser whose iframe was removed stays pending and `handleDialog({ accept: false })` fails.
 - `handleDialog({ files })` vs a separate `tab.chooseFiles()`, 15 runs each on gpt-5.6-luna: both 15/15, but with `chooseFiles` the model read `dialog()` as closed while a chooser waited.
