@@ -110549,5 +110549,11 @@
     "wake": ""
    }
   ]
+ },
+ "opening": {
+  "id": "fable-shared-wall-block",
+  "token": "aeffb093fd4c472b9b547e00a116ea0e",
+  "host": "MacBook-Pro",
+  "at": "2026-11-17T23:04:49Z"
  }
 }

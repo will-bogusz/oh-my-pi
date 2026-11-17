@@ -25,7 +25,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 | logger-console-level | fix(utils): apply OMP_LOG_LEVEL to the console transport | other | P2 | 2h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/logger-console-level) |
 | account-switch-reason | feat(ai,coding-agent): record why a session's OAuth account switched | auth | P2 | 1h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/account-switch-reason) |
 | qt-filler-windows | fix(natives): list Qt windows built from a bare QWidget on Wayland | natives | P2 | 1h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/qt-filler-windows) |
-| wayland-share-picker-deadline | fix(natives): wait for the Wayland screen-share picker until the call's deadline | natives | P2 | 0h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-share-picker-deadline) |
+| wayland-share-picker-deadline | fix(natives): wait for the Wayland screen-share picker until the call's deadline | natives | P2 | 1h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-share-picker-deadline) |
 
 ## Conflict-held (18)
 
