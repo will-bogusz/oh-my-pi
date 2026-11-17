@@ -1,27 +1,29 @@
 ## What
 
-When my agent typed a letter on a closed dropdown in a Mac app and then read the window, it saw the old option and went on trying other ways to pick it. Now that read waits until the dropdown shows the option the letter chose.
+When my agent typed a letter on a closed dropdown in a Mac app and then read the window, it saw the old option and kept trying other ways to pick it. Now that read waits until the dropdown shows the option the letter chose.
 
-`press(letter)` then `ax()` in the same call: the chosen option showed 0 of 40 times before and 40 of 40 after, on AppKit pop-up buttons and SwiftUI pickers, in the background and in front. The key call itself takes as long as before.
+`press(letter)` then `ax()` in the same call: the chosen option showed 0 of 40 times before and 40 of 40 after, on AppKit pop-up buttons and SwiftUI pickers, in the background and in front.
 
 | | before | after |
 |---|---|---|
 | `el.press("r")` on a focused native pop-up | returns about 0.5 s after the key | unchanged |
 | `ax()`, `find`, `value()` of that pop-up right after | the option from before the key | waits until the option changes (about 0.5 s later), at most 1.5 s after the last key |
 | a letter that matches nothing, or the current option | read at once | read about 1.0 s later, unchanged, no error |
+| `el.click({menu: ["Zulu"]})` on that pop-up 100 ms after the letter's call | reports ok, but the letter's late choice replaces Zulu (20 of 20) | waits for the letter's choice before taking input, then chooses Zulu (20 of 20) |
 | Chrome and Electron `<select>`, other keys, reads of other elements and windows, typing into text fields | | unchanged |
 
 ## Why
 
-A focused pop-up chooses the first option that starts with the letters typed on it. AppKit pop-ups, SwiftUI menu pickers included, collect the letters and apply them together about 1 s after the last key (1001 to 1033 ms, 40 of 40). The accessibility value is live, so the read was right, only early. A web `<select>` applies each key at once.
+AppKit pop-ups, SwiftUI menu pickers included, collect the letters and apply them together about 1 s after the last key (1001 to 1033 ms, 40 of 40). A web `<select>` applies each key at once.
 
-The wait sits on the read, not on the key: blocking each key until its choice shows would make `m`, `e`, `d` sent as three calls into three separate searches. Where the pop-up ends is unchanged (below). It applies by role and key kind only: a character other than a space, with Shift at most, sent to an `AXPopUpButton`.
+The wait sits on the read, not on the key: blocking each key until its choice shows would make `m`, `e`, `d` sent as three calls into three separate searches. It applies by role, surface and key kind only: a character other than a space, with Shift at most, sent to an `AXPopUpButton` outside web content.
 
 <details><summary>Shape of the change</summary>
 
 - `macos/ax/type_ahead.rs`: before type-ahead keys, the target (the element, or the focused element for `win.press`) is read for role and value; once the keys went out the pop-up is marked with that value and a deadline 1.5 s after the last key. Marks live on the session's worker thread. A further letter to the same pop-up takes its own value-before and moves the deadline.
 - `MacAx::props`, `walk_node` and `attributes` settle a marked element before reading it: poll its `AXValue` every 10 ms until it differs or the deadline passes, then clear the mark. A cancelled read keeps the mark.
 - `macos/input.rs`: `window_chord` and `window_type` watch and mark; a key call that fails after its letters went out still marks.
+- Nothing waits under the input lease, which keeps every other session's input out: `Worker::execute` settles the element of an element action other than keys and typing (`AxBackend::settle`) before it takes the lease, and a read made with the lease held returns at once and keeps the mark (`control::input_held`). Returning at once alone (no wait before the lease) left a menu click's item replaced by the letter's choice 20 of 20, as on main.
 - Polling, not notifications: SwiftUI pickers post no `AXValueChanged` (0 of 20); AppKit posts one 2 to 11 ms after the change.
 - What a letter does: one letter picks the first option starting with it; pressed again, a native pop-up stays there while a web select moves on to the next match. A whole title typed on a web select passes through the options on the way and fires the page's change handlers for each (typing "medium": Mediocre, then Medium); a native pop-up applies it once.
 
@@ -61,6 +63,16 @@ Trials in a macOS 26 VM: a fixture app with an AppKit pop-up and a SwiftUI picke
 | picker | fg | three | Mediocre 10/10 | Mediocre 10/10 | 10/10 | [1] / [1] | 1801 / 1800 |
 | picker | fg | typed | Mediocre 10/10 | Mediocre 10/10 | 10/10 | [1] / [1] | 617 / 616 |
 
+**a letter, then el.click() on the pop-up 100 ms after the letter's call, plain or with `menu: ["Zulu"]` (main / this PR, 10 tries each, background)**
+| control | click | ends on | call ok | call ms | input lease held, ms |
+|---|---|---|---|---|---|
+| popup | plain | letter 10 / letter 10 | 0 / 0 (menu closed, items listed) | 734 / 1113 | 731 / 726 |
+| popup | menu Zulu | letter 10 / Zulu 10 | 10 / 10 | 733 / 1116 | 732 / 727 |
+| picker | plain | letter 10 / letter 10 | 0 / 0 (menu closed, items listed) | 736 / 1117 | 735 / 727 |
+| picker | menu Zulu | letter 10 / Zulu 10 | 10 / 10 | 734 / 1117 | 732 / 729 |
+
+At 600 ms, after the choice showed, both end on Zulu 20 of 20 in the same time. Rerun against main: the read shows the new option 20 of 20 (Chrome and Electron 20 of 20 on both), `m`, `e`, `d` end on Mediocre 20 of 20, a letter, Tab and typing within 6 ms.
+
 **a letter that changes nothing, then ax(): value shown, errors, time of the read**
 | control | mode | letter | base shown | fix shown | ok base / fix | base ax ms | fix ax ms (min-median-max) |
 |---|---|---|---|---|---|---|---|
@@ -72,6 +84,10 @@ Trials in a macOS 26 VM: a fixture app with an AppKit pop-up and a SwiftUI picke
 | picker | bg | current | ['Bravo'] | ['Bravo'] | 10/10 / 10/10 | 23 | 991-994-1001 |
 | picker | fg | nomatch | ['Bravo'] | ['Bravo'] | 10/10 / 10/10 | 24 | 988-995-999 |
 | picker | fg | current | ['Bravo'] | ['Bravo'] | 10/10 / 10/10 | 26 | 990-994-996 |
+| chrome | bg | nomatch | ['Bravo'] | ['Bravo'] | 10/10 / 10/10 | 36 | 15-36-40 |
+| chrome | bg | current | ['Bravo'] | ['Bravo'] | 10/10 / 10/10 | 36 | 23-35-42 |
+| electron | bg | nomatch | ['Bravo'] | ['Bravo'] | 10/10 / 10/10 | 20 | 19-20-29 |
+| electron | bg | current | ['Bravo'] | ['Bravo'] | 10/10 / 10/10 | 20 | 18-20-21 |
 
 **time per call with no read of the pop-up after it (median ms, p10-p90)**
 | mode | call | base | fix |
@@ -93,7 +109,8 @@ Trials in a macOS 26 VM: a fixture app with an AppKit pop-up and a SwiftUI picke
 | picker | Medium | 5 | 5 | [1] | 0 | 0 of 100 | 0 | 5/5 | 658 |
 | picker | Zulu | 5 | 5 | [1] | 0 | 0 of 100 | 0 | 5/5 | 624 |
 
-Unit tests: `cargo test -p pi-natives --lib type_ahead` (a mark counts from the last key and keeps the latest value-before; a read of the marked pop-up waits for its change, another element's read passes, an unchanged pop-up is read at the deadline, a cancel keeps the mark).
+Unit tests: `cargo test -p pi-natives --lib -- type_ahead element_action refused_first` (an element action waits with the lease free and the front app pinned; a read under the lease neither waits nor clears the mark; a refused first key marks nothing; web pop-ups are not watched).
 
-Limits: Chrome and Electron in front can return about 20 ms after the key, and a read then was stale 1 to 2 of 10 on the base, an accessibility lag of 8 to 26 ms this change leaves alone. In an `ax()` of the whole window, elements read before the pop-up are read before its wait. A click on the marked pop-up within 1.5 s waits for the choice first, since it reads the element's frame.
+Limits: Chrome and Electron in front can return about 20 ms after the key, and a read then was stale 1 to 2 of 10 on the base, an accessibility lag this change leaves alone. In an `ax()` of the whole window, elements read before the pop-up are read before its wait. An element click, `press()`, `perform()` or `setValue` on the pop-up within 1.5 s of the letter waits for its choice before taking the input lease: about 0.4 s more 100 ms after the letter's call, with the lease held for the click alone as on main.
+
 

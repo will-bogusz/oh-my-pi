@@ -94068,7 +94068,7 @@
    "needs": [
     "key-menu"
    ],
-   "base": "bf9a9fbd40e96766d528a9f19a603e53e8c0b5a1",
+   "base": "1bdbf6d242d99ca62bdf2feeff4519ff992f647d",
    "body": "bodies/macos-key-read-settled.md",
    "state": "queued",
    "pr": null,
@@ -94076,7 +94076,7 @@
    "worktree": "/home/will/.omp/main-wt/oh-my-pi/key-read-settled",
    "host": "goliath",
    "added": "2026-11-14T10:14:31Z",
-   "updated": "2026-11-17T00:50:21Z",
+   "updated": "2026-11-17T03:17:12Z",
    "note": "KeyMenu2 r3 2026-11-14: head b67260ce06d on key-menu 636a981d140 (#19179). Review KeyMenu2.KeyReadReview needs-changes at 159a5f5d5e; M1-M4, S2, N1-N5 fixed in the one commit; S1 (a click on the marked popup waits) and N6 stated as limits in the body. rust-check linux+macos at b67260ce06. All tables from VM blocks on the final Rust lines (b3, b4). Benchmark lane re-runs IR-01/IR-02 after this merges.",
    "advanced": "2026-11-17T00:50:21Z"
   },
