@@ -70668,6 +70668,19 @@
        "\t\tif (!follow || response.status < 300 || response.status >= 400 || location === null) return response;"
       ]
      }
+    },
+    {
+     "at": "2026-11-17T22:14:22Z",
+     "reason": "SolFinal19513 fixes (Main go): clone-preserving markRedirected, corrected redirect-limit comment",
+     "old": "6b9f2cdcfd08e89639e1bfa955661601e70e2525",
+     "new": "b318ff4225ac17579fa7ea14fc44aa6f535ee171",
+     "dropped": {
+      "packages/ai/src/utils/upload-progress-fetch.ts": [
+       "/** The fetch standard's redirect limit, which Bun's `fetch` also applies. */",
+       "/** A redirect followed here leaves the final `Response` reading `redirected: false`; say it was, as `fetch` does. */",
+       "\tObject.defineProperty(response, \"redirected\", { value: true });"
+      ]
+     }
     }
    ],
    "opened": "2026-11-17T02:58:48Z",
