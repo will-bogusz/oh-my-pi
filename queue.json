@@ -94208,7 +94208,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-window-order",
    "host": "MacBook-Pro",
    "added": "2026-11-14T01:37:23Z",
-   "updated": "2026-11-17T05:57:35Z",
+   "updated": "2026-11-17T05:59:39Z",
    "note": "QueueTwentySeven 2026-11-16: rebased locally onto main as 14e0989d3bd (clean). HandBack 2026-11-14: head 37142503cd9 (amended): takeover hand-back also raises the user's key window (with_foreground, hand_back_keeps_order). rust-check macos/linux/windows at 37142503cd9 (diff d9e990b339). Review TakeoverOrderReview needs-changes -> fixed (cause wording, same-app test, doubled error text, docs/changelog/title). Earlier: key-window-only restore, OrderReview2 7/7. Overlaps: #16553 pair recorded; #19062/#19179/drag-confirm/scroll-direction none.",
    "rebases_after": [
     16553,
@@ -94218,7 +94218,81 @@
     "16553": "HandBack, 2026-11-14: textual conflict only, in with_background_watch and WindowServerDesktop (skylight.rs). Combined form keeps both sides: #16553's 'let placement = match (clicks, previous.pid) {Tap|HitTest}' first, then this entry's 'let order = previous.pid.zip(capture::stacked_windows()).and_then(|(user, stack)| window_order::EntryOrder::new(pid, user, previous_key, &stack));' (read before anything is sent; placement sends nothing); WindowServerDesktop { spi, previous, key: previous_key, placement, stopped: &stopped, order: RefCell::new(order), raises: Cell::new(0) }; struct fields key, placement, stopped, order, raises. No semantic overlap: placement feeds SwitchSignals, order feeds keep_order.",
     "19296": "Main, 2026-11-16: skylight.rs takeover path only: window-order adds the stacking read 'let mut order = capture::stacked_windows().and_then(|stack| window_order::EntryOrder::new(pid, previous_pid, previous_key, &stack));' where #19296 adds 'control::intervention::start_takeover()?;'. Combined form: window-order's order read first, then #19296's start_takeover()? as the last step before the target comes forward; EntryOrder has no Drop, so a refusal from the typing check after the read leaves nothing to undo. Before open: #19296's a_takeover_admitted_before_the_lease_stops_at_a_press_since and window-order's tests pass together on the merged tree."
    },
-   "advanced": "2026-11-17T00:47:32Z"
+   "advanced": "2026-11-17T00:47:32Z",
+   "built": [
+    {
+     "with": "#17756",
+     "code": "f8e3627aa8cb6951db769c6957a605d3a41d992c",
+     "with_code": "0d8ce0853d7a35698937e2f28ecfef19e265c94e",
+     "tip": "43ab6e05979ad1b72463a0e3b48baa9dc170fad9",
+     "with_tip": "02c153e5cb6a1e80b9000e2c423386bf7423ac85",
+     "at": "2026-11-17T05:59:34Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19195",
+     "code": "f8e3627aa8cb6951db769c6957a605d3a41d992c",
+     "with_code": "a6537b230b0aca2d167690b2dd7419dc03c04fb0",
+     "tip": "43ab6e05979ad1b72463a0e3b48baa9dc170fad9",
+     "with_tip": "10d298f1df6a017c1fd1672939dcf2ae9ded27ad",
+     "at": "2026-11-17T05:59:38Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#17897",
+     "code": "f8e3627aa8cb6951db769c6957a605d3a41d992c",
+     "with_code": "2bbb547591ae156ccac7af195b43202e415d1bd2",
+     "tip": "43ab6e05979ad1b72463a0e3b48baa9dc170fad9",
+     "with_tip": "1630d69fc76fc75c713722e3bb2742c2db302bab",
+     "at": "2026-11-17T05:59:38Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19504",
+     "code": "f8e3627aa8cb6951db769c6957a605d3a41d992c",
+     "with_code": "e41fbf6b9a34a8290bfb3b95be76b15e0fbe30da",
+     "tip": "43ab6e05979ad1b72463a0e3b48baa9dc170fad9",
+     "with_tip": "e01f4c4530a38eb4f259737574dd9557dac1ab72",
+     "at": "2026-11-17T05:59:38Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19515",
+     "code": "f8e3627aa8cb6951db769c6957a605d3a41d992c",
+     "with_code": "659168553fb0799f6edfa9b006a04b8709d521dd",
+     "tip": "43ab6e05979ad1b72463a0e3b48baa9dc170fad9",
+     "with_tip": "af0b9bc40129722fe54b88f2d70d79a526db9255",
+     "at": "2026-11-17T05:59:38Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19519",
+     "code": "f8e3627aa8cb6951db769c6957a605d3a41d992c",
+     "with_code": "10f2f0166cf201563e33349758382bd628db9ba6",
+     "tip": "43ab6e05979ad1b72463a0e3b48baa9dc170fad9",
+     "with_tip": "991758d9f45175f37d125db647f11b687b08b663",
+     "at": "2026-11-17T05:59:38Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19521",
+     "code": "f8e3627aa8cb6951db769c6957a605d3a41d992c",
+     "with_code": "3e841e715da9e843f6bad42656891f40861ea4cc",
+     "tip": "43ab6e05979ad1b72463a0e3b48baa9dc170fad9",
+     "with_tip": "1197233333f5668786fbd0b567b6c199abeeac7d",
+     "at": "2026-11-17T05:59:39Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19516",
+     "code": "f8e3627aa8cb6951db769c6957a605d3a41d992c",
+     "with_code": "5b5a77a932badd38c2416ced9055562552dfbb3f",
+     "tip": "43ab6e05979ad1b72463a0e3b48baa9dc170fad9",
+     "with_tip": "8f0f48f03bf4d1b86ba33ce07a27f541db28d116",
+     "at": "2026-11-17T05:59:39Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "macos-stale-press",
