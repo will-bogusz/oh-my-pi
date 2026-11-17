@@ -80441,7 +80441,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-xtest-release",
    "host": "MacBook-Pro",
    "added": "2026-11-11T02:31:05Z",
-   "updated": "2026-11-17T04:53:05Z",
+   "updated": "2026-11-17T04:55:15Z",
    "note": "",
    "rebases_after": [
     18222,
@@ -80450,7 +80450,81 @@
    "pair_reasons": {
     "18222": "Main, 2026-11-17: docs only, adjacent lines in docs/computer-use.md and docs/tools/computer.md: #18222 inserts its named-menu paragraph / sub-bullet right before the holdKeys line this entry edits. Combined form: in both files #18222's new menu line first, then this entry's holdKeys line, nothing else changed (~/tmp/oh-my-pi/XtestRelease/docs-18222-pair.md). Not to open until Main says (watcher fork-cost measurement pending).",
     "19519": "Main, 2026-11-17: adjacent unions in x11/mod.rs (mod lines), input.rs use list, X11Input::new fields and foreground_keys_after (watch_releases() then Keymap::xtest); in send_xtest #19519's text_mapping.pressed(keycode) moves into xtest's restructured send_xtest at the same point (after the request is sent, before check(), key presses only), no new logic. Combined form: merge 7b0d2ff0b68, ~/tmp/oh-my-pi/queuethirty/xpair-combined.md"
-   }
+   },
+   "built": [
+    {
+     "with": "#17756",
+     "code": "459896eee83ec5d289ae0a83ecc1c5b57d994480",
+     "with_code": "0d8ce0853d7a35698937e2f28ecfef19e265c94e",
+     "tip": "540e62c179c9d26fa6e732e3b56ee0a71a5e584b",
+     "with_tip": "02c153e5cb6a1e80b9000e2c423386bf7423ac85",
+     "at": "2026-11-17T04:55:10Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19195",
+     "code": "459896eee83ec5d289ae0a83ecc1c5b57d994480",
+     "with_code": "a6537b230b0aca2d167690b2dd7419dc03c04fb0",
+     "tip": "540e62c179c9d26fa6e732e3b56ee0a71a5e584b",
+     "with_tip": "10d298f1df6a017c1fd1672939dcf2ae9ded27ad",
+     "at": "2026-11-17T04:55:14Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#17897",
+     "code": "459896eee83ec5d289ae0a83ecc1c5b57d994480",
+     "with_code": "2bbb547591ae156ccac7af195b43202e415d1bd2",
+     "tip": "540e62c179c9d26fa6e732e3b56ee0a71a5e584b",
+     "with_tip": "1630d69fc76fc75c713722e3bb2742c2db302bab",
+     "at": "2026-11-17T04:55:14Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19515",
+     "code": "459896eee83ec5d289ae0a83ecc1c5b57d994480",
+     "with_code": "659168553fb0799f6edfa9b006a04b8709d521dd",
+     "tip": "540e62c179c9d26fa6e732e3b56ee0a71a5e584b",
+     "with_tip": "af0b9bc40129722fe54b88f2d70d79a526db9255",
+     "at": "2026-11-17T04:55:14Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19521",
+     "code": "459896eee83ec5d289ae0a83ecc1c5b57d994480",
+     "with_code": "3e841e715da9e843f6bad42656891f40861ea4cc",
+     "tip": "540e62c179c9d26fa6e732e3b56ee0a71a5e584b",
+     "with_tip": "1197233333f5668786fbd0b567b6c199abeeac7d",
+     "at": "2026-11-17T04:55:14Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19504",
+     "code": "459896eee83ec5d289ae0a83ecc1c5b57d994480",
+     "with_code": "e41fbf6b9a34a8290bfb3b95be76b15e0fbe30da",
+     "tip": "540e62c179c9d26fa6e732e3b56ee0a71a5e584b",
+     "with_tip": "e01f4c4530a38eb4f259737574dd9557dac1ab72",
+     "at": "2026-11-17T04:55:15Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19516",
+     "code": "459896eee83ec5d289ae0a83ecc1c5b57d994480",
+     "with_code": "5b5a77a932badd38c2416ced9055562552dfbb3f",
+     "tip": "540e62c179c9d26fa6e732e3b56ee0a71a5e584b",
+     "with_tip": "8f0f48f03bf4d1b86ba33ce07a27f541db28d116",
+     "at": "2026-11-17T04:55:15Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19519",
+     "code": "459896eee83ec5d289ae0a83ecc1c5b57d994480",
+     "with_code": "6d4331bc3c7625d0229fade13237280aba610203",
+     "tip": "540e62c179c9d26fa6e732e3b56ee0a71a5e584b",
+     "with_tip": "c45c4a479121650e1961f7f8ccbf9f27bc8883cb",
+     "at": "2026-11-17T04:55:15Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "x11-takeover-keyboard-state",
