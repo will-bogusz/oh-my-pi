@@ -74170,8 +74170,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-observe-settle",
    "host": "MacBook-Pro",
    "added": "2026-11-10T18:56:46Z",
-   "updated": "2026-11-17T00:30:21Z",
-   "note": "",
+   "updated": "2026-11-17T00:32:16Z",
+   "note": "Merged 2026-11-17 00:21Z in Brit's second batch with maintainer commit(s) on the branch (learn-from-merge read by Main's separate agent). ",
    "advanced": "2026-11-16T21:15:29Z",
    "kind": "proposal",
    "built": [
