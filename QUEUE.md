@@ -1,23 +1,22 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17 01:10Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17 01:11Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-17 00:47Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 6, conflict-held 20, stacked 16, held 12, parked 2, open PRs 15; merged 366, closed 37
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-17 01:10Z on goliath; groups below are from it, states from the manifest)
+**Counts:** openable now 5, conflict-held 21, stacked 16, held 12, parked 2, open PRs 15; merged 366, closed 37
 
-## Openable now (6)
+## Openable now (5)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
-| stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 3d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 | factory-droid-1100-pin | feat(catalog): identify Factory Droid requests as droid 1.10.0 | factory-droid |  | 3d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-pin) |
 | macos-window-order | fix(natives): put the user's key window back in front of a macOS target after background input and takeover | computer | P1 | 2d | open; accepted pair with #16553: HandBack, 2026-11-14: textual conflict only, in with_background_watch and WindowServerDesktop (skylight.rs). Combined form keeps both sides: #16553's 'let placement = match (clicks, previous.pid) {Tap\|HitTest}' first, then this entry's 'let order = previous.pid.zip(capture::stacked_windows()).and_then(\|(user, stack)\| window_order::EntryOrder::new(pid, user, previous_key, &stack));' (read before anything is sent; placement sends nothing); WindowServerDesktop { spi, previous, key: previous_key, placement, stopped: &stopped, order: RefCell::new(order), raises: Cell::new(0) }; struct fields key, placement, stopped, order, raises. No semantic overlap: placement feeds SwitchSignals, order feeds keep_order. | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-window-order) |
 | macos-move-receipt | fix(coding-agent): say what a macOS background move did | computer | P2 | 2d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-move-receipt) |
-| macos-key-read-settled | fix(natives): read a macOS popup after the option its typed letters choose | computer | P1 | 2d | open; advance first | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-key-read-settled) |
+| macos-key-read-settled | fix(natives): read a macOS popup after the option its typed letters choose | computer | P1 | 2d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-key-read-settled) |
 | macos-handback-typed | fix(natives): give the macOS key window back after a takeover while another program types | computer | P2 | 2d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-handback-typed) |
 
-## Conflict-held (20)
+## Conflict-held (21)
 
 | id | title | area | priority | age | blocked by | branch |
 |---|---|---|---|---|---|---|
@@ -40,6 +39,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 | macos-ax-cancel-before-send | fix(natives): send no macOS AX action once its run is cancelled | natives | P2 | 5d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), macos-key-read-settled, main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-ax-cancel-before-send) |
 | win-ax-states | fix(natives): expose Windows control state and stale-reference matches | computer | P2 | 5d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#18925](https://github.com/can1357/oh-my-pi/pull/18925), macos-key-read-settled, main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-ax-states) |
 | x11-keysym-remap | fix(natives): type characters outside the X11 keymap through temporary keycodes | computer | P2 | 5d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-keysym-remap) |
+| stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 3d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 | macos-reroute-not-a-press | fix(natives): count keys moved back to a macOS user's app as theirs | computer | P2 | 2d | [#18925](https://github.com/can1357/oh-my-pi/pull/18925), macos-window-order, main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-reroute-not-a-press) |
 
 ## Stacked (16)
@@ -91,8 +91,8 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 
 | PR | id | title | area | rank | open | plan | branch |
 |---|---|---|---|---|---|---|---|
-| [#18925](https://github.com/can1357/oh-my-pi/pull/18925) | r2/native-window-report | feat(coding-agent): name the native windows a browser call raised on macOS | browser | P2 | 5d | rebase | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/r2/native-window-report) |
-| [#16553](https://github.com/can1357/oh-my-pi/pull/16553) | click-place-release | fix(natives): place macOS clicks for the focus guard where WindowServer routed them | natives-macos | P1 | 27d | rebase | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/click-place-release) |
+| [#18925](https://github.com/can1357/oh-my-pi/pull/18925) | r2/native-window-report | feat(coding-agent): name the native windows a browser call raised on macOS | browser | P2 | 5d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/r2/native-window-report) |
+| [#16553](https://github.com/can1357/oh-my-pi/pull/16553) | click-place-release | fix(natives): place macOS clicks for the focus guard where WindowServer routed them | natives-macos | P1 | 27d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/click-place-release) |
 | [#16611](https://github.com/can1357/oh-my-pi/pull/16611) | read-audio-transcripts | feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio | catalog | P2 | 26d | rebase | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-audio-transcripts) |
 | [#18222](https://github.com/can1357/oh-my-pi/pull/18222) | computer-menu-subtree | feat(coding-agent): find nested menu commands in one read | computer | P2 | 11d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-menu-subtree) |
 | [#17897](https://github.com/can1357/oh-my-pi/pull/17897) | iphone-mirror-key-gap | perf(natives): type on iPhone Mirroring twice as fast | computer | P2 | 13d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-key-gap) |

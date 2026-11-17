@@ -95190,13 +95190,17 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-17T00:39:57Z",
+  "checked": "2026-11-17T01:10:38Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
    "macos-key-read-settled": {
     "since": "2026-11-17T00:39:57Z",
     "title": "fix(natives): read a macOS popup after the option its typed letters choose"
+   },
+   "macos-window-order": {
+    "since": "2026-11-17T01:10:38Z",
+    "title": "fix(natives): put the user's key window back in front of a macOS target after background input and takeover"
    },
    "macos-handback-typed": {
     "since": "2026-11-17T00:39:57Z",
@@ -95212,23 +95216,6 @@
    }
   },
   "conflicts": {
-   "#18925": {
-    "since": "2026-11-17T00:39:57Z",
-    "title": "feat(coding-agent): name the native windows a browser call raised on macOS",
-    "files": [
-     "packages/coding-agent/src/tools/browser/tab-protocol.ts",
-     "packages/coding-agent/src/tools/browser/tab-supervisor.ts",
-     "packages/coding-agent/src/tools/browser/tab-worker.ts"
-    ]
-   },
-   "#16553": {
-    "since": "2026-11-17T00:39:57Z",
-    "title": "fix(natives): place macOS clicks for the focus guard where WindowServer routed them",
-    "files": [
-     "crates/pi-natives/src/desktop/control/intervention.rs",
-     "crates/pi-natives/src/desktop/control/macos.rs"
-    ]
-   },
    "#16611": {
     "since": "2026-11-12T01:15:20Z",
     "title": "feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio",
@@ -98925,6 +98912,12 @@
      "crates/pi-natives/src/desktop/control/intervention.rs",
      "crates/pi-natives/src/desktop/control/macos.rs"
     ]
+   },
+   {
+    "at": "2026-11-17T01:10:38Z",
+    "kind": "openable",
+    "id": "macos-window-order",
+    "title": "fix(natives): put the user's key window back in front of a macOS target after background input and takeover"
    }
   ]
  },
@@ -105660,8 +105653,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-17T00:47:42.162498Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-17T01:10:39.269146Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -105676,10 +105669,8 @@
     "area": "natives-macos",
     "priority": "P1",
     "title": "fix(natives): place macOS clicks for the focus guard where WindowServer routed them",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in crates/pi-natives/src/desktop/control/intervention.rs, crates/pi-natives/src/desktop/control/macos.rs"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -105924,10 +105915,8 @@
     "area": "browser",
     "priority": "P2",
     "title": "feat(coding-agent): name the native windows a browser call raised on macOS",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -106007,7 +105996,7 @@
     "title": "fix(natives): read a macOS popup after the option its typed letters choose",
     "action": "open",
     "reasons": [],
-    "note": "advance first",
+    "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [],
@@ -106281,12 +106270,17 @@
     "title": "fix(natives): note a macOS background drag that changed nothing readable",
     "action": "wait",
     "reasons": [
-     "needs #19195 (open)"
+     "needs #19195 (open)",
+     "conflicts with #16553 in crates/pi-natives/src/desktop/macos/input.rs",
+     "conflicts with macos-key-read-settled in crates/pi-natives/src/desktop/macos/input.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#16553",
+     "macos-key-read-settled"
+    ],
     "needs": [
      "macos-drag-confirm"
     ],
@@ -106390,8 +106384,9 @@
     "action": "wait",
     "reasons": [
      "needs macos-reroute-not-a-press (queued)",
+     "conflicts with #16553 in crates/pi-natives/src/desktop/macos/input.rs",
      "conflicts with #19195 in docs/computer-use.md",
-     "conflicts with macos-key-read-settled in crates/pi-natives/src/desktop/macos/input.rs",
+     "conflicts with macos-key-read-settled in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/macos/input.rs, docs/computer-use.md",
      "conflicts with macos-window-order in docs/computer-use.md",
      "conflicts with macos-handback-typed in docs/computer-use.md",
      "its need macos-reroute-not-a-press conflicts with main in crates/pi-natives/src/desktop/control/macos.rs, crates/pi-natives/src/desktop/macos/mod.rs",
@@ -106401,6 +106396,7 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#16553",
      "#19195",
      "macos-key-read-settled",
      "macos-window-order",
@@ -106424,8 +106420,7 @@
      "needs #18925 (open)",
      "conflicts with #18786 in docs/tools/browser.md",
      "conflicts with #18789 in docs/tools/browser.md",
-     "its need #18925 conflicts with main in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
+     "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
     ],
     "note": "",
     "over": [],
@@ -106507,7 +106502,7 @@
     "title": "fix(coding-agent,browser-relay): fail a browser call a print preview holds in an attached browser within seconds",
     "action": "wait",
     "reasons": [
-     "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts",
+     "conflicts with #18925 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts"
     ],
     "note": "",
@@ -106655,7 +106650,7 @@
     "action": "held",
     "reasons": [
      "held: Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check",
-     "conflicts with #18925 in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts",
+     "conflicts with #18925 in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
     ],
     "note": "",
@@ -106826,7 +106821,7 @@
      "conflicts with #19195 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md",
-     "conflicts with #18925 in crates/pi-natives/src/desktop/macos/capture.rs, crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with #18925 in crates/pi-natives/src/desktop/macos/capture.rs, crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs, packages/natives/native/index.d.ts",
      "conflicts with macos-window-order in crates/pi-natives/src/desktop/macos/capture.rs, crates/pi-natives/src/desktop/macos/mod.rs",
      "conflicts with macos-move-receipt in docs/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/test/tools/computer.test.ts"
@@ -107041,8 +107036,10 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with main in (branch missing on the fork)"
+    ],
     "note": "",
     "over": [],
     "paired": [],
