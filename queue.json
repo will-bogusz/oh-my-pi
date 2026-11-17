@@ -94270,7 +94270,7 @@
    "worktree": "/home/will/.omp/main-wt/oh-my-pi/key-read-settled",
    "host": "goliath",
    "added": "2026-11-14T10:14:31Z",
-   "updated": "2026-11-17T03:27:15Z",
+   "updated": "2026-11-17T03:29:15Z",
    "note": "KeyMenu2 r4 2026-11-17: head d4e02a09386 on main 1bdbf6d242d. No wait under the input lease: an element action other than keys/typing on a popup with pending type-ahead pins EntryFront and waits before the lease (VM: menu click 100 ms after a letter ends on the menu item 20/20 vs the letter 20/20 on main; lease ~727 ms as main); reads under the lease return at once. Web pop-ups not watched; a refused first key marks nothing. Reviews: KeyMenuReview (Astra) and KeyMenuReviewSol needs-changes at c1ad0fa, all fixed; KeyMenu2.KeyReadFollowup needs-changes at 1df86fe then ready at d4e02a0. rust-check linux, windows, macos at d4e02a0. Not run: model sample for the prompt line (no model runs). Text-only amend e3e11216dfa (KeyMenu2, 2026-11-17): prompt line describes the letter effect only and points to menu:; docs:155 typing advice dropped; body adds Main sample (advising wording: Sol 4 of 15 wrong, main 0). Rust diff unchanged (69ba7a2054).",
    "advanced": "2026-11-17T00:50:21Z",
    "rebases_after": [
@@ -94278,7 +94278,45 @@
    ],
    "pair_reasons": {
     "19195": "Main, 2026-11-17: adjacent thread_local statics in desktop/control.rs; combined = both statics (DRAG_NOTE then INPUT_HELD), then input_held() unchanged"
-   }
+   },
+   "built": [
+    {
+     "with": "#17756",
+     "code": "65859bd8d65a15bdb223800471b2921715ac8598",
+     "with_code": "00b33a7b015bc7730a8a6926657f2a3f49039187",
+     "tip": "e3e11216dfa1c75a9783090663197fefd567aae1",
+     "with_tip": "5fa26ba5481db59442c67c224e6eb42cf2131d83",
+     "at": "2026-11-17T03:29:11Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19195",
+     "code": "65859bd8d65a15bdb223800471b2921715ac8598",
+     "with_code": "9cb775e8f735e281467b990231772a3c6b7fa35b",
+     "tip": "e3e11216dfa1c75a9783090663197fefd567aae1",
+     "with_tip": "008596298a587cdeb99733695dfa5ec5a06fdbfa",
+     "at": "2026-11-17T03:29:14Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#17897",
+     "code": "65859bd8d65a15bdb223800471b2921715ac8598",
+     "with_code": "2bbb547591ae156ccac7af195b43202e415d1bd2",
+     "tip": "e3e11216dfa1c75a9783090663197fefd567aae1",
+     "with_tip": "1630d69fc76fc75c713722e3bb2742c2db302bab",
+     "at": "2026-11-17T03:29:14Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19504",
+     "code": "65859bd8d65a15bdb223800471b2921715ac8598",
+     "with_code": "e41fbf6b9a34a8290bfb3b95be76b15e0fbe30da",
+     "tip": "e3e11216dfa1c75a9783090663197fefd567aae1",
+     "with_tip": "e01f4c4530a38eb4f259737574dd9557dac1ab72",
+     "at": "2026-11-17T03:29:15Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "macos-keys-no-press",
