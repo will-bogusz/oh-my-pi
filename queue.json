@@ -72096,7 +72096,7 @@
    "area": "browser",
    "priority": "P1",
    "needs": [],
-   "base": "433a9101959de11e34cd0047996cb1e87446a383",
+   "base": "1bdbf6d242d99ca62bdf2feeff4519ff992f647d",
    "body": "bodies/browser-wait-predicate.md",
    "state": "queued",
    "pr": null,
@@ -72104,9 +72104,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-wait-predicate",
    "host": "MacBook-Pro",
    "added": "2026-11-10T15:45:44Z",
-   "updated": "2026-11-17T01:50:07Z",
+   "updated": "2026-11-17T02:58:01Z",
    "note": "",
-   "advanced": "2026-11-10T22:13:06Z"
+   "advanced": "2026-11-17T02:58:01Z"
   },
   {
    "id": "computer-input-lease-wait",
