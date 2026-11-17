@@ -97361,7 +97361,7 @@
    "branch": "will/reserve-per-model-family",
    "title": "feat(ai): reserve per usage limit in account policies",
    "area": "broker",
-   "priority": null,
+   "priority": "P2",
    "needs": [],
    "base": "1abafe8e71cae521f995e2203055ce840b859da4",
    "body": "bodies/reserve-per-model-family.md",
@@ -97371,7 +97371,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/reserve-per-model-family",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:13:06Z",
-   "updated": "2026-11-17T21:35:37Z",
+   "updated": "2026-11-17T22:35:42Z",
    "note": "Will, 2026-11-17: go-ahead to open",
    "kind": "proposal"
   },
