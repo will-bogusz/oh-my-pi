@@ -96588,6 +96588,24 @@
    "added": "2026-11-17T21:06:15Z",
    "updated": "2026-11-17T21:06:15Z",
    "note": ""
+  },
+  {
+   "id": "broker-client-startup-retry",
+   "branch": "will/broker-client-startup-retry",
+   "title": "fix(ai): retry the initial auth-broker snapshot through a broker restart",
+   "area": "broker",
+   "priority": null,
+   "needs": [],
+   "base": "baf60290fde5e9eea4edb30bff07695877682ba9",
+   "body": "bodies/broker-client-startup-retry.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/broker-client-startup-retry",
+   "host": "MacBook-Pro",
+   "added": "2026-11-17T21:08:05Z",
+   "updated": "2026-11-17T21:08:05Z",
+   "note": ""
   }
  ],
  "watch": {
