@@ -107021,12 +107021,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-17T04:40:10.443225Z",
+  "at": "2026-11-17T04:50:23.601856Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 5,
-   "left": 3
+   "used": 4,
+   "left": 4
   },
   "rows": [
    {
@@ -107136,6 +107136,23 @@
     "created": "2026-11-17T03:47:16Z"
    },
    {
+    "id": "atspi-walk-reads",
+    "label": "#19521",
+    "number": 19521,
+    "state": "open",
+    "area": "computer",
+    "priority": "P0",
+    "title": "fix(natives): read each AT-SPI element in two concurrent rounds",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-17T04:39:20Z"
+   },
+   {
     "id": "macos-handback-typed",
     "label": "#19504",
     "number": 19504,
@@ -107223,23 +107240,6 @@
     "created": "2026-11-17T04:19:37Z"
    },
    {
-    "id": "atspi-walk-reads",
-    "label": "#19521",
-    "number": 19521,
-    "state": "open",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives): read each AT-SPI element in two concurrent rounds",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-17T04:39:20Z"
-   },
-   {
     "id": "browser-select-objects",
     "label": "#19518",
     "number": 19518,
@@ -107321,16 +107321,14 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): release X11 XTest keys and buttons a killed omp held",
-    "action": "wait",
-    "reasons": [
-     "conflicts with #19519 in crates/pi-natives/src/desktop/linux/x11/input.rs, crates/pi-natives/src/desktop/linux/x11/mod.rs"
-    ],
-    "note": "",
+    "action": "open",
+    "reasons": [],
+    "note": "accepted pair with #19519: Main, 2026-11-17: adjacent unions in x11/mod.rs (mod lines), input.rs use list, X11Input::new fields and foreground_keys_after (watch_releases() then Keymap::xtest); in send_xtest #19519's text_mapping.pressed(keycode) moves into xtest's restructured send_xtest at the same point (after the request is sent, before check(), key presses only), no new logic. Combined form: merge 7b0d2ff0b68, ~/tmp/oh-my-pi/queuethirty/xpair-combined.md",
     "over": [],
-    "paired": [],
-    "blocked_by": [
+    "paired": [
      "#19519"
     ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T02:31:05Z"
    },
@@ -107470,6 +107468,7 @@
      "conflicts with #19504 in docs/computer-use.md",
      "conflicts with #19509 in packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #19516 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with x11-xtest-release in docs/computer-use.md",
      "conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
@@ -107481,7 +107480,8 @@
      "#19515",
      "#19504",
      "#19509",
-     "#19516"
+     "#19516",
+     "x11-xtest-release"
     ],
     "needs": [],
     "created": "2026-10-19T07:26:45Z"
@@ -107579,6 +107579,7 @@
      "conflicts with #19515 in docs/computer-use.md",
      "conflicts with #19504 in docs/computer-use.md",
      "conflicts with #19516 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/macos/input.rs, docs/computer-use.md",
+     "conflicts with x11-xtest-release in docs/computer-use.md",
      "conflicts with main in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/macos/input.rs, docs/computer-use.md"
     ],
     "note": "",
@@ -107589,7 +107590,8 @@
      "#19195",
      "#19515",
      "#19504",
-     "#19516"
+     "#19516",
+     "x11-xtest-release"
     ],
     "needs": [
      "macos-reroute-not-a-press"
@@ -107715,9 +107717,9 @@
     "action": "wait",
     "reasons": [
      "conflicts with #19195 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with #19521 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #19516 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19519 in crates/pi-natives/src/desktop/mod.rs",
-     "conflicts with #19521 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with main in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs"
     ],
     "note": "",
@@ -107725,9 +107727,9 @@
     "paired": [],
     "blocked_by": [
      "#19195",
+     "#19521",
      "#19516",
-     "#19519",
-     "#19521"
+     "#19519"
     ],
     "needs": [],
     "created": "2026-11-11T10:16:04Z"
@@ -107884,6 +107886,7 @@
      "conflicts with #19504 in docs/computer-use.md",
      "conflicts with #19509 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19516 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with x11-xtest-release in docs/computer-use.md, docs/tools/computer.md",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -107896,7 +107899,8 @@
      "#19515",
      "#19504",
      "#19509",
-     "#19516"
+     "#19516",
+     "x11-xtest-release"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -107919,6 +107923,7 @@
      "conflicts with #19509 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19516 in crates/pi-natives/src/desktop/backend.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #19519 in crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with x11-xtest-release in docs/tools/computer.md",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md"
     ],
@@ -107930,7 +107935,8 @@
      "#19195",
      "#19509",
      "#19516",
-     "#19519"
+     "#19519",
+     "x11-xtest-release"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -107954,6 +107960,7 @@
      "conflicts with #19509 in docs/tools/computer.md",
      "conflicts with #19516 in crates/pi-natives/src/desktop/backend.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19519 in crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with x11-xtest-release in docs/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
@@ -107965,7 +107972,8 @@
      "#19515",
      "#19509",
      "#19516",
-     "#19519"
+     "#19519",
+     "x11-xtest-release"
     ],
     "needs": [],
     "created": "2026-11-11T00:21:12Z"
@@ -108102,6 +108110,7 @@
      "held: Main, 2026-11-12: proposal; opens only after entry A merges and Will has seen the body",
      "conflicts with #19100 in docs/tools/computer.md",
      "conflicts with #19509 in docs/tools/computer.md",
+     "conflicts with x11-xtest-release in docs/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/win32/input.rs, crates/pi-natives/src/desktop/win32/mod.rs"
     ],
     "note": "",
@@ -108109,7 +108118,8 @@
     "paired": [],
     "blocked_by": [
      "#19100",
-     "#19509"
+     "#19509",
+     "x11-xtest-release"
     ],
     "needs": [],
     "created": "2026-11-12T04:40:13Z"
