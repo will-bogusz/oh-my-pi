@@ -96757,7 +96757,7 @@
    "branch": "will/broker-wire-forward-compat",
    "title": "fix(ai): read auth-broker responses that carry fields a newer broker adds",
    "area": "broker",
-   "priority": null,
+   "priority": "P2",
    "needs": [],
    "base": "baf60290fde5e9eea4edb30bff07695877682ba9",
    "body": "bodies/broker-wire-forward-compat.md",
@@ -96767,7 +96767,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/broker-wire-forward-compat",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:01:16Z",
-   "updated": "2026-11-17T21:52:08Z",
+   "updated": "2026-11-17T22:35:27Z",
    "note": "Will, 2026-11-17: go-ahead to open",
    "built": [
     {
