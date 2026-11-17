@@ -6,13 +6,13 @@ Typing `héllo wörld ✓` into a GTK 3, Qt 5, Qt 6 or Chromium field: refused 4
 
 ## Why
 
-X11 typing presses keys, so `Keymap::plan_text` (`linux/x11/keymap.rs`) refused a whole text when one character had no keycode. xdotool's answer is to bind the missing keysym to an unused keycode and restore it later; `TextMapping` (`linux/x11/text_mapping.rs`) does that. Bindings are kept after the call and reused, and restored when the session closes; a later call may take a row over once its last key is 500 ms old. The X server grab covers only keymap reads and writes: another X client now waits under 2 ms however long the text, where binding a million characters under the grab stalled it 91 ms.
+X11 typing presses keys, so `Keymap::plan_text` (`linux/x11/keymap.rs`) refused a whole text when one character had no keycode. xdotool's answer is to bind the missing keysym to an unused keycode and restore it later; `TextMapping` (`linux/x11/text_mapping.rs`) does that. Bindings are kept after the call and reused, and restored when the session closes; a later call may take a row over once its last key is 500 ms old. The X server grab covers only keymap reads and writes: another X client now waits under 2 ms however long the text (91 ms for a million characters before).
 
 Limits:
 
 - A text needing more distinct characters outside the layout than there are spare keycodes (19 on Xvfb's default US layout) is refused before any key, saying how many fit. Typing it in runs that rebind rows mid-text garbled receivers that read late (cells below).
 - Chords and holds of such characters still refuse, as on `main`. If omp is killed, the bound rows stay until `setxkbmap` reloads the layout; the refusal says so.
-- A call that needs a row an earlier call used less than 500 ms ago waits out the rest before its first key, holding the cross-session input lease.
+- A call that needs a row an earlier call used less than 500 ms ago waits out the rest before its first key, holding the cross-session input lease. A receiver stalled longer than that can read the earlier call's keys through the new keysym.
 
 <details><summary>Binding rules</summary>
 
@@ -51,7 +51,7 @@ Another client's worst `GetInputFocus` round trip while omp binds a long text in
 | 1,000,006 characters | 94.6 / 91.1 ms | 0.2 ms |
 
 - `cargo test -p pi-natives --lib -- --ignored remap_tests` on goliath Xvfb: 10 passed, covering late-reading receivers through XTEST and `XSendEvent`, the over-capacity refusal, cancellation, foreign and rejected rebinds, refused chords, `MappingNotify` batching, MPX restore and failed close. The rejected-rebind test and `closing_a_session_reports_what_its_backend_could_not_undo` fail with their fix reverted.
-- `a_cancel_stops_presses_but_never_releases` also checks that an MPX key cancelled before its write counts nothing and one whose sync report fails still counts.
+- `a_cancel_stops_presses_but_never_releases` also checks MPX press counting around a cancel and a failed sync.
 - Non-ignored `desktop::` tests pass; ignored `desktop::linux::x11` tests pass under Xvfb except four MPX tests needing Xorg with uinput hotplug (not run; the first-use MPX refusal is checked by reading). `scripts/rust-check` on Linux, macOS and Windows.
 
 ---
