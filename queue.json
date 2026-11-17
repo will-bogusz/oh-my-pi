@@ -65733,7 +65733,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "bf9a9fbd40e96766d528a9f19a603e53e8c0b5a1",
+   "base": "1bdbf6d242d99ca62bdf2feeff4519ff992f647d",
    "body": "bodies/atspi-walk-reads.md",
    "state": "queued",
    "pr": null,
@@ -65741,8 +65741,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-walk-reads",
    "host": "MacBook-Pro",
    "added": "2026-11-03T09:05:24Z",
-   "updated": "2026-11-17T02:31:07Z",
-   "note": "LinuxGrabs, 2026-11-17: rebased onto main bf9a9fbd40e as one commit 7c83575f996 (local branch in ~/.omp/main-wt/oh-my-pi/atspi-walk-reads; fork branch still the old 35a9e15702d, not pushed) carrying the bounded #19036 child reads from trial 3f71f7f3588. Remeasured on goliath box vs current main (bench.jsonl in ~/tmp/oh-my-pi/LinuxGrabs). Linux rust-check recorded; Astra review: code ready, body placeholders fixed.",
+   "updated": "2026-11-17T02:49:50Z",
+   "note": "LinuxGrabs, 2026-11-17: rebased onto main 1bdbf6d242d as one commit 6e14a2ffdba (local branch in ~/.omp/main-wt/oh-my-pi/atspi-walk-reads; fork branch still the old 35a9e15702d, not pushed), carrying #19036's bounded child reads (from trial 3f71f7f3588). Measured as 7c83575f996 on bf9a9fbd40e (same Rust diff) on a goliath box vs main; raw data ~/tmp/oh-my-pi/LinuxGrabs/bench*.jsonl. Linux rust-check recorded; Astra review: code ready, body placeholders since filled.",
    "advanced": "2026-11-12T13:25:41Z",
    "line_loss_overrides": [
     {

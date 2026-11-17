@@ -14,7 +14,7 @@ An element that does not list `Component` is not asked for bounds: input fails w
 
 ## Testing
 
-Main `bf9a9fbd40e` versus this head `7c83575f996`, in one goliath Ubuntu 22.04 X11 microVM (Xvfb, openbox, AT-SPI), same app window per pair. Eight measured pairs per app alternate order after one excluded warmup pair. Medians with the full min-max range; ranges do not overlap on any app.
+Main `bf9a9fbd40e` versus this change on it (`7c83575f996`, the same Rust diff as this head), in one goliath Ubuntu 22.04 X11 microVM (Xvfb, openbox, AT-SPI), same app window per pair. Eight measured pairs per app alternate order after one excluded warmup pair. Medians with the full min-max range; ranges do not overlap on any app.
 
 | App | Elements | Main seconds, median [range] | This PR seconds, median [range] | Bus calls/element, main → PR |
 |---|---|---|---|---|
@@ -27,7 +27,7 @@ The real AT-SPI `ax::query` (`find`) path runs with limit 5,000 in identical tes
 
 A GTK 3 `TreeView` of 100,000 rows × 2 columns, same guest, three alternating pairs: `find()` stops at its 5,000-node budget on both, and both ask the table for 4,997 children by `GetChildAtIndex`, with `GetChildren` only on the registry and app roots. Main takes 7.97 s [7.89-9.05], this PR 4.65 s [4.64-4.77], with one more call per element (13.0 → 14.0: `GetInterfaces`, as every cell implements each interface asked).
 
-Re-run on Linux at this head: `cargo test -p pi-natives --lib desktop::linux` (127 passed; 35 ignored that each need their own X server), `cargo test -p pi-natives --lib desktop::ax` (48 passed), and Linux `rust-check` passed.
+Re-run on Linux at `7c83575f996`: `cargo test -p pi-natives --lib desktop::linux` (127 passed; 35 ignored that each need their own X server), `cargo test -p pi-natives --lib desktop::ax` (48 passed), and Linux `rust-check` passed.
 
 `an_element_is_read_in_two_rounds_and_only_on_its_interfaces` holds peer-to-peer D-Bus replies until every expected call arrives; it requires `ChildCount` in round one and the bounded `GetChildAtIndex` in round two, and checks skipped interfaces and the unknown-interface fallback.
 
