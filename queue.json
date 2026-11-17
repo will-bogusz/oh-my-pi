@@ -97031,7 +97031,27 @@
     }
    ],
    "opened": "2026-11-17T23:04:13Z",
-   "readied": "2026-11-17T23:04:39Z"
+   "readied": "2026-11-17T23:04:39Z",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-17T23:17:34Z",
+     "reason": "round fix replaces the anonymous once-listeners with removable named ones (roboomp r4607014248) and the as-OAuthCredential cast with a typed local (r4607014256)",
+     "old": "b974dd6e41c67782a359045ca805dcad61e8dcfb",
+     "new": "478f38ebe93d732ad35b60c71f03d5e00c665228",
+     "dropped": {
+      "packages/coding-agent/src/cli/auth-broker-cli.ts": [
+       "\tprocess.once(\"SIGINT\", () => shutdown(\"SIGINT\"));",
+       "\tprocess.once(\"SIGTERM\", () => shutdown(\"SIGTERM\"));"
+      ],
+      "packages/coding-agent/test/auth-broker-serve-shutdown.test.ts": [
+       "import { AuthStorage, type OAuthCredential, SqliteAuthCredentialStore } from \"@oh-my-pi/pi-ai\";",
+       "import { mcpOAuthCredentialId } from \"@oh-my-pi/pi-coding-agent/mcp/oauth-flow\";",
+       "\t\t\tawait seed.credentials.set(MCP_PROVIDER, {",
+       "\t\t\t} as OAuthCredential);"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "logger-console-level",
