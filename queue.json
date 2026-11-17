@@ -75138,7 +75138,7 @@
    "needs": [
     "act-look-prompt"
    ],
-   "base": "8cc0132b90627341d701a924ada19881b87f6d85",
+   "base": "7e1024481f25b6c8e008cc80ee4d0af9264d79b8",
    "body": "bodies/observe-stable-ids.md",
    "state": "queued",
    "pr": null,
@@ -75146,7 +75146,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-observe-stable-ids",
    "host": "MacBook-Pro",
    "added": "2026-11-10T18:57:15Z",
-   "updated": "2026-11-11T14:46:27Z",
+   "updated": "2026-11-17T00:08:59Z",
    "note": "",
    "kind": "proposal",
    "built": [
