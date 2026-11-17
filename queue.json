@@ -96659,7 +96659,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/usage-state-per-model",
    "host": "MacBook-Pro",
    "added": "2026-11-17T20:59:31Z",
-   "updated": "2026-11-17T22:35:19Z",
+   "updated": "2026-11-17T22:54:12Z",
    "note": "",
    "built": [
     {
@@ -96677,15 +96677,6 @@
      "with_code": "a6537b230b0aca2d167690b2dd7419dc03c04fb0",
      "tip": "2383399c38c22fa6ba5581478a3993bdc704260c",
      "with_tip": "4deabb0e95fcf29a451415b62795427a4173fa6a",
-     "at": "2026-11-17T21:52:28Z",
-     "host": "MacBook-Pro"
-    },
-    {
-     "with": "#19516",
-     "code": "e722ab5a95190315178281c067d3336af4ce453e",
-     "with_code": "e0d04259b3a1b34c6b652badd5104175329b8566",
-     "tip": "2383399c38c22fa6ba5581478a3993bdc704260c",
-     "with_tip": "ff8424bcab2403c9fa8f8b026dc99d6b99ac7fb1",
      "at": "2026-11-17T21:52:28Z",
      "host": "MacBook-Pro"
     },
@@ -96714,6 +96705,33 @@
      "tip": "2383399c38c22fa6ba5581478a3993bdc704260c",
      "with_tip": "31cf61cebac4032268bb24a466a3971058db50e4",
      "at": "2026-11-17T21:52:28Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19516",
+     "code": "e722ab5a95190315178281c067d3336af4ce453e",
+     "with_code": "c35eb84674f684815047cf2878df282dd722c7f3",
+     "tip": "2383399c38c22fa6ba5581478a3993bdc704260c",
+     "with_tip": "f0c8da3fd45354c11cd53f093fdcb854d61689db",
+     "at": "2026-11-17T22:54:07Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19592",
+     "code": "e722ab5a95190315178281c067d3336af4ce453e",
+     "with_code": "2de31525408f5bd840a7993c119c6a71d310a52b",
+     "tip": "2383399c38c22fa6ba5581478a3993bdc704260c",
+     "with_tip": "bbc606e53aac36298daa70e428e6c6f598fec211",
+     "at": "2026-11-17T22:54:11Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19513",
+     "code": "e722ab5a95190315178281c067d3336af4ce453e",
+     "with_code": "58756d46d0aaa29d1bfd113ddd35ea5f4d7583d5",
+     "tip": "2383399c38c22fa6ba5581478a3993bdc704260c",
+     "with_tip": "b318ff4225ac17579fa7ea14fc44aa6f535ee171",
+     "at": "2026-11-17T22:54:11Z",
      "host": "MacBook-Pro"
     }
    ]
