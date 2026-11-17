@@ -53,11 +53,12 @@ Nothing raised, nothing changes: 250 background actions on six apps while a simu
 | Second window of mine the target covered | Stays behind the target (above) |
 | Another background app's windows the target covered | Stay behind; `AXRaise` from outside that app leaves the order as it is |
 | My key window behind another window of mine at entry | Nothing raised; target stays in front, as on `main` (10 of 10, no keys elsewhere, key window key at the end 10 of 10) |
-| I bring another of my windows in front of my key window during the call | Left alone |
+| I bring another of my windows in front of my key window, pick one with a click, or click into a floating panel of my app, during the call | Left alone, also while the guard is looking my window up for the raise |
 | Target's own windows | Never moved: a sheet or menu it opened stays above its parent |
 | Target keeps ordering itself in front | Raised at most three times during the call; the last poll raises once more and, if the target is still in front, the call throws `InputFailed` naming my window ("… the input was sent to the target"), after the usual "input may already have been delivered … inspect the desktop" |
 | Key window accessibility no longer lists | Dropped silently |
 | Target shows in front before the raise | 13 to 49 ms median by app and input (max 70), from the input to the next check plus macOS drawing the raise; 12 to 14 ms with the first version's 1 ms checks |
+| Read-back of a raise | Runs under the input lease, as the guard does on `main`: at most 18 ms of scheduled waits during the action's 500 ms settle, and 40 ms on the last pass, which follows the settle and runs only when the target is in front then (the original entry: 40 ms on every pass) |
 | Takeover hand-back | Raises my key window once, unless I switched, clicked or used a shortcut after the hand-back's request, another window of mine was in front of the key window at entry, or the target is in my own app |
 
 <details><summary>How the order was measured and why once a poll</summary>
