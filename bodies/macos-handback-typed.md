@@ -10,7 +10,7 @@ Now, only while the monitor is behind, the window that was key is made key again
 |---|---|---|
 | No choice shows | make-key records, then the window is confirmed key | `handed the keyboard back to Notes's window` |
 | A shortcut the monitor counted, a click on the HID press counters, or another of the app's windows focused | nothing | `focus is on Notes, left as the user chose` |
-| ⌘ or ⌃ down as a request is about to go (the user's or a tool's), `WindowServer` refused three times, or another app is in front | nothing | as on `main` for `notSent`: no choice is claimed |
+| ⌘ or ⌃ down, or any modifier changed within the last 250 ms (a ⌃-→ whose arrow the monitor has not reached), as a request is about to go (the user's or a tool's), `WindowServer` refused three times, or another app is in front | nothing | as on `main` for `notSent`: no choice is claimed |
 | Records sent, but the window is not confirmed key within 400 ms | nothing more: the records are sent once and the tool does not rerun the call | the call fails: `input may already have been delivered, but restoration failed: …; inspect the desktop before retrying` (after `UserIntervened`: that error, then `restoration also failed: …`). On `main` this call returned success with `notSent` |
 
 The added work runs under the input lock: about 1 ms in the measured calls (median 0.9 ms, max 43 ms over 145), and at most about 1.4 s, from one 0.5 s accessibility read of the focused window plus the 400 ms confirm, whose last read can take another 0.5 s.
@@ -21,7 +21,7 @@ The added work runs under the input lock: about 1 ms in the measured calls (medi
 
 ## Testing
 
-`cargo test -p pi-natives --lib -- skylight`: tests cover each outcome of that case and the retry and stand-down loop (`rekey_unless_chosen`); a held ⌘ or ⌃ reports `notSent`, not a choice, while a real choice beside it is still named; the new tests fail with the Pending branch reverted to `main`'s "send nothing", and the retry test fails with the retry removed.
+`cargo test -p pi-natives --lib -- skylight`: tests cover each outcome of that case and the retry and stand-down loop (`rekey_unless_chosen`); a held ⌘ or ⌃ reports `notSent`, not a choice, while a real choice beside it is still named; a modifier change 240 ms before the request reports `notSent` and one 260 ms before it hands the window back; the new tests fail with the Pending branch reverted to `main`'s "send nothing", and the retry test fails with the retry removed.
 
 Measured in a macOS 26.5 VM, `main` (#19208) against this branch, 10 tries per cell and build, with the user's app's own log as truth (Chrome: `document.hasFocus()` in the page). Keys from another process were posted to the HID event tap; real-keyboard keys and choices came through the VM's VNC server.
 
@@ -57,11 +57,13 @@ In no try did the records undo a choice that had taken effect.
 | ⌘-Tab during the hand-back with posted typing | ends on the user's own app 9/10 (real ⌘-Tab) and 10/10 (posted) on both builds | `main`'s front request lands while the switcher is open; unchanged here |
 | ⌘-` with posted typing on `main` | 0/10 kept | ⌘-` does nothing in an app with no key window; this PR keeps 1/10 (real) and 6/10 (posted) |
 | Real ⌘-` during the takeover, real typing | lost or overridden 2/40 on both builds; none of the 4 reached this PR's path | #19208's own hand-back, tracked separately |
-| A choice another process posts that leaves no trace (no press, ⌘ released before the check, the same window focused) within the ~50 ms the monitor is waited for | 0 of 30 posted-choice tries | it would be overridden |
-| ⌘ or ⌃ down as a request is about to go, held by the user or posted by a tool (a text expander's ⌘V) | posted ⌘ stood the request down in 7 of 20 posted ⌘-Tab and ⌘-` tries (measured before the notice change; the notice is covered by a unit test) | nothing is sent and the notice is `main`'s `notSent` line; the app stays without a key window, as on `main` |
+| A choice that leaves no trace the checks can read (no press, ⌘ and ⌃ up, the same window focused) while the monitor is behind | not met in 30 posted-choice tries | the user's own chords are covered as well as posted ones: any modifier going down or up within 250 ms before a request (a ⌃-→ whose arrow the monitor has not reached) stands it down as `notSent`. A chord whose last modifier change is older than 250 ms when the request is checked, and that the monitor still has not counted, would be overridden |
+| ⌘ or ⌃ down, or any modifier changed within 250 ms, as a request is about to go, by the user, by a tool (a text expander's ⌘V) or by the takeover's own shortcut | a held posted ⌘ stood the request down in 7 of 20 posted ⌘-Tab and ⌘-` tries before the 250 ms window; `WindowServer` keeps one time for every modifier, so a typed ⇧, a modifier a tool posts, or the release ending omp's own shortcut within 250 ms now stands it down too (not measured; a unit test covers both sides of the window) | nothing is sent and the notice is `main`'s `notSent` line; the app stays without a key window, as on `main` |
+| A returning takeover (the rerun of a refused background action) with a choice the monitor has not counted | not measured | its first front request is `main`'s, sent while the monitor is behind and unguarded by the 250 ms check, so a ⌃-→ just before it can still have the user's app brought forward over the Spaces switch; the check is not added there because a takeover's own shortcut ends one 40 ms settle before that request and would stand every such hand-back down. Only the make-key records are kept back |
 | `WindowServer` without the conditional request (`SLSSetFrontProcessWithInfo` unresolved) | not met on 26.5 | the make-key records go out unconditionally after the same checks, as #19208's front request does there |
 | `WindowServer` refusing a rekey | 0 in 145 Pending-path calls | the retry ran only in unit tests |
 | Window not confirmed key after the records | 0 in 145 | the failing outcome above |
 | macOS versions | 26.5 only | older macOS not run |
 
 </details>
+
