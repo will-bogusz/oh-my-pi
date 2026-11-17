@@ -96493,6 +96493,24 @@
     "reason": "ReviewBrokerShutdown, 2026-11-17: one regression test; the exit race exists only in a spawned omp auth-broker serve process, so its lines are process and fixture setup",
     "at": "2026-11-17T21:03:16Z"
    }
+  },
+  {
+   "id": "logger-console-level",
+   "branch": "will/logger-console-level",
+   "title": "fix(utils): apply OMP_LOG_LEVEL to the console transport",
+   "area": "other",
+   "priority": null,
+   "needs": [],
+   "base": "baf60290fde5e9eea4edb30bff07695877682ba9",
+   "body": "bodies/logger-console-level.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/logger-console-level",
+   "host": "MacBook-Pro",
+   "added": "2026-11-17T21:03:30Z",
+   "updated": "2026-11-17T21:03:30Z",
+   "note": ""
   }
  ],
  "watch": {
