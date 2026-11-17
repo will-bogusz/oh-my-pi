@@ -3,10 +3,10 @@
 Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17 20:56Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-17 20:53Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 6, conflict-held 16, stacked 13, held 7, parked 3, open PRs 11, queued since the last plan 1; merged 381, closed 41
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-17 20:54Z on MacBook-Pro; groups below are from it, states from the manifest)
+**Counts:** openable now 7, conflict-held 16, stacked 13, held 7, parked 3, open PRs 11; merged 381, closed 41
 
-## Openable now (6)
+## Openable now (7)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
@@ -16,6 +16,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 | wayland-display-count | fix(natives): report the Wayland display count as unknown before the first capture | natives | P2 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-display-count) |
 | devin-gemini-promo-prices | fix(catalog): switch Devin's Gemini promo prices to list when each promo ends | catalog |  | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-gemini-promo-prices) |
 | devin-image-budgets | fix(catalog): carry Devin's measured image limits | catalog |  | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-image-budgets) |
+| docs-reclaim-drift | docs(auth-gateway): describe reclaim moving warm pins back | auth |  | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/docs-reclaim-drift) |
 
 ## Conflict-held (16)
 
@@ -91,9 +92,3 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 | [#19532](https://github.com/can1357/oh-my-pi/pull/19532) | macos-window-order | fix(natives): put the user's key window back in front of a macOS target after background input and takeover | computer | P1 | 13h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-window-order) |
 | [#19516](https://github.com/can1357/oh-my-pi/pull/19516) | macos-key-read-settled | fix(natives): read a macOS popup after the option its typed letters choose | computer | P1 | 17h | keep; accepted pair with #19195: Main, 2026-11-17: adjacent thread_local statics in desktop/control.rs; combined = both statics (DRAG_NOTE then INPUT_HELD), then input_held() unchanged | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-key-read-settled) |
 | [#19504](https://github.com/can1357/oh-my-pi/pull/19504) | macos-handback-typed | fix(natives): give the macOS key window back after a takeover while another program types | computer | P1 | 19h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-handback-typed) |
-
-## Queued since the last plan (1)
-
-| id | title | area | priority | age | branch |
-|---|---|---|---|---|---|
-| docs-reclaim-drift | docs(auth-gateway): describe reclaim moving warm pins back | auth |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/docs-reclaim-drift) |
