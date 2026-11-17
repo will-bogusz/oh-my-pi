@@ -78164,7 +78164,20 @@
     }
    ],
    "opened": "2026-11-12T23:56:36Z",
-   "readied": "2026-11-12T23:57:07Z"
+   "readied": "2026-11-12T23:57:07Z",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-17T03:55:47Z",
+     "reason": "BritRunError19100 restored the exact Escape assertion in place of toThrow(partial) (Brit's change request)",
+     "old": "fc3c0c0416e210f879704e604d1afa55da30151c",
+     "new": "e54f54ebcf0d7c14482fdfe097a996e3f95ad542",
+     "dropped": {
+      "packages/coding-agent/test/tools/computer.test.ts": [
+       "\t\t\t\t\tawait expect(supervisor.run(\"1\", 1_000, snapshot())).rejects.toThrow(partial);"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "browser-select-readback",
