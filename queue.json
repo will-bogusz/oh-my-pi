@@ -65818,6 +65818,28 @@
        "\t\t\tdisplays:   Vec::new(),"
       ]
      }
+    },
+    {
+     "at": "2026-11-17T03:19:35Z",
+     "reason": "LinuxGrabs' rebase onto 1bdbf6d carrying #19036's bounded child reads, reviewed by the lane",
+     "old": "35a9e15702d2003cd7be9a331728f1e72c0dfb88",
+     "new": "bbc16f8d075780e21b5d873e42c1f0924a609d44",
+     "dropped": {
+      "crates/pi-natives/src/desktop/linux/ax.rs": [
+       "\t/// and its children when `children` asks.",
+       "\t\tchildren: bool,",
+       "\t\t\t\tif children {",
+       "\t\t\t\t\tOk(Vec::new())",
+       "\t\tlet child_refs = child_refs?;",
+       "\t\t\t.read_node(h, WalkBounds::Read, false)",
+       "\t\tlet (props, children) = self.read_node(h, bounds, true)?;",
+       "\t\t\t\t\t\t\"GetChildren\" => {",
+       "\t\t\t\t\t\t\t\t.reply(&header, &Vec::<(String, OwnedObjectPath)>::new())",
+       "\t\t\tround(\"/text\", &[\"Get CharacterCount\", \"GetChildren\"]),",
+       "\t\t\tround(\"/button\", &[\"Get NActions\", \"GetChildren\"]),",
+       "\t\t\tround(\"/legacy\", &[\"Get CharacterCount\", \"Get NActions\", \"GetExtents\", \"GetChildren\"]),"
+      ]
+     }
     }
    ]
   },
