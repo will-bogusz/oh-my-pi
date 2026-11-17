@@ -96683,7 +96683,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/broker-refresh-failure-loud",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:06:15Z",
-   "updated": "2026-11-17T21:39:01Z",
+   "updated": "2026-11-17T21:39:28Z",
    "note": "",
    "built": [
     {
@@ -96705,7 +96705,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-11-17T21:39:01Z"
+   "opened": "2026-11-17T21:39:01Z",
+   "readied": "2026-11-17T21:39:27Z"
   },
   {
    "id": "broker-client-startup-retry",
