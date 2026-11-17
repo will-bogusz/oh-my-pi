@@ -72353,6 +72353,39 @@
        "\t\t\tconst answer = (await this.#evalUser(label, source, args, frame, true)) as PredicateAnswer | undefined;"
       ]
      }
+    },
+    {
+     "at": "2026-11-17T21:34:23Z",
+     "reason": "Sol re-review (gpt-6.1-sol) P2 fix: cmux predicate evaluated outside the poll script's binding; export-only test replaced by a public-path test",
+     "old": "25df0f51e23f1b900ec6c52d3f23106a74d7154e",
+     "new": "1134016fe1f3b306978e9bf7eea5bce1c3780b50",
+     "dropped": {
+      "packages/coding-agent/src/tools/browser/cmux/cmux-tab.ts": [
+       " * whole script with the daemon's opaque `js_error`. The daemon evaluates synchronously: a Promise is handed to the",
+       " * envelope, which reports it, not judged here.",
+       "export function cmuxPredicateScript(",
+       "\tconst call = `(${PREDICATE_CALL_SOURCE})(${predicate}, ${JSON.stringify(args)})`;",
+       "\treturn wrapEvalEnvelope(",
+       "\t\t`(() => { const value = ${call}; return value && typeof value.then === \"function\" ? value : (${PREDICATE_ANSWER_SOURCE})(value); })()`,"
+      ],
+      "packages/coding-agent/test/tools/browser-cmux-eval-envelope.test.ts": [
+       "import { cmuxPredicateScript } from \"@oh-my-pi/pi-coding-agent/tools/browser/cmux/cmux-tab\";",
+       "import type { PredicateAnswer } from \"@oh-my-pi/pi-coding-agent/tools/browser/queries\";",
+       "\tit(\"runs a function predicate without eval, so a page whose CSP forbids eval still answers\", () => {",
+       "\t\t// The page's `eval` stands in for one a `script-src` without 'unsafe-eval' blocks.",
+       "\t\tconst blocked = () => {",
+       "\t\t\tthrow new EvalError(\"Refused to evaluate a string as JavaScript\");",
+       "\t\t};",
+       "\t\tconst run = (script: string) => JSON.parse(JSON.stringify(new Function(\"eval\", `return (${script})`)(blocked)));",
+       "\t\tconst script = cmuxPredicateScript(((n: number) => n * 2) as (...args: unknown[]) => unknown, [21]);",
+       "\t\texpect(unwrapEvalEnvelope<PredicateAnswer>(run(script), \"tab.waitForFunction()\")).toEqual({",
+       "\t\t\theld: true,",
+       "\t\t\tvalue: 42,",
+       "\t\t// A string still goes through indirect eval, so such a page refuses it with the page's own error.",
+       "\t\texpect(() => unwrapEvalEnvelope(run(cmuxPredicateScript(\"(n) => n * 2\", [21])), \"tab.waitForFunction()\")).toThrow(",
+       "\t\t\t/Refused to evaluate/,"
+      ]
+     }
     }
    ],
    "built": [
