@@ -93726,6 +93726,17 @@
        "\t\tassert_eq!(app.check(column), Ok(()));"
       ]
      }
+    },
+    {
+     "at": "2026-11-17T00:17:08Z",
+     "reason": "recorded #19048 pair form (Main 2026-11-14): require_shown reuses #19048's hoisted mac handle instead of a second ax::mac_handle(element) call",
+     "old": "83f42e3be6972da9b5c366b40d9fb27271e1b234",
+     "new": "fd01163c0c7265b72ced0f5a9a349e3c8b60ef08",
+     "dropped": {
+      "crates/pi-natives/src/desktop/macos/mod.rs": [
+       "\t\t\t\tax::require_shown(ax::mac_handle(element)?)?;"
+      ]
+     }
     }
    ]
   },
