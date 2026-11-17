@@ -4,10 +4,11 @@ When a Wayland screenshot opens the screen-share picker, I made the call wait fo
 
 On Omarchy 4.5 (Hyprland), with no stored grant and the picker answered 40 s after the screenshot started, the screenshot failed 5/5 times at 32 s with `CaptureFailed: Wayland ScreenCast portal timed out`, and the picker the user then answered captured nothing. With this PR it returned the capture 5/5 times at 40.2 s.
 
-| Omarchy 4.5, no stored grant | `main` | this PR |
+| no stored grant | `main` | this PR |
 |---|---|---|
-| picker answered after 40 s (5 tries) | 5/5 fail at 32.1 s, the answer is lost | 5/5 captured at 40.2 s |
-| picker left unanswered, 3 screenshots in one run | each fails after 30–32 s with `CaptureFailed: … portal timed out`; the picker stays open | each waits until its deadline (117.5–119.5 s here) and fails with `Timeout: the screen-share portal did not answer before the call's deadline…`; the picker stays open |
+| Omarchy 4.5: picker answered after 40 s (5 tries) | 5/5 fail at 32.1 s, the answer is lost | 5/5 captured at 40.2 s |
+| Omarchy 4.5: picker left unanswered, 3 screenshots in one run | each fails after 30–32 s with `CaptureFailed: … portal timed out`; the picker stays open | each waits until its deadline (117.5–119.5 s here) and fails with `Timeout: the screen-share portal did not answer before the call's deadline…`; the picker stays open |
+| GNOME 50: ScreenCast dialog approved after 40 s (2 tries) | 2/2 fail at 30.1 s | 2/2 captured at 41.0 s |
 
 ## Why
 
@@ -23,11 +24,11 @@ Unchanged: the stored grant still skips the picker after the first answer.
 
 ## Testing
 
-- Live on a fresh Omarchy 4.5 VM (Hyprland 0.56.2, xdg-desktop-portal-hyprland 1.4.1) through the real path (`AgentSession` → eval → `computer` prelude → pi-natives built from `main` and from this branch). xdph was pointed at a scripted picker (`custom_picker_binary`) that answers when the harness tells it to, so "the user answers after 40 s" is exact; xdph and the portal were restarted before each try.
+- Live on a fresh Omarchy 4.5 VM (Hyprland 0.56.2, xdg-desktop-portal-hyprland 1.4.1) through the real path (`AgentSession` → eval → `computer` prelude → pi-natives built from `main` and from this branch), and on a Fedora 44 GNOME 50.6 VM with its dialog approved over VNC. xdph was pointed at a scripted picker (`custom_picker_binary`) that answers when the harness tells it to, so "the user answers after 40 s" is exact; xdph and the portal were restarted before each try.
 - `until_deadline`'s tests (`an_unanswered_permission_dialog_is_given_up_before_the_run_ends`) now pass the message; they cover giving up before the deadline and letting a later answer through. The capture path itself needs a live portal, so the VM run is its test.
 - `cargo test -p pi-natives --lib -- wayland` on Linux; `scripts/rust-check` clippy and rustfmt on Linux.
 
-Not run: GNOME and KDE, where the dialog opens in `Start` and `main`'s bound was the same 30 s.
+Not run: KDE.
 
 ---
 
