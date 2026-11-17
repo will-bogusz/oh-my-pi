@@ -96532,6 +96532,24 @@
    "note": "",
    "kind": "proposal",
    "hold": "Will, 2026-11-17: P2 proposal; held until Will's go-ahead"
+  },
+  {
+   "id": "broker-refresh-failure-loud",
+   "branch": "will/broker-refresh-failure-loud",
+   "title": "fix(ai): warn when a broker refresh failure outlasts the access token",
+   "area": "broker",
+   "priority": null,
+   "needs": [],
+   "base": "baf60290fde5e9eea4edb30bff07695877682ba9",
+   "body": "bodies/broker-refresh-failure-loud.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/broker-refresh-failure-loud",
+   "host": "MacBook-Pro",
+   "added": "2026-11-17T21:06:15Z",
+   "updated": "2026-11-17T21:06:15Z",
+   "note": ""
   }
  ],
  "watch": {
