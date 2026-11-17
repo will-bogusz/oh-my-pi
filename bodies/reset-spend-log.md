@@ -16,7 +16,7 @@ On `main` a successful automatic spend only raises a transient notice, and `clau
 <summary>Details</summary>
 
 - `trigger` is `blocked`, `sweep` or `manual`. `reason` is the planner rule (`blocked-account` or `expiring-credit`) and `window` is the window whose consent governed an automatic spend.
-- `code` is the redeem's own code (`reset`, `already_redeemed`, `no_credit`, `offer_changed`, …), or `error` when the redeem threw. When nothing was sent, it is `fenced` (another omp process attempted within the cooldown; `marker` gives its state), `balance_spent` (the live Codex balance had already fallen) or `left_pool` (the session may no longer use the account).
+- `code` is the redeem's own code (`reset`, `already_redeemed`, `no_credit`, `offer_changed`, …), or `error` when the redeem or the cross-process fence around it threw, which can happen after the provider applied the reset. When nothing was sent, it is `fenced` (another omp process attempted within the cooldown; `marker` gives its state), `balance_spent` (the live Codex balance had already fallen) or `left_pool` (the session may no longer use the account).
 - `account` is the credential's email or account id, the same identity the existing `codex-auto-reset`/`claude-auto-reset` warnings already log as `account`.
 - Consent declines and adopting a peer's reset are not spend attempts, so they write nothing.
 - Reading order: `session/reset-fence.ts` (`logResetSpend`), then `AgentSession.#executeResetActions` and `AgentSession.redeemResetCredit`, then `cli/usage-cli.ts`.
