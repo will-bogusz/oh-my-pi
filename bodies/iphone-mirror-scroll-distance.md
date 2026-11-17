@@ -4,8 +4,8 @@ A background scroll on iPhone Mirroring moved the phone's page by one wheel even
 
 A 300 px background scroll moved a Safari page on the phone 128 px on `main` (0 → 128 → 256 over two calls) and exactly 300 px with this PR; 2,000 px moved 2,000.
 
-- `report_scroll` (`macos/input.rs`) aims the phone once, then posts the distance as wheel events of at most 30 px, 16 ms apart, checking the target before each one; `post_background_wheel` is split out of `background_scroll` for it. A zero scroll returns before aiming.
-- The report path allows up to 200 events (`MAX_REPORT_WHEEL_EVENTS`), so 6,000 px still goes out in 30 px steps; takeover keeps its 40.
+- `report_scroll` (`macos/input.rs`) aims the phone once, then posts the distance as wheel events of at most 30 px, 16 ms apart, checking the target before each one; `post_background_wheel` is split out of `background_scroll` for it. A zero scroll returns before aiming. Deltas go through `quartz_scroll_deltas`, so a positive `dy` scrolls down as on every macOS path since #19165.
+- Up to 200 events (`MAX_REPORT_WHEEL_EVENTS`): up to 6,000 px goes out in steps of at most 30 px per axis, about 3.3 s of paced waits (60 ms aim hold, 199 gaps of 16 ms) while other sessions' input waits on the lease. Takeover keeps its 40.
 
 ## Why
 
@@ -13,12 +13,14 @@ A 300 px background scroll moved a Safari page on the phone 128 px on `main` (0 
 
 `main` sent the whole distance as one wheel event, and the phone moved its page by about one event's worth however large the event was. Takeover scrolls (`global_scroll`) already split into these steps for the same kind of surface.
 
+Limit: past 6,000 px some of the 200 events carry more than 30 px per axis, unmeasured on the phone; the docs say so and suggest calls of at most 6,000 px. I stated the limit rather than adding trains: a phone screen is under 1,000 px, so 6,000 px is about seven screens, and each further 1,000 px would hold other sessions' input another 0.5 s.
+
 Not changed: Screen Sharing and other windows, takeover scrolls, and the scroll's direction.
 
 ## Testing
 
-- Live, iPhone 16 Pro (iOS 18.7) through iPhone Mirroring on macOS 26.1, a Safari page logging `scrollY` until 200 ms after its last scroll event: on `main`, `dy: -300` took the page 0 → 128 → 256 over two calls and `dy: +300` back to 129. With the change, at the head commit: `dy: -300` moved 300 down in 5 of 5 calls and `+300` 300 up in 2 of 2 (0.80-0.86 s per call); `dy: ∓2000` moved exactly 2,000 in 7 of 7 (1.86-1.92 s). One earlier 2,000 px run read 1,556 under a throttled page log that could miss the final position, with the same 67 wheel events delivered.
-- `report_scroll_aims_once_then_posts_the_requested_distance_in_paced_chunks`, `report_scroll_stops_mid_train_and_keeps_long_distances_in_small_steps` (a failed check after three wheels stops at three, a cancel between wheels stops, 6,000 px is 200 steps of 30, a zero scroll aims nothing), all with injected waits. `cargo test -p pi-natives --lib desktop` on macOS; clippy and rustfmt on macOS and Linux.
+- Live, iPhone 16 Pro (iOS 18.7) through iPhone Mirroring on macOS 26.1, a Safari page logging `scrollY` until 200 ms after its last scroll event, before #19165 flipped the sign: on `main`, `dy: -300` took the page 0 → 128 → 256 over two calls and `dy: +300` back to 129. With the change: `dy: -300` moved 300 down in 5 of 5 calls and `+300` 300 up in 2 of 2 (0.80-0.86 s per call); `dy: ∓2000` moved exactly 2,000 in 7 of 7 (1.86-1.92 s). Not re-run on the phone after the rebase; the unit test pins the negated deltas.
+- `report_scroll_aims_once_then_posts_the_requested_distance_in_paced_chunks` (negated deltas), `report_scroll_stops_mid_train_and_keeps_long_distances_in_small_steps` (a failed check after three wheels stops at three, a cancel between wheels stops, 6,000 px is 200 steps of 30, a zero scroll aims nothing), all with injected waits. `cargo test -p pi-natives --lib desktop::macos::input` and `rust-check` (clippy, rustfmt) on macOS.
 
 ---
 
