@@ -105760,12 +105760,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-17T01:40:55.334312Z",
-  "host": "goliath",
+  "at": "2026-11-17T01:46:25.874137Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 1,
+   "left": 7
   },
   "rows": [
    {
@@ -105871,6 +105871,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-09T16:23:43Z"
+   },
+   {
+    "id": "macos-handback-typed",
+    "label": "#19504",
+    "number": 19504,
+    "state": "open",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): give the macOS key window back after a takeover while another program types",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-17T01:43:47Z"
    },
    {
     "id": "claude-refusal-strip-retry",
@@ -106321,6 +106338,7 @@
     "reasons": [
      "conflicts with #19100 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #19195 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
+     "conflicts with #19504 in docs/computer-use.md",
      "conflicts with #18353 in docs/computer-use.md",
      "conflicts with #18013 in docs/computer-use.md",
      "conflicts with #18222 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
@@ -106334,6 +106352,7 @@
     "blocked_by": [
      "#19100",
      "#19195",
+     "#19504",
      "#18353",
      "#18013",
      "#18222",
@@ -106394,23 +106413,6 @@
     "created": "2026-11-14T12:00:22Z"
    },
    {
-    "id": "macos-handback-typed",
-    "label": "macos-handback-typed",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P2",
-    "title": "fix(natives): give the macOS key window back after a takeover while another program types",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-14T11:57:04Z"
-   },
-   {
     "id": "macos-keys-no-press",
     "label": "macos-keys-no-press",
     "number": null,
@@ -106438,13 +106440,13 @@
     "created": "2026-11-14T10:49:09Z"
    },
    {
-    "id": "macos-move-receipt",
-    "label": "macos-move-receipt",
+    "id": "macos-move-receipt-r2",
+    "label": "macos-move-receipt-r2",
     "number": null,
     "state": "queued",
     "area": "computer",
     "priority": "P2",
-    "title": "fix(coding-agent): say what a macOS background move did",
+    "title": "fix(coding-agent): say once that a macOS background move gives no hover",
     "action": "open",
     "reasons": [],
     "note": "",
@@ -106493,9 +106495,9 @@
      "needs macos-reroute-not-a-press (queued)",
      "conflicts with #19195 in docs/computer-use.md",
      "conflicts with #16553 in crates/pi-natives/src/desktop/macos/input.rs",
+     "conflicts with #19504 in docs/computer-use.md",
      "conflicts with macos-key-read-settled in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/macos/input.rs, docs/computer-use.md",
      "conflicts with macos-window-order in docs/computer-use.md",
-     "conflicts with macos-handback-typed in docs/computer-use.md",
      "its need macos-reroute-not-a-press conflicts with main in crates/pi-natives/src/desktop/control/macos.rs, crates/pi-natives/src/desktop/macos/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/macos/input.rs, docs/computer-use.md"
     ],
@@ -106505,9 +106507,9 @@
     "blocked_by": [
      "#19195",
      "#16553",
+     "#19504",
      "macos-key-read-settled",
-     "macos-window-order",
-     "macos-handback-typed"
+     "macos-window-order"
     ],
     "needs": [
      "macos-reroute-not-a-press"
@@ -106659,6 +106661,7 @@
     "reasons": [
      "conflicts with #19195 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #18222 in packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with macos-move-receipt-r2 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/win32/capture.rs, crates/pi-natives/src/desktop/win32/mod.rs, packages/coding-agent/src/prompts/tools/computer.md"
     ],
     "note": "",
@@ -106666,7 +106669,8 @@
     "paired": [],
     "blocked_by": [
      "#19195",
-     "#18222"
+     "#18222",
+     "macos-move-receipt-r2"
     ],
     "needs": [],
     "created": "2026-11-11T09:06:32Z"
@@ -106811,7 +106815,7 @@
      "conflicts with #19195 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18222 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/prompts/tools/eval.md, packages/coding-agent/src/tools/eval.ts",
-     "conflicts with macos-move-receipt in packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with macos-move-receipt-r2 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with main in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/sdk-computer-prelude-toggle.test.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
@@ -106822,7 +106826,7 @@
      "#19195",
      "#18222",
      "#18786",
-     "macos-move-receipt"
+     "macos-move-receipt-r2"
     ],
     "needs": [
      "browser-core-first-use"
@@ -106843,14 +106847,14 @@
      "needs computer-ui-quiet (queued)",
      "conflicts with #19100 in docs/tools/computer.md, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19195 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with #19504 in docs/computer-use.md",
      "conflicts with #18353 in docs/computer-use.md, docs/tools/computer.md",
      "conflicts with #18013 in docs/computer-use.md",
      "conflicts with #18222 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18786 in packages/coding-agent/src/tools/eval.ts",
      "conflicts with macos-key-read-settled in docs/computer-use.md",
      "conflicts with macos-window-order in docs/computer-use.md",
-     "conflicts with macos-handback-typed in docs/computer-use.md",
-     "conflicts with macos-move-receipt in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with macos-move-receipt-r2 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -106860,14 +106864,14 @@
     "blocked_by": [
      "#19100",
      "#19195",
+     "#19504",
      "#18353",
      "#18013",
      "#18222",
      "#18786",
      "macos-key-read-settled",
      "macos-window-order",
-     "macos-handback-typed",
-     "macos-move-receipt"
+     "macos-move-receipt-r2"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -106891,7 +106895,7 @@
      "conflicts with #18222 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #18925 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with macos-key-read-settled in crates/pi-natives/src/desktop/macos/ax.rs",
-     "conflicts with macos-move-receipt in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with macos-move-receipt-r2 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md"
     ],
@@ -106905,7 +106909,7 @@
      "#18222",
      "#18925",
      "macos-key-read-settled",
-     "macos-move-receipt"
+     "macos-move-receipt-r2"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -106930,7 +106934,7 @@
      "conflicts with #18222 in docs/tools/computer.md",
      "conflicts with #18925 in crates/pi-natives/src/desktop/macos/capture.rs, crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs, packages/natives/native/index.d.ts",
      "conflicts with macos-window-order in crates/pi-natives/src/desktop/macos/capture.rs, crates/pi-natives/src/desktop/macos/mod.rs",
-     "conflicts with macos-move-receipt in docs/tools/computer.md",
+     "conflicts with macos-move-receipt-r2 in docs/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
@@ -106944,7 +106948,7 @@
      "#18222",
      "#18925",
      "macos-window-order",
-     "macos-move-receipt"
+     "macos-move-receipt-r2"
     ],
     "needs": [],
     "created": "2026-11-11T00:21:12Z"
@@ -107090,7 +107094,7 @@
      "conflicts with #19100 in docs/tools/computer.md",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md",
-     "conflicts with macos-move-receipt in docs/tools/computer.md",
+     "conflicts with macos-move-receipt-r2 in docs/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/win32/input.rs, crates/pi-natives/src/desktop/win32/mod.rs"
     ],
     "note": "",
@@ -107100,7 +107104,7 @@
      "#19100",
      "#18353",
      "#18222",
-     "macos-move-receipt"
+     "macos-move-receipt-r2"
     ],
     "needs": [],
     "created": "2026-11-12T04:40:13Z"
@@ -107143,10 +107147,8 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "wait",
-    "reasons": [
-     "conflicts with main in (branch missing on the fork)"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
