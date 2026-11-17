@@ -97721,14 +97721,14 @@
    "needs": [],
    "base": "276169d5168bbbb8196ca090661296fb5a23721a",
    "body": "bodies/qt-filler-windows.md",
-   "state": "queued",
+   "state": "closed",
    "pr": null,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/qt-filler-windows",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:55:55Z",
-   "updated": "2026-11-17T21:55:55Z",
-   "note": ""
+   "updated": "2026-11-17T23:25:41Z",
+   "note": "Main, 2026-11-18: closed; bare-QWidget toplevels are rare in real apps and AT-SPI gives no toplevel signal on Wayland, so any filter trades one wrong case for another"
   },
   {
    "id": "wayland-share-picker-deadline",
