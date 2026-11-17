@@ -106070,7 +106070,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-17T02:44:46.704971Z",
+  "at": "2026-11-17T02:48:09.168941Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -106302,9 +106302,11 @@
     "area": "other",
     "priority": "P1",
     "title": "fix(ai,agent): say how far a request body uploaded when any provider's connection drops",
-    "action": "open",
-    "reasons": [],
-    "note": "advance first",
+    "action": "wait",
+    "reasons": [
+     "conflicts with main in packages/ai/src/error/classes.ts"
+    ],
+    "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [],
