@@ -4,9 +4,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 
 **Opening:** not paused
 **Ready budget:** 4 of 8 ready events used in the hour before the last plan, 4 left (plan of 2026-11-17 23:09Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 12, conflict-held 19, stacked 13, held 7, parked 3, open PRs 20; merged 381, closed 42
+**Counts:** openable now 11, conflict-held 19, stacked 13, held 7, parked 3, open PRs 21; merged 381, closed 42
 
-## Openable now (12)
+## Openable now (11)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
@@ -19,7 +19,6 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 | image-eviction-notice | fix(coding-agent): mark images the provider image limit evicts in place | other |  | 2h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/image-eviction-notice) |
 | usage-state-per-model | fix(coding-agent): judge omp usage policy state by account-wide windows | broker | P2 | 2h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/usage-state-per-model) |
 | reset-spend-log | feat(coding-agent): log every saved-reset spend attempt at info | coding-agent | P2 | 2h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-spend-log) |
-| logger-console-level | fix(utils): apply OMP_LOG_LEVEL to the console transport | other | P2 | 2h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/logger-console-level) |
 | account-switch-reason | feat(ai,coding-agent): record why a session's OAuth account switched | auth | P2 | 2h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/account-switch-reason) |
 | wayland-still-capture | fix(natives): keep the Wayland ScreenCast stream open between screenshots | natives | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-still-capture) |
 
@@ -85,7 +84,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 | [#15130](https://github.com/can1357/oh-my-pi/pull/15130) | reset-before-reserve | feat(coding-agent): opt in to spending a blocked account's saved reset before a reserve-only backup | broker | P2 | 6d | Will, 2026-11-02: account broker redesign, on hold since 2026-11-02 | not checked or kept fresh | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-before-reserve) |
 | [#16611](https://github.com/can1357/oh-my-pi/pull/16611) | read-audio-transcripts | feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio | catalog | P2 | 4h | Will, 2026-11-17: parked as draft, not maintained for now; revisit later | not checked or kept fresh | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-audio-transcripts) |
 
-## Open PRs (20)
+## Open PRs (21)
 
 | PR | id | title | area | rank | open | plan | branch |
 |---|---|---|---|---|---|---|---|
@@ -105,6 +104,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 | [#19600](https://github.com/can1357/oh-my-pi/pull/19600) | fable-shared-wall-block | fix(ai): heal Claude tier blocks a shared weekly wall caused from single-window usage reports | broker | P1 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/fable-shared-wall-block) |
 | [#19602](https://github.com/can1357/oh-my-pi/pull/19602) | broker-wire-forward-compat | fix(ai): read auth-broker responses that carry fields a newer broker adds | broker | P2 | 2h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-wire-forward-compat) |
 | [#19599](https://github.com/can1357/oh-my-pi/pull/19599) | broker-shutdown-refresh-save | fix(coding-agent): let auth-broker serve save an in-flight refresh before exit | broker | P1 | 0h | keep; tests-over: ReviewBrokerShutdown, 2026-11-17: one regression test; the exit race exists only in a spawned omp auth-broker serve process, so its lines are process and fixture setup | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-shutdown-refresh-save) |
+| [#19605](https://github.com/can1357/oh-my-pi/pull/19605) | logger-console-level | fix(utils): apply OMP_LOG_LEVEL to the console transport | other | P2 | 2h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/logger-console-level) |
 | [#19592](https://github.com/can1357/oh-my-pi/pull/19592) | broker-version-skew | feat(ai,coding-agent): exchanged omp versions between auth-broker clients and the broker | auth-broker | P2 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-version-skew) |
 | [#19590](https://github.com/can1357/oh-my-pi/pull/19590) | broker-refresh-failure-loud | fix(ai): warn when a broker refresh failure outlasts the access token | broker | P0 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-refresh-failure-loud) |
 | [#19598](https://github.com/can1357/oh-my-pi/pull/19598) | broker-client-startup-retry | fix(ai): retry the initial auth-broker snapshot through a broker restart | broker | P1 | 0h | keep; tests-over: BrokerClientStartupRetry, 2026-11-17: four distinct branches (retry succeeds; non-transient answer fails at once; retry off for runtime switch; deadline cancels an in-flight request), each failing or pinning main's outcome; over by 8 lines of imports and server setup | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-client-startup-retry) |
