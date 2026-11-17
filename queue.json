@@ -96857,7 +96857,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/broker-wire-forward-compat",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:01:16Z",
-   "updated": "2026-11-17T23:18:05Z",
+   "updated": "2026-11-17T23:35:14Z",
    "note": "Will, 2026-11-17: go-ahead to open",
    "built": [
     {
@@ -96899,10 +96899,28 @@
     {
      "with": "#19592",
      "code": "0b2d8911dad63a1dc250c53bf81061eb0ba54bf5",
-     "with_code": "2de31525408f5bd840a7993c119c6a71d310a52b",
-     "tip": "afd42125ba98395b4d5a66a3d2c14464cc57625a",
-     "with_tip": "bbc606e53aac36298daa70e428e6c6f598fec211",
-     "at": "2026-11-17T22:54:41Z",
+     "with_code": "8392c922c234ea7d1826f17a99c3caf7c8ee65c7",
+     "tip": "d5ee0fed6941f46b693399be12e6112c838ef578",
+     "with_tip": "ffe74eace28cb6d0678e4efed2b6dea3961228bd",
+     "at": "2026-11-17T23:35:10Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19598",
+     "code": "0b2d8911dad63a1dc250c53bf81061eb0ba54bf5",
+     "with_code": "6264a3652cb9e53dc3e3730c6b248b5c798700c7",
+     "tip": "d5ee0fed6941f46b693399be12e6112c838ef578",
+     "with_tip": "42eea7e9e6d490c27231d04099e02e8f1dabe8f5",
+     "at": "2026-11-17T23:35:14Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19600",
+     "code": "0b2d8911dad63a1dc250c53bf81061eb0ba54bf5",
+     "with_code": "403a3fdeeaaeea2b6227088ae2dfefe8c56f1321",
+     "tip": "d5ee0fed6941f46b693399be12e6112c838ef578",
+     "with_tip": "7948f971c466220d81373fb5a51ec1fb036756b9",
+     "at": "2026-11-17T23:35:14Z",
      "host": "MacBook-Pro"
     }
    ],
