@@ -96471,6 +96471,28 @@
    "added": "2026-11-17T21:02:20Z",
    "updated": "2026-11-17T21:02:40Z",
    "note": "Review ResetSpendLog.ReviewResetSpendLog at 608d234 needs-changes: #2 (CLI fence throw unlogged) fixed in code, no test (marker-write failure is input nobody sends); #1 (two concurrent unfenced in-process redeems coalesce into one POST yet log two resets) declined: only reachable for /usage reset racing an auto spend on the same account within the redeem's 15 s; auto vs auto is serialized by the reset fence"
+  },
+  {
+   "id": "broker-shutdown-refresh-save",
+   "branch": "will/broker-shutdown-refresh-save",
+   "title": "fix(coding-agent): let auth-broker serve save an in-flight refresh before exit",
+   "area": "broker",
+   "priority": null,
+   "needs": [],
+   "base": "baf60290fde5e9eea4edb30bff07695877682ba9",
+   "body": "bodies/broker-shutdown-refresh-save.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/broker-shutdown-refresh-save",
+   "host": "MacBook-Pro",
+   "added": "2026-11-17T21:03:11Z",
+   "updated": "2026-11-17T21:03:11Z",
+   "note": "",
+   "tests_over_override": {
+    "reason": "ReviewBrokerShutdown, 2026-11-17: one regression test; the exit race exists only in a spawned omp auth-broker serve process, so its lines are process and fixture setup",
+    "at": "2026-11-17T21:03:16Z"
+   }
   }
  ],
  "watch": {
