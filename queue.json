@@ -108981,6 +108981,11 @@
     "sha": "d0ab2f333f07fe817f1a1929d97e9b7398add1f3",
     "at": "2026-11-17T23:07:23Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "d0ab2f333f07fe817f1a1929d97e9b7398add1f3",
+    "at": "2026-11-17T23:07:49Z",
+    "host": "goliath"
    }
   }
  },
