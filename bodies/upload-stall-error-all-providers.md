@@ -23,7 +23,7 @@ How: `transportFetch` and the cowork transport's `fetch` fallback send a body of
 Decisions:
 - **1 MB threshold:** a smaller body fits in the socket buffers and would always read "written", so it keeps Bun's own handling.
 - **Only socket-close errors are wrapped:** Bun pulls a chunk even for a refused connect, so connect failures, aborts and timeouts keep their errors. The new text matches every transient pattern the old did; remote compaction matched only the old wording, so it accepts the new error too.
-- **Redirects:** Bun cannot replay a streamed body, so redirects are followed here as `fetch` does (307/308 resend the body, 303 becomes a GET, credentials dropped across origins).
+- **Redirects:** Bun cannot replay a streamed body, so the fetch standard's redirects (301/302/303/307/308) are followed here with its method rules (307/308 resend the body, 303 and a POST's 301/302 become a GET, credentials dropped across origins); any other 3xx, such as a 300 with a `Location`, is returned unfollowed.
 - Proxies (forward and CONNECT) checked; `Request` inputs and a caller's own `fetch` untouched; size is after compression.
 - **Websockets:** a failed Codex websocket send falls back to SSE, whose error is the one surfaced.
 
@@ -31,7 +31,7 @@ Maintenance: if Bun buffers the stream eagerly, the mid-upload test fails.
 
 ## Testing
 
-- `packages/ai/test/transport-fetch-upload-error.test.ts`: a server that never responds drops after 256 KiB of a 32 MB body, or after all of it; the messages differ by upload state and stay retriable, through `transportFetch` and `AnthropicMessagesClient`. A 64 KB body keeps Bun's error; a 307 uploads once to the new location and names the drop there; a cross-origin 303 becomes a GET without credentials. Each fails with its source change reverted.
+- `packages/ai/test/transport-fetch-upload-error.test.ts`: a server that never responds drops after 256 KiB of a 32 MB body, or after all of it; the messages differ by upload state and stay retriable, through `transportFetch` and `AnthropicMessagesClient`. A 64 KB body keeps Bun's error; a 307 uploads once to the new location and names the drop there; a cross-origin 303 becomes a GET without credentials; a 300 with a `Location` is returned without resending. Each fails with its source change reverted.
 - `packages/agent/test/remote-compaction.test.ts`: the new error is retried; fails without the compaction change.
 - `stream()` per provider in the table against a local TLS server, retries included: the messages above, with `main`'s `errorId` and attempt counts (OpenAI Responses 6, Completions 12, Codex 6, Codex websocket then SSE 7, xAI 6, Gemini 1, Gemini CLI 4, Antigravity 4, Factory Droid 6, Anthropic-compatible 11, Anthropic over `http://` 11).
 
@@ -40,3 +40,4 @@ Maintenance: if Bun buffers the stream eagerly, the mid-upload test fails.
 - [x] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
