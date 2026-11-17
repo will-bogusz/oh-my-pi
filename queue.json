@@ -108361,11 +108361,5 @@
     "wake": ""
    }
   ]
- },
- "opening": {
-  "id": "x11-keysym-remap",
-  "token": "1f7f0f012c0c4867aedd029b0ceca0de",
-  "host": "MacBook-Pro",
-  "at": "2026-11-17T04:20:02Z"
  }
 }
