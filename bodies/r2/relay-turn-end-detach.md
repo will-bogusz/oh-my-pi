@@ -43,7 +43,7 @@ Model steps and a continuing steer keep the attachment; tabs opened with a CDP e
 > **Relay context.** Chrome shows the bar on every tab while an extension has the debugger on any tab, and drops it about 5 s after the last detach.
 
 - **Maintainer call: on by default.** The bar flaps once per turn instead of staying up; `browser.relayReleaseOnTurnEnd: false` keeps main's behaviour. Per-call detach would flap per call; closing the tabs would lose the agent's page.
-- **One worker across the release.** The tab's worker keeps its state and moves it onto the new attachment; a new worker replaying settings would lose run globals, ids and logs. A new one takes over only if the worker died while released, through main's worker-exit recovery (#16037), saying what started fresh in the same next-call notice.
+- **One worker across a release.** It keeps run globals, ids and logs, moving its instruments onto the new attachment. Only a lost worker is replaced through main's recovery, and the next result says what started fresh.
 - **Kept attached:** routes, captures and held keys act only while attached, so the gap would slip past them; `allowed_domains` likewise; an orphaned dialog can't be answered later; `persist` opts out.
 - **Relay contract 2** (`OMP.releaseTarget`) detaches the tab and the popups omp owns from it, keeping the claim and group; the extension is unchanged.
 - **Maintenance:** a new per-tab instrument with state must move in `#reattach`, or keep the tab attached in `#release`.
@@ -53,7 +53,7 @@ Model steps and a continuing steer keep the attachment; tabs opened with a CDP e
 
 Live, isolated relay harness (real extension), n=5 per arm, on an earlier build of this design: turn 1 observes, clicks by id, logs, fetches, uploads and sets a timezone; turn 2 reuses the id and ARIA ref and reads it back. Same result 5/5, release off and on; first call after a reattach median 54 ms (50 ms attached). Earlier head, macOS VM, visible Chrome, n=5: bar between turns 5/5 → 0/5.
 
-`browser-relay-turn-release.test.ts` runs the same two turns with release on and off. Its continuity case logs two identical objects; on `4f0c6a0546d`, Runtime bootstrap replay added a third, while normalized replay keeps exactly two. The session-release and turn-release files pass all 18 tests; `bun run check:ts` passes.
+On the rebased head, 356 tests pass, including unchanged main dialog/WebKit regressions; `bun run check:ts` passes. Re-run: `bun test packages/coding-agent/test/tools/browser-{relay*,nav-frames-dialogs,webkit-dialogs}.test.ts packages/coding-agent/test/agent-session-relay-release.test.ts`. The continuity case logs two identical objects: `4f0c6a0546d` replayed a third, while normalized replay preserves exactly two.
 
 A real relay release/reattach probe logged before and during the gap and awaited a fetch while detached: both console messages returned after reattach, but the request log was empty. Console recovery is therefore partial, not a claim of complete capture while released.
 
