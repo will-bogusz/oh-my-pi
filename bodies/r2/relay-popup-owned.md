@@ -10,8 +10,6 @@ When a page omp was driving opened a link in a new tab or a popup, Chrome put it
 | popups from tabs omp does not drive, tabs the user opens | untouched | untouched |
 | relay extension installed before this PR | — | popups stay unowned, as before (reinstall for ownership) |
 
-Reading order: `extension/background.ts` → `popup-placement.ts` → `relay/bridge.ts` → `tab-worker.ts`.
-
 ## Why
 
 > **Relay context.** The relay attaches only tabs a client opened or claimed, so a popup is a new, unclaimed tab. Chrome's `webNavigation.onCreatedNavigationTarget` names the tab (any frame) that opened it, `noopener` links included.
@@ -20,8 +18,10 @@ Reading order: `extension/background.ts` → `popup-placement.ts` → `relay/bri
 - **Each popup undoes only what it displaced**, and only while the window's selection count is unchanged, so a tab the user picked meanwhile is never overridden; chained popups resolve to the user's tab.
 - **Popup windows stay where Chrome put them.** A minimized one stops rendering (omp's screenshot and click timed out), and Chrome refuses to move one off screen. If it took the focus from one of the user's Chrome windows, focus goes back there, past any popup windows that took it in between (also across a brief no-focus report on Linux); from another app, nothing is focused. The extension knows which windows are omp's popup windows from Chrome's window and tab events, so putting one back asks Chrome only about that popup, plus once about any earlier popup whose events it did not see.
 - **Focus emulation on popups and their own popups**, as for omp's own background tabs, so an unselected popup renders and takes input; a popup's popup is owned even before omp has attached to the first.
-- **Bounded reports.** The relay takes a report only when both ids are non-negative integers and the opener is a tab a client owns, and ignores a repeat for the same popup and opener. At most 32 reports wait for their tab at once; one waits at most 10 s and is dropped on use, tab close or reconnect. A popup past that cap stays in front, not owned.
+- **Bounded reports.** Both tab ids must be non-negative integers and the opener owned. Duplicate reports are ignored; at most 32 wait, for at most 10 s. Use, close or reconnect removes them. A popup beyond that cap stays in front, unowned.
 <details><summary>Maintenance and the known limit</summary>
+
+Reading order: `extension/background.ts` → `popup-placement.ts` → `relay/bridge.ts` → `tab-worker.ts`.
 
 - **Maintenance.** One new extension permission (`webNavigation`); CHANGELOG and README say to reinstall. An older extension sends no reports and is never asked to background anything.
 - **Known limit:** when the user is in another app, Chrome makes itself the active app as it creates the new tab or window, 40-50 ms after omp's click and before the relay acts (15/15 on both branches below); this PR does not hand the app back.
