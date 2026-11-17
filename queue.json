@@ -108783,7 +108783,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-17T22:08:06.975924Z",
+  "at": "2026-11-17T22:31:09.613262Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -108922,7 +108922,7 @@
     "title": "fix(ai,agent): say how far a request body uploaded when any provider's connection drops",
     "action": "keep",
     "reasons": [],
-    "note": "",
+    "note": "tests-over: Main, 2026-11-17: each test pins a distinct user-visible behaviour: upload progress named for bodies of 1 MiB or more (mid-body, after body, below threshold, Anthropic fetch fallback), resend semantics per redirect status (only the five real redirect codes resend; 300 returned), credentials dropped cross-origin, and redirected on the response and its clones; plus remote compaction retrying the new error",
     "over": [],
     "paired": [],
     "blocked_by": [],
