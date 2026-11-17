@@ -72883,7 +72883,7 @@
    "needs": [
     "browser-wait-predicate"
    ],
-   "base": "69cf42b09f543113be237971140115888993aefd",
+   "base": "3dfcc48b3db1e82f4341fa838ca88a7bc47f2cd8",
    "body": "bodies/browser-wait-text-regexp.md",
    "state": "queued",
    "pr": null,
@@ -72891,7 +72891,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-wait-text-regexp",
    "host": "MacBook-Pro",
    "added": "2026-11-10T16:35:28Z",
-   "updated": "2026-11-17T05:46:31Z",
+   "updated": "2026-11-17T19:09:23Z",
    "note": ""
   },
   {
