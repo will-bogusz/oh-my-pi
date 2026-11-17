@@ -97171,7 +97171,22 @@
    "updated": "2026-11-17T23:42:20Z",
    "note": "Will, 2026-11-17: go-ahead to open",
    "opened": "2026-11-17T23:41:54Z",
-   "readied": "2026-11-17T23:42:20Z"
+   "readied": "2026-11-17T23:42:20Z",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-17T23:54:53Z",
+     "reason": "UpstreamOpener, 2026-11-17: roboomp r4607308035 nit folds the console test's parse loop into a shared parseLogLines helper",
+     "old": "af018457d7df388f8bf6c37b6955f5c81af56fd4",
+     "new": "a7d786d5126744fd2d649e730ce5982b88f3e70f",
+     "dropped": {
+      "packages/utils/test/logger-contract.test.ts": [
+       "\t\tconst messagesPrinted = result.stdout",
+       "\t\t\t\treturn entry.message;",
+       "\t\texpect(messagesPrinted).toEqual([...messages]);"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "broker-version-skew",
