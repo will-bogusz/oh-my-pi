@@ -96162,13 +96162,13 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-17T05:15:42Z",
+  "checked": "2026-11-17T06:15:33Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "covered-fill": {
-    "since": "2026-11-17T05:15:42Z",
-    "title": "fix(coding-agent): refuse browser keys aimed at a field a modal dialog covers"
+   "macos-window-order": {
+    "since": "2026-11-17T06:15:33Z",
+    "title": "fix(natives): put the user's key window back in front of a macOS target after background input and takeover"
    },
    "x11-xtest-release": {
     "since": "2026-11-17T05:15:42Z",
@@ -96183,17 +96183,7 @@
     "title": "feat(catalog): identify Factory Droid requests as droid 1.10.0"
    }
   },
-  "conflicts": {
-   "#16611": {
-    "since": "2026-11-12T01:15:20Z",
-    "title": "feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio",
-    "files": [
-     "packages/catalog/src/model-manager.ts",
-     "packages/coding-agent/src/prompts/tools/read.md",
-     "packages/coding-agent/src/tools/read.ts"
-    ]
-   }
-  },
+  "conflicts": {},
   "merged_through": "2026-11-17T02:40:39Z",
   "unreleased": {
    "19191": {
@@ -96385,7 +96375,8 @@
    19516,
    19518,
    19519,
-   19521
+   19521,
+   19524
   ],
   "post_merge": {
    "16553": {
@@ -96623,55 +96614,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-10T05:32:52Z",
-    "kind": "openable",
-    "id": "computer-window-exact-app",
-    "title": "fix(coding-agent): prefer exact app names when selecting windows"
-   },
-   {
-    "at": "2026-11-10T05:32:52Z",
-    "kind": "openable",
-    "id": "finder-desktop-key",
-    "title": "fix(natives): restore Finder with its desktop focus after macOS background input"
-   },
-   {
-    "at": "2026-11-10T05:32:52Z",
-    "kind": "openable",
-    "id": "computer-find-role-alias",
-    "title": "fix(natives): accept aliases in computer role searches"
-   },
-   {
-    "at": "2026-11-10T06:03:36Z",
-    "kind": "openable",
-    "id": "browser-call-timeout",
-    "title": "fix(browser): give browser calls without a timeout the Eval cell's timeout"
-   },
-   {
-    "at": "2026-11-10T06:03:36Z",
-    "kind": "openable",
-    "id": "browser-console-shape",
-    "title": "fix(browser): tell agents that treat console() or errors() as an array to read .entries"
-   },
-   {
-    "at": "2026-11-10T06:03:36Z",
-    "kind": "openable",
-    "id": "browser-dead-tab-hint",
-    "title": "fix(browser): point calls on a tab that is not open at browser.open()"
-   },
-   {
-    "at": "2026-11-10T06:03:36Z",
-    "kind": "openable",
-    "id": "computer-strict-options",
-    "title": "fix(computer): reject unknown helper option keys"
-   },
-   {
-    "at": "2026-11-10T06:03:36Z",
-    "kind": "unopenable",
-    "id": "finder-desktop-key",
-    "title": "fix(natives): restore Finder with its desktop focus after macOS background input",
-    "why": "opened as #18680"
-   },
    {
     "at": "2026-11-10T16:14:59Z",
     "kind": "openable",
@@ -100100,6 +100042,19 @@
     "id": "macos-key-read-settled",
     "title": "fix(natives): read a macOS popup after the option its typed letters choose",
     "why": "opened as #19516"
+   },
+   {
+    "at": "2026-11-17T06:15:33Z",
+    "kind": "openable",
+    "id": "macos-window-order",
+    "title": "fix(natives): put the user's key window back in front of a macOS target after background input and takeover"
+   },
+   {
+    "at": "2026-11-17T06:15:33Z",
+    "kind": "unopenable",
+    "id": "covered-fill",
+    "title": "fix(coding-agent): refuse browser keys aimed at a field a modal dialog covers",
+    "why": "opened as #19524"
    }
   ]
  },
@@ -107272,12 +107227,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-17T05:15:43.333519Z",
+  "at": "2026-11-17T06:15:34.531733Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 3,
-   "left": 5
+   "used": 1,
+   "left": 7
   },
   "rows": [
    {
@@ -107358,10 +107313,8 @@
     "area": "catalog",
     "priority": "P2",
     "title": "feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in packages/catalog/src/model-manager.ts, packages/coding-agent/src/prompts/tools/read.md, packages/coding-agent/src/tools/read.ts"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -107491,6 +107444,23 @@
     "created": "2026-11-17T04:19:37Z"
    },
    {
+    "id": "covered-fill",
+    "label": "#19524",
+    "number": 19524,
+    "state": "open",
+    "area": "browser",
+    "priority": "P1",
+    "title": "fix(coding-agent): refuse browser keys aimed at a field a modal dialog covers",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-17T05:21:31Z"
+   },
+   {
     "id": "browser-select-objects",
     "label": "#19518",
     "number": 19518,
@@ -107506,23 +107476,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-17T04:15:36Z"
-   },
-   {
-    "id": "covered-fill",
-    "label": "covered-fill",
-    "number": null,
-    "state": "queued",
-    "area": "browser",
-    "priority": "P1",
-    "title": "fix(coding-agent): refuse browser keys aimed at a field a modal dialog covers",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-11T02:11:47Z"
    },
    {
     "id": "iphone-mirror-scroll-distance",
@@ -107553,10 +107506,8 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): put the user's key window back in front of a macOS target after background input and takeover",
-    "action": "wait",
-    "reasons": [
-     "conflicts with main in crates/pi-natives/src/desktop/macos/skylight.rs"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -107610,13 +107561,13 @@
     "title": "feat(browser): settle the preceding action before reads too",
     "action": "wait",
     "reasons": [
-     "conflicts with covered-fill in packages/coding-agent/src/tools/browser/tab-worker.ts"
+     "conflicts with #19524 in packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "covered-fill"
+     "#19524"
     ],
     "needs": [],
     "created": "2026-11-10T18:56:55Z"
@@ -107631,20 +107582,12 @@
     "title": "fix(browser): accept a RegExp in waitForText, as waitForUrl does",
     "action": "wait",
     "reasons": [
-     "needs browser-wait-predicate (queued)",
-     "conflicts with #19518 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts",
-     "conflicts with covered-fill in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts, packages/coding-agent/test/tools/browser-tern-tab.test.ts",
-     "conflicts with browser-wait-predicate in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/aria/aria-snapshot.ts, packages/coding-agent/src/tools/browser/cmux/cmux-tab.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/queries.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts, packages/coding-agent/test/tools/browser-tern-tab.test.ts",
-     "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/aria/aria-snapshot.ts, packages/coding-agent/src/tools/browser/cmux/cmux-tab.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/queries.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts, packages/coding-agent/test/tools/browser-tern-tab.test.ts"
+     "needs browser-wait-predicate (queued)"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#19518",
-     "covered-fill",
-     "browser-wait-predicate"
-    ],
+    "blocked_by": [],
     "needs": [
      "browser-wait-predicate"
     ],
@@ -107660,18 +107603,12 @@
     "title": "fix(browser): let a scoped waitForText match only text the page renders",
     "action": "wait",
     "reasons": [
-     "needs browser-wait-text-regexp (queued)",
-     "conflicts with #19518 in docs/tools/browser.md",
-     "conflicts with browser-wait-predicate in docs/tools/browser.md, packages/coding-agent/src/tools/browser/cmux/cmux-tab.ts, packages/coding-agent/src/tools/browser/queries.ts",
-     "its need browser-wait-text-regexp conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts, packages/coding-agent/test/tools/browser-tern-tab.test.ts"
+     "needs browser-wait-text-regexp (queued)"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#19518",
-     "browser-wait-predicate"
-    ],
+    "blocked_by": [],
     "needs": [
      "browser-wait-text-regexp"
     ],
@@ -107719,6 +107656,7 @@
      "conflicts with #19504 in docs/computer-use.md",
      "conflicts with #19509 in packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #19516 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with macos-window-order in docs/computer-use.md",
      "conflicts with x11-xtest-release in docs/computer-use.md",
      "conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts"
     ],
@@ -107732,6 +107670,7 @@
      "#19504",
      "#19509",
      "#19516",
+     "macos-window-order",
      "x11-xtest-release"
     ],
     "needs": [],
@@ -107749,6 +107688,7 @@
     "reasons": [
      "conflicts with #19195 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with #19516 in crates/pi-natives/src/desktop/macos/ax.rs",
+     "conflicts with macos-window-order in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with main in crates/pi-natives/src/desktop/macos/ax.rs"
     ],
     "note": "",
@@ -107756,7 +107696,8 @@
     "paired": [],
     "blocked_by": [
      "#19195",
-     "#19516"
+     "#19516",
+     "macos-window-order"
     ],
     "needs": [],
     "created": "2026-11-11T09:59:13Z"
@@ -107800,14 +107741,15 @@
     "reasons": [
      "needs macos-window-order (queued)",
      "conflicts with #17756 in crates/pi-natives/src/desktop/macos/input.rs",
-     "its need macos-window-order conflicts with main in crates/pi-natives/src/desktop/macos/skylight.rs",
+     "conflicts with macos-window-order in docs/computer-use.md",
      "conflicts with main in docs/computer-use.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#17756"
+     "#17756",
+     "macos-window-order"
     ],
     "needs": [
      "macos-window-order"
@@ -107830,6 +107772,7 @@
      "conflicts with #19515 in docs/computer-use.md",
      "conflicts with #19504 in docs/computer-use.md",
      "conflicts with #19516 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/macos/input.rs, docs/computer-use.md",
+     "conflicts with macos-window-order in crates/pi-natives/src/desktop/macos/ax.rs, docs/computer-use.md",
      "conflicts with x11-xtest-release in docs/computer-use.md",
      "conflicts with main in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/macos/input.rs, docs/computer-use.md"
     ],
@@ -107842,6 +107785,7 @@
      "#19515",
      "#19504",
      "#19516",
+     "macos-window-order",
      "x11-xtest-release"
     ],
     "needs": [
@@ -107859,8 +107803,8 @@
     "title": "fix(browser): attach only the relay tabs omp opened or borrowed",
     "action": "wait",
     "reasons": [
+     "conflicts with #19524 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19518 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with covered-fill in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with browser-wait-predicate in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, crates/pi-natives/src/desktop/macos/roster.rs, crates/pi-natives/src/desktop/roster.rs, packages/natives/native/desktop.d.ts, packages/natives/native/desktop.js, packages/natives/native/index.d.ts"
     ],
@@ -107868,8 +107812,8 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#19524",
      "#19518",
-     "covered-fill",
      "browser-wait-predicate"
     ],
     "needs": [],
@@ -107886,8 +107830,8 @@
     "action": "wait",
     "reasons": [
      "needs r2/relay-own-only (queued)",
+     "conflicts with #19524 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19518 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with covered-fill in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with browser-wait-predicate in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need r2/relay-own-only conflicts with main in crates/pi-natives/src/desktop/roster.rs, docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/native-windows.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-native-windows.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts, packages/natives/native/desktop.js",
      "conflicts with main in packages/browser-relay/extension/background.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt"
@@ -107896,8 +107840,8 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#19524",
      "#19518",
-     "covered-fill",
      "browser-wait-predicate"
     ],
     "needs": [
@@ -107916,8 +107860,10 @@
     "action": "wait",
     "reasons": [
      "needs r2/relay-popup-owned (queued), r2/page-waiting (queued)",
+     "conflicts with #16611 in packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with #19524 in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts, packages/coding-agent/test/tools/browser-interactions.test.ts",
      "conflicts with #19518 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts, packages/coding-agent/test/tools/browser-interactions.test.ts",
-     "conflicts with covered-fill in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts, packages/coding-agent/test/tools/browser-interactions.test.ts",
+     "conflicts with macos-window-order in crates/pi-natives/src/desktop/macos/capture.rs",
      "conflicts with browser-wait-predicate in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts",
      "its need r2/relay-popup-owned conflicts with main in crates/pi-natives/src/desktop/roster.rs, docs/tools/browser.md, packages/browser-relay/extension/background.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/native-windows.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-native-windows.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts, packages/natives/native/desktop.js",
      "its need r2/page-waiting conflicts with main in crates/pi-natives/src/desktop/roster.rs, docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/dialogs.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/native-windows.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-native-windows.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts, packages/natives/native/desktop.js"
@@ -107926,8 +107872,10 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#16611",
+     "#19524",
      "#19518",
-     "covered-fill",
+     "macos-window-order",
      "browser-wait-predicate"
     ],
     "needs": [
@@ -107971,6 +107919,7 @@
      "conflicts with #19521 in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with #19516 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19519 in crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with macos-window-order in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with main in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs"
     ],
     "note": "",
@@ -107980,7 +107929,8 @@
      "#19195",
      "#19521",
      "#19516",
-     "#19519"
+     "#19519",
+     "macos-window-order"
     ],
     "needs": [],
     "created": "2026-11-11T10:16:04Z"
@@ -108022,8 +107972,8 @@
     "action": "wait",
     "reasons": [
      "needs settle-reads (queued)",
+     "conflicts with #19524 in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19518 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with covered-fill in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with browser-wait-predicate in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
@@ -108031,8 +107981,8 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#19524",
      "#19518",
-     "covered-fill",
      "browser-wait-predicate"
     ],
     "needs": [
@@ -108050,16 +108000,16 @@
     "title": "feat(browser): print what each browser action did to the page",
     "action": "wait",
     "reasons": [
+     "conflicts with #19524 in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19518 in packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with covered-fill in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with browser-wait-predicate in docs/tools/browser.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#19524",
      "#19518",
-     "covered-fill",
      "browser-wait-predicate"
     ],
     "needs": [],
@@ -108076,8 +108026,8 @@
     "action": "held",
     "reasons": [
      "held: Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check",
+     "conflicts with #19524 in packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts",
      "conflicts with #19518 in packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts",
-     "conflicts with covered-fill in packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts",
      "conflicts with browser-wait-predicate in packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
     ],
@@ -108085,8 +108035,8 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#19524",
      "#19518",
-     "covered-fill",
      "browser-wait-predicate"
     ],
     "needs": [],
@@ -108137,6 +108087,7 @@
      "conflicts with #19504 in docs/computer-use.md",
      "conflicts with #19509 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19516 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with macos-window-order in docs/computer-use.md",
      "conflicts with x11-xtest-release in docs/computer-use.md, docs/tools/computer.md",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/tools/computer.test.ts"
@@ -108151,6 +108102,7 @@
      "#19504",
      "#19509",
      "#19516",
+     "macos-window-order",
      "x11-xtest-release"
     ],
     "needs": [
@@ -108174,6 +108126,7 @@
      "conflicts with #19509 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19516 in crates/pi-natives/src/desktop/backend.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #19519 in crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with macos-window-order in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with x11-xtest-release in docs/tools/computer.md",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md"
@@ -108187,6 +108140,7 @@
      "#19509",
      "#19516",
      "#19519",
+     "macos-window-order",
      "x11-xtest-release"
     ],
     "needs": [
@@ -108211,6 +108165,7 @@
      "conflicts with #19509 in docs/tools/computer.md",
      "conflicts with #19516 in crates/pi-natives/src/desktop/backend.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19519 in crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with macos-window-order in crates/pi-natives/src/desktop/macos/capture.rs, crates/pi-natives/src/desktop/macos/mod.rs",
      "conflicts with x11-xtest-release in docs/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -108224,6 +108179,7 @@
      "#19509",
      "#19516",
      "#19519",
+     "macos-window-order",
      "x11-xtest-release"
     ],
     "needs": [],
@@ -108259,12 +108215,15 @@
     "action": "held",
     "reasons": [
      "held: Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance",
+     "conflicts with #16611 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in docs/advisor-watchdog.md, docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-advisors.ts, packages/coding-agent/src/session/turn-recovery.ts, packages/coding-agent/test/agent-session-retry-fallback.test.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#16611"
+    ],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
    },
@@ -108279,8 +108238,8 @@
     "action": "wait",
     "reasons": [
      "needs act-look-prompt (queued)",
+     "conflicts with #19524 in packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts, packages/coding-agent/test/tools/browser-tern-tab.test.ts",
      "conflicts with #19518 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts",
-     "conflicts with covered-fill in packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts, packages/coding-agent/test/tools/browser-tern-tab.test.ts",
      "conflicts with browser-wait-predicate in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts, packages/coding-agent/test/tools/browser-tern-tab.test.ts",
      "its need act-look-prompt conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/network.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-observe.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tern/tern-tab.ts, packages/coding-agent/test/tools/browser-tern-tab.test.ts"
@@ -108289,8 +108248,8 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#19524",
      "#19518",
-     "covered-fill",
      "browser-wait-predicate"
     ],
     "needs": [
@@ -108309,8 +108268,8 @@
     "action": "wait",
     "reasons": [
      "needs r2/relay-own-only (queued)",
+     "conflicts with #19524 in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19518 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with covered-fill in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with browser-wait-predicate in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts",
      "its need r2/relay-own-only conflicts with main in crates/pi-natives/src/desktop/roster.rs, docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/native-windows.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-native-windows.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts, packages/natives/native/desktop.js",
      "conflicts with main in packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/dialogs.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts"
@@ -108319,8 +108278,8 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#19524",
      "#19518",
-     "covered-fill",
      "browser-wait-predicate"
     ],
     "needs": [
@@ -108339,12 +108298,15 @@
     "action": "held",
     "reasons": [
      "held: Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance",
+     "conflicts with #16611 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in docs/auth-broker-gateway.md, packages/ai/src/auth-broker/discover.ts, packages/ai/src/auth/types.ts, packages/ai/test/auth-storage-codex-selection.test.ts, packages/coding-agent/src/cli/usage-cli.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/claude-auto-reset.ts, packages/coding-agent/src/session/codex-auto-reset.ts, packages/coding-agent/test/claude-auto-reset-integration.test.ts, packages/coding-agent/test/claude-auto-reset.test.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#16611"
+    ],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
    },
@@ -108386,6 +108348,7 @@
     "action": "wait",
     "reasons": [
      "needs token-count-policy (queued), wire-delta-count (queued)",
+     "conflicts with #16611 in packages/ai/src/providers/factory-droid/gemini.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/context-view.ts",
      "its need token-count-policy conflicts with main in packages/catalog/src/compat/rules/classes/anthropic.kdl, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/session/session-stats.ts, packages/coding-agent/test/context-fits-model.test.ts",
      "its need wire-delta-count conflicts with main in packages/agent/src/tokenizer.ts, packages/agent/test/tokenizer.test.ts, packages/ai/src/providers/factory-droid.ts, packages/ai/src/providers/transform-messages.ts, packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with main in packages/agent/src/agent.ts, packages/ai/src/providers/factory-droid/gemini.ts, packages/ai/src/providers/google-gemini-cli.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/context-view.ts, packages/coding-agent/test/modes/context-view.test.ts, packages/tui/src/status-line/context-usage.ts, packages/tui/test/context-usage.test.ts"
@@ -108393,7 +108356,9 @@
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#16611"
+    ],
     "needs": [
      "token-count-policy",
      "wire-delta-count"
@@ -108492,12 +108457,15 @@
     "reasons": [
      "held: Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance",
      "needs reset-account-optout (queued)",
+     "conflicts with #16611 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in packages/coding-agent/src/cli/auth-broker-cli.ts, packages/coding-agent/src/session/agent-session.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#16611"
+    ],
     "needs": [
      "#15133"
     ],
@@ -108537,12 +108505,15 @@
     "title": "feat(coding-agent): record what triggered each compaction",
     "action": "wait",
     "reasons": [
+     "conflicts with #16611 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/tui/src/chat/compaction-summary-message.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#16611"
+    ],
     "needs": [],
     "created": "2026-10-20T23:41:41Z"
    },
