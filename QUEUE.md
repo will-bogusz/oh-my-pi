@@ -1,39 +1,40 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17 17:51Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17 17:52Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-17 16:27Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 1, conflict-held 16, stacked 14, held 11, parked 2, open PRs 12; merged 381, closed 37
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-17 17:50Z on MacBook-Pro; groups below are from it, states from the manifest)
+**Counts:** openable now 2, conflict-held 16, stacked 13, held 11, parked 2, open PRs 12; merged 381, closed 37
 
-## Openable now (1)
+## Openable now (2)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
+| stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 4d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 | factory-droid-1100-pin | feat(catalog): identify Factory Droid requests as droid 1.10.0 | factory-droid |  | 4d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-pin) |
 
 ## Conflict-held (16)
 
 | id | title | area | priority | age | blocked by | branch |
 |---|---|---|---|---|---|---|
-| r2/relay-own-only | fix(browser): attach only the relay tabs omp opened or borrowed | browser | P2 | 34d | [#19524](https://github.com/can1357/oh-my-pi/pull/19524), [#19518](https://github.com/can1357/oh-my-pi/pull/19518), [#19542](https://github.com/can1357/oh-my-pi/pull/19542), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/r2/relay-own-only) |
+| r2/relay-own-only | fix(browser): attach only the relay tabs omp opened or borrowed | browser | P2 | 34d | [#19542](https://github.com/can1357/oh-my-pi/pull/19542), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/r2/relay-own-only) |
 | factory-droid-web-search | feat(coding-agent): search the web through a Factory Droid login (web/factory) | web | P2 | 29d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-web-search) |
-| computer-ui-quiet | fix(computer): wait for the app to finish reacting before the next read or input | computer | P2 | 29d | [#19100](https://github.com/can1357/oh-my-pi/pull/19100), [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19515](https://github.com/can1357/oh-my-pi/pull/19515), [#19504](https://github.com/can1357/oh-my-pi/pull/19504), [#19509](https://github.com/can1357/oh-my-pi/pull/19509), [#19516](https://github.com/can1357/oh-my-pi/pull/19516), [#19532](https://github.com/can1357/oh-my-pi/pull/19532), [#19531](https://github.com/can1357/oh-my-pi/pull/19531), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-ui-quiet) |
+| computer-ui-quiet | fix(computer): wait for the app to finish reacting before the next read or input | computer | P2 | 29d | [#19100](https://github.com/can1357/oh-my-pi/pull/19100), [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19504](https://github.com/can1357/oh-my-pi/pull/19504), [#19516](https://github.com/can1357/oh-my-pi/pull/19516), [#19532](https://github.com/can1357/oh-my-pi/pull/19532), [#19531](https://github.com/can1357/oh-my-pi/pull/19531), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-ui-quiet) |
 | compaction-trigger | feat(coding-agent): record what triggered each compaction | other |  | 27d | [#16611](https://github.com/can1357/oh-my-pi/pull/16611), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/compaction-trigger) |
 | iphone-mirror-scroll-distance | fix(natives): scroll iPhone Mirroring the whole distance asked for in the background | computer | P1 | 17d | [#17756](https://github.com/can1357/oh-my-pi/pull/17756) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-scroll-distance) |
 | text-reader-usage-shift | fix(coding-agent): price a text-only fallback's archive text, not the failed request's frames, in the fit check | coding-agent |  | 16d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/text-reader-usage-shift) |
 | token-count-policy | feat(catalog,coding-agent): token-count framing policy in KDL | catalog |  | 14d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/token-count-policy) |
 | wire-delta-count | refactor(agent,ai): count the anchored delta from the reader's transformed wire messages | other |  | 14d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wire-delta-count) |
-| settle-reads | feat(browser): settle the preceding action before reads too | browser | P1 | 6d | [#19524](https://github.com/can1357/oh-my-pi/pull/19524) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-settle-reads) |
-| browser-action-outcome | feat(browser): print what each browser action did to the page | browser | P2 | 6d | [#19524](https://github.com/can1357/oh-my-pi/pull/19524), [#19518](https://github.com/can1357/oh-my-pi/pull/19518), [#19542](https://github.com/can1357/oh-my-pi/pull/19542) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-action-outcome) |
-| computer-filter-types | fix(computer): say window and element filters take text when given a RegExp | computer | P2 | 6d | [#19100](https://github.com/can1357/oh-my-pi/pull/19100), [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19509](https://github.com/can1357/oh-my-pi/pull/19509), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-filter-types) |
+| settle-reads | feat(browser): settle the preceding action before reads too | browser | P1 | 6d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-settle-reads) |
+| browser-action-outcome | feat(browser): print what each browser action did to the page | browser | P2 | 6d | [#19542](https://github.com/can1357/oh-my-pi/pull/19542), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-action-outcome) |
+| computer-filter-types | fix(computer): say window and element filters take text when given a RegExp | computer | P2 | 6d | [#19100](https://github.com/can1357/oh-my-pi/pull/19100), [#19195](https://github.com/can1357/oh-my-pi/pull/19195), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-filter-types) |
 | relay-print-preview-error | fix(coding-agent,browser-relay): fail a browser call a print preview holds in an attached browser within seconds | browser | P2 | 6d | [#19542](https://github.com/can1357/oh-my-pi/pull/19542) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-print-preview-error) |
-| win-minimised-windows | fix(natives,coding-agent): show a minimized Windows app's window from apps.open instead of launching it again | computer | P2 | 6d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19509](https://github.com/can1357/oh-my-pi/pull/19509), [#19516](https://github.com/can1357/oh-my-pi/pull/19516), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-minimised-windows) |
+| win-minimised-windows | fix(natives,coding-agent): show a minimized Windows app's window from apps.open instead of launching it again | computer | P2 | 6d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19516](https://github.com/can1357/oh-my-pi/pull/19516), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-minimised-windows) |
 | macos-ax-cancel-before-send | fix(natives): send no macOS AX action once its run is cancelled | natives | P2 | 6d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19516](https://github.com/can1357/oh-my-pi/pull/19516), [#19532](https://github.com/can1357/oh-my-pi/pull/19532), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-ax-cancel-before-send) |
-| win-ax-states | fix(natives): expose Windows control state and stale-reference matches | computer | P2 | 6d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19521](https://github.com/can1357/oh-my-pi/pull/19521), [#19516](https://github.com/can1357/oh-my-pi/pull/19516), [#19519](https://github.com/can1357/oh-my-pi/pull/19519), [#19532](https://github.com/can1357/oh-my-pi/pull/19532), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-ax-states) |
-| stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 4d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
+| win-ax-states | fix(natives): expose Windows control state and stale-reference matches | computer | P2 | 6d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19516](https://github.com/can1357/oh-my-pi/pull/19516), [#19519](https://github.com/can1357/oh-my-pi/pull/19519), [#19532](https://github.com/can1357/oh-my-pi/pull/19532), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-ax-states) |
+| macos-web-type-background | fix(natives): type into a background macOS web page field without a takeover | computer | P2 | 2d | [#17756](https://github.com/can1357/oh-my-pi/pull/17756), [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#17897](https://github.com/can1357/oh-my-pi/pull/17897), [#19504](https://github.com/can1357/oh-my-pi/pull/19504), [#19516](https://github.com/can1357/oh-my-pi/pull/19516), [#19532](https://github.com/can1357/oh-my-pi/pull/19532), [#19531](https://github.com/can1357/oh-my-pi/pull/19531), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-web-type-background) |
 
-## Stacked (14)
+## Stacked (13)
 
 | id | title | area | priority | age | needs | branch |
 |---|---|---|---|---|---|---|
@@ -50,7 +51,6 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 | factory-droid-1100-models | feat(catalog): add the Factory Droid models droid 1.10.0 serves | factory-droid |  | 4d | factory-droid-1100-pin | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-models) |
 | macos-keys-no-press | fix(natives): send macOS background keys to the key window without a press | computer | P2 | 3d | macos-window-order ([#19532](https://github.com/can1357/oh-my-pi/pull/19532)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-keys-no-press) |
 | macos-drag-no-change-note | fix(natives): note a macOS background drag that changed nothing readable | computer | P2 | 3d | macos-drag-confirm ([#19195](https://github.com/can1357/oh-my-pi/pull/19195)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-drag-no-change-note) |
-| macos-web-type-background | fix(natives): type into a background macOS web page field without a takeover | computer | P2 | 2d | macos-reroute-not-a-press ([#19515](https://github.com/can1357/oh-my-pi/pull/19515)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-web-type-background) |
 
 ## Held (11)
 
