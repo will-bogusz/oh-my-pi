@@ -95271,7 +95271,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-17T01:10:38Z",
+  "checked": "2026-11-17T02:43:20Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -95279,17 +95279,9 @@
     "since": "2026-11-17T00:39:57Z",
     "title": "fix(natives): read a macOS popup after the option its typed letters choose"
    },
-   "macos-window-order": {
-    "since": "2026-11-17T01:10:38Z",
-    "title": "fix(natives): put the user's key window back in front of a macOS target after background input and takeover"
-   },
-   "macos-handback-typed": {
-    "since": "2026-11-17T00:39:57Z",
-    "title": "fix(natives): give the macOS key window back after a takeover while another program types"
-   },
-   "macos-move-receipt": {
-    "since": "2026-11-14T05:00:07Z",
-    "title": "fix(coding-agent): say what a macOS background move did"
+   "upload-stall-error-all-providers": {
+    "since": "2026-11-17T02:43:20Z",
+    "title": "fix(ai,agent): say how far a request body uploaded when any provider's connection drops"
    },
    "factory-droid-1100-pin": {
     "since": "2026-11-17T00:39:57Z",
@@ -95305,16 +95297,9 @@
      "packages/coding-agent/src/prompts/tools/read.md",
      "packages/coding-agent/src/tools/read.ts"
     ]
-   },
-   "#17610": {
-    "since": "2026-11-12T23:05:54Z",
-    "title": "fix(ai,coding-agent): carry other models' reasoning to Claude and retry its refusal without it",
-    "files": [
-     "packages/ai/src/providers/pi-native-server.ts"
-    ]
    }
   },
-  "merged_through": "2026-11-17T00:27:47Z",
+  "merged_through": "2026-11-17T02:40:39Z",
   "unreleased": {
    "19191": {
     "title": "feat(catalog): add the Factory Droid models droid 1.7.1 serves",
@@ -95440,26 +95425,110 @@
     "title": "feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy",
     "merge_commit": "87c9959fe16fa123f26feed25c2816edf1b3ba7d",
     "merged_at": "2026-11-17T00:27:47Z"
+   },
+   "18925": {
+    "title": "feat(coding-agent): name the native windows a browser call raised on macOS",
+    "merge_commit": "7e17184a906cae569c4b7b2856cc1d43630ae515",
+    "merged_at": "2026-11-17T02:40:38Z"
+   },
+   "18789": {
+    "title": "feat(coding-agent): keep subagents' browser tabs out of the user's Chrome and Tern pane unless asked",
+    "merge_commit": "1f77bfabf4aa4618505a77b933937e790781fb0f",
+    "merged_at": "2026-11-17T02:40:38Z"
+   },
+   "18786": {
+    "title": "feat(agent,coding-agent): send a short browser guide with the first browser call",
+    "merge_commit": "98b300789aefe7768a80eddcde9e6ed4bea89180",
+    "merged_at": "2026-11-17T02:40:38Z"
+   },
+   "18624": {
+    "title": "fix(ai): say whether an Anthropic request body finished uploading when its connection drops",
+    "merge_commit": "d92b493207964825d975425da2a84539bba6cec5",
+    "merged_at": "2026-11-17T02:40:38Z"
+   },
+   "18353": {
+    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
+    "merge_commit": "b2182f0dc39e30fafdc2814756d7f0cfcaf6c944",
+    "merged_at": "2026-11-17T02:40:38Z"
+   },
+   "18222": {
+    "title": "feat(coding-agent): find nested menu commands in one read",
+    "merge_commit": "cbafcab9dd0de408da896bd8fa11599d5c482114",
+    "merged_at": "2026-11-17T02:40:38Z"
+   },
+   "18013": {
+    "title": "feat(natives): type text the wayland layout lacks through libei text",
+    "merge_commit": "3eac7afd80d55f4678ebe0458304cd472018adc9",
+    "merged_at": "2026-11-17T02:40:38Z"
+   },
+   "16553": {
+    "title": "fix(natives): place macOS clicks for the focus guard where WindowServer routed them",
+    "merge_commit": "087f80db4728b3c15cb5c9996ee28c4a6bd0d7ef",
+    "merged_at": "2026-11-17T02:40:38Z"
+   },
+   "18125": {
+    "title": "fix(ai,coding-agent): keep Anthropic web search queries intact, always search, and report refusals",
+    "merge_commit": "fc88d5b6fa2c981a7be6a1728f267de588281334",
+    "merged_at": "2026-11-17T02:40:39Z"
+   },
+   "17610": {
+    "title": "fix(ai,coding-agent): carry other models' reasoning to Claude and retry its refusal without it",
+    "merge_commit": "b158ec31da4fb7217261eee33be81310b9bfec22",
+    "merged_at": "2026-11-17T02:40:39Z"
    }
   },
   "ready": [
-   16553,
    16611,
-   17610,
    17756,
    17897,
-   18013,
-   18125,
-   18222,
-   18353,
-   18624,
-   18786,
-   18789,
-   18925,
    19100,
-   19195
+   19195,
+   19504,
+   19509
   ],
   "post_merge": {
+   "16553": {
+    "title": "fix(natives): place macOS clicks for the focus guard where WindowServer routed them",
+    "merge_commit": "087f80db4728b3c15cb5c9996ee28c4a6bd0d7ef",
+    "merged_at": "2026-11-17T02:40:38Z",
+    "findings": []
+   },
+   "17610": {
+    "title": "fix(ai,coding-agent): carry other models' reasoning to Claude and retry its refusal without it",
+    "merge_commit": "b158ec31da4fb7217261eee33be81310b9bfec22",
+    "merged_at": "2026-11-17T02:40:39Z",
+    "findings": []
+   },
+   "18013": {
+    "title": "feat(natives): type text the wayland layout lacks through libei text",
+    "merge_commit": "3eac7afd80d55f4678ebe0458304cd472018adc9",
+    "merged_at": "2026-11-17T02:40:38Z",
+    "findings": []
+   },
+   "18125": {
+    "title": "fix(ai,coding-agent): keep Anthropic web search queries intact, always search, and report refusals",
+    "merge_commit": "fc88d5b6fa2c981a7be6a1728f267de588281334",
+    "merged_at": "2026-11-17T02:40:39Z",
+    "findings": []
+   },
+   "18222": {
+    "title": "feat(coding-agent): find nested menu commands in one read",
+    "merge_commit": "cbafcab9dd0de408da896bd8fa11599d5c482114",
+    "merged_at": "2026-11-17T02:40:38Z",
+    "findings": []
+   },
+   "18353": {
+    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
+    "merge_commit": "b2182f0dc39e30fafdc2814756d7f0cfcaf6c944",
+    "merged_at": "2026-11-17T02:40:38Z",
+    "findings": []
+   },
+   "18624": {
+    "title": "fix(ai): say whether an Anthropic request body finished uploading when its connection drops",
+    "merge_commit": "d92b493207964825d975425da2a84539bba6cec5",
+    "merged_at": "2026-11-17T02:40:38Z",
+    "findings": []
+   },
    "18632": {
     "title": "fix(coding-agent): resolve Chromium role selectors through Chrome's accessibility tree",
     "merge_commit": "0c740e39652b83516103538b63225385a945bf6c",
@@ -95482,6 +95551,24 @@
       "addressed_by": 18658
      }
     ]
+   },
+   "18786": {
+    "title": "feat(agent,coding-agent): send a short browser guide with the first browser call",
+    "merge_commit": "98b300789aefe7768a80eddcde9e6ed4bea89180",
+    "merged_at": "2026-11-17T02:40:38Z",
+    "findings": []
+   },
+   "18789": {
+    "title": "feat(coding-agent): keep subagents' browser tabs out of the user's Chrome and Tern pane unless asked",
+    "merge_commit": "1f77bfabf4aa4618505a77b933937e790781fb0f",
+    "merged_at": "2026-11-17T02:40:38Z",
+    "findings": []
+   },
+   "18925": {
+    "title": "feat(coding-agent): name the native windows a browser call raised on macOS",
+    "merge_commit": "7e17184a906cae569c4b7b2856cc1d43630ae515",
+    "merged_at": "2026-11-17T02:40:38Z",
+    "findings": []
    },
    "18987": {
     "title": "feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy",
@@ -98999,6 +99086,113 @@
     "kind": "openable",
     "id": "macos-window-order",
     "title": "fix(natives): put the user's key window back in front of a macOS target after background input and takeover"
+   },
+   {
+    "at": "2026-11-17T02:43:20Z",
+    "kind": "merged",
+    "number": 18925,
+    "title": "feat(coding-agent): name the native windows a browser call raised on macOS",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-17T02:43:20Z",
+    "kind": "merged",
+    "number": 18789,
+    "title": "feat(coding-agent): keep subagents' browser tabs out of the user's Chrome and Tern pane unless asked",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-17T02:43:20Z",
+    "kind": "merged",
+    "number": 18786,
+    "title": "feat(agent,coding-agent): send a short browser guide with the first browser call",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-17T02:43:20Z",
+    "kind": "merged",
+    "number": 18624,
+    "title": "fix(ai): say whether an Anthropic request body finished uploading when its connection drops",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-17T02:43:20Z",
+    "kind": "merged",
+    "number": 18353,
+    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-17T02:43:20Z",
+    "kind": "merged",
+    "number": 18222,
+    "title": "feat(coding-agent): find nested menu commands in one read",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-17T02:43:20Z",
+    "kind": "merged",
+    "number": 18013,
+    "title": "feat(natives): type text the wayland layout lacks through libei text",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-17T02:43:20Z",
+    "kind": "merged",
+    "number": 16553,
+    "title": "fix(natives): place macOS clicks for the focus guard where WindowServer routed them",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-17T02:43:20Z",
+    "kind": "merged",
+    "number": 18125,
+    "title": "fix(ai,coding-agent): keep Anthropic web search queries intact, always search, and report refusals",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-17T02:43:20Z",
+    "kind": "merged",
+    "number": 17610,
+    "title": "fix(ai,coding-agent): carry other models' reasoning to Claude and retry its refusal without it",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-17T02:43:20Z",
+    "kind": "openable",
+    "id": "upload-stall-error-all-providers",
+    "title": "fix(ai,agent): say how far a request body uploaded when any provider's connection drops"
+   },
+   {
+    "at": "2026-11-17T02:43:20Z",
+    "kind": "unopenable",
+    "id": "macos-window-order",
+    "title": "fix(natives): put the user's key window back in front of a macOS target after background input and takeover",
+    "why": "plan: wait (conflicts with main in crates/pi-natives/src/desktop/macos/skylight.rs)"
+   },
+   {
+    "at": "2026-11-17T02:43:20Z",
+    "kind": "unopenable",
+    "id": "macos-handback-typed",
+    "title": "fix(natives): give the macOS key window back after a takeover while another program types",
+    "why": "opened as #19504"
+   },
+   {
+    "at": "2026-11-17T02:43:20Z",
+    "kind": "unopenable",
+    "id": "macos-move-receipt",
+    "title": "fix(coding-agent): say what a macOS background move did",
+    "why": "left the queue"
    }
   ]
  },
