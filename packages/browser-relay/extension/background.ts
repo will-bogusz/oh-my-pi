@@ -410,9 +410,12 @@ chrome.debugger.onDetach.addListener((source, reason) => {
 onForeignFramesHidden((tabId, frames) => post({ t: "framesHidden", tabId, frames }));
 
 chrome.tabs.onCreated.addListener(tab => {
+	if (tab.id !== undefined) placement.tabPlaced(tab.id, tab.windowId);
 	const snap = snapshot(tab);
 	if (snap) post({ t: "tabCreated", tab: snap });
 });
+
+chrome.tabs.onAttached.addListener((tabId, { newWindowId }) => placement.tabPlaced(tabId, newWindowId));
 
 chrome.tabs.onUpdated.addListener((_tabId, _changeInfo, tab) => {
 	const snap = snapshot(tab);
@@ -442,6 +445,9 @@ chrome.webNavigation.onCreatedNavigationTarget.addListener(({ sourceTabId, tabId
 	post({ t: "popupCreated", tabId, sourceTabId });
 });
 
+chrome.windows.onCreated.addListener(window => {
+	if (window.id !== undefined) placement.windowCreated(window.id, window.type);
+});
 chrome.windows.onFocusChanged.addListener(windowId => placement.focusChanged(windowId));
 chrome.windows.onRemoved.addListener(windowId => placement.windowRemoved(windowId));
 

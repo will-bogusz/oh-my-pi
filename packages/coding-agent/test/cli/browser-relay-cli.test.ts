@@ -27,10 +27,18 @@ function runExtensionWorker(script: string, port: number, manifest: object): () 
 		tabs: {
 			query: () => Promise.resolve([]),
 			onCreated: event,
+			onAttached: event,
 			onUpdated: event,
 			onActivated: event,
 			onRemoved: event,
 		},
+		windows: {
+			getLastFocused: () => Promise.resolve(null),
+			onCreated: event,
+			onFocusChanged: event,
+			onRemoved: event,
+		},
+		webNavigation: { onCreatedNavigationTarget: event },
 		tabGroups: { query: () => Promise.resolve([]) },
 		debugger: { getTargets: () => Promise.resolve([]), onEvent: event, onDetach: event },
 		downloads: { search: () => Promise.resolve([]), onCreated: event, onChanged: event },

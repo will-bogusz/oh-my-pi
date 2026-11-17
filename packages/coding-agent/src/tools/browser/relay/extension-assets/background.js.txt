@@ -209,6 +209,8 @@ class PopupPlacement {
   #generation = new Map;
   #displacedTab = new Map;
   #popups = new Set;
+  #windowOf = new Map;
+  #popupTypeWindows = new Set;
   #focused;
   #focusedBefore = new Map;
   #awaitingFocus = new Map;
@@ -262,15 +264,24 @@ class PopupPlacement {
     if (driven || this.#popups.has(sourceTabId))
       this.opened(tabId);
   }
+  tabPlaced(tabId, windowId) {
+    this.#windowOf.set(tabId, windowId);
+  }
+  windowCreated(windowId, type) {
+    if (type === "popup")
+      this.#popupTypeWindows.add(windowId);
+  }
   removed(tabId) {
     this.#displacedTab.delete(tabId);
     this.#popups.delete(tabId);
+    this.#windowOf.delete(tabId);
   }
   windowRemoved(windowId) {
     this.#selected.delete(windowId);
     this.#generation.delete(windowId);
     this.#focusedBefore.delete(windowId);
     this.#awaitingFocus.delete(windowId);
+    this.#popupTypeWindows.delete(windowId);
     if (this.#beforeNone === windowId)
       this.#beforeNone = undefined;
   }
@@ -281,13 +292,13 @@ class PopupPlacement {
     if (!tab)
       return;
     const window = await this.#chrome.getWindow(tab.windowId);
+    this.#windowOf.set(tabId, tab.windowId);
     if (window.type === "popup") {
+      this.#popupTypeWindows.add(tab.windowId);
       if (this.#focused === tab.windowId) {
         if (!window.focused)
           return;
-        const before = await this.#pastPopupWindows(this.#focusedBefore.get(tab.windowId));
-        if (this.#focused !== tab.windowId)
-          return;
+        const before = this.#pastPopupWindows(this.#focusedBefore.get(tab.windowId));
         if (before === undefined) {
           const last = await this.#chrome.lastFocusedNormalWindow();
           if (last !== undefined && last !== tab.windowId && this.#focused === tab.windowId) {
@@ -299,9 +310,7 @@ class PopupPlacement {
         const current = this.#lastFocused();
         if (current === undefined || current === NO_WINDOW || this.#focusedBefore.has(tab.windowId))
           return;
-        const back = await this.#pastPopupWindows(current);
-        if (this.#lastFocused() !== current || this.#focusedBefore.has(tab.windowId))
-          return;
+        const back = this.#pastPopupWindows(current);
         if (back === undefined || back === NO_WINDOW)
           return;
         if (window.focused)
@@ -327,19 +336,14 @@ class PopupPlacement {
       return;
     await this.#chrome.selectTab(previous);
   }
-  async#pastPopupWindows(windowId) {
+  #pastPopupWindows(windowId) {
     if (windowId === undefined || windowId === NO_WINDOW)
       return windowId;
     const popupWindows = new Set;
     for (const popup of this.#popups) {
-      const tab = await this.#chrome.getTab(popup);
-      if (!tab || popupWindows.has(tab.windowId))
-        continue;
-      const window = await this.#chrome.getWindow(tab.windowId).catch(() => {
-        return;
-      });
-      if (window?.type === "popup")
-        popupWindows.add(tab.windowId);
+      const window = this.#windowOf.get(popup);
+      if (window !== undefined && this.#popupTypeWindows.has(window))
+        popupWindows.add(window);
     }
     const seen = new Set;
     let current = windowId;
@@ -680,10 +684,13 @@ chrome.debugger.onDetach.addListener((source, reason) => {
 });
 onForeignFramesHidden((tabId, frames) => post({ t: "framesHidden", tabId, frames }));
 chrome.tabs.onCreated.addListener((tab) => {
+  if (tab.id !== undefined)
+    placement.tabPlaced(tab.id, tab.windowId);
   const snap = snapshot(tab);
   if (snap)
     post({ t: "tabCreated", tab: snap });
 });
+chrome.tabs.onAttached.addListener((tabId, { newWindowId }) => placement.tabPlaced(tabId, newWindowId));
 chrome.tabs.onUpdated.addListener((_tabId, _changeInfo, tab) => {
   const snap = snapshot(tab);
   if (snap)
@@ -705,6 +712,10 @@ chrome.tabs.onRemoved.addListener((tabId) => {
 chrome.webNavigation.onCreatedNavigationTarget.addListener(({ sourceTabId, tabId }) => {
   placement.openedFrom(sourceTabId, tabId, debuggerTabs.has(sourceTabId));
   post({ t: "popupCreated", tabId, sourceTabId });
+});
+chrome.windows.onCreated.addListener((window) => {
+  if (window.id !== undefined)
+    placement.windowCreated(window.id, window.type);
 });
 chrome.windows.onFocusChanged.addListener((windowId) => placement.focusChanged(windowId));
 chrome.windows.onRemoved.addListener((windowId) => placement.windowRemoved(windowId));

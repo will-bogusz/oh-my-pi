@@ -41,11 +41,13 @@ class FakeChrome implements PlacementChrome {
 	}
 }
 
-/** omp's page opened tab 3 in popup window 7. */
-function popupWindow(chrome: FakeChrome, placement: PopupPlacement, focused: boolean): void {
-	chrome.tabs.set(3, { active: true, windowId: 7 });
-	chrome.windows.set(7, { type: "popup", focused });
-	placement.opened(3);
+/** omp's page opened tab `tabId` (3) in new popup window `windowId` (7), with Chrome's events for both. */
+function popupWindow(chrome: FakeChrome, placement: PopupPlacement, focused: boolean, tabId = 3, windowId = 7): void {
+	chrome.tabs.set(tabId, { active: true, windowId });
+	chrome.windows.set(windowId, { type: "popup", focused });
+	placement.windowCreated(windowId, "popup");
+	placement.tabPlaced(tabId, windowId);
+	placement.opened(tabId);
 }
 
 /** Chrome selects tab `tabId` in window 1, as it does for a new tab or a click. */
@@ -297,9 +299,7 @@ describe("PopupPlacement", () => {
 			popupWindow(chrome, placement, true);
 			placement.focusChanged(7);
 			chrome.windows.set(7, { type: "popup", focused: false });
-			chrome.tabs.set(5, { active: true, windowId: 8 });
-			chrome.windows.set(8, { type: "popup", focused: true });
-			placement.opened(5);
+			popupWindow(chrome, placement, true, 5, 8);
 			placement.focusChanged(8);
 			await placement.background(first);
 			await placement.background(second);
@@ -311,9 +311,7 @@ describe("PopupPlacement", () => {
 		const { chrome, placement } = setup();
 		popupWindow(chrome, placement, true);
 		placement.focusChanged(7);
-		chrome.tabs.set(5, { active: true, windowId: 8 });
-		chrome.windows.set(8, { type: "popup", focused: false });
-		placement.opened(5);
+		popupWindow(chrome, placement, false, 5, 8);
 		await placement.background(5);
 		expect(chrome.calls).toEqual([]);
 		placement.focusChanged(8);
