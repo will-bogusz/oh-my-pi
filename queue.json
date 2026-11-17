@@ -110351,11 +110351,5 @@
     "wake": ""
    }
   ]
- },
- "opening": {
-  "id": "wayland-window-crop-clip",
-  "token": "79cad4f9cd114dffab0c8ff4668e533f",
-  "host": "MacBook-Pro",
-  "at": "2026-11-17T22:35:00Z"
  }
 }
