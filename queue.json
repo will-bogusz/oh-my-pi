@@ -635,7 +635,7 @@
    ],
    "base": "aafb01eb877a52609176395c1a8a913569bb9906",
    "body": "bodies/broker-sweep-clients-defer.md",
-   "state": "queued",
+   "state": "closed",
    "pr": null,
    "closed_prs": [
     15144
@@ -643,8 +643,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/broker-sweep-clients-defer",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-11-02T02:39:21Z",
-   "note": "",
+   "updated": "2026-11-17T20:47:39Z",
+   "note": "Will, 2026-11-17: superseded by the usage-control assessment (~/tmp/adhoc/2026-11-17-auth-broker-review/ASSESSMENT.md); rebuilt fresh on #18661 where still wanted; branch kept",
    "hold": "Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance"
   },
   {
