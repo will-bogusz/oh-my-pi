@@ -97305,6 +97305,24 @@
    "updated": "2026-11-17T21:35:33Z",
    "note": "Will, 2026-11-17: go-ahead to open",
    "kind": "proposal"
+  },
+  {
+   "id": "qt-filler-windows",
+   "branch": "will/qt-filler-windows",
+   "title": "fix(natives): list Qt windows built from a bare QWidget on Wayland",
+   "area": "natives",
+   "priority": "P2",
+   "needs": [],
+   "base": "276169d5168bbbb8196ca090661296fb5a23721a",
+   "body": "bodies/qt-filler-windows.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/qt-filler-windows",
+   "host": "MacBook-Pro",
+   "added": "2026-11-17T21:55:55Z",
+   "updated": "2026-11-17T21:55:55Z",
+   "note": ""
   }
  ],
  "watch": {
