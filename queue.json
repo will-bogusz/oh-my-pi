@@ -108036,12 +108036,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-17T21:27:56.739904Z",
+  "at": "2026-11-17T21:42:43.800255Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 1,
-   "left": 7
+   "used": 2,
+   "left": 6
   },
   "rows": [
    {
@@ -108113,6 +108113,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-03T02:19:43Z"
+   },
+   {
+    "id": "broker-refresh-failure-loud",
+    "label": "#19590",
+    "number": 19590,
+    "state": "open",
+    "area": "broker",
+    "priority": "P0",
+    "title": "fix(ai): warn when a broker refresh failure outlasts the access token",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-17T21:39:00Z"
    },
    {
     "id": "docs-reclaim-drift",
@@ -108756,10 +108773,8 @@
     "area": "auth-broker",
     "priority": "P2",
     "title": "feat(ai,coding-agent): exchanged omp versions between auth-broker clients and the broker",
-    "action": "held",
-    "reasons": [
-     "held: Will, 2026-11-17: P2 proposal; held until Will's go-ahead"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -109099,23 +109114,6 @@
     "created": "2026-11-17T21:08:05Z"
    },
    {
-    "id": "broker-refresh-failure-loud",
-    "label": "broker-refresh-failure-loud",
-    "number": null,
-    "state": "queued",
-    "area": "broker",
-    "priority": null,
-    "title": "fix(ai): warn when a broker refresh failure outlasts the access token",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-17T21:06:15Z"
-   },
-   {
     "id": "broker-shutdown-refresh-save",
     "label": "broker-shutdown-refresh-save",
     "number": null,
@@ -109123,7 +109121,7 @@
     "area": "broker",
     "priority": null,
     "title": "fix(coding-agent): let auth-broker serve save an in-flight refresh before exit",
-    "action": "open",
+    "action": "next-hour",
     "reasons": [],
     "note": "tests-over: ReviewBrokerShutdown, 2026-11-17: one regression test; the exit race exists only in a spawned omp auth-broker serve process, so its lines are process and fixture setup",
     "over": [],
@@ -109140,10 +109138,8 @@
     "area": "broker",
     "priority": null,
     "title": "fix(ai): read auth-broker responses that carry fields a newer broker adds",
-    "action": "held",
-    "reasons": [
-     "held: Will, 2026-11-17: P2; held until Will's go-ahead"
-    ],
+    "action": "next-hour",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -109252,10 +109248,8 @@
     "area": "other",
     "priority": null,
     "title": "fix(utils): apply OMP_LOG_LEVEL to the console transport",
-    "action": "held",
-    "reasons": [
-     "held: Will, 2026-11-17: P2; held until Will's go-ahead"
-    ],
+    "action": "next-hour",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -109343,10 +109337,8 @@
     "area": "auth",
     "priority": null,
     "title": "feat(ai,coding-agent): record why a session's OAuth account switched",
-    "action": "held",
-    "reasons": [
-     "held: Will, 2026-11-17: P2 proposal; held until Will's go-ahead"
-    ],
+    "action": "next-hour",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -109364,12 +109356,15 @@
     "title": "feat(coding-agent): record what triggered each compaction",
     "action": "wait",
     "reasons": [
+     "conflicts with account-switch-reason in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/tui/src/chat/compaction-summary-message.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "account-switch-reason"
+    ],
     "needs": [],
     "created": "2026-10-20T23:41:41Z"
    },
@@ -109381,14 +109376,16 @@
     "area": "ai/auth",
     "priority": null,
     "title": "feat(ai): rank an account priority by quota deadline",
-    "action": "held",
+    "action": "wait",
     "reasons": [
-     "held: Will, 2026-11-17: P2 proposal; held until Will's go-ahead"
+     "conflicts with account-switch-reason in packages/ai/test/auth-storage-account-reclaim.test.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "account-switch-reason"
+    ],
     "needs": [],
     "created": "2026-11-17T21:17:58Z"
    },
@@ -109480,9 +109477,8 @@
     "area": "broker",
     "priority": null,
     "title": "feat(ai): reserve per usage limit in account policies",
-    "action": "held",
+    "action": "wait",
     "reasons": [
-     "held: Will, 2026-11-17: P2 proposal; held until Will's go-ahead",
      "conflicts with usage-state-per-model in packages/coding-agent/src/cli/usage-cli.ts"
     ],
     "note": "",
@@ -109502,9 +109498,8 @@
     "area": "broker",
     "priority": null,
     "title": "feat(ai,coding-agent): let an account policy decide its own saved-reset spending",
-    "action": "held",
+    "action": "wait",
     "reasons": [
-     "held: Will, 2026-11-17: P2 proposal; held until Will's go-ahead",
      "conflicts with usage-state-per-model in packages/coding-agent/src/cli/usage-cli.ts"
     ],
     "note": "",
