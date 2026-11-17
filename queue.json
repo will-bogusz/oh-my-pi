@@ -97871,8 +97871,91 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-share-picker-deadline",
    "host": "MacBook-Pro",
    "added": "2026-11-17T22:04:45Z",
-   "updated": "2026-11-17T22:33:36Z",
-   "note": ""
+   "updated": "2026-11-17T23:52:09Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#17756",
+     "code": "78cf60f47fa33bd00a18756a7efedcbc8683f34c",
+     "with_code": "deb21ab1d8736576bddf8ff817335896e1a392cf",
+     "tip": "905e43e26452b231517c5e8043a1b21a9da241a0",
+     "with_tip": "ec62cc55e7f96d135637ac73735fd3c810e411f2",
+     "at": "2026-11-17T23:52:04Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19195",
+     "code": "78cf60f47fa33bd00a18756a7efedcbc8683f34c",
+     "with_code": "a6537b230b0aca2d167690b2dd7419dc03c04fb0",
+     "tip": "905e43e26452b231517c5e8043a1b21a9da241a0",
+     "with_tip": "4deabb0e95fcf29a451415b62795427a4173fa6a",
+     "at": "2026-11-17T23:52:08Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#17897",
+     "code": "78cf60f47fa33bd00a18756a7efedcbc8683f34c",
+     "with_code": "a7c281050ab1f367593f3fb318f816ec27be20f4",
+     "tip": "905e43e26452b231517c5e8043a1b21a9da241a0",
+     "with_tip": "1bd1fbbdc15c7667bbf647612ea3c71199c85497",
+     "at": "2026-11-17T23:52:08Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19596",
+     "code": "78cf60f47fa33bd00a18756a7efedcbc8683f34c",
+     "with_code": "ef68b761dcc0bbf3f11d2fc6c951acdade939113",
+     "tip": "905e43e26452b231517c5e8043a1b21a9da241a0",
+     "with_tip": "09de82fda556e06b677e1b3430070892741931c5",
+     "at": "2026-11-17T23:52:08Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19504",
+     "code": "78cf60f47fa33bd00a18756a7efedcbc8683f34c",
+     "with_code": "f07da370727d1df506bc6648cb72075f148d1db9",
+     "tip": "905e43e26452b231517c5e8043a1b21a9da241a0",
+     "with_tip": "c49d47b9e543dfba5208c436c1849d844ebaee6a",
+     "at": "2026-11-17T23:52:08Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19519",
+     "code": "78cf60f47fa33bd00a18756a7efedcbc8683f34c",
+     "with_code": "10f2f0166cf201563e33349758382bd628db9ba6",
+     "tip": "905e43e26452b231517c5e8043a1b21a9da241a0",
+     "with_tip": "11100c5f055edcd3362cfec4b0f0effcb553e81a",
+     "at": "2026-11-17T23:52:08Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19532",
+     "code": "78cf60f47fa33bd00a18756a7efedcbc8683f34c",
+     "with_code": "20fb8b9ff954b92f5cafa67a2bd140ea7b65619d",
+     "tip": "905e43e26452b231517c5e8043a1b21a9da241a0",
+     "with_tip": "d92ae5387e1ba7dc344d5e8f5b0d6382e70a42f9",
+     "at": "2026-11-17T23:52:09Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19516",
+     "code": "78cf60f47fa33bd00a18756a7efedcbc8683f34c",
+     "with_code": "c35eb84674f684815047cf2878df282dd722c7f3",
+     "tip": "905e43e26452b231517c5e8043a1b21a9da241a0",
+     "with_tip": "f0c8da3fd45354c11cd53f093fdcb854d61689db",
+     "at": "2026-11-17T23:52:09Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19531",
+     "code": "78cf60f47fa33bd00a18756a7efedcbc8683f34c",
+     "with_code": "b29b5594e7a215aba02e35a191b07a5f66090d4d",
+     "tip": "905e43e26452b231517c5e8043a1b21a9da241a0",
+     "with_tip": "7bab9f11e73eddfda911430ba197267509ae95f0",
+     "at": "2026-11-17T23:52:09Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "wayland-still-capture",
