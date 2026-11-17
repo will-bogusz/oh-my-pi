@@ -93818,21 +93818,21 @@
    "merged_by": "pr"
   },
   {
-   "id": "macos-move-receipt",
-   "branch": "will/macos-move-receipt",
+   "id": "macos-move-receipt-r2",
+   "branch": "will/macos-move-receipt-r2",
    "title": "fix(coding-agent): say what a macOS background move did",
    "area": "computer",
    "priority": "P2",
    "needs": [],
-   "base": "6ec2b71cd7d80e18e1b6481f2e3d9c05f5f0c56c",
-   "body": "bodies/macos-move-receipt.md",
+   "base": "bf9a9fbd40e96766d528a9f19a603e53e8c0b5a1",
+   "body": "bodies/macos-move-receipt-r2.md",
    "state": "queued",
    "pr": null,
    "closed_prs": [],
-   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-move-receipt",
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/move-receipt2",
    "host": "MacBook-Pro",
    "added": "2026-11-14T04:35:48Z",
-   "updated": "2026-11-16T17:32:56Z",
+   "updated": "2026-11-17T01:45:37Z",
    "note": "MoveReview (needs-changes at 2609fd1) answered in e11ccec: 1 refuse-aware ending naming the setting, test under refuse; 2 oxfmt applied; 3 wording held to observations ('have shown', 'may still be hidden', takeover only after a screenshot shows it); docs/tools/computer.md one line; CHANGELOG tightened; behaviour NOTE answered in body (no sample set: macOS-only line, benchmark lane re-measures). QueueTwenty 2026-11-14: model sample skipped as given (macOS-only line, benchmark lane re-measures those tasks); body first sentence made first-person.",
    "built": [
     {
