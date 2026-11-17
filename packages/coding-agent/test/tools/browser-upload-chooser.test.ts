@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, test, vi } from "bun:test";
+import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
@@ -7,11 +7,12 @@ import { disposeAllVmContexts } from "@oh-my-pi/pi-coding-agent/eval/js/context-
 import { createBrowserPrelude } from "@oh-my-pi/pi-coding-agent/tools/browser";
 import { findFreeCdpPort, waitForCdp } from "@oh-my-pi/pi-coding-agent/tools/browser/attach";
 import { ensureChromiumExecutable } from "@oh-my-pi/pi-coding-agent/tools/browser/launch";
+import { FileChooserCatcher } from "@oh-my-pi/pi-coding-agent/tools/browser/file-choosers";
 import { releaseAllTabs } from "@oh-my-pi/pi-coding-agent/tools/browser/tab-supervisor";
 import type { ToolSession } from "@oh-my-pi/pi-coding-agent/tools/index";
 import puppeteer from "puppeteer-core";
+import { Connection } from "puppeteer-core/internal/cdp/Connection.js";
 import { chromiumAvailable } from "./chromium-probe";
-import { drive, elapse } from "../helpers/fake-clock";
 
 const CHROMIUM_AVAILABLE = await chromiumAvailable();
 // Windows ignores POSIX read bits and root reads a mode-000 file, so neither can make delivery fail through one.
@@ -82,7 +83,7 @@ interface LogEntry {
  * Open a tab on the fixture. `attempt` reloads it, runs `code`, and returns the thrown message and the page log;
  * `step` runs `code` on the page as it is and returns the call's printed notes and the page log.
  */
-async function openFixture(app?: { cdp_url: string }) {
+async function openFixture(app?: string) {
 	const session = makeSession();
 	const prelude = createBrowserPrelude(session);
 	const context = { session, toolCallId: "browser-upload" };
@@ -122,8 +123,8 @@ return { error, log: await tab.evaluate(() => window.log) };`,
 	return { attempt, step, log, close };
 }
 
-/** Run the real tab worker inline so the release-tail clock is controlled by the test. */
-async function withReleaseClock(work: () => Promise<void>): Promise<void> {
+/** Drive the real inline worker's release callback without advancing browser-I/O deadlines. */
+async function withReleaseClock(work: (release: () => Promise<void>) => Promise<void>): Promise<void> {
 	const workerDescriptor = Object.getOwnPropertyDescriptor(globalThis, "Worker")!;
 	Object.defineProperty(globalThis, "Worker", {
 		...workerDescriptor,
@@ -131,11 +132,61 @@ async function withReleaseClock(work: () => Promise<void>): Promise<void> {
 			throw new Error("Worker threads unavailable");
 		},
 	});
-	vi.useFakeTimers();
+	const endDescriptor = Object.getOwnPropertyDescriptor(FileChooserCatcher.prototype, "endCall")!;
+	const armDescriptor = Object.getOwnPropertyDescriptor(FileChooserCatcher.prototype, "arm")!;
+	const endCall = FileChooserCatcher.prototype.endCall;
+	const arm = FileChooserCatcher.prototype.arm;
+	const tails = new Map<FileChooserCatcher, () => void>();
+	Object.defineProperty(FileChooserCatcher.prototype, "endCall", {
+		...endDescriptor,
+		value: function (this: FileChooserCatcher, ms: number | undefined) {
+			tails.delete(this);
+			const timerDescriptor = Object.getOwnPropertyDescriptor(globalThis, "setTimeout")!;
+			Object.defineProperty(globalThis, "setTimeout", {
+				...timerDescriptor,
+				value: (callback: () => void) => {
+					tails.set(this, callback);
+				},
+			});
+			try {
+				endCall.call(this, ms);
+			} finally {
+				Object.defineProperty(globalThis, "setTimeout", timerDescriptor);
+			}
+		},
+	});
+	Object.defineProperty(FileChooserCatcher.prototype, "arm", {
+		...armDescriptor,
+		value: function (this: FileChooserCatcher) {
+			tails.delete(this);
+			return arm.call(this);
+		},
+	});
 	try {
-		await drive(work());
+		await work(async () => {
+			const descriptor = Object.getOwnPropertyDescriptor(Connection.prototype, "_rawSend")!;
+			const send = Connection.prototype._rawSend;
+			const sent: Promise<unknown>[] = [];
+			Object.defineProperty(Connection.prototype, "_rawSend", {
+				...descriptor,
+				value: function (this: Connection, ...args: Parameters<Connection["_rawSend"]>) {
+					const result = send.apply(this, args);
+					if (args[1] === "Page.setInterceptFileChooserDialog") sent.push(result);
+					return result;
+				},
+			});
+			try {
+				const callbacks = [...tails.values()];
+				tails.clear();
+				for (const callback of callbacks) callback();
+			} finally {
+				Object.defineProperty(Connection.prototype, "_rawSend", descriptor);
+			}
+			await Promise.all(sent);
+		});
 	} finally {
-		vi.useRealTimers();
+		Object.defineProperty(FileChooserCatcher.prototype, "endCall", endDescriptor);
+		Object.defineProperty(FileChooserCatcher.prototype, "arm", armDescriptor);
 		Object.defineProperty(globalThis, "Worker", workerDescriptor);
 	}
 }
@@ -445,22 +496,28 @@ await tab.handleDialog({ accept: false });`);
 	}, 60_000);
 
 	test("in the user's own browser, holds choosers only around omp's calls", async () => {
-		await withReleaseClock(async () => {
+		await withReleaseClock(async release => {
 			const user = await launchUserBrowser();
 			try {
-				const { attempt, step, log, close } = await openFixture({ cdp_url: user.cdpUrl });
+				const { attempt, step, close } = await openFixture(user.cdpUrl);
 				try {
 					await attempt("");
 					expect((await step(`await tab.click("#trigger");`)).notes).toContain(
 						"The page opened a file chooser (one file) during this call",
 					);
 					// Advance the worker's release tail; the chooser it already holds still waits.
-					await elapse(2_000);
+					await release();
 					await step(`await tab.handleDialog({ accept: true, files: ["alpha.txt"] });`);
-					expect(await log()).toEqual([{ id: "trigger-input", event: "change", names: ["alpha.txt"] }]);
+					expect(
+						(
+							await step(
+								"await page.waitForFunction(() => window.log.length === 1); return await tab.evaluate(() => window.log);",
+							)
+						).value,
+					).toEqual([{ id: "trigger-input", event: "change", names: ["alpha.txt"] }]);
 
 					// Past the tail, the user's own click reaches Chrome's chooser (headless: cancel), unreported.
-					await elapse(2_000);
+					await release();
 					const browser = await puppeteer.connect({ browserURL: user.cdpUrl, defaultViewport: null });
 					try {
 						const page = (await browser.pages()).find(candidate => candidate.url() === url);
@@ -469,7 +526,9 @@ await tab.handleDialog({ accept: false });`);
 					} finally {
 						await browser.disconnect();
 					}
-					const after = await step("await Bun.sleep(300); return await tab.evaluate(() => window.log);");
+					const after = await step(
+						"await page.waitForFunction(() => window.log.length === 2); return await tab.evaluate(() => window.log);",
+					);
 					expect(after.value).toEqual([
 						{ id: "trigger-input", event: "change", names: ["alpha.txt"] },
 						{ id: "trigger-input", event: "cancel", names: [] },
@@ -485,16 +544,17 @@ await tab.handleDialog({ accept: false });`);
 	}, 60_000);
 
 	test("in the user's own browser, lets the user's later click reach Chrome's chooser after a raw page.waitForFileChooser()", async () => {
-		await withReleaseClock(async () => {
+		await withReleaseClock(async release => {
 			const user = await launchUserBrowser();
 			try {
-				const { attempt, step, close } = await openFixture({ cdp_url: user.cdpUrl });
+				const { attempt, step, close } = await openFixture(user.cdpUrl);
 				try {
 					const alpha = JSON.stringify(path.join(tempDir, "alpha.txt"));
-					await attempt(`const [chooser] = await Promise.all([page.waitForFileChooser(), tab.click("#trigger")]);
+					await attempt("");
+					await step(`const [chooser] = await Promise.all([page.waitForFileChooser(), tab.click("#trigger")]);
 await chooser.accept([${alpha}]);`);
 					// Advance the worker's release tail before the user's own click.
-					await elapse(2_000);
+					await release();
 					const browser = await puppeteer.connect({ browserURL: user.cdpUrl, defaultViewport: null });
 					try {
 						const page = (await browser.pages()).find(candidate => candidate.url() === url);
@@ -503,7 +563,9 @@ await chooser.accept([${alpha}]);`);
 					} finally {
 						await browser.disconnect();
 					}
-					const after = await step("await Bun.sleep(300); return await tab.evaluate(() => window.log);");
+					const after = await step(
+						"await page.waitForFunction(() => window.log.length === 2); return await tab.evaluate(() => window.log);",
+					);
 					expect(after.value).toEqual([
 						{ id: "trigger-input", event: "change", names: ["alpha.txt"] },
 						{ id: "other-input", event: "cancel", names: [] },
@@ -518,16 +580,19 @@ await chooser.accept([${alpha}]);`);
 	}, 60_000);
 
 	test("in the user's own browser, goes on while a confirm waits past the hold, and holds the chooser it leads to", async () => {
-		await withReleaseClock(async () => {
+		await withReleaseClock(async release => {
 			const user = await launchUserBrowser();
 			try {
-				const { attempt, step, log, close } = await openFixture({ cdp_url: user.cdpUrl });
+				const { attempt, step, close } = await openFixture(user.cdpUrl);
 				try {
 					await attempt("");
 					await step(`await tab.click("#ask-upload");`);
 					// Advance the worker's release tail while the confirm stops the page.
-					await elapse(2_000);
-					expect((await step("return await tab.dialog();")).value).toMatchObject({ open: true, type: "confirm" });
+					await release();
+					expect((await step("return await tab.dialog();")).value).toMatchObject({
+						open: true,
+						type: "confirm",
+					});
 					// The hold that was on when the confirm opened is still on when the page goes on to open its chooser.
 					const answered = await step(`await tab.handleDialog({ accept: true });`);
 					expect(answered.notes).toContain("file chooser");
@@ -536,7 +601,13 @@ await chooser.accept([${alpha}]);`);
 						type: "file-chooser",
 					});
 					await step(`await tab.handleDialog({ accept: true, files: ["alpha.txt"] });`);
-					expect(await log()).toEqual([{ id: "trigger-input", event: "change", names: ["alpha.txt"] }]);
+					expect(
+						(
+							await step(
+								"await page.waitForFunction(() => window.log.length === 1); return await tab.evaluate(() => window.log);",
+							)
+						).value,
+					).toEqual([{ id: "trigger-input", event: "change", names: ["alpha.txt"] }]);
 				} finally {
 					await close();
 				}

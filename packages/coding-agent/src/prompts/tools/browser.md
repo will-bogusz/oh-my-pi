@@ -56,7 +56,7 @@ selectors: CSS, or Puppeteer aria/… text/… xpath/… pierce/… label/… pl
 - `route` is declarative: matching requests are aborted or fulfilled from its options; it takes no handler.
   - Watching traffic: `requests()` lists metadata; `request(id)` adds request and response bodies.
 - Navigation and re-renders invalidate observed ids and refs: re-observe, then act in the same cell. `pushState(url)`: SPA navigation without a document load.
-- No dialog policy: alerts and beforeunload prompts auto-accept; confirms and prompts stay pending for `handleDialog`, and page calls fail naming them until answered.
+- No dialog policy: beforeunload prompts auto-accept; alerts too except in connected and relay Chromium browsers. Other dialogs stay pending for `handleDialog`, and page calls fail naming them until answered.
 - `emulate` merges device/viewport, geolocation, offline/network, media, headers/auth, UA, timezone/locale, and CPU overrides.
 - `devices()` lists valid device names.
 - Cookie imports accept objects, arrays of them (`setCookies(await other.cookies())` copies a session), raw `Cookie:` headers, DevTools cURL dumps, or JSON array strings.

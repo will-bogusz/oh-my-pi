@@ -21,7 +21,7 @@ Drive real Chromium tabs from JavaScript or Python Eval with the global `browser
   - Wait: `waitFor`, `waitForSelector`, `waitForUrl`, `waitForText`; they resolve as soon as the condition holds.
     After a click or navigation wait for the expected text, URL or selector instead of a fixed sleep.
   - Frames: `frame(selectorOrNameOrUrl)` returns a handle with `click`, `fill`, `type`, `press`, `text`, `evaluate`, `waitForSelector`.
-  - Dialogs: alerts are accepted automatically; confirms and prompts wait for `handleDialog`.
+  - Dialogs: alerts auto-accept except in connected and relay Chromium browsers; other alerts, confirms and prompts wait for `handleDialog`.
   - Downloads: start `waitForDownload()` and the click that downloads in one `tab.run`.
   - Page JavaScript: `tab.evaluate(fnOrExpression)` runs in the page; a string is an expression (no top-level `return`), so pass a function to use `return`.
 - `tab.id(n)` (an id from the last `observe()`) and `tab.ref("e5")` (a ref from the last `ariaSnapshot()`)

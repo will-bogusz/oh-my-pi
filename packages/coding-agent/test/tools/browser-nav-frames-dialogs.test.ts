@@ -253,6 +253,48 @@ test("hands any waitUntil other than load/domcontentloaded to Puppeteer unchange
 });
 
 describe.skipIf(!CHROMIUM_AVAILABLE)("browser navigation, frames, dialogs, and tab listing", () => {
+	test("reads cookies for the document a requested navigation reaches", async () => {
+		const destination = Promise.withResolvers<Response>();
+		const site = Bun.serve({
+			hostname: "127.0.0.1",
+			port: 0,
+			fetch(request) {
+				const { pathname } = new URL(request.url);
+				if (pathname === "/next") return destination.promise;
+				if (pathname === "/release") {
+					destination.resolve(new Response("<p>next</p>", { headers: { "set-cookie": "phase=after; Path=/" } }));
+					return new Response("released");
+				}
+				if (pathname === "/")
+					return new Response("<p>start</p>", { headers: { "set-cookie": "phase=before; Path=/" } });
+				return new Response(null, { status: 204 });
+			},
+		});
+		const start = `http://127.0.0.1:${site.port}`;
+		const next = `http://localhost:${site.port}/next`;
+		const invoke = createHost();
+		try {
+			await invoke({ action: "open", name: "cookie-navigation", url: start });
+			const result = valueOf(
+				await invoke({
+					action: "run",
+					name: "cookie-navigation",
+					code: `const requested = Promise.withResolvers();
+page.mainFrame().client.once("Page.frameRequestedNavigation", requested.resolve);
+await page.evaluate(url => { location.href = url; }, ${JSON.stringify(next)});
+await requested.promise;
+const cookies = tab.cookies();
+await fetch(${JSON.stringify(`${start}/release`)});
+return (await cookies).find(cookie => cookie.name === "phase")?.value;`,
+				}),
+			);
+			expect(result).toBe("after");
+		} finally {
+			await invoke({ action: "close", name: "cookie-navigation" });
+			site.stop(true);
+		}
+	});
+
 	test("drives history and SPA navigation without reloading", async () => {
 		const invoke = createHost();
 		await invoke({ action: "open", name: "nav", url: `${baseUrl}/one` });
@@ -806,7 +848,7 @@ return errors;`,
 		await withUserBrowser(async cdpUrl => {
 			const invoke = createHost();
 			try {
-				await invoke({ action: "open", name: "user-alert", url: `${baseUrl}/ask`, app: { cdp_url: cdpUrl } });
+				await invoke({ action: "open", name: "user-alert", url: `${baseUrl}/ask`, app: cdpUrl });
 				const user = await userAtPage(cdpUrl, "/ask");
 				try {
 					// It used to be accepted at once, so the user never saw it.

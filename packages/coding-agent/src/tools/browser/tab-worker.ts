@@ -2930,6 +2930,8 @@ export class WorkerCore {
 		const started = pageWait === "reads" ? undefined : Promise.withResolvers<DialogState>();
 		const unsubscribe = started && this.#onPageWaits(started.resolve);
 		const inputs: OpInputs = { sent: 0, outer: opInputs.getStore() };
+		let finished = false;
+		let result!: T;
 		try {
 			if (pageWait === undefined || pageWait === "input") {
 				const waiting = await this.#pageWaitsOn();
@@ -2941,7 +2943,12 @@ export class WorkerCore {
 					);
 				}
 			}
-			if (!watchdog && !started) return await this.#afterDownloadsArm(opSignal, fn);
+			if (!watchdog && !started) {
+				return await this.#afterDownloadsArm(opSignal, async sig => {
+					if (opts?.awaitNavigation) await this.#awaitRequestedNavigation(sig, perOpTimeoutMs);
+					return await fn(sig);
+				});
+			}
 			// Ends the op's work when the page starts waiting; only then, so a finished op's lingering work goes on.
 			const interruptAc = new AbortController();
 			const signals = [opSignal, interruptAc.signal];
@@ -2949,7 +2956,8 @@ export class WorkerCore {
 			const racedSignal = AbortSignal.any(signals);
 			const work = this.#afterDownloadsArm(racedSignal, async sig => {
 				if (opts?.awaitNavigation) await this.#awaitRequestedNavigation(sig, perOpTimeoutMs);
-				const result = await opInputs.run(inputs, () => fn(sig));
+				result = await opInputs.run(inputs, () => fn(sig));
+				finished = true;
 				// A chooser the input opened is waiting before the next op starts, not just before the call ends.
 				if (pageWait === "input") await this.#choosers?.sync(sig);
 				return result;
@@ -2961,6 +2969,7 @@ export class WorkerCore {
 					started.promise.then(state => {
 						// A page stopped in a dialog never answers the op's own wait, so the op ends here.
 						markHandled(work);
+						if (finished) return result;
 						// The answer, or an input the op already sent, is what the page waits on now: the op did its part.
 						if (pageWait === "answers" || (pageWait === "input" && inputs.sent > 0)) {
 							return opts?.whenWaiting ? opts.whenWaiting() : (undefined as T);
