@@ -105737,31 +105737,14 @@
   }
  },
  "plan": {
-  "at": "2026-11-17T01:19:05.601189Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-17T01:40:55.334312Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 0,
    "left": 8
   },
   "rows": [
-   {
-    "id": "click-place-release",
-    "label": "#16553",
-    "number": 16553,
-    "state": "open",
-    "area": "natives-macos",
-    "priority": "P1",
-    "title": "fix(natives): place macOS clicks for the focus guard where WindowServer routed them",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-20T20:20:43Z"
-   },
    {
     "id": "iphone-mirror-pointer",
     "label": "#17756",
@@ -105778,23 +105761,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-02T03:27:31Z"
-   },
-   {
-    "id": "upload-stall-error",
-    "label": "#18624",
-    "number": 18624,
-    "state": "open",
-    "area": "other",
-    "priority": "P1",
-    "title": "fix(ai): say whether an Anthropic request body finished uploading when its connection drops",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-09T16:23:43Z"
    },
    {
     "id": "computer-run-failure-output",
@@ -105829,6 +105795,59 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-13T20:28:59Z"
+   },
+   {
+    "id": "read-audio-transcripts",
+    "label": "#16611",
+    "number": 16611,
+    "state": "open",
+    "area": "catalog",
+    "priority": "P2",
+    "title": "feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio",
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in packages/catalog/src/model-manager.ts, packages/coding-agent/src/prompts/tools/read.md, packages/coding-agent/src/tools/read.ts"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-10-21T06:07:03Z"
+   },
+   {
+    "id": "click-place-release",
+    "label": "#16553",
+    "number": 16553,
+    "state": "open",
+    "area": "natives-macos",
+    "priority": "P1",
+    "title": "fix(natives): place macOS clicks for the focus guard where WindowServer routed them",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-10-20T20:20:43Z"
+   },
+   {
+    "id": "upload-stall-error",
+    "label": "#18624",
+    "number": 18624,
+    "state": "open",
+    "area": "other",
+    "priority": "P1",
+    "title": "fix(ai): say whether an Anthropic request body finished uploading when its connection drops",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-09T16:23:43Z"
    },
    {
     "id": "claude-refusal-strip-retry",
@@ -105901,25 +105920,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-03T02:19:43Z"
-   },
-   {
-    "id": "read-audio-transcripts",
-    "label": "#16611",
-    "number": 16611,
-    "state": "open",
-    "area": "catalog",
-    "priority": "P2",
-    "title": "feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in packages/catalog/src/model-manager.ts, packages/coding-agent/src/prompts/tools/read.md, packages/coding-agent/src/tools/read.ts"
-    ],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-10-21T06:07:03Z"
    },
    {
     "id": "wayland-ei-text",
@@ -106468,8 +106468,8 @@
     "action": "wait",
     "reasons": [
      "needs macos-reroute-not-a-press (queued)",
-     "conflicts with #16553 in crates/pi-natives/src/desktop/macos/input.rs",
      "conflicts with #19195 in docs/computer-use.md",
+     "conflicts with #16553 in crates/pi-natives/src/desktop/macos/input.rs",
      "conflicts with macos-key-read-settled in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/macos/input.rs, docs/computer-use.md",
      "conflicts with macos-window-order in docs/computer-use.md",
      "conflicts with macos-handback-typed in docs/computer-use.md",
@@ -106480,8 +106480,8 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#16553",
      "#19195",
+     "#16553",
      "macos-key-read-settled",
      "macos-window-order",
      "macos-handback-typed"
@@ -106900,9 +106900,9 @@
     "action": "held",
     "reasons": [
      "held: Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check | Main 2026-11-12: before it opens, the waiting-key-chord case with the cursor actually drawn (20 trials at a 20 s deadline; CursorDemo's cursor-on arm never drew one, and an early run on the combined tree returned 'Cancelled, input may be partial' 11/11, unexplained), on the polished branch will/desktop-cursor-polish.",
-     "conflicts with #16553 in crates/pi-natives/src/desktop/macos/mod.rs",
      "conflicts with #19100 in docs/tools/computer.md",
      "conflicts with #19195 in crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with #16553 in crates/pi-natives/src/desktop/macos/mod.rs",
      "conflicts with #18353 in docs/tools/computer.md",
      "conflicts with #18222 in docs/tools/computer.md",
      "conflicts with #18925 in crates/pi-natives/src/desktop/macos/capture.rs, crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs, packages/natives/native/index.d.ts",
@@ -106914,9 +106914,9 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#16553",
      "#19100",
      "#19195",
+     "#16553",
      "#18353",
      "#18222",
      "#18925",
@@ -107120,8 +107120,10 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with main in (branch missing on the fork)"
+    ],
     "note": "",
     "over": [],
     "paired": [],
