@@ -108667,5 +108667,11 @@
     "wake": ""
    }
   ]
+ },
+ "opening": {
+  "id": "macos-window-order",
+  "token": "269bd9cf31e943cc9e70e5b4b5a72dcf",
+  "host": "MacBook-Pro",
+  "at": "2026-11-17T07:10:21Z"
  }
 }
