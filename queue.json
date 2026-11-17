@@ -96245,7 +96245,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-17T18:02:51Z",
+  "checked": "2026-11-17T19:01:58Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -96738,12 +96738,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-10T18:44:26Z",
-    "kind": "openable",
-    "id": "subagent-browser",
-    "title": "fix(coding-agent): keep a child omp's browser tabs out of its parent's Tern pane and cmux workspace"
-   },
    {
     "at": "2026-11-10T19:17:32Z",
     "kind": "openable",
