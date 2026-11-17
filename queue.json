@@ -97443,7 +97443,29 @@
     }
    ],
    "opened": "2026-11-17T23:00:36Z",
-   "readied": "2026-11-17T23:01:04Z"
+   "readied": "2026-11-17T23:01:04Z",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-17T23:20:12Z",
+     "reason": "roboomp round: 99cf69bb30 rewrites these lines (fetchInitialSnapshot options object, onBrokerRetry hook, doc sentence, test names)",
+     "old": "31bcd7eb2370bfd84236058a8dbb4ba4f21de508",
+     "new": "42eea7e9e6d490c27231d04099e02e8f1dabe8f5",
+     "dropped": {
+      "docs/auth-broker-gateway.md": [
+       "If the broker is down at boot and a fresh cache exists, startup succeeds from the cache. If the cache is missing, expired, corrupt, incompatible, written for another URL, or encrypted with another token, startup requires a live snapshot. A connection failure, timeout, or 5xx/408/429 answer is retried with backoff (0.5 s doubling to 8 s) for up to 30 s, so a broker restart or a short network outage does not fail startup; any other answer, such as a 401 for a revoked token, fails at once. A broker switched mid-session through settings gets no retries: the first failure keeps the current store. Startup never silently opens the local credential store instead."
+      ],
+      "packages/ai/src/auth-broker/discover.ts": [
+       "async function fetchInitialSnapshot(client: AuthBrokerClient, retry: boolean): Promise<SnapshotResponse> {",
+       "\t\t\tif (budget?.aborted && lastError) throw initialSnapshotRetriesSpent(lastError);",
+       "\t\t\tinitialSnapshot = await fetchInitialSnapshot(client, options.retryUnreachableBroker === true);"
+      ],
+      "packages/coding-agent/test/auth-broker-snapshot-cache.test.ts": [
+       "\ttest(\"retries the initial snapshot while the broker restarts\", async () => {",
+       "\t\t\tconst outcome = rejectionOf(discoverAuthStorage(tempDir)).finally(() => {"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "wayland-window-crop-clip",
