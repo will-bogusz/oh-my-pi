@@ -94167,8 +94167,8 @@
    "worktree": null,
    "host": "MacBook-Pro",
    "added": "2026-11-14T12:00:22Z",
-   "updated": "2026-11-17T02:45:43Z",
-   "note": "DragConfirm r8 2026-11-14: head fe61c49af67 on #19195 7e76500ba6a. Untracked background drags (middle-button; left on a tracking role with no value) read start/end elements of the target window before/after (DragEnds, 0.5 s per-element AX timeout), note when unchanged after 560 ms. Review DragConfirm.ReviewDragNoChange needs-changes@bd3e1b6026, all 6 findings fixed (not re-reviewed). rust-check macos/linux/windows at diff 9fc60e421f. VM lease c3881734: static 0/10 moved, note branch (+645 ms); box 10/10 moved, no note. Source: MB-09 index 2 batch1 background."
+   "updated": "2026-11-17T02:46:02Z",
+   "note": "MacLockWaits 2026-11-17: head f6c3de1bd99 on base 4b455fe06b7. Watch of an untracked drag's ends moved out of the input lease (Worker::execute after drop(lease)), scheduled from its own start: 15 reads 40 ms apart, every AX request bounded by the time left of 700 ms; before-read under the lease bounded at 500 ms; cancel on entry and before accepting -> no note. Reviews m4 MacLockWaitsReview (needs-changes, fixed), reviewer DragWatchTiming approve on f6c3de1bd99. VM lease dc87c75f (fs-mac deleted): Static/Box unchanged outcomes; other session's hover wait 1.9 s -> 1.3 s, slow-AX app 5 s InputBusy -> 1.25 s. rust-check macos 91931431ef; linux/windows pending on goliath rc-goliath2."
   },
   {
    "id": "ax-number-setvalue",
