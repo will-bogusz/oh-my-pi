@@ -94383,7 +94383,7 @@
    "worktree": "/home/will/.omp/main-wt/oh-my-pi/key-read-settled",
    "host": "goliath",
    "added": "2026-11-14T10:14:31Z",
-   "updated": "2026-11-17T03:34:43Z",
+   "updated": "2026-11-17T03:51:27Z",
    "note": "Main, 2026-11-17: review stamp at d4e02a0 stands; e3e11216dfa is a text-only amend whose text Main's model-sample rerun checked (Haiku/Sol 0 wrong, ~/tmp/oh-my-pi/KeyReadSample/)",
    "advanced": "2026-11-17T00:50:21Z",
    "rebases_after": [
@@ -94445,6 +94445,15 @@
      "tip": "e3e11216dfa1c75a9783090663197fefd567aae1",
      "with_tip": "bcdbaf1c3f8dd3d2d0f29c21de40f3accd3ff174",
      "at": "2026-11-17T03:34:16Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19515",
+     "code": "65859bd8d65a15bdb223800471b2921715ac8598",
+     "with_code": "2d99602bd4c01e6c5042d0a1982c2eb5ea7f3481",
+     "tip": "e3e11216dfa1c75a9783090663197fefd567aae1",
+     "with_tip": "8b675ba1962c5b298106e7860984b60c38b17fde",
+     "at": "2026-11-17T03:51:22Z",
      "host": "MacBook-Pro"
     }
    ]
