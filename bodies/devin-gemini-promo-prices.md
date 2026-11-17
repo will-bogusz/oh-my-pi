@@ -10,9 +10,9 @@ Before this, `devin/gemini-4-carbon` would keep showing and billing $2/$10 after
 | Gemini 4 Argon | $2 / $10, $0.10 cached | $4 / $20, $0.20 cached, from 2026-12-01 08:00 UTC |
 | Gemini 4 Carbon | $2 / $10, $0.10 cached | $4 / $20, $0.20 cached, from 2026-11-24 16:00 UTC |
 
-Prices are per million input / output tokens. Nothing else on Devin changes, Gemini 4 Hydrogen and Gemini 3.6 Flash included.
+Prices are per million input / output tokens. Nothing else on Devin changes.
 
-**Non-goals:** Gemini 4 Hydrogen also has a promo end date (2026-11-26), but its price hasn't changed and no list price is published, so there's nothing to put on a card. SWE-2 Fast's promo has no published list price either.
+**Non-goals:** Gemini 4 Hydrogen's promo (ends 2026-11-26) doesn't change its price and has no published list price, so there's no card to write. SWE-2 Fast's promo has no list price either.
 
 ## Why
 
