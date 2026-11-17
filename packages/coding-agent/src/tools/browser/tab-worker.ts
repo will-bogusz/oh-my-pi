@@ -616,14 +616,11 @@ export type ActionableHandle = InteractionHandle & ElementQueryHelpers & { fill(
  * A named per-op guard: runs `fn` inside the active run's fail-fast deadline and
  * in-flight tracking (the same wrapper `tab.click(selector)` uses), so a stalled
  * handle action rejects with a named error before the cell budget instead of
- * hanging on puppeteer's protocol timeout. `dialog` says how the action meets a
- * confirm or prompt (`OpOptions.dialog`): a click or key press that opens one is
- * done (`"answers"`); any other action fails (`"blocks"`, the default).
+ * hanging on puppeteer's protocol timeout.
  */
 export type HandleOpGuard = <T>(
 	label: string,
 	fn: (signal: AbortSignal) => Promise<T>,
-	dialog?: "blocks" | "answers",
 ) => Promise<T>;
 
 /**
@@ -1178,7 +1175,6 @@ export function toActionableHandle(
 						() => (method === "press" ? original(args[0], args[1], signal) : original(...args)),
 						invalidate,
 					),
-				method === "press" || method === "tap" ? "answers" : "blocks",
 			);
 	}
 	// An element handle a read returns gets the same guards, so a child resolved before the page started waiting

@@ -344,6 +344,35 @@ error = JSON.stringify(await tab.dialog());`);
 		}
 	}, 60_000);
 
+	test("lets go of a held chooser whose frame went away", async () => {
+		const { attempt, step, close } = await openFixture();
+		try {
+			await attempt(`await tab.evaluate(async () => {
+	const frame = document.createElement("iframe");
+	frame.id = "upload-frame";
+	frame.srcdoc = '<input id="inner" type="file">';
+	document.body.append(frame);
+	await new Promise(loaded => frame.addEventListener("load", loaded, { once: true }));
+});`);
+			await step(`await (await tab.frame("#upload-frame")).click("#inner");`);
+			expect((await step("return await tab.dialog();")).value).toMatchObject({ open: true, type: "file-chooser" });
+			// Nothing can answer an input whose frame is gone: it used to stay pending and block every call. The
+			// hold ends when Chrome fails omp's watch on that frame, which no page event announces, so this polls.
+			const after = await step(`await page.evaluate(() => document.getElementById("upload-frame").remove());
+for (let i = 0; i < 100 && (await tab.dialog()).open; i++) await Bun.sleep(20);
+const state = await tab.dialog();
+let cancel;
+try { await tab.handleDialog({ accept: false }); } catch (e) { cancel = e.message; }
+return { state, cancel };`);
+			expect(after.value).toEqual({
+				state: { open: false },
+				cancel: expect.stringContaining("found nothing waiting"),
+			});
+		} finally {
+			await close();
+		}
+	}, 60_000);
+
 	test("ends a wait when the page opens a chooser during it", async () => {
 		const { attempt, close } = await openFixture();
 		try {

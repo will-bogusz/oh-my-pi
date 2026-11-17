@@ -367,10 +367,15 @@ export class FileChooserCatcher {
 
 	/**
 	 * Holds `chooser` until something answers its input: this catcher, or another that Chrome told about it too
-	 * (another attachment to the page, raw Puppeteer), which this one would otherwise never hear of.
+	 * (another attachment to the page, raw Puppeteer), which this one would otherwise never hear of. A watch that
+	 * cannot start or ends without an answer (its frame or document went away) lets go too: nothing could answer
+	 * that input any more.
 	 */
 	#holdUntilAnswered(chooser: CaughtFileChooser, backendNodeId: number): void {
 		this.#held = chooser;
+		const release = (): void => {
+			if (this.#held === chooser) this.#held = undefined;
+		};
 		void this.#onInput(chooser, backendNodeId, undefined, objectId =>
 			this.#session.send("Runtime.callFunctionOn", {
 				objectId,
@@ -378,12 +383,7 @@ export class FileChooserCatcher {
 					"function () { return new Promise(answered => { this.addEventListener('change', answered, { once: true }); this.addEventListener('cancel', answered, { once: true }); }); }",
 				awaitPromise: true,
 			}),
-		).then(
-			() => {
-				if (this.#held === chooser) this.#held = undefined;
-			},
-			() => undefined,
-		);
+		).then(release, release);
 	}
 
 	/**
@@ -419,12 +419,7 @@ export class FileChooserCatcher {
 		signal: AbortSignal | undefined,
 		use: (objectId: string) => Promise<T>,
 	): Promise<T> {
-		const world =
-			this.#worlds.get(chooser) ??
-			this.#session
-				.send("Page.createIsolatedWorld", { frameId: chooser.frameId, worldName: WORLD_NAME })
-				.then(created => created.executionContextId);
-		this.#worlds.set(chooser, world);
+		const world = this.#worlds.get(chooser) ?? this.#createWorld(chooser);
 		const executionContextId = await untilAborted(signal, () => world);
 		const { object } = await untilAborted(signal, () =>
 			this.#session.send("DOM.resolveNode", { backendNodeId, executionContextId }),
@@ -436,5 +431,17 @@ export class FileChooserCatcher {
 		} finally {
 			void this.#session.send("Runtime.releaseObject", { objectId }).catch(() => undefined);
 		}
+	}
+
+	/** Make `chooser`'s isolated world; a failed creation (its frame went away) is not kept for the next use. */
+	#createWorld(chooser: CaughtFileChooser): Promise<number> {
+		const world = this.#session
+			.send("Page.createIsolatedWorld", { frameId: chooser.frameId, worldName: WORLD_NAME })
+			.then(result => result.executionContextId);
+		this.#worlds.set(chooser, world);
+		world.catch(() => {
+			if (this.#worlds.get(chooser) === world) this.#worlds.delete(chooser);
+		});
+		return world;
 	}
 }
