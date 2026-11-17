@@ -13,6 +13,7 @@
 
 ### Fixed
 
+- Fixed background scrolls on iPhone Mirroring stopping after one wheel event's distance (128 pixels of a Safari page), whatever distance was asked for: up to 6,000 pixels now go out as wheel events of at most 30 pixels
 - Fixed macOS `press()` on a list row, cell or text that has no press action sending agents to a window click at the element's `bounds()`: the refusal now names the element's own `click()` and lists only actions `perform()` takes ([#19063](https://github.com/can1357/oh-my-pi/pull/19063) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed a macOS coordinate click made before any screenshot telling agents only to take one: the refusal now also names the element's own `click()`, which needs none ([#19063](https://github.com/can1357/oh-my-pi/pull/19063) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed every Windows takeover saying "focus was not confirmed afterwards": it now says where focus went, such as "focus returned to Windows Explorer", as on macOS ([#18298](https://github.com/can1357/oh-my-pi/issues/18298)) ([#19062](https://github.com/can1357/oh-my-pi/pull/19062) by [@will-bogusz](https://github.com/will-bogusz))

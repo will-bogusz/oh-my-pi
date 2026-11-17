@@ -168,6 +168,8 @@ Character chords read the active macOS input source for each call rather than re
 
 While iPhone Mirroring shows a connection screen ("Connection Paused", "iPhone in Use", "Timed Out") instead of the phone, a click, scroll, drag, hold, typed text or key press to it throws `InputFailed` quoting that screen, checked when the call starts, and nothing is sent. The screen's buttons are pressed with `press()` on their element; connecting needs the phone locked and plays the phone's audio on the Mac.
 
+A background scroll on iPhone Mirroring goes out as wheel events of at most 30 px per axis, 16 ms apart, since the phone moves each event only so far (about 128 px of a Safari page): up to 6,000 px, about 3.3 s of paced waits during which other omp sessions' input waits. A longer scroll is still 200 events, some of them over 30 px per axis, which was not measured on the phone; scroll further in calls of at most 6,000 px.
+
 Wayland per-window native input and `raise()` remain unavailable without compositor-specific integration; use AX actions, or desktop input after focusing the target yourself.
 
 `await win.observe({ silent?, all?, maxDepth? })` captures a full screenshot and accessibility tree together. It returns screenshot metadata plus `ax`, `nodeCount`, and `truncated`, and normally emits both image and tree. A failed or canceled observation does not replace the previous delivered click frame.
