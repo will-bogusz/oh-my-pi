@@ -82052,7 +82052,26 @@
    "added": "2026-11-11T09:27:26Z",
    "updated": "2026-11-17T02:53:43Z",
    "note": "",
-   "advanced": "2026-11-17T02:53:43Z"
+   "advanced": "2026-11-17T02:53:43Z",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-17T03:26:53Z",
+     "reason": "BrowserRebase's rebase onto 1bdbf6d, Main-approved combined form (~/tmp/oh-my-pi/BrowserRebase/combined-browser-select-objects.md)",
+     "old": "39dbe2e0e10a7c336eb65bf0ca5710ef94f93a97",
+     "new": "8e8f1d91668c3c9cb8504d147b8e11e0f516b32a",
+     "dropped": {
+      "docs/tools/browser.md": [
+       "Selectors accept CSS and Puppeteer `aria/\u2026`, `text/\u2026`, `xpath/\u2026`, `pierce/\u2026`, plus `label/\u2026`, `placeholder/\u2026`, `testid/\u2026`, `alt/\u2026`, `title/\u2026`, and `role/<role>[name=\"\u2026\"]` query handlers. Add ` exact` inside the role name filter for exact matching; names match case-insensitively either way. On Chromium-backed tabs `role/` asks Chrome's accessibility tree for each element's role and name, so it accepts Chrome's own roles such as `DescriptionList`, finds a table Chrome classes as a layout table as `role/table` too, reaches into open shadow roots, and skips hidden and `aria-hidden` elements. On Tern it uses the kit's own rules, which also reach open shadow roots, and every role and name its `observe()` reports for an element selects that element again (text-only `StaticText` entries have no `role/` selector, on either backend). Playwright-only pseudos such as `:has-text()` and `:visible` are rejected. For `<select>`, use `tab.select(selector, ...choices)` or `handle.select(...choices)`, not `fill`: choices mix strings (exact value, then label), `{label: \"full text\"}`, `{value: \"exact value\"}`, or `{index: 0}`; labels match exactly or full option text with whitespace collapsed and trimmed."
+      ],
+      "packages/coding-agent/src/prompts/tools/browser.md": [
+       "- For `<select>`, use `tab.select(selector, ...choices)` or `handle.select(...choices)`, not `fill`. Choices mix strings (exact value, then label), `{label: \"full text\"}`, `{value: \"exact value\"}`, or `{index: 0}`; labels match exactly or full option text with whitespace collapsed and trimmed."
+      ],
+      "packages/coding-agent/src/tools/browser/tern/tern-tab.ts": [
+       "\t\treturn await this.#kit<string[]>(\"select\", [spec, choices]);"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "win-screen-locked",
