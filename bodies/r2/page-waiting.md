@@ -7,6 +7,7 @@ On Chromium, a JavaScript dialog the page leaves open and a file chooser omp hol
 - Choosers are held instead of opening the OS file dialog: for the tab's life in browsers omp launched, and in connected and relay browsers only during omp's calls and 1.5 s after, so the user's own upload clicks still get Chrome's picker. File System Access pickers are cancelled with a notice.
 - Alerts in connected and relay browsers stay open for the user instead of being accepted. Managed browsers and beforeunload are unchanged.
 - A call that times out behind a dialog dismisses it, so the tab recovers instead of being killed.
+- A held chooser's `<input>` is read and watched in an isolated world of its own (freed with its document), so a page that replaced `addEventListener` or the input's getters cannot keep a filled chooser reported as waiting or change its filter; `accept` is cut to 200 characters. A chooser whose frame or document goes away is let go.
 
 Printing is disabled in omp's own Chrome profile by merged #18838; attached browsers retain their print settings, and printing is not a pending dialog state here. Tern rejects `files`; cmux still rejects dialog calls. Also fixed: `tab.id(n)` called an element stale in a later run once an earlier run had used it (the deadline wrapper here bound the cached handle to the run that first used it).
 
@@ -47,8 +48,8 @@ Headless Chrome for Testing on macOS; `user-` cases drive a separate Chromium th
 
 <details><summary>Regression and prototype evidence</summary>
 
-- On the tree without this change, 24 of its tests fail: 12 in `browser-nav-frames-dialogs.test.ts`, 10 in `browser-upload-chooser.test.ts` (one is main's chooser-cancel test, now expecting the hold) and 2 in `browser-upload-contents.test.ts`; the `tab.id(n)` test fails with its fix reverted.
-- `browser-nav-frames-dialogs`, `browser-upload-chooser` and `browser-upload-contents` with the stacked suites (`browser-interactions`, `browser-native-windows`, `browser-input-release`, `browser-relay-bridge`, `browser-relay-tab-isolation`): 239 pass; `check:types`, oxlint and oxfmt pass.
+- On the tree without this change, 26 of its tests fail: 12 in `browser-nav-frames-dialogs.test.ts`, 12 in `browser-upload-chooser.test.ts` (one is main's chooser-cancel test, now expecting the hold) and 2 in `browser-upload-contents.test.ts`; the `tab.id(n)` test fails with its fix reverted. With the input read in the page's own world, the chooser test on a page that replaced `addEventListener` fails on the 200-character `accept`, and the same page probed without that check kept the chooser reported as waiting after Puppeteer filled it. Without letting go on a failed watch, a chooser whose iframe was removed stays pending and `handleDialog({ accept: false })` fails.
+- `browser-nav-frames-dialogs`, `browser-upload-chooser`, `browser-upload-contents`, `browser-open-lease` and every `browser-relay-*` suite: 315 pass; `check:types`, oxlint and oxfmt pass. The alert auto-accept test in `browser-nav-frames-dialogs` fails now and then on this host, as before this round of fixes (2/6 and 1/6 runs).
 - `handleDialog({ files })` vs a separate `tab.chooseFiles()`, 15 runs each on gpt-5.6-luna: both 15/15, but with `chooseFiles` the model read `dialog()` as closed while a chooser waited.
 - Visible relay run of the prototype (macOS VM, CfT 150, before #16119 opened omp's own relay tabs in the background): no Open panel, focus stays in the front app, uploads answered (3/3); `main` shows the panel and reports nothing (2/2).
 
@@ -59,6 +60,7 @@ Headless Chrome for Testing on macOS; `user-` cases drive a separate Chromium th
 - [x] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
 
 
 
