@@ -1,6 +1,6 @@
 ## What
 
-<!-- Will: confirm own-words -->
+
 I want the auth broker and every client to say which omp version they run and warn me when they differ, so a broker left on an older release stops being the last thing I suspect.
 
 | Surface | `main` | This PR |
@@ -39,3 +39,4 @@ Reading order: `types.ts` header constants → `client.ts` `#noteBrokerVersion` 
 - [x] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
