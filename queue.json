@@ -94270,7 +94270,7 @@
    "worktree": "/home/will/.omp/main-wt/oh-my-pi/key-read-settled",
    "host": "goliath",
    "added": "2026-11-14T10:14:31Z",
-   "updated": "2026-11-17T03:29:15Z",
+   "updated": "2026-11-17T03:34:17Z",
    "note": "KeyMenu2 r4 2026-11-17: head d4e02a09386 on main 1bdbf6d242d. No wait under the input lease: an element action other than keys/typing on a popup with pending type-ahead pins EntryFront and waits before the lease (VM: menu click 100 ms after a letter ends on the menu item 20/20 vs the letter 20/20 on main; lease ~727 ms as main); reads under the lease return at once. Web pop-ups not watched; a refused first key marks nothing. Reviews: KeyMenuReview (Astra) and KeyMenuReviewSol needs-changes at c1ad0fa, all fixed; KeyMenu2.KeyReadFollowup needs-changes at 1df86fe then ready at d4e02a0. rust-check linux, windows, macos at d4e02a0. Not run: model sample for the prompt line (no model runs). Text-only amend e3e11216dfa (KeyMenu2, 2026-11-17): prompt line describes the letter effect only and points to menu:; docs:155 typing advice dropped; body adds Main sample (advising wording: Sol 4 of 15 wrong, main 0). Rust diff unchanged (69ba7a2054).",
    "advanced": "2026-11-17T00:50:21Z",
    "rebases_after": [
@@ -94314,6 +94314,24 @@
      "tip": "e3e11216dfa1c75a9783090663197fefd567aae1",
      "with_tip": "e01f4c4530a38eb4f259737574dd9557dac1ab72",
      "at": "2026-11-17T03:29:15Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19100",
+     "code": "65859bd8d65a15bdb223800471b2921715ac8598",
+     "with_code": "330108f635037766ff5964aa9060d6bbd3bbe7eb",
+     "tip": "e3e11216dfa1c75a9783090663197fefd567aae1",
+     "with_tip": "fc3c0c0416e210f879704e604d1afa55da30151c",
+     "at": "2026-11-17T03:34:13Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19509",
+     "code": "65859bd8d65a15bdb223800471b2921715ac8598",
+     "with_code": "f6c986330dedc5e6515a3c14d5b38c5e9d95db2d",
+     "tip": "e3e11216dfa1c75a9783090663197fefd567aae1",
+     "with_tip": "bcdbaf1c3f8dd3d2d0f29c21de40f3accd3ff174",
+     "at": "2026-11-17T03:34:16Z",
      "host": "MacBook-Pro"
     }
    ]
