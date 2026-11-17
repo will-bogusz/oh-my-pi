@@ -96802,8 +96802,10 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/reset-consent-per-account",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:24:43Z",
-   "updated": "2026-11-17T21:24:43Z",
-   "note": ""
+   "updated": "2026-11-17T21:24:57Z",
+   "note": "",
+   "hold": "Will, 2026-11-17: P2 proposal; held until Will's go-ahead",
+   "kind": "proposal"
   }
  ],
  "watch": {
