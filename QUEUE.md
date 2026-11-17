@@ -4,9 +4,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 
 **Opening:** not paused
 **Ready budget:** 4 of 8 ready events used in the hour before the last plan, 4 left (plan of 2026-11-17 23:09Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 15, conflict-held 19, stacked 13, held 7, parked 3, open PRs 18; merged 381, closed 41
+**Counts:** openable now 14, conflict-held 19, stacked 13, held 7, parked 3, open PRs 19; merged 381, closed 41
 
-## Openable now (15)
+## Openable now (14)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
@@ -15,7 +15,6 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 | factory-droid-1100-pin | feat(catalog): identify Factory Droid requests as droid 1.10.0 | factory-droid |  | 4d | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-pin) |
 | wayland-input-refusal | fix(natives): refuse every Wayland input call at once when no input route exists | natives | P2 | 2h | next-hour; tests-over: OmarchyFixes, 2026-11-17: one test going through all 8 gated input arms; each request is an arm no other test reaches | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-input-refusal) |
 | wayland-display-count | fix(natives): report the Wayland display count as unknown before the first capture | natives | P2 | 2h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-display-count) |
-| devin-gemini-promo-prices | fix(catalog): switch Devin's Gemini promo prices to list when each promo ends | catalog | P1 | 2h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-gemini-promo-prices) |
 | devin-image-budgets | fix(catalog): carry Devin's measured image limits | catalog |  | 2h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-image-budgets) |
 | image-eviction-notice | fix(coding-agent): mark images the provider image limit evicts in place | other |  | 2h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/image-eviction-notice) |
 | usage-state-per-model | fix(coding-agent): judge omp usage policy state by account-wide windows | broker | P2 | 2h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/usage-state-per-model) |
@@ -88,7 +87,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 | [#15130](https://github.com/can1357/oh-my-pi/pull/15130) | reset-before-reserve | feat(coding-agent): opt in to spending a blocked account's saved reset before a reserve-only backup | broker | P2 | 6d | Will, 2026-11-02: account broker redesign, on hold since 2026-11-02 | not checked or kept fresh | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-before-reserve) |
 | [#16611](https://github.com/can1357/oh-my-pi/pull/16611) | read-audio-transcripts | feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio | catalog | P2 | 3h | Will, 2026-11-17: parked as draft, not maintained for now; revisit later | not checked or kept fresh | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-audio-transcripts) |
 
-## Open PRs (18)
+## Open PRs (19)
 
 | PR | id | title | area | rank | open | plan | branch |
 |---|---|---|---|---|---|---|---|
@@ -103,6 +102,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-17
 | [#19532](https://github.com/can1357/oh-my-pi/pull/19532) | macos-window-order | fix(natives): put the user's key window back in front of a macOS target after background input and takeover | computer | P1 | 15h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-window-order) |
 | [#19516](https://github.com/can1357/oh-my-pi/pull/19516) | macos-key-read-settled | fix(natives): read a macOS popup after the option its typed letters choose | computer | P1 | 19h | keep; accepted pair with #19195: Main, 2026-11-17: adjacent thread_local statics in desktop/control.rs; combined = both statics (DRAG_NOTE then INPUT_HELD), then input_held() unchanged | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-key-read-settled) |
 | [#19504](https://github.com/can1357/oh-my-pi/pull/19504) | macos-handback-typed | fix(natives): give the macOS key window back after a takeover while another program types | computer | P1 | 21h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-handback-typed) |
+| [#19601](https://github.com/can1357/oh-my-pi/pull/19601) | devin-gemini-promo-prices | fix(catalog): switch Devin's Gemini promo prices to list when each promo ends | catalog | P1 | 2h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-gemini-promo-prices) |
 | [#19586](https://github.com/can1357/oh-my-pi/pull/19586) | docs-reclaim-drift | docs(auth-gateway): describe reclaim moving warm pins back | auth | P0 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/docs-reclaim-drift) |
 | [#19600](https://github.com/can1357/oh-my-pi/pull/19600) | fable-shared-wall-block | fix(ai): heal Claude tier blocks a shared weekly wall caused from single-window usage reports | broker | P1 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/fable-shared-wall-block) |
 | [#19599](https://github.com/can1357/oh-my-pi/pull/19599) | broker-shutdown-refresh-save | fix(coding-agent): let auth-broker serve save an in-flight refresh before exit | broker | P1 | 0h | keep; tests-over: ReviewBrokerShutdown, 2026-11-17: one regression test; the exit race exists only in a spawned omp auth-broker serve process, so its lines are process and fixture setup | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-shutdown-refresh-save) |
