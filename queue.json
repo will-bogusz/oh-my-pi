@@ -65769,13 +65769,13 @@
    "needs": [],
    "base": "1bdbf6d242d99ca62bdf2feeff4519ff992f647d",
    "body": "bodies/atspi-walk-reads.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19521,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-walk-reads",
    "host": "MacBook-Pro",
    "added": "2026-11-03T09:05:24Z",
-   "updated": "2026-11-17T04:47:55Z",
+   "updated": "2026-11-17T17:42:51Z",
    "note": "LinuxGrabs, 2026-11-17: rebased onto main 1bdbf6d242d as one commit 6e14a2ffdba (local branch in ~/.omp/main-wt/oh-my-pi/atspi-walk-reads; fork branch still the old 35a9e15702d, not pushed), carrying #19036's bounded child reads (from trial 3f71f7f3588). Measured as 7c83575f996 on bf9a9fbd40e (same Rust diff) on a goliath box vs main; raw data ~/tmp/oh-my-pi/LinuxGrabs/bench*.jsonl. Linux rust-check recorded; Astra review: code ready, body placeholders since filled.",
    "advanced": "2026-11-17T03:19:46Z",
    "line_loss_overrides": [
@@ -65959,7 +65959,8 @@
     }
    ],
    "opened": "2026-11-17T04:39:21Z",
-   "readied": "2026-11-17T04:39:43Z"
+   "readied": "2026-11-17T04:39:43Z",
+   "merged_by": "pr"
   },
   {
    "id": "atspi-setvalue-readback",
@@ -80066,13 +80067,13 @@
    "needs": [],
    "base": "1bdbf6d242d99ca62bdf2feeff4519ff992f647d",
    "body": "bodies/covered-fill.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19524,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/covered-fill",
    "host": "MacBook-Pro",
    "added": "2026-11-11T02:11:47Z",
-   "updated": "2026-11-17T05:21:55Z",
+   "updated": "2026-11-17T17:42:51Z",
    "note": "",
    "advanced": "2026-11-17T03:23:25Z",
    "line_loss_overrides": [
@@ -80136,7 +80137,8 @@
     }
    ],
    "opened": "2026-11-17T05:21:32Z",
-   "readied": "2026-11-17T05:21:54Z"
+   "readied": "2026-11-17T05:21:54Z",
+   "merged_by": "pr"
   },
   {
    "id": "atspi-text-first",
@@ -82446,13 +82448,13 @@
    "needs": [],
    "base": "1bdbf6d242d99ca62bdf2feeff4519ff992f647d",
    "body": "bodies/browser-select-objects.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19518,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-select-objects",
    "host": "MacBook-Pro",
    "added": "2026-11-11T09:27:26Z",
-   "updated": "2026-11-17T04:47:55Z",
+   "updated": "2026-11-17T17:42:51Z",
    "note": "",
    "advanced": "2026-11-17T03:26:59Z",
    "line_loss_overrides": [
@@ -82522,7 +82524,8 @@
     }
    ],
    "opened": "2026-11-17T04:15:37Z",
-   "readied": "2026-11-17T04:15:59Z"
+   "readied": "2026-11-17T04:15:59Z",
+   "merged_by": "pr"
   },
   {
    "id": "win-screen-locked",
@@ -94629,13 +94632,13 @@
    "needs": [],
    "base": "1bdbf6d242d99ca62bdf2feeff4519ff992f647d",
    "body": "bodies/macos-move-receipt-r2.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19509,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/move-receipt2",
    "host": "MacBook-Pro",
    "added": "2026-11-14T04:35:48Z",
-   "updated": "2026-11-17T02:51:03Z",
+   "updated": "2026-11-17T17:42:51Z",
    "note": "MoveReview (needs-changes at 2609fd1) answered in e11ccec: 1 refuse-aware ending naming the setting, test under refuse; 2 oxfmt applied; 3 wording held to observations ('have shown', 'may still be hidden', takeover only after a screenshot shows it); docs/tools/computer.md one line; CHANGELOG tightened; behaviour NOTE answered in body (no sample set: macOS-only line, benchmark lane re-measures). QueueTwenty 2026-11-14: model sample skipped as given (macOS-only line, benchmark lane re-measures those tasks); body first sentence made first-person.",
    "built": [
     {
@@ -94833,7 +94836,8 @@
       ]
      }
     }
-   ]
+   ],
+   "merged_by": "pr"
   },
   {
    "id": "macos-key-read-settled",
@@ -95927,13 +95931,13 @@
    "needs": [],
    "base": "1bdbf6d242d99ca62bdf2feeff4519ff992f647d",
    "body": "bodies/macos-reroute-not-a-press.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19515,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-reroute-not-a-press",
    "host": "MacBook-Pro",
    "added": "2026-11-14T20:50:07Z",
-   "updated": "2026-11-17T04:47:55Z",
+   "updated": "2026-11-17T17:42:51Z",
    "note": "MacLockWaits 2026-11-17: taken over from Main; rebased onto main 1bdbf6d242d as 5edae5aa592 over #16553 and Brit's 760422a2052 (releases stay out of last_press). Combined observe_user = main's + input_target(.., |pid| rerouted_to(pid, event)); Main approved the form. Earlier review TypingTakeover.ReviewRerouteRule needs-changes at d23777b14e, all 7 fixed (not re-reviewed). macOS desktop tests 486 pass; rust-check macos/linux/windows at Rust diff 15cd8383fc. VM tables measured before the rebase (fe194ec2f12).",
    "rebases_after": [
     16553
@@ -95995,7 +95999,8 @@
     }
    ],
    "opened": "2026-11-17T03:47:18Z",
-   "readied": "2026-11-17T03:47:39Z"
+   "readied": "2026-11-17T03:47:39Z",
+   "merged_by": "pr"
   },
   {
    "id": "macos-web-type-background",
