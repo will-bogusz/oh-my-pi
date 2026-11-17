@@ -110420,5 +110420,11 @@
     "wake": ""
    }
   ]
+ },
+ "opening": {
+  "id": "devin-image-budgets",
+  "token": "2870be9528654dc9ae6cf8111e307b6e",
+  "host": "MacBook-Pro",
+  "at": "2026-11-17T22:49:33Z"
  }
 }
