@@ -94007,7 +94007,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "da62490735ca74a8730ecc428d5ed46c81f5eff9",
+   "base": "45f720e85870a304d8fbccf0e32316ff5ec37213",
    "body": "bodies/ax-number-setvalue.md",
    "state": "open",
    "pr": 19405,
@@ -94015,7 +94015,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/ax-number-setvalue",
    "host": "MacBook-Pro",
    "added": "2026-11-14T18:08:21Z",
-   "updated": "2026-11-16T23:54:51Z",
+   "updated": "2026-11-17T00:15:49Z",
    "note": "SliderValue, 2026-11-14: review e2b8f0e needs-changes; fixed: oxfmt (c14459a), rust-check mac+linux recorded at 16af99c, docs/tools/computer.md number paragraph, El-path number/boolean test, control::settle, single AXValue read via value_kind with test; kept: 8c7e150 in this PR by Main's decision (one PR about setValue on value controls). Limits: no-step not-settable controls keep today's refusal; SwiftUI steps by its own step; clamp read-back waits 500 ms.",
    "built": [
     {
@@ -94316,7 +94316,7 @@
      "host": "MacBook-Pro"
     }
    ],
-   "advanced": "2026-11-16T23:54:51Z",
+   "advanced": "2026-11-17T00:15:49Z",
    "rebases_after": [
     19061
    ],
