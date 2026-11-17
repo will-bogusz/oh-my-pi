@@ -1,6 +1,6 @@
 ## What
 
-<!-- Will: confirm own-words -->
+
 I want my Codex Team workspace to spend a saved reset when it hits its weekly limit while my Pro account and a shared login never spend theirs, and today the reset settings can only decide that for a whole provider.
 
 An `auth.accountPolicies` entry can now set `autoRedeem5h`, `autoRedeemWeekly` and (Anthropic only) `autoRedeemFable` to `yes` or `no`. For that one account it replaces the provider's `codexResets.*` / `claudeResets.*` key of the same window, in either direction.
@@ -69,3 +69,4 @@ Not run: a live spend, which would consume a real saved reset.
 - [ ] `bun check` passes
 - [ ] Tested locally
 - [ ] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
