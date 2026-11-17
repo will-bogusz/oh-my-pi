@@ -96869,7 +96869,7 @@
    "branch": "will/broker-shutdown-refresh-save",
    "title": "fix(coding-agent): let auth-broker serve save an in-flight refresh before exit",
    "area": "broker",
-   "priority": null,
+   "priority": "P1",
    "needs": [],
    "base": "baf60290fde5e9eea4edb30bff07695877682ba9",
    "body": "bodies/broker-shutdown-refresh-save.md",
@@ -96879,7 +96879,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/broker-shutdown-refresh-save",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:03:11Z",
-   "updated": "2026-11-17T21:51:58Z",
+   "updated": "2026-11-17T22:35:11Z",
    "note": "",
    "tests_over_override": {
     "reason": "ReviewBrokerShutdown, 2026-11-17: one regression test; the exit race exists only in a spawned omp auth-broker serve process, so its lines are process and fixture setup",
