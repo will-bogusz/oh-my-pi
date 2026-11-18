@@ -98529,7 +98529,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/account-switch-reason",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:19:21Z",
-   "updated": "2026-11-18T02:27:29Z",
+   "updated": "2026-11-18T02:28:21Z",
    "note": "Will, 2026-11-17: go-ahead to open",
    "kind": "proposal",
    "built": [
@@ -98710,7 +98710,8 @@
     }
    ],
    "advanced": "2026-11-18T02:23:46Z",
-   "opened": "2026-11-18T02:27:29Z"
+   "opened": "2026-11-18T02:27:29Z",
+   "readied": "2026-11-18T02:28:21Z"
   },
   {
    "id": "reset-consent-per-account",
