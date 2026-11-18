@@ -421,6 +421,26 @@ describe("shape resolution", () => {
 		expect(customOpus.cellWidth).toBe(11);
 		expect(customOpus.frameSize).toBe(1932);
 
+		// A Devin Fusion pairing reads as its lead, whatever its sidekick: an
+		// Opus 5.5 lead gets Opus's 1932px frames, and a GPT lead GPT's layout
+		// even beside a Claude sidekick.
+		const fusion = (id: string, identity: { class: string; family: string; revision: string }) =>
+			snapcompact.resolveShape({ api: "devin-agent", provider: "devin", id, identity });
+		const opusLed = fusion("fusion-claude-opus-5-5-high-fast-sidekick-claude-haiku-5-5-medium", {
+			class: "anthropic",
+			family: "opus",
+			revision: "5.5.0",
+		});
+		expect(opusLed.cellWidth).toBe(11);
+		expect(opusLed.frameSize).toBe(1932);
+		const gptLed = fusion("fusion-gpt-5-6-sol-high-fast-sidekick-claude-haiku-5-5-medium", {
+			class: "openai",
+			family: "gpt",
+			revision: "5.6.0",
+		});
+		expect(gptLed.cellHeight).toBe(22);
+		expect(gptLed.frameSize).toBe(1568);
+
 		// High-res frames are reserved for the lines that read them natively;
 		// older Claude lines keep the safe 1568px family default.
 		expect(snapcompact.resolveShape({ api: "anthropic-messages", id: "claude-opus-4-8" }).frameSize).toBe(1932);
