@@ -102926,8 +102926,8 @@
    "worktree": null,
    "host": "MacBook-Pro",
    "added": "2026-11-18T18:02:46Z",
-   "updated": "2026-11-18T18:03:17Z",
-   "note": "",
+   "updated": "2026-11-18T18:03:29Z",
+   "note": "Main, 2026-11-18: MacCosts' d0f9ccd2f78 split off macos-keys-no-press (never pushed or reviewed there). Focused-element proof: key-call read 50-110 us vs 4.5 ms copying 2,004 children (MacCosts keys-body.md, timed from a separate process); 16-child fallback still ~4.3 ms. Needs an independent review and a VM row before it can open; rebase onto macos-keys-no-press's merged commit then.",
    "hold": "Main, 2026-11-18: needs an independent review and a VM row before it can open; no work on it now"
   }
  ],
