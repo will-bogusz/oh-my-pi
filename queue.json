@@ -115415,12 +115415,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-18T19:14:34.267847Z",
+  "at": "2026-11-18T19:45:20.326398Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 5,
-   "left": 3
+   "used": 2,
+   "left": 6
   },
   "rows": [
    {
@@ -116239,7 +116239,7 @@
      "needs #19702 (open)",
      "conflicts with #19195 in docs/computer-use.md",
      "conflicts with #19702 in docs/computer-use.md",
-     "conflicts with main in crates/natives/src/desktop/macos/ax.rs, docs/computer-use.md"
+     "conflicts with main in crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/macos/input.rs, docs/computer-use.md"
     ],
     "note": "",
     "over": [],
@@ -116452,7 +116452,7 @@
      "conflicts with #19195 in docs/tools/computer.md, packages/natives/native/index.d.ts",
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md, packages/natives/native/index.d.ts",
-     "conflicts with main in crates/natives/src/desktop/backend.rs, crates/natives/src/desktop/cursor.rs, crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/macos/capture.rs, crates/natives/src/desktop/macos/cursor.rs, crates/natives/src/desktop/macos/cursor/helper.m, crates/natives/src/desktop/macos/mod.rs, crates/natives/src/desktop/mod.rs, packages/coding-agent/test/tools/computer.test.ts"
+     "conflicts with main in crates/natives/src/desktop/backend.rs, crates/natives/src/desktop/cursor.rs, crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/macos/capture.rs, crates/natives/src/desktop/macos/cursor.rs, crates/natives/src/desktop/macos/cursor/helper.m, crates/natives/src/desktop/macos/mod.rs, crates/natives/src/desktop/mod.rs, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
     "over": [],
