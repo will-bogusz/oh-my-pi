@@ -40,7 +40,7 @@ Maintenance: later DeepSeek lines are measured on their own.
 
 ## Testing
 
-- Live, opencode-go at low effort: 60 archived turns with a codename in the archived middle, `/compact` with snapcompact at a 40k threshold, then a question about it. This branch stored 3 frames and sent no images and 60k characters of archive text; the base sent its 5 frames. Both answered `ZEBRA-4417`: a mechanism check, not recall evidence.
+- Live, opencode-go at low effort: 60 archived turns with a codename in the archived middle, `/compact` with snapcompact at a 40k threshold, then a question about it. This branch stored 3 frames and sent no images and 60k characters of archive text; the base sent its 5 frames. Both answered `ZEBRA-4417` (a mechanism check).
 - `agent-session-snapcompact-reader.test.ts`: after a switch from GPT, DeepSeek V4.1 Flash's request carries the archive's text and only the user's attached image (with the rule removed, the frames are sent); its own `/compact` with a ~40k-token kept turn lands within 60% of a 100k threshold as read, 54.8k (sizing reverted: 64.5k); and its first `/compact` after a resume commits (judged against frames: `would not reduce context`).
 - `bun test` over the snapcompact suites in `coding-agent`, `snapcompact` and `catalog`: all pass except two `agent-session-snapcompact-no-reduction` cases that fail on the base branch here too (a local catalog context window).
 
