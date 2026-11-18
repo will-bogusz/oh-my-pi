@@ -111135,5 +111135,11 @@
     "wake": ""
    }
   ]
+ },
+ "opening": {
+  "id": "usage-state-per-model",
+  "token": "cdb2ea1e012f4d509960a77b36f47179",
+  "host": "MacBook-Pro",
+  "at": "2026-11-18T00:14:04Z"
  }
 }
