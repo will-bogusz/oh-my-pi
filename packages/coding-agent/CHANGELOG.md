@@ -75,6 +75,7 @@
 - Fixed `computer` on Windows passing off a fully covered window's screenshot and `ax()` tree as current: for Chrome, Edge and Electron apps, which can stop drawing while covered, both now say the window appeared covered and may be stale ([#19849](https://github.com/can1357/oh-my-pi/pull/19849) by [@will-bogusz](https://github.com/will-bogusz))
 - Entering `/goal` on Anthropic no longer re-writes the cached system prompt and transcript ([#19826](https://github.com/can1357/oh-my-pi/issues/19826))
 - Fixed isolated `task` subagents starting with no git work tree when the session cwd is a bare-repository container (`.git` with `core.bare=true`); isolation now refuses before spawning and names the repository's work trees to start from ([#19791](https://github.com/can1357/oh-my-pi/issues/19791))
+- Fixed a snapcompact archive keeping the frame shape of the model that compacted it after a model switch: a model that reads another shape best (a Gemini model after Claude) now gets the archive re-rendered in its own shape, and switching back sends the original frames ([#19620](https://github.com/can1357/oh-my-pi/pull/19620) by [@will-bogusz](https://github.com/will-bogusz))
 
 ## [19.0.1] - 2026-11-19
 
@@ -180,10 +181,6 @@
 - Fixed MCP OAuth reauthentication errors to expose registration endpoints, status details, and remedies, and fixed auth-broker shutdown so refreshed tokens are saved safely.
 - Fixed Spotlight retry and account handling, including waitlisted accounts, rate limits, outages, and request identification.
 - Fixed cross-platform shell and desktop behavior, including macOS startup and redraw performance, Windows file operations and application lookup, speech output, and desktop opening.
-
-### Fixed
-
-- Fixed a snapcompact archive keeping the frame shape of the model that compacted it after a model switch: a model that reads another shape best (a Gemini model after Claude) now gets the archive re-rendered in its own shape, and switching back sends the original frames
 
 ## [18.22.2] - 2026-11-18
 
