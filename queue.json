@@ -98520,7 +98520,7 @@
    "area": "auth",
    "priority": "P2",
    "needs": [],
-   "base": "baf60290fde5e9eea4edb30bff07695877682ba9",
+   "base": "e1ae2cc998efd1ca151b46ebefc0e0dab6c23c63",
    "body": "bodies/account-switch-reason.md",
    "state": "queued",
    "pr": null,
@@ -98528,7 +98528,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/account-switch-reason",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:19:21Z",
-   "updated": "2026-11-18T02:20:04Z",
+   "updated": "2026-11-18T02:23:46Z",
    "note": "Will, 2026-11-17: go-ahead to open",
    "kind": "proposal",
    "built": [
@@ -98707,7 +98707,8 @@
      "at": "2026-11-18T02:19:59Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "advanced": "2026-11-18T02:23:46Z"
   },
   {
    "id": "reset-consent-per-account",
