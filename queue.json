@@ -115840,8 +115840,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-18T21:17:57.188000Z",
-  "host": "goliath",
+  "at": "2026-11-18T21:32:59.114484Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -116417,9 +116417,9 @@
     "title": "fix(browser): attach only the relay tabs omp opened or borrowed",
     "action": "wait",
     "reasons": [
-     "conflicts with #19542 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with #19633 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with main in crates/natives/src/desktop/macos/capture.rs, crates/natives/src/desktop/macos/roster.rs, crates/natives/src/desktop/roster.rs, packages/natives/native/desktop.d.ts, packages/natives/native/desktop.js, packages/natives/native/index.d.ts"
+     "conflicts with #19542 in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #19633 in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with main in packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-daemon.test.ts"
     ],
     "note": "",
     "over": [],
@@ -116442,10 +116442,9 @@
     "action": "wait",
     "reasons": [
      "needs r2/relay-own-only (queued)",
-     "conflicts with #19542 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with #19633 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "its need r2/relay-own-only conflicts with main in crates/natives/src/desktop/macos/roster.rs, crates/natives/src/desktop/roster.rs, docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/native-windows.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-native-windows.test.ts, packages/coding-agent/test/tools/browser-relay-daemon.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts, packages/natives/native/desktop.js",
-     "conflicts with main in packages/browser-relay/extension/background.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt"
+     "conflicts with #19542 in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #19633 in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "its need r2/relay-own-only conflicts with main in packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-daemon.test.ts"
     ],
     "note": "",
     "over": [],
@@ -116470,23 +116469,18 @@
     "action": "wait",
     "reasons": [
      "needs r2/relay-popup-owned (queued), r2/page-waiting (queued)",
-     "conflicts with #19542 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts",
-     "conflicts with #19623 in packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with #19626 in packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with #19633 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts",
-     "conflicts with #19701 in packages/coding-agent/src/session/agent-session.ts",
-     "its need r2/relay-popup-owned conflicts with main in crates/natives/src/desktop/macos/roster.rs, crates/natives/src/desktop/roster.rs, docs/tools/browser.md, packages/browser-relay/extension/background.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/native-windows.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-native-windows.test.ts, packages/coding-agent/test/tools/browser-relay-daemon.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts, packages/natives/native/desktop.js",
-     "its need r2/page-waiting conflicts with main in crates/natives/src/desktop/macos/roster.rs, crates/natives/src/desktop/roster.rs, docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/dialogs.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/native-windows.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-native-windows.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts, packages/natives/native/desktop.js"
+     "conflicts with #19542 in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #19633 in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "its need r2/relay-popup-owned conflicts with main in packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-daemon.test.ts",
+     "its need r2/page-waiting conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/dialogs.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
+     "conflicts with main in packages/coding-agent/src/tools/browser.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
      "#19542",
-     "#19623",
-     "#19626",
-     "#19633",
-     "#19701"
+     "#19633"
     ],
     "needs": [
      "r2/relay-popup-owned",
@@ -116633,18 +116627,12 @@
     "title": "docs(browser): teach acting and looking in one Eval cell without sleeps",
     "action": "wait",
     "reasons": [
-     "needs #19633 (open)",
-     "conflicts with #19542 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-observe.test.ts",
-     "conflicts with #19633 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-observe.test.ts",
-     "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts"
+     "needs #19633 (open)"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#19542",
-     "#19633"
-    ],
+    "blocked_by": [],
     "needs": [
      "settle-reads"
     ],
@@ -116663,7 +116651,9 @@
      "held: Main, 2026-11-18: needs an independent review and a VM row before it can open; no work on it now",
      "needs #19702 (open)",
      "conflicts with #19195 in docs/computer-use.md",
+     "conflicts with #19504 in docs/computer-use.md",
      "conflicts with #19702 in docs/computer-use.md",
+     "conflicts with #19531 in docs/computer-use.md",
      "conflicts with main in crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/macos/input.rs, docs/computer-use.md"
     ],
     "note": "",
@@ -116671,7 +116661,9 @@
     "paired": [],
     "blocked_by": [
      "#19195",
-     "#19702"
+     "#19504",
+     "#19702",
+     "#19531"
     ],
     "needs": [
      "macos-keys-no-press"
@@ -116951,10 +116943,10 @@
     "action": "wait",
     "reasons": [
      "needs act-look-prompt (queued)",
-     "conflicts with #19542 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts, packages/coding-agent/test/tools/browser-observe.test.ts, packages/coding-agent/test/tools/browser-tern-tab.test.ts",
-     "conflicts with #19633 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-observe.test.ts",
-     "its need act-look-prompt conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/network.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-observe.test.ts",
-     "conflicts with main in packages/coding-agent/src/tools/browser/tern/tern-tab.ts, packages/coding-agent/test/tools/browser-tern-tab.test.ts"
+     "conflicts with #19542 in packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts",
+     "conflicts with #19633 in packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-observe.test.ts",
+     "its need act-look-prompt conflicts with main in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with main in packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
     ],
     "note": "",
     "over": [],
@@ -116979,10 +116971,10 @@
     "action": "wait",
     "reasons": [
      "needs r2/relay-own-only (queued)",
-     "conflicts with #19542 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts",
-     "conflicts with #19633 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts",
-     "its need r2/relay-own-only conflicts with main in crates/natives/src/desktop/macos/roster.rs, crates/natives/src/desktop/roster.rs, docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/native-windows.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-native-windows.test.ts, packages/coding-agent/test/tools/browser-relay-daemon.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts, packages/natives/native/desktop.js",
-     "conflicts with main in packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/dialogs.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts"
+     "conflicts with #19542 in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #19633 in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "its need r2/relay-own-only conflicts with main in packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-daemon.test.ts",
+     "conflicts with main in packages/coding-agent/src/tools/browser/dialogs.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/interactions.ts"
     ],
     "note": "",
     "over": [],
@@ -117063,10 +117055,8 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "wait",
-    "reasons": [
-     "conflicts with main in (branch missing on the fork)"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
