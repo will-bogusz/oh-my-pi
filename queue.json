@@ -102908,6 +102908,26 @@
     }
    ],
    "readied": "2026-11-18T17:59:49Z"
+  },
+  {
+   "id": "macos-keys-no-press-children-read",
+   "branch": "will/macos-keys-no-press-children-read",
+   "title": "perf(natives): prove a macOS key window draws its own content without reading all its children",
+   "area": "computer",
+   "priority": "P2",
+   "needs": [
+    "macos-keys-no-press"
+   ],
+   "base": "aca318e3666eb59c5d5f046c60c1de5014121ba0",
+   "body": null,
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": null,
+   "host": "MacBook-Pro",
+   "added": "2026-11-18T18:02:46Z",
+   "updated": "2026-11-18T18:02:46Z",
+   "note": ""
   }
  ],
  "watch": {

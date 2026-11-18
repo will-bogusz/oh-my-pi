@@ -4,7 +4,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-18
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-18 17:57Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 3, conflict-held 18, stacked 16, held 7, parked 1, open PRs 18; merged 396, closed 44
+**Counts:** openable now 3, conflict-held 18, stacked 16, held 7, parked 1, open PRs 18, queued since the last plan 1; merged 396, closed 44
 
 ## Openable now (3)
 
@@ -98,3 +98,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-18
 | [#19615](https://github.com/can1357/oh-my-pi/pull/19615) | wayland-still-capture | fix(natives): keep the Wayland ScreenCast stream open between screenshots on Hyprland and wlroots | natives | P2 | 16h | keep; accepted pair with #19616: Main, 2026-11-18: no conflict since #19615 376a1b8be12 moved the kept-stream consts to wayland/capture/share.rs (git merge-tree clean); the merged tree built and its wayland tests passed 57/57 on goliath (ShareScope) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-still-capture) |
 | [#19620](https://github.com/can1357/oh-my-pi/pull/19620) | snapcompact-rerender-on-switch | fix(snapcompact,coding-agent): re-render a snapcompact archive in the frame shape of the model reading it | snapcompact | P2 | 15h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-rerender-on-switch) |
 | [#19696](https://github.com/can1357/oh-my-pi/pull/19696) | export-viewer-regen | fix(coding-agent): regenerated the stale export viewer metadata | other | P0 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/export-viewer-regen) |
+
+## Queued since the last plan (1)
+
+| id | title | area | priority | age | branch |
+|---|---|---|---|---|---|
+| macos-keys-no-press-children-read | perf(natives): prove a macOS key window draws its own content without reading all its children | computer | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-keys-no-press-children-read) |
