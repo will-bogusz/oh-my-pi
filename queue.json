@@ -97010,7 +97010,22 @@
     }
    ],
    "opened": "2026-11-18T00:18:40Z",
-   "readied": "2026-11-18T00:19:27Z"
+   "readied": "2026-11-18T00:19:27Z",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-18T00:35:15Z",
+     "reason": "replaced by the modelId predicate in this round's fix",
+     "old": "8c3bea2f987a6cd01f202fc1b3d97ae95a09f52b",
+     "new": "d6f211860c282e91687d5ec665486490279fe0f6",
+     "dropped": {
+      "packages/coding-agent/src/cli/usage-cli.ts": [
+       "\t// A `sharedGroup` row is one subpool's quota, not an account-wide window,",
+       "\t// and a provider that marks no account-wide window keeps every row.",
+       "\tconst accountWide = reported.filter(limit => limit.scope.shared === true && limit.scope.sharedGroup === undefined);"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "fable-shared-wall-block",
