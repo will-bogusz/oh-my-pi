@@ -100365,7 +100365,7 @@
    "area": "other",
    "priority": "P1",
    "needs": [],
-   "base": "e1ae2cc998efd1ca151b46ebefc0e0dab6c23c63",
+   "base": "2cdc756f93122a4da1e75100099eebcc0a22b451",
    "body": "bodies/image-eviction-notice.md",
    "state": "open",
    "pr": 19611,
@@ -100373,7 +100373,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/image-eviction-notice",
    "host": "MacBook-Pro",
    "added": "2026-11-17T20:57:09Z",
-   "updated": "2026-11-18T01:26:38Z",
+   "updated": "2026-11-18T17:52:22Z",
    "note": "Main for Will, 2026-11-17: P2 estimate, images silently dropped from model context on every provider",
    "built": [
     {
@@ -100451,7 +100451,7 @@
    ],
    "opened": "2026-11-18T00:45:54Z",
    "readied": "2026-11-18T00:46:28Z",
-   "advanced": "2026-11-18T01:26:38Z",
+   "advanced": "2026-11-18T17:52:22Z",
    "tests_over_override": {
     "reason": "LaneImageDropNotice, 2026-11-18: four distinct branches (archive run grouping; notice bytes charged against the body-limit room; a grown notice charged once; count-clamp notice extended by the byte clamp), the last two asked for by roboomp; each fails with its branch removed",
     "at": "2026-11-18T01:26:31Z"
