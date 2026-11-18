@@ -98942,13 +98942,13 @@
    "needs": [],
    "base": "e1ae2cc998efd1ca151b46ebefc0e0dab6c23c63",
    "body": "bodies/snapcompact-rerender-on-switch.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19620,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-rerender-on-switch",
    "host": "MacBook-Pro",
    "added": "2026-11-18T00:36:24Z",
-   "updated": "2026-11-18T01:58:08Z",
+   "updated": "2026-11-18T02:06:13Z",
    "note": "",
    "advanced": "2026-11-18T01:34:36Z",
    "built": [
@@ -99072,7 +99072,8 @@
      "host": "MacBook-Pro",
      "tree": "4cc6b7d9db959f93f46c319bce3e4460daeb9fe6"
     }
-   ]
+   ],
+   "opened": "2026-11-18T02:06:13Z"
   },
   {
    "id": "snapcompact-shape-kdl",
