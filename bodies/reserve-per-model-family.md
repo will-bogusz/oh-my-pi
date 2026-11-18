@@ -20,7 +20,7 @@ auth:
 | Fable request | served here (25% > 2%) | in reserve: ranks after siblings outside theirs, a warm pin moves to one |
 | Opus request (not metered by the Fable row) | served here | served here |
 | `retry.usageAwareFallback` health for Fable | healthy | reserve |
-| `omp usage` policy line | `reserve 2% (override) · eligible` | `reserve 2% (override) · anthropic:7d:fable reserve 30% · inside reserve` |
+| `omp usage` policy line | `reserve 2% (override) · eligible · 40.0% left` | `reserve 2% (override) · anthropic:7d:fable reserve 30% · eligible · 40.0% left · Claude 7 Day (Fable) inside reserve` |
 
 Without the map nothing changes: an account is in reserve when any limit that applies to the request is inside its own reserve, which with one reserve for all limits is `main`'s test on the most-used limit. Not in this PR: a hard stop (a reserve still only ranks an account last) and per-limit `reclaimAbovePct`.
 
@@ -32,6 +32,7 @@ Decisions:
 - **Keyed by the limit `id` from usage reports**, not a model family or a parsed `window:tier` string. Every provider's reports already carry ids (`anthropic:7d:fable`, Copilot's per-model rows, Antigravity buckets), so no model list lives in TS, and the key a user writes is the one `omp usage --json` prints. An id that never appears is inert.
 - **A new optional key beside `reservePct`**, not a number-or-map `reservePct`, so readers of `reservePct` (`omp usage --json`, scripts that write policies) keep a number.
 - **Reclaim skips an account inside its reserve.** `reclaimAbovePct` is still validated against the scalar reserve, so a limit's reserve can sit above it; without the guard, a session on a sibling that is itself in reserve was pulled onto the preferred account while that account was inside its Fable reserve. On `main` the guard changes nothing, since reclaim already had to be above the only reserve.
+- **`omp usage` keeps the account's state on its shared windows** (#19606). A Fable reserve ranks only Fable requests, so it does not turn the account `inside reserve`; the Fable row is named beside the state, as #19606 names a spent one, and JSON lists it in `scopedInsideReserve`. A map entry for a shared window (`anthropic:7d`) does decide the state.
 
 Related: #14074 and #19323 shrink a reserve as a window's reset nears; this sets which reserve a limit starts from, so either composes with it.
 
@@ -56,4 +57,5 @@ Related: #14074 and #19323 shrink a reserve as a window's reset nears; this sets
 - [ ] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
 
