@@ -18,7 +18,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-18
 | devin-image-budgets | fix(catalog): carry Devin's measured image limits | catalog | P2 | 3h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-image-budgets) |
 | image-eviction-notice | fix(coding-agent): mark images the provider image limit evicts in place | other | P2 | 3h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/image-eviction-notice) |
 | reset-spend-log | feat(coding-agent): log every saved-reset spend attempt at info | coding-agent | P2 | 3h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-spend-log) |
-| account-switch-reason | feat(ai,coding-agent): record why a session's OAuth account switched | auth | P2 | 2h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/account-switch-reason) |
+| account-switch-reason | feat(ai,coding-agent): record why a session's OAuth account switched | auth | P2 | 3h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/account-switch-reason) |
 | wayland-still-capture | fix(natives): keep the Wayland ScreenCast stream open between screenshots | natives | P1 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-still-capture) |
 
 ## Conflict-held (19)
