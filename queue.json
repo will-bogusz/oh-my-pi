@@ -109858,12 +109858,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-18T00:09:52.586811Z",
+  "at": "2026-11-18T00:36:41.045971Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 3,
-   "left": 5
+   "used": 2,
+   "left": 6
   },
   "rows": [
    {
@@ -109882,23 +109882,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-02T03:27:31Z"
-   },
-   {
-    "id": "computer-run-failure-output",
-    "label": "#19100",
-    "number": 19100,
-    "state": "open",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(computer): retain output and screenshots when a run fails",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-12T23:56:35Z"
    },
    {
     "id": "macos-drag-confirm",
@@ -110179,6 +110162,23 @@
     "created": "2026-11-17T23:13:21Z"
    },
    {
+    "id": "usage-state-per-model",
+    "label": "#19606",
+    "number": 19606,
+    "state": "open",
+    "area": "broker",
+    "priority": "P1",
+    "title": "fix(coding-agent): judge omp usage policy state by account-wide windows",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-18T00:18:38Z"
+   },
+   {
     "id": "x11-xtest-release",
     "label": "#19531",
     "number": 19531,
@@ -110338,7 +110338,6 @@
     "title": "fix(computer): say window and element filters take text when given a RegExp",
     "action": "wait",
     "reasons": [
-     "conflicts with #19100 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #19195 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/computer/worker.ts"
     ],
@@ -110346,7 +110345,6 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#19100",
      "#19195"
     ],
     "needs": [],
@@ -110362,7 +110360,6 @@
     "title": "fix(computer): wait for the app to finish reacting before the next read or input",
     "action": "wait",
     "reasons": [
-     "conflicts with #19100 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #19195 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #19596 in docs/computer-use.md",
      "conflicts with #19504 in docs/computer-use.md",
@@ -110375,7 +110372,6 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#19100",
      "#19195",
      "#19596",
      "#19504",
@@ -110385,6 +110381,40 @@
     ],
     "needs": [],
     "created": "2026-10-19T07:26:45Z"
+   },
+   {
+    "id": "devin-image-budgets",
+    "label": "devin-image-budgets",
+    "number": null,
+    "state": "queued",
+    "area": "catalog",
+    "priority": "P2",
+    "title": "fix(catalog): carry Devin's measured image limits",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-17T20:52:57Z"
+   },
+   {
+    "id": "image-eviction-notice",
+    "label": "image-eviction-notice",
+    "number": null,
+    "state": "queued",
+    "area": "other",
+    "priority": "P2",
+    "title": "fix(coding-agent): mark images the provider image limit evicts in place",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-17T20:57:09Z"
    },
    {
     "id": "macos-ax-cancel-before-send",
@@ -110609,23 +110639,6 @@
     "created": "2026-11-11T07:04:56Z"
    },
    {
-    "id": "usage-state-per-model",
-    "label": "usage-state-per-model",
-    "number": null,
-    "state": "queued",
-    "area": "broker",
-    "priority": "P2",
-    "title": "fix(coding-agent): judge omp usage policy state by account-wide windows",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-17T20:59:31Z"
-   },
-   {
     "id": "wayland-display-count",
     "label": "wayland-display-count",
     "number": null,
@@ -110652,7 +110665,7 @@
     "title": "fix(natives): refuse every Wayland input call at once when no input route exists",
     "action": "open",
     "reasons": [],
-    "note": "tests-over: OmarchyFixes, 2026-11-18: one test going through the 9 refused input requests with control held elsewhere; each request is an arm no other test reaches",
+    "note": "tests-over: OmarchyFixes, 2026-11-18: one test through the 9 refused input requests with control held elsewhere, one for the no-backend side; each reaches a branch no other test does",
     "over": [],
     "paired": [],
     "blocked_by": [],
@@ -110842,7 +110855,6 @@
     "action": "held",
     "reasons": [
      "held: Main, 2026-11-11: stays held until #18786 merges with the typed-message guide channel (design check replace); then one property on the computer prelude, drop the wrap variant, re-run its blind legs",
-     "conflicts with #19100 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19195 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with main in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/sdk-computer-prelude-toggle.test.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -110850,7 +110862,6 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#19100",
      "#19195"
     ],
     "needs": [],
@@ -110868,7 +110879,6 @@
     "reasons": [
      "held: Main for InputDiffFix, 2026-11-12: held; the fix round failed two Opus acceptance lines fixed beforehand (Finder steps 1.47x, Automator tokens 1.26x vs main); code branch stays local and unpushed; see note",
      "needs computer-ui-quiet (queued)",
-     "conflicts with #19100 in docs/tools/computer.md, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19195 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19596 in docs/computer-use.md",
      "conflicts with #19504 in docs/computer-use.md",
@@ -110883,7 +110893,6 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#19100",
      "#19195",
      "#19596",
      "#19504",
@@ -110908,7 +110917,6 @@
     "action": "wait",
     "reasons": [
      "needs computer-ui-quiet (queued)",
-     "conflicts with #19100 in docs/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19195 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19596 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19516 in crates/pi-natives/src/desktop/backend.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/prompts/tools/computer.md",
@@ -110924,7 +110932,6 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#19100",
      "#19195",
      "#19596",
      "#19516",
@@ -110971,7 +110978,6 @@
     "action": "held",
     "reasons": [
      "held: Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check | Main 2026-11-12: before it opens, the waiting-key-chord case with the cursor actually drawn (20 trials at a 20 s deadline; CursorDemo's cursor-on arm never drew one, and an early run on the combined tree returned 'Cancelled, input may be partial' 11/11, unexplained), on the polished branch will/desktop-cursor-polish.",
-     "conflicts with #19100 in docs/tools/computer.md",
      "conflicts with #19195 in crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/types.rs, packages/natives/native/index.d.ts",
      "conflicts with #19596 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19516 in crates/pi-natives/src/desktop/backend.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
@@ -110986,7 +110992,6 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#19100",
      "#19195",
      "#19596",
      "#19516",
@@ -111107,13 +111112,13 @@
     "title": "feat(ai): reserve per usage limit in account policies",
     "action": "wait",
     "reasons": [
-     "conflicts with usage-state-per-model in packages/coding-agent/src/cli/usage-cli.ts"
+     "conflicts with #19606 in packages/coding-agent/src/cli/usage-cli.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "usage-state-per-model"
+     "#19606"
     ],
     "needs": [],
     "created": "2026-11-17T21:13:06Z"
@@ -111128,13 +111133,13 @@
     "title": "feat(ai,coding-agent): let an account policy decide its own saved-reset spending",
     "action": "wait",
     "reasons": [
-     "conflicts with usage-state-per-model in packages/coding-agent/src/cli/usage-cli.ts"
+     "conflicts with #19606 in packages/coding-agent/src/cli/usage-cli.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "usage-state-per-model"
+     "#19606"
     ],
     "needs": [],
     "created": "2026-11-17T21:24:43Z"
@@ -111167,7 +111172,6 @@
     "action": "held",
     "reasons": [
      "held: Main, 2026-11-12: proposal; opens only after entry A merges and Will has seen the body",
-     "conflicts with #19100 in docs/tools/computer.md",
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with wayland-display-count in crates/pi-natives/src/desktop/win32/mod.rs, docs/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/win32/input.rs, crates/pi-natives/src/desktop/win32/mod.rs"
@@ -111176,29 +111180,11 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#19100",
      "#19531",
      "wayland-display-count"
     ],
     "needs": [],
     "created": "2026-11-12T04:40:13Z"
-   },
-   {
-    "id": "devin-image-budgets",
-    "label": "devin-image-budgets",
-    "number": null,
-    "state": "queued",
-    "area": "catalog",
-    "priority": null,
-    "title": "fix(catalog): carry Devin's measured image limits",
-    "action": "next-hour",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-17T20:52:57Z"
    },
    {
     "id": "encoded-prefix-count",
@@ -111231,13 +111217,13 @@
     "created": "2026-11-03T01:54:17Z"
    },
    {
-    "id": "image-eviction-notice",
-    "label": "image-eviction-notice",
+    "id": "snapcompact-rerender-on-switch",
+    "label": "snapcompact-rerender-on-switch",
     "number": null,
     "state": "queued",
-    "area": "other",
+    "area": "snapcompact",
     "priority": null,
-    "title": "fix(coding-agent): mark images the provider image limit evicts in place",
+    "title": "fix(snapcompact,coding-agent): re-render a snapcompact archive in the frame shape of the model reading it",
     "action": "next-hour",
     "reasons": [],
     "note": "",
@@ -111245,7 +111231,7 @@
     "paired": [],
     "blocked_by": [],
     "needs": [],
-    "created": "2026-11-17T20:57:09Z"
+    "created": "2026-11-18T00:36:24Z"
    },
    {
     "id": "stats-live-appends",
@@ -111274,12 +111260,15 @@
     "title": "fix(coding-agent): price a text-only fallback's archive text, not the failed request's frames, in the fit check",
     "action": "wait",
     "reasons": [
+     "conflicts with snapcompact-rerender-on-switch in packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with main in packages/coding-agent/src/session/session-maintenance.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "snapcompact-rerender-on-switch"
+    ],
     "needs": [],
     "created": "2026-10-31T21:07:28Z"
    },
@@ -111293,12 +111282,15 @@
     "title": "refactor(agent,ai): count the anchored delta from the reader's transformed wire messages",
     "action": "wait",
     "reasons": [
+     "conflicts with snapcompact-rerender-on-switch in packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with main in packages/agent/src/tokenizer.ts, packages/agent/test/tokenizer.test.ts, packages/ai/src/providers/factory-droid.ts, packages/ai/src/providers/transform-messages.ts, packages/coding-agent/src/session/session-maintenance.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "snapcompact-rerender-on-switch"
+    ],
     "needs": [],
     "created": "2026-11-03T01:33:54Z"
    },
@@ -111314,6 +111306,7 @@
     "reasons": [
      "conflicts with account-switch-reason in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with reset-spend-log in packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with snapcompact-rerender-on-switch in packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with main in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/tui/src/chat/compaction-summary-message.ts"
     ],
     "note": "",
@@ -111321,7 +111314,8 @@
     "paired": [],
     "blocked_by": [
      "account-switch-reason",
-     "reset-spend-log"
+     "reset-spend-log",
+     "snapcompact-rerender-on-switch"
     ],
     "needs": [],
     "created": "2026-10-20T23:41:41Z"
@@ -111416,12 +111410,15 @@
     "title": "feat(catalog,coding-agent): token-count framing policy in KDL",
     "action": "wait",
     "reasons": [
+     "conflicts with snapcompact-rerender-on-switch in packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with main in packages/catalog/src/compat/rules/classes/anthropic.kdl, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/session/session-stats.ts, packages/coding-agent/test/context-fits-model.test.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "snapcompact-rerender-on-switch"
+    ],
     "needs": [],
     "created": "2026-11-03T01:24:37Z"
    }
