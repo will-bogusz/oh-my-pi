@@ -8,7 +8,7 @@ Snapcompact draws archived history into image frames. Gemini bills every frame a
 
 | Gemini 4 Carbon on | Before | Now |
 |---|---|---|
-| Devin, Factory Droid | `8on22-bw` at 2048px | `8on22-bw` at 1568px |
+| Devin (`gemini-4-carbon` and its raw effort uids `-low`, `-medium`, `-high`), Factory Droid (`gemini-4-carbon`) | `8on22-bw` at 2048px | `8on22-bw` at 1568px |
 | Google, Vertex, OpenRouter and every other host | `8on22-bw` at 2048px | unchanged |
 
 It is one rule in `classes/gemini.kdl`, inside the class-wide 2048px block.
@@ -37,7 +37,7 @@ Maintenance: a change in how Gemini bills or resamples images calls for re-runni
 
 ## Testing
 
-- `bun test packages/snapcompact/test/snapcompact.test.ts -t "Gemini 4 Carbon"`: renders one Carbon frame per host and decodes its PNG. Devin and Factory frames are 1568px wide in the 8x22 cell, Google's 2048px. With the rule removed it fails (`Expected: 1568, Received: 2048`).
+- `bun test packages/snapcompact/test/snapcompact.test.ts -t "Gemini 4 Carbon"`: renders one Carbon frame per host and decodes its PNG. Devin frames (logical id and the `-high` effort uid) and Factory frames are 1568px wide in the 8x22 cell, Google's 2048px. With the rule removed, or the effort uid dropped from it, it fails (`Expected: 1568, Received: 2048`).
 - `resolveShape()` on this branch: Carbon on Devin and Factory 1568px; Carbon on Google, Gemini 3.7 Flash on Devin and Factory, and Gemini 4 Argon on Factory 2048px.
 - `bun test packages/snapcompact/test/snapcompact.test.ts`: 122 pass.
 

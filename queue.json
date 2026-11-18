@@ -102745,8 +102745,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-carbon-1568",
    "host": "MacBook-Pro",
    "added": "2026-11-18T04:51:10Z",
-   "updated": "2026-11-18T04:51:10Z",
-   "note": ""
+   "updated": "2026-11-18T17:49:38Z",
+   "note": "LaneReaderCarriers, 2026-11-18: one-push fix after review: Devin's Carbon effort uids (-low/-medium/-high) added to the 1568 rule after Brit's b76734aac30 showed Devin serves them; test row fails without the uid. Factory carries only gemini-4-carbon."
   }
  ],
  "watch": {
