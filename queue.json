@@ -97632,7 +97632,7 @@
    "area": "other",
    "priority": "P0",
    "needs": [],
-   "base": "7a53f0a2d36e160f9255d80626ed757f41280b76",
+   "base": "e1ae2cc998efd1ca151b46ebefc0e0dab6c23c63",
    "body": "bodies/logger-console-level.md",
    "state": "open",
    "pr": 19605,
@@ -97640,7 +97640,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/logger-console-level",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:03:30Z",
-   "updated": "2026-11-18T00:34:08Z",
+   "updated": "2026-11-18T01:14:36Z",
    "note": "Will, 2026-11-17: go-ahead to open",
    "opened": "2026-11-17T23:41:54Z",
    "readied": "2026-11-17T23:42:20Z",
@@ -97659,7 +97659,7 @@
      }
     }
    ],
-   "advanced": "2026-11-17T23:54:59Z"
+   "advanced": "2026-11-18T01:14:36Z"
   },
   {
    "id": "broker-version-skew",
