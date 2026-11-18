@@ -104606,7 +104606,7 @@
    "area": "tui",
    "priority": "P1",
    "needs": [],
-   "base": "5feafa1fd4dca059a6e35bb01cf20a22ceb15c36",
+   "base": "2421bdb99f84fbc74454eda374747afcbf9c0f4d",
    "body": "bodies/loop-sampler-stop.md",
    "state": "open",
    "pr": 19703,
@@ -104614,7 +104614,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/loop-sampler-stop",
    "host": "MacBook-Pro",
    "added": "2026-11-18T18:13:26Z",
-   "updated": "2026-11-18T18:54:17Z",
+   "updated": "2026-11-18T22:48:52Z",
    "note": "SamplerStop, 2026-11-18: P1 estimate. Production effect is small: after TUI.stop (external editor, session end) the profiler kept sampling but a 2 s timer drained it, so no lasting retention; the real harm is bun test, where 3 Composer-starting files break parked-subagent GC tests later in the process. Root-cause fix plus regression test; profile() pause trick and debug-report limit are what a maintainer may question.",
    "opened": "2026-11-18T18:49:18Z",
    "readied": "2026-11-18T18:49:44Z",
@@ -104646,7 +104646,7 @@
      }
     }
    ],
-   "advanced": "2026-11-18T18:54:17Z"
+   "advanced": "2026-11-18T22:48:52Z"
   },
   {
    "id": "oxfmt-main-drift",
