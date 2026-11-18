@@ -9,6 +9,7 @@ When my agent typed a letter on a closed dropdown in a Mac app and then read the
 | `el.press("r")` on a focused native pop-up | returns about 0.5 s after the key | unchanged |
 | `ax()`, `find`, `value()` of that pop-up right after | the option from before the key | waits until the option changes (about 0.5 s later), at most 1.5 s after the last key |
 | a letter that matches nothing, or the current option | read at once | read about 1.0 s later, unchanged, no error |
+| Limit: a pop-up with no readable value before the keys | read at once | waits the full 1.5 s after the last key (about 1.0 s after the call returns): with nothing read before, no change can end it early |
 | `el.click({menu: ["Zulu"]})` on that pop-up 100 ms after the letter's call | reports ok, but the letter's late choice replaces Zulu (20 of 20) | waits for the letter's choice before taking input, then chooses Zulu (20 of 20) |
 | Chrome and Electron `<select>`, other keys, reads of other elements and windows, typing into text fields | | unchanged |
 
@@ -109,11 +110,13 @@ At 600 ms both end on Zulu 20 of 20 in the same time. Rerun against main: read 2
 | picker | Medium | 5 | 5 | [1] | 0 | 0 of 100 | 0 | 5/5 | 658 |
 | picker | Zulu | 5 | 5 | [1] | 0 | 0 of 100 | 0 | 5/5 | 624 |
 
-Unit tests: `cargo test -p pi-natives --lib -- type_ahead element_action refused_first` (waits with the lease free and the front app pinned; no wait under the lease; a refused first key marks nothing; web pop-ups unwatched).
+Unit tests: `cargo test -p omp-natives --lib -- type_ahead element_action refused_first` (waits with the lease free and the front app pinned; no wait under the lease; a refused first key marks nothing; web pop-ups unwatched).
 
 The prompt line only describes what a letter does and points to `menu:`. In a 60-call sample (Haiku 5.5, GPT-6.1 Sol), an earlier wording advising typing moved Sol from the menu (13 of 15 on main) to typing (14 of 15), 4 of 15 wrong ("US Legal" typed as `USLegal`) against 0 on main.
 
 Limits: Chrome and Electron in front can return about 20 ms after the key, and a read then was stale 1 to 2 of 10 on the base, an accessibility lag this change leaves alone. In an `ax()` of the whole window, elements read before the pop-up are read before its wait. An element click, `press()`, `perform()` or `setValue` on the pop-up within 1.5 s of the letter waits for its choice before taking the input lease: about 0.4 s more 100 ms after the letter's call, with the lease held for the click alone as on main.
+
+
 
 
 

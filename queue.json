@@ -97106,7 +97106,7 @@
    "worktree": "/home/will/.omp/main-wt/oh-my-pi/key-read-settled",
    "host": "goliath",
    "added": "2026-11-14T10:14:31Z",
-   "updated": "2026-11-18T16:20:26Z",
+   "updated": "2026-11-18T16:20:48Z",
    "note": "Main, 2026-11-17: review stamp at d4e02a0 stands; e3e11216dfa is a text-only amend whose text Main's model-sample rerun checked (Haiku/Sol 0 wrong, ~/tmp/oh-my-pi/KeyReadSample/)",
    "advanced": "2026-11-18T16:20:26Z",
    "rebases_after": [
