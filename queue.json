@@ -101041,8 +101041,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/logger-console-level",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:03:30Z",
-   "updated": "2026-11-18T17:15:00Z",
-   "note": "Will, 2026-11-17: go-ahead to open",
+   "updated": "2026-11-18T17:50:36Z",
+   "note": "Will, 2026-11-17: go-ahead to open\nPost-merge (QueueThirtyFour, 2026-11-18 learn): Brit 727b7f828dd scrubbed OMP_LOG_LEVEL in #19599's serve-shutdown test, which this PR's console gating could silence. Not named by us or a review.",
    "opened": "2026-11-17T23:41:54Z",
    "readied": "2026-11-17T23:42:20Z",
    "line_loss_overrides": [
