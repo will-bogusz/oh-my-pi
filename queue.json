@@ -114482,7 +114482,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-18T18:06:00.317382Z",
+  "at": "2026-11-18T18:12:48.476574Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -115615,14 +115615,14 @@
     "title": "feat(ai,coding-agent): let an account policy decide its own saved-reset spending",
     "action": "wait",
     "reasons": [
-     "conflicts with #19626 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with reserve-per-model-family in docs/auth-broker-gateway.md, packages/ai/src/auth-broker/discover.ts, packages/coding-agent/src/cli/usage-cli.ts"
     ],
-    "note": "",
+    "note": "accepted pair with #19626: Main, 2026-11-18: adjacent call-site edits in agent-session.ts #redeemConsentedResets and its three callers; #19626 adds a trigger argument, this adds a consent argument; the combined form passes both (provider, trigger, actions, coordinator, consent) and keeps this PR's per-action credentialResetModes",
     "over": [],
-    "paired": [],
+    "paired": [
+     "#19626"
+    ],
     "blocked_by": [
-     "#19626",
      "reserve-per-model-family"
     ],
     "needs": [],

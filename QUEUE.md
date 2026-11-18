@@ -1,9 +1,9 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-18 18:12Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-18 18:13Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-18 18:06Z on MacBook-Pro; groups below are from it, states from the manifest)
+**Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-18 18:12Z on MacBook-Pro; groups below are from it, states from the manifest)
 **Counts:** openable now 3, conflict-held 18, stacked 16, held 8, parked 1, open PRs 18; merged 396, closed 44
 
 ## Openable now (3)
@@ -12,7 +12,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-18
 |---|---|---|---|---|---|---|
 | stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 5d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 | factory-droid-1100-pin | feat(catalog): identify Factory Droid requests as droid 1.10.0 | factory-droid |  | 5d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-pin) |
-| reserve-per-model-family | feat(ai): reserve per usage limit in account policies | broker | P2 | 20h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reserve-per-model-family) |
+| reserve-per-model-family | feat(ai): reserve per usage limit in account policies | broker | P2 | 21h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reserve-per-model-family) |
 
 ## Conflict-held (18)
 
@@ -35,7 +35,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-18
 | macos-keys-no-press | fix(natives): send macOS background keys to the key window without a press | computer | P2 | 4d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-keys-no-press) |
 | macos-web-type-background | fix(natives): type into a background macOS web page field without a takeover | computer | P2 | 3d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19504](https://github.com/can1357/oh-my-pi/pull/19504), [#19531](https://github.com/can1357/oh-my-pi/pull/19531), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-web-type-background) |
 | deadline-ranking | feat(ai): rank an account priority by quota deadline | ai/auth | P2 | 20h | [#19623](https://github.com/can1357/oh-my-pi/pull/19623) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/deadline-ranking) |
-| reset-consent-per-account | feat(ai,coding-agent): let an account policy decide its own saved-reset spending | broker | P2 | 20h | [#19626](https://github.com/can1357/oh-my-pi/pull/19626), reserve-per-model-family | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-consent-per-account) |
+| reset-consent-per-account | feat(ai,coding-agent): let an account policy decide its own saved-reset spending | broker | P2 | 20h | reserve-per-model-family | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-consent-per-account) |
 
 ## Stacked (16)
 
