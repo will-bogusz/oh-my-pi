@@ -109952,7 +109952,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-18T00:36:41.045971Z",
+  "at": "2026-11-18T00:48:44.509882Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -110273,6 +110273,23 @@
     "created": "2026-11-18T00:18:38Z"
    },
    {
+    "id": "image-eviction-notice",
+    "label": "#19611",
+    "number": 19611,
+    "state": "open",
+    "area": "other",
+    "priority": "P1",
+    "title": "fix(coding-agent): mark images the provider image limit evicts in place",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-18T00:45:52Z"
+   },
+   {
     "id": "x11-xtest-release",
     "label": "#19531",
     "number": 19531,
@@ -110492,23 +110509,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-17T20:52:57Z"
-   },
-   {
-    "id": "image-eviction-notice",
-    "label": "image-eviction-notice",
-    "number": null,
-    "state": "queued",
-    "area": "other",
-    "priority": "P2",
-    "title": "fix(coding-agent): mark images the provider image limit evicts in place",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-17T20:57:09Z"
    },
    {
     "id": "macos-ax-cancel-before-send",
@@ -110733,6 +110733,44 @@
     "created": "2026-11-11T07:04:56Z"
    },
    {
+    "id": "snapcompact-rerender-on-switch",
+    "label": "snapcompact-rerender-on-switch",
+    "number": null,
+    "state": "queued",
+    "area": "snapcompact",
+    "priority": "P2",
+    "title": "fix(snapcompact,coding-agent): re-render a snapcompact archive in the frame shape of the model reading it",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-18T00:36:24Z"
+   },
+   {
+    "id": "snapcompact-shape-reader-identity",
+    "label": "snapcompact-shape-reader-identity",
+    "number": null,
+    "state": "queued",
+    "area": "snapcompact",
+    "priority": "P2",
+    "title": "fix(catalog): give snapcompact readers their lead model's frame shape",
+    "action": "wait",
+    "reasons": [
+     "needs snapcompact-shape-kdl (queued)"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [
+     "snapcompact-shape-kdl"
+    ],
+    "created": "2026-11-18T00:48:33Z"
+   },
+   {
     "id": "wayland-display-count",
     "label": "wayland-display-count",
     "number": null,
@@ -110873,6 +110911,23 @@
     "created": "2026-11-10T18:57:06Z"
    },
    {
+    "id": "snapcompact-shape-kdl",
+    "label": "snapcompact-shape-kdl",
+    "number": null,
+    "state": "queued",
+    "area": "snapcompact",
+    "priority": "P2",
+    "title": "refactor(catalog,snapcompact): move snapcompact frame shapes into catalog rules",
+    "action": "next-hour",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-18T00:47:39Z"
+   },
+   {
     "id": "account-switch-reason",
     "label": "account-switch-reason",
     "number": null,
@@ -110979,6 +111034,7 @@
      "conflicts with #19516 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #19532 in docs/computer-use.md",
      "conflicts with #19531 in docs/computer-use.md, docs/tools/computer.md",
+     "conflicts with snapcompact-rerender-on-switch in packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with wayland-display-count in docs/tools/computer.md",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/tools/computer.test.ts"
@@ -110993,6 +111049,7 @@
      "#19516",
      "#19532",
      "#19531",
+     "snapcompact-rerender-on-switch",
      "wayland-display-count"
     ],
     "needs": [
@@ -111128,6 +111185,7 @@
     "action": "held",
     "reasons": [
      "held: Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance",
+     "conflicts with snapcompact-rerender-on-switch in packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with account-switch-reason in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in docs/advisor-watchdog.md, docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-advisors.ts, packages/coding-agent/src/session/turn-recovery.ts, packages/coding-agent/test/agent-session-retry-fallback.test.ts"
     ],
@@ -111135,6 +111193,7 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "snapcompact-rerender-on-switch",
      "account-switch-reason"
     ],
     "needs": [],
@@ -111311,23 +111370,6 @@
     "created": "2026-11-03T01:54:17Z"
    },
    {
-    "id": "snapcompact-rerender-on-switch",
-    "label": "snapcompact-rerender-on-switch",
-    "number": null,
-    "state": "queued",
-    "area": "snapcompact",
-    "priority": null,
-    "title": "fix(snapcompact,coding-agent): re-render a snapcompact archive in the frame shape of the model reading it",
-    "action": "next-hour",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-18T00:36:24Z"
-   },
-   {
     "id": "stats-live-appends",
     "label": "stats-live-appends",
     "number": null,
@@ -111398,18 +111440,18 @@
     "title": "feat(coding-agent): record what triggered each compaction",
     "action": "wait",
     "reasons": [
+     "conflicts with snapcompact-rerender-on-switch in packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with account-switch-reason in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with reset-spend-log in packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with snapcompact-rerender-on-switch in packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with main in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/tui/src/chat/compaction-summary-message.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
+     "snapcompact-rerender-on-switch",
      "account-switch-reason",
-     "reset-spend-log",
-     "snapcompact-rerender-on-switch"
+     "reset-spend-log"
     ],
     "needs": [],
     "created": "2026-10-20T23:41:41Z"
@@ -111505,13 +111547,15 @@
     "action": "wait",
     "reasons": [
      "conflicts with snapcompact-rerender-on-switch in packages/coding-agent/src/session/session-maintenance.ts",
+     "conflicts with snapcompact-shape-kdl in packages/catalog/src/compat/rules/classes/anthropic.kdl, packages/catalog/src/compat/rules/classes/glm.kdl, packages/catalog/src/compat/rules/classes/kimi.kdl, packages/catalog/src/compat/rules/classes/openai.kdl",
      "conflicts with main in packages/catalog/src/compat/rules/classes/anthropic.kdl, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/session/session-stats.ts, packages/coding-agent/test/context-fits-model.test.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "snapcompact-rerender-on-switch"
+     "snapcompact-rerender-on-switch",
+     "snapcompact-shape-kdl"
     ],
     "needs": [],
     "created": "2026-11-03T01:24:37Z"
