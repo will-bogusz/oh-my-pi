@@ -102980,7 +102980,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/oxfmt-main-drift",
    "host": "MacBook-Pro",
    "added": "2026-11-18T18:15:43Z",
-   "updated": "2026-11-18T18:18:48Z",
+   "updated": "2026-11-18T18:19:10Z",
    "note": "",
    "built": [
     {
@@ -103074,7 +103074,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-11-18T18:18:48Z"
+   "opened": "2026-11-18T18:18:48Z",
+   "readied": "2026-11-18T18:19:10Z"
   }
  ],
  "watch": {
