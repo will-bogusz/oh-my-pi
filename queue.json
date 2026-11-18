@@ -98411,7 +98411,7 @@
    "area": "natives",
    "priority": "P2",
    "needs": [],
-   "base": "276169d5168bbbb8196ca090661296fb5a23721a",
+   "base": "e1ae2cc998efd1ca151b46ebefc0e0dab6c23c63",
    "body": "bodies/wayland-share-picker-deadline.md",
    "state": "queued",
    "pr": null,
@@ -98419,7 +98419,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-share-picker-deadline",
    "host": "MacBook-Pro",
    "added": "2026-11-17T22:04:45Z",
-   "updated": "2026-11-18T01:49:43Z",
+   "updated": "2026-11-18T01:50:02Z",
    "note": "",
    "built": [
     {
@@ -98509,7 +98509,8 @@
    ],
    "pair_reasons": {
     "19615": "Main, 2026-11-18: adjacent new consts in wayland/capture.rs; combined = both blocks"
-   }
+   },
+   "advanced": "2026-11-18T01:50:02Z"
   },
   {
    "id": "wayland-still-capture",
