@@ -1,12 +1,12 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-18 02:52Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-18 02:55Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-18 01:39Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 5, conflict-held 18, stacked 15, held 7, parked 1, open PRs 28; merged 382, closed 44
+**Counts:** openable now 4, conflict-held 18, stacked 15, held 7, parked 1, open PRs 29; merged 382, closed 44
 
-## Openable now (5)
+## Openable now (4)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
@@ -14,7 +14,6 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-18
 | stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 4d | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 | factory-droid-1100-pin | feat(catalog): identify Factory Droid requests as droid 1.10.0 | factory-droid |  | 4d | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-pin) |
 | wayland-input-refusal | fix(natives): refuse every Wayland input call at once when no input route exists | natives | P2 | 6h | open; tests-over: OmarchyFixes, 2026-11-18: one test through the 9 refused input requests with control held elsewhere, one for the no-backend side; each reaches a branch no other test does | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-input-refusal) |
-| reset-spend-log | feat(coding-agent): log every saved-reset spend attempt at info | coding-agent | P2 | 5h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-spend-log) |
 
 ## Conflict-held (18)
 
@@ -77,7 +76,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-18
 |---|---|---|---|---|---|---|---|---|
 | [#16611](https://github.com/can1357/oh-my-pi/pull/16611) | read-audio-transcripts | feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio | catalog | P2 | 7h | Will, 2026-11-17: parked as draft, not maintained for now; revisit later | not checked or kept fresh | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-audio-transcripts) |
 
-## Open PRs (28)
+## Open PRs (29)
 
 | PR | id | title | area | rank | open | plan | branch |
 |---|---|---|---|---|---|---|---|
@@ -89,16 +88,17 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-18
 | [#19519](https://github.com/can1357/oh-my-pi/pull/19519) | x11-keysym-remap | fix(natives): type characters outside the X11 keymap through temporary keycodes | computer | P1 | 22h | keep; accepted pair with #19531: Main, 2026-11-17: adjacent unions in x11/mod.rs (mod lines), input.rs use list, X11Input::new fields and foreground_keys_after (watch_releases() then Keymap::xtest); in send_xtest #19519's text_mapping.pressed(keycode) moves into xtest's restructured send_xtest at the same point (after the request is sent, before check(), key presses only), no new logic. Combined form: merge 7b0d2ff0b68, ~/tmp/oh-my-pi/queuethirty/xpair-combined.md | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-keysym-remap) |
 | [#19195](https://github.com/can1357/oh-my-pi/pull/19195) | macos-drag-confirm | fix(natives): stop macOS background drags reporting moves that did not happen | computer | P1 | 4d | keep; accepted pair with #19516: Main, 2026-11-17: adjacent thread_local statics in desktop/control.rs; combined = both statics (DRAG_NOTE then INPUT_HELD), then input_held() unchanged | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-drag-confirm) |
 | [#19532](https://github.com/can1357/oh-my-pi/pull/19532) | macos-window-order | fix(natives): put the user's key window back in front of a macOS target after background input and takeover | computer | P1 | 19h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-window-order) |
-| [#19516](https://github.com/can1357/oh-my-pi/pull/19516) | macos-key-read-settled | fix(natives): read a macOS popup after the option its typed letters choose | computer | P1 | 22h | keep; accepted pair with #19195: Main, 2026-11-17: adjacent thread_local statics in desktop/control.rs; combined = both statics (DRAG_NOTE then INPUT_HELD), then input_held() unchanged | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-key-read-settled) |
+| [#19516](https://github.com/can1357/oh-my-pi/pull/19516) | macos-key-read-settled | fix(natives): read a macOS popup after the option its typed letters choose | computer | P1 | 23h | keep; accepted pair with #19195: Main, 2026-11-17: adjacent thread_local statics in desktop/control.rs; combined = both statics (DRAG_NOTE then INPUT_HELD), then input_held() unchanged | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-key-read-settled) |
 | [#19504](https://github.com/can1357/oh-my-pi/pull/19504) | macos-handback-typed | fix(natives): give the macOS key window back after a takeover while another program types | computer | P1 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-handback-typed) |
 | [#19618](https://github.com/can1357/oh-my-pi/pull/19618) | wayland-display-count | fix(natives): report the Wayland display count as unknown before the first capture | natives | P2 | 6h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-display-count) |
 | [#19601](https://github.com/can1357/oh-my-pi/pull/19601) | devin-gemini-promo-prices | fix(catalog): switch Devin's Gemini promo prices to list when each promo ends | catalog | P1 | 3h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-gemini-promo-prices) |
-| [#19619](https://github.com/can1357/oh-my-pi/pull/19619) | devin-image-budgets | fix(catalog): carry Devin's measured image limits | catalog | P2 | 5h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-image-budgets) |
+| [#19619](https://github.com/can1357/oh-my-pi/pull/19619) | devin-image-budgets | fix(catalog): carry Devin's measured image limits | catalog | P2 | 6h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-image-budgets) |
 | [#19586](https://github.com/can1357/oh-my-pi/pull/19586) | docs-reclaim-drift | docs(auth-gateway): describe reclaim moving warm pins back | auth | P0 | 5h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/docs-reclaim-drift) |
 | [#19611](https://github.com/can1357/oh-my-pi/pull/19611) | image-eviction-notice | fix(coding-agent): mark images the provider image limit evicts in place | other | P1 | 2h | keep; tests-over: LaneImageDropNotice, 2026-11-18: four distinct branches (archive run grouping; notice bytes charged against the body-limit room; a grown notice charged once; count-clamp notice extended by the byte clamp), the last two asked for by roboomp; each fails with its branch removed | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/image-eviction-notice) |
 | [#19606](https://github.com/can1357/oh-my-pi/pull/19606) | usage-state-per-model | fix(coding-agent): judge omp usage policy state by account-wide windows | broker | P1 | 2h | keep; tests-over: UpstreamOpener.ReviewUsageStateFinal, 2026-11-18: three policy cases, one per account-wide-pool branch (model-scoped tier row, sharedGroup-only fallback, shared row with a modelId); none merges into another | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/usage-state-per-model) |
 | [#19600](https://github.com/can1357/oh-my-pi/pull/19600) | fable-shared-wall-block | fix(ai): heal Claude tier blocks a shared weekly wall caused from single-window usage reports | broker | P0 | 3h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/fable-shared-wall-block) |
 | [#19602](https://github.com/can1357/oh-my-pi/pull/19602) | broker-wire-forward-compat | fix(ai): read auth-broker responses that carry fields a newer broker adds | broker | P0 | 3h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-wire-forward-compat) |
+| [#19626](https://github.com/can1357/oh-my-pi/pull/19626) | reset-spend-log | feat(coding-agent): log every saved-reset spend attempt at info | coding-agent | P2 | 5h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-spend-log) |
 | [#19599](https://github.com/can1357/oh-my-pi/pull/19599) | broker-shutdown-refresh-save | fix(coding-agent): let auth-broker serve save an in-flight refresh before exit | broker | P1 | 3h | keep; tests-over: ReviewBrokerShutdown, 2026-11-17: one regression test; the exit race exists only in a spawned omp auth-broker serve process, so its lines are process and fixture setup | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-shutdown-refresh-save) |
 | [#19605](https://github.com/can1357/oh-my-pi/pull/19605) | logger-console-level | fix(utils): apply OMP_LOG_LEVEL to the console transport | other | P0 | 3h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/logger-console-level) |
 | [#19592](https://github.com/can1357/oh-my-pi/pull/19592) | broker-version-skew | feat(ai,coding-agent): exchanged omp versions between auth-broker clients and the broker | auth-broker | P2 | 4h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-version-skew) |
