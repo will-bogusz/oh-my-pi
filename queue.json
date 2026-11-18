@@ -115735,5 +115735,11 @@
     "wake": ""
    }
   ]
+ },
+ "opening": {
+  "id": "reserve-per-model-family",
+  "token": "49462f1f86644f50913a89b013202d5e",
+  "host": "MacBook-Pro",
+  "at": "2026-11-18T18:33:35Z"
  }
 }
