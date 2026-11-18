@@ -96800,13 +96800,13 @@
    "needs": [],
    "base": "baf60290fde5e9eea4edb30bff07695877682ba9",
    "body": "bodies/usage-state-per-model.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19606,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/usage-state-per-model",
    "host": "MacBook-Pro",
    "added": "2026-11-17T20:59:31Z",
-   "updated": "2026-11-18T00:12:22Z",
+   "updated": "2026-11-18T00:18:40Z",
    "note": "",
    "built": [
     {
@@ -96899,7 +96899,8 @@
      "at": "2026-11-18T00:12:13Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-18T00:18:40Z"
   },
   {
    "id": "fable-shared-wall-block",
