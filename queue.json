@@ -98948,7 +98948,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-rerender-on-switch",
    "host": "MacBook-Pro",
    "added": "2026-11-18T00:36:24Z",
-   "updated": "2026-11-18T02:06:13Z",
+   "updated": "2026-11-18T02:06:41Z",
    "note": "",
    "advanced": "2026-11-18T01:34:36Z",
    "built": [
@@ -99073,7 +99073,8 @@
      "tree": "4cc6b7d9db959f93f46c319bce3e4460daeb9fe6"
     }
    ],
-   "opened": "2026-11-18T02:06:13Z"
+   "opened": "2026-11-18T02:06:13Z",
+   "readied": "2026-11-18T02:06:40Z"
   },
   {
    "id": "snapcompact-shape-kdl",
