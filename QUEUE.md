@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-18 17:15Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-18 17:24Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-18 15:38Z on MacBook-Pro; groups below are from it, states from the manifest)
@@ -33,7 +33,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-18
 | win-ax-states | fix(natives): expose Windows control state and stale-reference matches | computer | P2 | 7d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19516](https://github.com/can1357/oh-my-pi/pull/19516), [#19519](https://github.com/can1357/oh-my-pi/pull/19519), [#19532](https://github.com/can1357/oh-my-pi/pull/19532), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-ax-states) |
 | macos-web-type-background | fix(natives): type into a background macOS web page field without a takeover | computer | P2 | 3d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19596](https://github.com/can1357/oh-my-pi/pull/19596), [#19504](https://github.com/can1357/oh-my-pi/pull/19504), [#19516](https://github.com/can1357/oh-my-pi/pull/19516), [#19532](https://github.com/can1357/oh-my-pi/pull/19532), [#19531](https://github.com/can1357/oh-my-pi/pull/19531), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-web-type-background) |
 | reserve-per-model-family | feat(ai): reserve per usage limit in account policies | broker | P2 | 20h | [#19606](https://github.com/can1357/oh-my-pi/pull/19606), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reserve-per-model-family) |
-| deadline-ranking | feat(ai): rank an account priority by quota deadline | ai/auth | P2 | 19h | [#19623](https://github.com/can1357/oh-my-pi/pull/19623) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/deadline-ranking) |
+| deadline-ranking | feat(ai): rank an account priority by quota deadline | ai/auth | P2 | 20h | [#19623](https://github.com/can1357/oh-my-pi/pull/19623) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/deadline-ranking) |
 | reset-consent-per-account | feat(ai,coding-agent): let an account policy decide its own saved-reset spending | broker | P2 | 19h | [#19606](https://github.com/can1357/oh-my-pi/pull/19606), [#19626](https://github.com/can1357/oh-my-pi/pull/19626) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-consent-per-account) |
 
 ## Stacked (17)
@@ -74,7 +74,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-18
 
 | PR | id | title | area | rank | parked | why | since | branch |
 |---|---|---|---|---|---|---|---|---|
-| [#16611](https://github.com/can1357/oh-my-pi/pull/16611) | read-audio-transcripts | feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio | catalog | P2 | 21h | Will, 2026-11-17: parked as draft, not maintained for now; revisit later | not checked or kept fresh | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-audio-transcripts) |
+| [#16611](https://github.com/can1357/oh-my-pi/pull/16611) | read-audio-transcripts | feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio | catalog | P2 | 22h | Will, 2026-11-17: parked as draft, not maintained for now; revisit later | not checked or kept fresh | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-audio-transcripts) |
 
 ## Open PRs (17)
 
