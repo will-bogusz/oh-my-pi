@@ -104760,6 +104760,24 @@
    "opened": "2026-11-18T18:18:48Z",
    "readied": "2026-11-18T18:19:10Z",
    "merged_by": "pr"
+  },
+  {
+   "id": "macos-main-key-tests",
+   "branch": "will/macos-main-key-tests",
+   "title": "test(natives): restore passing macOS native typing tests",
+   "area": "computer",
+   "priority": "P1",
+   "needs": [],
+   "base": "028f1d6b495425022db0a417e4bb134a919cfed3",
+   "body": "bodies/macos-main-key-tests.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.local/state/ovnfs/git/macos-main-key-tests",
+   "host": "MacBook-Pro",
+   "added": "2026-11-18T21:47:33Z",
+   "updated": "2026-11-18T21:47:33Z",
+   "note": ""
   }
  ],
  "watch": {
