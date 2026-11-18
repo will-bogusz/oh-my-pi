@@ -99231,6 +99231,27 @@
    "added": "2026-11-18T00:48:33Z",
    "updated": "2026-11-18T00:48:33Z",
    "note": ""
+  },
+  {
+   "id": "snapcompact-deepseek-text",
+   "branch": "will/snapcompact-deepseek-text",
+   "title": "fix(catalog,snapcompact,coding-agent): give DeepSeek V4.1 Flash its snapcompact archive as text",
+   "area": "snapcompact",
+   "priority": "P2",
+   "needs": [
+    "snapcompact-shape-kdl",
+    "snapcompact-rerender-on-switch"
+   ],
+   "base": "e3ab64546170e0b7f742d1f422254430e97270e0",
+   "body": "bodies/snapcompact-deepseek-text.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-deepseek-text",
+   "host": "MacBook-Pro",
+   "added": "2026-11-18T04:50:59Z",
+   "updated": "2026-11-18T04:50:59Z",
+   "note": ""
   }
  ],
  "watch": {
