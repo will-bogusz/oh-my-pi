@@ -101915,7 +101915,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/reset-consent-per-account",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:24:43Z",
-   "updated": "2026-11-18T18:08:01Z",
+   "updated": "2026-11-18T18:08:11Z",
    "note": "Will, 2026-11-17: go-ahead to open",
    "kind": "proposal",
    "line_loss_overrides": [
@@ -101931,7 +101931,13 @@
      }
     }
    ],
-   "advanced": "2026-11-18T18:08:01Z"
+   "advanced": "2026-11-18T18:08:01Z",
+   "rebases_after": [
+    19626
+   ],
+   "pair_reasons": {
+    "19626": "Main, 2026-11-18: adjacent call-site edits in agent-session.ts #redeemConsentedResets and its three callers; #19626 adds a trigger argument, this adds a consent argument; the combined form passes both (provider, trigger, actions, coordinator, consent) and keeps this PR's per-action credentialResetModes"
+   }
   },
   {
    "id": "qt-filler-windows",
