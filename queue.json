@@ -98518,6 +98518,26 @@
    "added": "2026-11-18T00:47:39Z",
    "updated": "2026-11-18T00:47:39Z",
    "note": ""
+  },
+  {
+   "id": "snapcompact-shape-reader-identity",
+   "branch": "will/snapcompact-shape-reader-identity",
+   "title": "fix(catalog): give snapcompact readers their lead model's frame shape",
+   "area": "snapcompact",
+   "priority": "P2",
+   "needs": [
+    "snapcompact-shape-kdl"
+   ],
+   "base": "495a582070a024db23680d35a7562f935b9829cc",
+   "body": "bodies/snapcompact-shape-reader-identity.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-shape-reader-identity",
+   "host": "MacBook-Pro",
+   "added": "2026-11-18T00:48:33Z",
+   "updated": "2026-11-18T00:48:33Z",
+   "note": ""
   }
  ],
  "watch": {
