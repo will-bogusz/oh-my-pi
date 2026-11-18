@@ -44,6 +44,13 @@ const claude = bundled("anthropic", "claude-opus-5-5");
 const gemini = bundled("google", "gemini-3.5-flash");
 // Takes no image input.
 const deepseek = bundled("fireworks", "deepseek-v4-flash");
+// Takes image input, but reads an archive's text better than its frames.
+const deepseekFlash = bundled("opencode-go", "deepseek-v4.1-flash");
+const IMAGE = {
+	type: "image",
+	mimeType: "image/png",
+	data: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==",
+} as const;
 
 function assistant(model: Model, content: AssistantMessage["content"]): AssistantMessage {
 	return {
@@ -122,6 +129,7 @@ describe("snapcompact archive read by another model", () => {
 		authStorage.keys.setRuntime("openai", "test-key");
 		authStorage.keys.setRuntime("fireworks", "test-key");
 		authStorage.keys.setRuntime("google", "test-key");
+		authStorage.keys.setRuntime("opencode-go", "test-key");
 		modelRegistry = new ModelRegistry(authStorage);
 	});
 
@@ -453,6 +461,75 @@ describe("snapcompact archive read by another model", () => {
 		const large = requestContent(mock.calls[1]?.context.messages);
 		expect(large.text).toContain(imagedReply(archive));
 		expect(large.text).not.toContain("middle history omitted above");
+	});
+
+	it("sends DeepSeek V4.1 Flash the archive's text in place of its frames, and the user's image as an image", async () => {
+		const sessionManager = SessionManager.inMemory();
+		const original = await seedArchive(sessionManager);
+		const archive = snapcompact.getPreservedArchive(original.preserveData)!;
+		const { session, mock } = startSession(sessionManager, gpt);
+
+		await session.setModel(deepseekFlash);
+		await session.prompt("What is in this image?", { images: [IMAGE] });
+		const { text, images } = requestContent(mock.calls[0]?.context.messages);
+		// The image the user attached, resized for the request; no archive frames beside it.
+		expect(images).toHaveLength(1);
+		expect(text).toContain(imagedReply(archive));
+		expect(text).not.toContain(FRAME_LEGEND);
+		expectOriginalIntact(latestCompaction(sessionManager), original);
+	});
+
+	it("sizes DeepSeek V4.1 Flash's own snapcompact archive by the text it reads, not by its frames", async () => {
+		const sessionManager = SessionManager.inMemory();
+		for (let pass = 0; pass < 3; pass++) {
+			for (const message of archivedTurns()) sessionManager.appendMessage(message);
+		}
+		// A kept turn of ~40k tokens leaves room under 60% of the 100k threshold for about two frames' worth of
+		// archive text; priced as images, five frames would fit.
+		sessionManager.appendMessage({
+			role: "user",
+			content: `Kept turn: ${"lorem ipsum ".repeat(13_333)}`,
+			timestamp: Date.now(),
+		});
+		const { session } = startSession(
+			sessionManager,
+			{ ...deepseekFlash, contextWindow: 200_000 },
+			{
+				settings: Settings.isolated({
+					"compaction.enabled": false,
+					"compaction.keepRecentTokens": 1,
+					"compaction.thresholdTokens": 100_000,
+				}),
+			},
+		);
+
+		await session.compact(undefined, { mode: "snapcompact" });
+		const entry = latestCompaction(sessionManager);
+		expect(entry.method).toBe("snapcompact");
+		expect(entry.tokensAfter).toBeLessThanOrEqual(60_000);
+	});
+
+	it("judges DeepSeek V4.1 Flash's first pass after a resume against the archive text it reads", async () => {
+		const sessionManager = SessionManager.inMemory();
+		await seedArchive(sessionManager);
+		sessionManager.appendMessage({ role: "user", content: "A newer task. ".repeat(100), timestamp: Date.now() });
+		sessionManager.appendMessage(assistant(gpt, [{ type: "text", text: "New task done." }]));
+		sessionManager.appendMessage({ role: "user", content: "Current turn.", timestamp: Date.now() });
+		// No model call yet, so the live summary still carries GPT's frames.
+		const { session } = startSession(
+			sessionManager,
+			{ ...deepseekFlash, contextWindow: 200_000 },
+			{
+				settings: Settings.isolated({
+					"compaction.enabled": false,
+					"compaction.keepRecentTokens": 1,
+					"compaction.thresholdTokens": 60_000,
+				}),
+			},
+		);
+
+		await session.compact(undefined, { mode: "snapcompact" });
+		expect(sessionManager.getBranch().filter(entry => entry.type === "compaction")).toHaveLength(2);
 	});
 
 	// An extension or custom template may write its own summary over a snapcompact archive, without

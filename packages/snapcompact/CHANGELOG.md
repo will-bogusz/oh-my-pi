@@ -13,6 +13,7 @@
 ### Added
 
 - Added `archiveInShape()`, which tells whether an archive's frames are drawn in a given shape ([#19620](https://github.com/can1357/oh-my-pi/pull/19620) by [@will-bogusz](https://github.com/will-bogusz))
+- Added `readerTakesArchiveText()`: whether a model reads an archive's kept text in place of its frames (catalog `snapcompact-text-archive`)
 
 ## [19.0.1] - 2026-11-19
 

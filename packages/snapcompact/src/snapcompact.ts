@@ -587,6 +587,11 @@ export function readerImagesReadResults(model: Model): boolean {
 	return resolveCatalogPolicy(model).snapcompactImageReads === true;
 }
 
+/** Whether `model` reads an archive's kept text in place of its frames (catalog `snapcompact-text-archive`, opt-in). */
+export function readerTakesArchiveText(model: Model): boolean {
+	return resolveCatalogPolicy(model).snapcompactTextArchive === true;
+}
+
 /** Key under `CompactionEntry.preserveData` holding the frame archive. */
 export const PRESERVE_KEY = "snapcompact";
 

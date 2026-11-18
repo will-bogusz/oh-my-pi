@@ -591,7 +591,10 @@ export interface SessionMaintenanceHost {
 interface ArchiveReader {
 	/** Its classifier refuses quoted reasoning ({@link snapcompact.readerIncludesThinking}). */
 	excludeThinking: boolean;
-	/** It takes no image input, so frames would reach it as placeholders. */
+	/**
+	 * It reads the archive's kept text in place of the frames: it takes no image input, so frames would reach it
+	 * as placeholders, or its catalog rule says it reads that text better ({@link snapcompact.readerTakesArchiveText}).
+	 */
 	withoutFrames: boolean;
 	/** Both flags as one value, for caches and scan bookkeeping. */
 	key: `${boolean}:${boolean}`;
@@ -599,8 +602,26 @@ interface ArchiveReader {
 
 function archiveReader(model: Model): ArchiveReader {
 	const excludeThinking = !snapcompact.readerIncludesThinking(model);
-	const withoutFrames = !sendsImageInputOnWire(model);
+	const withoutFrames = !sendsImageInputOnWire(model) || snapcompact.readerTakesArchiveText(model);
 	return { excludeThinking, withoutFrames, key: `${excludeThinking}:${withoutFrames}` };
+}
+
+/**
+ * Tokens `chars` of archive text cost a reader of text in place of frames: ~4 chars per token,
+ * with 15% for denser content, the rate the cap reserve prices text edges at.
+ */
+function archiveTextTokens(chars: number): number {
+	return Math.ceil((chars * 1.15) / 4);
+}
+
+/**
+ * Tokens one archive frame of `shape` costs `model`: its image price, or for a reader of text in
+ * place of frames, the text a full frame holds, which is what that reader gets instead.
+ */
+function snapcompactFrameCost(model: Model | undefined, shape: snapcompact.Shape): number {
+	return model && archiveReader(model).withoutFrames
+		? archiveTextTokens(snapcompact.geometry(shape).capacity)
+		: snapcompact.plannedFrameTokens(shape);
 }
 
 /**
@@ -671,7 +692,7 @@ export class SessionMaintenance {
 	#experimentalNotesReminderBoundaryId: string | undefined;
 	/** Each archive's no-reasoning view, rendered (or failed closed) once per compaction entry. */
 	readonly #withoutThinkingViews = new WeakMap<CompactionEntry, Promise<snapcompact.ArchiveView>>();
-	/** Each archive's text view for readers without image input, keyed by reader, model and text budget
+	/** Each archive's text view for readers of text in place of frames, keyed by reader, model and text budget
 	 *  (`null`: the original already reads as text). */
 	readonly #withoutFramesViews = new WeakMap<CompactionEntry, Map<string, snapcompact.ArchiveView | null>>();
 	/** Each archive re-rendered in an image reader's frame shape ({@link #viewInShape}), keyed by the render (shape,
@@ -3036,7 +3057,16 @@ export class SessionMaintenance {
 		const standingSummary = this.#replacesStandingSummary(preparation)
 			? this.#host.messages().find(message => message.role === "compactionSummary")
 			: undefined;
-		if (standingSummary) tokens += this.#tokenizer.countMessage(standingSummary);
+		if (standingSummary) {
+			// A reader of text in place of frames is charged the text it reads, as the result is, even
+			// before a model call has swapped that text in (a resumed session's first pass).
+			const model = this.#model;
+			tokens += this.#tokenizer.countMessages(
+				model && archiveReader(model).withoutFrames
+					? this.#messagesAsRead([standingSummary], this.#host.sessionManager.getBranchView(), model)
+					: [standingSummary],
+			);
+		}
 		tokens += this.#tokenizer.countMessages(preparation.messagesToSummarize, opts);
 		tokens += this.#tokenizer.countMessages(preparation.turnPrefixMessages, opts);
 		tokens += this.#tokenizer.countMessages(preparation.recentMessages, opts);
@@ -4226,7 +4256,9 @@ export class SessionMaintenance {
 	 * window. Charges each frame {@link snapcompact.plannedFrameTokens}, never
 	 * less than the per-frame price the tokenizer will bill, so picking
 	 * `maxFrames` from this helper makes
-	 * {@link #projectSnapcompactContextTokens} succeed by construction.
+	 * {@link #projectSnapcompactContextTokens} succeed by construction. A reader
+	 * of text in place of frames is charged the text each frame holds instead
+	 * ({@link snapcompactFrameCost}), which bounds the archive's kept source.
 	 *
 	 * Skip vs. cap use different reserves on purpose. The **skip** decision
 	 * (return `0`) trips only when kept-recent plus non-message tokens already
@@ -4314,7 +4346,7 @@ export class SessionMaintenance {
 			SNAPCOMPACT_POST_COMPACTION_TARGET * thresholdTokens - fixedTokens,
 		);
 		const frameBudget = Math.min(totalBudget - baseTokens - capReserve, roomBudget);
-		const frameCost = snapcompact.plannedFrameTokens(shape);
+		const frameCost = snapcompactFrameCost(this.#model, shape);
 		if (roomBudget < frameCost) {
 			logger.warn("Snapcompact archive has no room under the compaction trigger", {
 				model: this.#model?.id,
@@ -4382,7 +4414,8 @@ export class SessionMaintenance {
 	 * - {@link SNAPCOMPACT_POST_COMPACTION_TARGET} of the threshold, counting
 	 *   `pendingTokens` (a pre-prompt pass's prompt, not yet in the session):
 	 *   the cap reserves text from an estimate that can run short, so the fit
-	 *   drops the measured excess at the archive's mean frame price.
+	 *   drops the measured excess at the archive's mean frame price (for a
+	 *   reader of text in place of frames, the text a frame holds).
 	 * A single frame cannot shrink further, so 60% is a sizing target, not a
 	 * guarantee. The caller still rejects a payload that stays over budget, and
 	 * passes that need the recovery band reject a context above it
@@ -4402,6 +4435,7 @@ export class SessionMaintenance {
 			ctxWindow > 0
 				? Math.floor(SNAPCOMPACT_POST_COMPACTION_TARGET * resolveThresholdTokens(ctxWindow, settings))
 				: Number.POSITIVE_INFINITY;
+		const readsFrames = !this.#model || !archiveReader(this.#model).withoutFrames;
 		for (let rerender = 0; rerender < 2; rerender++) {
 			const archive = snapcompact.getPreservedArchive(result.preserveData);
 			if (!archive) break;
@@ -4414,7 +4448,9 @@ export class SessionMaintenance {
 				this.#projectSnapcompactContextTokens(preparation, result, { excludeEncryptedReasoning: true }) +
 				pendingTokens;
 			if (projected > targetTokens && frames > 1) {
-				const perFrame = this.#snapcompactArchiveFrameTokens(archive) / frames;
+				const perFrame = readsFrames
+					? this.#snapcompactArchiveFrameTokens(archive) / frames
+					: archiveTextTokens(archive.frames.reduce((sum, frame) => sum + frame.chars, 0) / frames);
 				maxFrames = Math.min(maxFrames, Math.max(1, frames - Math.ceil((projected - targetTokens) / perFrame)));
 			}
 			if (maxFrames < 1 || maxFrames >= frames) break;
@@ -4457,23 +4493,31 @@ export class SessionMaintenance {
 
 	/**
 	 * Project the post-compaction context size of a snapcompact result: kept
-	 * recent messages + the summary message with its re-attached frames + the
-	 * fixed non-message overhead (system prompt + tools). Mirrors how the
-	 * compacted context is rebuilt, so the estimate matches the wire shape, and
-	 * lets the caller decide whether snapcompact brought the context under the
-	 * window or should fall back to an LLM summary.
+	 * recent messages + the summary message as the active model reads it (with
+	 * its re-attached frames, or the archive's text in their place for a reader
+	 * of text) + the fixed non-message overhead (system prompt + tools). Mirrors
+	 * how the compacted context is rebuilt, so the estimate matches the wire
+	 * shape, and lets the caller decide whether snapcompact brought the context
+	 * under the window or should fall back to an LLM summary.
 	 */
 	#projectSnapcompactContextTokens(
 		preparation: CompactionPreparation,
 		result: snapcompact.CompactionResult,
 		options?: MessageCountOptions,
 	): number {
-		const archive = snapcompact.getPreservedArchive(result.preserveData);
+		const original = snapcompact.getPreservedArchive(result.preserveData);
+		const model = this.#model;
+		const reader = model && archiveReader(model);
+		const view =
+			original && model && reader?.withoutFrames
+				? this.#textView(result.summary, original, reader, model)
+				: undefined;
+		const archive = view?.archive ?? original;
 		const blocks = archive
-			? snapcompact.historyBlocks(archive, { maxFrameDataBytes: snapcompact.frameDataBytesBudget(this.#model) })
+			? snapcompact.historyBlocks(archive, { maxFrameDataBytes: snapcompact.frameDataBytesBudget(model) })
 			: undefined;
 		const summaryMessage = createCompactionSummaryMessage(
-			result.summary,
+			view?.summary ?? result.summary,
 			result.tokensBefore,
 			new Date().toISOString(),
 			{
@@ -4766,7 +4810,7 @@ export class SessionMaintenance {
 		// turn comes off it at the active model's count. The local floor counts
 		// what `model` itself would be sent: another reader drops the active
 		// model's natively replayed reasoning, a cold session drops its own, and
-		// a reader without image input gets each archive as text.
+		// a reader of text in place of frames gets each archive as text.
 		const providerExcludedTokens = activeExcludedMessage ? this.#tokenizer.countMessage(activeExcludedMessage) : 0;
 		const tokenizerOptions = {
 			nativeHistoryReplay: openAIResponsesReplaysNativeHistory(model, this.#host.providerSessionState),
@@ -4973,7 +5017,7 @@ export class SessionMaintenance {
 			this.#host.settings.revision,
 		);
 		const frameBudget = recoveryBandTokens - baseTokens - keptTailTokens - snapcompactTextReserveTokens(shape);
-		const frameCost = snapcompact.plannedFrameTokens(shape);
+		const frameCost = snapcompactFrameCost(this.#model, shape);
 		if (frameBudget < frameCost) return 0;
 		// Same hard caps as #computeSnapcompactMaxFrames: a threshold-derived
 		// count above the per-request payload or provider image budget would
@@ -5171,7 +5215,9 @@ export class SessionMaintenance {
 	 *   archive's no-reasoning view instead.
 	 * - A model that takes no image input would read every frame as an
 	 *   image-omitted placeholder; it gets the archive's kept source as text in
-	 *   place of the frames ({@link snapcompact.viewWithoutFrames}).
+	 *   place of the frames ({@link snapcompact.viewWithoutFrames}), as does a
+	 *   model whose catalog rule says it reads that text better than frames
+	 *   ({@link snapcompact.readerTakesArchiveText}).
 	 * - Frames are drawn in the shape the compacting model reads best; a model
 	 *   that reads another shape best gets them re-rendered in its own shape
 	 *   from the archive's kept source ({@link #viewInShape}).
@@ -5275,9 +5321,9 @@ export class SessionMaintenance {
 
 	/**
 	 * `messages`, rebuilt from `entries`, with each snapcompact summary in the form
-	 * `model` (the active model by default) reads when it takes no image input,
-	 * the way {@link renderArchiveForModel} will send it, so a local count
-	 * measures that request; for a reader with image input, a text copy goes back
+	 * `model` (the active model by default) reads when it reads text in place of
+	 * frames, the way {@link renderArchiveForModel} will send it, so a local count
+	 * measures that request; for a reader of frames, a text copy goes back
 	 * to its original frames, or to its re-shaped view once one is rendered for
 	 * `model` ({@link #viewInShape}). Synchronous: the no-reasoning frames of an
 	 * image reader, and re-shaped ones not rendered yet, are left to
@@ -5405,7 +5451,7 @@ export class SessionMaintenance {
 	}
 
 	/**
-	 * Tokens of archive text a reader without image input gets in `model`'s
+	 * Tokens of archive text a reader of text in place of frames gets in `model`'s
 	 * window: the share snapcompact sizes an imaged archive to
 	 * ({@link SNAPCOMPACT_POST_COMPACTION_TARGET} of its compaction threshold),
 	 * so an archive built for a larger window still leaves the reader room to
@@ -5419,10 +5465,9 @@ export class SessionMaintenance {
 	}
 
 	/**
-	 * `entry`'s archive as `model`, a reader without image input, reads it
-	 * ({@link snapcompact.viewWithoutFrames}), derived from its kept source once
-	 * per entry, reader and budget; `undefined` when that is the original. Text
-	 * past {@link #archiveTextBudget} loses its middle.
+	 * `entry`'s archive as `model`, a reader of text in place of frames, reads it
+	 * ({@link #textView}), derived from its kept source once per entry, reader
+	 * and budget; `undefined` when that is the original.
 	 */
 	#viewWithoutFrames(
 		entry: CompactionEntry,
@@ -5439,27 +5484,43 @@ export class SessionMaintenance {
 		let view = views.get(key);
 		if (view === undefined) {
 			const archive = snapcompact.getPreservedArchive(entry.preserveData)!;
-			const options = { includeThinking: !reader.excludeThinking };
-			let unfolded = snapcompact.viewWithoutFrames(entry.summary, archive, options);
-			// The original too: a frameless archive was sized for the window that compacted.
-			if (targetTokens !== undefined) {
-				const tokenizer = this.#tokenizer.countsAlike(model) ? this.#tokenizer : new Tokenizer(model);
-				const keptText = (view: snapcompact.ArchiveView) =>
-					`${view.archive.textHead ?? ""}${view.archive.textTail ?? ""}`;
-				let chars = keptText(unfolded).length;
-				let tokens = tokenizer.countTokens(keptText(unfolded));
-				// Cut at the measured rate, then measure the kept ends again: they may tokenize more
-				// densely than the dropped middle. Each pass cuts at least 2%.
-				while (tokens > targetTokens && chars > 0) {
-					chars = Math.min(Math.floor((chars * targetTokens) / tokens), Math.floor(chars * 0.98));
-					unfolded = snapcompact.viewWithoutFrames(entry.summary, archive, { ...options, maxChars: chars });
-					tokens = tokenizer.countTokens(keptText(unfolded));
-				}
-			}
+			const unfolded = this.#textView(entry.summary, archive, reader, model);
 			view = unfolded.archive === archive ? null : unfolded;
 			views.set(key, view);
 		}
 		return view ?? undefined;
+	}
+
+	/**
+	 * The archive behind `summary` as text without frames
+	 * ({@link snapcompact.viewWithoutFrames}); text past {@link #archiveTextBudget}
+	 * loses its middle. The original when it already is that view.
+	 */
+	#textView(
+		summary: string,
+		archive: snapcompact.Archive,
+		reader: ArchiveReader,
+		model: Model,
+	): snapcompact.ArchiveView {
+		const targetTokens = this.#archiveTextBudget(model);
+		const options = { includeThinking: !reader.excludeThinking };
+		let unfolded = snapcompact.viewWithoutFrames(summary, archive, options);
+		// The original too: a frameless archive was sized for the window that compacted.
+		if (targetTokens !== undefined) {
+			const tokenizer = this.#tokenizer.countsAlike(model) ? this.#tokenizer : new Tokenizer(model);
+			const keptText = (view: snapcompact.ArchiveView) =>
+				`${view.archive.textHead ?? ""}${view.archive.textTail ?? ""}`;
+			let chars = keptText(unfolded).length;
+			let tokens = tokenizer.countTokens(keptText(unfolded));
+			// Cut at the measured rate, then measure the kept ends again: they may tokenize more
+			// densely than the dropped middle. Each pass cuts at least 2%.
+			while (tokens > targetTokens && chars > 0) {
+				chars = Math.min(Math.floor((chars * targetTokens) / tokens), Math.floor(chars * 0.98));
+				unfolded = snapcompact.viewWithoutFrames(summary, archive, { ...options, maxChars: chars });
+				tokens = tokenizer.countTokens(keptText(unfolded));
+			}
+		}
+		return unfolded;
 	}
 
 	#viewWithoutThinking(entry: CompactionEntry, model: Model): Promise<snapcompact.ArchiveView> {

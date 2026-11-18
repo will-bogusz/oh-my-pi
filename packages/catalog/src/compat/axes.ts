@@ -559,6 +559,18 @@ export const AXES: Readonly<Record<string, AxisDef>> = {
 	 * variant's size. Frames never exceed `image-max-edge`.
 	 */
 	"snapcompact-frame-size": { key: "snapcompactFrameSize", set: "catalog", shape: "scalar" },
+	/**
+	 * Opt-in: the reader gets its snapcompact archive's kept text in place of the
+	 * frames, as a reader without image input does, because it reads that text
+	 * better per billed token than any frame layout. Other images it is sent stay
+	 * images. Unassigned: frames.
+	 */
+	"snapcompact-text-archive": {
+		key: "snapcompactTextArchive",
+		set: "catalog",
+		shape: "scalar",
+		values: [true, false],
+	},
 	"inline-image-byte-budget": { key: "inlineImageByteBudget", set: "catalog", shape: "scalar" },
 	/**
 	 * Largest request body the host accepts. Where set, the inline-image byte clamp keeps images within what the

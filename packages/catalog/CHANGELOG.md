@@ -7,6 +7,10 @@
 - Added `uncached-instructions` compatibility flag, enabled for GPT-6.2 models on every host, which moves the system prompt out of the uncached Responses `instructions` field
 - Added the `snapcompact-variant` and `snapcompact-frame-size` catalog rules and `resolveSnapcompactShape()`, which now hold each model's snapcompact frame shape below a configured `snapcompactShape`
 
+### Changed
+
+- DeepSeek V4.1 Flash now reads snapcompact archives as text instead of image frames, whose 8px glyphs it can barely read (the new `snapcompact-text-archive` catalog rule)
+
 ### Fixed
 
 - Cursor's newly served models (Claude Fable 5.2, Claude Haiku 4.5, Claude Sonnet 5.5, Gemini 2.5 Flash, Gemini 4 Hydrogen/Neon, GLM 5.3, GPT-5.1, Muse Wonder 1.0) now use their documented per-token prices instead of $0 ([#19842](https://github.com/can1357/oh-my-pi/pull/19842) by [@fenilmodi00](https://github.com/fenilmodi00)).

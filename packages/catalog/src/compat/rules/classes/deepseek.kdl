@@ -148,3 +148,16 @@ class "deepseek" {
 		}
 	}
 }
+
+// Snapcompact archive as text: V4.1 Flash bills images by area (~1,690 px² per
+// token) and cannot read 8px glyphs, so no frame layout reaches its text recall
+// for fewer tokens. On real transcripts text scored F1 .919, the unassigned
+// `8on22-bw` at 1568px .535, and the best layout tried (16x26 cells at 1092px)
+// .908 at text's token cost (opencode-go and OpenRouter, 2026-11).
+class "deepseek" {
+	family "flash" {
+		revision ">=4.1 <4.2" {
+			snapcompact-text-archive #true
+		}
+	}
+}
