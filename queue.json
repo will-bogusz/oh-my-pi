@@ -111705,5 +111705,11 @@
     "wake": ""
    }
   ]
+ },
+ "opening": {
+  "id": "wayland-still-capture",
+  "token": "9476bc180e2c4a3d88543940c829de08",
+  "host": "MacBook-Pro",
+  "at": "2026-11-18T01:45:57Z"
  }
 }
