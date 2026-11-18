@@ -98508,7 +98508,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-still-capture",
    "host": "MacBook-Pro",
    "added": "2026-11-17T23:02:30Z",
-   "updated": "2026-11-17T23:51:59Z",
+   "updated": "2026-11-18T01:04:15Z",
    "note": "",
    "built": [
     {
@@ -98566,15 +98566,6 @@
      "host": "MacBook-Pro"
     },
     {
-     "with": "#19519",
-     "code": "0c5f9b647dd33fe374b1ed3525689be59dd7ae6c",
-     "with_code": "10f2f0166cf201563e33349758382bd628db9ba6",
-     "tip": "7090c3fd0e0fbeecae98b48e65744ce33596f427",
-     "with_tip": "11100c5f055edcd3362cfec4b0f0effcb553e81a",
-     "at": "2026-11-17T23:51:58Z",
-     "host": "MacBook-Pro"
-    },
-    {
      "with": "#19532",
      "code": "0c5f9b647dd33fe374b1ed3525689be59dd7ae6c",
      "with_code": "20fb8b9ff954b92f5cafa67a2bd140ea7b65619d",
@@ -98599,6 +98590,15 @@
      "tip": "7090c3fd0e0fbeecae98b48e65744ce33596f427",
      "with_tip": "7bab9f11e73eddfda911430ba197267509ae95f0",
      "at": "2026-11-17T23:51:58Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19519",
+     "code": "0c5f9b647dd33fe374b1ed3525689be59dd7ae6c",
+     "with_code": "055b12ff43628e438aec61d2a7be66001d03e643",
+     "tip": "7090c3fd0e0fbeecae98b48e65744ce33596f427",
+     "with_tip": "04d4af3cdb26adf679e2c2efb301470609e84ab8",
+     "at": "2026-11-18T01:04:09Z",
      "host": "MacBook-Pro"
     }
    ]
