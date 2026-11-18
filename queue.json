@@ -98110,7 +98110,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/account-switch-reason",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:19:21Z",
-   "updated": "2026-11-18T00:12:34Z",
+   "updated": "2026-11-18T00:46:00Z",
    "note": "Will, 2026-11-17: go-ahead to open",
    "kind": "proposal",
    "built": [
@@ -98211,6 +98211,15 @@
      "tip": "2c7c797eeb2e0eeca143cf8c1cbf66e282c73438",
      "with_tip": "7d98453473f36b7c9a0281e1649ea4e13cd3d47a",
      "at": "2026-11-18T00:12:27Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19606",
+     "code": "7dddacdfab1bbea036ab45d87704946d57787679",
+     "with_code": "cdf5dbe501bfc8e2f49d6f7ccf4db0eb5c032cd6",
+     "tip": "2c7c797eeb2e0eeca143cf8c1cbf66e282c73438",
+     "with_tip": "d6f211860c282e91687d5ec665486490279fe0f6",
+     "at": "2026-11-18T00:45:50Z",
      "host": "MacBook-Pro"
     }
    ]
