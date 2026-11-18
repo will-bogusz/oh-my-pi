@@ -102962,8 +102962,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/loop-sampler-stop",
    "host": "MacBook-Pro",
    "added": "2026-11-18T18:13:26Z",
-   "updated": "2026-11-18T18:13:26Z",
-   "note": ""
+   "updated": "2026-11-18T18:13:47Z",
+   "note": "SamplerStop, 2026-11-18: P1 estimate. Production effect is small: after TUI.stop (external editor, session end) the profiler kept sampling but a 2 s timer drained it, so no lasting retention; the real harm is bun test, where 3 Composer-starting files break parked-subagent GC tests later in the process. Root-cause fix plus regression test; profile() pause trick and debug-report limit are what a maintainer may question."
   }
  ],
  "watch": {
