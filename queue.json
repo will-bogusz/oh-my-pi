@@ -97579,6 +97579,38 @@
        "\t\t\tconst outcome = rejectionOf(discoverAuthStorage(tempDir)).finally(() => {"
       ]
      }
+    },
+    {
+     "at": "2026-11-18T00:04:50Z",
+     "reason": "final-review round: 2c70c6388f rewrites these lines (body-read normalization, composer-gated wait notice, raw TCP proxy tests)",
+     "old": "42eea7e9e6d490c27231d04099e02e8f1dabe8f5",
+     "new": "7d98453473f36b7c9a0281e1649ea4e13cd3d47a",
+     "dropped": {
+      "docs/auth-broker-gateway.md": [
+       "If the broker is down at boot and a fresh cache exists, startup succeeds from the cache. If the cache is missing, expired, corrupt, incompatible, written for another URL, or encrypted with another token, startup requires a live snapshot. A connection failure, timeout, or 5xx/408/429 answer is retried with backoff (0.5 s doubling to 8 s) for up to 30 s, so a broker restart or a short network outage does not fail startup; any other answer, such as a 401 for a revoked token, fails at once. CLI commands outside the interactive session print `Waiting for auth broker at <url> \u2026` to stderr on the first retry; SDK hosts get each retry through `discoverAuthStorage`'s `onBrokerRetry`. A broker switched mid-session through settings gets no retries: the first failure keeps the current store. Startup never silently opens the local credential store instead."
+      ],
+      "packages/coding-agent/src/session/auth-broker-config.ts": [
+       " * on stderr; the interactive host skips it because its prepaint composer owns",
+       " * the terminal.",
+       "function authBrokerWaitNotice(): (retry: AuthBrokerStartupRetry) => void {"
+      ],
+      "packages/coding-agent/test/auth-broker-snapshot-cache.test.ts": [
+       "\ttest(\"retries the initial snapshot while the broker restarts, reporting each retry\", async () => {",
+       "\t\t// The proxy in front of the broker answers 503 to the first snapshot request, as during a restart.",
+       "\t\tlet snapshotRequests = 0;",
+       "\t\tconst proxy = Bun.serve({",
+       "\t\t\tfetch: request => {",
+       "\t\t\t\tconst { pathname, search } = new URL(request.url);",
+       "\t\t\t\tif (pathname === \"/v1/snapshot\" && ++snapshotRequests === 1) {",
+       "\t\t\t\t\treturn new Response(\"restarting\", { status: 503 });",
+       "\t\t\t\treturn fetch(new URL(`${pathname}${search}`, handle.url), request);",
+       "\t\t\tprocess.env.OMP_AUTH_BROKER_URL = proxy.url.toString();",
+       "\t\t\texpect(snapshotRequests).toBe(2);",
+       "\t\t\texpect(retries).toMatchObject([",
+       "\t\t\t\t{ url: proxy.url.toString(), error: { status: 503 }, delayMs: 500, budgetMs: 30_000 },",
+       "\t\t\t]);"
+      ]
+     }
     }
    ],
    "advanced": "2026-11-17T23:20:18Z"
