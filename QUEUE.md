@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-18 02:47Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-18 02:48Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-18 01:39Z on MacBook-Pro; groups below are from it, states from the manifest)
@@ -56,8 +56,8 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-18
 | factory-droid-1100-models | feat(catalog): add the Factory Droid models droid 1.10.0 serves | factory-droid |  | 4d | factory-droid-1100-pin | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-models) |
 | macos-keys-no-press | fix(natives): send macOS background keys to the key window without a press | computer | P2 | 3d | macos-window-order ([#19532](https://github.com/can1357/oh-my-pi/pull/19532)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-keys-no-press) |
 | macos-drag-no-change-note | fix(natives): note a macOS background drag that changed nothing readable | computer | P2 | 3d | macos-drag-confirm ([#19195](https://github.com/can1357/oh-my-pi/pull/19195)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-drag-no-change-note) |
-| snapcompact-shape-kdl | refactor(catalog,snapcompact): move snapcompact frame shapes into catalog rules | snapcompact | P2 | 1h | snapcompact-rerender-on-switch ([#19620](https://github.com/can1357/oh-my-pi/pull/19620)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-shape-kdl) |
-| snapcompact-shape-reader-identity | fix(catalog): give snapcompact readers their lead model's frame shape | snapcompact | P2 | 1h | snapcompact-shape-kdl | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-shape-reader-identity) |
+| snapcompact-shape-kdl | refactor(catalog,snapcompact): move snapcompact frame shapes into catalog rules | snapcompact | P2 | 2h | snapcompact-rerender-on-switch ([#19620](https://github.com/can1357/oh-my-pi/pull/19620)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-shape-kdl) |
+| snapcompact-shape-reader-identity | fix(catalog): give snapcompact readers their lead model's frame shape | snapcompact | P2 | 2h | snapcompact-shape-kdl | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-shape-reader-identity) |
 
 ## Held (7)
 
