@@ -102967,231 +102967,121 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-17T19:31:01Z",
+  "checked": "2026-11-18T18:13:33Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
+   "reserve-per-model-family": {
+    "since": "2026-11-18T18:13:33Z",
+    "title": "feat(ai): reserve per usage limit in account policies"
+   },
    "factory-droid-1100-pin": {
     "since": "2026-11-17T00:39:57Z",
     "title": "feat(catalog): identify Factory Droid requests as droid 1.10.0"
    }
   },
-  "conflicts": {},
-  "merged_through": "2026-11-17T17:39:12Z",
+  "conflicts": {
+   "#19195": {
+    "since": "2026-11-18T18:13:33Z",
+    "title": "fix(natives): stop macOS background drags reporting moves that did not happen",
+    "files": [
+     "crates/natives/src/desktop/control.rs",
+     "crates/natives/src/desktop/macos/ax/drag_control.rs"
+    ]
+   }
+  },
+  "merged_through": "2026-11-18T17:12:46Z",
   "unreleased": {
-   "19191": {
-    "title": "feat(catalog): add the Factory Droid models droid 1.7.1 serves",
-    "merge_commit": "d29faaebcbc095c6af0e07217a14153174799615",
-    "merged_at": "2026-11-16T22:52:35Z"
+   "17897": {
+    "title": "perf(natives): type on iPhone Mirroring twice as fast",
+    "merge_commit": "a71d48b6850a95c803dc95f1370142f0ecdb4b11",
+    "merged_at": "2026-11-18T10:14:12Z"
    },
-   "19481": {
-    "title": "fix(browser): forget a dialog the user or another client answered",
-    "merge_commit": "85f1939ab247d6e9dc03a1a176a5a2aa67dcd53b",
-    "merged_at": "2026-11-16T23:37:49Z"
+   "19629": {
+    "title": "fix(natives): refuse every Wayland input call at once when no input route exists",
+    "merge_commit": "bcbc1b9ef2cf1bcbe2fb9a31308aa2a8ab9ec05e",
+    "merged_at": "2026-11-18T17:12:46Z"
    },
-   "19224": {
-    "title": "fix(natives): choose a Chromium select's option on macOS and close the menu it opens",
-    "merge_commit": "d18725201362b8831f3c33132ca4fb76418b03e6",
-    "merged_at": "2026-11-16T23:37:49Z"
+   "19619": {
+    "title": "fix(catalog): carry Devin's measured image limits",
+    "merge_commit": "7d72a0224f7e35ee63e2cc699e0777b0a80d297b",
+    "merged_at": "2026-11-18T17:12:46Z"
    },
-   "19208": {
-    "title": "fix(natives): give the user's key window back after macOS takeover and focus-guard hand-backs",
-    "merge_commit": "5563ac58c36b0e74496b84c80216b3971e243890",
-    "merged_at": "2026-11-16T23:37:49Z"
+   "19606": {
+    "title": "fix(coding-agent): judge omp usage policy state by account-wide windows",
+    "merge_commit": "d0d57d7d5be51481f70f637d44ed83fc9319866c",
+    "merged_at": "2026-11-18T17:12:46Z"
    },
-   "19194": {
-    "title": "test(ai): keep captured Factory Droid parity cases when one case fails",
-    "merge_commit": "12eece8845f9469ea15624a47baf8d0dc8da74a5",
-    "merged_at": "2026-11-16T23:37:49Z"
+   "19605": {
+    "title": "fix(utils): apply OMP_LOG_LEVEL to the console transport",
+    "merge_commit": "34dadb878d845311904928875a7f6dd8f77099a9",
+    "merged_at": "2026-11-18T17:12:46Z"
    },
-   "19178": {
-    "title": "fix(browser-relay): keep a relay tab when another extension's frame keeps omp out",
-    "merge_commit": "7d878a1480ddc3f7b0c91a35193a2e27e5af72d0",
-    "merged_at": "2026-11-16T23:37:49Z"
+   "19602": {
+    "title": "fix(ai): read auth-broker responses that carry fields a newer broker adds",
+    "merge_commit": "850e17501228cfd7dd4405a1fe9b70053bbaa6c3",
+    "merged_at": "2026-11-18T17:12:46Z"
    },
-   "19165": {
-    "title": "fix(natives): scroll down for a positive dy on macOS, as on Windows and Linux",
-    "merge_commit": "7061d827a306a295f230bc0db6650a9bd5d2775f",
-    "merged_at": "2026-11-16T23:37:49Z"
+   "19601": {
+    "title": "fix(catalog): switch Devin's Gemini promo prices to list when each promo ends",
+    "merge_commit": "aba92696315b6945ceda3d2d7c22078ec63066fd",
+    "merged_at": "2026-11-18T17:12:46Z"
    },
-   "19120": {
-    "title": "fix(stats): count snapcompact compactions on the Gain tab",
-    "merge_commit": "c5c225b7c967d5bc49d3524fbd5a8f87405f6843",
-    "merged_at": "2026-11-16T23:37:49Z"
+   "19600": {
+    "title": "fix(ai): heal Claude tier blocks a shared weekly wall caused from single-window usage reports",
+    "merge_commit": "a6d09e9aa1991d4dd1c02c86cb3a99101fa9ee02",
+    "merged_at": "2026-11-18T17:12:46Z"
    },
-   "19080": {
-    "title": "fix(natives): type X11 XTest text through a neutral keyboard state",
-    "merge_commit": "02ba430bc35c41ed5fa4f2657c0af2c65e59a940",
-    "merged_at": "2026-11-16T23:37:49Z"
+   "19599": {
+    "title": "fix(coding-agent): let auth-broker serve save an in-flight refresh before exit",
+    "merge_commit": "713aba6df013437df844495f5ea83b17608f46b6",
+    "merged_at": "2026-11-18T17:12:46Z"
    },
-   "19066": {
-    "title": "fix(natives): refuse X11 XTest keys while another client grabs the keyboard",
-    "merge_commit": "ae43375b2cd5c282e93b186a603e573143556737",
-    "merged_at": "2026-11-16T23:37:49Z"
+   "19598": {
+    "title": "fix(ai): retry the initial auth-broker snapshot through a broker restart",
+    "merge_commit": "254ae243060e8258ef8b99d938c23321946cce2b",
+    "merged_at": "2026-11-18T17:12:46Z"
    },
-   "19063": {
-    "title": "fix(natives): point a refused macOS press at the element's own click",
-    "merge_commit": "98a8202c71ca4f1b8c1f19e312a69775f5a8e841",
-    "merged_at": "2026-11-16T23:37:49Z"
+   "19596": {
+    "title": "fix(natives): capture the visible part of a Linux window partly off its monitor",
+    "merge_commit": "7de774b6f7f5db17335d672eb7d7b052614b8df0",
+    "merged_at": "2026-11-18T17:12:46Z"
    },
-   "19062": {
-    "title": "fix(natives): report where focus went after a Windows takeover",
-    "merge_commit": "bcdad7cf324470460c3fed9f8196cbe353597010",
-    "merged_at": "2026-11-16T23:37:49Z"
+   "19586": {
+    "title": "docs(auth-gateway): describe reclaim moving warm pins back",
+    "merge_commit": "0e9db07d6cf4c2f21c53df6ba92aff5ea3034143",
+    "merged_at": "2026-11-18T17:12:46Z"
    },
-   "19061": {
-    "title": "fix(natives): name a macOS control by the label its AXTitleUIElement links to",
-    "merge_commit": "82661d6e25c21129313769f416a5753490def555",
-    "merged_at": "2026-11-16T23:37:49Z"
+   "19532": {
+    "title": "fix(natives): put the user's key window back in front of a macOS target after background input and takeover",
+    "merge_commit": "958607927742b92faffe8fc6fc7f6a107255bee1",
+    "merged_at": "2026-11-18T17:12:46Z"
    },
-   "19048": {
-    "title": "fix(natives): follow rebuilt macOS table rows without selecting a neighbour",
-    "merge_commit": "c5deaee95135abefc490acc347ffd2591a8c9fbf",
-    "merged_at": "2026-11-16T23:37:49Z"
-   },
-   "19035": {
-    "title": "fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility",
-    "merge_commit": "295826b038b85544dd7ffe6879d8f60064f474e0",
-    "merged_at": "2026-11-16T23:37:49Z"
-   },
-   "19025": {
-    "title": "fix(natives): map Windows keys on the receiving keyboard layout",
-    "merge_commit": "79cb23f69059475451bc09d089e4e29be23e442d",
-    "merged_at": "2026-11-16T23:37:49Z"
-   },
-   "19034": {
-    "title": "fix(natives): choose Linux combo box options without opening their keyboard-grabbing list",
-    "merge_commit": "8cad3c339a0d590c2d4b45c74cc299252efdf087",
-    "merged_at": "2026-11-16T23:37:50Z"
-   },
-   "19405": {
-    "title": "fix(natives): set macOS sliders and other number controls from setValue",
-    "merge_commit": "d47787163af36022169c0b8af8743919eee0e29f",
-    "merged_at": "2026-11-17T00:27:46Z"
-   },
-   "19296": {
-    "title": "fix(natives): keep macOS takeover from taking a typing user's keys",
-    "merge_commit": "665ee2530bc2eb4582b4af2f1d639e8420724fe7",
-    "merged_at": "2026-11-17T00:27:46Z"
-   },
-   "19258": {
-    "title": "fix(natives): refuse macOS element actions on a control a person could not click",
-    "merge_commit": "fd01163c0c7265b72ced0f5a9a349e3c8b60ef08",
-    "merged_at": "2026-11-17T00:27:46Z"
-   },
-   "19179": {
-    "title": "fix(natives): close the menu a macOS background key press opens",
-    "merge_commit": "bfa1f8bf3a490f0fb446c10cac1e1b338793d6ec",
-    "merged_at": "2026-11-17T00:27:46Z"
-   },
-   "19045": {
-    "title": "feat(browser): let observe() settle the effects of the preceding action",
-    "merge_commit": "6f360ba7fe2e5c0cd6883b707ee4ff785b76bed4",
-    "merged_at": "2026-11-17T00:27:46Z"
-   },
-   "19036": {
-    "title": "fix(natives): stop Linux accessibility reads from freezing apps that show long tables",
-    "merge_commit": "5af131c69274200ee4ba032568e9ccab44291c69",
-    "merged_at": "2026-11-17T00:27:46Z"
-   },
-   "19001": {
-    "title": "fix(browser-relay): say what the relay hid in a driven tab",
-    "merge_commit": "7cd4adbea1f68c49cbfe726f660760ec7ebfd0f0",
-    "merged_at": "2026-11-17T00:27:47Z"
-   },
-   "18987": {
-    "title": "feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy",
-    "merge_commit": "87c9959fe16fa123f26feed25c2816edf1b3ba7d",
-    "merged_at": "2026-11-17T00:27:47Z"
-   },
-   "18925": {
-    "title": "feat(coding-agent): name the native windows a browser call raised on macOS",
-    "merge_commit": "7e17184a906cae569c4b7b2856cc1d43630ae515",
-    "merged_at": "2026-11-17T02:40:38Z"
-   },
-   "18789": {
-    "title": "feat(coding-agent): keep subagents' browser tabs out of the user's Chrome and Tern pane unless asked",
-    "merge_commit": "1f77bfabf4aa4618505a77b933937e790781fb0f",
-    "merged_at": "2026-11-17T02:40:38Z"
-   },
-   "18786": {
-    "title": "feat(agent,coding-agent): send a short browser guide with the first browser call",
-    "merge_commit": "98b300789aefe7768a80eddcde9e6ed4bea89180",
-    "merged_at": "2026-11-17T02:40:38Z"
-   },
-   "18624": {
-    "title": "fix(ai): say whether an Anthropic request body finished uploading when its connection drops",
-    "merge_commit": "d92b493207964825d975425da2a84539bba6cec5",
-    "merged_at": "2026-11-17T02:40:38Z"
-   },
-   "18353": {
-    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
-    "merge_commit": "b2182f0dc39e30fafdc2814756d7f0cfcaf6c944",
-    "merged_at": "2026-11-17T02:40:38Z"
-   },
-   "18222": {
-    "title": "feat(coding-agent): find nested menu commands in one read",
-    "merge_commit": "cbafcab9dd0de408da896bd8fa11599d5c482114",
-    "merged_at": "2026-11-17T02:40:38Z"
-   },
-   "18013": {
-    "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "merge_commit": "3eac7afd80d55f4678ebe0458304cd472018adc9",
-    "merged_at": "2026-11-17T02:40:38Z"
-   },
-   "16553": {
-    "title": "fix(natives): place macOS clicks for the focus guard where WindowServer routed them",
-    "merge_commit": "087f80db4728b3c15cb5c9996ee28c4a6bd0d7ef",
-    "merged_at": "2026-11-17T02:40:38Z"
-   },
-   "18125": {
-    "title": "fix(ai,coding-agent): keep Anthropic web search queries intact, always search, and report refusals",
-    "merge_commit": "fc88d5b6fa2c981a7be6a1728f267de588281334",
-    "merged_at": "2026-11-17T02:40:39Z"
-   },
-   "17610": {
-    "title": "fix(ai,coding-agent): carry other models' reasoning to Claude and retry its refusal without it",
-    "merge_commit": "b158ec31da4fb7217261eee33be81310b9bfec22",
-    "merged_at": "2026-11-17T02:40:39Z"
-   },
-   "19524": {
-    "title": "fix(coding-agent): refuse browser keys aimed at a field a modal dialog covers",
-    "merge_commit": "aaa24ea395171af4b567d02ab1d22e4236eb91bc",
-    "merged_at": "2026-11-17T17:39:12Z"
-   },
-   "19521": {
-    "title": "fix(natives): read each AT-SPI element in two concurrent rounds",
-    "merge_commit": "b3639374207913e0fcd55dd410710b76dfed2d13",
-    "merged_at": "2026-11-17T17:39:12Z"
-   },
-   "19518": {
-    "title": "feat(browser): accept explicit dropdown option selectors",
-    "merge_commit": "5bad38df5afde14df242df0dab42dc93486e062d",
-    "merged_at": "2026-11-17T17:39:12Z"
-   },
-   "19515": {
-    "title": "fix(natives): count keys moved back to a macOS user's app as theirs",
-    "merge_commit": "9c1b48dc8168cb4f588a39488a5967614760d386",
-    "merged_at": "2026-11-17T17:39:12Z"
-   },
-   "19509": {
-    "title": "fix(coding-agent): say once that a macOS background move gives no hover",
-    "merge_commit": "e7bb3ff1c04940608886a6146321587b5fde05df",
-    "merged_at": "2026-11-17T17:39:12Z"
+   "19516": {
+    "title": "fix(natives): read a macOS popup after the option its typed letters choose",
+    "merge_commit": "4dbe7c2cf0309753befa9bb73a3f65758bc645b2",
+    "merged_at": "2026-11-18T17:12:46Z"
    }
   },
   "ready": [
    17756,
-   17897,
-   19100,
    19195,
    19504,
    19513,
-   19516,
    19519,
    19531,
-   19532,
-   19542
+   19542,
+   19590,
+   19592,
+   19611,
+   19615,
+   19616,
+   19618,
+   19620,
+   19623,
+   19626,
+   19633,
+   19696
   ],
   "post_merge": {
    "16553": {
@@ -103204,6 +103094,12 @@
     "title": "fix(ai,coding-agent): carry other models' reasoning to Claude and retry its refusal without it",
     "merge_commit": "b158ec31da4fb7217261eee33be81310b9bfec22",
     "merged_at": "2026-11-17T02:40:39Z",
+    "findings": []
+   },
+   "17897": {
+    "title": "perf(natives): type on iPhone Mirroring twice as fast",
+    "merge_commit": "a71d48b6850a95c803dc95f1370142f0ecdb4b11",
+    "merged_at": "2026-11-18T10:14:12Z",
     "findings": []
    },
    "18013": {
@@ -103355,6 +103251,12 @@
     "merged_at": "2026-11-16T23:37:49Z",
     "findings": []
    },
+   "19100": {
+    "title": "fix(computer): retain output and screenshots when a run fails",
+    "merge_commit": "542454c814a483c0c5605e234134de81d35d297c",
+    "merged_at": "2026-11-18T00:31:44Z",
+    "findings": []
+   },
    "19120": {
     "title": "fix(stats): count snapcompact compactions on the Gain tab",
     "merge_commit": "c5c225b7c967d5bc49d3524fbd5a8f87405f6843",
@@ -103439,6 +103341,12 @@
     "merged_at": "2026-11-17T17:39:12Z",
     "findings": []
    },
+   "19516": {
+    "title": "fix(natives): read a macOS popup after the option its typed letters choose",
+    "merge_commit": "4dbe7c2cf0309753befa9bb73a3f65758bc645b2",
+    "merged_at": "2026-11-18T17:12:46Z",
+    "findings": []
+   },
    "19518": {
     "title": "feat(browser): accept explicit dropdown option selectors",
     "merge_commit": "5bad38df5afde14df242df0dab42dc93486e062d",
@@ -103456,869 +103364,81 @@
     "merge_commit": "aaa24ea395171af4b567d02ab1d22e4236eb91bc",
     "merged_at": "2026-11-17T17:39:12Z",
     "findings": []
+   },
+   "19532": {
+    "title": "fix(natives): put the user's key window back in front of a macOS target after background input and takeover",
+    "merge_commit": "958607927742b92faffe8fc6fc7f6a107255bee1",
+    "merged_at": "2026-11-18T17:12:46Z",
+    "findings": []
+   },
+   "19586": {
+    "title": "docs(auth-gateway): describe reclaim moving warm pins back",
+    "merge_commit": "0e9db07d6cf4c2f21c53df6ba92aff5ea3034143",
+    "merged_at": "2026-11-18T17:12:46Z",
+    "findings": []
+   },
+   "19596": {
+    "title": "fix(natives): capture the visible part of a Linux window partly off its monitor",
+    "merge_commit": "7de774b6f7f5db17335d672eb7d7b052614b8df0",
+    "merged_at": "2026-11-18T17:12:46Z",
+    "findings": []
+   },
+   "19598": {
+    "title": "fix(ai): retry the initial auth-broker snapshot through a broker restart",
+    "merge_commit": "254ae243060e8258ef8b99d938c23321946cce2b",
+    "merged_at": "2026-11-18T17:12:46Z",
+    "findings": []
+   },
+   "19599": {
+    "title": "fix(coding-agent): let auth-broker serve save an in-flight refresh before exit",
+    "merge_commit": "713aba6df013437df844495f5ea83b17608f46b6",
+    "merged_at": "2026-11-18T17:12:46Z",
+    "findings": []
+   },
+   "19600": {
+    "title": "fix(ai): heal Claude tier blocks a shared weekly wall caused from single-window usage reports",
+    "merge_commit": "a6d09e9aa1991d4dd1c02c86cb3a99101fa9ee02",
+    "merged_at": "2026-11-18T17:12:46Z",
+    "findings": []
+   },
+   "19601": {
+    "title": "fix(catalog): switch Devin's Gemini promo prices to list when each promo ends",
+    "merge_commit": "aba92696315b6945ceda3d2d7c22078ec63066fd",
+    "merged_at": "2026-11-18T17:12:46Z",
+    "findings": []
+   },
+   "19602": {
+    "title": "fix(ai): read auth-broker responses that carry fields a newer broker adds",
+    "merge_commit": "850e17501228cfd7dd4405a1fe9b70053bbaa6c3",
+    "merged_at": "2026-11-18T17:12:46Z",
+    "findings": []
+   },
+   "19605": {
+    "title": "fix(utils): apply OMP_LOG_LEVEL to the console transport",
+    "merge_commit": "34dadb878d845311904928875a7f6dd8f77099a9",
+    "merged_at": "2026-11-18T17:12:46Z",
+    "findings": []
+   },
+   "19606": {
+    "title": "fix(coding-agent): judge omp usage policy state by account-wide windows",
+    "merge_commit": "d0d57d7d5be51481f70f637d44ed83fc9319866c",
+    "merged_at": "2026-11-18T17:12:46Z",
+    "findings": []
+   },
+   "19619": {
+    "title": "fix(catalog): carry Devin's measured image limits",
+    "merge_commit": "7d72a0224f7e35ee63e2cc699e0777b0a80d297b",
+    "merged_at": "2026-11-18T17:12:46Z",
+    "findings": []
+   },
+   "19629": {
+    "title": "fix(natives): refuse every Wayland input call at once when no input route exists",
+    "merge_commit": "bcbc1b9ef2cf1bcbe2fb9a31308aa2a8ab9ec05e",
+    "merged_at": "2026-11-18T17:12:46Z",
+    "findings": []
    }
   },
   "events": [
-   {
-    "at": "2026-11-10T19:47:07Z",
-    "kind": "openable",
-    "id": "observe-print",
-    "title": "fix(browser): print every observed element, one line each, instead of cutting at 100"
-   },
-   {
-    "at": "2026-11-10T19:47:07Z",
-    "kind": "openable",
-    "id": "screenshot-result-line",
-    "title": "feat(coding-agent): report browser screenshots and opens on one line"
-   },
-   {
-    "at": "2026-11-10T19:47:07Z",
-    "kind": "openable",
-    "id": "factory-droid-171-pin",
-    "title": "feat(ai,catalog): identify Factory Droid requests as droid 1.7.1"
-   },
-   {
-    "at": "2026-11-10T20:17:32Z",
-    "kind": "unopenable",
-    "id": "observe-print",
-    "title": "fix(browser): print every observed element, one line each, instead of cutting at 100",
-    "why": "opened as #18772"
-   },
-   {
-    "at": "2026-11-10T20:17:32Z",
-    "kind": "unopenable",
-    "id": "subagent-browser",
-    "title": "fix(coding-agent): keep a child omp's browser tabs out of its parent's Tern pane and cmux workspace",
-    "why": "opened as #18773"
-   },
-   {
-    "at": "2026-11-10T20:17:32Z",
-    "kind": "unopenable",
-    "id": "factory-droid-171-pin",
-    "title": "feat(ai,catalog): identify Factory Droid requests as droid 1.7.1",
-    "why": "opened as #18771"
-   },
-   {
-    "at": "2026-11-10T20:17:32Z",
-    "kind": "conflict",
-    "label": "#18353",
-    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
-    "files": [
-     "MODULE.bazel.lock"
-    ]
-   },
-   {
-    "at": "2026-11-10T20:17:32Z",
-    "kind": "conflict",
-    "label": "#18013",
-    "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "files": [
-     "MODULE.bazel.lock"
-    ]
-   },
-   {
-    "at": "2026-11-10T20:48:01Z",
-    "kind": "openable",
-    "id": "x11-covered-capture",
-    "title": "fix(natives): capture a covered X11 window from its own pixels, or say it is covered"
-   },
-   {
-    "at": "2026-11-10T20:48:01Z",
-    "kind": "unopenable",
-    "id": "eval-error-frames",
-    "title": "fix(coding-agent): print a failed JavaScript cell's own frames, not omp's host stack",
-    "why": "opened as #18775"
-   },
-   {
-    "at": "2026-11-10T20:48:01Z",
-    "kind": "unopenable",
-    "id": "screenshot-result-line",
-    "title": "feat(coding-agent): report browser screenshots and opens on one line",
-    "why": "opened as #18776"
-   },
-   {
-    "at": "2026-11-10T21:17:59Z",
-    "kind": "openable",
-    "id": "x11-takeover-user",
-    "title": "fix(natives): keep X11 takeover from taking a typing user's keys"
-   },
-   {
-    "at": "2026-11-10T22:19:02Z",
-    "kind": "merged",
-    "number": 18773,
-    "title": "fix(coding-agent): keep a child omp's browser tabs out of its parent's Tern pane and cmux workspace",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-10T22:19:02Z",
-    "kind": "merged",
-    "number": 18768,
-    "title": "fix(catalog): show list prices for Factory Droid Fable 5.1, GLM 5.2 Fast and Muse Spark Open",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-10T22:19:02Z",
-    "kind": "merged",
-    "number": 18767,
-    "title": "fix(catalog): show Factory Droid's Gemini 4 Argon credit promotion",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-10T22:19:02Z",
-    "kind": "merged",
-    "number": 18761,
-    "title": "fix(browser): have agents report a step the page cannot do instead of faking it",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-10T22:19:02Z",
-    "kind": "merged",
-    "number": 18746,
-    "title": "fix(natives): wait for another session's input lock before failing InputBusy",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-10T22:19:02Z",
-    "kind": "merged",
-    "number": 18745,
-    "title": "fix(natives): accept aliases in computer role searches",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-10T22:19:02Z",
-    "kind": "merged",
-    "number": 18744,
-    "title": "fix(coding-agent): prefer exact app names when selecting windows",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-10T22:19:02Z",
-    "kind": "merged",
-    "number": 18739,
-    "title": "fix(browser): point calls on a tab that is not open at browser.open()",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-10T22:19:02Z",
-    "kind": "merged",
-    "number": 18675,
-    "title": "fix(natives): send macOS keys for a window to the sheet focused on it",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-10T22:19:02Z",
-    "kind": "merged",
-    "number": 18680,
-    "title": "fix(natives): restore Finder with its desktop focus after macOS background input",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-10T22:19:02Z",
-    "kind": "merged",
-    "number": 18658,
-    "title": "fix(coding-agent): preserve role selectors across locales and document waits",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-10T22:19:02Z",
-    "kind": "merged",
-    "number": 18657,
-    "title": "fix(browser-relay): keep a shared child frame attached when one connection turns auto-attach off",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-10T22:19:02Z",
-    "kind": "openable",
-    "id": "subagent-browser-relay",
-    "title": "feat(coding-agent): keep subagents' browser tabs out of the user's Chrome and Tern pane unless asked"
-   },
-   {
-    "at": "2026-11-10T22:19:02Z",
-    "kind": "unopenable",
-    "id": "x11-covered-capture",
-    "title": "fix(natives): capture a covered X11 window from its own pixels, or say it is covered",
-    "why": "opened as #18783"
-   },
-   {
-    "at": "2026-11-10T22:19:02Z",
-    "kind": "unopenable",
-    "id": "x11-takeover-user",
-    "title": "fix(natives): keep X11 takeover from taking a typing user's keys",
-    "why": "opened as #18784"
-   },
-   {
-    "at": "2026-11-10T22:49:03Z",
-    "kind": "openable",
-    "id": "x11-mpx-qt",
-    "title": "fix(natives): stop X11 background input from crashing your running Qt 6.5+ apps"
-   },
-   {
-    "at": "2026-11-10T22:49:03Z",
-    "kind": "unopenable",
-    "id": "subagent-browser-relay",
-    "title": "feat(coding-agent): keep subagents' browser tabs out of the user's Chrome and Tern pane unless asked",
-    "why": "opened as #18789"
-   },
-   {
-    "at": "2026-11-10T23:50:44Z",
-    "kind": "openable",
-    "id": "atspi-unanswered-app",
-    "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool"
-   },
-   {
-    "at": "2026-11-10T23:50:44Z",
-    "kind": "openable",
-    "id": "agent-identity",
-    "title": "feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy"
-   },
-   {
-    "at": "2026-11-11T00:21:30Z",
-    "kind": "openable",
-    "id": "browser-select-readback",
-    "title": "fix(coding-agent): return the options a page leaves selected after its change handlers"
-   },
-   {
-    "at": "2026-11-11T00:21:30Z",
-    "kind": "openable",
-    "id": "browser-download-missing-file",
-    "title": "fix(coding-agent): fail a download wait when the saved file is not on this machine"
-   },
-   {
-    "at": "2026-11-11T00:21:30Z",
-    "kind": "unopenable",
-    "id": "x11-mpx-qt",
-    "title": "fix(natives): stop X11 background input from crashing your running Qt 6.5+ apps",
-    "why": "plan: wait (conflicts with #18784 in crates/pi-natives/src/desktop/linux/x11/mpx.rs)"
-   },
-   {
-    "at": "2026-11-11T00:21:30Z",
-    "kind": "unopenable",
-    "id": "atspi-unanswered-app",
-    "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool",
-    "why": "plan: held (held: Main, 2026-11-11: waits for AtspiHarm's description paragraph and Main's P0 call; conflicts with #18353 in MODULE.bazel.lock, crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs; conflicts with #18013 in MODULE.bazel.lock)"
-   },
-   {
-    "at": "2026-11-11T00:21:30Z",
-    "kind": "unopenable",
-    "id": "agent-identity",
-    "title": "feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy",
-    "why": "plan: wait (conflicts with #18784 in docs/tools/computer.md)"
-   },
-   {
-    "at": "2026-11-11T00:51:58Z",
-    "kind": "openable",
-    "id": "atspi-unanswered-app",
-    "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool"
-   },
-   {
-    "at": "2026-11-11T01:52:22Z",
-    "kind": "openable",
-    "id": "macos-click-timestamp",
-    "title": "fix(natives): stop macOS background left clicks from crashing Electron and Chrome pages"
-   },
-   {
-    "at": "2026-11-11T01:52:22Z",
-    "kind": "openable",
-    "id": "relay-detach-owned-close",
-    "title": "fix(browser): say omp closed its own relay tab when Chrome's detach ends it"
-   },
-   {
-    "at": "2026-11-11T01:52:22Z",
-    "kind": "openable",
-    "id": "relay-target-miss-hint",
-    "title": "fix(browser): name the relay's own-tab open when a target matches no tab"
-   },
-   {
-    "at": "2026-11-11T02:22:35Z",
-    "kind": "openable",
-    "id": "qt5-getall-crash",
-    "title": "fix(natives): stop Linux computer reads from crashing Qt, GTK 3 and Firefox apps"
-   },
-   {
-    "at": "2026-11-11T02:22:35Z",
-    "kind": "openable",
-    "id": "x11-mpx-qt",
-    "title": "fix(natives): stop X11 background input from crashing your running Qt 6.5+ apps"
-   },
-   {
-    "at": "2026-11-11T02:53:00Z",
-    "kind": "openable",
-    "id": "x11-mpx-key-confirm",
-    "title": "fix(natives): confirm every X11 virtual-keyboard key release, in order"
-   },
-   {
-    "at": "2026-11-11T03:23:48Z",
-    "kind": "released",
-    "number": 18773,
-    "title": "fix(coding-agent): keep a child omp's browser tabs out of its parent's Tern pane and cmux workspace",
-    "tag": "v18.18.8"
-   },
-   {
-    "at": "2026-11-11T03:23:48Z",
-    "kind": "released",
-    "number": 18768,
-    "title": "fix(catalog): show list prices for Factory Droid Fable 5.1, GLM 5.2 Fast and Muse Spark Open",
-    "tag": "v18.18.8"
-   },
-   {
-    "at": "2026-11-11T03:23:48Z",
-    "kind": "released",
-    "number": 18767,
-    "title": "fix(catalog): show Factory Droid's Gemini 4 Argon credit promotion",
-    "tag": "v18.18.8"
-   },
-   {
-    "at": "2026-11-11T03:23:48Z",
-    "kind": "released",
-    "number": 18761,
-    "title": "fix(browser): have agents report a step the page cannot do instead of faking it",
-    "tag": "v18.18.8"
-   },
-   {
-    "at": "2026-11-11T03:23:48Z",
-    "kind": "released",
-    "number": 18746,
-    "title": "fix(natives): wait for another session's input lock before failing InputBusy",
-    "tag": "v18.18.8"
-   },
-   {
-    "at": "2026-11-11T03:23:48Z",
-    "kind": "released",
-    "number": 18745,
-    "title": "fix(natives): accept aliases in computer role searches",
-    "tag": "v18.18.8"
-   },
-   {
-    "at": "2026-11-11T03:23:48Z",
-    "kind": "released",
-    "number": 18744,
-    "title": "fix(coding-agent): prefer exact app names when selecting windows",
-    "tag": "v18.18.8"
-   },
-   {
-    "at": "2026-11-11T03:23:48Z",
-    "kind": "released",
-    "number": 18739,
-    "title": "fix(browser): point calls on a tab that is not open at browser.open()",
-    "tag": "v18.18.8"
-   },
-   {
-    "at": "2026-11-11T03:23:48Z",
-    "kind": "released",
-    "number": 18675,
-    "title": "fix(natives): send macOS keys for a window to the sheet focused on it",
-    "tag": "v18.18.8"
-   },
-   {
-    "at": "2026-11-11T03:23:48Z",
-    "kind": "released",
-    "number": 18680,
-    "title": "fix(natives): restore Finder with its desktop focus after macOS background input",
-    "tag": "v18.18.8"
-   },
-   {
-    "at": "2026-11-11T03:23:48Z",
-    "kind": "released",
-    "number": 18658,
-    "title": "fix(coding-agent): preserve role selectors across locales and document waits",
-    "tag": "v18.18.8"
-   },
-   {
-    "at": "2026-11-11T03:23:48Z",
-    "kind": "released",
-    "number": 18657,
-    "title": "fix(browser-relay): keep a shared child frame attached when one connection turns auto-attach off",
-    "tag": "v18.18.8"
-   },
-   {
-    "at": "2026-11-11T03:23:48Z",
-    "kind": "openable",
-    "id": "atspi-text-first",
-    "title": "fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility"
-   },
-   {
-    "at": "2026-11-11T03:23:48Z",
-    "kind": "unopenable",
-    "id": "atspi-unanswered-app",
-    "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool",
-    "why": "plan: wait (conflicts with #18353 in MODULE.bazel.lock, crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs; conflicts with #18013 in MODULE.bazel.lock; conflicts with main in MODULE.bazel.lock)"
-   },
-   {
-    "at": "2026-11-11T03:23:48Z",
-    "kind": "conflict",
-    "label": "#18353",
-    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
-    "files": [
-     "MODULE.bazel.lock"
-    ]
-   },
-   {
-    "at": "2026-11-11T03:23:48Z",
-    "kind": "conflict",
-    "label": "#18013",
-    "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "files": [
-     "MODULE.bazel.lock"
-    ]
-   },
-   {
-    "at": "2026-11-11T03:54:34Z",
-    "kind": "openable",
-    "id": "atspi-unanswered-app",
-    "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool"
-   },
-   {
-    "at": "2026-11-11T03:54:34Z",
-    "kind": "unopenable",
-    "id": "macos-click-timestamp",
-    "title": "fix(natives): stop macOS background left clicks from crashing Electron and Chrome pages",
-    "why": "opened as #18824"
-   },
-   {
-    "at": "2026-11-11T03:54:34Z",
-    "kind": "unopenable",
-    "id": "qt5-getall-crash",
-    "title": "fix(natives): stop Linux computer reads from crashing Qt, GTK 3 and Firefox apps",
-    "why": "opened as #18823"
-   },
-   {
-    "at": "2026-11-11T03:54:34Z",
-    "kind": "unopenable",
-    "id": "x11-mpx-qt",
-    "title": "fix(natives): stop X11 background input from crashing your running Qt 6.5+ apps",
-    "why": "opened as #18825"
-   },
-   {
-    "at": "2026-11-11T03:54:34Z",
-    "kind": "unopenable",
-    "id": "atspi-text-first",
-    "title": "fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility",
-    "why": "plan: wait (conflicts with atspi-unanswered-app in crates/pi-natives/src/desktop/linux/wayland/mod.rs)"
-   },
-   {
-    "at": "2026-11-11T04:25:00Z",
-    "kind": "unopenable",
-    "id": "atspi-unanswered-app",
-    "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool",
-    "why": "plan: wait (conflicts with #18823 in crates/pi-natives/src/desktop/linux/ax.rs; conflicts with #18353 in MODULE.bazel.lock, crates/pi-natives/Cargo.toml, crates/pi-natives/src/desktop/linux/wayland/mod.rs; conflicts with #18013 in MODULE.bazel.lock)"
-   },
-   {
-    "at": "2026-11-11T04:55:02Z",
-    "kind": "unopenable",
-    "id": "x11-mpx-key-confirm",
-    "title": "fix(natives): confirm every X11 virtual-keyboard key release, in order",
-    "why": "opened as #18828"
-   },
-   {
-    "at": "2026-11-11T05:25:43Z",
-    "kind": "unopenable",
-    "id": "browser-select-readback",
-    "title": "fix(coding-agent): return the options a page leaves selected after its change handlers",
-    "why": "opened as #18829"
-   },
-   {
-    "at": "2026-11-11T05:25:43Z",
-    "kind": "unopenable",
-    "id": "browser-download-missing-file",
-    "title": "fix(coding-agent): fail a download wait when the saved file is not on this machine",
-    "why": "opened as #18830"
-   },
-   {
-    "at": "2026-11-11T05:25:43Z",
-    "kind": "unopenable",
-    "id": "relay-detach-owned-close",
-    "title": "fix(browser): say omp closed its own relay tab when Chrome's detach ends it",
-    "why": "opened as #18832"
-   },
-   {
-    "at": "2026-11-11T05:25:43Z",
-    "kind": "unopenable",
-    "id": "relay-target-miss-hint",
-    "title": "fix(browser): name the relay's own-tab open when a target matches no tab",
-    "why": "opened as #18833"
-   },
-   {
-    "at": "2026-11-11T05:55:48Z",
-    "kind": "openable",
-    "id": "print-pref",
-    "title": "fix(coding-agent,browser-relay): stop a page calling window.print() from hanging browser calls"
-   },
-   {
-    "at": "2026-11-11T06:26:06Z",
-    "kind": "unopenable",
-    "id": "print-pref",
-    "title": "fix(coding-agent,browser-relay): stop a page calling window.print() from hanging browser calls",
-    "why": "opened as #18838"
-   },
-   {
-    "at": "2026-11-11T09:30:26Z",
-    "kind": "openable",
-    "id": "win-target-layout",
-    "title": "fix(natives): map Windows keys on the receiving keyboard layout"
-   },
-   {
-    "at": "2026-11-11T10:00:57Z",
-    "kind": "openable",
-    "id": "browser-main-wait-globals",
-    "title": "fix(browser): keep main-world waits from exposing query bindings"
-   },
-   {
-    "at": "2026-11-11T10:00:57Z",
-    "kind": "openable",
-    "id": "macos-press-disabled",
-    "title": "fix(natives): refuse a macOS press on a disabled element"
-   },
-   {
-    "at": "2026-11-11T10:00:57Z",
-    "kind": "openable",
-    "id": "win-posted-modifiers",
-    "title": "fix(natives): refuse Windows background input that holds a modifier"
-   },
-   {
-    "at": "2026-11-11T10:00:57Z",
-    "kind": "openable",
-    "id": "browser-main-wait-navigation",
-    "title": "fix(browser): rearm main-world waits after navigation"
-   },
-   {
-    "at": "2026-11-11T10:00:57Z",
-    "kind": "openable",
-    "id": "macos-ax-cancel-before-send",
-    "title": "fix(natives): send no macOS AX action once its run is cancelled"
-   },
-   {
-    "at": "2026-11-11T10:00:57Z",
-    "kind": "openable",
-    "id": "macos-menu-miss-items",
-    "title": "fix(natives): name the menu items on offer when a menu bar path misses"
-   },
-   {
-    "at": "2026-11-11T10:00:57Z",
-    "kind": "unopenable",
-    "id": "win-target-layout",
-    "title": "fix(natives): map Windows keys on the receiving keyboard layout",
-    "why": "plan: held (held: WindowsMined, 2026-11-11: live Windows trial pending; unhold when its body carries the result; conflicts with win-posted-modifiers in crates/pi-natives/src/desktop/win32/input.rs)"
-   },
-   {
-    "at": "2026-11-11T10:31:11Z",
-    "kind": "openable",
-    "id": "xproc-intervention",
-    "title": "fix(natives): stop macOS input refusals between omp processes"
-   },
-   {
-    "at": "2026-11-11T10:31:11Z",
-    "kind": "openable",
-    "id": "win-menu-modal",
-    "title": "fix(natives): confirm Windows menu commands that open modal dialogs"
-   },
-   {
-    "at": "2026-11-11T10:31:11Z",
-    "kind": "openable",
-    "id": "wait-ladder-context",
-    "title": "feat(wait): reduce empty checks in large conversations"
-   },
-   {
-    "at": "2026-11-11T11:01:45Z",
-    "kind": "openable",
-    "id": "ax-ref-read-as",
-    "title": "fix(natives): refuse macOS element actions once the ref's element reads as another control"
-   },
-   {
-    "at": "2026-11-11T11:01:45Z",
-    "kind": "openable",
-    "id": "macos-layout-chords",
-    "title": "fix(natives): press macOS key chords on the keys of the current keyboard layout"
-   },
-   {
-    "at": "2026-11-11T12:02:52Z",
-    "kind": "openable",
-    "id": "win-takeover-focus",
-    "title": "fix(natives): hand the foreground back after Windows element takeover input"
-   },
-   {
-    "at": "2026-11-11T12:02:52Z",
-    "kind": "unopenable",
-    "id": "browser-main-wait-globals",
-    "title": "fix(browser): keep main-world waits from exposing query bindings",
-    "why": "opened as #18883"
-   },
-   {
-    "at": "2026-11-11T12:02:52Z",
-    "kind": "unopenable",
-    "id": "browser-main-wait-navigation",
-    "title": "fix(browser): rearm main-world waits after navigation",
-    "why": "opened as #18884"
-   },
-   {
-    "at": "2026-11-11T12:02:52Z",
-    "kind": "conflict",
-    "label": "#18013",
-    "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "files": [
-     "MODULE.bazel.lock"
-    ]
-   },
-   {
-    "at": "2026-11-11T13:34:31Z",
-    "kind": "openable",
-    "id": "win-setvalue-readback",
-    "title": "fix(natives): verify Windows value writes and notify combo selections"
-   },
-   {
-    "at": "2026-11-11T13:34:31Z",
-    "kind": "openable",
-    "id": "atspi-press-actions",
-    "title": "fix(natives): press Chromium menu items, options and tabs on Linux"
-   },
-   {
-    "at": "2026-11-11T13:34:31Z",
-    "kind": "openable",
-    "id": "browser-wait-selector-state",
-    "title": "fix(browser): honor selector wait states and reject unknown options"
-   },
-   {
-    "at": "2026-11-11T13:34:31Z",
-    "kind": "unopenable",
-    "id": "ax-ref-read-as",
-    "title": "fix(natives): refuse macOS element actions once the ref's element reads as another control",
-    "why": "opened as #18892"
-   },
-   {
-    "at": "2026-11-11T13:34:31Z",
-    "kind": "unopenable",
-    "id": "macos-layout-chords",
-    "title": "fix(natives): press macOS key chords on the keys of the current keyboard layout",
-    "why": "opened as #18897"
-   },
-   {
-    "at": "2026-11-11T13:34:31Z",
-    "kind": "unopenable",
-    "id": "macos-press-disabled",
-    "title": "fix(natives): refuse a macOS press on a disabled element",
-    "why": "opened as #18898"
-   },
-   {
-    "at": "2026-11-11T13:34:31Z",
-    "kind": "unopenable",
-    "id": "win-posted-modifiers",
-    "title": "fix(natives): refuse Windows background input that holds a modifier",
-    "why": "opened as #18895"
-   },
-   {
-    "at": "2026-11-11T13:34:31Z",
-    "kind": "unopenable",
-    "id": "xproc-intervention",
-    "title": "fix(natives): stop macOS input refusals between omp processes",
-    "why": "opened as #18896"
-   },
-   {
-    "at": "2026-11-11T13:34:31Z",
-    "kind": "unopenable",
-    "id": "macos-ax-cancel-before-send",
-    "title": "fix(natives): send no macOS AX action once its run is cancelled",
-    "why": "plan: wait (conflicts with #18898 in crates/pi-natives/src/desktop/macos/ax.rs)"
-   },
-   {
-    "at": "2026-11-11T14:04:44Z",
-    "kind": "merged",
-    "number": 18865,
-    "title": "fix(coding-agent): print nothing for a JavaScript eval cell that ends in an assignment",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-11T14:04:44Z",
-    "kind": "merged",
-    "number": 18840,
-    "title": "fix(browser): say where tab.run code runs when it reaches for a page global",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-11T14:04:44Z",
-    "kind": "merged",
-    "number": 18838,
-    "title": "fix(coding-agent): stop a page calling window.print() from hanging the browser omp launches",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-11T14:04:44Z",
-    "kind": "merged",
-    "number": 18833,
-    "title": "fix(browser): name the relay's own-tab open when a target matches no tab",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-11T14:04:44Z",
-    "kind": "merged",
-    "number": 18832,
-    "title": "fix(browser): give owned relay tabs truthful detach recovery guidance",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-11T14:04:44Z",
-    "kind": "merged",
-    "number": 18830,
-    "title": "fix(coding-agent): fail a download wait when the saved file is not on this machine",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-11T14:04:44Z",
-    "kind": "merged",
-    "number": 18829,
-    "title": "fix(coding-agent): return the options a page leaves selected after its change handlers",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-11T14:04:44Z",
-    "kind": "merged",
-    "number": 18824,
-    "title": "fix(natives): stop macOS background left clicks from crashing Electron and Chrome pages",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-11T14:04:44Z",
-    "kind": "merged",
-    "number": 18823,
-    "title": "fix(natives): stop Linux computer reads from crashing Qt, GTK 3 and Firefox apps",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-11T14:04:44Z",
-    "kind": "merged",
-    "number": 18795,
-    "title": "fix(catalog): drop Devin's retired SWE-1.6 Fast seed row",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-11T14:04:44Z",
-    "kind": "merged",
-    "number": 18766,
-    "title": "fix(catalog): identify Devin requests as CLI 3000.12.43",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-11T14:04:44Z",
-    "kind": "merged",
-    "number": 18676,
-    "title": "fix(coding-agent): look a click's selector up again when the page replaces its element",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-11T14:04:44Z",
-    "kind": "merged",
-    "number": 17757,
-    "title": "fix(natives): match macOS window screenshots to the window on screen",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-11T14:04:44Z",
-    "kind": "merged",
-    "number": 16274,
-    "title": "fix(agent,coding-agent): re-read a file an earlier bash call changed in the same message",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-11T14:04:44Z",
-    "kind": "openable",
-    "id": "atspi-unanswered-app",
-    "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool"
-   },
-   {
-    "at": "2026-11-11T14:35:37Z",
-    "kind": "openable",
-    "id": "r2/native-window-report",
-    "title": "feat(coding-agent): name the native windows a browser call raised on macOS"
-   },
-   {
-    "at": "2026-11-11T15:05:44Z",
-    "kind": "conflict",
-    "label": "#18353",
-    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
-    "files": [
-     "nix/native.nix"
-    ]
-   },
-   {
-    "at": "2026-11-11T17:07:03Z",
-    "kind": "unopenable",
-    "id": "atspi-unanswered-app",
-    "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool",
-    "why": "opened as #18914"
-   },
-   {
-    "at": "2026-11-11T17:07:03Z",
-    "kind": "unopenable",
-    "id": "win-setvalue-readback",
-    "title": "fix(natives): verify Windows value writes and notify combo selections",
-    "why": "opened as #18915"
-   },
-   {
-    "at": "2026-11-11T17:07:03Z",
-    "kind": "unopenable",
-    "id": "win-takeover-focus",
-    "title": "fix(natives): hand the foreground back after Windows element takeover input",
-    "why": "opened as #18919"
-   },
-   {
-    "at": "2026-11-11T17:07:03Z",
-    "kind": "unopenable",
-    "id": "atspi-press-actions",
-    "title": "fix(natives): press Chromium menu items, options and tabs on Linux",
-    "why": "opened as #18921"
-   },
-   {
-    "at": "2026-11-11T17:07:03Z",
-    "kind": "unopenable",
-    "id": "browser-wait-selector-state",
-    "title": "fix(browser): honor selector wait states and reject unknown options",
-    "why": "opened as #18924"
-   },
-   {
-    "at": "2026-11-11T17:07:03Z",
-    "kind": "unopenable",
-    "id": "macos-menu-miss-items",
-    "title": "fix(natives): name the menu items on offer when a menu bar path misses",
-    "why": "opened as #18923"
-   },
-   {
-    "at": "2026-11-11T17:07:03Z",
-    "kind": "unopenable",
-    "id": "win-menu-modal",
-    "title": "fix(natives): confirm Windows menu commands that open modal dialogs",
-    "why": "opened as #18922"
-   },
-   {
-    "at": "2026-11-11T17:07:03Z",
-    "kind": "unopenable",
-    "id": "r2/native-window-report",
-    "title": "feat(coding-agent): name the native windows a browser call raised on macOS",
-    "why": "opened as #18925"
-   },
    {
     "at": "2026-11-11T18:38:11Z",
     "kind": "released",
@@ -106833,6 +105953,429 @@
     "title": "fix(coding-agent): say once that a macOS background move gives no hover",
     "merged_by": "H4vC",
     "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "released",
+    "number": 19191,
+    "title": "feat(catalog): add the Factory Droid models droid 1.7.1 serves",
+    "tag": "v18.22.1"
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "released",
+    "number": 19481,
+    "title": "fix(browser): forget a dialog the user or another client answered",
+    "tag": "v18.22.1"
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "released",
+    "number": 19224,
+    "title": "fix(natives): choose a Chromium select's option on macOS and close the menu it opens",
+    "tag": "v18.22.1"
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "released",
+    "number": 19208,
+    "title": "fix(natives): give the user's key window back after macOS takeover and focus-guard hand-backs",
+    "tag": "v18.22.1"
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "released",
+    "number": 19194,
+    "title": "test(ai): keep captured Factory Droid parity cases when one case fails",
+    "tag": "v18.22.1"
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "released",
+    "number": 19178,
+    "title": "fix(browser-relay): keep a relay tab when another extension's frame keeps omp out",
+    "tag": "v18.22.1"
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "released",
+    "number": 19165,
+    "title": "fix(natives): scroll down for a positive dy on macOS, as on Windows and Linux",
+    "tag": "v18.22.1"
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "released",
+    "number": 19120,
+    "title": "fix(stats): count snapcompact compactions on the Gain tab",
+    "tag": "v18.22.1"
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "released",
+    "number": 19080,
+    "title": "fix(natives): type X11 XTest text through a neutral keyboard state",
+    "tag": "v18.22.1"
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "released",
+    "number": 19066,
+    "title": "fix(natives): refuse X11 XTest keys while another client grabs the keyboard",
+    "tag": "v18.22.1"
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "released",
+    "number": 19063,
+    "title": "fix(natives): point a refused macOS press at the element's own click",
+    "tag": "v18.22.1"
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "released",
+    "number": 19062,
+    "title": "fix(natives): report where focus went after a Windows takeover",
+    "tag": "v18.22.1"
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "released",
+    "number": 19061,
+    "title": "fix(natives): name a macOS control by the label its AXTitleUIElement links to",
+    "tag": "v18.22.1"
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "released",
+    "number": 19048,
+    "title": "fix(natives): follow rebuilt macOS table rows without selecting a neighbour",
+    "tag": "v18.22.1"
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "released",
+    "number": 19035,
+    "title": "fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility",
+    "tag": "v18.22.1"
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "released",
+    "number": 19025,
+    "title": "fix(natives): map Windows keys on the receiving keyboard layout",
+    "tag": "v18.22.1"
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "released",
+    "number": 19034,
+    "title": "fix(natives): choose Linux combo box options without opening their keyboard-grabbing list",
+    "tag": "v18.22.1"
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "released",
+    "number": 19405,
+    "title": "fix(natives): set macOS sliders and other number controls from setValue",
+    "tag": "v18.22.1"
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "released",
+    "number": 19296,
+    "title": "fix(natives): keep macOS takeover from taking a typing user's keys",
+    "tag": "v18.22.1"
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "released",
+    "number": 19258,
+    "title": "fix(natives): refuse macOS element actions on a control a person could not click",
+    "tag": "v18.22.1"
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "released",
+    "number": 19179,
+    "title": "fix(natives): close the menu a macOS background key press opens",
+    "tag": "v18.22.1"
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "released",
+    "number": 19045,
+    "title": "feat(browser): let observe() settle the effects of the preceding action",
+    "tag": "v18.22.1"
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "released",
+    "number": 19036,
+    "title": "fix(natives): stop Linux accessibility reads from freezing apps that show long tables",
+    "tag": "v18.22.1"
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "released",
+    "number": 19001,
+    "title": "fix(browser-relay): say what the relay hid in a driven tab",
+    "tag": "v18.22.1"
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "released",
+    "number": 18987,
+    "title": "feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy",
+    "tag": "v18.22.1"
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "released",
+    "number": 18925,
+    "title": "feat(coding-agent): name the native windows a browser call raised on macOS",
+    "tag": "v18.22.1"
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "released",
+    "number": 18789,
+    "title": "feat(coding-agent): keep subagents' browser tabs out of the user's Chrome and Tern pane unless asked",
+    "tag": "v18.22.1"
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "released",
+    "number": 18786,
+    "title": "feat(agent,coding-agent): send a short browser guide with the first browser call",
+    "tag": "v18.22.1"
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "released",
+    "number": 18624,
+    "title": "fix(ai): say whether an Anthropic request body finished uploading when its connection drops",
+    "tag": "v18.22.1"
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "released",
+    "number": 18353,
+    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
+    "tag": "v18.22.1"
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "released",
+    "number": 18222,
+    "title": "feat(coding-agent): find nested menu commands in one read",
+    "tag": "v18.22.1"
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "released",
+    "number": 18013,
+    "title": "feat(natives): type text the wayland layout lacks through libei text",
+    "tag": "v18.22.1"
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "released",
+    "number": 16553,
+    "title": "fix(natives): place macOS clicks for the focus guard where WindowServer routed them",
+    "tag": "v18.22.1"
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "released",
+    "number": 18125,
+    "title": "fix(ai,coding-agent): keep Anthropic web search queries intact, always search, and report refusals",
+    "tag": "v18.22.1"
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "released",
+    "number": 17610,
+    "title": "fix(ai,coding-agent): carry other models' reasoning to Claude and retry its refusal without it",
+    "tag": "v18.22.1"
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "released",
+    "number": 19524,
+    "title": "fix(coding-agent): refuse browser keys aimed at a field a modal dialog covers",
+    "tag": "v18.22.1"
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "released",
+    "number": 19521,
+    "title": "fix(natives): read each AT-SPI element in two concurrent rounds",
+    "tag": "v18.22.1"
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "released",
+    "number": 19518,
+    "title": "feat(browser): accept explicit dropdown option selectors",
+    "tag": "v18.22.1"
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "released",
+    "number": 19515,
+    "title": "fix(natives): count keys moved back to a macOS user's app as theirs",
+    "tag": "v18.22.1"
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "released",
+    "number": 19509,
+    "title": "fix(coding-agent): say once that a macOS background move gives no hover",
+    "tag": "v18.22.1"
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "merged",
+    "number": 19100,
+    "title": "fix(computer): retain output and screenshots when a run fails",
+    "merged_by": "H4vC",
+    "maintainer_commits": 2
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "released",
+    "number": 19100,
+    "title": "fix(computer): retain output and screenshots when a run fails",
+    "tag": "v18.22.2"
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "merged",
+    "number": 17897,
+    "title": "perf(natives): type on iPhone Mirroring twice as fast",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "merged",
+    "number": 19629,
+    "title": "fix(natives): refuse every Wayland input call at once when no input route exists",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "merged",
+    "number": 19619,
+    "title": "fix(catalog): carry Devin's measured image limits",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "merged",
+    "number": 19606,
+    "title": "fix(coding-agent): judge omp usage policy state by account-wide windows",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "merged",
+    "number": 19605,
+    "title": "fix(utils): apply OMP_LOG_LEVEL to the console transport",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "merged",
+    "number": 19602,
+    "title": "fix(ai): read auth-broker responses that carry fields a newer broker adds",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "merged",
+    "number": 19601,
+    "title": "fix(catalog): switch Devin's Gemini promo prices to list when each promo ends",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "merged",
+    "number": 19600,
+    "title": "fix(ai): heal Claude tier blocks a shared weekly wall caused from single-window usage reports",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "merged",
+    "number": 19599,
+    "title": "fix(coding-agent): let auth-broker serve save an in-flight refresh before exit",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "merged",
+    "number": 19598,
+    "title": "fix(ai): retry the initial auth-broker snapshot through a broker restart",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "merged",
+    "number": 19596,
+    "title": "fix(natives): capture the visible part of a Linux window partly off its monitor",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "merged",
+    "number": 19586,
+    "title": "docs(auth-gateway): describe reclaim moving warm pins back",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "merged",
+    "number": 19532,
+    "title": "fix(natives): put the user's key window back in front of a macOS target after background input and takeover",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "merged",
+    "number": 19516,
+    "title": "fix(natives): read a macOS popup after the option its typed letters choose",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "openable",
+    "id": "reserve-per-model-family",
+    "title": "feat(ai): reserve per usage limit in account policies"
+   },
+   {
+    "at": "2026-11-18T18:13:33Z",
+    "kind": "conflict",
+    "label": "#19195",
+    "title": "fix(natives): stop macOS background drags reporting moves that did not happen",
+    "files": [
+     "crates/natives/src/desktop/control.rs",
+     "crates/natives/src/desktop/macos/ax/drag_control.rs"
+    ]
    }
   ]
  },
