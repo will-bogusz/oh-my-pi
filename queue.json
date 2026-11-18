@@ -102974,13 +102974,13 @@
    "needs": [],
    "base": "2cdc756f93122a4da1e75100099eebcc0a22b451",
    "body": "bodies/oxfmt-main-drift.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19699,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/oxfmt-main-drift",
    "host": "MacBook-Pro",
    "added": "2026-11-18T18:15:43Z",
-   "updated": "2026-11-18T18:17:55Z",
+   "updated": "2026-11-18T18:18:48Z",
    "note": "",
    "built": [
     {
@@ -103073,7 +103073,8 @@
      "at": "2026-11-18T18:17:54Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-18T18:18:48Z"
   }
  ],
  "watch": {
