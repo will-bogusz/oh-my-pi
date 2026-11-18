@@ -102782,6 +102782,24 @@
    "added": "2026-11-18T04:51:10Z",
    "updated": "2026-11-18T17:49:38Z",
    "note": "LaneReaderCarriers, 2026-11-18: one-push fix after review: Devin's Carbon effort uids (-low/-medium/-high) added to the 1568 rule after Brit's b76734aac30 showed Devin serves them; test row fails without the uid. Factory carries only gemini-4-carbon."
+  },
+  {
+   "id": "export-viewer-regen",
+   "branch": "will/export-viewer-regen",
+   "title": "fix(coding-agent): regenerated the stale export viewer metadata",
+   "area": "other",
+   "priority": "P0",
+   "needs": [],
+   "base": "2cdc756f93122a4da1e75100099eebcc0a22b451",
+   "body": "bodies/export-viewer-regen.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/export-viewer-regen",
+   "host": "MacBook-Pro",
+   "added": "2026-11-18T17:53:46Z",
+   "updated": "2026-11-18T17:53:46Z",
+   "note": ""
   }
  ],
  "watch": {
