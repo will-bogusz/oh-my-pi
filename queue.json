@@ -114424,7 +114424,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-18T17:53:09.108279Z",
+  "at": "2026-11-18T17:57:09.128859Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -114736,6 +114736,23 @@
     "created": "2026-11-18T04:43:51Z"
    },
    {
+    "id": "export-viewer-regen",
+    "label": "export-viewer-regen",
+    "number": null,
+    "state": "queued",
+    "area": "other",
+    "priority": "P0",
+    "title": "fix(coding-agent): regenerated the stale export viewer metadata",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-18T17:53:46Z"
+   },
+   {
     "id": "iphone-mirror-scroll-distance",
     "label": "iphone-mirror-scroll-distance",
     "number": null,
@@ -115034,13 +115051,15 @@
     "action": "wait",
     "reasons": [
      "conflicts with #19542 in docs/tools/browser.md",
+     "conflicts with #19633 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#19542"
+     "#19542",
+     "#19633"
     ],
     "needs": [],
     "created": "2026-11-11T07:04:56Z"
@@ -115166,8 +115185,7 @@
      "needs #19633 (open)",
      "conflicts with #19542 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-observe.test.ts",
      "conflicts with #19633 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-observe.test.ts",
-     "its need #19633 conflicts with main in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with main in docs/tools/browser.md"
+     "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
     "over": [],
@@ -115497,10 +115515,8 @@
     "area": "broker",
     "priority": "P2",
     "title": "feat(ai): reserve per usage limit in account policies",
-    "action": "wait",
-    "reasons": [
-     "conflicts with main in packages/coding-agent/src/cli/usage-cli.ts"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -115519,13 +115535,14 @@
     "action": "wait",
     "reasons": [
      "conflicts with #19626 in packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with main in packages/coding-agent/src/cli/usage-cli.ts"
+     "conflicts with reserve-per-model-family in docs/auth-broker-gateway.md, packages/ai/src/auth-broker/discover.ts, packages/coding-agent/src/cli/usage-cli.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#19626"
+     "#19626",
+     "reserve-per-model-family"
     ],
     "needs": [],
     "created": "2026-11-17T21:24:43Z"
