@@ -78371,8 +78371,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-run-failure-output",
    "host": "MacBook-Pro",
    "added": "2026-11-11T00:07:07Z",
-   "updated": "2026-11-18T00:34:08Z",
-   "note": "",
+   "updated": "2026-11-18T00:34:16Z",
+   "note": "Merged 2026-11-18 00:31Z (542454c814a) with 2 maintainer commits: 98c68cc9c78 filed the CHANGELOG entry under Fixed; 15ccb43746e made the eval preludes (prelude.js/.py) drop the trailing 'name: message' line, since our change printed a failed run's error twice (in the logged partial output and again in the thrown error), plus a print-once test and a docs line. Lesson: text the model reads twice across two output paths; missed by our reviews and the Sol final pass.",
    "advanced": "2026-11-17T20:52:02Z",
    "built": [
     {
