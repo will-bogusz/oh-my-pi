@@ -1,42 +1,32 @@
 ## What
 
-I made omp leave a short note where it drops images to fit a provider's image limit, so the model knows they're missing instead of reading the message as whole.
+I made the image omission note from 3967d6bcc63 reach evicted computer-use results on the Responses route too, which it skipped, putting it ahead of their text so the route's truncation can't cut it.
 
-| What the model receives after a drop | `main` | This PR |
+| An evicted computer result on a Responses route (OpenAI, Azure, Factory GPT, Codex with native computer use) | `main` | This PR |
 |---|---|---|
-| A message with text and images, some dropped | the text and the surviving images, no sign anything is missing | `[N images omitted: provider image limit]` in the place of each run of dropped images |
-| A snapcompact archive losing its oldest frames | head text, the remaining frames, `imaged middle above` | head text, `[3 images omitted: provider image limit]`, the remaining frames, tail |
-| An image-only message | `[image omitted: provider image limit]` | unchanged |
-| A computer result evicted on the Responses route | its text only | the notice, then its text |
-
-Both clamps leave the notice, the count cap (`clampProviderContextImages`) and the byte budget (`clampProviderContextImageBytes`), for every provider. Consecutive drops share one notice, also when the count cap drops some and the byte budget the next ones.
+| with text | its text only, no sign the screenshot was dropped | `[1 image omitted: provider image limit]`, then its text |
+| with text over 16,000 characters | its text, cut at 16,000 | the note, then the text cut at 16,000: the note survives the cut |
+| without text | `[image omitted: provider image limit]` | unchanged |
 
 ## Why
 
-A long session moved to a provider with a 5-image cap. Its snapcompact archive summary lost 12 of its frames with no marker, while the archive text still described an unbroken imaged middle. Only a message left with nothing already got the omission text; the shared path now covers that case, so its special case is removed.
+3967d6bcc63 made every message that keeps other content say how many of its images the clamp dropped (`clampContent`). On a route that sends a computer result's metadata screenshot instead of its content, eviction goes through `clampToolResultMessage` instead, which returns the result's text alone, so the model reads it as a complete result.
 
 Decisions:
-- **One notice per run, in place**, rather than one note per message, so the model sees which part is missing.
-- **Frames `capFrameDataBytes` already replaced keep snapcompact's own notice**; they are gone before this clamp runs, so nothing is marked twice.
-- **The notice counts against the request body limit**, in the same re-check the byte clamp already runs for an evicted computer result's text, so it can't push a request over a limit like Factory's 4.5 MB.
-- **On the Responses computer path the notice leads the text**, since that route truncates the text to 16,000 characters from the end.
+- **The note leads instead of trailing as in `clampContent`**: the Responses wire folds an evicted result into an assistant note and truncates its text to 16,000 characters from the end (`appendResponsesToolResultMessages`), so a trailing note would be cut from exactly the long results.
+- **Main's wording, shared through one helper** (`omittedImages`) instead of a second copy of the template.
+- **No new byte accounting**: the note is part of the fallback text the byte clamp already measures and charges against a request body limit.
 
-Non-goals: which images get dropped and when (oldest first, as on `main`).
-
-Related: #15238 (batched eviction in the same file).
+Non-goals: the note's position and count elsewhere stay as `main` has them.
 
 ## Testing
 
-Live, `devin/claude-haiku-5-5` (no catalog image budgets, so omp's 5-image default), seven digit images, asking the model to quote any bracketed text and list the digits:
-- `main`: digits 3-7, no omission text; it guesses images 6 and 7 are the missing ones.
-- This PR: quotes `[2 images omitted: provider image limit]`, digits 3-7.
+`bun test packages/coding-agent/test/session/provider-image-budget.test.ts packages/coding-agent/test/provider-image-integrity.test.ts`: 88 pass. "evicts more computer screenshots when the text the evicted ones send crowds the rest" (200 Factory GPT computer results with 20,000-character texts, oldest evicted) now also asserts the serialized request carries `call_id=call_0]: [1 image omitted: provider image limit]`; with the source change reverted it fails. `bun run check:types` in `coding-agent` is clean; `bun check` at the root fails on oxfmt in six files this PR does not touch.
 
-`bun test packages/coding-agent/test/session/provider-image-budget.test.ts`: 73 pass. New: a summary archive over the count cap shows one `[3 images omitted …]` between its head text and the remaining frames; a Factory request whose fresh image fits by fewer bytes than the notice drops it too; a long computer result's serialized note keeps the notice. Each fails with its part of the change reverted. Neighbouring suites: 310 pass; `bun run check:ts` is clean.
-
-Review first: `markEviction` in `provider-image-budget.ts`, then the byte loop's `addedTextBytes`.
+No CHANGELOG line: 3967d6bcc63 is unreleased, and its `[Unreleased]` entry already says dropped images are noted.
 
 ---
 
-- [x] `bun check` passes
+- [ ] `bun check` passes
 - [x] Tested locally
-- [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+- [ ] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
