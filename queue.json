@@ -102840,18 +102840,66 @@
    "needs": [],
    "base": "2cdc756f93122a4da1e75100099eebcc0a22b451",
    "body": "bodies/export-viewer-regen.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19696,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/export-viewer-regen",
    "host": "MacBook-Pro",
    "added": "2026-11-18T17:53:46Z",
-   "updated": "2026-11-18T17:53:56Z",
+   "updated": "2026-11-18T17:59:23Z",
    "note": "",
    "main_repair": {
     "reason": "`bun install` (root prepare `gen:export-viewer` check) fails since b2795320363",
     "at": "2026-11-18T17:53:55Z"
-   }
+   },
+   "opened": "2026-11-18T17:59:23Z",
+   "owed_builds": [
+    {
+     "label": "#19611",
+     "units": [
+      "packages/coding-agent"
+     ],
+     "built": false,
+     "excluded": "",
+     "opening": false
+    },
+    {
+     "label": "#19626",
+     "units": [
+      "packages/coding-agent"
+     ],
+     "built": false,
+     "excluded": "",
+     "opening": false
+    },
+    {
+     "label": "#19592",
+     "units": [
+      "packages/coding-agent"
+     ],
+     "built": false,
+     "excluded": "",
+     "opening": false
+    },
+    {
+     "label": "#19623",
+     "units": [
+      "packages/coding-agent"
+     ],
+     "built": false,
+     "excluded": "",
+     "opening": false
+    },
+    {
+     "label": "#19620",
+     "units": [
+      "packages/coding-agent"
+     ],
+     "built": false,
+     "excluded": "",
+     "opening": false
+    }
+   ]
   }
  ],
  "watch": {
