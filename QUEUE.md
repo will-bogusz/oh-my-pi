@@ -1,9 +1,9 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-18 17:53Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-18 17:54Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-18 17:48Z on MacBook-Pro; groups below are from it, states from the manifest)
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-18 17:52Z on MacBook-Pro; groups below are from it, states from the manifest)
 **Counts:** openable now 2, conflict-held 19, stacked 16, held 7, parked 1, open PRs 17, queued since the last plan 1; merged 396, closed 44
 
 ## Openable now (2)
@@ -89,7 +89,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-18
 | [#19195](https://github.com/can1357/oh-my-pi/pull/19195) | macos-drag-confirm | fix(natives): stop macOS background drags reporting moves that did not happen | computer | P1 | 4d | rebase | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-drag-confirm) |
 | [#19504](https://github.com/can1357/oh-my-pi/pull/19504) | macos-handback-typed | fix(natives): give the macOS key window back after a takeover while another program types | computer | P1 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-handback-typed) |
 | [#19618](https://github.com/can1357/oh-my-pi/pull/19618) | wayland-display-count | fix(natives): report the Wayland display count as unknown before the first capture | natives | P2 | 15h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-display-count) |
-| [#19611](https://github.com/can1357/oh-my-pi/pull/19611) | image-eviction-notice | fix(coding-agent): mark images the provider image limit evicts in place | other | P1 | 17h | rebase; tests-over: LaneImageDropNotice, 2026-11-18: four distinct branches (archive run grouping; notice bytes charged against the body-limit room; a grown notice charged once; count-clamp notice extended by the byte clamp), the last two asked for by roboomp; each fails with its branch removed | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/image-eviction-notice) |
+| [#19611](https://github.com/can1357/oh-my-pi/pull/19611) | image-eviction-notice | fix(coding-agent): mark images the provider image limit evicts in place | other | P1 | 17h | keep; tests-over: LaneImageDropNotice, 2026-11-18: four distinct branches (archive run grouping; notice bytes charged against the body-limit room; a grown notice charged once; count-clamp notice extended by the byte clamp), the last two asked for by roboomp; each fails with its branch removed | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/image-eviction-notice) |
 | [#19626](https://github.com/can1357/oh-my-pi/pull/19626) | reset-spend-log | feat(coding-agent): log every saved-reset spend attempt at info | coding-agent | P2 | 14h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-spend-log) |
 | [#19592](https://github.com/can1357/oh-my-pi/pull/19592) | broker-version-skew | feat(ai,coding-agent): exchanged omp versions between auth-broker clients and the broker | auth-broker | P2 | 19h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-version-skew) |
 | [#19590](https://github.com/can1357/oh-my-pi/pull/19590) | broker-refresh-failure-loud | fix(ai): warn when a broker refresh failure outlasts the access token | broker | P0 | 20h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/broker-refresh-failure-loud) |
