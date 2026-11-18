@@ -20,7 +20,6 @@ No CHANGELOG entry: formatting and a test fix, nothing a user sees.
 
 ## Testing
 - On `main` (2cdc756f931), `bun run check` fails on the six files' formatting; with them formatted, type checking then fails on TS2554 in `runner.test.ts`. On this branch, `bun run check` and `bun run collab:web:build` (the job's other steps) exit 0.
-- On `main` (2cdc756f931), `bun run check` fails on the six files' formatting and on TS2554 in `runner.test.ts`. On this branch, `bun run check` and `bun run collab:web:build` (the job's other steps) exit 0.
 - `bun test adapters/edit/runner.test.ts` in `packages/metaharness`: 10 pass. Before the path fix, the copy test failed with ENOENT on `run-1/0.log`.
 
 ---
