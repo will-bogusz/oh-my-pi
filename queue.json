@@ -96923,7 +96923,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-image-budgets",
    "host": "MacBook-Pro",
    "added": "2026-11-17T20:52:57Z",
-   "updated": "2026-11-18T01:34:27Z",
+   "updated": "2026-11-18T01:50:27Z",
    "note": "Main for Will, 2026-11-17: P2 estimate, Devin sessions lose most archive frames to the 5-image fallback",
    "built": [
     {
@@ -96951,15 +96951,6 @@
      "tip": "2737dec265bcd011e6c1d775b8d99b3b2aaa43c3",
      "with_tip": "1134016fe1f3b306978e9bf7eea5bce1c3780b50",
      "at": "2026-11-17T22:09:21Z",
-     "host": "MacBook-Pro"
-    },
-    {
-     "with": "#19516",
-     "code": "3fe30b0598cc37ba2f311425b40685c97b113705",
-     "with_code": "c35eb84674f684815047cf2878df282dd722c7f3",
-     "tip": "2737dec265bcd011e6c1d775b8d99b3b2aaa43c3",
-     "with_tip": "f0c8da3fd45354c11cd53f093fdcb854d61689db",
-     "at": "2026-11-18T00:31:56Z",
      "host": "MacBook-Pro"
     },
     {
@@ -97006,6 +96997,16 @@
      "with_tip": "7d98453473f36b7c9a0281e1649ea4e13cd3d47a",
      "at": "2026-11-18T00:32:02Z",
      "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19516",
+     "code": "c853e761010d50d59b4cef3a673e3839ccddc858",
+     "with_code": "c35eb84674f684815047cf2878df282dd722c7f3",
+     "tip": "d4f243a6b265b3bdf95ed5edfdb56a8df9dea838",
+     "with_tip": "6476ed929258c95d185efec2481d664230cc680b",
+     "at": "2026-11-18T01:50:26Z",
+     "host": "MacBook-Pro",
+     "tree": "7f65197c2dcb376081d239ac174d62fd6e7193cb"
     }
    ],
    "advanced": "2026-11-18T01:34:27Z"
