@@ -102659,7 +102659,13 @@
     }
    ],
    "opened": "2026-11-18T02:06:13Z",
-   "readied": "2026-11-18T02:06:40Z"
+   "readied": "2026-11-18T02:06:40Z",
+   "push_anyway_overrides": [
+    {
+     "at": "2026-11-18T17:49:29Z",
+     "reason": "Main, 2026-11-18: GitHub CONFLICTING after the 17:57Z merge batch blocks #19620, which four queued PRs wait on"
+    }
+   ]
   },
   {
    "id": "snapcompact-shape-kdl",
