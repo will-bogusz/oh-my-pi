@@ -46,7 +46,7 @@ Two windows of mine over the target, a background click while I type 52 keys (fi
 
 Nothing raised, nothing changes: 250 background actions on six apps while a simulated user types 3,000 keys, first version → this head: p50 532 → 532 ms, none left in front, all 3,000 keys arrived on both (details).
 
-`cargo nextest run -p pi-natives` passes on macOS.
+`cargo test -p omp-natives --lib desktop` on macOS: 706 pass; the 2 failures, `desktop::macos::input` Unicode-typing tests, fail the same on `main`.
 
 | Limit | Behaviour |
 |---|---|
@@ -113,3 +113,4 @@ I switch to my other window 10 to 55 ms into a background click, 20 tries, previ
 ## Risk
 
 Review first: `keep` in `window_order.rs`, `stacked_down_to` in `capture.rs` and the order pass in `guard_focus`. A switch of mine is honoured unless it lands during the last stacking read or before `AXRaise` reaches my app.
+
