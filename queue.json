@@ -96637,7 +96637,7 @@
    "branch": "will/devin-image-budgets",
    "title": "fix(catalog): carry Devin's measured image limits",
    "area": "catalog",
-   "priority": null,
+   "priority": "P2",
    "needs": [],
    "base": "baf60290fde5e9eea4edb30bff07695877682ba9",
    "body": "bodies/devin-image-budgets.md",
@@ -96647,8 +96647,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-image-budgets",
    "host": "MacBook-Pro",
    "added": "2026-11-17T20:52:57Z",
-   "updated": "2026-11-17T22:09:26Z",
-   "note": "",
+   "updated": "2026-11-18T00:12:15Z",
+   "note": "Main for Will, 2026-11-17: P2 estimate, Devin sessions lose most archive frames to the 5-image fallback",
    "built": [
     {
      "with": "#19100",
