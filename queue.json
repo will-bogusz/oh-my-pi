@@ -101899,7 +101899,20 @@
    "added": "2026-11-17T21:24:43Z",
    "updated": "2026-11-17T22:35:38Z",
    "note": "Will, 2026-11-17: go-ahead to open",
-   "kind": "proposal"
+   "kind": "proposal",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-18T17:56:53Z",
+     "reason": "Main, 2026-11-18: same call now also passes report.limits to formatPolicyLine, as #19606 does on main",
+     "old": "5eece50b5cbcbcc0e9cc144791acce715de54a5f",
+     "new": "fc28a31e7792399a2ed8e9ec60bed7d2a07218cd",
+     "dropped": {
+      "packages/coding-agent/src/cli/usage-cli.ts": [
+       "\t\t\t\t\t`      ${chalk.dim(formatPolicyLine(computePolicyDiagnostics(provider, usageReportIdentity(report), report.limits, policyOptions, reportConsentIdentity(report, providerReports, policyOptions.accounts))))}`,"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "qt-filler-windows",
