@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-18 02:20Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-18 02:23Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-18 01:39Z on MacBook-Pro; groups below are from it, states from the manifest)
@@ -76,7 +76,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-18
 
 | PR | id | title | area | rank | parked | why | since | branch |
 |---|---|---|---|---|---|---|---|---|
-| [#16611](https://github.com/can1357/oh-my-pi/pull/16611) | read-audio-transcripts | feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio | catalog | P2 | 6h | Will, 2026-11-17: parked as draft, not maintained for now; revisit later | not checked or kept fresh | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-audio-transcripts) |
+| [#16611](https://github.com/can1357/oh-my-pi/pull/16611) | read-audio-transcripts | feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio | catalog | P2 | 7h | Will, 2026-11-17: parked as draft, not maintained for now; revisit later | not checked or kept fresh | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-audio-transcripts) |
 
 ## Open PRs (27)
 
