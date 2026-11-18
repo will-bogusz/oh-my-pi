@@ -104776,8 +104776,91 @@
    "worktree": "/Users/viathebrink/.local/state/ovnfs/git/macos-main-key-tests",
    "host": "MacBook-Pro",
    "added": "2026-11-18T21:47:33Z",
-   "updated": "2026-11-18T21:47:45Z",
-   "note": "P1: main macOS native desktop test job is red from stale Return/Tab expectations introduced by adbb616. Test-only repair: final head passes 720 desktop tests; macOS and Linux rust-check records present; precheck exits 0. Independent review findings fixed in b58302b9c5: omit internal-only changelog (no test needed), reuse Tab fixture (already covered). Opening still owes sibling merged-tree builds."
+   "updated": "2026-11-18T22:01:35Z",
+   "note": "P1: main macOS native desktop test job is red from stale Return/Tab expectations introduced by adbb616. Test-only repair: final head passes 720 desktop tests; macOS and Linux rust-check records present; precheck exits 0. Independent review findings fixed in b58302b9c5: omit internal-only changelog (no test needed), reuse Tab fixture (already covered). Opening still owes sibling merged-tree builds.",
+   "built": [
+    {
+     "with": "#17756",
+     "code": "73348bbc7eab8d0ebbdf1d9bed933b73384abc27",
+     "with_code": "4aefc67cb62000b42b0df6eb349663a8643bce60",
+     "tip": "b58302b9c5fb45eaed5b7b3dd93c66cb56bf1ed6",
+     "with_tip": "533c8cc508263b4fb0af3110429dfe9ddeb8abb2",
+     "at": "2026-11-18T22:01:31Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19195",
+     "code": "73348bbc7eab8d0ebbdf1d9bed933b73384abc27",
+     "with_code": "56bc48e70fa4daf9d8b1cce1241872aa370143ed",
+     "tip": "b58302b9c5fb45eaed5b7b3dd93c66cb56bf1ed6",
+     "with_tip": "81c63a4adde836490204d65c7f9b0a5db7ad54e6",
+     "at": "2026-11-18T22:01:34Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19504",
+     "code": "73348bbc7eab8d0ebbdf1d9bed933b73384abc27",
+     "with_code": "f8037e9523c86c49401722f3db522683d3a9b468",
+     "tip": "b58302b9c5fb45eaed5b7b3dd93c66cb56bf1ed6",
+     "with_tip": "fd84926e6437a7951c8762b392889dec87ef6a86",
+     "at": "2026-11-18T22:01:34Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19519",
+     "code": "73348bbc7eab8d0ebbdf1d9bed933b73384abc27",
+     "with_code": "45a89a2439613d933fe11b03a5fdd65a8dfe8cba",
+     "tip": "b58302b9c5fb45eaed5b7b3dd93c66cb56bf1ed6",
+     "with_tip": "c416a7bcec287d19f52659a9f73831c544f5d0b7",
+     "at": "2026-11-18T22:01:34Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19616",
+     "code": "73348bbc7eab8d0ebbdf1d9bed933b73384abc27",
+     "with_code": "c2e503bbece19a4d9c701332d58da781cd8f1230",
+     "tip": "b58302b9c5fb45eaed5b7b3dd93c66cb56bf1ed6",
+     "with_tip": "5a451e3f800598ee9ef388378fe437f002a1808d",
+     "at": "2026-11-18T22:01:35Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19702",
+     "code": "73348bbc7eab8d0ebbdf1d9bed933b73384abc27",
+     "with_code": "e608cd824a8447d2fca6ebe64e6b79079f530099",
+     "tip": "b58302b9c5fb45eaed5b7b3dd93c66cb56bf1ed6",
+     "with_tip": "2d45d44f5c143cbd3295540e3a2c1c638600d6a6",
+     "at": "2026-11-18T22:01:35Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19531",
+     "code": "73348bbc7eab8d0ebbdf1d9bed933b73384abc27",
+     "with_code": "d6ffe761e6cb2055157979cb3d54b5c3ba1571d5",
+     "tip": "b58302b9c5fb45eaed5b7b3dd93c66cb56bf1ed6",
+     "with_tip": "688224d1c56ffe515f5e09b2fab8962d67949c40",
+     "at": "2026-11-18T22:01:35Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19615",
+     "code": "73348bbc7eab8d0ebbdf1d9bed933b73384abc27",
+     "with_code": "0036bb43366a79d0cfba6ea0b6b3e12b5e29c41d",
+     "tip": "b58302b9c5fb45eaed5b7b3dd93c66cb56bf1ed6",
+     "with_tip": "37914bc99cc7f1b5362d5a36a6ed40f4ed485e41",
+     "at": "2026-11-18T22:01:35Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19618",
+     "code": "73348bbc7eab8d0ebbdf1d9bed933b73384abc27",
+     "with_code": "3a959a39c3120742b133ff2ed29e7708078c2ad8",
+     "tip": "b58302b9c5fb45eaed5b7b3dd93c66cb56bf1ed6",
+     "with_tip": "88e5d649f0381de4592d2e5e61c871fece2337ad",
+     "at": "2026-11-18T22:01:35Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   }
  ],
  "watch": {
