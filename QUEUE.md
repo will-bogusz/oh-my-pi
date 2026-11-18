@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-18 18:20Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-18 18:24Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-18 18:16Z on goliath; groups below are from it, states from the manifest)
@@ -36,7 +36,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-18
 | stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 5d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 | macos-web-type-background | fix(natives): type into a background macOS web page field without a takeover | computer | P2 | 3d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19504](https://github.com/can1357/oh-my-pi/pull/19504), [#19531](https://github.com/can1357/oh-my-pi/pull/19531), macos-keys-no-press, main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-web-type-background) |
 | deadline-ranking | feat(ai): rank an account priority by quota deadline | ai/auth | P2 | 21h | [#19623](https://github.com/can1357/oh-my-pi/pull/19623) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/deadline-ranking) |
-| reset-consent-per-account | feat(ai,coding-agent): let an account policy decide its own saved-reset spending | broker | P2 | 20h | reserve-per-model-family | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-consent-per-account) |
+| reset-consent-per-account | feat(ai,coding-agent): let an account policy decide its own saved-reset spending | broker | P2 | 21h | reserve-per-model-family | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-consent-per-account) |
 
 ## Stacked (16)
 
@@ -76,7 +76,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-18
 
 | PR | id | title | area | rank | parked | why | since | branch |
 |---|---|---|---|---|---|---|---|---|
-| [#16611](https://github.com/can1357/oh-my-pi/pull/16611) | read-audio-transcripts | feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio | catalog | P2 | 22h | Will, 2026-11-17: parked as draft, not maintained for now; revisit later | not checked or kept fresh | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-audio-transcripts) |
+| [#16611](https://github.com/can1357/oh-my-pi/pull/16611) | read-audio-transcripts | feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio | catalog | P2 | 23h | Will, 2026-11-17: parked as draft, not maintained for now; revisit later | not checked or kept fresh | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-audio-transcripts) |
 
 ## Open PRs (19)
 
