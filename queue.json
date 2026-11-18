@@ -99324,14 +99324,14 @@
    "worktree": null,
    "host": "MacBook-Pro",
    "added": "2026-11-14T10:49:09Z",
-   "updated": "2026-11-18T18:47:18Z",
+   "updated": "2026-11-18T19:12:01Z",
    "note": "Will, 2026-11-16: go, at P2. DragConfirm r7 2026-11-14: head d44070508c4 on macos-window-order 4f8d2cd973d. Rule: keys skip the activating press only when AXFocusedWindow==target and the window draws its own content (key_without_press), read after the activation inside with_background_watch. VM block lease ce51b160 (r7/a/out-final.jsonl, kit r7/kit/sum8.py): 540 tries, all cells pass. Review DragConfirm.ReviewKeysNoPress ready@0c5567391a; after it: docs scope, remote panels keep the press (+test). rust-check macos+linux at d44070508c. Benchmark: keys/type on Electron/Chrome raised 2 of ~83 actions, 0 trials flip (OmpTrajClass2 s2).",
    "advanced": "2026-11-18T18:00:24Z",
    "rebases_after": [
     17756
    ],
    "pair_reasons": {
-    "17756": "Main, 2026-11-18: one argument added to the make_key_in_background call that #17756 moves into keyboard_in_watch; combined = #17756's function with that argument"
+    "17756": "Main, 2026-11-18: one argument added to the make_key_in_background call that #17756 moves into keyboard_in_watch; combined = #17756's function with that argument, now KeyPurpose::Keyboard (was ActivatingPress::UnlessKey before the KeysNoPressTest refactor)"
    },
    "built": [
     {
