@@ -98623,7 +98623,7 @@
    "area": "snapcompact",
    "priority": "P2",
    "needs": [],
-   "base": "542454c814a483c0c5605e234134de81d35d297c",
+   "base": "e1ae2cc998efd1ca151b46ebefc0e0dab6c23c63",
    "body": "bodies/snapcompact-rerender-on-switch.md",
    "state": "queued",
    "pr": null,
@@ -98631,9 +98631,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-rerender-on-switch",
    "host": "MacBook-Pro",
    "added": "2026-11-18T00:36:24Z",
-   "updated": "2026-11-18T00:49:28Z",
+   "updated": "2026-11-18T01:34:36Z",
    "note": "",
-   "advanced": "2026-11-18T00:42:15Z",
+   "advanced": "2026-11-18T01:34:36Z",
    "built": [
     {
      "with": "#19516",
