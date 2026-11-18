@@ -110708,6 +110708,11 @@
     "sha": "b17705d3abc4382e846d681e5d707ec50a8deb8d",
     "at": "2026-11-18T15:59:41Z",
     "host": "goliath"
+   },
+   "macos": {
+    "sha": "b17705d3abc4382e846d681e5d707ec50a8deb8d",
+    "at": "2026-11-18T15:57:32Z",
+    "host": "Wills-MacBook-Pro"
    }
   }
  },
