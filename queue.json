@@ -112245,11 +112245,5 @@
     "wake": ""
    }
   ]
- },
- "opening": {
-  "id": "wayland-input-refusal",
-  "token": "8d579371936c477a82a6cbd052fd4776",
-  "host": "MacBook-Pro",
-  "at": "2026-11-18T03:16:48Z"
  }
 }
