@@ -102846,7 +102846,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/export-viewer-regen",
    "host": "MacBook-Pro",
    "added": "2026-11-18T17:53:46Z",
-   "updated": "2026-11-18T17:59:23Z",
+   "updated": "2026-11-18T17:59:49Z",
    "note": "",
    "main_repair": {
     "reason": "`bun install` (root prepare `gen:export-viewer` check) fails since b2795320363",
@@ -102899,7 +102899,8 @@
      "excluded": "",
      "opening": false
     }
-   ]
+   ],
+   "readied": "2026-11-18T17:59:49Z"
   }
  ],
  "watch": {
