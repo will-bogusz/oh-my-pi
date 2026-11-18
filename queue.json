@@ -112177,5 +112177,11 @@
     "wake": ""
    }
   ]
+ },
+ "opening": {
+  "id": "account-switch-reason",
+  "token": "9be810c994eb4c1584a4f6da36c40db6",
+  "host": "MacBook-Pro",
+  "at": "2026-11-18T02:20:18Z"
  }
 }
