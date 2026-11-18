@@ -96914,7 +96914,7 @@
    "area": "catalog",
    "priority": "P2",
    "needs": [],
-   "base": "f6e1fbe1c735f06b8084102619f59e44e6f61d0f",
+   "base": "e1ae2cc998efd1ca151b46ebefc0e0dab6c23c63",
    "body": "bodies/devin-image-budgets.md",
    "state": "queued",
    "pr": null,
@@ -96922,7 +96922,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-image-budgets",
    "host": "MacBook-Pro",
    "added": "2026-11-17T20:52:57Z",
-   "updated": "2026-11-18T00:57:44Z",
+   "updated": "2026-11-18T01:34:27Z",
    "note": "Main for Will, 2026-11-17: P2 estimate, Devin sessions lose most archive frames to the 5-image fallback",
    "built": [
     {
@@ -97007,7 +97007,7 @@
      "host": "MacBook-Pro"
     }
    ],
-   "advanced": "2026-11-18T00:57:44Z"
+   "advanced": "2026-11-18T01:34:27Z"
   },
   {
    "id": "docs-reclaim-drift",
