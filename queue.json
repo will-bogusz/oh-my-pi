@@ -96939,13 +96939,13 @@
    "needs": [],
    "base": "e1ae2cc998efd1ca151b46ebefc0e0dab6c23c63",
    "body": "bodies/wayland-display-count.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19618,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-display-count",
    "host": "MacBook-Pro",
    "added": "2026-11-17T20:34:09Z",
-   "updated": "2026-11-18T01:50:41Z",
+   "updated": "2026-11-18T01:58:22Z",
    "note": "",
    "built": [
     {
@@ -97048,7 +97048,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "advanced": "2026-11-18T01:50:41Z"
+   "advanced": "2026-11-18T01:50:41Z",
+   "opened": "2026-11-18T01:58:22Z"
   },
   {
    "id": "devin-gemini-promo-prices",
