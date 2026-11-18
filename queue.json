@@ -101665,7 +101665,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/reserve-per-model-family",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:13:06Z",
-   "updated": "2026-11-18T18:34:40Z",
+   "updated": "2026-11-18T18:35:24Z",
    "note": "Will, 2026-11-17: go-ahead to open",
    "kind": "proposal",
    "advanced": "2026-11-18T18:07:53Z",
@@ -101802,7 +101802,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-11-18T18:34:40Z"
+   "opened": "2026-11-18T18:34:40Z",
+   "readied": "2026-11-18T18:35:23Z"
   },
   {
    "id": "deadline-ranking",
