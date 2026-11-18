@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-18 00:26Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-18 00:30Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 3 of 8 ready events used in the hour before the last plan, 5 left (plan of 2026-11-18 00:09Z on MacBook-Pro; groups below are from it, states from the manifest)
@@ -13,7 +13,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-18
 | settle-reads | feat(browser): settle the preceding action before reads too | browser | P1 | 7d | open; tests-over: Main, 2026-11-18: one test per settle branch: settled read, unanswered request bound, no preceding action, batched reads settle once, element id survives an action, click opening a confirm | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-settle-reads) |
 | stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 4d | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 | factory-droid-1100-pin | feat(catalog): identify Factory Droid requests as droid 1.10.0 | factory-droid |  | 4d | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-pin) |
-| wayland-input-refusal | fix(natives): refuse every Wayland input call at once when no input route exists | natives | P2 | 3h | open; tests-over: OmarchyFixes, 2026-11-18: one test going through the 9 refused input requests with control held elsewhere; each request is an arm no other test reaches | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-input-refusal) |
+| wayland-input-refusal | fix(natives): refuse every Wayland input call at once when no input route exists | natives | P2 | 4h | open; tests-over: OmarchyFixes, 2026-11-18: one test going through the 9 refused input requests with control held elsewhere; each request is an arm no other test reaches | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-input-refusal) |
 | wayland-display-count | fix(natives): report the Wayland display count as unknown before the first capture | natives | P2 | 3h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-display-count) |
 | devin-image-budgets | fix(catalog): carry Devin's measured image limits | catalog | P2 | 3h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-image-budgets) |
 | image-eviction-notice | fix(coding-agent): mark images the provider image limit evicts in place | other | P2 | 3h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/image-eviction-notice) |
