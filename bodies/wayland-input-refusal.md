@@ -17,7 +17,7 @@ On Omarchy 4.5 (Hyprland), a click or scroll used to fail one of three ways depe
 The worker resolved a coordinate call's frame before asking the backend whether it can send input at all. Resolving the frame needs a capture, and on Wayland it also refreshes the display geometry by opening a ScreenCast stream, which on a still Hyprland screen waits 5 s for a frame that never comes. Only after that did libei's portal check refuse. Typing has no frame, so it already refused straight away.
 
 - `desktop/backend.rs`: new `Backend::refuse_input`, `Ok(())` by default, so macOS, Windows and X11 are unchanged.
-- `desktop/mod.rs`: the worker asks it first for every pointer and keyboard request (`click`, `moveMouse`, `drag`, `scroll`, `type`, `keyChord`, `holdKeys`, `holdMouse`, element `click`), after a cancellation check and before it waits for the input lease another session may hold or resolves the target or frame.
+- `desktop/mod.rs`: the worker asks it first for every pointer and keyboard request (`click`, `moveMouse`, `drag`, `scroll`, `type`, `keyChord`, `holdKeys`, `holdMouse`, element `click`), before the input lease or the target or frame; with no backend at all (headless) calls fail as before.
 - `linux/wayland/mod.rs`: answers it from the existing cached RemoteDesktop/`LIBEI_SOCKET` probe, which `run_input` now also calls, so the two can't drift apart.
 
 With no input route, a window target now gets this refusal rather than `BackgroundUnavailable`, since its advice to use desktop input couldn't work either.
@@ -26,7 +26,7 @@ With no input route, a window target now gets this refusal rather than `Backgrou
 
 - Live on a fresh Omarchy 4.5 VM (Hyprland 0.56.2, xdg-desktop-portal-hyprland 1.4.1, PipeWire 1.6.9) through the real path (`AgentSession` → eval → `computer` prelude → pi-natives built from `main` and from this branch's first version, with the check inside each arm): the counts in the table.
 - `every_input_call_is_refused_before_its_frame_when_input_is_unavailable` (`desktop/mod.rs`, runs on every OS): with another session holding control, each of the 9 input requests to a backend with no input route must fail with `PermissionDenied` with no capture, window lookup or click. Against this PR's first version (a check inside each arm, after the lease) it fails with `InputBusy`.
-- `cargo test -p pi-natives --lib -- wayland every_input_call` on Linux; `scripts/rust-check` clippy and rustfmt on Linux, macOS and Windows.
+- `input_without_a_backend_still_asks_for_its_frame`; `cargo test -p pi-natives --lib -- wayland every_input_call input_without` and `bun test packages/natives/test/desktop.test.ts` headless on Linux; `rust-check` on all three OSes.
 
 ---
 
