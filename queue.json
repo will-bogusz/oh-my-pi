@@ -114460,12 +114460,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-18T17:57:09.128859Z",
+  "at": "2026-11-18T18:06:00.317382Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 1,
+   "left": 7
   },
   "rows": [
    {
@@ -114520,6 +114520,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-17T21:39:00Z"
+   },
+   {
+    "id": "export-viewer-regen",
+    "label": "#19696",
+    "number": 19696,
+    "state": "open",
+    "area": "other",
+    "priority": "P0",
+    "title": "fix(coding-agent): regenerated the stale export viewer metadata",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-18T17:59:21Z"
    },
    {
     "id": "macos-handback-typed",
@@ -114581,7 +114598,7 @@
     "state": "open",
     "area": "other",
     "priority": "P1",
-    "title": "fix(coding-agent): mark images the provider image limit evicts in place",
+    "title": "fix(coding-agent): keep the image omission note on evicted Responses computer results",
     "action": "keep",
     "reasons": [],
     "note": "tests-over: LaneImageDropNotice, 2026-11-18: four distinct branches (archive run grouping; notice bytes charged against the body-limit room; a grown notice charged once; count-clamp notice extended by the byte clamp), the last two asked for by roboomp; each fails with its branch removed",
@@ -114690,10 +114707,8 @@
     "area": "browser",
     "priority": "P2",
     "title": "feat(browser): add waitForFunction to tabs and frames",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/test/tools/browser-tab-timeouts.test.ts"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -114760,33 +114775,14 @@
     "area": "browser",
     "priority": "P2",
     "title": "feat(browser): settle the preceding action before reads too",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "tests-over: Main, 2026-11-18: one test per settle branch: settled read, unanswered request bound, no preceding action, batched reads settle once, element id survives an action, click opening a confirm",
     "over": [],
     "paired": [],
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-18T04:43:51Z"
-   },
-   {
-    "id": "export-viewer-regen",
-    "label": "export-viewer-regen",
-    "number": null,
-    "state": "queued",
-    "area": "other",
-    "priority": "P0",
-    "title": "fix(coding-agent): regenerated the stale export viewer metadata",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-18T17:53:46Z"
    },
    {
     "id": "iphone-mirror-scroll-distance",
@@ -114819,8 +114815,7 @@
     "title": "fix(browser): accept a RegExp in waitForText, as waitForUrl does",
     "action": "wait",
     "reasons": [
-     "needs #19542 (open)",
-     "its need #19542 conflicts with main in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/test/tools/browser-tab-timeouts.test.ts"
+     "needs #19542 (open)"
     ],
     "note": "",
     "over": [],
@@ -114841,8 +114836,7 @@
     "title": "fix(browser): let a scoped waitForText match only text the page renders",
     "action": "wait",
     "reasons": [
-     "needs browser-wait-text-regexp (queued)",
-     "its need browser-wait-text-regexp conflicts with main in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/test/tools/browser-tab-timeouts.test.ts"
+     "needs browser-wait-text-regexp (queued)"
     ],
     "note": "",
     "over": [],
@@ -114956,11 +114950,13 @@
     "title": "fix(natives): send macOS background keys to the key window without a press",
     "action": "wait",
     "reasons": [
-     "conflicts with main in docs/computer-use.md"
+     "conflicts with main in crates/natives/src/desktop/macos/skylight.rs"
     ],
-    "note": "",
+    "note": "accepted pair with #17756: Main, 2026-11-18: one argument added to the make_key_in_background call that #17756 moves into keyboard_in_watch; combined = #17756's function with that argument",
     "over": [],
-    "paired": [],
+    "paired": [
+     "#17756"
+    ],
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-14T10:49:09Z"
@@ -115086,7 +115082,7 @@
     "title": "fix(coding-agent,browser-relay): fail a browser call a print preview holds in an attached browser within seconds",
     "action": "wait",
     "reasons": [
-     "conflicts with #19542 in docs/tools/browser.md",
+     "conflicts with #19542 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19633 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
@@ -115234,6 +115230,33 @@
      "settle-reads"
     ],
     "created": "2026-11-10T18:57:06Z"
+   },
+   {
+    "id": "macos-keys-read-cost",
+    "label": "macos-keys-read-cost",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P2",
+    "title": "perf(natives): prove a macOS key window draws its own content without reading all its children",
+    "action": "held",
+    "reasons": [
+     "held: Main, 2026-11-18: needs an independent review and a VM row before it can open; no work on it now",
+     "needs macos-keys-no-press (queued)",
+     "conflicts with #19195 in crates/pi-natives/src/desktop/macos/ax.rs",
+     "its need macos-keys-no-press conflicts with main in crates/natives/src/desktop/macos/capture.rs, crates/natives/src/desktop/macos/skylight.rs, crates/natives/src/desktop/macos/window_order.rs, docs/computer-use.md",
+     "conflicts with main in crates/natives/src/desktop/macos/ax.rs"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "#19195"
+    ],
+    "needs": [
+     "macos-keys-no-press"
+    ],
+    "created": "2026-11-18T18:02:46Z"
    },
    {
     "id": "snapcompact-shape-kdl",
