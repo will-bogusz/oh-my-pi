@@ -103251,7 +103251,35 @@
    "updated": "2026-11-18T18:49:44Z",
    "note": "SamplerStop, 2026-11-18: P1 estimate. Production effect is small: after TUI.stop (external editor, session end) the profiler kept sampling but a 2 s timer drained it, so no lasting retention; the real harm is bun test, where 3 Composer-starting files break parked-subagent GC tests later in the process. Root-cause fix plus regression test; profile() pause trick and debug-report limit are what a maintainer may question.",
    "opened": "2026-11-18T18:49:18Z",
-   "readied": "2026-11-18T18:49:44Z"
+   "readied": "2026-11-18T18:49:44Z",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-18T18:54:10Z",
+     "reason": "SamplerStop, 2026-11-18: roboomp thread 4619169043 asked to replace the spy-call assertions with sample checks; the dropped lines are those spies",
+     "old": "4d47638d97b216c67635330e738dc85103d4b67c",
+     "new": "3b00f9e594886a7f9901f10505fd150172f1e436",
+     "dropped": {
+      "packages/tui/test/loop-watchdog.test.ts": [
+       "\t\t\t\t'import * as jsc from \"bun:jsc\";',",
+       "\t\t\t\t'import { spyOn } from \"bun:test\";',",
+       "\t\t\t\t'const startProfiler = spyOn(jsc, \"startSamplingProfiler\");',",
+       "\t\t\t\t'const pauseProfiler = spyOn(jsc, \"profile\");',",
+       "\t\t\t\t\"const startsForTwo = startProfiler.mock.calls.length;\",",
+       "\t\t\t\t\"const pausesAfterFirstStop = pauseProfiler.mock.calls.length;\",",
+       "\t\t\t\t\"const pausesAfterLastStop = pauseProfiler.mock.calls.length;\",",
+       "\t\t\t\t\"const samplesAfterLastStop = jsc.samplingProfilerStackTraces().traces.length;\",",
+       "\t\t\t\t\"const startsAfterRestart = startProfiler.mock.calls.length;\",",
+       "\t\t\t\t// A paused profiler records again once restarted.",
+       "\t\t\t\t\"while (jsc.samplingProfilerStackTraces().traces.length === 0) blockLoopInSamplerProbe(10);\",",
+       "\t\t\t\t\"process.stdout.write(JSON.stringify({ startsForTwo, pausesAfterFirstStop, pausesAfterLastStop, samplesAfterLastStop, startsAfterRestart }));\",",
+       "\t\t\t\tstartsForTwo: 1,",
+       "\t\t\t\tpausesAfterFirstStop: 0,",
+       "\t\t\t\tpausesAfterLastStop: 1,",
+       "\t\t\t\tstartsAfterRestart: 2,"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "oxfmt-main-drift",
