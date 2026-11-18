@@ -96713,7 +96713,7 @@
    "branch": "will/image-eviction-notice",
    "title": "fix(coding-agent): mark images the provider image limit evicts in place",
    "area": "other",
-   "priority": null,
+   "priority": "P2",
    "needs": [],
    "base": "baf60290fde5e9eea4edb30bff07695877682ba9",
    "body": "bodies/image-eviction-notice.md",
@@ -96723,8 +96723,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/image-eviction-notice",
    "host": "MacBook-Pro",
    "added": "2026-11-17T20:57:09Z",
-   "updated": "2026-11-17T23:27:37Z",
-   "note": "",
+   "updated": "2026-11-18T00:12:11Z",
+   "note": "Main for Will, 2026-11-17: P2 estimate, images silently dropped from model context on every provider",
    "built": [
     {
      "with": "#19100",
