@@ -112130,11 +112130,5 @@
     "wake": ""
    }
   ]
- },
- "opening": {
-  "id": "wayland-display-count",
-  "token": "b9953227c14d4097a50cd3f9c9de44e6",
-  "host": "MacBook-Pro",
-  "at": "2026-11-18T01:58:45Z"
  }
 }
