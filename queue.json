@@ -97327,7 +97327,7 @@
    "area": "broker",
    "priority": "P0",
    "needs": [],
-   "base": "baf60290fde5e9eea4edb30bff07695877682ba9",
+   "base": "e1ae2cc998efd1ca151b46ebefc0e0dab6c23c63",
    "body": "bodies/broker-wire-forward-compat.md",
    "state": "open",
    "pr": 19602,
@@ -97335,7 +97335,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/broker-wire-forward-compat",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:01:16Z",
-   "updated": "2026-11-18T00:34:08Z",
+   "updated": "2026-11-18T01:14:24Z",
    "note": "Will, 2026-11-17: go-ahead to open",
    "built": [
     {
@@ -97402,7 +97402,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-11-17T23:18:05Z"
+   "opened": "2026-11-17T23:18:05Z",
+   "advanced": "2026-11-18T01:14:24Z"
   },
   {
    "id": "reset-spend-log",
