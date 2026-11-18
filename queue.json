@@ -94738,7 +94738,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "fcdfcce337ce73ea94f1273f609a13282a0a63e6",
+   "base": "08cb444207d55091daaa61d37b3652c876aa8df1",
    "body": "bodies/macos-window-order.md",
    "state": "open",
    "pr": 19532,
@@ -94746,7 +94746,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-window-order",
    "host": "MacBook-Pro",
    "added": "2026-11-14T01:37:23Z",
-   "updated": "2026-11-18T15:43:03Z",
+   "updated": "2026-11-18T15:49:03Z",
    "note": "QueueTwentySeven 2026-11-16: rebased locally onto main as 14e0989d3bd (clean). HandBack 2026-11-14: head 37142503cd9 (amended): takeover hand-back also raises the user's key window (with_foreground, hand_back_keeps_order). rust-check macos/linux/windows at 37142503cd9 (diff d9e990b339). Review TakeoverOrderReview needs-changes -> fixed (cause wording, same-app test, doubled error text, docs/changelog/title). Earlier: key-window-only restore, OrderReview2 7/7. Overlaps: #16553 pair recorded; #19062/#19179/drag-confirm/scroll-direction none.",
    "rebases_after": [
     16553,
@@ -94756,7 +94756,7 @@
     "16553": "HandBack, 2026-11-14: textual conflict only, in with_background_watch and WindowServerDesktop (skylight.rs). Combined form keeps both sides: #16553's 'let placement = match (clicks, previous.pid) {Tap|HitTest}' first, then this entry's 'let order = previous.pid.zip(capture::stacked_windows()).and_then(|(user, stack)| window_order::EntryOrder::new(pid, user, previous_key, &stack));' (read before anything is sent; placement sends nothing); WindowServerDesktop { spi, previous, key: previous_key, placement, stopped: &stopped, order: RefCell::new(order), raises: Cell::new(0) }; struct fields key, placement, stopped, order, raises. No semantic overlap: placement feeds SwitchSignals, order feeds keep_order.",
     "19296": "Main, 2026-11-16: skylight.rs takeover path only: window-order adds the stacking read 'let mut order = capture::stacked_windows().and_then(|stack| window_order::EntryOrder::new(pid, previous_pid, previous_key, &stack));' where #19296 adds 'control::intervention::start_takeover()?;'. Combined form: window-order's order read first, then #19296's start_takeover()? as the last step before the target comes forward; EntryOrder has no Drop, so a refusal from the typing check after the read leaves nothing to undo. Before open: #19296's a_takeover_admitted_before_the_lease_stops_at_a_press_since and window-order's tests pass together on the merged tree."
    },
-   "advanced": "2026-11-18T15:43:03Z",
+   "advanced": "2026-11-18T15:49:03Z",
    "built": [
     {
      "with": "#17756",
