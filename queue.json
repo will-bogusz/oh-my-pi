@@ -96650,7 +96650,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-input-refusal",
    "host": "MacBook-Pro",
    "added": "2026-11-17T20:29:55Z",
-   "updated": "2026-11-18T00:35:37Z",
+   "updated": "2026-11-18T01:04:36Z",
    "note": "",
    "tests_over_override": {
     "reason": "OmarchyFixes, 2026-11-18: one test through the 9 refused input requests with control held elsewhere, one for the no-backend side; each reaches a branch no other test does",
@@ -96699,15 +96699,6 @@
      "with_code": "f07da370727d1df506bc6648cb72075f148d1db9",
      "tip": "450562ceff770163cbf4dccafda5910d7ff7e649",
      "with_tip": "c49d47b9e543dfba5208c436c1849d844ebaee6a",
-     "at": "2026-11-18T00:35:35Z",
-     "host": "MacBook-Pro"
-    },
-    {
-     "with": "#19519",
-     "code": "57b5a01daac06327dc393af990df902c108c4a23",
-     "with_code": "10f2f0166cf201563e33349758382bd628db9ba6",
-     "tip": "450562ceff770163cbf4dccafda5910d7ff7e649",
-     "with_tip": "11100c5f055edcd3362cfec4b0f0effcb553e81a",
      "at": "2026-11-18T00:35:35Z",
      "host": "MacBook-Pro"
     },
@@ -96763,6 +96754,15 @@
      "tip": "450562ceff770163cbf4dccafda5910d7ff7e649",
      "with_tip": "3ae4f0b1907a624b8bfe622d7c1ef36593a72f4e",
      "at": "2026-11-18T00:35:36Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19519",
+     "code": "57b5a01daac06327dc393af990df902c108c4a23",
+     "with_code": "055b12ff43628e438aec61d2a7be66001d03e643",
+     "tip": "450562ceff770163cbf4dccafda5910d7ff7e649",
+     "with_tip": "04d4af3cdb26adf679e2c2efb301470609e84ab8",
+     "at": "2026-11-18T01:04:31Z",
      "host": "MacBook-Pro"
     }
    ]
