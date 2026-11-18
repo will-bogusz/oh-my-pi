@@ -115997,8 +115997,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-18T21:47:50.719037Z",
-  "host": "goliath",
+  "at": "2026-11-18T21:48:59.827639Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -116401,6 +116401,23 @@
     ],
     "needs": [],
     "created": "2026-10-30T21:35:55Z"
+   },
+   {
+    "id": "macos-main-key-tests",
+    "label": "macos-main-key-tests",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P1",
+    "title": "test(natives): restore passing macOS native typing tests",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-18T21:47:33Z"
    },
    {
     "id": "browser-wait-text-regexp",
@@ -117212,10 +117229,8 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "wait",
-    "reasons": [
-     "conflicts with main in (branch missing on the fork)"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
