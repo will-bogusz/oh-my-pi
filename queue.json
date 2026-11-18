@@ -97088,7 +97088,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-image-budgets",
    "host": "MacBook-Pro",
    "added": "2026-11-17T20:52:57Z",
-   "updated": "2026-11-18T02:02:29Z",
+   "updated": "2026-11-18T02:02:58Z",
    "note": "Main for Will, 2026-11-17: P2 estimate, Devin sessions lose most archive frames to the 5-image fallback",
    "built": [
     {
@@ -97242,7 +97242,8 @@
     }
    ],
    "advanced": "2026-11-18T01:34:27Z",
-   "opened": "2026-11-18T02:02:29Z"
+   "opened": "2026-11-18T02:02:29Z",
+   "readied": "2026-11-18T02:02:57Z"
   },
   {
    "id": "docs-reclaim-drift",
