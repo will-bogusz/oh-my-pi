@@ -110705,12 +110705,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-18T04:51:20.613836Z",
+  "at": "2026-11-18T15:38:33.357767Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 1,
-   "left": 7
+   "used": 0,
+   "left": 8
   },
   "rows": [
    {
@@ -110738,8 +110738,10 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): stop macOS background drags reporting moves that did not happen",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in crates/natives/src/desktop/macos/ax/drag_control.rs"
+    ],
     "note": "accepted pair with #19516: Main, 2026-11-17: adjacent thread_local statics in desktop/control.rs; combined = both statics (DRAG_NOTE then INPUT_HELD), then input_held() unchanged",
     "over": [],
     "paired": [
@@ -110748,23 +110750,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-13T20:28:59Z"
-   },
-   {
-    "id": "iphone-mirror-key-gap",
-    "label": "#17897",
-    "number": 17897,
-    "state": "open",
-    "area": "computer",
-    "priority": "P2",
-    "title": "perf(natives): type on iPhone Mirroring twice as fast",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-03T02:19:43Z"
    },
    {
     "id": "broker-refresh-failure-loud",
@@ -110927,8 +110912,10 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): read a macOS popup after the option its typed letters choose",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in crates/natives/src/desktop/macos/ax/type_ahead.rs"
+    ],
     "note": "accepted pair with #19195: Main, 2026-11-17: adjacent thread_local statics in desktop/control.rs; combined = both statics (DRAG_NOTE then INPUT_HELD), then input_held() unchanged",
     "over": [],
     "paired": [
@@ -110946,8 +110933,10 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): type characters outside the X11 keymap through temporary keycodes",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in crates/natives/src/desktop/linux/x11/remap_tests.rs, crates/natives/src/desktop/linux/x11/text_mapping.rs, crates/natives/src/desktop/mod.rs"
+    ],
     "note": "accepted pair with #19531: Main, 2026-11-17: adjacent unions in x11/mod.rs (mod lines), input.rs use list, X11Input::new fields and foreground_keys_after (watch_releases() then Keymap::xtest); in send_xtest #19519's text_mapping.pressed(keycode) moves into xtest's restructured send_xtest at the same point (after the request is sent, before check(), key presses only), no new logic. Combined form: merge 7b0d2ff0b68, ~/tmp/oh-my-pi/queuethirty/xpair-combined.md",
     "over": [],
     "paired": [
@@ -110965,8 +110954,10 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): put the user's key window back in front of a macOS target after background input and takeover",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in crates/natives/src/desktop/macos/window_order.rs"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -111050,8 +111041,10 @@
     "area": "other",
     "priority": "P1",
     "title": "fix(coding-agent): mark images the provider image limit evicts in place",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in packages/coding-agent/src/session/provider-image-budget.ts, packages/coding-agent/test/session/provider-image-budget.test.ts"
+    ],
     "note": "tests-over: LaneImageDropNotice, 2026-11-18: four distinct branches (archive run grouping; notice bytes charged against the body-limit room; a grown notice charged once; count-clamp notice extended by the byte clamp), the last two asked for by roboomp; each fails with its branch removed",
     "over": [],
     "paired": [],
@@ -111103,8 +111096,10 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): release X11 XTest keys and buttons a killed omp held",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in crates/natives/src/desktop/linux/x11/release_watcher.rs"
+    ],
     "note": "accepted pair with #19519: Main, 2026-11-17: adjacent unions in x11/mod.rs (mod lines), input.rs use list, X11Input::new fields and foreground_keys_after (watch_releases() then Keymap::xtest); in send_xtest #19519's text_mapping.pressed(keycode) moves into xtest's restructured send_xtest at the same point (after the request is sent, before check(), key presses only), no new logic. Combined form: merge 7b0d2ff0b68, ~/tmp/oh-my-pi/queuethirty/xpair-combined.md",
     "over": [],
     "paired": [
@@ -111175,8 +111170,10 @@
     "area": "browser",
     "priority": "P2",
     "title": "feat(browser): add waitForFunction to tabs and frames",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/test/tools/browser-tab-timeouts.test.ts"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -111243,8 +111240,10 @@
     "area": "browser",
     "priority": "P2",
     "title": "feat(browser): settle the preceding action before reads too",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts"
+    ],
     "note": "tests-over: Main, 2026-11-18: one test per settle branch: settled read, unanswered request bound, no preceding action, batched reads settle once, element id survives an action, click opening a confirm",
     "over": [],
     "paired": [],
@@ -111262,7 +111261,7 @@
     "title": "fix(natives): scroll iPhone Mirroring the whole distance asked for in the background",
     "action": "wait",
     "reasons": [
-     "conflicts with #17756 in crates/pi-natives/src/desktop/macos/input.rs"
+     "conflicts with #17756 in crates/natives/src/desktop/macos/input.rs"
     ],
     "note": "",
     "over": [],
@@ -111283,7 +111282,8 @@
     "title": "fix(browser): accept a RegExp in waitForText, as waitForUrl does",
     "action": "wait",
     "reasons": [
-     "needs #19542 (open)"
+     "needs #19542 (open)",
+     "its need #19542 conflicts with main in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/test/tools/browser-tab-timeouts.test.ts"
     ],
     "note": "",
     "over": [],
@@ -111304,7 +111304,8 @@
     "title": "fix(browser): let a scoped waitForText match only text the page renders",
     "action": "wait",
     "reasons": [
-     "needs browser-wait-text-regexp (queued)"
+     "needs browser-wait-text-regexp (queued)",
+     "its need browser-wait-text-regexp conflicts with main in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/test/tools/browser-tab-timeouts.test.ts"
     ],
     "note": "",
     "over": [],
@@ -111353,7 +111354,7 @@
      "conflicts with #19516 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #19532 in docs/computer-use.md",
      "conflicts with #19531 in docs/computer-use.md",
-     "conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts"
+     "conflicts with main in crates/natives/src/desktop/macos/settle.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
     "over": [],
@@ -111382,7 +111383,7 @@
      "conflicts with #19195 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with #19516 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with #19532 in crates/pi-natives/src/desktop/macos/ax.rs",
-     "conflicts with main in crates/pi-natives/src/desktop/macos/ax.rs"
+     "conflicts with main in crates/natives/src/desktop/macos/ax.rs"
     ],
     "note": "",
     "over": [],
@@ -111406,17 +111407,14 @@
     "action": "wait",
     "reasons": [
      "needs #19195 (open)",
-     "conflicts with #17756 in crates/pi-natives/src/desktop/macos/input.rs",
-     "conflicts with #17897 in crates/pi-natives/src/desktop/macos/input.rs",
      "conflicts with #19516 in crates/pi-natives/src/desktop/control.rs, crates/pi-natives/src/desktop/macos/input.rs",
-     "conflicts with main in crates/pi-natives/src/desktop/macos/ax/drag_control.rs, crates/pi-natives/src/desktop/macos/input.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md"
+     "its need #19195 conflicts with main in crates/natives/src/desktop/macos/ax/drag_control.rs",
+     "conflicts with main in crates/natives/src/desktop/macos/input.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#17756",
-     "#17897",
      "#19516"
     ],
     "needs": [
@@ -111435,15 +111433,14 @@
     "action": "wait",
     "reasons": [
      "needs #19532 (open)",
-     "conflicts with #17756 in crates/pi-natives/src/desktop/macos/input.rs",
      "conflicts with #19532 in docs/computer-use.md",
+     "its need #19532 conflicts with main in crates/natives/src/desktop/macos/window_order.rs",
      "conflicts with main in docs/computer-use.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#17756",
      "#19532"
     ],
     "needs": [
@@ -111461,23 +111458,19 @@
     "title": "fix(natives): type into a background macOS web page field without a takeover",
     "action": "wait",
     "reasons": [
-     "conflicts with #17756 in crates/pi-natives/src/desktop/macos/input.rs",
      "conflicts with #19195 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/macos/input.rs, docs/computer-use.md",
-     "conflicts with #17897 in crates/pi-natives/src/desktop/macos/input.rs",
      "conflicts with #19596 in docs/computer-use.md",
      "conflicts with #19504 in docs/computer-use.md",
      "conflicts with #19516 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/macos/input.rs, docs/computer-use.md",
      "conflicts with #19532 in crates/pi-natives/src/desktop/macos/ax.rs, docs/computer-use.md",
      "conflicts with #19531 in docs/computer-use.md",
-     "conflicts with main in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/macos/input.rs, docs/computer-use.md"
+     "conflicts with main in crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/macos/input.rs, docs/computer-use.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#17756",
      "#19195",
-     "#17897",
      "#19596",
      "#19504",
      "#19516",
@@ -111499,7 +111492,7 @@
     "reasons": [
      "conflicts with #19542 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19633 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, crates/pi-natives/src/desktop/macos/roster.rs, crates/pi-natives/src/desktop/roster.rs, packages/natives/native/desktop.d.ts, packages/natives/native/desktop.js, packages/natives/native/index.d.ts"
+     "conflicts with main in crates/natives/src/desktop/macos/capture.rs, crates/natives/src/desktop/macos/roster.rs, crates/natives/src/desktop/roster.rs, packages/natives/native/desktop.d.ts, packages/natives/native/desktop.js, packages/natives/native/index.d.ts"
     ],
     "note": "",
     "over": [],
@@ -111524,7 +111517,7 @@
      "needs r2/relay-own-only (queued)",
      "conflicts with #19542 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19633 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "its need r2/relay-own-only conflicts with main in crates/pi-natives/src/desktop/roster.rs, docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/native-windows.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-native-windows.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts, packages/natives/native/desktop.js",
+     "its need r2/relay-own-only conflicts with main in crates/natives/src/desktop/macos/roster.rs, crates/natives/src/desktop/roster.rs, docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/native-windows.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-native-windows.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts, packages/natives/native/desktop.js",
      "conflicts with main in packages/browser-relay/extension/background.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt"
     ],
     "note": "",
@@ -111555,8 +111548,8 @@
      "conflicts with #19623 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #19626 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #19633 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts",
-     "its need r2/relay-popup-owned conflicts with main in crates/pi-natives/src/desktop/roster.rs, docs/tools/browser.md, packages/browser-relay/extension/background.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/native-windows.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-native-windows.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts, packages/natives/native/desktop.js",
-     "its need r2/page-waiting conflicts with main in crates/pi-natives/src/desktop/roster.rs, docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/dialogs.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/native-windows.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-native-windows.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts, packages/natives/native/desktop.js"
+     "its need r2/relay-popup-owned conflicts with main in crates/natives/src/desktop/macos/roster.rs, crates/natives/src/desktop/roster.rs, docs/tools/browser.md, packages/browser-relay/extension/background.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/native-windows.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-native-windows.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts, packages/natives/native/desktop.js",
+     "its need r2/page-waiting conflicts with main in crates/natives/src/desktop/macos/roster.rs, crates/natives/src/desktop/roster.rs, docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/dialogs.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/native-windows.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-native-windows.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts, packages/natives/native/desktop.js"
     ],
     "note": "",
     "over": [],
@@ -111584,7 +111577,8 @@
     "title": "fix(coding-agent,browser-relay): fail a browser call a print preview holds in an attached browser within seconds",
     "action": "wait",
     "reasons": [
-     "conflicts with #19542 in docs/tools/browser.md"
+     "conflicts with #19542 in docs/tools/browser.md",
+     "conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
     "over": [],
@@ -111670,20 +111664,16 @@
     "action": "wait",
     "reasons": [
      "conflicts with #19195 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
-     "conflicts with #19596 in crates/pi-natives/src/desktop/mod.rs",
-     "conflicts with #19629 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19516 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19519 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19532 in crates/pi-natives/src/desktop/macos/ax.rs",
-     "conflicts with main in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs"
+     "conflicts with main in crates/natives/src/desktop/ax.rs, crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/mod.rs, crates/natives/src/desktop/win32/ax.rs, crates/natives/src/desktop/win32/ax_states.rs, crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/win32/mod.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
      "#19195",
-     "#19596",
-     "#19629",
      "#19516",
      "#19519",
      "#19532"
@@ -111703,16 +111693,14 @@
     "reasons": [
      "conflicts with #19195 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #19516 in packages/coding-agent/src/prompts/tools/computer.md",
-     "conflicts with #19618 in crates/pi-natives/src/desktop/win32/mod.rs",
-     "conflicts with main in crates/pi-natives/src/desktop/win32/capture.rs, crates/pi-natives/src/desktop/win32/mod.rs, packages/coding-agent/src/prompts/tools/computer.md"
+     "conflicts with main in crates/natives/src/desktop/win32/capture.rs, crates/natives/src/desktop/win32/reopen.rs, crates/pi-natives/src/desktop/win32/mod.rs, packages/coding-agent/src/prompts/tools/computer.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
      "#19195",
-     "#19516",
-     "#19618"
+     "#19516"
     ],
     "needs": [],
     "created": "2026-11-11T09:06:32Z"
@@ -111730,7 +111718,8 @@
      "needs #19633 (open)",
      "conflicts with #19542 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-observe.test.ts",
      "conflicts with #19633 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-observe.test.ts",
-     "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts"
+     "its need #19633 conflicts with main in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with main in docs/tools/browser.md"
     ],
     "note": "",
     "over": [],
@@ -111826,7 +111815,7 @@
     "reasons": [
      "held: Main, 2026-11-11: stays held until #18786 merges with the typed-message guide channel (design check replace); then one property on the computer prelude, drop the wrap variant, re-run its blind legs",
      "conflicts with #19195 in packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with main in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/sdk-computer-prelude-toggle.test.ts, packages/coding-agent/test/tools/computer.test.ts"
+     "conflicts with main in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/sdk-computer-prelude-toggle.test.ts, packages/coding-agent/test/tools/computer.test.ts, packages/coding-agent/test/tools/eval-description.test.ts"
     ],
     "note": "",
     "over": [],
@@ -111857,7 +111846,7 @@
      "conflicts with #19531 in docs/computer-use.md, docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md",
      "conflicts with #19620 in packages/coding-agent/src/session/session-maintenance.ts",
-     "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
+     "its need computer-ui-quiet conflicts with main in crates/natives/src/desktop/macos/settle.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
@@ -111890,23 +111879,19 @@
     "reasons": [
      "needs computer-ui-quiet (queued)",
      "conflicts with #19195 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with #19596 in crates/pi-natives/src/desktop/mod.rs",
-     "conflicts with #19629 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19516 in crates/pi-natives/src/desktop/backend.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #19519 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19532 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md",
-     "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
-     "conflicts with main in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md"
+     "its need computer-ui-quiet conflicts with main in crates/natives/src/desktop/macos/settle.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
+     "conflicts with main in crates/natives/src/desktop/macos/ax/rich_text.rs, crates/natives/src/desktop/mod.rs, docs/tools/computer.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
      "#19195",
-     "#19596",
-     "#19629",
      "#19516",
      "#19519",
      "#19532",
@@ -111951,22 +111936,18 @@
     "reasons": [
      "held: Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check | Main 2026-11-12: before it opens, the waiting-key-chord case with the cursor actually drawn (20 trials at a 20 s deadline; CursorDemo's cursor-on arm never drew one, and an early run on the combined tree returned 'Cancelled, input may be partial' 11/11, unexplained), on the polished branch will/desktop-cursor-polish.",
      "conflicts with #19195 in crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/types.rs, packages/natives/native/index.d.ts",
-     "conflicts with #19596 in crates/pi-natives/src/desktop/mod.rs",
-     "conflicts with #19629 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19516 in crates/pi-natives/src/desktop/backend.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19519 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19532 in crates/pi-natives/src/desktop/macos/capture.rs, crates/pi-natives/src/desktop/macos/mod.rs",
      "conflicts with #19531 in docs/tools/computer.md",
-     "conflicts with #19618 in crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/types.rs, docs/tools/computer.md, packages/natives/native/index.d.ts",
-     "conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/test/tools/computer.test.ts"
+     "conflicts with #19618 in docs/tools/computer.md, packages/natives/native/index.d.ts",
+     "conflicts with main in crates/natives/src/desktop/cursor.rs, crates/natives/src/desktop/macos/capture.rs, crates/natives/src/desktop/macos/cursor.rs, crates/natives/src/desktop/macos/cursor/helper.m, crates/natives/src/desktop/macos/mod.rs, crates/natives/src/desktop/mod.rs, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
      "#19195",
-     "#19596",
-     "#19629",
      "#19516",
      "#19519",
      "#19532",
@@ -112063,8 +112044,8 @@
      "needs r2/relay-own-only (queued)",
      "conflicts with #19542 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts",
      "conflicts with #19633 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts",
-     "its need r2/relay-own-only conflicts with main in crates/pi-natives/src/desktop/roster.rs, docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/native-windows.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-native-windows.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts, packages/natives/native/desktop.js",
-     "conflicts with main in packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/dialogs.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts"
+     "its need r2/relay-own-only conflicts with main in crates/natives/src/desktop/macos/roster.rs, crates/natives/src/desktop/roster.rs, docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/native-windows.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-native-windows.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts, packages/natives/native/desktop.js",
+     "conflicts with main in packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/dialogs.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts"
     ],
     "note": "",
     "over": [],
@@ -112088,7 +112069,8 @@
     "title": "feat(ai): reserve per usage limit in account policies",
     "action": "wait",
     "reasons": [
-     "conflicts with #19606 in packages/coding-agent/src/cli/usage-cli.ts"
+     "conflicts with #19606 in packages/coding-agent/src/cli/usage-cli.ts",
+     "conflicts with main in packages/coding-agent/src/cli/usage-cli.ts"
     ],
     "note": "",
     "over": [],
@@ -112134,8 +112116,8 @@
     "reasons": [
      "held: Main, 2026-11-12: proposal; opens only after entry A merges and Will has seen the body",
      "conflicts with #19531 in docs/tools/computer.md",
-     "conflicts with #19618 in crates/pi-natives/src/desktop/win32/mod.rs, docs/tools/computer.md",
-     "conflicts with main in crates/pi-natives/src/desktop/win32/input.rs, crates/pi-natives/src/desktop/win32/mod.rs"
+     "conflicts with #19618 in docs/tools/computer.md",
+     "conflicts with main in crates/natives/src/desktop/win32/edit.rs, crates/natives/src/desktop/win32/input.rs, crates/natives/src/desktop/win32/mod.rs"
     ],
     "note": "",
     "over": [],
@@ -112333,7 +112315,8 @@
     "action": "wait",
     "reasons": [
      "needs token-count-policy (queued)",
-     "its need token-count-policy conflicts with main in packages/catalog/src/compat/rules/classes/anthropic.kdl, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/session/session-stats.ts, packages/coding-agent/test/context-fits-model.test.ts"
+     "its need token-count-policy conflicts with main in packages/catalog/src/compat/rules/classes/anthropic.kdl, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/session/session-stats.ts, packages/coding-agent/test/context-fits-model.test.ts",
+     "conflicts with main in crates/natives/data/LICENSE.gemma4, crates/natives/data/gemma4.bin.zst, crates/natives/fixtures/gemma4.json, crates/natives/src/utok/gemma.rs, crates/natives/src/utok/tests/gemma.rs, crates/natives/tools/gen-gemma-fixtures.py, crates/natives/tools/pack-gemma.ts, packages/natives/THIRD-PARTY-NOTICES.txt"
     ],
     "note": "",
     "over": [],
