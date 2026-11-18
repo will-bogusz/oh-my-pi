@@ -111717,5 +111717,11 @@
     "wake": ""
    }
   ]
+ },
+ "opening": {
+  "id": "wayland-share-picker-deadline",
+  "token": "8fd65f8360914daa993eae2feba71ee9",
+  "host": "MacBook-Pro",
+  "at": "2026-11-18T01:51:34Z"
  }
 }
