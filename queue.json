@@ -114500,7 +114500,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-18T18:12:48.476574Z",
+  "at": "2026-11-18T18:14:16.675499Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -114846,6 +114846,23 @@
     "created": "2026-10-30T21:35:55Z"
    },
    {
+    "id": "loop-sampler-stop",
+    "label": "loop-sampler-stop",
+    "number": null,
+    "state": "queued",
+    "area": "tui",
+    "priority": "P1",
+    "title": "fix(tui): stopped the loop profiler when the last TUI watchdog stops",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-18T18:13:26Z"
+   },
+   {
     "id": "browser-wait-text-regexp",
     "label": "browser-wait-text-regexp",
     "number": null,
@@ -114988,10 +115005,8 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): send macOS background keys to the key window without a press",
-    "action": "wait",
-    "reasons": [
-     "conflicts with main in crates/natives/src/desktop/macos/skylight.rs"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "accepted pair with #17756: Main, 2026-11-18: one argument added to the make_key_in_background call that #17756 moves into keyboard_in_watch; combined = #17756's function with that argument",
     "over": [],
     "paired": [
@@ -115014,6 +115029,7 @@
      "conflicts with #19195 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/macos/input.rs, docs/computer-use.md",
      "conflicts with #19504 in docs/computer-use.md",
      "conflicts with #19531 in docs/computer-use.md",
+     "conflicts with macos-keys-no-press in docs/computer-use.md",
      "conflicts with main in crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/macos/input.rs, docs/computer-use.md"
     ],
     "note": "",
@@ -115022,7 +115038,8 @@
     "blocked_by": [
      "#19195",
      "#19504",
-     "#19531"
+     "#19531",
+     "macos-keys-no-press"
     ],
     "needs": [],
     "created": "2026-11-14T20:50:44Z"
@@ -115284,14 +115301,15 @@
      "held: Main, 2026-11-18: needs an independent review and a VM row before it can open; no work on it now",
      "needs macos-keys-no-press (queued)",
      "conflicts with #19195 in crates/pi-natives/src/desktop/macos/ax.rs",
-     "its need macos-keys-no-press conflicts with main in crates/natives/src/desktop/macos/capture.rs, crates/natives/src/desktop/macos/skylight.rs, crates/natives/src/desktop/macos/window_order.rs, docs/computer-use.md",
-     "conflicts with main in crates/natives/src/desktop/macos/ax.rs"
+     "conflicts with macos-keys-no-press in docs/computer-use.md",
+     "conflicts with main in crates/natives/src/desktop/macos/ax.rs, docs/computer-use.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#19195"
+     "#19195",
+     "macos-keys-no-press"
     ],
     "needs": [
      "macos-keys-no-press"
@@ -115408,6 +115426,7 @@
      "conflicts with #19531 in docs/computer-use.md, docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md",
      "conflicts with #19620 in packages/coding-agent/src/session/session-maintenance.ts",
+     "conflicts with macos-keys-no-press in docs/computer-use.md",
      "its need computer-ui-quiet conflicts with main in crates/natives/src/desktop/macos/settle.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -115419,7 +115438,8 @@
      "#19504",
      "#19531",
      "#19618",
-     "#19620"
+     "#19620",
+     "macos-keys-no-press"
     ],
     "needs": [
      "computer-ui-quiet"
