@@ -96806,7 +96806,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/usage-state-per-model",
    "host": "MacBook-Pro",
    "added": "2026-11-17T20:59:31Z",
-   "updated": "2026-11-18T00:18:40Z",
+   "updated": "2026-11-18T00:19:27Z",
    "note": "",
    "built": [
     {
@@ -96900,7 +96900,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-11-18T00:18:40Z"
+   "opened": "2026-11-18T00:18:40Z",
+   "readied": "2026-11-18T00:19:27Z"
   },
   {
    "id": "fable-shared-wall-block",
