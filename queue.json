@@ -97259,7 +97259,7 @@
    "area": "broker",
    "priority": "P0",
    "needs": [],
-   "base": "1abafe8e71cae521f995e2203055ce840b859da4",
+   "base": "e1ae2cc998efd1ca151b46ebefc0e0dab6c23c63",
    "body": "bodies/fable-shared-wall-block.md",
    "state": "open",
    "pr": 19600,
@@ -97267,7 +97267,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/fable-shared-wall-block",
    "host": "MacBook-Pro",
    "added": "2026-11-17T20:59:40Z",
-   "updated": "2026-11-18T00:34:08Z",
+   "updated": "2026-11-18T01:14:13Z",
    "note": "",
    "built": [
     {
@@ -97317,7 +97317,8 @@
     }
    ],
    "opened": "2026-11-17T23:07:54Z",
-   "readied": "2026-11-17T23:09:35Z"
+   "readied": "2026-11-17T23:09:35Z",
+   "advanced": "2026-11-18T01:14:13Z"
   },
   {
    "id": "broker-wire-forward-compat",
