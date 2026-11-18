@@ -103077,10 +103077,18 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-18T18:13:33Z",
+  "checked": "2026-11-18T18:16:27Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
+   "loop-sampler-stop": {
+    "since": "2026-11-18T18:16:27Z",
+    "title": "fix(tui): stopped the loop profiler when the last TUI watchdog stops"
+   },
+   "macos-keys-no-press": {
+    "since": "2026-11-18T18:16:27Z",
+    "title": "fix(natives): send macOS background keys to the key window without a press"
+   },
    "reserve-per-model-family": {
     "since": "2026-11-18T18:13:33Z",
     "title": "feat(ai): reserve per usage limit in account policies"
@@ -106486,6 +106494,18 @@
      "crates/natives/src/desktop/control.rs",
      "crates/natives/src/desktop/macos/ax/drag_control.rs"
     ]
+   },
+   {
+    "at": "2026-11-18T18:16:27Z",
+    "kind": "openable",
+    "id": "loop-sampler-stop",
+    "title": "fix(tui): stopped the loop profiler when the last TUI watchdog stops"
+   },
+   {
+    "at": "2026-11-18T18:16:27Z",
+    "kind": "openable",
+    "id": "macos-keys-no-press",
+    "title": "fix(natives): send macOS background keys to the key window without a press"
    }
   ]
  },
@@ -114153,8 +114173,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-18T18:14:16.675499Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-18T18:16:28.649702Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 1,
@@ -115382,8 +115402,10 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with main in (branch missing on the fork)"
+    ],
     "note": "",
     "over": [],
     "paired": [],
