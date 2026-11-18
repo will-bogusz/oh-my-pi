@@ -101109,7 +101109,41 @@
    ],
    "advanced": "2026-11-18T21:12:26Z",
    "opened": "2026-11-18T01:58:22Z",
-   "readied": "2026-11-18T01:58:49Z"
+   "readied": "2026-11-18T01:58:49Z",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-18T21:29:22Z",
+     "reason": "QueueThirtyFive, 2026-11-18: v19 crate rename crates/pi-natives -> crates/natives; the PR's +/- lines outside CHANGELOG are identical before and after (44 = 44)",
+     "old": "ce74d34d355947c18c0f9508fc5c078f23fe4b10",
+     "new": "88e5d649f0381de4592d2e5e61c871fece2337ad",
+     "dropped": {
+      "crates/pi-natives/src/desktop/linux/wayland/mod.rs": [
+       "\t\t\t// The portal names the shared monitor only when a capture opens a",
+       "\t\t\t// stream, so before the first one the count is unknown, not zero.",
+       "\t\t\tdisplay_count: (!self.displays.is_empty()).then_some(self.displays.len() as u32),",
+       "\tfn display_count_is_unknown_until_the_first_capture() {",
+       "\t\tassert_eq!(backend.capabilities().display_count, None);",
+       "\t\tassert_eq!(backend.capabilities().display_count, Some(1));"
+      ],
+      "crates/pi-natives/src/desktop/linux/x11/mod.rs": [
+       "\t\t\tdisplay_count: Some(",
+       "\t\t\t\tdisplays.map_or(0, |items| u32::try_from(items.len()).unwrap_or(u32::MAX)),"
+      ],
+      "crates/pi-natives/src/desktop/macos/mod.rs": [
+       "\t\t\tdisplay_count: Some(display_count),"
+      ],
+      "crates/pi-natives/src/desktop/types.rs": [
+       "\t/// Displays capture and coordinate input can use; absent while the backend",
+       "\t/// cannot tell yet: Wayland learns its monitor from the first capture.",
+       "\tpub display_count: Option<u32>,",
+       "\t\t\tdisplay_count: Some(0),"
+      ],
+      "crates/pi-natives/src/desktop/win32/mod.rs": [
+       "\t\t\tdisplay_count: Some(display_count),"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "devin-gemini-promo-prices",
