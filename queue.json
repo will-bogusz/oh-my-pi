@@ -100179,8 +100179,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-image-budgets",
    "host": "MacBook-Pro",
    "added": "2026-11-17T20:52:57Z",
-   "updated": "2026-11-18T17:15:00Z",
-   "note": "Main for Will, 2026-11-17: P2 estimate, Devin sessions lose most archive frames to the 5-image fallback",
+   "updated": "2026-11-18T17:50:40Z",
+   "note": "Main for Will, 2026-11-17: P2 estimate, Devin sessions lose most archive frames to the 5-image fallback\nPost-merge (QueueThirtyFour, 2026-11-18 learn): Brit regenerated rules.json in merge 7d72a0224f and b76734aac30 moved the verified Gemini image rule to a class match so effort-suffixed Carbon uids and Flash 3.7 get it. Not named by us or a review.",
    "built": [
     {
      "with": "#19100",
