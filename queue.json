@@ -115724,5 +115724,11 @@
     "wake": ""
    }
   ]
+ },
+ "opening": {
+  "id": "export-viewer-regen",
+  "token": "890da0d0439048d9b0b142b4705c8300",
+  "host": "MacBook-Pro",
+  "at": "2026-11-18T17:57:22Z"
  }
 }
