@@ -109560,7 +109560,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-17T23:09:52.518215Z",
+  "at": "2026-11-18T00:08:53.141192Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -109671,6 +109671,57 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-17T22:34:51Z"
+   },
+   {
+    "id": "fable-shared-wall-block",
+    "label": "#19600",
+    "number": 19600,
+    "state": "open",
+    "area": "broker",
+    "priority": "P0",
+    "title": "fix(ai): heal Claude tier blocks a shared weekly wall caused from single-window usage reports",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-17T23:07:49Z"
+   },
+   {
+    "id": "broker-wire-forward-compat",
+    "label": "#19602",
+    "number": 19602,
+    "state": "open",
+    "area": "broker",
+    "priority": "P0",
+    "title": "fix(ai): read auth-broker responses that carry fields a newer broker adds",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-17T23:18:04Z"
+   },
+   {
+    "id": "logger-console-level",
+    "label": "#19605",
+    "number": 19605,
+    "state": "open",
+    "area": "other",
+    "priority": "P0",
+    "title": "fix(utils): apply OMP_LOG_LEVEL to the console transport",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-17T23:41:50Z"
    },
    {
     "id": "docs-reclaim-drift",
@@ -109813,13 +109864,13 @@
     "created": "2026-11-17T23:04:12Z"
    },
    {
-    "id": "fable-shared-wall-block",
-    "label": "#19600",
-    "number": 19600,
+    "id": "devin-gemini-promo-prices",
+    "label": "#19601",
+    "number": 19601,
     "state": "open",
-    "area": "broker",
+    "area": "catalog",
     "priority": "P1",
-    "title": "fix(ai): heal Claude tier blocks a shared weekly wall caused from single-window usage reports",
+    "title": "fix(catalog): switch Devin's Gemini promo prices to list when each promo ends",
     "action": "keep",
     "reasons": [],
     "note": "",
@@ -109827,7 +109878,7 @@
     "paired": [],
     "blocked_by": [],
     "needs": [],
-    "created": "2026-11-17T23:07:49Z"
+    "created": "2026-11-17T23:13:21Z"
    },
    {
     "id": "x11-xtest-release",
@@ -109883,23 +109934,6 @@
     "created": "2026-11-17T22:07:16Z"
    },
    {
-    "id": "devin-gemini-promo-prices",
-    "label": "devin-gemini-promo-prices",
-    "number": null,
-    "state": "queued",
-    "area": "catalog",
-    "priority": "P1",
-    "title": "fix(catalog): switch Devin's Gemini promo prices to list when each promo ends",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-17T20:51:19Z"
-   },
-   {
     "id": "iphone-mirror-scroll-distance",
     "label": "iphone-mirror-scroll-distance",
     "number": null,
@@ -109947,29 +109981,12 @@
     "title": "feat(browser): settle the preceding action before reads too",
     "action": "open",
     "reasons": [],
-    "note": "",
+    "note": "tests-over: Main, 2026-11-18: one test per settle branch: settled read, unanswered request bound, no preceding action, batched reads settle once, element id survives an action, click opening a confirm",
     "over": [],
     "paired": [],
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-10T18:56:55Z"
-   },
-   {
-    "id": "broker-wire-forward-compat",
-    "label": "broker-wire-forward-compat",
-    "number": null,
-    "state": "queued",
-    "area": "broker",
-    "priority": "P2",
-    "title": "fix(ai): read auth-broker responses that carry fields a newer broker adds",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-17T21:01:16Z"
    },
    {
     "id": "browser-wait-text-regexp",
@@ -110070,23 +110087,6 @@
     ],
     "needs": [],
     "created": "2026-10-19T07:26:45Z"
-   },
-   {
-    "id": "logger-console-level",
-    "label": "logger-console-level",
-    "number": null,
-    "state": "queued",
-    "area": "other",
-    "priority": "P2",
-    "title": "fix(utils): apply OMP_LOG_LEVEL to the console transport",
-    "action": "next-hour",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-17T21:03:30Z"
    },
    {
     "id": "macos-ax-cancel-before-send",
@@ -110207,23 +110207,6 @@
     "created": "2026-11-14T20:50:44Z"
    },
    {
-    "id": "qt-filler-windows",
-    "label": "qt-filler-windows",
-    "number": null,
-    "state": "queued",
-    "area": "natives",
-    "priority": "P2",
-    "title": "fix(natives): list Qt windows built from a bare QWidget on Wayland",
-    "action": "next-hour",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-17T21:55:55Z"
-   },
-   {
     "id": "r2/relay-own-only",
     "label": "r2/relay-own-only",
     "number": null,
@@ -110335,7 +110318,7 @@
     "area": "broker",
     "priority": "P2",
     "title": "fix(coding-agent): judge omp usage policy state by account-wide windows",
-    "action": "next-hour",
+    "action": "open",
     "reasons": [],
     "note": "",
     "over": [],
@@ -110352,7 +110335,7 @@
     "area": "natives",
     "priority": "P2",
     "title": "fix(natives): report the Wayland display count as unknown before the first capture",
-    "action": "next-hour",
+    "action": "open",
     "reasons": [],
     "note": "",
     "over": [],
@@ -110371,7 +110354,7 @@
     "title": "fix(natives): refuse every Wayland input call at once when no input route exists",
     "action": "next-hour",
     "reasons": [],
-    "note": "tests-over: OmarchyFixes, 2026-11-17: one test going through all 8 gated input arms; each request is an arm no other test reaches",
+    "note": "tests-over: OmarchyFixes, 2026-11-18: one test going through the 9 refused input requests with control held elsewhere; each request is an arm no other test reaches",
     "over": [],
     "paired": [],
     "blocked_by": [],
@@ -110414,7 +110397,6 @@
      "conflicts with #19516 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19519 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19532 in crates/pi-natives/src/desktop/macos/ax.rs",
-     "conflicts with qt-filler-windows in crates/pi-natives/src/desktop/linux/ax.rs",
      "conflicts with wayland-input-refusal in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs"
     ],
@@ -110427,7 +110409,6 @@
      "#19516",
      "#19519",
      "#19532",
-     "qt-filler-windows",
      "wayland-input-refusal"
     ],
     "needs": [],
@@ -110596,6 +110577,7 @@
      "conflicts with #19516 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #19532 in docs/computer-use.md",
      "conflicts with #19531 in docs/computer-use.md, docs/tools/computer.md",
+     "conflicts with wayland-display-count in docs/tools/computer.md",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -110609,7 +110591,8 @@
      "#19504",
      "#19516",
      "#19532",
-     "#19531"
+     "#19531",
+     "wayland-display-count"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -110634,6 +110617,7 @@
      "conflicts with #19519 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19532 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with #19531 in docs/tools/computer.md",
+     "conflicts with wayland-display-count in docs/tools/computer.md",
      "conflicts with wayland-input-refusal in crates/pi-natives/src/desktop/mod.rs",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md"
@@ -110649,6 +110633,7 @@
      "#19519",
      "#19532",
      "#19531",
+     "wayland-display-count",
      "wayland-input-refusal"
     ],
     "needs": [
@@ -110695,7 +110680,7 @@
      "conflicts with #19519 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19532 in crates/pi-natives/src/desktop/macos/capture.rs, crates/pi-natives/src/desktop/macos/mod.rs",
      "conflicts with #19531 in docs/tools/computer.md",
-     "conflicts with wayland-display-count in crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/types.rs, packages/natives/native/index.d.ts",
+     "conflicts with wayland-display-count in crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/types.rs, docs/tools/computer.md, packages/natives/native/index.d.ts",
      "conflicts with wayland-input-refusal in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -110824,8 +110809,7 @@
     "title": "feat(ai): reserve per usage limit in account policies",
     "action": "wait",
     "reasons": [
-     "conflicts with usage-state-per-model in packages/coding-agent/src/cli/usage-cli.ts",
-     "conflicts with main in packages/ai/src/auth/health.ts"
+     "conflicts with usage-state-per-model in packages/coding-agent/src/cli/usage-cli.ts"
     ],
     "note": "",
     "over": [],
@@ -110887,7 +110871,7 @@
      "held: Main, 2026-11-12: proposal; opens only after entry A merges and Will has seen the body",
      "conflicts with #19100 in docs/tools/computer.md",
      "conflicts with #19531 in docs/tools/computer.md",
-     "conflicts with wayland-display-count in crates/pi-natives/src/desktop/win32/mod.rs",
+     "conflicts with wayland-display-count in crates/pi-natives/src/desktop/win32/mod.rs, docs/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/win32/input.rs, crates/pi-natives/src/desktop/win32/mod.rs"
     ],
     "note": "",
