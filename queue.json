@@ -97131,7 +97131,7 @@
    "area": "broker",
    "priority": "P1",
    "needs": [],
-   "base": "542454c814a483c0c5605e234134de81d35d297c",
+   "base": "e1ae2cc998efd1ca151b46ebefc0e0dab6c23c63",
    "body": "bodies/usage-state-per-model.md",
    "state": "open",
    "pr": 19606,
@@ -97139,7 +97139,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/usage-state-per-model",
    "host": "MacBook-Pro",
    "added": "2026-11-17T20:59:31Z",
-   "updated": "2026-11-18T00:35:21Z",
+   "updated": "2026-11-18T01:14:57Z",
    "note": "",
    "built": [
     {
@@ -97250,7 +97250,7 @@
      }
     }
    ],
-   "advanced": "2026-11-18T00:35:21Z",
+   "advanced": "2026-11-18T01:14:57Z",
    "tests_over_override": {
     "reason": "UpstreamOpener.ReviewUsageStateFinal, 2026-11-18: three policy cases, one per account-wide-pool branch (model-scoped tier row, sharedGroup-only fallback, shared row with a modelId); none merges into another",
     "at": "2026-11-18T01:14:50Z"
