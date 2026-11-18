@@ -100921,8 +100921,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/broker-shutdown-refresh-save",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:03:11Z",
-   "updated": "2026-11-18T17:15:00Z",
-   "note": "",
+   "updated": "2026-11-18T17:50:31Z",
+   "note": "Post-merge (QueueThirtyFour, 2026-11-18 learn): Brit 727b7f828dd documented serve's 143/130 stop status and scrubbed OMP_LOG_LEVEL in auth-broker-serve-shutdown.test.ts (interaction with #19605's console gating); 578ecca1f2d then made a requested stop exit 0 (postmortem exitCleanlyOnStopSignals). Not named by us or a review.",
    "tests_over_override": {
     "reason": "ReviewBrokerShutdown, 2026-11-17: one regression test; the exit race exists only in a spawned omp auth-broker serve process, so its lines are process and fixture setup",
     "at": "2026-11-17T21:03:16Z"
