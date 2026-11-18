@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-18 00:23Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-18 00:26Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 3 of 8 ready events used in the hour before the last plan, 5 left (plan of 2026-11-18 00:09Z on MacBook-Pro; groups below are from it, states from the manifest)
@@ -42,7 +42,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-18
 | macos-web-type-background | fix(natives): type into a background macOS web page field without a takeover | computer | P2 | 3d | [#17756](https://github.com/can1357/oh-my-pi/pull/17756), [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#17897](https://github.com/can1357/oh-my-pi/pull/17897), [#19596](https://github.com/can1357/oh-my-pi/pull/19596), [#19504](https://github.com/can1357/oh-my-pi/pull/19504), [#19516](https://github.com/can1357/oh-my-pi/pull/19516), [#19532](https://github.com/can1357/oh-my-pi/pull/19532), [#19531](https://github.com/can1357/oh-my-pi/pull/19531), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-web-type-background) |
 | reserve-per-model-family | feat(ai): reserve per usage limit in account policies | broker | P2 | 3h | usage-state-per-model | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reserve-per-model-family) |
 | deadline-ranking | feat(ai): rank an account priority by quota deadline | ai/auth | P2 | 3h | account-switch-reason | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/deadline-ranking) |
-| reset-consent-per-account | feat(ai,coding-agent): let an account policy decide its own saved-reset spending | broker | P2 | 2h | usage-state-per-model | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-consent-per-account) |
+| reset-consent-per-account | feat(ai,coding-agent): let an account policy decide its own saved-reset spending | broker | P2 | 3h | usage-state-per-model | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-consent-per-account) |
 | wayland-share-picker-deadline | fix(natives): wait for the Wayland screen-share picker until the call's deadline | natives | P2 | 2h | wayland-still-capture | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-share-picker-deadline) |
 
 ## Stacked (13)
