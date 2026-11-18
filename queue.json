@@ -96934,7 +96934,7 @@
    "area": "other",
    "priority": "P2",
    "needs": [],
-   "base": "baf60290fde5e9eea4edb30bff07695877682ba9",
+   "base": "f6e1fbe1c735f06b8084102619f59e44e6f61d0f",
    "body": "bodies/image-eviction-notice.md",
    "state": "open",
    "pr": 19611,
@@ -96942,7 +96942,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/image-eviction-notice",
    "host": "MacBook-Pro",
    "added": "2026-11-17T20:57:09Z",
-   "updated": "2026-11-18T00:46:28Z",
+   "updated": "2026-11-18T00:52:00Z",
    "note": "Main for Will, 2026-11-17: P2 estimate, images silently dropped from model context on every provider",
    "built": [
     {
@@ -97019,7 +97019,8 @@
     }
    ],
    "opened": "2026-11-18T00:45:54Z",
-   "readied": "2026-11-18T00:46:28Z"
+   "readied": "2026-11-18T00:46:28Z",
+   "advanced": "2026-11-18T00:52:00Z"
   },
   {
    "id": "usage-state-per-model",
