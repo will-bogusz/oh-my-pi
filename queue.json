@@ -102038,7 +102038,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/reset-consent-per-account",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:24:43Z",
-   "updated": "2026-11-18T18:35:37Z",
+   "updated": "2026-11-18T18:39:06Z",
    "note": "Will, 2026-11-17: go-ahead to open",
    "kind": "proposal",
    "line_loss_overrides": [
@@ -102062,7 +102062,108 @@
    "pair_reasons": {
     "19626": "Main, 2026-11-18: adjacent call-site edits in agent-session.ts #redeemConsentedResets and its three callers; #19626 adds a trigger argument, this adds a consent argument; the combined form passes both (provider, trigger, actions, coordinator, consent) and keeps this PR's per-action credentialResetModes",
     "19700": "Main, 2026-11-18: both add account-policy keys side by side in docs/auth-broker-gateway.md (table row), ai auth-broker/discover.ts (allowed keys) and cli/usage-cli.ts (diagnostics fields, base spread, policy-line prefix); the combined form keeps both: reservePctByLimit/scopedInsideReserve plus autoRedeem*, prefix with limit reserves then reclaim then auto-redeem"
-   }
+   },
+   "built": [
+    {
+     "with": "#19699",
+     "code": "6b985ef806e72e0766d5853d599f9c384f47aeca",
+     "with_code": "ff4773545c8e60ccf34f841d3dcfdb1cc2d61789",
+     "tip": "f111b53e032dd5c9f84035acf5fa0e8e31eb572d",
+     "with_tip": "3502429e86c5d8290b8d64aab3b36f41c1bf45fb",
+     "at": "2026-11-18T18:39:01Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19590",
+     "code": "6b985ef806e72e0766d5853d599f9c384f47aeca",
+     "with_code": "c49f10493f27cb00c119846d41c8b95332278c13",
+     "tip": "f111b53e032dd5c9f84035acf5fa0e8e31eb572d",
+     "with_tip": "515059dc946221420e3671fab0d656aaa58767e5",
+     "at": "2026-11-18T18:39:05Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19696",
+     "code": "6b985ef806e72e0766d5853d599f9c384f47aeca",
+     "with_code": "bcaa05ab28d42a65a609172781c1e898835cda9e",
+     "tip": "f111b53e032dd5c9f84035acf5fa0e8e31eb572d",
+     "with_tip": "39e86c14bbec90de2a0c4ed3ddc9cf47fa09c7d1",
+     "at": "2026-11-18T18:39:05Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19513",
+     "code": "6b985ef806e72e0766d5853d599f9c384f47aeca",
+     "with_code": "58756d46d0aaa29d1bfd113ddd35ea5f4d7583d5",
+     "tip": "f111b53e032dd5c9f84035acf5fa0e8e31eb572d",
+     "with_tip": "35bb518dd5d5352d61c2003e99d5828c523a1bf0",
+     "at": "2026-11-18T18:39:05Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19611",
+     "code": "6b985ef806e72e0766d5853d599f9c384f47aeca",
+     "with_code": "abb759a1993a323b89d47becb5b8d77e7890bf2a",
+     "tip": "f111b53e032dd5c9f84035acf5fa0e8e31eb572d",
+     "with_tip": "35928aad3b512c594597f70b13e51b33301c7b40",
+     "at": "2026-11-18T18:39:05Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19620",
+     "code": "6b985ef806e72e0766d5853d599f9c384f47aeca",
+     "with_code": "50704a7a3010dc2f95c7ccfac54c3dbc0be63508",
+     "tip": "f111b53e032dd5c9f84035acf5fa0e8e31eb572d",
+     "with_tip": "83016bc91d8f4b241f4b489213c4725318357cc9",
+     "at": "2026-11-18T18:39:05Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19542",
+     "code": "6b985ef806e72e0766d5853d599f9c384f47aeca",
+     "with_code": "6b44688ac7aebf378528cef1914db8089f4eb8f2",
+     "tip": "f111b53e032dd5c9f84035acf5fa0e8e31eb572d",
+     "with_tip": "549a72f97a820d4b830e33dd33cfb46f808d2fd1",
+     "at": "2026-11-18T18:39:05Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19592",
+     "code": "6b985ef806e72e0766d5853d599f9c384f47aeca",
+     "with_code": "8392c922c234ea7d1826f17a99c3caf7c8ee65c7",
+     "tip": "f111b53e032dd5c9f84035acf5fa0e8e31eb572d",
+     "with_tip": "43f7a2a1ca11375af52026dcdeed6f52108fe9b2",
+     "at": "2026-11-18T18:39:05Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19623",
+     "code": "6b985ef806e72e0766d5853d599f9c384f47aeca",
+     "with_code": "824c97ce88b305b5a1b1c6b433091bdd9d7db6df",
+     "tip": "f111b53e032dd5c9f84035acf5fa0e8e31eb572d",
+     "with_tip": "ce9ff497924103deff896aae21e3cffe8e05c996",
+     "at": "2026-11-18T18:39:05Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19633",
+     "code": "6b985ef806e72e0766d5853d599f9c384f47aeca",
+     "with_code": "36560a5f0f1bb92067fb1052c8131b57201112cf",
+     "tip": "f111b53e032dd5c9f84035acf5fa0e8e31eb572d",
+     "with_tip": "1f28992a61f93cbdac2e0682877d60b48953db1a",
+     "at": "2026-11-18T18:39:05Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "factory-droid-1100-pin",
+     "code": "6b985ef806e72e0766d5853d599f9c384f47aeca",
+     "with_code": "2ce01c8d9d3dfcc120b3ef5dbca0d7384e45e2c5",
+     "tip": "f111b53e032dd5c9f84035acf5fa0e8e31eb572d",
+     "with_tip": "3336d0c48fe7e24ff937dcba4743738472ed1c1f",
+     "at": "2026-11-18T18:39:05Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "qt-filler-windows",
