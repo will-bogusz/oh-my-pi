@@ -27,7 +27,7 @@ Non-goal: the sampler's cost while a TUI runs (Related: #19634).
 
 ## Testing
 
-- New test in `packages/tui/test/loop-watchdog.test.ts`: with two watchdogs on the real sampler, the profiler starts once, is not paused when the first stops, is paused when the second stops (empty buffer after more JS runs), and records again after a restart. 3/3 pass; 3/3 fail with `src/` reverted. Three tests in that file that left a default-sampler watchdog running now pass `sampler: null`, as its harness does.
+- New test in `packages/tui/test/loop-watchdog.test.ts`, in a fresh process: with two watchdogs on the real sampler, the profiler starts once, is not paused when the first stops, is paused when the second stops (empty buffer after more JS), and records again after a restart. 3/3 pass; 3/3 fail with `src/` reverted. Three tests in that file that left a real-sampler watchdog running now pass `sampler: null`.
 - Table: `bun test <first> test/task/parked-subagent-session-release.test.ts --parallel=1 --timeout=30000` in `packages/coding-agent`.
 - `packages/tui` `bun test`: same 25 failures as bare `main` (local native addon is 18.22.0); `check:types` clean for `tui` and `coding-agent`.
 - Not run: Linux, Windows.
