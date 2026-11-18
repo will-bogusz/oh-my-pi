@@ -97250,7 +97250,11 @@
      }
     }
    ],
-   "advanced": "2026-11-18T00:35:21Z"
+   "advanced": "2026-11-18T00:35:21Z",
+   "tests_over_override": {
+    "reason": "UpstreamOpener.ReviewUsageStateFinal, 2026-11-18: three policy cases, one per account-wide-pool branch (model-scoped tier row, sharedGroup-only fallback, shared row with a modelId); none merges into another",
+    "at": "2026-11-18T01:14:50Z"
+   }
   },
   {
    "id": "fable-shared-wall-block",
