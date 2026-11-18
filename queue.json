@@ -101659,13 +101659,13 @@
    "needs": [],
    "base": "2cdc756f93122a4da1e75100099eebcc0a22b451",
    "body": "bodies/reserve-per-model-family.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19700,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/reserve-per-model-family",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:13:06Z",
-   "updated": "2026-11-18T18:33:30Z",
+   "updated": "2026-11-18T18:34:40Z",
    "note": "Will, 2026-11-17: go-ahead to open",
    "kind": "proposal",
    "advanced": "2026-11-18T18:07:53Z",
@@ -101801,7 +101801,8 @@
      "at": "2026-11-18T18:33:27Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-18T18:34:40Z"
   },
   {
    "id": "deadline-ranking",
