@@ -109560,12 +109560,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-18T00:08:53.141192Z",
+  "at": "2026-11-18T00:09:52.586811Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 4,
-   "left": 4
+   "used": 3,
+   "left": 5
   },
   "rows": [
    {
@@ -110352,7 +110352,7 @@
     "area": "natives",
     "priority": "P2",
     "title": "fix(natives): refuse every Wayland input call at once when no input route exists",
-    "action": "next-hour",
+    "action": "open",
     "reasons": [],
     "note": "tests-over: OmarchyFixes, 2026-11-18: one test going through the 9 refused input requests with control held elsewhere; each request is an arm no other test reaches",
     "over": [],
