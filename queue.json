@@ -80822,7 +80822,7 @@
    "area": "computer",
    "priority": "P2",
    "needs": [],
-   "base": "fcdfcce337ce73ea94f1273f609a13282a0a63e6",
+   "base": "08cb444207d55091daaa61d37b3652c876aa8df1",
    "body": "bodies/x11-xtest-release.md",
    "state": "open",
    "pr": 19531,
@@ -80830,7 +80830,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-xtest-release",
    "host": "MacBook-Pro",
    "added": "2026-11-11T02:31:05Z",
-   "updated": "2026-11-18T15:43:38Z",
+   "updated": "2026-11-18T15:49:41Z",
    "note": "",
    "rebases_after": [
     18222,
@@ -80925,7 +80925,7 @@
    ],
    "opened": "2026-11-17T06:33:00Z",
    "readied": "2026-11-17T06:33:25Z",
-   "advanced": "2026-11-18T15:43:38Z"
+   "advanced": "2026-11-18T15:49:41Z"
   },
   {
    "id": "x11-takeover-keyboard-state",
