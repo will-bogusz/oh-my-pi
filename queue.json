@@ -88230,6 +88230,98 @@
        "\t\t\trequired.push(symbol);"
       ]
      }
+    },
+    {
+     "at": "2026-11-18T00:53:26Z",
+     "reason": "Main, 2026-11-18: SolFinal19519 rework: reject_writes test hook and its a_rejected_rebind test replaced by the register/confirm unit test; hide()/Keymap::xtest/text_mapping fields reworked for cross-session marks and the split-map rules",
+     "old": "11100c5f055edcd3362cfec4b0f0effcb553e81a",
+     "new": "04d4af3cdb26adf679e2c2efb301470609e84ab8",
+     "dropped": {
+      "crates/pi-natives/src/desktop/linux/x11/input.rs": [
+       "\t\t\tself.text_mapping.hide(&mut self.keymap);"
+      ],
+      "crates/pi-natives/src/desktop/linux/x11/keymap.rs": [
+       "\t\tOk(Self {",
+       "\t\t\tmodifier_masks: core.modifier_masks,",
+       "\t\t\t..Self::device(conn, device.into())?"
+      ],
+      "crates/pi-natives/src/desktop/linux/x11/mpx.rs": [
+       "\t\tself.text_mapping.hide(&mut map);"
+      ],
+      "crates/pi-natives/src/desktop/linux/x11/remap_tests.rs": [
+       "fn a_rejected_rebind_still_restores_the_row_it_held() {",
+       "\tlet min = conn.setup().min_keycode;",
+       "\tlet count = conn.setup().max_keycode - min + 1;",
+       "\t\t.get_keyboard_mapping(min, count)",
+       "\t// One spare row, so the second text has to take the first one's row.",
+       "\tlet mut keysyms = current.keysyms;",
+       "\tlet mut spare = false;",
+       "\tfor row in keysyms.chunks_exact_mut(usize::from(current.keysyms_per_keycode)) {",
+       "\t\t\tif spare {",
+       "\t\t\t\trow.fill(u32::from(b'#'));",
+       "\t\t\tspare = true;",
+       "\t\t.change_keyboard_mapping(count, min, current.keysyms_per_keycode, &keysyms)",
+       "\tmapping.reject_writes = true;",
+       "\tassert!(mapping.bind(&mut map, \"\u00f6\").is_err());",
+       "\tassert_eq!(core_symbols(&conn), before, \"the row still holding \u00e9 was not restored\");",
+       "\tlet reload = Command::new(\"setxkbmap\")",
+       "\t\t.args([\"-display\", &display, \"us\"])",
+       "\tassert!(reload.success());"
+      ],
+      "crates/pi-natives/src/desktop/linux/x11/text_mapping.rs": [
+       "\tprotocol::{xinput::ConnectionExt as _, xproto::ConnectionExt as _},",
+       "\tconn:                     Arc<RustConnection>,",
+       "\tbound:                    Vec<Binding>,",
+       "\ttargets:                  Vec<MapTarget>,",
+       "\tpresses:                  Cell<u64>,",
+       "\t/// While set, `bind` fails its keymap writes as a server rejecting them.",
+       "\tpub(super) reject_writes: bool,",
+       "\t\t\treject_writes: false,",
+       "\t/// Chords and holds use only the user's layout, not our cached text rows.",
+       "\tpub(super) fn hide(&self, map: &mut Keymap) {",
+       "\t\t\tif binding.owns(map) {",
+       "\t\t\t\tlet start = usize::from(binding.code - map.min_keycode) * width;",
+       "\t\tlet other = if source.core_mapping && source.device.is_some() {",
+       "\t\t\tSome(Keymap::core(&self.conn)?)",
+       "\t\t} else if let Some(master) = source.master {",
+       "\t\t\tSome(Keymap::device(&self.conn, master.into())?)",
+       "\t\t\tNone",
+       "\tfn available(&self, map: &Keymap, other: Option<&Keymap>) -> Vec<u8> {",
+       "\t/// Keysyms the layout types on its own rows' first two levels; our rows",
+       "\t/// do not count.",
+       "\tfn natives(&self, map: &Keymap) -> HashSet<u32> {",
+       "\t\t\treturn HashSet::new();",
+       "\t\t\t.filter(|&(index, _)| {",
+       "\t\t\t\tlet code = usize::from(map.min_keycode) + index;",
+       "\t\t\t\t!self",
+       "\t\t\t\t\t.any(|binding| usize::from(binding.code) == code && binding.owns(map))",
+       "\t\t\t.flat_map(|(_, row)| row.iter().take(2).copied())",
+       "\t\t\tlet available = self.available(&fresh, other.as_ref());",
+       "\t\t\tlet natives = self.natives(&fresh);",
+       "\t\t\t\t\twidth:  other",
+       "\t\t\t\t\t\t.map_or(fresh.keysyms_per_keycode, |map| map.keysyms_per_keycode),",
+       "\t\t\t// Register before writing, and confirm only after: a rejected or",
+       "\t\t\t// partial write can leave the row with the old keysym or the new.",
+       "\t\t\tfor &(code, symbol) in &writes {",
+       "\t\t\t\tif let Some(binding) = self.bound.iter_mut().find(|binding| binding.code == code) {",
+       "\t\t\t\t\tself.bound.push(Binding {",
+       "\t\t\t\tif self.reject_writes {",
+       "\t\t\t\t\treturn Err(failed(\"the test rejected this write\"));",
+       "\t\t\tlet applied = if writes.is_empty() {",
+       "\t\t\t\tlet map = match target.device {",
+       "\t\t\t\t\tSome(device) => Keymap::device(&self.conn, device.into()),",
+       "\t\t\t\t\tNone => Keymap::core(&self.conn),",
+       "\t\t\t\tlet result = map.and_then(|map| {",
+       "\t\t\t\t\t\t.filter(|binding| binding.owns(&map))",
+       "// XKB canonicalizes redundant levels to NoSymbol padding.",
+       "\tcode",
+       "\t\t.checked_sub(map.min_keycode)",
+       "\t\t.and_then(|index| {",
+       "\t\t\t\t.get(usize::from(index) * width..(usize::from(index) + 1) * width)",
+       "\t\t.is_some_and(|row| {",
+       "\t\t\trow.first() == Some(&symbol) && row.iter().all(|&value| value == 0 || value == symbol)"
+      ]
+     }
     }
    ],
    "advanced": "2026-11-17T20:51:02Z",
