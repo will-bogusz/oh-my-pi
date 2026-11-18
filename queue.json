@@ -96907,7 +96907,7 @@
    "area": "broker",
    "priority": "P1",
    "needs": [],
-   "base": "baf60290fde5e9eea4edb30bff07695877682ba9",
+   "base": "542454c814a483c0c5605e234134de81d35d297c",
    "body": "bodies/usage-state-per-model.md",
    "state": "open",
    "pr": 19606,
@@ -96915,7 +96915,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/usage-state-per-model",
    "host": "MacBook-Pro",
    "added": "2026-11-17T20:59:31Z",
-   "updated": "2026-11-18T00:34:08Z",
+   "updated": "2026-11-18T00:35:21Z",
    "note": "",
    "built": [
     {
@@ -97025,7 +97025,8 @@
       ]
      }
     }
-   ]
+   ],
+   "advanced": "2026-11-18T00:35:21Z"
   },
   {
    "id": "fable-shared-wall-block",
