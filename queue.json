@@ -96942,7 +96942,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/image-eviction-notice",
    "host": "MacBook-Pro",
    "added": "2026-11-17T20:57:09Z",
-   "updated": "2026-11-18T00:12:11Z",
+   "updated": "2026-11-18T00:40:41Z",
    "note": "Main for Will, 2026-11-17: P2 estimate, images silently dropped from model context on every provider",
    "built": [
     {
@@ -97002,10 +97002,19 @@
     {
      "with": "#19598",
      "code": "536f907f927bf16407819536f088a629c305da26",
-     "with_code": "6264a3652cb9e53dc3e3730c6b248b5c798700c7",
+     "with_code": "b61d2ff2270a6b325577bf9ed16d043f0737b76c",
      "tip": "4722e9bd24645dfd962c966af7dbc10e85afe76d",
-     "with_tip": "42eea7e9e6d490c27231d04099e02e8f1dabe8f5",
-     "at": "2026-11-17T23:27:37Z",
+     "with_tip": "7d98453473f36b7c9a0281e1649ea4e13cd3d47a",
+     "at": "2026-11-18T00:40:33Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19606",
+     "code": "536f907f927bf16407819536f088a629c305da26",
+     "with_code": "cdf5dbe501bfc8e2f49d6f7ccf4db0eb5c032cd6",
+     "tip": "4722e9bd24645dfd962c966af7dbc10e85afe76d",
+     "with_tip": "d6f211860c282e91687d5ec665486490279fe0f6",
+     "at": "2026-11-18T00:40:40Z",
      "host": "MacBook-Pro"
     }
    ]
