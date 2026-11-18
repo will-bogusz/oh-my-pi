@@ -4,14 +4,13 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-18
 
 **Opening:** not paused
 **Ready budget:** 4 of 8 ready events used in the hour before the last plan, 4 left (plan of 2026-11-18 18:43Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 3, conflict-held 17, stacked 16, held 8, parked 1, open PRs 21; merged 396, closed 44
+**Counts:** openable now 2, conflict-held 17, stacked 16, held 8, parked 1, open PRs 22; merged 396, closed 44
 
-## Openable now (3)
+## Openable now (2)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
 | factory-droid-1100-pin | feat(catalog): identify Factory Droid requests as droid 1.10.0 | factory-droid |  | 5d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-pin) |
-| macos-keys-no-press | fix(natives): send macOS background keys to the key window without a press | computer | P2 | 4d | open; accepted pair with #17756: Main, 2026-11-18: one argument added to the make_key_in_background call that #17756 moves into keyboard_in_watch; combined = #17756's function with that argument | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-keys-no-press) |
 | loop-sampler-stop | fix(tui): stopped the loop profiler when the last TUI watchdog stops | tui | P1 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/loop-sampler-stop) |
 
 ## Conflict-held (17)
@@ -76,7 +75,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-18
 |---|---|---|---|---|---|---|---|---|
 | [#16611](https://github.com/can1357/oh-my-pi/pull/16611) | read-audio-transcripts | feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio | catalog | P2 | 23h | Will, 2026-11-17: parked as draft, not maintained for now; revisit later | not checked or kept fresh | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-audio-transcripts) |
 
-## Open PRs (21)
+## Open PRs (22)
 
 | PR | id | title | area | rank | open | plan | branch |
 |---|---|---|---|---|---|---|---|
@@ -87,6 +86,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-18
 | [#19531](https://github.com/can1357/oh-my-pi/pull/19531) | x11-xtest-release | fix(natives): release X11 XTest keys and buttons a killed omp held | computer | P2 | 1d | keep; accepted pair with #19519: Main, 2026-11-17: adjacent unions in x11/mod.rs (mod lines), input.rs use list, X11Input::new fields and foreground_keys_after (watch_releases() then Keymap::xtest); in send_xtest #19519's text_mapping.pressed(keycode) moves into xtest's restructured send_xtest at the same point (after the request is sent, before check(), key presses only), no new logic. Combined form: merge 7b0d2ff0b68, ~/tmp/oh-my-pi/queuethirty/xpair-combined.md | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-xtest-release) |
 | [#19519](https://github.com/can1357/oh-my-pi/pull/19519) | x11-keysym-remap | fix(natives): type characters outside the X11 keymap through temporary keycodes | computer | P1 | 1d | keep; accepted pair with #19531: Main, 2026-11-17: adjacent unions in x11/mod.rs (mod lines), input.rs use list, X11Input::new fields and foreground_keys_after (watch_releases() then Keymap::xtest); in send_xtest #19519's text_mapping.pressed(keycode) moves into xtest's restructured send_xtest at the same point (after the request is sent, before check(), key presses only), no new logic. Combined form: merge 7b0d2ff0b68, ~/tmp/oh-my-pi/queuethirty/xpair-combined.md | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-keysym-remap) |
 | [#19195](https://github.com/can1357/oh-my-pi/pull/19195) | macos-drag-confirm | fix(natives): stop macOS background drags reporting moves that did not happen | computer | P1 | 4d | rebase | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-drag-confirm) |
+| [#19702](https://github.com/can1357/oh-my-pi/pull/19702) | macos-keys-no-press | fix(natives): send macOS background keys to the key window without a press | computer | P2 | 4d | open; accepted pair with #17756: Main, 2026-11-18: one argument added to the make_key_in_background call that #17756 moves into keyboard_in_watch; combined = #17756's function with that argument | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-keys-no-press) |
 | [#19504](https://github.com/can1357/oh-my-pi/pull/19504) | macos-handback-typed | fix(natives): give the macOS key window back after a takeover while another program types | computer | P1 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-handback-typed) |
 | [#19618](https://github.com/can1357/oh-my-pi/pull/19618) | wayland-display-count | fix(natives): report the Wayland display count as unknown before the first capture | natives | P2 | 16h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-display-count) |
 | [#19611](https://github.com/can1357/oh-my-pi/pull/19611) | image-eviction-notice | fix(coding-agent): keep the image omission note on evicted Responses computer results | other | P1 | 18h | keep; tests-over: LaneImageDropNotice, 2026-11-18: four distinct branches (archive run grouping; notice bytes charged against the body-limit room; a grown notice charged once; count-clamp notice extended by the byte clamp), the last two asked for by roboomp; each fails with its branch removed | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/image-eviction-notice) |
