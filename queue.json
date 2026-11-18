@@ -96698,13 +96698,13 @@
    "needs": [],
    "base": "08cb444207d55091daaa61d37b3652c876aa8df1",
    "body": "bodies/macos-window-order.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19532,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-window-order",
    "host": "MacBook-Pro",
    "added": "2026-11-14T01:37:23Z",
-   "updated": "2026-11-18T16:18:47Z",
+   "updated": "2026-11-18T17:15:00Z",
    "note": "QueueTwentySeven 2026-11-16: rebased locally onto main as 14e0989d3bd (clean). HandBack 2026-11-14: head 37142503cd9 (amended): takeover hand-back also raises the user's key window (with_foreground, hand_back_keeps_order). rust-check macos/linux/windows at 37142503cd9 (diff d9e990b339). Review TakeoverOrderReview needs-changes -> fixed (cause wording, same-app test, doubled error text, docs/changelog/title). Earlier: key-window-only restore, OrderReview2 7/7. Overlaps: #16553 pair recorded; #19062/#19179/drag-confirm/scroll-direction none.",
    "rebases_after": [
     16553,
@@ -97372,7 +97372,8 @@
       ]
      }
     }
-   ]
+   ],
+   "merged_by": "pr"
   },
   {
    "id": "macos-stale-press",
@@ -97876,13 +97877,13 @@
    ],
    "base": "08cb444207d55091daaa61d37b3652c876aa8df1",
    "body": "bodies/macos-key-read-settled.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19516,
    "closed_prs": [],
    "worktree": "/home/will/.omp/main-wt/oh-my-pi/key-read-settled",
    "host": "goliath",
    "added": "2026-11-14T10:14:31Z",
-   "updated": "2026-11-18T16:20:48Z",
+   "updated": "2026-11-18T17:15:00Z",
    "note": "Main, 2026-11-17: review stamp at d4e02a0 stands; e3e11216dfa is a text-only amend whose text Main's model-sample rerun checked (Haiku/Sol 0 wrong, ~/tmp/oh-my-pi/KeyReadSample/)",
    "advanced": "2026-11-18T16:20:26Z",
    "rebases_after": [
@@ -98482,7 +98483,8 @@
       ]
      }
     }
-   ]
+   ],
+   "merged_by": "pr"
   },
   {
    "id": "macos-keys-no-press",
@@ -99864,13 +99866,13 @@
    "needs": [],
    "base": "e1ae2cc998efd1ca151b46ebefc0e0dab6c23c63",
    "body": "bodies/wayland-input-refusal.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19629,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-input-refusal",
    "host": "MacBook-Pro",
    "added": "2026-11-17T20:29:55Z",
-   "updated": "2026-11-18T10:18:09Z",
+   "updated": "2026-11-18T17:15:00Z",
    "note": "",
    "tests_over_override": {
     "reason": "OmarchyFixes, 2026-11-18: one test through the 9 refused input requests with control held elsewhere, one for the no-backend side; each reaches a branch no other test does",
@@ -100015,7 +100017,8 @@
    ],
    "advanced": "2026-11-18T01:50:21Z",
    "opened": "2026-11-18T03:16:27Z",
-   "readied": "2026-11-18T03:16:52Z"
+   "readied": "2026-11-18T03:16:52Z",
+   "merged_by": "pr"
   },
   {
    "id": "wayland-display-count",
@@ -100148,17 +100151,18 @@
    "needs": [],
    "base": "e1ae2cc998efd1ca151b46ebefc0e0dab6c23c63",
    "body": "bodies/devin-gemini-promo-prices.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19601,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-gemini-promo-prices",
    "host": "MacBook-Pro",
    "added": "2026-11-17T20:51:19Z",
-   "updated": "2026-11-18T01:28:01Z",
+   "updated": "2026-11-18T17:15:00Z",
    "note": "Main for Will, 2026-11-17: P1 estimate, Carbon's list-price card must merge before 2026-11-24 16:00Z",
    "opened": "2026-11-17T23:13:22Z",
    "readied": "2026-11-17T23:13:49Z",
-   "advanced": "2026-11-18T01:28:01Z"
+   "advanced": "2026-11-18T01:28:01Z",
+   "merged_by": "pr"
   },
   {
    "id": "devin-image-budgets",
@@ -100169,13 +100173,13 @@
    "needs": [],
    "base": "e1ae2cc998efd1ca151b46ebefc0e0dab6c23c63",
    "body": "bodies/devin-image-budgets.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19619,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-image-budgets",
    "host": "MacBook-Pro",
    "added": "2026-11-17T20:52:57Z",
-   "updated": "2026-11-18T10:18:09Z",
+   "updated": "2026-11-18T17:15:00Z",
    "note": "Main for Will, 2026-11-17: P2 estimate, Devin sessions lose most archive frames to the 5-image fallback",
    "built": [
     {
@@ -100330,7 +100334,8 @@
    ],
    "advanced": "2026-11-18T01:34:27Z",
    "opened": "2026-11-18T02:02:29Z",
-   "readied": "2026-11-18T02:02:57Z"
+   "readied": "2026-11-18T02:02:57Z",
+   "merged_by": "pr"
   },
   {
    "id": "docs-reclaim-drift",
@@ -100341,16 +100346,17 @@
    "needs": [],
    "base": "baf60290fde5e9eea4edb30bff07695877682ba9",
    "body": "bodies/docs-reclaim-drift.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19586,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/docs-reclaim-drift",
    "host": "MacBook-Pro",
    "added": "2026-11-17T20:54:14Z",
-   "updated": "2026-11-18T00:34:08Z",
+   "updated": "2026-11-18T17:15:00Z",
    "note": "",
    "opened": "2026-11-17T20:58:21Z",
-   "readied": "2026-11-17T20:58:44Z"
+   "readied": "2026-11-17T20:58:44Z",
+   "merged_by": "pr"
   },
   {
    "id": "image-eviction-notice",
@@ -100460,13 +100466,13 @@
    "needs": [],
    "base": "e1ae2cc998efd1ca151b46ebefc0e0dab6c23c63",
    "body": "bodies/usage-state-per-model.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19606,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/usage-state-per-model",
    "host": "MacBook-Pro",
    "added": "2026-11-17T20:59:31Z",
-   "updated": "2026-11-18T01:14:57Z",
+   "updated": "2026-11-18T17:15:00Z",
    "note": "",
    "built": [
     {
@@ -100581,7 +100587,8 @@
    "tests_over_override": {
     "reason": "UpstreamOpener.ReviewUsageStateFinal, 2026-11-18: three policy cases, one per account-wide-pool branch (model-scoped tier row, sharedGroup-only fallback, shared row with a modelId); none merges into another",
     "at": "2026-11-18T01:14:50Z"
-   }
+   },
+   "merged_by": "pr"
   },
   {
    "id": "fable-shared-wall-block",
@@ -100592,13 +100599,13 @@
    "needs": [],
    "base": "e1ae2cc998efd1ca151b46ebefc0e0dab6c23c63",
    "body": "bodies/fable-shared-wall-block.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19600,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/fable-shared-wall-block",
    "host": "MacBook-Pro",
    "added": "2026-11-17T20:59:40Z",
-   "updated": "2026-11-18T01:14:13Z",
+   "updated": "2026-11-18T17:15:00Z",
    "note": "",
    "built": [
     {
@@ -100649,7 +100656,8 @@
    ],
    "opened": "2026-11-17T23:07:54Z",
    "readied": "2026-11-17T23:09:35Z",
-   "advanced": "2026-11-18T01:14:13Z"
+   "advanced": "2026-11-18T01:14:13Z",
+   "merged_by": "pr"
   },
   {
    "id": "broker-wire-forward-compat",
@@ -100660,13 +100668,13 @@
    "needs": [],
    "base": "e1ae2cc998efd1ca151b46ebefc0e0dab6c23c63",
    "body": "bodies/broker-wire-forward-compat.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19602,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/broker-wire-forward-compat",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:01:16Z",
-   "updated": "2026-11-18T01:14:24Z",
+   "updated": "2026-11-18T17:15:00Z",
    "note": "Will, 2026-11-17: go-ahead to open",
    "built": [
     {
@@ -100734,7 +100742,8 @@
     }
    ],
    "opened": "2026-11-17T23:18:05Z",
-   "advanced": "2026-11-18T01:14:24Z"
+   "advanced": "2026-11-18T01:14:24Z",
+   "merged_by": "pr"
   },
   {
    "id": "reset-spend-log",
@@ -100906,13 +100915,13 @@
    "needs": [],
    "base": "e1ae2cc998efd1ca151b46ebefc0e0dab6c23c63",
    "body": "bodies/broker-shutdown-refresh-save.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19599,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/broker-shutdown-refresh-save",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:03:11Z",
-   "updated": "2026-11-18T01:14:02Z",
+   "updated": "2026-11-18T17:15:00Z",
    "note": "",
    "tests_over_override": {
     "reason": "ReviewBrokerShutdown, 2026-11-17: one regression test; the exit race exists only in a spawned omp auth-broker serve process, so its lines are process and fixture setup",
@@ -101014,7 +101023,8 @@
      }
     }
    ],
-   "advanced": "2026-11-18T01:14:02Z"
+   "advanced": "2026-11-18T01:14:02Z",
+   "merged_by": "pr"
   },
   {
    "id": "logger-console-level",
@@ -101025,13 +101035,13 @@
    "needs": [],
    "base": "e1ae2cc998efd1ca151b46ebefc0e0dab6c23c63",
    "body": "bodies/logger-console-level.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19605,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/logger-console-level",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:03:30Z",
-   "updated": "2026-11-18T01:14:36Z",
+   "updated": "2026-11-18T17:15:00Z",
    "note": "Will, 2026-11-17: go-ahead to open",
    "opened": "2026-11-17T23:41:54Z",
    "readied": "2026-11-17T23:42:20Z",
@@ -101050,7 +101060,8 @@
      }
     }
    ],
-   "advanced": "2026-11-18T01:14:36Z"
+   "advanced": "2026-11-18T01:14:36Z",
+   "merged_by": "pr"
   },
   {
    "id": "broker-version-skew",
@@ -101308,13 +101319,13 @@
    "needs": [],
    "base": "08cb444207d55091daaa61d37b3652c876aa8df1",
    "body": "bodies/broker-client-startup-retry.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19598,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/broker-client-startup-retry",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:08:05Z",
-   "updated": "2026-11-18T16:57:50Z",
+   "updated": "2026-11-18T17:15:00Z",
    "note": "Main's session 01a08220 took #19598 over from session 01a1eafc on Will's word, 2026-11-18 (fix lane BrokerRetryLeak). Chunk-1 leak fixed in 5f3a4c39d53 (rebased onto main 08cb444207d, not pushed; QueueThirtyFour pushes): the PR's own test row 'composer: true' in coding-agent/test/issue-8096-broker-unreachable-startup.test.ts started a real Composer, whose TUI LoopWatchdog starts bun:jsc's process-wide sampling profiler (tui/src/loop-sampler.ts:78); bun test cancels the file's 2 s drain interval (loop-sampler.ts:81) when the file ends, so undrained samples stay GC roots (JSC root reason 'Debugger') holding AgentSession#handleAgentEvent/#processAgentEvent and runSubagent closures, i.e. the parked session and its settings. Fix: the row builds its composer with PI_LOOP_SAMPLER=0, restored right after; both rows assert the retry callback ran. Chunk 1 on the Mac: 2 parked fails before, 0 after [ran]. Same latent hazard on main in other tests that start a Composer (e.g. issue-9597-cold-launch-double-clear.test.ts), out of scope.",
    "tests_over_override": {
     "reason": "BrokerClientStartupRetry, 2026-11-17: four distinct branches (retry succeeds; non-transient answer fails at once; retry off for runtime switch; deadline cancels an in-flight request), each failing or pinning main's outcome; over by 8 lines of imports and server setup",
@@ -101477,7 +101488,8 @@
      }
     }
    ],
-   "advanced": "2026-11-18T16:45:59Z"
+   "advanced": "2026-11-18T16:45:59Z",
+   "merged_by": "pr"
   },
   {
    "id": "wayland-window-crop-clip",
@@ -101488,13 +101500,13 @@
    "needs": [],
    "base": "e1ae2cc998efd1ca151b46ebefc0e0dab6c23c63",
    "body": "bodies/wayland-window-crop-clip.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19596,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-window-crop-clip",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:09:14Z",
-   "updated": "2026-11-18T01:24:14Z",
+   "updated": "2026-11-18T17:15:00Z",
    "note": "",
    "built": [
     {
@@ -101571,7 +101583,8 @@
     }
    ],
    "opened": "2026-11-17T22:34:52Z",
-   "advanced": "2026-11-18T01:24:14Z"
+   "advanced": "2026-11-18T01:24:14Z",
+   "merged_by": "pr"
   },
   {
    "id": "reserve-per-model-family",
