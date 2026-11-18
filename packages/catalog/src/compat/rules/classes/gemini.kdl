@@ -244,7 +244,14 @@ class "gemini" {
 	// a 2048px frame holds 23.8k. At 1568px (13.9k) it copied 84% of dense
 	// identifier lines exactly against 30% at 2048, with no loss of
 	// real-transcript recall (Devin and Factory, 2026-11).
-	on "devin" "factory-droid" {
+	// Devin also serves Carbon under its raw effort uids; Factory only under
+	// the logical id.
+	on "devin" {
+		models "gemini-4-carbon" "gemini-4-carbon-low" "gemini-4-carbon-medium" "gemini-4-carbon-high" {
+			snapcompact-frame-size 1568
+		}
+	}
+	on "factory-droid" {
 		models "gemini-4-carbon" {
 			snapcompact-frame-size 1568
 		}

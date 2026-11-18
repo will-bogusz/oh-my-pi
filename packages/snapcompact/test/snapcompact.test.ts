@@ -554,8 +554,10 @@ describe("shape resolution", () => {
 			return decodePng(Buffer.from(frame.data, "base64")).width;
 		};
 		const onDevin = { provider: "devin", api: "devin-agent", id: "gemini-4-carbon" } as const;
+		// Devin also serves Carbon under raw effort uids.
+		const effortOnDevin = { provider: "devin", api: "devin-agent", id: "gemini-4-carbon-high" } as const;
 		const onFactory = { provider: "factory-droid", api: "factory-droid-agent", id: "gemini-4-carbon" } as const;
-		for (const model of [onDevin, onFactory]) {
+		for (const model of [onDevin, effortOnDevin, onFactory]) {
 			expect(snapcompact.resolveShape(model)).toMatchObject({ cellWidth: 8, cellHeight: 22, variant: "bw" });
 			expect(await frameWidth(model)).toBe(1568);
 		}
