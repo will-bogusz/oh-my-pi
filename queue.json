@@ -75070,7 +75070,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-settle-reads",
    "host": "MacBook-Pro",
    "added": "2026-11-10T18:56:55Z",
-   "updated": "2026-11-18T04:43:52Z",
+   "updated": "2026-11-18T04:44:32Z",
    "note": "",
    "kind": "proposal",
    "built": [
@@ -75483,7 +75483,8 @@
     "reason": "Main, 2026-11-18: one test per settle branch: settled read, unanswered request bound, no preceding action, batched reads settle once, element id survives an action, click opening a confirm",
     "at": "2026-11-17T23:38:37Z"
    },
-   "opened": "2026-11-18T04:43:52Z"
+   "opened": "2026-11-18T04:43:52Z",
+   "readied": "2026-11-18T04:44:32Z"
   },
   {
    "id": "act-look-prompt",
