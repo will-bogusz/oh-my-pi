@@ -98520,7 +98520,9 @@
    "title": "refactor(catalog,snapcompact): move snapcompact frame shapes into catalog rules",
    "area": "snapcompact",
    "priority": "P2",
-   "needs": [],
+   "needs": [
+    "snapcompact-rerender-on-switch"
+   ],
    "base": "7a53f0a2d36e160f9255d80626ed757f41280b76",
    "body": "bodies/snapcompact-shape-kdl.md",
    "state": "queued",
@@ -98529,7 +98531,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-shape-kdl",
    "host": "MacBook-Pro",
    "added": "2026-11-18T00:47:39Z",
-   "updated": "2026-11-18T00:47:39Z",
+   "updated": "2026-11-18T00:53:09Z",
    "note": ""
   },
   {
