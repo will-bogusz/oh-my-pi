@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-18 01:01Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-18 01:04Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-11-18 00:53Z on MacBook-Pro; groups below are from it, states from the manifest)
@@ -16,9 +16,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-18
 | wayland-input-refusal | fix(natives): refuse every Wayland input call at once when no input route exists | natives | P2 | 4h | open; tests-over: OmarchyFixes, 2026-11-18: one test through the 9 refused input requests with control held elsewhere, one for the no-backend side; each reaches a branch no other test does | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-input-refusal) |
 | wayland-display-count | fix(natives): report the Wayland display count as unknown before the first capture | natives | P2 | 4h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-display-count) |
 | devin-image-budgets | fix(catalog): carry Devin's measured image limits | catalog | P2 | 4h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-image-budgets) |
-| reset-spend-log | feat(coding-agent): log every saved-reset spend attempt at info | coding-agent | P2 | 3h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-spend-log) |
+| reset-spend-log | feat(coding-agent): log every saved-reset spend attempt at info | coding-agent | P2 | 4h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/reset-spend-log) |
 | account-switch-reason | feat(ai,coding-agent): record why a session's OAuth account switched | auth | P2 | 3h | next-hour | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/account-switch-reason) |
-| wayland-still-capture | fix(natives): keep the Wayland ScreenCast stream open between screenshots | natives | P1 | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-still-capture) |
+| wayland-still-capture | fix(natives): keep the Wayland ScreenCast stream open between screenshots | natives | P1 | 2h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-still-capture) |
 | snapcompact-rerender-on-switch | fix(snapcompact,coding-agent): re-render a snapcompact archive in the frame shape of the model reading it | snapcompact | P2 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-rerender-on-switch) |
 
 ## Conflict-held (19)
