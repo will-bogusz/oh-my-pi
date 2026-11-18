@@ -112190,5 +112190,11 @@
     "wake": ""
    }
   ]
+ },
+ "opening": {
+  "id": "reset-spend-log",
+  "token": "8e155bfe69624dcda5fd100d467aa35b",
+  "host": "MacBook-Pro",
+  "at": "2026-11-18T02:45:52Z"
  }
 }
