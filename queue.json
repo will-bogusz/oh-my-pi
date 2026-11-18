@@ -75478,6 +75478,17 @@
        "\t\t\t\texpect(result).toEqual([\"Detail\", \"Detail\"]);"
       ]
      }
+    },
+    {
+     "at": "2026-11-18T17:57:55Z",
+     "reason": "Main, 2026-11-18: approved combined form over adbb616f490: the line becomes main's block-body 'return hooks.read(\"frame.ariaSnapshot()\", ...)' after optionalSelectorArgs; the read call is kept",
+     "old": "e279e52c4f87b99b47a651e1810afb495d0be8dc",
+     "new": "1f28992a61f93cbdac2e0682877d60b48953db1a",
+     "dropped": {
+      "packages/coding-agent/src/tools/browser/frames.ts": [
+       "\t\t\thooks.read(\"frame.ariaSnapshot()\", hooks.quickOpMs, async signal => {"
+      ]
+     }
     }
    ],
    "tests_over_override": {
