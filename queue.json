@@ -58690,7 +58690,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "baf60290fde5e9eea4edb30bff07695877682ba9",
+   "base": "e1ae2cc998efd1ca151b46ebefc0e0dab6c23c63",
    "body": "bodies/iphone-mirror-pointer.md",
    "state": "open",
    "pr": 17756,
@@ -58698,7 +58698,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/iphone-mirror-pointer",
    "host": "MacBook-Pro",
    "added": "2026-10-30T21:35:47Z",
-   "updated": "2026-11-17T22:30:09Z",
+   "updated": "2026-11-18T01:23:00Z",
    "note": "next push: input.rs primed() doc comment (~3496-3499) says a cancel keeps the mark; a cancel noticed after a successful primer clears it first (SolFinal17756 P3; body fixed 2026-11-17)",
    "built": [
     {
@@ -58769,7 +58769,7 @@
      "tree": "1c2e904f816765145387f519b84705329a98de9a"
     }
    ],
-   "advanced": "2026-11-17T20:49:20Z",
+   "advanced": "2026-11-18T01:23:00Z",
    "opened": "2026-11-02T03:27:34Z",
    "readied": "2026-11-02T03:27:55Z",
    "line_loss_overrides": [
