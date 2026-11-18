@@ -7,6 +7,10 @@
 - Added `uncached-instructions` compatibility flag, enabled for GPT-6.2 models on every host, which moves the system prompt out of the uncached Responses `instructions` field
 - Added the `snapcompact-variant` and `snapcompact-frame-size` catalog rules and `resolveSnapcompactShape()`, which now hold each model's snapcompact frame shape below a configured `snapcompactShape` ([#19880](https://github.com/can1357/oh-my-pi/pull/19880) by [@will-bogusz](https://github.com/will-bogusz))
 
+### Changed
+
+- Gemini 4 Carbon on Devin and Factory Droid now reads its snapcompact archive in 1568px frames instead of 2048px, which it copies exactly far more often
+
 ### Fixed
 
 - Cursor's newly served models (Claude Fable 5.2, Claude Haiku 4.5, Claude Sonnet 5.5, Gemini 2.5 Flash, Gemini 4 Hydrogen/Neon, GLM 5.3, GPT-5.1, Muse Wonder 1.0) now use their documented per-token prices instead of $0 ([#19842](https://github.com/can1357/oh-my-pi/pull/19842) by [@fenilmodi00](https://github.com/fenilmodi00)).

@@ -548,6 +548,20 @@ describe("shape resolution", () => {
 		).toMatchObject({ frameSize: 1932, frameTokenEstimate: 69 * 69 });
 	});
 
+	it("draws Gemini 4 Carbon's frames at 1568px on Devin and Factory, and 2048px elsewhere", async () => {
+		const frameWidth = async (model: snapcompact.ShapeTarget) => {
+			const [frame] = await snapcompact.renderMany("carbon ".repeat(2000), { model, maxFrames: 1 });
+			return decodePng(Buffer.from(frame.data, "base64")).width;
+		};
+		const onDevin = { provider: "devin", api: "devin-agent", id: "gemini-4-carbon" } as const;
+		const onFactory = { provider: "factory-droid", api: "factory-droid-agent", id: "gemini-4-carbon" } as const;
+		for (const model of [onDevin, onFactory]) {
+			expect(snapcompact.resolveShape(model)).toMatchObject({ cellWidth: 8, cellHeight: 22, variant: "bw" });
+			expect(await frameWidth(model)).toBe(1568);
+		}
+		expect(await frameWidth({ provider: "google", api: "google-generative-ai", id: "gemini-4-carbon" })).toBe(2048);
+	});
+
 	it("prices frames by the reading model's lineage, not the wire API", () => {
 		const codex = snapcompact.resolveShape({ api: "openai-codex-responses", id: "gpt-6-astra" });
 		expect(codex.frameSize).toBe(1568);

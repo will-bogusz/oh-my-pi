@@ -235,12 +235,18 @@ class "gemini" {
 }
 
 // Snapcompact frames: 8x13 glyphs on a 22px pitch (`8on22-bw`) at 2048px.
-// Gemini bills a fixed ~1,090 tokens per image regardless of pixels (Gemini 4
-// Carbon, 2026-11): 2048px packs 1.7x the chars of 1568 at the same bill. On
-// pages of dense random identifiers 1568 copies exact lines far better (84% vs
-// 35%), but on real transcripts recall is equal (ΔF1 -.017 Devin, +.028
-// Factory, both n.s.), so 2048 stays.
+// Gemini bills a fixed ~1,090 tokens per image regardless of pixels, so 2048px
+// packs 1.7x the chars of 1568 at the same bill.
 class "gemini" {
 	snapcompact-variant "8on22-bw"
 	snapcompact-frame-size 2048
+	// Gemini 4 Carbon copies a frame's text exactly only up to ~15k chars, and
+	// a 2048px frame holds 23.8k. At 1568px (13.9k) it copied 84% of dense
+	// identifier lines exactly against 30% at 2048, with no loss of
+	// real-transcript recall (Devin and Factory, 2026-11).
+	on "devin" "factory-droid" {
+		models "gemini-4-carbon" {
+			snapcompact-frame-size 1568
+		}
+	}
 }
