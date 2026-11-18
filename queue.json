@@ -110704,7 +110704,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-18T01:39:22.819860Z",
+  "at": "2026-11-18T04:50:16.963415Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -110849,6 +110849,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-17T23:41:50Z"
+   },
+   {
+    "id": "wayland-input-refusal",
+    "label": "#19629",
+    "number": 19629,
+    "state": "open",
+    "area": "natives",
+    "priority": "P0",
+    "title": "fix(natives): refuse every Wayland input call at once when no input route exists",
+    "action": "keep",
+    "reasons": [],
+    "note": "tests-over: OmarchyFixes, 2026-11-18: one test through the 9 refused input requests with control held elsewhere, one for the no-backend side; each reaches a branch no other test does",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-18T03:16:26Z"
    },
    {
     "id": "docs-reclaim-drift",
@@ -111042,6 +111059,42 @@
     "created": "2026-11-18T00:45:52Z"
    },
    {
+    "id": "wayland-share-picker-deadline",
+    "label": "#19616",
+    "number": 19616,
+    "state": "open",
+    "area": "natives",
+    "priority": "P1",
+    "title": "fix(natives): wait for the Wayland screen-share picker until the call's deadline",
+    "action": "keep",
+    "reasons": [],
+    "note": "accepted pair with #19615: Main, 2026-11-18: adjacent new consts in wayland/capture.rs; combined = both blocks",
+    "over": [],
+    "paired": [
+     "#19615"
+    ],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-18T01:54:34Z"
+   },
+   {
+    "id": "devin-image-budgets",
+    "label": "#19619",
+    "number": 19619,
+    "state": "open",
+    "area": "catalog",
+    "priority": "P1",
+    "title": "fix(catalog): carry Devin's measured image limits",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-18T02:02:28Z"
+   },
+   {
     "id": "x11-xtest-release",
     "label": "#19531",
     "number": 19531,
@@ -111059,6 +111112,59 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-17T06:32:59Z"
+   },
+   {
+    "id": "wayland-still-capture",
+    "label": "#19615",
+    "number": 19615,
+    "state": "open",
+    "area": "natives",
+    "priority": "P2",
+    "title": "fix(natives): keep the Wayland ScreenCast stream open between screenshots",
+    "action": "keep",
+    "reasons": [],
+    "note": "accepted pair with #19616: Main, 2026-11-18: adjacent new consts in wayland/capture.rs; combined = both blocks",
+    "over": [],
+    "paired": [
+     "#19616"
+    ],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-18T01:48:58Z"
+   },
+   {
+    "id": "wayland-display-count",
+    "label": "#19618",
+    "number": 19618,
+    "state": "open",
+    "area": "natives",
+    "priority": "P2",
+    "title": "fix(natives): report the Wayland display count as unknown before the first capture",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-18T01:58:21Z"
+   },
+   {
+    "id": "snapcompact-rerender-on-switch",
+    "label": "#19620",
+    "number": 19620,
+    "state": "open",
+    "area": "snapcompact",
+    "priority": "P2",
+    "title": "fix(snapcompact,coding-agent): re-render a snapcompact archive in the frame shape of the model reading it",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-18T02:06:12Z"
    },
    {
     "id": "browser-wait-predicate",
@@ -111095,6 +111201,57 @@
     "created": "2026-11-17T22:07:16Z"
    },
    {
+    "id": "account-switch-reason",
+    "label": "#19623",
+    "number": 19623,
+    "state": "open",
+    "area": "auth",
+    "priority": "P2",
+    "title": "feat(ai,coding-agent): record why a session's OAuth account switched",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-18T02:27:27Z"
+   },
+   {
+    "id": "reset-spend-log",
+    "label": "#19626",
+    "number": 19626,
+    "state": "open",
+    "area": "coding-agent",
+    "priority": "P2",
+    "title": "feat(coding-agent): log every saved-reset spend attempt at info",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-18T02:55:17Z"
+   },
+   {
+    "id": "settle-reads",
+    "label": "#19633",
+    "number": 19633,
+    "state": "open",
+    "area": "browser",
+    "priority": "P2",
+    "title": "feat(browser): settle the preceding action before reads too",
+    "action": "keep",
+    "reasons": [],
+    "note": "tests-over: Main, 2026-11-18: one test per settle branch: settled read, unanswered request bound, no preceding action, batched reads settle once, element id survives an action, click opening a confirm",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-18T04:43:51Z"
+   },
+   {
     "id": "iphone-mirror-scroll-distance",
     "label": "iphone-mirror-scroll-distance",
     "number": null,
@@ -111114,40 +111271,6 @@
     ],
     "needs": [],
     "created": "2026-10-30T21:35:55Z"
-   },
-   {
-    "id": "wayland-still-capture",
-    "label": "wayland-still-capture",
-    "number": null,
-    "state": "queued",
-    "area": "natives",
-    "priority": "P1",
-    "title": "fix(natives): keep the Wayland ScreenCast stream open between screenshots",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-17T23:02:30Z"
-   },
-   {
-    "id": "settle-reads",
-    "label": "settle-reads",
-    "number": null,
-    "state": "queued",
-    "area": "browser",
-    "priority": "P1",
-    "title": "feat(browser): settle the preceding action before reads too",
-    "action": "open",
-    "reasons": [],
-    "note": "tests-over: Main, 2026-11-18: one test per settle branch: settled read, unanswered request bound, no preceding action, batched reads settle once, element id survives an action, click opening a confirm",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-10T18:56:55Z"
    },
    {
     "id": "browser-wait-text-regexp",
@@ -111244,23 +111367,6 @@
     ],
     "needs": [],
     "created": "2026-10-19T07:26:45Z"
-   },
-   {
-    "id": "devin-image-budgets",
-    "label": "devin-image-budgets",
-    "number": null,
-    "state": "queued",
-    "area": "catalog",
-    "priority": "P2",
-    "title": "fix(catalog): carry Devin's measured image limits",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-17T20:52:57Z"
    },
    {
     "id": "macos-ax-cancel-before-send",
@@ -111391,7 +111497,7 @@
     "action": "wait",
     "reasons": [
      "conflicts with #19542 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with settle-reads in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #19633 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, crates/pi-natives/src/desktop/macos/roster.rs, crates/pi-natives/src/desktop/roster.rs, packages/natives/native/desktop.d.ts, packages/natives/native/desktop.js, packages/natives/native/index.d.ts"
     ],
     "note": "",
@@ -111399,7 +111505,7 @@
     "paired": [],
     "blocked_by": [
      "#19542",
-     "settle-reads"
+     "#19633"
     ],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
@@ -111416,7 +111522,7 @@
     "reasons": [
      "needs r2/relay-own-only (queued)",
      "conflicts with #19542 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with settle-reads in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #19633 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need r2/relay-own-only conflicts with main in crates/pi-natives/src/desktop/roster.rs, docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/native-windows.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-native-windows.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts, packages/natives/native/desktop.js",
      "conflicts with main in packages/browser-relay/extension/background.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt"
     ],
@@ -111425,7 +111531,7 @@
     "paired": [],
     "blocked_by": [
      "#19542",
-     "settle-reads"
+     "#19633"
     ],
     "needs": [
      "r2/relay-own-only"
@@ -111445,7 +111551,9 @@
      "needs r2/relay-popup-owned (queued), r2/page-waiting (queued)",
      "conflicts with #19532 in crates/pi-natives/src/desktop/macos/capture.rs",
      "conflicts with #19542 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts",
-     "conflicts with settle-reads in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts",
+     "conflicts with #19623 in packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with #19626 in packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with #19633 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts",
      "its need r2/relay-popup-owned conflicts with main in crates/pi-natives/src/desktop/roster.rs, docs/tools/browser.md, packages/browser-relay/extension/background.ts, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/native-windows.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-native-windows.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts, packages/natives/native/desktop.js",
      "its need r2/page-waiting conflicts with main in crates/pi-natives/src/desktop/roster.rs, docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/dialogs.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/native-windows.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-native-windows.test.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts, packages/natives/native/desktop.js"
     ],
@@ -111455,7 +111563,9 @@
     "blocked_by": [
      "#19532",
      "#19542",
-     "settle-reads"
+     "#19623",
+     "#19626",
+     "#19633"
     ],
     "needs": [
      "r2/relay-popup-owned",
@@ -111485,23 +111595,6 @@
     "created": "2026-11-11T07:04:56Z"
    },
    {
-    "id": "snapcompact-rerender-on-switch",
-    "label": "snapcompact-rerender-on-switch",
-    "number": null,
-    "state": "queued",
-    "area": "snapcompact",
-    "priority": "P2",
-    "title": "fix(snapcompact,coding-agent): re-render a snapcompact archive in the frame shape of the model reading it",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-18T00:36:24Z"
-   },
-   {
     "id": "snapcompact-shape-reader-identity",
     "label": "snapcompact-shape-reader-identity",
     "number": null,
@@ -111523,61 +111616,6 @@
     "created": "2026-11-18T00:48:33Z"
    },
    {
-    "id": "wayland-display-count",
-    "label": "wayland-display-count",
-    "number": null,
-    "state": "queued",
-    "area": "natives",
-    "priority": "P2",
-    "title": "fix(natives): report the Wayland display count as unknown before the first capture",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-17T20:34:09Z"
-   },
-   {
-    "id": "wayland-input-refusal",
-    "label": "wayland-input-refusal",
-    "number": null,
-    "state": "queued",
-    "area": "natives",
-    "priority": "P2",
-    "title": "fix(natives): refuse every Wayland input call at once when no input route exists",
-    "action": "open",
-    "reasons": [],
-    "note": "tests-over: OmarchyFixes, 2026-11-18: one test through the 9 refused input requests with control held elsewhere, one for the no-backend side; each reaches a branch no other test does",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-17T20:29:55Z"
-   },
-   {
-    "id": "wayland-share-picker-deadline",
-    "label": "wayland-share-picker-deadline",
-    "number": null,
-    "state": "queued",
-    "area": "natives",
-    "priority": "P2",
-    "title": "fix(natives): wait for the Wayland screen-share picker until the call's deadline",
-    "action": "wait",
-    "reasons": [
-     "conflicts with wayland-still-capture in crates/pi-natives/src/desktop/linux/wayland/capture.rs"
-    ],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [
-     "wayland-still-capture"
-    ],
-    "needs": [],
-    "created": "2026-11-17T22:04:45Z"
-   },
-   {
     "id": "win-ax-states",
     "label": "win-ax-states",
     "number": null,
@@ -111589,10 +111627,10 @@
     "reasons": [
      "conflicts with #19195 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19596 in crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with #19629 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19516 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19519 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19532 in crates/pi-natives/src/desktop/macos/ax.rs",
-     "conflicts with wayland-input-refusal in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/win32/ax.rs"
     ],
     "note": "",
@@ -111601,10 +111639,10 @@
     "blocked_by": [
      "#19195",
      "#19596",
+     "#19629",
      "#19516",
      "#19519",
-     "#19532",
-     "wayland-input-refusal"
+     "#19532"
     ],
     "needs": [],
     "created": "2026-11-11T10:16:04Z"
@@ -111621,7 +111659,7 @@
     "reasons": [
      "conflicts with #19195 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #19516 in packages/coding-agent/src/prompts/tools/computer.md",
-     "conflicts with wayland-display-count in crates/pi-natives/src/desktop/win32/mod.rs",
+     "conflicts with #19618 in crates/pi-natives/src/desktop/win32/mod.rs",
      "conflicts with main in crates/pi-natives/src/desktop/win32/capture.rs, crates/pi-natives/src/desktop/win32/mod.rs, packages/coding-agent/src/prompts/tools/computer.md"
     ],
     "note": "",
@@ -111630,7 +111668,7 @@
     "blocked_by": [
      "#19195",
      "#19516",
-     "wayland-display-count"
+     "#19618"
     ],
     "needs": [],
     "created": "2026-11-11T09:06:32Z"
@@ -111645,9 +111683,9 @@
     "title": "docs(browser): teach acting and looking in one Eval cell without sleeps",
     "action": "wait",
     "reasons": [
-     "needs settle-reads (queued)",
+     "needs #19633 (open)",
      "conflicts with #19542 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-observe.test.ts",
-     "conflicts with settle-reads in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-observe.test.ts",
+     "conflicts with #19633 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-observe.test.ts",
      "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
@@ -111655,7 +111693,7 @@
     "paired": [],
     "blocked_by": [
      "#19542",
-     "settle-reads"
+     "#19633"
     ],
     "needs": [
      "settle-reads"
@@ -111672,7 +111710,7 @@
     "title": "refactor(catalog,snapcompact): move snapcompact frame shapes into catalog rules",
     "action": "wait",
     "reasons": [
-     "needs snapcompact-rerender-on-switch (queued)"
+     "needs #19620 (open)"
     ],
     "note": "",
     "over": [],
@@ -111682,23 +111720,6 @@
      "snapcompact-rerender-on-switch"
     ],
     "created": "2026-11-18T00:47:39Z"
-   },
-   {
-    "id": "account-switch-reason",
-    "label": "account-switch-reason",
-    "number": null,
-    "state": "queued",
-    "area": "auth",
-    "priority": "P2",
-    "title": "feat(ai,coding-agent): record why a session's OAuth account switched",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-17T21:19:21Z"
    },
    {
     "id": "browser-action-outcome",
@@ -111711,7 +111732,7 @@
     "action": "wait",
     "reasons": [
      "conflicts with #19542 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with settle-reads in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #19633 in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts"
     ],
     "note": "",
@@ -111719,7 +111740,7 @@
     "paired": [],
     "blocked_by": [
      "#19542",
-     "settle-reads"
+     "#19633"
     ],
     "needs": [],
     "created": "2026-11-10T19:19:48Z"
@@ -111736,7 +111757,7 @@
     "reasons": [
      "held: Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check",
      "conflicts with #19542 in packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts",
-     "conflicts with settle-reads in packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #19633 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
     ],
     "note": "",
@@ -111744,7 +111765,7 @@
     "paired": [],
     "blocked_by": [
      "#19542",
-     "settle-reads"
+     "#19633"
     ],
     "needs": [],
     "created": "2026-11-10T23:39:37Z"
@@ -111790,8 +111811,8 @@
      "conflicts with #19516 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #19532 in docs/computer-use.md",
      "conflicts with #19531 in docs/computer-use.md, docs/tools/computer.md",
-     "conflicts with snapcompact-rerender-on-switch in packages/coding-agent/src/session/session-maintenance.ts",
-     "conflicts with wayland-display-count in docs/tools/computer.md",
+     "conflicts with #19618 in docs/tools/computer.md",
+     "conflicts with #19620 in packages/coding-agent/src/session/session-maintenance.ts",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -111805,8 +111826,8 @@
      "#19516",
      "#19532",
      "#19531",
-     "snapcompact-rerender-on-switch",
-     "wayland-display-count"
+     "#19618",
+     "#19620"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -111826,12 +111847,12 @@
      "needs computer-ui-quiet (queued)",
      "conflicts with #19195 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19596 in crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with #19629 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19516 in crates/pi-natives/src/desktop/backend.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #19519 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19532 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with #19531 in docs/tools/computer.md",
-     "conflicts with wayland-display-count in docs/tools/computer.md",
-     "conflicts with wayland-input-refusal in crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with #19618 in docs/tools/computer.md",
      "its need computer-ui-quiet conflicts with main in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in crates/pi-natives/src/desktop/mod.rs, docs/tools/computer.md"
     ],
@@ -111841,12 +111862,12 @@
     "blocked_by": [
      "#19195",
      "#19596",
+     "#19629",
      "#19516",
      "#19519",
      "#19532",
      "#19531",
-     "wayland-display-count",
-     "wayland-input-refusal"
+     "#19618"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -111863,13 +111884,13 @@
     "title": "feat(ai): rank an account priority by quota deadline",
     "action": "wait",
     "reasons": [
-     "conflicts with account-switch-reason in packages/ai/test/auth-storage-account-reclaim.test.ts"
+     "conflicts with #19623 in packages/ai/src/auth/select.ts, packages/ai/test/auth-storage-account-reclaim.test.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "account-switch-reason"
+     "#19623"
     ],
     "needs": [],
     "created": "2026-11-17T21:17:58Z"
@@ -111887,12 +111908,12 @@
      "held: Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check | Main 2026-11-12: before it opens, the waiting-key-chord case with the cursor actually drawn (20 trials at a 20 s deadline; CursorDemo's cursor-on arm never drew one, and an early run on the combined tree returned 'Cancelled, input may be partial' 11/11, unexplained), on the polished branch will/desktop-cursor-polish.",
      "conflicts with #19195 in crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/types.rs, packages/natives/native/index.d.ts",
      "conflicts with #19596 in crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with #19629 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19516 in crates/pi-natives/src/desktop/backend.rs, crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19519 in crates/pi-natives/src/desktop/mod.rs",
      "conflicts with #19532 in crates/pi-natives/src/desktop/macos/capture.rs, crates/pi-natives/src/desktop/macos/mod.rs",
      "conflicts with #19531 in docs/tools/computer.md",
-     "conflicts with wayland-display-count in crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/types.rs, docs/tools/computer.md, packages/natives/native/index.d.ts",
-     "conflicts with wayland-input-refusal in crates/pi-natives/src/desktop/mod.rs",
+     "conflicts with #19618 in crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/types.rs, docs/tools/computer.md, packages/natives/native/index.d.ts",
      "conflicts with main in crates/pi-natives/src/desktop/macos/capture.rs, crates/pi-natives/src/desktop/macos/mod.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
@@ -111901,12 +111922,12 @@
     "blocked_by": [
      "#19195",
      "#19596",
+     "#19629",
      "#19516",
      "#19519",
      "#19532",
      "#19531",
-     "wayland-display-count",
-     "wayland-input-refusal"
+     "#19618"
     ],
     "needs": [],
     "created": "2026-11-11T00:21:12Z"
@@ -111941,16 +111962,18 @@
     "action": "held",
     "reasons": [
      "held: Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance",
-     "conflicts with snapcompact-rerender-on-switch in packages/coding-agent/src/session/session-maintenance.ts",
-     "conflicts with account-switch-reason in packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with #19620 in packages/coding-agent/src/session/session-maintenance.ts",
+     "conflicts with #19623 in packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with #19626 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in docs/advisor-watchdog.md, docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-advisors.ts, packages/coding-agent/src/session/turn-recovery.ts, packages/coding-agent/test/agent-session-retry-fallback.test.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "snapcompact-rerender-on-switch",
-     "account-switch-reason"
+     "#19620",
+     "#19623",
+     "#19626"
     ],
     "needs": [],
     "created": "2026-10-13T21:47:19Z"
@@ -111967,7 +111990,7 @@
     "reasons": [
      "needs act-look-prompt (queued)",
      "conflicts with #19542 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts, packages/coding-agent/test/tools/browser-observe.test.ts, packages/coding-agent/test/tools/browser-tern-tab.test.ts",
-     "conflicts with settle-reads in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-observe.test.ts",
+     "conflicts with #19633 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-observe.test.ts",
      "its need act-look-prompt conflicts with main in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/network.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-observe.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tern/tern-tab.ts, packages/coding-agent/test/tools/browser-tern-tab.test.ts"
     ],
@@ -111976,7 +111999,7 @@
     "paired": [],
     "blocked_by": [
      "#19542",
-     "settle-reads"
+     "#19633"
     ],
     "needs": [
      "act-look-prompt"
@@ -111995,7 +112018,7 @@
     "reasons": [
      "needs r2/relay-own-only (queued)",
      "conflicts with #19542 in docs/tools/browser.md, packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts",
-     "conflicts with settle-reads in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts",
+     "conflicts with #19633 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts",
      "its need r2/relay-own-only conflicts with main in crates/pi-natives/src/desktop/roster.rs, docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/native-windows.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-native-windows.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts, packages/natives/native/desktop.js",
      "conflicts with main in packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/dialogs.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/test/tools/browser-nav-frames-dialogs.test.ts"
     ],
@@ -112004,7 +112027,7 @@
     "paired": [],
     "blocked_by": [
      "#19542",
-     "settle-reads"
+     "#19633"
     ],
     "needs": [
      "r2/relay-own-only"
@@ -112042,33 +112065,18 @@
     "title": "feat(ai,coding-agent): let an account policy decide its own saved-reset spending",
     "action": "wait",
     "reasons": [
-     "conflicts with #19606 in packages/coding-agent/src/cli/usage-cli.ts"
+     "conflicts with #19606 in packages/coding-agent/src/cli/usage-cli.ts",
+     "conflicts with #19626 in packages/coding-agent/src/session/agent-session.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#19606"
+     "#19606",
+     "#19626"
     ],
     "needs": [],
     "created": "2026-11-17T21:24:43Z"
-   },
-   {
-    "id": "reset-spend-log",
-    "label": "reset-spend-log",
-    "number": null,
-    "state": "queued",
-    "area": "coding-agent",
-    "priority": "P2",
-    "title": "feat(coding-agent): log every saved-reset spend attempt at info",
-    "action": "next-hour",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-17T21:02:20Z"
    },
    {
     "id": "win-type-insert",
@@ -112082,7 +112090,7 @@
     "reasons": [
      "held: Main, 2026-11-12: proposal; opens only after entry A merges and Will has seen the body",
      "conflicts with #19531 in docs/tools/computer.md",
-     "conflicts with wayland-display-count in crates/pi-natives/src/desktop/win32/mod.rs, docs/tools/computer.md",
+     "conflicts with #19618 in crates/pi-natives/src/desktop/win32/mod.rs, docs/tools/computer.md",
      "conflicts with main in crates/pi-natives/src/desktop/win32/input.rs, crates/pi-natives/src/desktop/win32/mod.rs"
     ],
     "note": "",
@@ -112090,7 +112098,7 @@
     "paired": [],
     "blocked_by": [
      "#19531",
-     "wayland-display-count"
+     "#19618"
     ],
     "needs": [],
     "created": "2026-11-12T04:40:13Z"
@@ -112106,8 +112114,8 @@
     "action": "wait",
     "reasons": [
      "needs token-count-policy (queued), wire-delta-count (queued)",
-     "conflicts with account-switch-reason in packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with reset-spend-log in packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with #19623 in packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with #19626 in packages/coding-agent/src/session/agent-session.ts",
      "its need token-count-policy conflicts with main in packages/catalog/src/compat/rules/classes/anthropic.kdl, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/session/session-stats.ts, packages/coding-agent/test/context-fits-model.test.ts",
      "its need wire-delta-count conflicts with main in packages/agent/src/tokenizer.ts, packages/agent/test/tokenizer.test.ts, packages/ai/src/providers/factory-droid.ts, packages/ai/src/providers/transform-messages.ts, packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with main in packages/agent/src/agent.ts, packages/ai/src/providers/factory-droid/gemini.ts, packages/ai/src/providers/google-gemini-cli.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/context-view.ts, packages/coding-agent/test/modes/context-view.test.ts, packages/tui/src/status-line/context-usage.ts, packages/tui/test/context-usage.test.ts"
@@ -112116,8 +112124,8 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "account-switch-reason",
-     "reset-spend-log"
+     "#19623",
+     "#19626"
     ],
     "needs": [
      "token-count-policy",
@@ -112133,7 +112141,7 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "next-hour",
+    "action": "open",
     "reasons": [],
     "note": "",
     "over": [],
@@ -112152,14 +112160,14 @@
     "title": "fix(coding-agent): price a text-only fallback's archive text, not the failed request's frames, in the fit check",
     "action": "wait",
     "reasons": [
-     "conflicts with snapcompact-rerender-on-switch in packages/coding-agent/src/session/session-maintenance.ts",
+     "conflicts with #19620 in packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with main in packages/coding-agent/src/session/session-maintenance.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "snapcompact-rerender-on-switch"
+     "#19620"
     ],
     "needs": [],
     "created": "2026-10-31T21:07:28Z"
@@ -112174,14 +112182,14 @@
     "title": "refactor(agent,ai): count the anchored delta from the reader's transformed wire messages",
     "action": "wait",
     "reasons": [
-     "conflicts with snapcompact-rerender-on-switch in packages/coding-agent/src/session/session-maintenance.ts",
+     "conflicts with #19620 in packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with main in packages/agent/src/tokenizer.ts, packages/agent/test/tokenizer.test.ts, packages/ai/src/providers/factory-droid.ts, packages/ai/src/providers/transform-messages.ts, packages/coding-agent/src/session/session-maintenance.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "snapcompact-rerender-on-switch"
+     "#19620"
     ],
     "needs": [],
     "created": "2026-11-03T01:33:54Z"
@@ -112196,18 +112204,18 @@
     "title": "feat(coding-agent): record what triggered each compaction",
     "action": "wait",
     "reasons": [
-     "conflicts with snapcompact-rerender-on-switch in packages/coding-agent/src/session/session-maintenance.ts",
-     "conflicts with account-switch-reason in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with reset-spend-log in packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with #19620 in packages/coding-agent/src/session/session-maintenance.ts",
+     "conflicts with #19623 in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts",
+     "conflicts with #19626 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with main in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/tui/src/chat/compaction-summary-message.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "snapcompact-rerender-on-switch",
-     "account-switch-reason",
-     "reset-spend-log"
+     "#19620",
+     "#19623",
+     "#19626"
     ],
     "needs": [],
     "created": "2026-10-20T23:41:41Z"
@@ -112261,7 +112269,7 @@
     "area": "factory-droid",
     "priority": null,
     "title": "feat(catalog): identify Factory Droid requests as droid 1.10.0",
-    "action": "next-hour",
+    "action": "open",
     "reasons": [],
     "note": "",
     "over": [],
@@ -112302,14 +112310,14 @@
     "title": "feat(catalog,coding-agent): token-count framing policy in KDL",
     "action": "wait",
     "reasons": [
-     "conflicts with snapcompact-rerender-on-switch in packages/coding-agent/src/session/session-maintenance.ts",
+     "conflicts with #19620 in packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with main in packages/catalog/src/compat/rules/classes/anthropic.kdl, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/session/session-stats.ts, packages/coding-agent/test/context-fits-model.test.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "snapcompact-rerender-on-switch"
+     "#19620"
     ],
     "needs": [],
     "created": "2026-11-03T01:24:37Z"
