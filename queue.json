@@ -58481,13 +58481,13 @@
    "needs": [],
    "base": "e1ae2cc998efd1ca151b46ebefc0e0dab6c23c63",
    "body": "bodies/iphone-mirror-key-gap.md",
-   "state": "open",
+   "state": "merged",
    "pr": 17897,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/iphone-mirror-key-gap",
    "host": "MacBook-Pro",
    "added": "2026-10-30T21:15:44Z",
-   "updated": "2026-11-18T01:23:10Z",
+   "updated": "2026-11-18T10:18:09Z",
    "note": "",
    "built": [
     {
@@ -58590,7 +58590,8 @@
    ],
    "advanced": "2026-11-18T01:23:10Z",
    "opened": "2026-11-03T02:19:44Z",
-   "readied": "2026-11-03T02:20:04Z"
+   "readied": "2026-11-03T02:20:04Z",
+   "merged_by": "pr"
   },
   {
    "id": "macos-capture-geometry",
@@ -75058,7 +75059,7 @@
    "branch": "will/browser-settle-reads",
    "title": "feat(browser): settle the preceding action before reads too",
    "area": "browser",
-   "priority": "P1",
+   "priority": "P2",
    "needs": [
     "observe-settle"
    ],
@@ -75070,7 +75071,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-settle-reads",
    "host": "MacBook-Pro",
    "added": "2026-11-10T18:56:55Z",
-   "updated": "2026-11-18T04:54:44Z",
+   "updated": "2026-11-18T10:18:09Z",
    "note": "",
    "kind": "proposal",
    "built": [
@@ -96838,7 +96839,7 @@
    "branch": "will/wayland-input-refusal",
    "title": "fix(natives): refuse every Wayland input call at once when no input route exists",
    "area": "natives",
-   "priority": "P2",
+   "priority": "P0",
    "needs": [],
    "base": "e1ae2cc998efd1ca151b46ebefc0e0dab6c23c63",
    "body": "bodies/wayland-input-refusal.md",
@@ -96848,7 +96849,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-input-refusal",
    "host": "MacBook-Pro",
    "added": "2026-11-17T20:29:55Z",
-   "updated": "2026-11-18T03:16:52Z",
+   "updated": "2026-11-18T10:18:09Z",
    "note": "",
    "tests_over_override": {
     "reason": "OmarchyFixes, 2026-11-18: one test through the 9 refused input requests with control held elsewhere, one for the no-backend side; each reaches a branch no other test does",
@@ -97143,7 +97144,7 @@
    "branch": "will/devin-image-budgets",
    "title": "fix(catalog): carry Devin's measured image limits",
    "area": "catalog",
-   "priority": "P2",
+   "priority": "P1",
    "needs": [],
    "base": "e1ae2cc998efd1ca151b46ebefc0e0dab6c23c63",
    "body": "bodies/devin-image-budgets.md",
@@ -97153,7 +97154,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-image-budgets",
    "host": "MacBook-Pro",
    "added": "2026-11-17T20:52:57Z",
-   "updated": "2026-11-18T02:02:58Z",
+   "updated": "2026-11-18T10:18:09Z",
    "note": "Main for Will, 2026-11-17: P2 estimate, Devin sessions lose most archive frames to the 5-image fallback",
    "built": [
     {
@@ -98831,7 +98832,7 @@
    "branch": "will/wayland-share-picker-deadline",
    "title": "fix(natives): wait for the Wayland screen-share picker until the call's deadline",
    "area": "natives",
-   "priority": "P2",
+   "priority": "P1",
    "needs": [],
    "base": "e1ae2cc998efd1ca151b46ebefc0e0dab6c23c63",
    "body": "bodies/wayland-share-picker-deadline.md",
@@ -98841,7 +98842,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-share-picker-deadline",
    "host": "MacBook-Pro",
    "added": "2026-11-17T22:04:45Z",
-   "updated": "2026-11-18T03:17:27Z",
+   "updated": "2026-11-18T10:18:09Z",
    "note": "",
    "built": [
     {
@@ -98941,7 +98942,7 @@
    "branch": "will/wayland-still-capture",
    "title": "fix(natives): keep the Wayland ScreenCast stream open between screenshots",
    "area": "natives",
-   "priority": "P1",
+   "priority": "P2",
    "needs": [],
    "base": "e1ae2cc998efd1ca151b46ebefc0e0dab6c23c63",
    "body": "bodies/wayland-still-capture.md",
@@ -98951,7 +98952,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-still-capture",
    "host": "MacBook-Pro",
    "added": "2026-11-17T23:02:30Z",
-   "updated": "2026-11-18T01:49:26Z",
+   "updated": "2026-11-18T10:18:09Z",
    "note": "",
    "built": [
     {
