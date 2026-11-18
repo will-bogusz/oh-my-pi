@@ -96812,7 +96812,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-input-refusal",
    "host": "MacBook-Pro",
    "added": "2026-11-17T20:29:55Z",
-   "updated": "2026-11-18T03:16:27Z",
+   "updated": "2026-11-18T03:16:52Z",
    "note": "",
    "tests_over_override": {
     "reason": "OmarchyFixes, 2026-11-18: one test through the 9 refused input requests with control held elsewhere, one for the no-backend side; each reaches a branch no other test does",
@@ -96956,7 +96956,8 @@
     }
    ],
    "advanced": "2026-11-18T01:50:21Z",
-   "opened": "2026-11-18T03:16:27Z"
+   "opened": "2026-11-18T03:16:27Z",
+   "readied": "2026-11-18T03:16:52Z"
   },
   {
    "id": "wayland-display-count",
