@@ -104282,34 +104282,17 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-18T18:43:50Z",
+  "checked": "2026-11-18T19:14:33Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "loop-sampler-stop": {
-    "since": "2026-11-18T18:16:27Z",
-    "title": "fix(tui): stopped the loop profiler when the last TUI watchdog stops"
-   },
-   "macos-keys-no-press": {
-    "since": "2026-11-18T18:16:27Z",
-    "title": "fix(natives): send macOS background keys to the key window without a press"
-   },
    "factory-droid-1100-pin": {
     "since": "2026-11-17T00:39:57Z",
     "title": "feat(catalog): identify Factory Droid requests as droid 1.10.0"
    }
   },
-  "conflicts": {
-   "#19195": {
-    "since": "2026-11-18T18:13:33Z",
-    "title": "fix(natives): stop macOS background drags reporting moves that did not happen",
-    "files": [
-     "crates/natives/src/desktop/control.rs",
-     "crates/natives/src/desktop/macos/ax/drag_control.rs"
-    ]
-   }
-  },
-  "merged_through": "2026-11-18T17:12:46Z",
+  "conflicts": {},
+  "merged_through": "2026-11-18T18:46:52Z",
   "unreleased": {
    "17897": {
     "title": "perf(natives): type on iPhone Mirroring twice as fast",
@@ -104380,6 +104363,16 @@
     "title": "fix(natives): read a macOS popup after the option its typed letters choose",
     "merge_commit": "4dbe7c2cf0309753befa9bb73a3f65758bc645b2",
     "merged_at": "2026-11-18T17:12:46Z"
+   },
+   "19696": {
+    "title": "fix(coding-agent): regenerated the stale export viewer metadata",
+    "merge_commit": "1885a7867e085098de815d9815deb7a98ff5bdca",
+    "merged_at": "2026-11-18T18:46:44Z"
+   },
+   "19699": {
+    "title": "fix: restored main's lint and type-check job",
+    "merge_commit": "5feafa1fd4dca059a6e35bb01cf20a22ceb15c36",
+    "merged_at": "2026-11-18T18:46:52Z"
    }
   },
   "ready": [
@@ -104400,10 +104393,10 @@
    19623,
    19626,
    19633,
-   19696,
-   19699,
    19700,
-   19701
+   19701,
+   19702,
+   19703
   ],
   "post_merge": {
    "16553": {
@@ -104757,6 +104750,18 @@
     "title": "fix(natives): refuse every Wayland input call at once when no input route exists",
     "merge_commit": "bcbc1b9ef2cf1bcbe2fb9a31308aa2a8ab9ec05e",
     "merged_at": "2026-11-18T17:12:46Z",
+    "findings": []
+   },
+   "19696": {
+    "title": "fix(coding-agent): regenerated the stale export viewer metadata",
+    "merge_commit": "1885a7867e085098de815d9815deb7a98ff5bdca",
+    "merged_at": "2026-11-18T18:46:44Z",
+    "findings": []
+   },
+   "19699": {
+    "title": "fix: restored main's lint and type-check job",
+    "merge_commit": "5feafa1fd4dca059a6e35bb01cf20a22ceb15c36",
+    "merged_at": "2026-11-18T18:46:52Z",
     "findings": []
    }
   },
@@ -107619,6 +107624,36 @@
     "id": "reserve-per-model-family",
     "title": "feat(ai): reserve per usage limit in account policies",
     "why": "opened as #19700"
+   },
+   {
+    "at": "2026-11-18T19:14:33Z",
+    "kind": "merged",
+    "number": 19696,
+    "title": "fix(coding-agent): regenerated the stale export viewer metadata",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-18T19:14:33Z",
+    "kind": "merged",
+    "number": 19699,
+    "title": "fix: restored main's lint and type-check job",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-18T19:14:33Z",
+    "kind": "unopenable",
+    "id": "loop-sampler-stop",
+    "title": "fix(tui): stopped the loop profiler when the last TUI watchdog stops",
+    "why": "opened as #19703"
+   },
+   {
+    "at": "2026-11-18T19:14:33Z",
+    "kind": "unopenable",
+    "id": "macos-keys-no-press",
+    "title": "fix(natives): send macOS background keys to the key window without a press",
+    "why": "opened as #19702"
    }
   ]
  },
@@ -115380,8 +115415,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-18T18:47:53.345302Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-18T19:14:34.267847Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 5,
@@ -115398,7 +115433,7 @@
     "title": "fix(natives): keep background iPhone Mirroring taps reaching the phone after a takeover tap",
     "action": "keep",
     "reasons": [],
-    "note": "accepted pair with #19702: Main, 2026-11-18: one argument added to the make_key_in_background call that #17756 moves into keyboard_in_watch; combined = #17756's function with that argument",
+    "note": "accepted pair with #19702: Main, 2026-11-18: one argument added to the make_key_in_background call that #17756 moves into keyboard_in_watch; combined = #17756's function with that argument, now KeyPurpose::Keyboard (was ActivatingPress::UnlessKey before the KeysNoPressTest refactor)",
     "over": [],
     "paired": [
      "#19702"
@@ -115415,10 +115450,8 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): stop macOS background drags reporting moves that did not happen",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in crates/natives/src/desktop/control.rs, crates/natives/src/desktop/macos/ax/drag_control.rs"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -115533,6 +115566,42 @@
     "created": "2026-11-18T01:54:34Z"
    },
    {
+    "id": "macos-keys-no-press",
+    "label": "#19702",
+    "number": 19702,
+    "state": "open",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): send macOS background keys to the key window without a press",
+    "action": "keep",
+    "reasons": [],
+    "note": "accepted pair with #17756: Main, 2026-11-18: one argument added to the make_key_in_background call that #17756 moves into keyboard_in_watch; combined = #17756's function with that argument, now KeyPurpose::Keyboard (was ActivatingPress::UnlessKey before the KeysNoPressTest refactor)",
+    "over": [],
+    "paired": [
+     "#17756"
+    ],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-18T18:46:50Z"
+   },
+   {
+    "id": "loop-sampler-stop",
+    "label": "#19703",
+    "number": 19703,
+    "state": "open",
+    "area": "tui",
+    "priority": "P1",
+    "title": "fix(tui): stopped the loop profiler when the last TUI watchdog stops",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-18T18:49:17Z"
+   },
+   {
     "id": "x11-xtest-release",
     "label": "#19531",
     "number": 19531,
@@ -115603,25 +115672,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-18T02:06:12Z"
-   },
-   {
-    "id": "macos-keys-no-press",
-    "label": "#19702",
-    "number": 19702,
-    "state": "open",
-    "area": "computer",
-    "priority": "P2",
-    "title": "fix(natives): send macOS background keys to the key window without a press",
-    "action": "keep",
-    "reasons": [],
-    "note": "accepted pair with #17756: Main, 2026-11-18: one argument added to the make_key_in_background call that #17756 moves into keyboard_in_watch; combined = #17756's function with that argument",
-    "over": [],
-    "paired": [
-     "#17756"
-    ],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-18T18:46:50Z"
    },
    {
     "id": "browser-wait-predicate",
@@ -115771,23 +115821,6 @@
     "created": "2026-10-30T21:35:55Z"
    },
    {
-    "id": "loop-sampler-stop",
-    "label": "loop-sampler-stop",
-    "number": null,
-    "state": "queued",
-    "area": "tui",
-    "priority": "P1",
-    "title": "fix(tui): stopped the loop profiler when the last TUI watchdog stops",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-18T18:13:26Z"
-   },
-   {
     "id": "browser-wait-text-regexp",
     "label": "browser-wait-text-regexp",
     "number": null,
@@ -115863,8 +115896,8 @@
     "reasons": [
      "conflicts with #19195 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #19504 in docs/computer-use.md",
-     "conflicts with #19531 in docs/computer-use.md",
      "conflicts with #19702 in docs/computer-use.md",
+     "conflicts with #19531 in docs/computer-use.md",
      "conflicts with main in crates/natives/src/desktop/macos/settle.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
@@ -115873,8 +115906,8 @@
     "blocked_by": [
      "#19195",
      "#19504",
-     "#19531",
-     "#19702"
+     "#19702",
+     "#19531"
     ],
     "needs": [],
     "created": "2026-10-19T07:26:45Z"
@@ -115889,15 +115922,12 @@
     "title": "fix(natives): send no macOS AX action once its run is cancelled",
     "action": "wait",
     "reasons": [
-     "conflicts with #19195 in crates/pi-natives/src/desktop/macos/ax.rs",
      "conflicts with main in crates/natives/src/desktop/macos/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#19195"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T09:59:13Z"
    },
@@ -115909,11 +115939,11 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): note a macOS background drag that changed nothing readable",
-    "action": "wait",
+    "action": "held",
     "reasons": [
+     "held: Main, 2026-11-18: rework against #19195's new drag logic after it merges (not a mechanical restack; drag_control.rs moved)",
      "needs #19195 (open)",
-     "its need #19195 conflicts with main in crates/natives/src/desktop/control.rs, crates/natives/src/desktop/macos/ax/drag_control.rs",
-     "conflicts with main in crates/natives/src/desktop/macos/input.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md"
+     "conflicts with main in crates/natives/src/desktop/macos/ax/drag_control.rs, crates/natives/src/desktop/macos/input.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md"
     ],
     "note": "",
     "over": [],
@@ -115934,10 +115964,10 @@
     "title": "fix(natives): type into a background macOS web page field without a takeover",
     "action": "wait",
     "reasons": [
-     "conflicts with #19195 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/macos/input.rs, docs/computer-use.md",
+     "conflicts with #19195 in docs/computer-use.md",
      "conflicts with #19504 in docs/computer-use.md",
-     "conflicts with #19531 in docs/computer-use.md",
      "conflicts with #19702 in docs/computer-use.md",
+     "conflicts with #19531 in docs/computer-use.md",
      "conflicts with main in crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/macos/input.rs, docs/computer-use.md"
     ],
     "note": "",
@@ -115946,8 +115976,8 @@
     "blocked_by": [
      "#19195",
      "#19504",
-     "#19531",
-     "#19702"
+     "#19702",
+     "#19531"
     ],
     "needs": [],
     "created": "2026-11-14T20:50:44Z"
@@ -116137,15 +116167,12 @@
     "title": "fix(natives): expose Windows control state and stale-reference matches",
     "action": "wait",
     "reasons": [
-     "conflicts with #19195 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs",
      "conflicts with main in crates/natives/src/desktop/ax.rs, crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/mod.rs, crates/natives/src/desktop/win32/ax.rs, crates/natives/src/desktop/win32/ax_states.rs, crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/win32/mod.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#19195"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T10:16:04Z"
    },
@@ -116210,7 +116237,7 @@
     "reasons": [
      "held: Main, 2026-11-18: needs an independent review and a VM row before it can open; no work on it now",
      "needs #19702 (open)",
-     "conflicts with #19195 in crates/pi-natives/src/desktop/macos/ax.rs",
+     "conflicts with #19195 in docs/computer-use.md",
      "conflicts with #19702 in docs/computer-use.md",
      "conflicts with main in crates/natives/src/desktop/macos/ax.rs, docs/computer-use.md"
     ],
@@ -116331,12 +116358,12 @@
     "reasons": [
      "held: Main for InputDiffFix, 2026-11-12: held; the fix round failed two Opus acceptance lines fixed beforehand (Finder steps 1.47x, Automator tokens 1.26x vs main); code branch stays local and unpushed; see note",
      "needs computer-ui-quiet (queued)",
-     "conflicts with #19195 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with #19195 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19504 in docs/computer-use.md",
+     "conflicts with #19702 in docs/computer-use.md",
      "conflicts with #19531 in docs/computer-use.md, docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md",
      "conflicts with #19620 in packages/coding-agent/src/session/session-maintenance.ts",
-     "conflicts with #19702 in docs/computer-use.md",
      "its need computer-ui-quiet conflicts with main in crates/natives/src/desktop/macos/settle.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -116346,10 +116373,10 @@
     "blocked_by": [
      "#19195",
      "#19504",
+     "#19702",
      "#19531",
      "#19618",
-     "#19620",
-     "#19702"
+     "#19620"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -116367,7 +116394,7 @@
     "action": "wait",
     "reasons": [
      "needs computer-ui-quiet (queued)",
-     "conflicts with #19195 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/mod.rs, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with #19195 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md",
      "its need computer-ui-quiet conflicts with main in crates/natives/src/desktop/macos/settle.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
@@ -116422,7 +116449,7 @@
     "action": "held",
     "reasons": [
      "held: Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check | Main 2026-11-12: before it opens, the waiting-key-chord case with the cursor actually drawn (20 trials at a 20 s deadline; CursorDemo's cursor-on arm never drew one, and an early run on the combined tree returned 'Cancelled, input may be partial' 11/11, unexplained), on the polished branch will/desktop-cursor-polish.",
-     "conflicts with #19195 in crates/pi-natives/src/desktop/mod.rs, crates/pi-natives/src/desktop/types.rs, packages/natives/native/index.d.ts",
+     "conflicts with #19195 in docs/tools/computer.md, packages/natives/native/index.d.ts",
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md, packages/natives/native/index.d.ts",
      "conflicts with main in crates/natives/src/desktop/backend.rs, crates/natives/src/desktop/cursor.rs, crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/macos/capture.rs, crates/natives/src/desktop/macos/cursor.rs, crates/natives/src/desktop/macos/cursor/helper.m, crates/natives/src/desktop/macos/mod.rs, crates/natives/src/desktop/mod.rs, packages/coding-agent/test/tools/computer.test.ts"
@@ -116555,6 +116582,7 @@
     "action": "held",
     "reasons": [
      "held: Main, 2026-11-12: proposal; opens only after entry A merges and Will has seen the body",
+     "conflicts with #19195 in docs/tools/computer.md",
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md",
      "conflicts with main in crates/natives/src/desktop/win32/edit.rs, crates/natives/src/desktop/win32/input.rs, crates/natives/src/desktop/win32/mod.rs"
@@ -116563,6 +116591,7 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#19195",
      "#19531",
      "#19618"
     ],
@@ -116609,8 +116638,10 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with main in (branch missing on the fork)"
+    ],
     "note": "",
     "over": [],
     "paired": [],
