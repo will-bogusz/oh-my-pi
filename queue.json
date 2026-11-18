@@ -101961,7 +101961,7 @@
   {
    "id": "wayland-still-capture",
    "branch": "will/wayland-still-capture",
-   "title": "fix(natives): keep the Wayland ScreenCast stream open between screenshots",
+   "title": "fix(natives): keep the Wayland ScreenCast stream open between screenshots on Hyprland and wlroots",
    "area": "natives",
    "priority": "P2",
    "needs": [],
@@ -101973,7 +101973,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-still-capture",
    "host": "MacBook-Pro",
    "added": "2026-11-17T23:02:30Z",
-   "updated": "2026-11-18T17:11:33Z",
+   "updated": "2026-11-18T17:11:45Z",
    "note": "",
    "built": [
     {
