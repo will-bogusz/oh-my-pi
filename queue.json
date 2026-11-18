@@ -101965,7 +101965,7 @@
    "area": "natives",
    "priority": "P2",
    "needs": [],
-   "base": "e1ae2cc998efd1ca151b46ebefc0e0dab6c23c63",
+   "base": "08cb444207d55091daaa61d37b3652c876aa8df1",
    "body": "bodies/wayland-still-capture.md",
    "state": "open",
    "pr": 19615,
@@ -101973,7 +101973,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-still-capture",
    "host": "MacBook-Pro",
    "added": "2026-11-17T23:02:30Z",
-   "updated": "2026-11-18T10:18:09Z",
+   "updated": "2026-11-18T17:11:33Z",
    "note": "",
    "built": [
     {
@@ -102067,7 +102067,7 @@
      "host": "MacBook-Pro"
     }
    ],
-   "advanced": "2026-11-18T01:30:47Z",
+   "advanced": "2026-11-18T17:11:33Z",
    "opened": "2026-11-18T01:48:59Z",
    "readied": "2026-11-18T01:49:25Z",
    "line_loss_overrides": [
