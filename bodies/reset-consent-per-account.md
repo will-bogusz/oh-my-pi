@@ -12,7 +12,7 @@ An `auth.accountPolicies` entry can now set `autoRedeem5h`, `autoRedeemWeekly` a
 | `omp usage` policy line | priority, reserve, reclaim | also `auto-redeem weekly yes`, from the stored account the reset planners attribute the report to |
 | `omp usage` expiring-reset banner | verdict from the provider key | verdict from the key that decides it: `(account policy autoRedeemWeekly: no)` |
 
-**Beyond the new keys:** two guards tighten for every account. A redeem whose stored row no longer shares the planned account's id or email (a replaced credential store can reuse row ids) returns `no_account`; `main` spends whichever account the row holds. A throttled Claude reset listing is waited out only for an account in the session's pool; on `main` any account's throttle delays a blocked session.
+**Beyond the new keys:** two guards tighten for every account. A redeem whose stored row no longer shares the planned account's id or email, or whose Claude token resolves another organization than planned (a replaced credential store can reuse row ids), returns `no_account`; `main` spends whichever account the row holds. A throttled Claude reset listing is waited out only for an account in the session's pool; on `main` any account's throttle delays a blocked session.
 
 Non-goals: a per-account `unset`, and a spend-time consent recheck (`main` has none).
 
@@ -47,7 +47,7 @@ A session blocked on Pro (policy `no`) with Team (policy `yes`) also blocked spe
 
 | Finding | Test |
 |---|---|
-| a replaced store reuses a row id | a row now holding another org, or an account sharing no id or email with the target: `no_account`, no reset request |
+| a replaced store reuses a row id | a row now holding another org (stored, or resolved live for a row stored without one), or an account sharing no id or email with the target: `no_account`, no reset request |
 | throttled account outside the pool | blocked session lists once instead of waiting |
 | Claude credential stored without its org | with one report: banner says "will be lost" by `account policy autoRedeemWeekly: no`; with two orgs' reports fitting it: attributed to neither |
 
@@ -69,4 +69,5 @@ Not run: a live spend, which would consume a real saved reset.
 - [ ] `bun check` passes
 - [ ] Tested locally
 - [ ] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
 
