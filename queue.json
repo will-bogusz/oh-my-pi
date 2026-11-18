@@ -114439,12 +114439,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-18T18:43:51.096757Z",
-  "host": "goliath",
+  "at": "2026-11-18T18:47:53.345302Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 4,
-   "left": 4
+   "used": 5,
+   "left": 3
   },
   "rows": [
    {
@@ -114457,9 +114457,11 @@
     "title": "fix(natives): keep background iPhone Mirroring taps reaching the phone after a takeover tap",
     "action": "keep",
     "reasons": [],
-    "note": "",
+    "note": "accepted pair with #19702: Main, 2026-11-18: one argument added to the make_key_in_background call that #17756 moves into keyboard_in_watch; combined = #17756's function with that argument",
     "over": [],
-    "paired": [],
+    "paired": [
+     "#19702"
+    ],
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-02T03:27:31Z"
@@ -114499,40 +114501,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-17T21:39:00Z"
-   },
-   {
-    "id": "export-viewer-regen",
-    "label": "#19696",
-    "number": 19696,
-    "state": "open",
-    "area": "other",
-    "priority": "P0",
-    "title": "fix(coding-agent): regenerated the stale export viewer metadata",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-18T17:59:21Z"
-   },
-   {
-    "id": "oxfmt-main-drift",
-    "label": "#19699",
-    "number": 19699,
-    "state": "open",
-    "area": "other",
-    "priority": "P0",
-    "title": "fix: restored main's lint and type-check job",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-18T18:18:47Z"
    },
    {
     "id": "macos-handback-typed",
@@ -114694,6 +114662,25 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-18T02:06:12Z"
+   },
+   {
+    "id": "macos-keys-no-press",
+    "label": "#19702",
+    "number": 19702,
+    "state": "open",
+    "area": "computer",
+    "priority": "P2",
+    "title": "fix(natives): send macOS background keys to the key window without a press",
+    "action": "keep",
+    "reasons": [],
+    "note": "accepted pair with #17756: Main, 2026-11-18: one argument added to the make_key_in_background call that #17756 moves into keyboard_in_watch; combined = #17756's function with that argument",
+    "over": [],
+    "paired": [
+     "#17756"
+    ],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-18T18:46:50Z"
    },
    {
     "id": "browser-wait-predicate",
@@ -114936,6 +114923,7 @@
      "conflicts with #19195 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #19504 in docs/computer-use.md",
      "conflicts with #19531 in docs/computer-use.md",
+     "conflicts with #19702 in docs/computer-use.md",
      "conflicts with main in crates/natives/src/desktop/macos/settle.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
@@ -114944,7 +114932,8 @@
     "blocked_by": [
      "#19195",
      "#19504",
-     "#19531"
+     "#19531",
+     "#19702"
     ],
     "needs": [],
     "created": "2026-10-19T07:26:45Z"
@@ -114995,25 +114984,6 @@
     "created": "2026-11-14T12:00:22Z"
    },
    {
-    "id": "macos-keys-no-press",
-    "label": "macos-keys-no-press",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": "P2",
-    "title": "fix(natives): send macOS background keys to the key window without a press",
-    "action": "open",
-    "reasons": [],
-    "note": "accepted pair with #17756: Main, 2026-11-18: one argument added to the make_key_in_background call that #17756 moves into keyboard_in_watch; combined = #17756's function with that argument",
-    "over": [],
-    "paired": [
-     "#17756"
-    ],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-14T10:49:09Z"
-   },
-   {
     "id": "macos-web-type-background",
     "label": "macos-web-type-background",
     "number": null,
@@ -115026,7 +114996,7 @@
      "conflicts with #19195 in crates/pi-natives/src/desktop/macos/ax.rs, crates/pi-natives/src/desktop/macos/input.rs, docs/computer-use.md",
      "conflicts with #19504 in docs/computer-use.md",
      "conflicts with #19531 in docs/computer-use.md",
-     "conflicts with macos-keys-no-press in docs/computer-use.md",
+     "conflicts with #19702 in docs/computer-use.md",
      "conflicts with main in crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/macos/input.rs, docs/computer-use.md"
     ],
     "note": "",
@@ -115036,7 +115006,7 @@
      "#19195",
      "#19504",
      "#19531",
-     "macos-keys-no-press"
+     "#19702"
     ],
     "needs": [],
     "created": "2026-11-14T20:50:44Z"
@@ -115298,9 +115268,9 @@
     "action": "held",
     "reasons": [
      "held: Main, 2026-11-18: needs an independent review and a VM row before it can open; no work on it now",
-     "needs macos-keys-no-press (queued)",
+     "needs #19702 (open)",
      "conflicts with #19195 in crates/pi-natives/src/desktop/macos/ax.rs",
-     "conflicts with macos-keys-no-press in docs/computer-use.md",
+     "conflicts with #19702 in docs/computer-use.md",
      "conflicts with main in crates/natives/src/desktop/macos/ax.rs, docs/computer-use.md"
     ],
     "note": "",
@@ -115308,7 +115278,7 @@
     "paired": [],
     "blocked_by": [
      "#19195",
-     "macos-keys-no-press"
+     "#19702"
     ],
     "needs": [
      "macos-keys-no-press"
@@ -115425,7 +115395,7 @@
      "conflicts with #19531 in docs/computer-use.md, docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md",
      "conflicts with #19620 in packages/coding-agent/src/session/session-maintenance.ts",
-     "conflicts with macos-keys-no-press in docs/computer-use.md",
+     "conflicts with #19702 in docs/computer-use.md",
      "its need computer-ui-quiet conflicts with main in crates/natives/src/desktop/macos/settle.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -115438,7 +115408,7 @@
      "#19531",
      "#19618",
      "#19620",
-     "macos-keys-no-press"
+     "#19702"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -115698,10 +115668,8 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "wait",
-    "reasons": [
-     "conflicts with main in (branch missing on the fork)"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
