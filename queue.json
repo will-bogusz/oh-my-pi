@@ -104882,7 +104882,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-18T23:18:23Z",
+  "checked": "2026-11-18T23:49:17Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -105020,24 +105020,6 @@
     "merged_at": "2026-11-17T00:27:47Z",
     "findings": []
    },
-   "19025": {
-    "title": "fix(natives): map Windows keys on the receiving keyboard layout",
-    "merge_commit": "79cb23f69059475451bc09d089e4e29be23e442d",
-    "merged_at": "2026-11-16T23:37:49Z",
-    "findings": []
-   },
-   "19034": {
-    "title": "fix(natives): choose Linux combo box options without opening their keyboard-grabbing list",
-    "merge_commit": "8cad3c339a0d590c2d4b45c74cc299252efdf087",
-    "merged_at": "2026-11-16T23:37:50Z",
-    "findings": []
-   },
-   "19035": {
-    "title": "fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility",
-    "merge_commit": "295826b038b85544dd7ffe6879d8f60064f474e0",
-    "merged_at": "2026-11-16T23:37:49Z",
-    "findings": []
-   },
    "19036": {
     "title": "fix(natives): stop Linux accessibility reads from freezing apps that show long tables",
     "merge_commit": "5af131c69274200ee4ba032568e9ccab44291c69",
@@ -105050,88 +105032,16 @@
     "merged_at": "2026-11-17T00:27:46Z",
     "findings": []
    },
-   "19048": {
-    "title": "fix(natives): follow rebuilt macOS table rows without selecting a neighbour",
-    "merge_commit": "c5deaee95135abefc490acc347ffd2591a8c9fbf",
-    "merged_at": "2026-11-16T23:37:49Z",
-    "findings": []
-   },
-   "19061": {
-    "title": "fix(natives): name a macOS control by the label its AXTitleUIElement links to",
-    "merge_commit": "82661d6e25c21129313769f416a5753490def555",
-    "merged_at": "2026-11-16T23:37:49Z",
-    "findings": []
-   },
-   "19062": {
-    "title": "fix(natives): report where focus went after a Windows takeover",
-    "merge_commit": "bcdad7cf324470460c3fed9f8196cbe353597010",
-    "merged_at": "2026-11-16T23:37:49Z",
-    "findings": []
-   },
-   "19063": {
-    "title": "fix(natives): point a refused macOS press at the element's own click",
-    "merge_commit": "98a8202c71ca4f1b8c1f19e312a69775f5a8e841",
-    "merged_at": "2026-11-16T23:37:49Z",
-    "findings": []
-   },
-   "19066": {
-    "title": "fix(natives): refuse X11 XTest keys while another client grabs the keyboard",
-    "merge_commit": "ae43375b2cd5c282e93b186a603e573143556737",
-    "merged_at": "2026-11-16T23:37:49Z",
-    "findings": []
-   },
-   "19080": {
-    "title": "fix(natives): type X11 XTest text through a neutral keyboard state",
-    "merge_commit": "02ba430bc35c41ed5fa4f2657c0af2c65e59a940",
-    "merged_at": "2026-11-16T23:37:49Z",
-    "findings": []
-   },
    "19100": {
     "title": "fix(computer): retain output and screenshots when a run fails",
     "merge_commit": "542454c814a483c0c5605e234134de81d35d297c",
     "merged_at": "2026-11-18T00:31:44Z",
     "findings": []
    },
-   "19120": {
-    "title": "fix(stats): count snapcompact compactions on the Gain tab",
-    "merge_commit": "c5c225b7c967d5bc49d3524fbd5a8f87405f6843",
-    "merged_at": "2026-11-16T23:37:49Z",
-    "findings": []
-   },
-   "19165": {
-    "title": "fix(natives): scroll down for a positive dy on macOS, as on Windows and Linux",
-    "merge_commit": "7061d827a306a295f230bc0db6650a9bd5d2775f",
-    "merged_at": "2026-11-16T23:37:49Z",
-    "findings": []
-   },
-   "19178": {
-    "title": "fix(browser-relay): keep a relay tab when another extension's frame keeps omp out",
-    "merge_commit": "7d878a1480ddc3f7b0c91a35193a2e27e5af72d0",
-    "merged_at": "2026-11-16T23:37:49Z",
-    "findings": []
-   },
    "19179": {
     "title": "fix(natives): close the menu a macOS background key press opens",
     "merge_commit": "bfa1f8bf3a490f0fb446c10cac1e1b338793d6ec",
     "merged_at": "2026-11-17T00:27:46Z",
-    "findings": []
-   },
-   "19194": {
-    "title": "test(ai): keep captured Factory Droid parity cases when one case fails",
-    "merge_commit": "12eece8845f9469ea15624a47baf8d0dc8da74a5",
-    "merged_at": "2026-11-16T23:37:49Z",
-    "findings": []
-   },
-   "19208": {
-    "title": "fix(natives): give the user's key window back after macOS takeover and focus-guard hand-backs",
-    "merge_commit": "5563ac58c36b0e74496b84c80216b3971e243890",
-    "merged_at": "2026-11-16T23:37:49Z",
-    "findings": []
-   },
-   "19224": {
-    "title": "fix(natives): choose a Chromium select's option on macOS and close the menu it opens",
-    "merge_commit": "d18725201362b8831f3c33132ca4fb76418b03e6",
-    "merged_at": "2026-11-16T23:37:49Z",
     "findings": []
    },
    "19258": {
@@ -105150,12 +105060,6 @@
     "title": "fix(natives): set macOS sliders and other number controls from setValue",
     "merge_commit": "d47787163af36022169c0b8af8743919eee0e29f",
     "merged_at": "2026-11-17T00:27:46Z",
-    "findings": []
-   },
-   "19481": {
-    "title": "fix(browser): forget a dialog the user or another client answered",
-    "merge_commit": "85f1939ab247d6e9dc03a1a176a5a2aa67dcd53b",
-    "merged_at": "2026-11-16T23:37:49Z",
     "findings": []
    },
    "19509": {
