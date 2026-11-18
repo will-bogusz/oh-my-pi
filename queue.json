@@ -104862,7 +104862,22 @@
     }
    ],
    "opened": "2026-11-18T22:03:30Z",
-   "readied": "2026-11-18T22:03:51Z"
+   "readied": "2026-11-18T22:03:51Z",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-18T22:20:50Z",
+     "reason": "QueueThirtyFive, 2026-11-18: roboomp nit 4621489826: the HidReports loop row repeated the KeyEvents path in keys_for; dropped on purpose",
+     "old": "b58302b9c5fb45eaed5b7b3dd93c66cb56bf1ed6",
+     "new": "129615b88f92508d6cf91165a17f32627903abf2",
+     "dropped": {
+      "crates/natives/src/desktop/macos/input.rs": [
+       "\t\tfor remote in [RemoteScreen::KeyEvents, RemoteScreen::HidReports] {",
+       "\t\t\tlet keys = keys_for(&window, \"aB\\n\\t\", Some(remote), || Ok(Some(us_stroke)));",
+       "\t\t\tassert_eq!(keys.unwrap(), ["
+      ]
+     }
+    }
+   ]
   }
  ],
  "watch": {
