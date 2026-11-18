@@ -75064,13 +75064,13 @@
    ],
    "base": "e1ae2cc998efd1ca151b46ebefc0e0dab6c23c63",
    "body": "bodies/settle-reads.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19633,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-settle-reads",
    "host": "MacBook-Pro",
    "added": "2026-11-10T18:56:55Z",
-   "updated": "2026-11-18T04:40:36Z",
+   "updated": "2026-11-18T04:43:52Z",
    "note": "",
    "kind": "proposal",
    "built": [
@@ -75482,7 +75482,8 @@
    "tests_over_override": {
     "reason": "Main, 2026-11-18: one test per settle branch: settled read, unanswered request bound, no preceding action, batched reads settle once, element id survives an action, click opening a confirm",
     "at": "2026-11-17T23:38:37Z"
-   }
+   },
+   "opened": "2026-11-18T04:43:52Z"
   },
   {
    "id": "act-look-prompt",
