@@ -110087,12 +110087,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-18T00:53:44.295368Z",
+  "at": "2026-11-18T01:39:22.819860Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 2,
-   "left": 6
+   "used": 1,
+   "left": 7
   },
   "rows": [
    {
@@ -110400,7 +110400,7 @@
     "title": "fix(coding-agent): judge omp usage policy state by account-wide windows",
     "action": "keep",
     "reasons": [],
-    "note": "",
+    "note": "tests-over: UpstreamOpener.ReviewUsageStateFinal, 2026-11-18: three policy cases, one per account-wide-pool branch (model-scoped tier row, sharedGroup-only fallback, shared row with a modelId); none merges into another",
     "over": [],
     "paired": [],
     "blocked_by": [],
@@ -110417,7 +110417,7 @@
     "title": "fix(coding-agent): mark images the provider image limit evicts in place",
     "action": "keep",
     "reasons": [],
-    "note": "",
+    "note": "tests-over: LaneImageDropNotice, 2026-11-18: four distinct branches (archive run grouping; notice bytes charged against the body-limit room; a grown notice charged once; count-clamp notice extended by the byte clamp), the last two asked for by roboomp; each fails with its branch removed",
     "over": [],
     "paired": [],
     "blocked_by": [],
@@ -111074,7 +111074,7 @@
     "area": "auth",
     "priority": "P2",
     "title": "feat(ai,coding-agent): record why a session's OAuth account switched",
-    "action": "next-hour",
+    "action": "open",
     "reasons": [],
     "note": "",
     "over": [],
