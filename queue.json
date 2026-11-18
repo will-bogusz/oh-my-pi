@@ -104282,7 +104282,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-18T20:47:08Z",
+  "checked": "2026-11-18T21:17:56Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -104293,88 +104293,7 @@
   },
   "conflicts": {},
   "merged_through": "2026-11-18T18:46:52Z",
-  "unreleased": {
-   "17897": {
-    "title": "perf(natives): type on iPhone Mirroring twice as fast",
-    "merge_commit": "a71d48b6850a95c803dc95f1370142f0ecdb4b11",
-    "merged_at": "2026-11-18T10:14:12Z"
-   },
-   "19629": {
-    "title": "fix(natives): refuse every Wayland input call at once when no input route exists",
-    "merge_commit": "bcbc1b9ef2cf1bcbe2fb9a31308aa2a8ab9ec05e",
-    "merged_at": "2026-11-18T17:12:46Z"
-   },
-   "19619": {
-    "title": "fix(catalog): carry Devin's measured image limits",
-    "merge_commit": "7d72a0224f7e35ee63e2cc699e0777b0a80d297b",
-    "merged_at": "2026-11-18T17:12:46Z"
-   },
-   "19606": {
-    "title": "fix(coding-agent): judge omp usage policy state by account-wide windows",
-    "merge_commit": "d0d57d7d5be51481f70f637d44ed83fc9319866c",
-    "merged_at": "2026-11-18T17:12:46Z"
-   },
-   "19605": {
-    "title": "fix(utils): apply OMP_LOG_LEVEL to the console transport",
-    "merge_commit": "34dadb878d845311904928875a7f6dd8f77099a9",
-    "merged_at": "2026-11-18T17:12:46Z"
-   },
-   "19602": {
-    "title": "fix(ai): read auth-broker responses that carry fields a newer broker adds",
-    "merge_commit": "850e17501228cfd7dd4405a1fe9b70053bbaa6c3",
-    "merged_at": "2026-11-18T17:12:46Z"
-   },
-   "19601": {
-    "title": "fix(catalog): switch Devin's Gemini promo prices to list when each promo ends",
-    "merge_commit": "aba92696315b6945ceda3d2d7c22078ec63066fd",
-    "merged_at": "2026-11-18T17:12:46Z"
-   },
-   "19600": {
-    "title": "fix(ai): heal Claude tier blocks a shared weekly wall caused from single-window usage reports",
-    "merge_commit": "a6d09e9aa1991d4dd1c02c86cb3a99101fa9ee02",
-    "merged_at": "2026-11-18T17:12:46Z"
-   },
-   "19599": {
-    "title": "fix(coding-agent): let auth-broker serve save an in-flight refresh before exit",
-    "merge_commit": "713aba6df013437df844495f5ea83b17608f46b6",
-    "merged_at": "2026-11-18T17:12:46Z"
-   },
-   "19598": {
-    "title": "fix(ai): retry the initial auth-broker snapshot through a broker restart",
-    "merge_commit": "254ae243060e8258ef8b99d938c23321946cce2b",
-    "merged_at": "2026-11-18T17:12:46Z"
-   },
-   "19596": {
-    "title": "fix(natives): capture the visible part of a Linux window partly off its monitor",
-    "merge_commit": "7de774b6f7f5db17335d672eb7d7b052614b8df0",
-    "merged_at": "2026-11-18T17:12:46Z"
-   },
-   "19586": {
-    "title": "docs(auth-gateway): describe reclaim moving warm pins back",
-    "merge_commit": "0e9db07d6cf4c2f21c53df6ba92aff5ea3034143",
-    "merged_at": "2026-11-18T17:12:46Z"
-   },
-   "19532": {
-    "title": "fix(natives): put the user's key window back in front of a macOS target after background input and takeover",
-    "merge_commit": "958607927742b92faffe8fc6fc7f6a107255bee1",
-    "merged_at": "2026-11-18T17:12:46Z"
-   },
-   "19516": {
-    "title": "fix(natives): read a macOS popup after the option its typed letters choose",
-    "merge_commit": "4dbe7c2cf0309753befa9bb73a3f65758bc645b2",
-    "merged_at": "2026-11-18T17:12:46Z"
-   },
-   "19696": {
-    "title": "fix(coding-agent): regenerated the stale export viewer metadata",
-    "merge_commit": "1885a7867e085098de815d9815deb7a98ff5bdca",
-    "merged_at": "2026-11-18T18:46:44Z"
-   },
-   "19699": {
-    "title": "fix: restored main's lint and type-check job",
-    "merge_commit": "5feafa1fd4dca059a6e35bb01cf20a22ceb15c36",
-    "merged_at": "2026-11-18T18:46:52Z"
-   }
-  },
+  "unreleased": {},
   "ready": [
    17756,
    19195,
@@ -104766,12 +104685,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-11T21:11:12Z",
-    "kind": "openable",
-    "id": "win-screen-locked",
-    "title": "fix(natives,coding-agent): report unavailable Windows desktop sessions"
-   },
    {
     "at": "2026-11-11T22:12:30Z",
     "kind": "unopenable",
@@ -107647,6 +107560,118 @@
     "id": "macos-keys-no-press",
     "title": "fix(natives): send macOS background keys to the key window without a press",
     "why": "opened as #19702"
+   },
+   {
+    "at": "2026-11-18T21:17:56Z",
+    "kind": "released",
+    "number": 17897,
+    "title": "perf(natives): type on iPhone Mirroring twice as fast",
+    "tag": "v19.0.0"
+   },
+   {
+    "at": "2026-11-18T21:17:56Z",
+    "kind": "released",
+    "number": 19629,
+    "title": "fix(natives): refuse every Wayland input call at once when no input route exists",
+    "tag": "v19.0.0"
+   },
+   {
+    "at": "2026-11-18T21:17:56Z",
+    "kind": "released",
+    "number": 19619,
+    "title": "fix(catalog): carry Devin's measured image limits",
+    "tag": "v19.0.0"
+   },
+   {
+    "at": "2026-11-18T21:17:56Z",
+    "kind": "released",
+    "number": 19606,
+    "title": "fix(coding-agent): judge omp usage policy state by account-wide windows",
+    "tag": "v19.0.0"
+   },
+   {
+    "at": "2026-11-18T21:17:56Z",
+    "kind": "released",
+    "number": 19605,
+    "title": "fix(utils): apply OMP_LOG_LEVEL to the console transport",
+    "tag": "v19.0.0"
+   },
+   {
+    "at": "2026-11-18T21:17:56Z",
+    "kind": "released",
+    "number": 19602,
+    "title": "fix(ai): read auth-broker responses that carry fields a newer broker adds",
+    "tag": "v19.0.0"
+   },
+   {
+    "at": "2026-11-18T21:17:56Z",
+    "kind": "released",
+    "number": 19601,
+    "title": "fix(catalog): switch Devin's Gemini promo prices to list when each promo ends",
+    "tag": "v19.0.0"
+   },
+   {
+    "at": "2026-11-18T21:17:56Z",
+    "kind": "released",
+    "number": 19600,
+    "title": "fix(ai): heal Claude tier blocks a shared weekly wall caused from single-window usage reports",
+    "tag": "v19.0.0"
+   },
+   {
+    "at": "2026-11-18T21:17:56Z",
+    "kind": "released",
+    "number": 19599,
+    "title": "fix(coding-agent): let auth-broker serve save an in-flight refresh before exit",
+    "tag": "v19.0.0"
+   },
+   {
+    "at": "2026-11-18T21:17:56Z",
+    "kind": "released",
+    "number": 19598,
+    "title": "fix(ai): retry the initial auth-broker snapshot through a broker restart",
+    "tag": "v19.0.0"
+   },
+   {
+    "at": "2026-11-18T21:17:56Z",
+    "kind": "released",
+    "number": 19596,
+    "title": "fix(natives): capture the visible part of a Linux window partly off its monitor",
+    "tag": "v19.0.0"
+   },
+   {
+    "at": "2026-11-18T21:17:56Z",
+    "kind": "released",
+    "number": 19586,
+    "title": "docs(auth-gateway): describe reclaim moving warm pins back",
+    "tag": "v19.0.0"
+   },
+   {
+    "at": "2026-11-18T21:17:56Z",
+    "kind": "released",
+    "number": 19532,
+    "title": "fix(natives): put the user's key window back in front of a macOS target after background input and takeover",
+    "tag": "v19.0.0"
+   },
+   {
+    "at": "2026-11-18T21:17:56Z",
+    "kind": "released",
+    "number": 19516,
+    "title": "fix(natives): read a macOS popup after the option its typed letters choose",
+    "tag": "v19.0.0"
+   },
+   {
+    "at": "2026-11-18T21:17:56Z",
+    "kind": "released",
+    "number": 19696,
+    "title": "fix(coding-agent): regenerated the stale export viewer metadata",
+    "tag": "v19.0.0"
+   },
+   {
+    "at": "2026-11-18T21:17:56Z",
+    "kind": "released",
+    "number": 19699,
+    "title": "fix: restored main's lint and type-check job",
+    "tag": "v19.0.0"
    }
   ]
  },
@@ -115415,8 +115440,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-18T20:59:10.874806Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-18T21:17:57.188000Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -116638,8 +116663,10 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with main in (branch missing on the fork)"
+    ],
     "note": "",
     "over": [],
     "paired": [],
