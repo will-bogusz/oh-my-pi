@@ -29,12 +29,16 @@ Without the map nothing changes: an account is in reserve when any limit that ap
 `reservePct` is one number for every window of an account. Since #8774 a Fable request is judged against the Fable weekly row, but by the same reserve as the shared windows, so keeping Fable off an account's last 30% of Fable quota also held back 30% of its shared quota from Opus.
 
 Decisions:
-- **Keyed by the limit `id` from usage reports**, not a model family or a parsed `window:tier` string. Every provider's reports already carry ids (`anthropic:7d:fable`, Copilot's per-model rows, Antigravity buckets), so no model list lives in TS, and the key a user writes is the one `omp usage --json` prints. An id that never appears is inert.
-- **A new optional key beside `reservePct`**, not a number-or-map `reservePct`, so readers of `reservePct` (`omp usage --json`, scripts that write policies) keep a number.
 - **Reclaim skips an account inside its reserve.** `reclaimAbovePct` is still validated against the scalar reserve, so a limit's reserve can sit above it; without the guard, a session on a sibling that is itself in reserve was pulled onto the preferred account while that account was inside its Fable reserve. On `main` the guard changes nothing, since reclaim already had to be above the only reserve.
 - **`omp usage` keeps the account's state on its shared windows** (#19606). A Fable reserve ranks only Fable requests, so it does not turn the account `inside reserve`; the Fable row is named beside the state, as #19606 names a spent one, and JSON lists it in `scopedInsideReserve`. A map entry for a shared window (`anthropic:7d`) does decide the state.
 
 Related: #14074 and #19323 shrink a reserve as a window's reset nears; this sets which reserve a limit starts from, so either composes with it.
+
+<details><summary>Why this key shape</summary>
+
+- **Keyed by the limit `id` from usage reports**, not a model family or a parsed `window:tier` string. Every provider's reports already carry ids (`anthropic:7d:fable`, Copilot's per-model rows, Antigravity buckets), so no model list lives in TS, and the key a user writes is the one `omp usage --json` prints. An id that never appears is inert.
+- **A new optional key beside `reservePct`**, not a number-or-map `reservePct`, so readers of `reservePct` (`omp usage --json`, scripts that write policies) keep a number.
+</details>
 
 <details><summary>Reading order</summary>
 
