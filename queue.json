@@ -98467,7 +98467,7 @@
    "branch": "will/snapcompact-rerender-on-switch",
    "title": "fix(snapcompact,coding-agent): re-render a snapcompact archive in the frame shape of the model reading it",
    "area": "snapcompact",
-   "priority": null,
+   "priority": "P2",
    "needs": [],
    "base": "542454c814a483c0c5605e234134de81d35d297c",
    "body": "bodies/snapcompact-rerender-on-switch.md",
@@ -98477,7 +98477,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-rerender-on-switch",
    "host": "MacBook-Pro",
    "added": "2026-11-18T00:36:24Z",
-   "updated": "2026-11-18T00:42:15Z",
+   "updated": "2026-11-18T00:45:41Z",
    "note": "",
    "advanced": "2026-11-18T00:42:15Z"
   }
