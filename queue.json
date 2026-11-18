@@ -416,13 +416,13 @@
    "needs": [],
    "base": "d33a0edb00c8b76b28d71eb976cd82d69617bcba",
    "body": null,
-   "state": "open",
+   "state": "closed",
    "pr": 15128,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/reset-restore-longest-wait",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-11-11T02:34:40Z",
+   "updated": "2026-11-18T00:34:08Z",
    "note": "Will, 2026-11-02: broker cluster on hold for redesign; not going to Brit; no worker on its Codex findings.",
    "advanced": "2026-10-29T20:19:04Z",
    "parked": {
@@ -450,13 +450,13 @@
    "needs": [],
    "base": "686b5e2fb542848dc3ff1a9e36a42a8fefdd2278",
    "body": null,
-   "state": "open",
+   "state": "closed",
    "pr": 15130,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/reset-before-reserve",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-11-11T02:34:40Z",
+   "updated": "2026-11-18T00:34:08Z",
    "note": "Will, 2026-11-02: broker cluster on hold for redesign; not going to Brit; no worker on its Codex findings.",
    "advanced": "2026-11-02T01:26:29Z",
    "built": [
@@ -78365,13 +78365,13 @@
    "needs": [],
    "base": "baf60290fde5e9eea4edb30bff07695877682ba9",
    "body": "bodies/computer-run-failure-output.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19100,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/computer-run-failure-output",
    "host": "MacBook-Pro",
    "added": "2026-11-11T00:07:07Z",
-   "updated": "2026-11-17T20:52:02Z",
+   "updated": "2026-11-18T00:34:08Z",
    "note": "",
    "advanced": "2026-11-17T20:52:02Z",
    "built": [
@@ -78489,7 +78489,8 @@
       ]
      }
     }
-   ]
+   ],
+   "merged_by": "pr"
   },
   {
    "id": "browser-select-readback",
@@ -96801,7 +96802,7 @@
    "branch": "will/docs-reclaim-drift",
    "title": "docs(auth-gateway): describe reclaim moving warm pins back",
    "area": "auth",
-   "priority": null,
+   "priority": "P0",
    "needs": [],
    "base": "baf60290fde5e9eea4edb30bff07695877682ba9",
    "body": "bodies/docs-reclaim-drift.md",
@@ -96811,7 +96812,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/docs-reclaim-drift",
    "host": "MacBook-Pro",
    "added": "2026-11-17T20:54:14Z",
-   "updated": "2026-11-17T20:58:45Z",
+   "updated": "2026-11-18T00:34:08Z",
    "note": "",
    "opened": "2026-11-17T20:58:21Z",
    "readied": "2026-11-17T20:58:44Z"
@@ -96904,7 +96905,7 @@
    "branch": "will/usage-state-per-model",
    "title": "fix(coding-agent): judge omp usage policy state by account-wide windows",
    "area": "broker",
-   "priority": "P2",
+   "priority": "P1",
    "needs": [],
    "base": "baf60290fde5e9eea4edb30bff07695877682ba9",
    "body": "bodies/usage-state-per-model.md",
@@ -96914,7 +96915,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/usage-state-per-model",
    "host": "MacBook-Pro",
    "added": "2026-11-17T20:59:31Z",
-   "updated": "2026-11-18T00:19:27Z",
+   "updated": "2026-11-18T00:34:08Z",
    "note": "",
    "built": [
     {
@@ -97016,7 +97017,7 @@
    "branch": "will/fable-shared-wall-block",
    "title": "fix(ai): heal Claude tier blocks a shared weekly wall caused from single-window usage reports",
    "area": "broker",
-   "priority": "P1",
+   "priority": "P0",
    "needs": [],
    "base": "1abafe8e71cae521f995e2203055ce840b859da4",
    "body": "bodies/fable-shared-wall-block.md",
@@ -97026,7 +97027,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/fable-shared-wall-block",
    "host": "MacBook-Pro",
    "added": "2026-11-17T20:59:40Z",
-   "updated": "2026-11-17T23:09:35Z",
+   "updated": "2026-11-18T00:34:08Z",
    "note": "",
    "built": [
     {
@@ -97083,7 +97084,7 @@
    "branch": "will/broker-wire-forward-compat",
    "title": "fix(ai): read auth-broker responses that carry fields a newer broker adds",
    "area": "broker",
-   "priority": "P2",
+   "priority": "P0",
    "needs": [],
    "base": "baf60290fde5e9eea4edb30bff07695877682ba9",
    "body": "bodies/broker-wire-forward-compat.md",
@@ -97093,7 +97094,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/broker-wire-forward-compat",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:01:16Z",
-   "updated": "2026-11-17T23:35:14Z",
+   "updated": "2026-11-18T00:34:08Z",
    "note": "Will, 2026-11-17: go-ahead to open",
    "built": [
     {
@@ -97369,7 +97370,7 @@
    "branch": "will/logger-console-level",
    "title": "fix(utils): apply OMP_LOG_LEVEL to the console transport",
    "area": "other",
-   "priority": "P2",
+   "priority": "P0",
    "needs": [],
    "base": "7a53f0a2d36e160f9255d80626ed757f41280b76",
    "body": "bodies/logger-console-level.md",
@@ -97379,7 +97380,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/logger-console-level",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:03:30Z",
-   "updated": "2026-11-17T23:54:59Z",
+   "updated": "2026-11-18T00:34:08Z",
    "note": "Will, 2026-11-17: go-ahead to open",
    "opened": "2026-11-17T23:41:54Z",
    "readied": "2026-11-17T23:42:20Z",
@@ -97611,7 +97612,7 @@
    "branch": "will/broker-refresh-failure-loud",
    "title": "fix(ai): warn when a broker refresh failure outlasts the access token",
    "area": "broker",
-   "priority": null,
+   "priority": "P0",
    "needs": [],
    "base": "baf60290fde5e9eea4edb30bff07695877682ba9",
    "body": "bodies/broker-refresh-failure-loud.md",
@@ -97621,7 +97622,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/broker-refresh-failure-loud",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:06:15Z",
-   "updated": "2026-11-17T21:39:28Z",
+   "updated": "2026-11-18T00:34:08Z",
    "note": "",
    "built": [
     {
@@ -97831,7 +97832,7 @@
    "branch": "will/wayland-window-crop-clip",
    "title": "fix(natives): capture the visible part of a Linux window partly off its monitor",
    "area": "natives",
-   "priority": "P2",
+   "priority": "P0",
    "needs": [],
    "base": "baf60290fde5e9eea4edb30bff07695877682ba9",
    "body": "bodies/wayland-window-crop-clip.md",
@@ -97841,7 +97842,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-window-crop-clip",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:09:14Z",
-   "updated": "2026-11-17T22:34:52Z",
+   "updated": "2026-11-18T00:34:08Z",
    "note": "",
    "built": [
     {
