@@ -98514,7 +98514,7 @@
    "worktree": null,
    "host": "MacBook-Pro",
    "added": "2026-11-14T10:49:09Z",
-   "updated": "2026-11-18T18:14:08Z",
+   "updated": "2026-11-18T18:46:03Z",
    "note": "Will, 2026-11-16: go, at P2. DragConfirm r7 2026-11-14: head d44070508c4 on macos-window-order 4f8d2cd973d. Rule: keys skip the activating press only when AXFocusedWindow==target and the window draws its own content (key_without_press), read after the activation inside with_background_watch. VM block lease ce51b160 (r7/a/out-final.jsonl, kit r7/kit/sum8.py): 540 tries, all cells pass. Review DragConfirm.ReviewKeysNoPress ready@0c5567391a; after it: docs scope, remote panels keep the press (+test). rust-check macos+linux at d44070508c. Benchmark: keys/type on Electron/Chrome raised 2 of ~83 actions, 0 trials flip (OmpTrajClass2 s2).",
    "advanced": "2026-11-18T18:00:24Z",
    "rebases_after": [
@@ -98531,6 +98531,60 @@
      "tip": "aca318e3666eb59c5d5f046c60c1de5014121ba0",
      "with_tip": "8bc7c7a02dd747f8c62a28fbca4743858d096ad1",
      "at": "2026-11-18T18:10:20Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19504",
+     "code": "6c2e38a098cbfaefb45c25f1379fe645efab2f50",
+     "with_code": "f07da370727d1df506bc6648cb72075f148d1db9",
+     "tip": "46fa4910b8617068f4df22691b04f2c772c2c7f1",
+     "with_tip": "97fefd08018fb3da34abe7873f340b656a030b5d",
+     "at": "2026-11-18T18:45:59Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19519",
+     "code": "6c2e38a098cbfaefb45c25f1379fe645efab2f50",
+     "with_code": "9010c5f105b851f2234f708de5ae36e2ce6d53d1",
+     "tip": "46fa4910b8617068f4df22691b04f2c772c2c7f1",
+     "with_tip": "886b4322f88db4e6c9593c7ac66b63d91511ba5a",
+     "at": "2026-11-18T18:46:02Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19616",
+     "code": "6c2e38a098cbfaefb45c25f1379fe645efab2f50",
+     "with_code": "154474056d5c386a2a638ed63dbbdac9e7232cdf",
+     "tip": "46fa4910b8617068f4df22691b04f2c772c2c7f1",
+     "with_tip": "984b407ede5078351813660e0a43778db54da99c",
+     "at": "2026-11-18T18:46:02Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19531",
+     "code": "6c2e38a098cbfaefb45c25f1379fe645efab2f50",
+     "with_code": "d6ffe761e6cb2055157979cb3d54b5c3ba1571d5",
+     "tip": "46fa4910b8617068f4df22691b04f2c772c2c7f1",
+     "with_tip": "2be0123b47599fa18968e92ef1b5f2773df7be30",
+     "at": "2026-11-18T18:46:02Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19615",
+     "code": "6c2e38a098cbfaefb45c25f1379fe645efab2f50",
+     "with_code": "0036bb43366a79d0cfba6ea0b6b3e12b5e29c41d",
+     "tip": "46fa4910b8617068f4df22691b04f2c772c2c7f1",
+     "with_tip": "376a1b8be127e820186ea3ecf686c3ff6b09bc9f",
+     "at": "2026-11-18T18:46:02Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19618",
+     "code": "6c2e38a098cbfaefb45c25f1379fe645efab2f50",
+     "with_code": "8b31dd3f89c155b2e500d9f2fd2782e1e74559a2",
+     "tip": "46fa4910b8617068f4df22691b04f2c772c2c7f1",
+     "with_tip": "ce74d34d355947c18c0f9508fc5c078f23fe4b10",
+     "at": "2026-11-18T18:46:02Z",
      "host": "MacBook-Pro"
     }
    ]
