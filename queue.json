@@ -99594,8 +99594,9 @@
    "worktree": null,
    "host": "MacBook-Pro",
    "added": "2026-11-14T12:00:22Z",
-   "updated": "2026-11-17T03:22:59Z",
-   "note": "MacLockWaits 2026-11-17: head e80e614c236 restacked on #19195 head 008596298a5 (mod.rs: watch before #19195's let-result form; CHANGELOGs reset to one own line each). Watch runs after drop(lease) in Worker::execute, 15 reads 40 ms apart from its own start, every AX request bounded by time left of 700 ms; before-read under the lease <=500 ms; cancel -> no note. Reviews stamped: MacLockWaitsReview needs-changes 0a6fd5dd9c1, DragWatchTiming ready f6c3de1bd99. VM lease dc87c75f (fs-mac deleted): other session's hover wait 1.86-1.92 s -> 1.29-1.33 s; slow-AX app 5 s InputBusy -> 1.84-1.87 s. macOS tests 399; rust-check all three at 91931431ef."
+   "updated": "2026-11-18T19:11:41Z",
+   "note": "MacLockWaits 2026-11-17: head e80e614c236 restacked on #19195 head 008596298a5 (mod.rs: watch before #19195's let-result form; CHANGELOGs reset to one own line each). Watch runs after drop(lease) in Worker::execute, 15 reads 40 ms apart from its own start, every AX request bounded by time left of 700 ms; before-read under the lease <=500 ms; cancel -> no note. Reviews stamped: MacLockWaitsReview needs-changes 0a6fd5dd9c1, DragWatchTiming ready f6c3de1bd99. VM lease dc87c75f (fs-mac deleted): other session's hover wait 1.86-1.92 s -> 1.29-1.33 s; slow-AX app 5 s InputBusy -> 1.84-1.87 s. macOS tests 399; rust-check all three at 91931431ef.",
+   "hold": "Main, 2026-11-18: rework against #19195's new drag logic after it merges (not a mechanical restack; drag_control.rs moved)"
   },
   {
    "id": "ax-number-setvalue",
