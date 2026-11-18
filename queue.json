@@ -98514,13 +98514,13 @@
    "needs": [],
    "base": "e1ae2cc998efd1ca151b46ebefc0e0dab6c23c63",
    "body": "bodies/wayland-still-capture.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19615,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-still-capture",
    "host": "MacBook-Pro",
    "added": "2026-11-17T23:02:30Z",
-   "updated": "2026-11-18T01:30:47Z",
+   "updated": "2026-11-18T01:48:59Z",
    "note": "",
    "built": [
     {
@@ -98614,7 +98614,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "advanced": "2026-11-18T01:30:47Z"
+   "advanced": "2026-11-18T01:30:47Z",
+   "opened": "2026-11-18T01:48:59Z"
   },
   {
    "id": "snapcompact-rerender-on-switch",
