@@ -102946,6 +102946,24 @@
    "updated": "2026-11-18T18:03:29Z",
    "note": "Main, 2026-11-18: MacCosts' d0f9ccd2f78 split off macos-keys-no-press (never pushed or reviewed there). Focused-element proof: key-call read 50-110 us vs 4.5 ms copying 2,004 children (MacCosts keys-body.md, timed from a separate process); 16-child fallback still ~4.3 ms. Needs an independent review and a VM row before it can open; rebase onto macos-keys-no-press's merged commit then.",
    "hold": "Main, 2026-11-18: needs an independent review and a VM row before it can open; no work on it now"
+  },
+  {
+   "id": "loop-sampler-stop",
+   "branch": "will/loop-sampler-stop",
+   "title": "fix(tui): stopped the loop profiler when the last TUI watchdog stops",
+   "area": "tui",
+   "priority": "P1",
+   "needs": [],
+   "base": "2cdc756f93122a4da1e75100099eebcc0a22b451",
+   "body": "bodies/loop-sampler-stop.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/loop-sampler-stop",
+   "host": "MacBook-Pro",
+   "added": "2026-11-18T18:13:26Z",
+   "updated": "2026-11-18T18:13:26Z",
+   "note": ""
   }
  ],
  "watch": {
