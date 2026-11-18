@@ -102725,8 +102725,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-deepseek-text",
    "host": "MacBook-Pro",
    "added": "2026-11-18T04:50:59Z",
-   "updated": "2026-11-18T04:50:59Z",
-   "note": ""
+   "updated": "2026-11-18T17:49:42Z",
+   "note": "LaneReaderCarriers, 2026-11-18: no code change; Devin's deepseek-v4-1-flash classifies deepseek/flash/4.1.0 and already gets the text archive; body names it."
   },
   {
    "id": "snapcompact-carbon-1568",

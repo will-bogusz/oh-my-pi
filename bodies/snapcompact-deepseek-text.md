@@ -32,11 +32,11 @@ Measured 2026-11-17 on opencode-go, low effort (OpenRouter billed and ranked the
 Frames also tripled output tokens, and at high effort 21 of 36 frame reads ran out of output or looped in thinking (3 of 36 at low).
 
 Decisions:
-- A boolean rule, scoped to the classified V4.1 Flash revision on every host (68 bundled rows, `-1017` snapshots and DeepSeek's own `deepseek-flash` included): the limit is the model's vision encoder, not the host.
+- A boolean rule, scoped to the classified V4.1 Flash revision on every host (68 bundled rows; `-1017` snapshots, DeepSeek's `deepseek-flash` and Devin's `deepseek-v4-1-flash` too): the limit is the model's vision encoder, not the host.
 - The switch reuses the no-image-input path: model switches, side requests and the text budget (60% of the threshold) work as for text-only models.
 - When DeepSeek compacts, snapcompact still stores frames for a later frame reader (rejected: a frameless archive, which would leave it none). Pricing each frame as its text sizes the kept source to the room under the trigger; the image-count and byte caps are unchanged.
 
-Maintenance: a later DeepSeek line is measured and scoped on its own.
+Maintenance: later DeepSeek lines are measured on their own.
 
 ## Testing
 
