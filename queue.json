@@ -104776,7 +104776,7 @@
    "worktree": "/Users/viathebrink/.local/state/ovnfs/git/macos-main-key-tests",
    "host": "MacBook-Pro",
    "added": "2026-11-18T21:47:33Z",
-   "updated": "2026-11-18T22:03:30Z",
+   "updated": "2026-11-18T22:03:51Z",
    "note": "P1: main macOS native desktop test job is red from stale Return/Tab expectations introduced by adbb616. Test-only repair: final head passes 720 desktop tests; macOS and Linux rust-check records present; precheck exits 0. Independent review findings fixed in b58302b9c5: omit internal-only changelog (no test needed), reuse Tab fixture (already covered). Opening still owes sibling merged-tree builds.",
    "built": [
     {
@@ -104861,7 +104861,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-11-18T22:03:30Z"
+   "opened": "2026-11-18T22:03:30Z",
+   "readied": "2026-11-18T22:03:51Z"
   }
  ],
  "watch": {
