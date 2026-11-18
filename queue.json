@@ -95343,7 +95343,7 @@
    "needs": [
     "key-menu"
    ],
-   "base": "e1ae2cc998efd1ca151b46ebefc0e0dab6c23c63",
+   "base": "fcdfcce337ce73ea94f1273f609a13282a0a63e6",
    "body": "bodies/macos-key-read-settled.md",
    "state": "open",
    "pr": 19516,
@@ -95351,9 +95351,9 @@
    "worktree": "/home/will/.omp/main-wt/oh-my-pi/key-read-settled",
    "host": "goliath",
    "added": "2026-11-14T10:14:31Z",
-   "updated": "2026-11-18T01:24:32Z",
+   "updated": "2026-11-18T15:43:30Z",
    "note": "Main, 2026-11-17: review stamp at d4e02a0 stands; e3e11216dfa is a text-only amend whose text Main's model-sample rerun checked (Haiku/Sol 0 wrong, ~/tmp/oh-my-pi/KeyReadSample/)",
-   "advanced": "2026-11-18T01:24:32Z",
+   "advanced": "2026-11-18T15:43:30Z",
    "rebases_after": [
     19195
    ],
