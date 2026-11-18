@@ -102108,6 +102108,19 @@
        "\t\t\t\t\t`      ${chalk.dim(formatPolicyLine(computePolicyDiagnostics(provider, usageReportIdentity(report), report.limits, policyOptions, reportConsentIdentity(report, providerReports, policyOptions.accounts))))}`,"
       ]
      }
+    },
+    {
+     "at": "2026-11-18T18:48:08Z",
+     "reason": "Main, 2026-11-18: comments reworded per roboomp should-fix on #19701 (they claimed planners spend nothing; Codex's planner can)",
+     "old": "5968aea922b7aea0f0c3f85c1ee904e559256d3a",
+     "new": "3704154aa9143ed620ccb6f77be94b68551a3a70",
+     "dropped": {
+      "packages/coding-agent/src/cli/usage-cli.ts": [
+       " * are known but none owns the report alone: the planners spend nothing for it, so",
+       " * no account's consent applies. Without stored accounts, the report's own identity.",
+       "\t\t\t// No unique owner: the planners spend nothing for this report, so no account policy decides it."
+      ]
+     }
     }
    ],
    "advanced": "2026-11-18T18:16:50Z",
