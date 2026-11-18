@@ -104766,7 +104766,7 @@
    "branch": "will/macos-main-key-tests",
    "title": "test(natives): restore passing macOS native typing tests",
    "area": "computer",
-   "priority": "P1",
+   "priority": "P0",
    "needs": [],
    "base": "028f1d6b495425022db0a417e4bb134a919cfed3",
    "body": "bodies/macos-main-key-tests.md",
@@ -104776,7 +104776,7 @@
    "worktree": "/Users/viathebrink/.local/state/ovnfs/git/macos-main-key-tests",
    "host": "MacBook-Pro",
    "added": "2026-11-18T21:47:33Z",
-   "updated": "2026-11-18T22:03:51Z",
+   "updated": "2026-11-18T22:17:56Z",
    "note": "P1: main macOS native desktop test job is red from stale Return/Tab expectations introduced by adbb616. Test-only repair: final head passes 720 desktop tests; macOS and Linux rust-check records present; precheck exits 0. Independent review findings fixed in b58302b9c5: omit internal-only changelog (no test needed), reuse Tab fixture (already covered). Opening still owes sibling merged-tree builds.",
    "built": [
     {
