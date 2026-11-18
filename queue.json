@@ -101639,7 +101639,30 @@
    "updated": "2026-11-17T23:23:19Z",
    "note": "Will, 2026-11-17: go-ahead to open",
    "kind": "proposal",
-   "advanced": "2026-11-17T23:23:19Z"
+   "advanced": "2026-11-17T23:23:19Z",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-18T17:55:21Z",
+     "reason": "Main, 2026-11-18: rebased onto #19606; policy state now judged on account-wide windows, so the all-rows reserve check and its test were rewritten (Fable row listed as scopedInsideReserve)",
+     "old": "9f1f5e20a772920643899f7cb2474e78d24b6d90",
+     "new": "e22198242e85b11407bb91f738323216c14a5477",
+     "dropped": {
+      "packages/coding-agent/src/cli/usage-cli.ts": [
+       "\t// account-wide state: every visible window, each against its own reserve.",
+       "\t// Actual routing still scopes limits and selection in AuthStorage.",
+       "\tconst insideReserve = isAnyUsageLimitWithinReserve(limits ?? [], limit =>",
+       "\t\tusageLimitReserveFraction(policy, limit.id, reservePct / 100),"
+      ],
+      "packages/coding-agent/test/usage-cli.test.ts": [
+       "\tit(\"reports inside reserve when one limit sits inside its own per-limit reserve\", () => {",
+       "\t\t\tmakeLimit({ id: \"anthropic:7d\", provider: \"anthropic\", usedFraction: 0.6 }),",
+       "\t\t\tmakeLimit({ id: \"anthropic:7d:fable\", provider: \"anthropic\", usedFraction: 0.75 }),",
+       "\t\t\tremainingPct: 25,",
+       "\t\t\t\"policy: priority 0 \u00b7 reserve 2% (override) \u00b7 anthropic:7d:fable reserve 30% \u00b7 inside reserve \u00b7 25.0% left\","
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "deadline-ranking",
