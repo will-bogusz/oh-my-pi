@@ -98244,7 +98244,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/account-switch-reason",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:19:21Z",
-   "updated": "2026-11-18T00:58:32Z",
+   "updated": "2026-11-18T01:34:46Z",
    "note": "Will, 2026-11-17: go-ahead to open",
    "kind": "proposal",
    "built": [
@@ -98348,21 +98348,21 @@
      "host": "MacBook-Pro"
     },
     {
-     "with": "#19606",
-     "code": "7dddacdfab1bbea036ab45d87704946d57787679",
-     "with_code": "cdf5dbe501bfc8e2f49d6f7ccf4db0eb5c032cd6",
-     "tip": "2c7c797eeb2e0eeca143cf8c1cbf66e282c73438",
-     "with_tip": "d6f211860c282e91687d5ec665486490279fe0f6",
-     "at": "2026-11-18T00:45:50Z",
-     "host": "MacBook-Pro"
-    },
-    {
      "with": "#19611",
      "code": "7dddacdfab1bbea036ab45d87704946d57787679",
      "with_code": "dac3ac55a8f9dfe73128d350176c01df9acbdc53",
      "tip": "2c7c797eeb2e0eeca143cf8c1cbf66e282c73438",
      "with_tip": "4eb75b4ee231a62e98eff80b761e78035646e21a",
      "at": "2026-11-18T00:58:24Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19606",
+     "code": "7dddacdfab1bbea036ab45d87704946d57787679",
+     "with_code": "3b282a7f1f4585a5243388667531eac47914424c",
+     "tip": "2c7c797eeb2e0eeca143cf8c1cbf66e282c73438",
+     "with_tip": "af1d7bca36656ad5b1aa93c11e16829bce79901e",
+     "at": "2026-11-18T01:34:40Z",
      "host": "MacBook-Pro"
     }
    ]
