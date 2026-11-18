@@ -98254,8 +98254,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/broker-client-startup-retry",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:08:05Z",
-   "updated": "2026-11-18T01:13:52Z",
-   "note": "review 1b457113ab needs-changes: (1) deadline now one AbortSignal across requests+backoff, test: never-answering broker case (hangs on main); (2) exhaustion test rewritten, fails on main; (3) retries scoped to startup via retryUnreachableBroker, test row: runtime switch fails after one request. Final-head review pass still owed per workflow.",
+   "updated": "2026-11-18T04:26:25Z",
+   "note": "Main (session 01a08220), 2026-11-18 04:15Z, for this entry's owner: #19598 at 6db8cef343f, merged alone onto main e1ae2cc998e, fails coding-agent chunk 1's test/task/parked-subagent-session-release.test.ts 2/2 runs ('releases a parked keep-alive subagent's session while the agent stays revivable', 'parks without retaining the run's settings overlay and revives with the settings it wrote'); bare main and every other open coding-agent PR pass; the file alone passes, so the PR keeps the parked session/settings alive when earlier files of the chunk run in the same bun process. Logs: goliath ~/tmp/oh-my-pi/queuethirtytwo/u/c1-x19598.logs [ran, bisect by QueueThirtyTwo].",
    "tests_over_override": {
     "reason": "BrokerClientStartupRetry, 2026-11-17: four distinct branches (retry succeeds; non-transient answer fails at once; retry off for runtime switch; deadline cancels an in-flight request), each failing or pinning main's outcome; over by 8 lines of imports and server setup",
     "at": "2026-11-17T21:09:43Z"
