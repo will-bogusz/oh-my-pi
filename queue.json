@@ -97872,7 +97872,7 @@
    "area": "broker",
    "priority": "P0",
    "needs": [],
-   "base": "baf60290fde5e9eea4edb30bff07695877682ba9",
+   "base": "e1ae2cc998efd1ca151b46ebefc0e0dab6c23c63",
    "body": "bodies/broker-refresh-failure-loud.md",
    "state": "open",
    "pr": 19590,
@@ -97880,7 +97880,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/broker-refresh-failure-loud",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:06:15Z",
-   "updated": "2026-11-18T00:34:08Z",
+   "updated": "2026-11-18T01:13:30Z",
    "note": "",
    "built": [
     {
@@ -97903,7 +97903,8 @@
     }
    ],
    "opened": "2026-11-17T21:39:01Z",
-   "readied": "2026-11-17T21:39:27Z"
+   "readied": "2026-11-17T21:39:27Z",
+   "advanced": "2026-11-18T01:13:30Z"
   },
   {
    "id": "broker-client-startup-retry",
