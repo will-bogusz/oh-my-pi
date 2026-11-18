@@ -100455,7 +100455,42 @@
    "tests_over_override": {
     "reason": "LaneImageDropNotice, 2026-11-18: four distinct branches (archive run grouping; notice bytes charged against the body-limit room; a grown notice charged once; count-clamp notice extended by the byte clamp), the last two asked for by roboomp; each fails with its branch removed",
     "at": "2026-11-18T01:26:31Z"
-   }
+   },
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-18T17:52:14Z",
+     "reason": "LaneImageDropNotice, 2026-11-18: the branch's OMITTED test constant and its assertions are replaced by main's omitted() helper (3967d6bcc63 added the same notice wording); the source adopts main's [N image(s) omitted] wording",
+     "old": "08c2fa6bdb237e43cc2e1fad378b12fddd415e04",
+     "new": "36075d1cba8919042d2ffd3ad8a83dd3047ef725",
+     "dropped": {
+      "packages/coding-agent/src/session/provider-image-budget.ts": [
+       "\treturn { type: \"text\", text: `[${count === 1 ? \"image\" : `${count} images`} omitted: provider image limit]` };",
+       "const IMAGE_EVICTION_NOTICE = /^\\[(?:image|(\\d+) images) omitted: provider image limit\\]$/;",
+       "\treturn match ? Number(match[1] ?? 1) : undefined;"
+      ],
+      "packages/coding-agent/test/session/provider-image-budget.test.ts": [
+       "const OMITTED = \"[image omitted: provider image limit]\";",
+       "\t\t\tArray.from({ length: 31 }, (_, index) => (index < 21 ? [`text-${index}`, OMITTED] : [`text-${index}`])).flat(),",
+       "\t\texpect(textData(clamped)).toEqual([\"image-0\", OMITTED, \"image-1\", \"image-2\"]);",
+       "\t\texpect(clamped.messages[0]).toEqual({ role: \"user\", content: [text(\"old\"), text(OMITTED)], timestamp: 0 });",
+       "\t\texpect(textData(clamped)).toEqual([\"old\", OMITTED, \"middle\", \"new\"]);",
+       "\t\t\t\tindex < 16 ? [`result-${index}`, OMITTED] : [`result-${index}`],",
+       "\t\texpect(textData(clamped)).toEqual([\"old\", OMITTED, \"new\"]);",
+       "\t\texpect(clamped.messages[1]?.content).toEqual([text(\"shot-0\"), text(OMITTED)]);",
+       "\t\t\texpect(clamped.messages[0].content).toEqual([text(\"result-0\"), text(OMITTED)]);",
+       "\t\t\texpect(textData(clamped).filter(value => value !== OMITTED)).toEqual(",
+       "\t\texpect(body).toContain(\"call_id=call_0]: [image omitted: provider image limit]\");",
+       "\t\texpect(textData(clamped)).toEqual([\"first\", OMITTED, \"second\", OMITTED, \"look at this\"]);",
+       "\t\texpect(textData(clamped)).toEqual([\"shot\", OMITTED, \"look at this\"]);",
+       "\t\texpect(textData(clamped)).toEqual([filler.text, OMITTED, \"look at this\", OMITTED]);",
+       "\t\texpect(clamped.messages[1]?.content).toEqual([text(\"new\"), text(OMITTED)]);",
+       "\t\texpect(textData(clamped)).toEqual([\"old\", \"new\", OMITTED]);",
+       "\t\texpect(countClamped.messages[0]?.content).toEqual([text(\"ref-0\"), text(OMITTED)]);",
+       "\t\t\tOMITTED,"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "usage-state-per-model",
