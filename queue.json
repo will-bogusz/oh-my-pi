@@ -101306,7 +101306,7 @@
    "area": "broker",
    "priority": "P1",
    "needs": [],
-   "base": "e1ae2cc998efd1ca151b46ebefc0e0dab6c23c63",
+   "base": "08cb444207d55091daaa61d37b3652c876aa8df1",
    "body": "bodies/broker-client-startup-retry.md",
    "state": "open",
    "pr": 19598,
@@ -101314,7 +101314,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/broker-client-startup-retry",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:08:05Z",
-   "updated": "2026-11-18T04:26:25Z",
+   "updated": "2026-11-18T16:45:59Z",
    "note": "Main (session 01a08220), 2026-11-18 04:15Z, for this entry's owner: #19598 at 6db8cef343f, merged alone onto main e1ae2cc998e, fails coding-agent chunk 1's test/task/parked-subagent-session-release.test.ts 2/2 runs ('releases a parked keep-alive subagent's session while the agent stays revivable', 'parks without retaining the run's settings overlay and revives with the settings it wrote'); bare main and every other open coding-agent PR pass; the file alone passes, so the PR keeps the parked session/settings alive when earlier files of the chunk run in the same bun process. Logs: goliath ~/tmp/oh-my-pi/queuethirtytwo/u/c1-x19598.logs [ran, bisect by QueueThirtyTwo].",
    "tests_over_override": {
     "reason": "BrokerClientStartupRetry, 2026-11-17: four distinct branches (retry succeeds; non-transient answer fails at once; retry off for runtime switch; deadline cancels an in-flight request), each failing or pinning main's outcome; over by 8 lines of imports and server setup",
@@ -101477,7 +101477,7 @@
      }
     }
    ],
-   "advanced": "2026-11-18T01:13:52Z"
+   "advanced": "2026-11-18T16:45:59Z"
   },
   {
    "id": "wayland-window-crop-clip",
