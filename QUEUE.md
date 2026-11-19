@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-19 19:14Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-19 19:23Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-19 19:14Z on goliath; groups below are from it, states from the manifest)
@@ -24,7 +24,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-19
 | text-reader-usage-shift | fix(coding-agent): price a text-only fallback's archive text, not the failed request's frames, in the fit check | coding-agent |  | 18d | [#19620](https://github.com/can1357/oh-my-pi/pull/19620), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/text-reader-usage-shift) |
 | token-count-policy | feat(catalog,coding-agent): token-count framing policy in KDL | catalog |  | 16d | [#19620](https://github.com/can1357/oh-my-pi/pull/19620), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/token-count-policy) |
 | wire-delta-count | refactor(agent,ai): count the anchored delta from the reader's transformed wire messages | other |  | 16d | [#19620](https://github.com/can1357/oh-my-pi/pull/19620), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wire-delta-count) |
-| browser-action-outcome | feat(browser): print what each browser action did to the page | browser | P2 | 8d | [#19542](https://github.com/can1357/oh-my-pi/pull/19542), [#19633](https://github.com/can1357/oh-my-pi/pull/19633), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-action-outcome) |
+| browser-action-outcome | feat(browser): print what each browser action did to the page | browser | P2 | 9d | [#19542](https://github.com/can1357/oh-my-pi/pull/19542), [#19633](https://github.com/can1357/oh-my-pi/pull/19633), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-action-outcome) |
 | computer-filter-types | fix(computer): say window and element filters take text when given a RegExp | computer | P2 | 8d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-filter-types) |
 | relay-print-preview-error | fix(coding-agent,browser-relay): fail a browser call a print preview holds in an attached browser within seconds | browser | P2 | 8d | [#19542](https://github.com/can1357/oh-my-pi/pull/19542), [#19633](https://github.com/can1357/oh-my-pi/pull/19633), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-print-preview-error) |
 | win-minimised-windows | fix(natives,coding-agent): show a minimized Windows app's window from apps.open instead of launching it again | computer | P2 | 8d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-minimised-windows) |
@@ -53,7 +53,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-19
 | snapcompact-shape-reader-identity | fix(catalog): give snapcompact readers their lead model's frame shape | snapcompact | P2 | 1d | snapcompact-shape-kdl | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-shape-reader-identity) |
 | snapcompact-deepseek-text | fix(catalog,snapcompact,coding-agent): give DeepSeek V4.1 Flash its snapcompact archive as text | snapcompact | P2 | 1d | snapcompact-shape-kdl, snapcompact-rerender-on-switch ([#19620](https://github.com/can1357/oh-my-pi/pull/19620)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-deepseek-text) |
 | snapcompact-carbon-1568 | fix(catalog): draw Gemini 4 Carbon's snapcompact frames at 1568px on Devin and Factory Droid | snapcompact | P2 | 1d | snapcompact-shape-kdl | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-carbon-1568) |
-| win-button-click | fix(natives): click Windows buttons without activating their window | computer |  | 7h | win-edit-setvalue ([#19814](https://github.com/can1357/oh-my-pi/pull/19814)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-button-click) |
+| win-button-click | fix(natives): click Windows buttons without activating their window | computer |  | 8h | win-edit-setvalue ([#19814](https://github.com/can1357/oh-my-pi/pull/19814)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-button-click) |
 
 ## Held (9)
 
@@ -73,7 +73,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-19
 
 | PR | id | title | area | rank | parked | why | since | branch |
 |---|---|---|---|---|---|---|---|---|
-| [#16611](https://github.com/can1357/oh-my-pi/pull/16611) | read-audio-transcripts | feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio | catalog | P2 | 1d | Will, 2026-11-17: parked as draft, not maintained for now; revisit later | not checked or kept fresh | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-audio-transcripts) |
+| [#16611](https://github.com/can1357/oh-my-pi/pull/16611) | read-audio-transcripts | feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio | catalog | P2 | 2d | Will, 2026-11-17: parked as draft, not maintained for now; revisit later | not checked or kept fresh | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-audio-transcripts) |
 
 ## Open PRs (22)
 
