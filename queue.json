@@ -104900,7 +104900,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-19T01:52:03Z",
+  "checked": "2026-11-19T02:23:02Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -105158,19 +105158,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-12T02:16:56Z",
-    "kind": "openable",
-    "id": "relay-frame-race",
-    "title": "fix(browser-relay): keep a driven tab when a password manager's frame drops omp from it"
-   },
-   {
-    "at": "2026-11-12T02:16:56Z",
-    "kind": "unopenable",
-    "id": "agent-identity",
-    "title": "feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy",
-    "why": "plan: held (held: Main, 2026-11-12: prepared; held until Main releases (key-chord Cancelled vs InputBusy VM check))"
-   },
    {
     "at": "2026-11-12T02:47:15Z",
     "kind": "openable",
