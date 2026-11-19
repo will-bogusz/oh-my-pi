@@ -115473,7 +115473,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-19T18:59:56.608332Z",
+  "at": "2026-11-19T19:01:36.535725Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -116756,10 +116756,8 @@
     "area": "computer",
     "priority": null,
     "title": "fix(natives): write Windows edit values without activating their window",
-    "action": "held",
-    "reasons": [
-     "held: Main, 2026-11-19: hold until WinMine3's interleaved stall check (v19.0.0 vs round-5 build, n=30/cell, wait-chain + minidump per stall) lands and Main gives the go"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
