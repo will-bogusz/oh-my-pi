@@ -18,8 +18,11 @@ use crate::desktop::{
 	types::DesktopWindow,
 };
 
+mod at_point;
 mod combo;
 mod menus;
+
+pub(crate) use at_point::PointOutcome;
 
 /// How long an application gets to answer before it counts as not answering:
 /// one request reads one element (about a dozen calls) or walks a short chain
@@ -68,6 +71,17 @@ pub(crate) trait NativeWindows: Send + Sync {
 	/// The current geometry of native window `id`; `None` once it is gone or
 	/// off screen (unmapped, minimized).
 	fn geometry(&self, id: &str) -> Option<NativeGeometry>;
+	/// Whether toolkits here answer screen coordinates with window ones
+	/// (native Wayland clients, which cannot learn where they are), so every
+	/// frame whose screen and window origins agree is placed by its window.
+	fn screen_is_window_relative(&self) -> bool {
+		false
+	}
+	/// The native window showing an AT-SPI frame of process `pid` titled
+	/// `title`.
+	fn window_for_frame(&self, pid: u32, title: &str) -> CoreResult<String> {
+		native_window_for_frame(&self.windows()?, pid, title)
+	}
 }
 
 /// What a tree walk learns about frames, kept from one `window_root` to the
@@ -893,8 +907,65 @@ impl AtSpiAx {
 	}
 
 	/// The deepest element under `root` at screen point (`x`, `y`). A placed
-	/// frame is hit-tested in its window coordinates.
+	/// frame is hit-tested in its window coordinates; where the toolkit's own
+	/// hit test ends on a bare pane, the frame's tree is walked by extents
+	/// instead (Electron answers its frame's hit test with a view panel that
+	/// answers none).
 	async fn descend(
+		connection: &Connection,
+		root: ObjectRefOwned,
+		placement: Option<Placement>,
+		x: i32,
+		y: i32,
+		reply_timeout: Duration,
+	) -> CoreResult<Option<AxHandle>> {
+		let found =
+			Self::descend_by_toolkit(connection, root.clone(), placement, x, y, reply_timeout).await?;
+		let Some(placement) = placement else {
+			return Ok(found);
+		};
+		if let Some(AxHandle::AtSpi(leaf)) = &found
+			&& !Self::empty_pane(connection, leaf, reply_timeout).await?
+		{
+			return Ok(found);
+		}
+		let (x, y) = (x.saturating_sub(placement.x), y.saturating_sub(placement.y));
+		Ok(Self::descend_by_extents(connection, root, x, y, reply_timeout, 0)
+			.await?
+			.map(AxHandle::AtSpi)
+			.or(found))
+	}
+
+	/// The deepest element under `node` at window point (`x`, `y`) by the
+	/// children's extents alone: of overlapping children, the topmost (last)
+	/// whose subtree holds more than bare panes there.
+	async fn descend_by_extents(
+		connection: &Connection,
+		node: ObjectRefOwned,
+		x: i32,
+		y: i32,
+		reply_timeout: Duration,
+		depth: usize,
+	) -> CoreResult<Option<ObjectRefOwned>> {
+		if depth == 32 {
+			return Ok(None);
+		}
+		let mut candidates = Self::children_containing(connection, &node, x, y, reply_timeout).await?;
+		while let Some(candidate) = candidates.pop() {
+			let leaf =
+				Box::pin(Self::descend_by_extents(connection, candidate, x, y, reply_timeout, depth + 1))
+					.await?;
+			if let Some(leaf) = leaf
+				&& !Self::empty_pane(connection, &leaf, reply_timeout).await?
+			{
+				return Ok(Some(leaf));
+			}
+		}
+		Ok(Some(node))
+	}
+
+	/// [`Self::descend`] by the toolkit's own `GetAccessibleAtPoint`.
+	async fn descend_by_toolkit(
 		connection: &Connection,
 		root: ObjectRefOwned,
 		placement: Option<Placement>,
@@ -941,26 +1012,31 @@ impl AtSpiAx {
 			)
 			.await?
 			.map_err(|err| DesktopError::ax_failed(format!("AT-SPI element at point: {err}")))?;
-			if child.is_null() || child == current {
+			// A placed frame checks what the toolkit named. GTK4 returns the
+			// deepest element from the frame, also one scrolled out of its
+			// viewport, and offsets the point twice below it; Electron's view
+			// panels answer no child for a point their only child covers. When the
+			// answer is not an element shown at the point, the frame looks the
+			// child up itself.
+			let named = (!child.is_null() && child != current).then_some(child);
+			let shown = match (placement, &named) {
+				(Some(_), Some(named)) => {
+					Self::shows_point(connection, named, &current, x, y, reply_timeout).await?
+				},
+				_ => true,
+			};
+			let child = match (placement, named) {
+				(None, named) => named,
+				(Some(_), Some(named)) if shown => Some(named),
+				(Some(_), _) => {
+					let mut candidates =
+						Self::children_containing(connection, &current, x, y, reply_timeout).await?;
+					if candidates.len() == 1 { candidates.pop() } else { None }
+				},
+			};
+			let Some(child) = child else {
 				return Ok(Some(AxHandle::AtSpi(current)));
-			}
-			// GTK4 returns the deepest element from the frame, then offsets the
-			// point twice below it and can name a child the point is not in.
-			if placement.is_some() {
-				let component =
-					answered("the application", reply_timeout, Self::component(connection, &child))
-						.await?
-						.map_err(DesktopError::ax_failed)?;
-				let inside =
-					answered("the application", reply_timeout, component.get_extents(CoordType::Window))
-						.await?
-						.is_ok_and(|(left, top, width, height)| {
-							Placement { x: left, y: top, width, height }.contains(x, y)
-						});
-				if !inside {
-					return Ok(Some(AxHandle::AtSpi(current)));
-				}
-			}
+			};
 			if ancestors.contains(&child) {
 				return Err(DesktopError::ax_failed("AT-SPI hit-test hierarchy contains a cycle"));
 			}
@@ -968,6 +1044,161 @@ impl AtSpiAx {
 			current = child;
 		}
 		Err(DesktopError::ax_failed("AT-SPI hit-test hierarchy exceeds the depth limit"))
+	}
+
+	/// Whether `element` and each of its ancestors below `above` hold window
+	/// point (`x`, `y`): an element its viewport scrolled away is not shown
+	/// there, whatever its own extents say.
+	async fn shows_point(
+		connection: &Connection,
+		element: &ObjectRefOwned,
+		above: &ObjectRefOwned,
+		x: i32,
+		y: i32,
+		reply_timeout: Duration,
+	) -> CoreResult<bool> {
+		let mut current = element.clone();
+		for _ in 0..64 {
+			if &current == above {
+				return Ok(true);
+			}
+			let Ok(component) = Self::component(connection, &current).await else {
+				return Ok(false);
+			};
+			let inside = answered("the application", reply_timeout, component.get_extents(CoordType::Window))
+				.await?
+				.is_ok_and(|(left, top, width, height)| {
+					// A container that cannot say where it is (GTK 3's scrolled
+					// viewport) clips nothing it can be checked against.
+					left == i32::MIN
+						|| top == i32::MIN
+						|| Placement { x: left, y: top, width, height }.contains(x, y)
+				});
+			if !inside {
+				return Ok(false);
+			}
+			let Ok(proxy) = current.as_accessible_proxy(connection).await else {
+				return Ok(false);
+			};
+			let Ok(parent) = answered("the application", reply_timeout, proxy.parent()).await? else {
+				return Ok(false);
+			};
+			if parent.is_null() || parent == current {
+				return Ok(false);
+			}
+			drop(proxy);
+			current = parent;
+		}
+		Ok(false)
+	}
+
+	/// Whether hit-testing ended on a bare pane: nothing under the point but
+	/// the containers around it.
+	async fn empty_pane(
+		connection: &Connection,
+		element: &ObjectRefOwned,
+		reply_timeout: Duration,
+	) -> CoreResult<bool> {
+		let Ok(proxy) = element.as_accessible_proxy(connection).await else {
+			return Ok(true);
+		};
+		Ok(answered("the application", reply_timeout, proxy.get_role())
+			.await?
+			.is_ok_and(|role| {
+				matches!(
+					role,
+					Role::Panel
+						| Role::Filler
+						| Role::Frame
+						| Role::Window
+						| Role::ScrollPane
+						| Role::Viewport
+				)
+			}))
+	}
+
+	/// The children of `parent` that may hold window point (`x`, `y`), in
+	/// child order: showing ones whose extents hold it, and containers whose
+	/// extents are unknown (GTK 3 reports a scrolled viewport at `i32::MIN`,
+	/// not showing, while its rows report true extents). Of a long list only
+	/// the rows around the point are read, found by bisecting their positions.
+	async fn children_containing(
+		connection: &Connection,
+		parent: &ObjectRefOwned,
+		x: i32,
+		y: i32,
+		reply_timeout: Duration,
+	) -> CoreResult<Vec<ObjectRefOwned>> {
+		/// Children read one by one before the list is bisected instead.
+		const SCANNED: i32 = 64;
+		let accessible =
+			answered("the application", reply_timeout, parent.as_accessible_proxy(connection))
+				.await?
+				.map_err(|err| DesktopError::ax_failed(format!("AT-SPI hit-test element: {err}")))?;
+		let count = answered("the application", reply_timeout, accessible.child_count())
+			.await?
+			.unwrap_or_default()
+			.max(0);
+		let child_at = async |index: i32| -> CoreResult<Option<(ObjectRefOwned, (i32, i32, i32, i32))>> {
+			let Ok(child) =
+				answered("the application", reply_timeout, accessible.get_child_at_index(index)).await?
+			else {
+				return Ok(None);
+			};
+			let Ok(component) = Self::component(connection, &child).await else {
+				return Ok(None);
+			};
+			Ok(answered("the application", reply_timeout, component.get_extents(CoordType::Window))
+				.await?
+				.ok()
+				.map(|extents| (child, extents)))
+		};
+		let indices: Vec<i32> = if count <= SCANNED {
+			(0..count).collect()
+		} else {
+			// The first row that ends below the point, and its neighbours.
+			let (mut low, mut high) = (0, count);
+			while low < high {
+				let middle = low + (high - low) / 2;
+				match child_at(middle).await? {
+					Some((_, (_, top, _, height))) if top.saturating_add(height) <= y => low = middle + 1,
+					Some(_) => high = middle,
+					None => break,
+				}
+			}
+			(low.saturating_sub(1)..(low + 2).min(count)).collect()
+		};
+		let mut found = Vec::new();
+		for index in indices {
+			let Some((child, (left, top, width, height))) = child_at(index).await? else {
+				continue;
+			};
+			let Ok(proxy) = child.as_accessible_proxy(connection).await else {
+				continue;
+			};
+			let unknown = left == i32::MIN || top == i32::MIN;
+			if unknown {
+				let container = answered("the application", reply_timeout, proxy.get_role())
+					.await?
+					.is_ok_and(|role| matches!(role, Role::Viewport | Role::ScrollPane | Role::Panel | Role::Filler));
+				let parent_of_more = answered("the application", reply_timeout, proxy.child_count())
+					.await?
+					.is_ok_and(|children| children > 0);
+				if container && parent_of_more {
+					drop(proxy);
+					found.push(child);
+				}
+				continue;
+			}
+			let showing = answered("the application", reply_timeout, proxy.get_state())
+				.await?
+				.is_ok_and(|states| states.contains(State::Showing));
+			if showing && (Placement { x: left, y: top, width, height }).contains(x, y) {
+				drop(proxy);
+				found.push(child);
+			}
+		}
+		Ok(found)
 	}
 }
 
@@ -987,7 +1218,8 @@ impl FrameCache {
 		if width < 0 || height < 0 {
 			return None;
 		}
-		if (x, y) == (0, 0)
+		let relative = native.is_some_and(|native| native.screen_is_window_relative());
+		if ((x, y) == (0, 0) || relative)
 			&& let Some(native) = native
 			&& let Some(frame) = self.frame(connection, object).await
 			&& let Some(placement) = self.placement(connection, native, &frame).await
@@ -1017,7 +1249,7 @@ impl FrameCache {
 		y: i32,
 	) -> CoreResult<Option<Option<Placement>>> {
 		if let Some(native) = native
-			&& self.unplaced(connection, frame).await
+			&& self.unplaced(connection, native, frame).await
 		{
 			let placement = self.placement(connection, native, frame).await;
 			return Ok(placement
@@ -1041,7 +1273,7 @@ impl FrameCache {
 		native: &dyn NativeWindows,
 		frame: &ObjectRefOwned,
 	) -> Option<Placement> {
-		if !self.unplaced(connection, frame).await {
+		if !self.unplaced(connection, native, frame).await {
 			return None;
 		}
 		let (.., width, height) = AtSpiAx::component(connection, frame)
@@ -1056,22 +1288,32 @@ impl FrameCache {
 
 	/// Whether `frame`'s toolkit answers screen coordinates with window ones.
 	/// GTK4 puts its frames at screen `0,0` and answers `Contains` true even
-	/// for a point above and left of them.
-	async fn unplaced(&mut self, connection: &zbus::Connection, frame: &ObjectRefOwned) -> bool {
+	/// for a point above and left of them. Where `native` says every toolkit
+	/// does (native Wayland clients), it is any frame whose screen and window
+	/// origins agree; an `XWayland` client reports its real screen position.
+	async fn unplaced(
+		&mut self,
+		connection: &zbus::Connection,
+		native: &dyn NativeWindows,
+		frame: &ObjectRefOwned,
+	) -> bool {
 		if let Some(&unplaced) = self.unplaced.get(frame) {
 			return unplaced;
 		}
 		let Ok(component) = AtSpiAx::component(connection, frame).await else {
 			return false;
 		};
-		let unplaced = component
-			.get_extents(CoordType::Screen)
-			.await
-			.is_ok_and(|(x, y, ..)| (x, y) == (0, 0))
-			&& component
-				.contains(-1, -1, CoordType::Screen)
-				.await
-				.unwrap_or(false);
+		let screen = component.get_extents(CoordType::Screen).await;
+		let unplaced = if native.screen_is_window_relative() {
+			let window = component.get_extents(CoordType::Window).await;
+			matches!((screen, window), (Ok((sx, sy, ..)), Ok((wx, wy, ..))) if (sx, sy) == (wx, wy))
+		} else {
+			screen.is_ok_and(|(x, y, ..)| (x, y) == (0, 0))
+				&& component
+					.contains(-1, -1, CoordType::Screen)
+					.await
+					.unwrap_or(false)
+		};
 		self.unplaced.insert(frame.clone(), unplaced);
 		unplaced
 	}
@@ -1176,7 +1418,7 @@ async fn native_window(
 		.get_connection_unix_process_id(frame.name()?.clone().into())
 		.await
 		.ok()?;
-	native_window_for_frame(&native.windows().ok()?, pid, &title).ok()
+	native.window_for_frame(pid, &title).ok()
 }
 
 fn atspi_window_id(frame: &ObjectRefOwned) -> String {

@@ -1,4 +1,5 @@
 mod capture;
+mod hyprland;
 mod libei;
 mod pipewire;
 mod portal;
@@ -14,12 +15,15 @@ use image::RgbaImage;
 
 use crate::desktop::{
 	ax::AxHandle,
-	backend::{AxBackend, Backend, DeliveryMode, ElementDelivery, ElementInput, PointerEvent},
+	backend::{
+		AxBackend, Backend, DeliveryMode, ElementDelivery, ElementInput, Modifiers, MouseButton,
+		PointerEvent,
+	},
 	control::{self, OperationToken},
 	error::{CoreResult, DesktopError},
 	frame::FrameGeometry,
 	keys::KeyName,
-	linux::ax::{self, AtSpiAx, AtSpiWindow, TextRoute, resolve_focus},
+	linux::ax::{self, AtSpiAx, AtSpiWindow, PointOutcome, TextRoute, resolve_focus},
 	types::{
 		CaptureCaps, DesktopCapabilities, DesktopDisplay, DesktopWindow, DisplaySelector, Target,
 	},
@@ -157,6 +161,9 @@ pub struct WaylandBackend {
 	/// Bus names of the applications that did not answer the last window
 	/// listing, whose windows it therefore left out.
 	unanswered:        Vec<String>,
+	/// Hyprland's IPC when the compositor is Hyprland: real window
+	/// positions, focus, and pixel clicks and scrolls through AT-SPI.
+	hyprland:          Option<hyprland::Hyprland>,
 }
 
 /// Reads the compositor's PID from the peer credentials of its Wayland socket.
@@ -167,7 +174,11 @@ fn compositor_pid() -> Option<u32> {
 	} else {
 		PathBuf::from(std::env::var_os("XDG_RUNTIME_DIR")?).join(display)
 	};
-	let socket = UnixStream::connect(path).ok()?;
+	peer_pid(&UnixStream::connect(path).ok()?)
+}
+
+/// The PID of the process at the other end of a connected Unix socket.
+fn peer_pid(socket: &UnixStream) -> Option<u32> {
 	let mut credentials = libc::ucred { pid: 0, uid: 0, gid: 0 };
 	let mut length = size_of::<libc::ucred>() as libc::socklen_t;
 	// SAFETY: `credentials` and `length` are live, correctly sized out-params
@@ -189,8 +200,13 @@ impl WaylandBackend {
 		// Remove the world-readable RemoteDesktop restore token that pre-#7884
 		// builds wrote during read-only calls; nothing reads it anymore (#7884).
 		portal::remove_orphaned_remote_desktop_token();
+		let compositor_pid = compositor_pid();
+		let hyprland = hyprland::Hyprland::detect(compositor_pid);
 		let (ax, ax_error) = match AtSpiAx::new() {
-			Ok(ax) => (Some(ax), None),
+			Ok(ax) => match &hyprland {
+				Some(hyprland) => (Some(ax.with_native_windows(Box::new(hyprland.clone()))), None),
+				None => (Some(ax), None),
+			},
 			Err(err) => (None, Some(err)),
 		};
 		Self {
@@ -201,8 +217,9 @@ impl WaylandBackend {
 			input: None,
 			input_unavailable: OnceCell::new(),
 			displays: Vec::new(),
-			compositor_pid: compositor_pid(),
+			compositor_pid,
 			unanswered: Vec::new(),
+			hyprland,
 		}
 	}
 
@@ -216,6 +233,16 @@ impl WaylandBackend {
 			.input_unavailable
 			.get_or_init(portal::input_unavailable_reason)
 			.as_deref()
+	}
+
+	/// Why native pointer and keyboard input cannot be sent, when it cannot.
+	fn native_input_refusal(&self) -> CoreResult<()> {
+		if self.input.is_some() {
+			return Ok(());
+		}
+		self
+			.input_unavailable()
+			.map_or(Ok(()), |reason| Err(DesktopError::permission_denied(reason)))
 	}
 
 	fn window_input_error(target: &Target, kind: &str) -> CoreResult<()> {
@@ -237,7 +264,7 @@ impl WaylandBackend {
 	) -> CoreResult<()> {
 		control::check()?;
 		Self::window_input_error(target, kind)?;
-		self.refuse_input()?;
+		self.native_input_refusal()?;
 		if self.input.is_none() {
 			self.input = Some(libei::Libei::new()?);
 		}
@@ -261,8 +288,99 @@ impl WaylandBackend {
 			})?
 			.windows()?;
 		self.unanswered = listed.unanswered;
-		Ok(listed.windows)
+		let Some(hyprland) = &self.hyprland else {
+			return Ok(listed.windows);
+		};
+		Ok(placed_by_hyprland(listed.windows, hyprland.list()?))
 	}
+
+	/// Clicks and scrolls at a point of a background window through the
+	/// AT-SPI element there (Hyprland only, where window positions are
+	/// known). `None` when the event is not one of those; otherwise what
+	/// happened, and why nothing was sent when it was declined.
+	fn pointer_through_ax(
+		&mut self,
+		target: &Target,
+		ev: &PointerEvent,
+		mode: DeliveryMode,
+	) -> Option<CoreResult<PointOutcome>> {
+		let Target::Window(id) = target else {
+			return None;
+		};
+		if self.hyprland.is_none() || mode != DeliveryMode::Background {
+			return None;
+		}
+		let plain_click = matches!(
+			ev,
+			PointerEvent::Click { button: MouseButton::Left, count: 1, modifiers, .. }
+				if *modifiers == Modifiers::default()
+		);
+		if !plain_click && !matches!(ev, PointerEvent::Scroll { .. }) {
+			return None;
+		}
+		let windows: Vec<DesktopWindow> = match self.atspi_windows() {
+			Ok(windows) => windows.into_iter().map(|entry| entry.window).collect(),
+			Err(error) => return Some(Err(error)),
+		};
+		let Some(window) = windows.iter().find(|window| &window.id == id) else {
+			return Some(Err(DesktopError::window_not_found(format!("Wayland window {id} not found"))));
+		};
+		if !window.id.starts_with("atspi:") {
+			return Some(Ok(PointOutcome::Declined(
+				"the window has no accessibility tree (its app does not publish AT-SPI)".to_owned(),
+			)));
+		}
+		let ax = self.ax.as_mut()?;
+		Some(match *ev {
+			PointerEvent::Click { x, y, .. } => ax.click_at(window, &windows, x, y),
+			PointerEvent::Scroll { x, y, dx, dy } => ax.scroll_at(window, x, y, dx, dy),
+			_ => return None,
+		})
+	}
+}
+
+/// AT-SPI `windows` placed where Hyprland's `clients` are: a frame takes the
+/// geometry and focus of its process's client ([`hyprland::client_for_frame`])
+/// (GTK4 keeps a frame's last drawn size while its workspace is hidden), and
+/// its position counts as known while a monitor shows it. Clients no frame
+/// matched (apps without AT-SPI, such as terminals) are listed as well.
+fn placed_by_hyprland(
+	windows: Vec<AtSpiWindow>,
+	clients: Vec<hyprland::HyprlandWindow>,
+) -> Vec<AtSpiWindow> {
+	let mut claimed = vec![false; clients.len()];
+	let mut placed: Vec<AtSpiWindow> = windows
+		.into_iter()
+		.map(|mut entry| {
+			let free = clients
+				.iter()
+				.enumerate()
+				.filter(|(index, _)| !claimed[*index])
+				.map(|(_, client)| &client.window);
+			let matched = hyprland::client_for_frame(free, entry.window.pid, &entry.window.title)
+				.and_then(|window| clients.iter().position(|client| client.window.id == window.id));
+			entry.window.focused = false;
+			if let Some(index) = matched {
+				let client = &clients[index];
+				claimed[index] = true;
+				entry.window.focused = client.window.focused;
+				entry.window.x = client.window.x;
+				entry.window.y = client.window.y;
+				entry.window.width = client.window.width;
+				entry.window.height = client.window.height;
+				entry.position_known = client.visible;
+			}
+			entry
+		})
+		.collect();
+	placed.extend(
+		clients
+			.into_iter()
+			.zip(claimed)
+			.filter(|(_, claimed)| !claimed)
+			.map(|(client, _)| AtSpiWindow { window: client.window, position_known: client.visible }),
+	);
+	placed
 }
 
 impl Backend for WaylandBackend {
@@ -309,13 +427,14 @@ impl Backend for WaylandBackend {
 		}
 	}
 
+	/// On Hyprland a background window click or scroll may still go through
+	/// AT-SPI, so the refusal waits for [`Backend::pointer`]; every route that
+	/// needs native input still meets it in `run_input`.
 	fn refuse_input(&mut self) -> CoreResult<()> {
-		if self.input.is_some() {
+		if self.hyprland.is_some() {
 			return Ok(());
 		}
-		self
-			.input_unavailable()
-			.map_or(Ok(()), |reason| Err(DesktopError::permission_denied(reason)))
+		self.native_input_refusal()
 	}
 
 	fn displays(&mut self) -> CoreResult<Vec<DesktopDisplay>> {
@@ -339,7 +458,9 @@ impl Backend for WaylandBackend {
 
 	fn windows(&mut self) -> CoreResult<Vec<DesktopWindow>> {
 		let mut windows = self.atspi_windows()?;
-		if let Some(ax) = self.ax.as_ref() {
+		if self.hyprland.is_none()
+			&& let Some(ax) = self.ax.as_ref()
+		{
 			resolve_focus(&mut windows, self.compositor_pid, !self.unanswered.is_empty(), |window| {
 				ax.holds_focus(window)
 			});
@@ -422,11 +543,27 @@ impl Backend for WaylandBackend {
 		target: &Target,
 		ev: PointerEvent,
 		_frame: &FrameGeometry,
-		_mode: DeliveryMode,
+		mode: DeliveryMode,
 		token: &OperationToken,
 	) -> CoreResult<()> {
 		token.check()?;
-		self.run_input(target, "pointer input", |input| input.pointer(ev))
+		let declined = match self.pointer_through_ax(target, &ev, mode) {
+			Some(Ok(PointOutcome::Done)) => return Ok(()),
+			Some(Ok(PointOutcome::Declined(why))) => Some(why),
+			Some(Err(error)) => return Err(error),
+			None => None,
+		};
+		self
+			.run_input(target, "pointer input", |input| input.pointer(ev))
+			.map_err(|mut error| {
+				if let Some(why) = declined {
+					error.message = format!(
+						"{}. Nothing was sent through accessibility either: {why}",
+						error.message
+					);
+				}
+				error
+			})
 	}
 
 	fn type_text(
@@ -569,6 +706,7 @@ mod tests {
 			displays:          Vec::new(),
 			compositor_pid:    None,
 			unanswered:        Vec::new(),
+			hyprland:          None,
 		}
 	}
 	/// Holds `LIBEI_ENV_LOCK` with `LIBEI_SOCKET` set to a test's value (removed
