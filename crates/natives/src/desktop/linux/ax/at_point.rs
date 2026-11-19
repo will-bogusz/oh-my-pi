@@ -637,9 +637,9 @@ mod tests {
 		let on = StateSet::new(State::Enabled | State::Showing);
 		assert_eq!(clickable(ClickKind::Control, on), Ok(()));
 		for extra in [State::Editable, State::HasPopup, State::Expandable] {
-			assert!(clickable(ClickKind::Control, on | extra).is_err(), "{extra:?}");
+			assert!(clickable(ClickKind::Control, on | StateSet::new(extra)).is_err(), "{extra:?}");
 		}
-		assert!(clickable(ClickKind::Row, on | State::Expandable).is_ok());
+		assert!(clickable(ClickKind::Row, on | StateSet::new(State::Expandable)).is_ok());
 		assert!(clickable(ClickKind::Control, StateSet::new(State::Showing)).is_err());
 		assert!(clickable(ClickKind::Control, StateSet::new(State::Enabled)).is_err());
 	}
@@ -647,13 +647,13 @@ mod tests {
 	#[test]
 	fn a_click_took_effect_when_its_state_moved_the_way_a_real_click_moves_it() {
 		let off = StateSet::new(State::Enabled);
-		let checked = off | State::Checked;
+		let checked = off | StateSet::new(State::Checked);
 		assert!(took_effect(State::Checked, Role::CheckBox, off, checked));
 		assert!(took_effect(State::Checked, Role::CheckBox, checked, off));
 		assert!(!took_effect(State::Checked, Role::CheckBox, off, off));
-		assert!(took_effect(State::Checked, Role::ToggleButton, off, off | State::Pressed));
+		assert!(took_effect(State::Checked, Role::ToggleButton, off, off | StateSet::new(State::Pressed)));
 		assert!(took_effect(State::Checked, Role::RadioButton, checked, checked));
-		let selected = off | State::Selected;
+		let selected = off | StateSet::new(State::Selected);
 		assert!(took_effect(State::Selected, Role::ListItem, off, selected));
 		assert!(took_effect(State::Selected, Role::ListItem, selected, selected));
 		assert!(!took_effect(State::Selected, Role::ListItem, off, off));
