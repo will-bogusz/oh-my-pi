@@ -105069,10 +105069,14 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-19T11:02:51Z",
+  "checked": "2026-11-19T11:33:48Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
+   "win-edit-setvalue": {
+    "since": "2026-11-19T11:33:48Z",
+    "title": "fix(natives): write Windows edit values without activating their window"
+   },
    "factory-droid-1100-pin": {
     "since": "2026-11-17T00:39:57Z",
     "title": "feat(catalog): identify Factory Droid requests as droid 1.10.0"
@@ -105264,42 +105268,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-12T11:24:23Z",
-    "kind": "conflict",
-    "label": "#18353",
-    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
-    "files": [
-     "MODULE.bazel.lock"
-    ]
-   },
-   {
-    "at": "2026-11-12T11:24:23Z",
-    "kind": "conflict",
-    "label": "#18013",
-    "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "files": [
-     "MODULE.bazel.lock"
-    ]
-   },
-   {
-    "at": "2026-11-12T11:24:23Z",
-    "kind": "conflict",
-    "label": "#18914",
-    "title": "fix(natives): keep an app that stops answering AT-SPI from hanging the Linux computer tool",
-    "files": [
-     "MODULE.bazel.lock"
-    ]
-   },
-   {
-    "at": "2026-11-12T11:24:23Z",
-    "kind": "conflict",
-    "label": "#18783",
-    "title": "fix(natives): capture a covered X11 window from its own pixels, or say it is covered",
-    "files": [
-     "MODULE.bazel.lock"
-    ]
-   },
    {
     "at": "2026-11-12T12:26:00Z",
     "kind": "merged",
@@ -107676,6 +107644,12 @@
     "id": "fill-key-events",
     "title": "fix(coding-agent): fire key events after a browser fill for pages that search on keyup",
     "why": "opened as #19748"
+   },
+   {
+    "at": "2026-11-19T11:33:48Z",
+    "kind": "openable",
+    "id": "win-edit-setvalue",
+    "title": "fix(natives): write Windows edit values without activating their window"
    }
   ]
  },
@@ -115680,8 +115654,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-19T11:22:01.513490Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-19T11:33:49.345847Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -116931,8 +116905,10 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with main in (branch missing on the fork)"
+    ],
     "note": "",
     "over": [],
     "paired": [],
