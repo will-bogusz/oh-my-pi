@@ -105040,6 +105040,26 @@
    "added": "2026-11-19T11:16:47Z",
    "updated": "2026-11-19T11:16:47Z",
    "note": ""
+  },
+  {
+   "id": "win-button-click",
+   "branch": "will/win-button-click",
+   "title": "fix(natives): click Windows buttons without activating their window",
+   "area": "computer",
+   "priority": null,
+   "needs": [
+    "win-edit-setvalue"
+   ],
+   "base": "50ae0a660111a84e696341058735d96d2c08b85d",
+   "body": "bodies/win-button-click.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-edit-setvalue",
+   "host": "MacBook-Pro",
+   "added": "2026-11-19T11:17:04Z",
+   "updated": "2026-11-19T11:17:04Z",
+   "note": ""
   }
  ],
  "watch": {

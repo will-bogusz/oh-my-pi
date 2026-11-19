@@ -1,10 +1,10 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-19 11:16Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-19 11:17Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-19 10:32Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 1, conflict-held 17, stacked 15, held 9, parked 1, open PRs 23, queued since the last plan 1; merged 398, closed 44
+**Counts:** openable now 1, conflict-held 17, stacked 15, held 9, parked 1, open PRs 23, queued since the last plan 2; merged 398, closed 44
 
 ## Openable now (1)
 
@@ -102,8 +102,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-19
 | [#19715](https://github.com/can1357/oh-my-pi/pull/19715) | macos-main-key-tests | test(natives): restore passing macOS native typing tests | computer | P0 | 13h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-main-key-tests) |
 | [#19748](https://github.com/can1357/oh-my-pi/pull/19748) | fill-key-events | fix(coding-agent): fire key events after a browser fill for pages that search on keyup | browser | P0 | 7h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/fill-key-events) |
 
-## Queued since the last plan (1)
+## Queued since the last plan (2)
 
 | id | title | area | priority | age | branch |
 |---|---|---|---|---|---|
 | win-edit-setvalue | fix(natives): write Windows edit values without activating their window | computer |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-edit-setvalue) |
+| win-button-click | fix(natives): click Windows buttons without activating their window | computer |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-button-click) |
