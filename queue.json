@@ -104879,6 +104879,24 @@
     }
    ],
    "advanced": "2026-11-18T22:20:57Z"
+  },
+  {
+   "id": "fill-key-events",
+   "branch": "will/fill-key-events",
+   "title": "fix(coding-agent): fire key events after a browser fill for pages that search on keyup",
+   "area": "browser",
+   "priority": "P0",
+   "needs": [],
+   "base": "57771ae562b9345e0579bceb2d68d585e3e6927e",
+   "body": "bodies/fill-key-events.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/fill-key-events",
+   "host": "MacBook-Pro",
+   "added": "2026-11-19T01:34:57Z",
+   "updated": "2026-11-19T01:34:57Z",
+   "note": ""
   }
  ],
  "watch": {
