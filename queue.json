@@ -99471,7 +99471,7 @@
    "worktree": null,
    "host": "MacBook-Pro",
    "added": "2026-11-14T10:49:09Z",
-   "updated": "2026-11-19T22:55:33Z",
+   "updated": "2026-11-19T22:55:37Z",
    "note": "Will, 2026-11-16: go, at P2. DragConfirm r7 2026-11-14: head d44070508c4 on macos-window-order 4f8d2cd973d. Rule: keys skip the activating press only when AXFocusedWindow==target and the window draws its own content (key_without_press), read after the activation inside with_background_watch. VM block lease ce51b160 (r7/a/out-final.jsonl, kit r7/kit/sum8.py): 540 tries, all cells pass. Review DragConfirm.ReviewKeysNoPress ready@0c5567391a; after it: docs scope, remote panels keep the press (+test). rust-check macos+linux at d44070508c. Benchmark: keys/type on Electron/Chrome raised 2 of ~83 actions, 0 trials flip (OmpTrajClass2 s2). | Main, 2026-11-18: once macos-main-key-tests merges, the body's Testing line '722 pass; the 2 failures, desktop::macos::input Unicode-typing tests, fail the same on main' is stale; fix it on the next push (no push for that alone). | Main, 2026-11-19: #19715 merged 18:35Z, so on #19702's next push drop the body's '2 failures ... Unicode-typing tests, fail the same on main' clause (Testing, macOS cargo line); no push for that alone.",
    "advanced": "2026-11-19T22:55:33Z",
    "rebases_after": [

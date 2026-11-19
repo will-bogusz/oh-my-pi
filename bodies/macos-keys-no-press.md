@@ -26,7 +26,7 @@ In every cell on both builds, my app stayed in front with its key window, and my
 
 On the benchmark this matters little. In the re-measure with the window-order repair in, keys and typing on Electron and Chrome raised the target in 2 of about 83 actions, and removing them would flip 0 trials; the raises that remain are mostly pixel clicks.
 
-`cargo test -p omp-natives --lib desktop` on macOS: 722 pass; the 2 failures, `desktop::macos::input` Unicode-typing tests, fail the same on `main`. The same holds on the tree merged with #17756. The tests on `needs_press` and `key_without_press` fail with the rule reverted to always pressing (the skip test) and to never pressing (the not-key test); a panel another process draws, such as a system Save sheet, keeps the press. Clippy and rustfmt are clean on macOS and Linux.
+`cargo test -p omp-natives --lib desktop` on macOS: 723 pass, none fail; 724 pass on the tree merged with #17756. The tests on `needs_press` and `key_without_press` fail with the rule reverted to always pressing (the skip test) and to never pressing (the not-key test); a panel another process draws, such as a system Save sheet, keeps the press. Clippy and rustfmt are clean on macOS and Linux.
 
 ## Risk
 
@@ -36,3 +36,4 @@ Review first: `needs_press` and where `make_key_in_background` calls it. A key w
 - [ ] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
