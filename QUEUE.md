@@ -1,17 +1,16 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-19 16:19Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-19 16:22Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-19 15:38Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 2, conflict-held 17, stacked 16, held 9, parked 1, open PRs 23; merged 398, closed 44
+**Counts:** openable now 1, conflict-held 17, stacked 16, held 10, parked 1, open PRs 23; merged 398, closed 44
 
-## Openable now (2)
+## Openable now (1)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
 | factory-droid-1100-pin | feat(catalog): identify Factory Droid requests as droid 1.10.0 | factory-droid |  | 5d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-pin) |
-| win-edit-setvalue | fix(natives): write Windows edit values without activating their window | computer |  | 5h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-edit-setvalue) |
 
 ## Conflict-held (17)
 
@@ -56,7 +55,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-19
 | snapcompact-carbon-1568 | fix(catalog): draw Gemini 4 Carbon's snapcompact frames at 1568px on Devin and Factory Droid | snapcompact | P2 | 1d | snapcompact-shape-kdl | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-carbon-1568) |
 | win-button-click | fix(natives): click Windows buttons without activating their window | computer |  | 5h | win-edit-setvalue | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-button-click) |
 
-## Held (9)
+## Held (10)
 
 | id | title | area | priority | age | hold | branch |
 |---|---|---|---|---|---|---|
@@ -69,6 +68,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-19
 | win-type-insert | feat(natives): insert typed text into a focused Windows multi-line edit control | computer | P2 | 7d | Main, 2026-11-12: proposal; opens only after entry A merges and Will has seen the body | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-type-insert) |
 | macos-drag-no-change-note | fix(natives): note a macOS background drag that changed nothing readable | computer | P2 | 5d | Main, 2026-11-18: rework against #19195's new drag logic after it merges (not a mechanical restack; drag_control.rs moved) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-drag-no-change-note) |
 | macos-keys-read-cost | perf(natives): prove a macOS key window draws its own content without reading all its children | computer | P2 | 22h | Main, 2026-11-18: needs an independent review and a VM row before it can open; no work on it now | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-keys-read-cost) |
+| win-edit-setvalue | fix(natives): write Windows edit values without activating their window | computer |  | 5h | Main, 2026-11-19: hold until WinMine3's interleaved stall check (v19.0.0 vs round-5 build, n=30/cell, wait-chain + minidump per stall) lands and Main gives the go | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-edit-setvalue) |
 
 ## Parked (1)
 

@@ -105038,7 +105038,7 @@
    "worktree": null,
    "host": "MacBook-Pro",
    "added": "2026-11-19T11:16:47Z",
-   "updated": "2026-11-19T16:19:32Z",
+   "updated": "2026-11-19T16:22:49Z",
    "note": "",
    "built": [
     {
@@ -105141,7 +105141,8 @@
      "host": "goliath",
      "tree": "7cb745689f0335fdeee979ef2cdfa40cc496e03d"
     }
-   ]
+   ],
+   "hold": "Main, 2026-11-19: hold until WinMine3's interleaved stall check (v19.0.0 vs round-5 build, n=30/cell, wait-chain + minidump per stall) lands and Main gives the go"
   },
   {
    "id": "win-button-click",
