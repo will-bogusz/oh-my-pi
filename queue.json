@@ -105171,7 +105171,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-19T13:36:55Z",
+  "checked": "2026-11-19T14:07:47Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -105370,12 +105370,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-12T13:57:47Z",
-    "kind": "openable",
-    "id": "atspi-write-timeout-warning",
-    "title": "fix(natives): preserve the empty-field warning on Linux write timeouts"
-   },
    {
     "at": "2026-11-12T14:58:26Z",
     "kind": "openable",
