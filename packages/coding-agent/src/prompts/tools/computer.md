@@ -222,6 +222,8 @@ await win.click(120, 48, button="right")
   In a run, use `wait(predicate, {timeout, interval})` for a specific state rather than assuming a fixed sleep means success.
 - Desktop-root pointer helpers (`computer.click`, `computer.move`, …) drive the user's real pointer; act through window handles.
 - Wayland: per-window native input and `.raise()` are unavailable; use AX, or desktop input after focusing the target yourself.
+  - Chromium and Electron apps opened with `computer.apps.open` get a DevTools route: their windows (listed as `devtools:…` when the desktop does not list them) take screenshots, clicks, `type` (any Unicode), `press`, `scroll`, `drag` and `move` (hover) in the background through the page, covered or not.
+    Their screenshot is the page viewport, without the browser's tabs and toolbar. An app that was already running has no route; the `apps.open` output says so.
 - macOS `screenLocked` (in `capabilities()`, a screenshot result, or a run's leading `Note:`):
   - A display capture shows the lock screen and a window capture that window's last frame.
   - Keystrokes, takeover and AX fail until someone unlocks, while background clicks still reach the app.

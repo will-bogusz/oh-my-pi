@@ -582,7 +582,7 @@ pub(super) fn from_path(path: &Path) -> CoreResult<Application> {
 	Ok(read_entry(path, id)?.application(&processes(), bus.as_ref()))
 }
 
-pub(super) fn open(app: Application, activate: bool) -> CoreResult<Application> {
+pub(super) fn open(app: Application, activate: bool, args: &[String]) -> CoreResult<Application> {
 	let entry = read_entry(Path::new(&app.path), app.id)?;
 	// Preflight before launching: XWayland cannot activate arbitrary native
 	// Wayland windows, and Wayland tokens require an originating user gesture.
@@ -591,12 +591,20 @@ pub(super) fn open(app: Application, activate: bool) -> CoreResult<Application> 
 	let current = entry.application(&processes(), bus.as_ref().ok());
 	let executable = entry.executable();
 	if current.running {
+		if !args.is_empty() {
+			return Err(invalid(format!(
+				"{} is already running; launch arguments reach only a new instance",
+				entry.path.display()
+			)));
+		}
 		if let Some(activation) = activation {
 			activation.activate(executable.as_deref(), current.pid, entry.terminal)?;
 		}
 		return Ok(current);
 	}
-	if entry.dbus && !entry.terminal {
+	// D-Bus activation carries no arguments: launch arguments take the entry's
+	// Exec.
+	if entry.dbus && !entry.terminal && args.is_empty() {
 		match bus.as_ref() {
 			Ok(bus) => {
 				if entry.activate_dbus(bus, activate)? {
@@ -615,7 +623,8 @@ pub(super) fn open(app: Application, activate: bool) -> CoreResult<Application> 
 			Err(_) => {}, // The entry's own Exec is its non-D-Bus fallback.
 		}
 	}
-	let argv = entry.argv()?;
+	let mut argv = entry.argv()?;
+	argv.extend(args.iter().cloned());
 	let executable = executable
 		.ok_or_else(|| invalid(format!("desktop Exec executable is unavailable: {}", argv[0])))?;
 	// Preserve the entry's actual executable spelling and argv[0]. Launching

@@ -51,6 +51,17 @@ import {
 	type WaitPredicateOptions,
 	waitForRun,
 } from "../run-scope";
+import {
+	DEVTOOLS_LAUNCH_ARGS,
+	DevToolsBridge,
+	type DevToolsRoute,
+	findNewEndpoint,
+	launchKind,
+	listeningPorts,
+	modifierBits,
+	type PageCapture,
+	WHEEL_STEP_PX,
+} from "./devtools-bridge";
 import { ToolAbortError, throwIfAborted } from "../tool-errors";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import { unknownOptionsMessage } from "./option-errors";
@@ -150,6 +161,8 @@ export type NativeDesktopSessionFactory = (
 type WindowFilter = { id?: string | number; app?: string; title?: string; wait?: number };
 const MAX_WINDOW_WAIT_MS = 10_000;
 const WINDOW_WAIT_INTERVAL_MS = 100;
+/** How long `apps.open` waits for a DevTools-launched app's first page to list, as macOS waits for a window. */
+const WINDOW_WAIT_LIMIT_MS = 3_000;
 /** Window listings are session-transcript payload; `window()` lookups search the whole native list. */
 const MAX_LISTED_WINDOWS = 48;
 /**
@@ -195,7 +208,8 @@ const holdMouseOptionsKeys: Record<keyof HoldMouseOptions, true> = {
 const windowFilterKeys: Record<keyof WindowFilter, true> = { id: true, app: true, title: true, wait: true };
 const windowListFilterKeys: Record<keyof Omit<WindowFilter, "wait">, true> = { id: true, app: true, title: true };
 const applicationQueryKeys: Record<keyof ApplicationQuery, true> = { query: true, runningOnly: true };
-const applicationOpenOptionsKeys: Record<keyof ApplicationOpenOptions, true> = {
+/** Launch `args` are the worker's own (the DevTools route's flag), never the model's. */
+const applicationOpenOptionsKeys: Record<keyof Omit<ApplicationOpenOptions, "args">, true> = {
 	activate: true,
 	reveal: true,
 	app: true,
@@ -1641,6 +1655,204 @@ class Win extends WindowAccess {
 	}
 }
 
+/** The capture of a routed window's page, in the shape screenshots report: its pixels are its pointer frame. */
+function pageFrame(target: string, page: PageCapture, region?: CaptureRegion): DesktopCapture {
+	return {
+		data: page.data,
+		width: page.width,
+		height: page.height,
+		sourceWidth: page.sourceWidth,
+		sourceHeight: page.sourceHeight,
+		coordinateWidth: region ? Math.round(page.cssWidth) : page.width,
+		coordinateHeight: region ? Math.round(page.cssHeight) : page.height,
+		...(region ? { region } : {}),
+		target,
+		displays: [],
+		backend: "devtools",
+		screenLocked: false,
+	};
+}
+
+/**
+ * A Chromium or Electron window on Wayland that the DevTools route drives (see `devtools-bridge.ts`): its
+ * screenshot is its front tab's page viewport, and pointer and key input go to that page through CDP, so the
+ * user's pointer, keyboard and focus are never used. Accessibility calls stay native: a window only DevTools
+ * lists (`devtools:` id) has none.
+ */
+class DevToolsWin extends Win {
+	readonly #route: DevToolsRoute;
+	readonly #context: RunContextAccessor;
+
+	constructor(
+		session: NativeDesktopSession,
+		getContext: RunContextAccessor,
+		window: DesktopWindow,
+		route: DevToolsRoute,
+	) {
+		super(session, getContext, window);
+		this.#route = route;
+		this.#context = getContext;
+	}
+
+	#input(method: string, takeover: boolean | undefined): ComputerRunContext {
+		const context = this.#context();
+		guardRun(context, method);
+		if (takeover === true) {
+			throw new ToolError(
+				`${method} with takeover: true: window ${this.id} takes input through its page's DevTools connection in the background, so nothing needs taking over; call it without takeover. Nothing was sent`,
+			);
+		}
+		return context;
+	}
+
+	async #call<T>(context: ComputerRunContext, call: () => Promise<T>): Promise<T> {
+		try {
+			const value = await call();
+			throwIfAborted(context.signal);
+			return value;
+		} catch (error) {
+			throwIfAborted(context.signal);
+			if (error instanceof ToolError || error instanceof ToolAbortError) throw error;
+			throw new ToolError(
+				`the DevTools route to window ${this.id} failed: ${error instanceof Error ? error.message : String(error)}`,
+			);
+		}
+	}
+
+	#sent(context: ComputerRunContext, what: string): void {
+		context.output.push({
+			type: "text",
+			text: `${what} went to the page of window ${this.id} through DevTools; the user's pointer and keyboard were not used`,
+		});
+	}
+
+	override async screenshot(options?: ScreenshotOptions): Promise<ScreenshotResult> {
+		strictOptions(options, screenshotOptionsKeys, "screenshot");
+		const context = this.#context();
+		const caps = { maxWidth: context.snapshot.captureMaxWidth, maxHeight: context.snapshot.captureMaxHeight };
+		const page = await this.#call(context, () => this.#route.capture(caps));
+		const result = await emitScreenshot(context, pageFrame(this.id, page), options);
+		if (!options?.silent) {
+			context.output.push({
+				type: "text",
+				text: `this is the page of window ${this.id} (tab ${JSON.stringify(this.#route.window.front?.title ?? "")}) through DevTools: its ${page.cssWidth}×${page.cssHeight} CSS-pixel viewport as rendered, covered or not, without the browser's tabs and toolbar; pointer positions on it reach the page`,
+			});
+		}
+		return result;
+	}
+
+	override async zoom(region: CaptureRegion, options?: ScreenshotOptions): Promise<ScreenshotResult> {
+		strictOptions(options, screenshotOptionsKeys, "zoom");
+		if (!region || typeof region !== "object" || Array.isArray(region)) {
+			throw new ToolError("zoom requires a region { x, y, width, height } in the last full screenshot's pixels");
+		}
+		const context = this.#context();
+		const caps = { maxWidth: context.snapshot.captureMaxWidth, maxHeight: context.snapshot.captureMaxHeight };
+		const page = await this.#call(context, () => this.#route.captureRegion(region, caps));
+		return await emitScreenshot(context, pageFrame(this.id, page, region), options);
+	}
+
+	override async click(x: number, y: number, options?: ClickOptions): Promise<void> {
+		strictOptions(options, clickOptionsKeys, "click");
+		const native = pointerOptions(options);
+		const context = this.#input("click", native.takeover);
+		if (native.menu)
+			throw new ToolError(`click on window ${this.id}: the DevTools route opens no native menus; nothing was sent`);
+		const at = await this.#call(context, () =>
+			this.#route.click(x, y, native.button, native.count ?? 1, modifierBits(native.modifiers)),
+		);
+		this.#sent(context, `click at CSS (${Math.round(at.x)}, ${Math.round(at.y)})`);
+	}
+
+	override async doubleClick(x: number, y: number, options?: Omit<ClickOptions, "count">): Promise<void> {
+		strictOptions(options, doubleClickKeys, "doubleClick");
+		const native = pointerOptions(options);
+		const context = this.#input("doubleClick", native.takeover);
+		const at = await this.#call(context, () =>
+			this.#route.click(x, y, native.button, 2, modifierBits(native.modifiers)),
+		);
+		this.#sent(context, `double click at CSS (${Math.round(at.x)}, ${Math.round(at.y)})`);
+	}
+
+	override async move(x: number, y: number, options?: InputOptions): Promise<void> {
+		strictOptions(options, inputOptionsKeys, "move");
+		const native = pointerOptions(options);
+		const context = this.#input("move", native.takeover);
+		const at = await this.#call(context, () => this.#route.move(x, y, modifierBits(native.modifiers)));
+		this.#sent(context, `pointer move (hover) to CSS (${Math.round(at.x)}, ${Math.round(at.y)})`);
+	}
+
+	override async drag(points: Array<[number, number]>, options?: DragOptions): Promise<AxTextSelection | undefined> {
+		strictOptions(options, dragOptionsKeys, "drag");
+		const native = pointerOptions(options);
+		const context = this.#input("drag", native.takeover);
+		const kind = await this.#call(context, () => this.#route.drag(points, modifierBits(native.modifiers)));
+		this.#sent(context, kind === "html" ? "drag (as an HTML drag and drop the page started)" : "drag");
+		return undefined;
+	}
+
+	override async scroll(x: number, y: number, options: ScrollOptions = {}): Promise<void> {
+		strictOptions(options, scrollOptionsKeys, "scroll");
+		const native = pointerOptions(options);
+		const context = this.#input("scroll", native.takeover);
+		const dx = options.dx ?? 0;
+		const dy = options.dy ?? 0;
+		await this.#call(context, () => this.#route.scroll(x, y, dx, dy, modifierBits(native.modifiers)));
+		this.#sent(context, `wheel of ${dx * WHEEL_STEP_PX}, ${dy * WHEEL_STEP_PX} CSS pixels`);
+	}
+
+	override async type(text: string, options?: InputOptions): Promise<void> {
+		strictOptions(options, inputOptionsKeys, "type");
+		validateString(text, "type(text)");
+		const context = this.#input("type", pointerOptions(options).takeover);
+		await this.#call(context, () => this.#route.type(text));
+		this.#sent(context, `text (${[...text].length} characters) for the page's focused field`);
+	}
+
+	override async press(chord: string | string[], options?: InputOptions): Promise<void> {
+		strictOptions(options, inputOptionsKeys, "press");
+		const keys = chordKeys(chord);
+		const context = this.#input("press", pointerOptions(options).takeover);
+		await this.#call(context, () => this.#route.press(keys));
+		this.#sent(context, `key ${keys.join("+")}`);
+	}
+
+	override async holdKeys(): Promise<void> {
+		guardRun(this.#context(), "holdKeys");
+		throw new ToolError(
+			`holdKeys on window ${this.id}: the DevTools route sends whole key presses, not held keys; nothing was sent`,
+		);
+	}
+
+	override async holdMouse(): Promise<void> {
+		guardRun(this.#context(), "holdMouse");
+		throw new ToolError(
+			`holdMouse on window ${this.id}: the DevTools route sends clicks and drags, not a held button; nothing was sent`,
+		);
+	}
+
+	#noAccessibility(method: string): never {
+		throw new ToolError(
+			`${method} on window ${this.id}: the desktop does not list this window (Chromium and Electron join accessibility only while the desktop's accessibility switch is on), so it has no accessibility tree here; use screenshot() and pointer input`,
+		);
+	}
+
+	override async observe(options?: ScreenshotOptions & AxOptions): Promise<ObservationResult> {
+		if (this.id.startsWith("devtools:")) this.#noAccessibility("observe");
+		return super.observe(options);
+	}
+
+	override async ax(options?: AxOptions): Promise<string> {
+		if (this.id.startsWith("devtools:")) this.#noAccessibility("ax");
+		return super.ax(options);
+	}
+
+	override async find(query: AxQuery): Promise<El[]> {
+		if (this.id.startsWith("devtools:")) this.#noAccessibility("find");
+		return super.find(query);
+	}
+}
+
 /** Hosts the persistent JavaScript runtime and native desktop session. */
 export class ComputerWorkerCore {
 	readonly #transport: ComputerWorkerTransport;
@@ -1661,6 +1873,8 @@ export class ComputerWorkerCore {
 	 * context instead of borrowing the next run's signal and read-only policy.
 	 */
 	readonly #runContexts = new AsyncLocalStorage<ComputerRunContext>();
+	/** DevTools endpoints of Chromium and Electron apps this worker launched (or may adopt), for Wayland windows. */
+	readonly #devtools = new DevToolsBridge();
 	#closed = false;
 	/** The latest agent turn whose end was sent here; a run of that turn or earlier, arriving late, holds nothing. */
 	#releasedTurn = 0;
@@ -2089,10 +2303,20 @@ export class ComputerWorkerCore {
 
 	#createDesktopScope(session: NativeDesktopSession): object {
 		const getContext = this.#currentRunContext;
-		const makeWin = (window: DesktopWindow): Win => new Win(session, getContext, window);
+		const devtools = this.#devtools;
+		// Wayland is the one backend without background input for these windows; X11, macOS and Windows have their own.
+		const devtoolsMode = () => (session.capabilities.backend === "wayland" ? getContext().snapshot.devtools : "off");
+		const makeWin = (window: DesktopWindow): Win => {
+			const route = devtools.route(window.id);
+			return route ? new DevToolsWin(session, getContext, window, route) : new Win(session, getContext, window);
+		};
 		const el = (node: AxNode): El => new El(session, getContext, node);
 		const listWindows = async (filter: WindowFilter | undefined, signal: AbortSignal) => {
-			const windows = await nativeCall(signal, () => session.listWindows());
+			const windows = await devtools.merge(
+				await nativeCall(signal, () => session.listWindows()),
+				devtoolsMode(),
+				signal,
+			);
 			let appPids: Set<number> | undefined;
 			const app = filter?.app?.toLocaleLowerCase();
 			// Decide before title/id filtering, so another app cannot substitute for the named app.
@@ -2234,10 +2458,50 @@ export class ComputerWorkerCore {
 					const cwd = context.snapshot.cwd;
 					const target = await sessionPath(id, cwd, listed);
 					if (typeof open.app === "string") open.app = await sessionPath(open.app, cwd, listed);
+					// The DevTools route: a Chromium or Electron app this call launches gets a loopback DevTools
+					// port, found by the socket it listens on. One already running cannot be given one.
+					let launch: { before: Set<number>; kind: string } | undefined;
+					if (devtoolsMode() !== "off" && open.app === undefined) {
+						const applications = await nativeCall(context.signal, () => session.listApplications());
+						const exact = applications.filter(app => app.id === target || app.path === target);
+						const named = exact.length
+							? exact
+							: applications.filter(app => app.name.toLocaleLowerCase() === target.toLocaleLowerCase());
+						const kind = named.length === 1 ? await launchKind(named[0]!.path) : undefined;
+						if (kind && !named[0]!.running) launch = { before: await listeningPorts(), kind };
+						else if (kind && named[0]!.pid !== undefined && !devtools.endpointOf(named[0]!.pid)) {
+							context.output.push({
+								type: "text",
+								text: `${named[0]!.name} was already running, so it got no DevTools port: on Wayland its windows take no background typing, scrolling, dragging or hover. A ${kind} instance takes the port only at launch; if the user agrees, quit it and open it again with apps.open`,
+							});
+						}
+					}
 					const { window: shown, ...application } = await nativeCall(context.signal, () =>
-						session.openApplication(target, open),
+						session.openApplication(target, launch ? { ...open, args: DEVTOOLS_LAUNCH_ARGS } : open),
 					);
-					return { ...application, window: shown ? makeWin(shown) : null };
+					if (!launch) return { ...application, window: shown ? makeWin(shown) : null };
+					const found = await findNewEndpoint(launch.before, context.signal);
+					if (!found) {
+						context.output.push({
+							type: "text",
+							text: `${application.name} was launched with a DevTools port, but none appeared within 15 s (Chrome ignores it on its default profile; a running instance may have taken the launch), so its windows have no DevTools route`,
+						});
+						return { ...application, window: null };
+					}
+					devtools.register(found, application.name, true);
+					context.output.push({
+						type: "text",
+						text: `opened ${application.name} (${found.browser}, pid ${found.pid}) with a DevTools port on 127.0.0.1:${found.port}: its windows take screenshots and input through their pages in the background. Until it quits, any local process can drive it through that port`,
+					});
+					// Like macOS's open, return the window once it shows: here, once its first page is listed.
+					const deadline = performance.now() + WINDOW_WAIT_LIMIT_MS;
+					for (;;) {
+						const { windows } = await listWindows(undefined, context.signal);
+						const window = windows.find(candidate => candidate.pid === found.pid && devtools.route(candidate.id));
+						if (window) return { ...application, pid: found.pid, window: makeWin(window) };
+						if (performance.now() > deadline) return { ...application, pid: found.pid, window: null };
+						await waitForRun(WINDOW_WAIT_INTERVAL_MS, context.signal);
+					}
 				},
 			},
 			control: {
@@ -2397,6 +2661,7 @@ export class ComputerWorkerCore {
 		this.#closed = true;
 		this.#active?.ac.abort(new ToolAbortError());
 		try {
+			this.#devtools.close();
 			await this.#session?.close();
 		} catch {
 			// Closing is best-effort; the worker is exiting and has no request to report this against.
