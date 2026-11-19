@@ -104900,7 +104900,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-19T02:23:02Z",
+  "checked": "2026-11-19T02:53:10Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -104941,52 +104941,10 @@
    19715
   ],
   "post_merge": {
-   "16553": {
-    "title": "fix(natives): place macOS clicks for the focus guard where WindowServer routed them",
-    "merge_commit": "087f80db4728b3c15cb5c9996ee28c4a6bd0d7ef",
-    "merged_at": "2026-11-17T02:40:38Z",
-    "findings": []
-   },
-   "17610": {
-    "title": "fix(ai,coding-agent): carry other models' reasoning to Claude and retry its refusal without it",
-    "merge_commit": "b158ec31da4fb7217261eee33be81310b9bfec22",
-    "merged_at": "2026-11-17T02:40:39Z",
-    "findings": []
-   },
    "17897": {
     "title": "perf(natives): type on iPhone Mirroring twice as fast",
     "merge_commit": "a71d48b6850a95c803dc95f1370142f0ecdb4b11",
     "merged_at": "2026-11-18T10:14:12Z",
-    "findings": []
-   },
-   "18013": {
-    "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "merge_commit": "3eac7afd80d55f4678ebe0458304cd472018adc9",
-    "merged_at": "2026-11-17T02:40:38Z",
-    "findings": []
-   },
-   "18125": {
-    "title": "fix(ai,coding-agent): keep Anthropic web search queries intact, always search, and report refusals",
-    "merge_commit": "fc88d5b6fa2c981a7be6a1728f267de588281334",
-    "merged_at": "2026-11-17T02:40:39Z",
-    "findings": []
-   },
-   "18222": {
-    "title": "feat(coding-agent): find nested menu commands in one read",
-    "merge_commit": "cbafcab9dd0de408da896bd8fa11599d5c482114",
-    "merged_at": "2026-11-17T02:40:38Z",
-    "findings": []
-   },
-   "18353": {
-    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
-    "merge_commit": "b2182f0dc39e30fafdc2814756d7f0cfcaf6c944",
-    "merged_at": "2026-11-17T02:40:38Z",
-    "findings": []
-   },
-   "18624": {
-    "title": "fix(ai): say whether an Anthropic request body finished uploading when its connection drops",
-    "merge_commit": "d92b493207964825d975425da2a84539bba6cec5",
-    "merged_at": "2026-11-17T02:40:38Z",
     "findings": []
    },
    "18632": {
@@ -105011,24 +104969,6 @@
       "addressed_by": 18658
      }
     ]
-   },
-   "18786": {
-    "title": "feat(agent,coding-agent): send a short browser guide with the first browser call",
-    "merge_commit": "98b300789aefe7768a80eddcde9e6ed4bea89180",
-    "merged_at": "2026-11-17T02:40:38Z",
-    "findings": []
-   },
-   "18789": {
-    "title": "feat(coding-agent): keep subagents' browser tabs out of the user's Chrome and Tern pane unless asked",
-    "merge_commit": "1f77bfabf4aa4618505a77b933937e790781fb0f",
-    "merged_at": "2026-11-17T02:40:38Z",
-    "findings": []
-   },
-   "18925": {
-    "title": "feat(coding-agent): name the native windows a browser call raised on macOS",
-    "merge_commit": "7e17184a906cae569c4b7b2856cc1d43630ae515",
-    "merged_at": "2026-11-17T02:40:38Z",
-    "findings": []
    },
    "19100": {
     "title": "fix(computer): retain output and screenshots when a run fails",
@@ -105158,31 +105098,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-12T02:47:15Z",
-    "kind": "openable",
-    "id": "computer-secure-input",
-    "title": "fix(natives,coding-agent): report macOS secure input and stop claiming globalEscape under it"
-   },
-   {
-    "at": "2026-11-12T02:47:15Z",
-    "kind": "openable",
-    "id": "status-entered-text",
-    "title": "fix(coding-agent): keep text a cell enters out of browser and computer status lines"
-   },
-   {
-    "at": "2026-11-12T02:47:15Z",
-    "kind": "openable",
-    "id": "agent-identity",
-    "title": "feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy"
-   },
-   {
-    "at": "2026-11-12T02:47:15Z",
-    "kind": "unopenable",
-    "id": "relay-frame-race",
-    "title": "fix(browser-relay): keep a driven tab when a password manager's frame drops omp from it",
-    "why": "plan: held (held: Main, 2026-11-12: regression against a signed-in real 1Password (VaultSignedIn, VM, Chrome 154, 1Password 8.12.44.33): autofocus cell tab kept 4/10 on the fix, 10/10 on main; after the first sweep 1Password puts back a frame the sweep finds but cannot empty and Chrome refuses every attach)"
-   },
    {
     "at": "2026-11-12T04:49:02Z",
     "kind": "openable",
@@ -115824,7 +115739,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-19T01:52:03.793318Z",
+  "at": "2026-11-19T02:53:10.682857Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
