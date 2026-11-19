@@ -105025,7 +105025,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-19T10:32:26Z",
+  "checked": "2026-11-19T11:02:51Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -105220,12 +105220,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-12T10:53:55Z",
-    "kind": "openable",
-    "id": "atspi-text-first",
-    "title": "fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility"
-   },
    {
     "at": "2026-11-12T11:24:23Z",
     "kind": "conflict",
