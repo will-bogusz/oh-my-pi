@@ -104882,7 +104882,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-19T00:50:25Z",
+  "checked": "2026-11-19T01:21:01Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -105136,121 +105136,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-12T01:15:20Z",
-    "kind": "conflict",
-    "label": "#18925",
-    "title": "feat(coding-agent): name the native windows a browser call raised on macOS",
-    "files": [
-     "packages/coding-agent/src/tools/browser/tab-protocol.ts"
-    ]
-   },
-   {
-    "at": "2026-11-12T01:15:20Z",
-    "kind": "conflict",
-    "label": "#16611",
-    "title": "feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio",
-    "files": [
-     "packages/coding-agent/src/prompts/tools/read.md"
-    ]
-   },
-   {
-    "at": "2026-11-12T01:15:20Z",
-    "kind": "conflict",
-    "label": "#18222",
-    "title": "feat(coding-agent): find nested menu commands in one read",
-    "files": [
-     "packages/coding-agent/src/prompts/tools/computer.md"
-    ]
-   },
-   {
-    "at": "2026-11-12T01:15:20Z",
-    "kind": "conflict",
-    "label": "#18737",
-    "title": "fix(browser): give browser calls without a timeout the Eval cell's timeout",
-    "files": [
-     "packages/coding-agent/src/prompts/tools/browser.md"
-    ]
-   },
-   {
-    "at": "2026-11-12T01:15:20Z",
-    "kind": "conflict",
-    "label": "#18738",
-    "title": "fix(browser): tell agents that treat console() or errors() as an array to read .entries",
-    "files": [
-     "packages/coding-agent/src/prompts/tools/browser.md"
-    ]
-   },
-   {
-    "at": "2026-11-12T01:15:20Z",
-    "kind": "conflict",
-    "label": "#18786",
-    "title": "feat(agent,coding-agent): send a short browser guide with the first browser call",
-    "files": [
-     "packages/coding-agent/src/prompts/tools/browser.md",
-     "packages/coding-agent/src/tools/browser.ts",
-     "packages/coding-agent/src/tools/eval.ts",
-     "packages/coding-agent/test/tools/browser-relay-kind.test.ts"
-    ]
-   },
-   {
-    "at": "2026-11-12T01:15:20Z",
-    "kind": "conflict",
-    "label": "#18789",
-    "title": "feat(coding-agent): keep subagents' browser tabs out of the user's Chrome and Tern pane unless asked",
-    "files": [
-     "docs/tools/browser.md",
-     "packages/browser-relay/README.md",
-     "packages/coding-agent/src/prompts/tools/browser.md",
-     "packages/coding-agent/src/tools/browser.ts",
-     "packages/coding-agent/src/tools/browser/settings.ts"
-    ]
-   },
-   {
-    "at": "2026-11-12T01:15:20Z",
-    "kind": "conflict",
-    "label": "#18776",
-    "title": "feat(coding-agent): report browser screenshots and opens on one line",
-    "files": [
-     "packages/coding-agent/src/tools/browser.ts"
-    ]
-   },
-   {
-    "at": "2026-11-12T01:15:20Z",
-    "kind": "conflict",
-    "label": "#18784",
-    "title": "fix(natives): keep X11 takeover from taking a typing user's keys",
-    "files": [
-     "packages/coding-agent/src/prompts/tools/computer.md"
-    ]
-   },
-   {
-    "at": "2026-11-12T01:15:20Z",
-    "kind": "conflict",
-    "label": "#18947",
-    "title": "fix(natives,coding-agent): report unavailable Windows desktop sessions",
-    "files": [
-     "packages/coding-agent/src/prompts/tools/computer-screen-state.md"
-    ]
-   },
-   {
-    "at": "2026-11-12T01:15:20Z",
-    "kind": "conflict",
-    "label": "#18892",
-    "title": "fix(natives): refuse macOS element actions once the ref's element reads as another control",
-    "files": [
-     "packages/coding-agent/src/prompts/tools/computer.md"
-    ]
-   },
-   {
-    "at": "2026-11-12T01:15:20Z",
-    "kind": "conflict",
-    "label": "#18924",
-    "title": "fix(browser): honor selector wait states and reject unknown options",
-    "files": [
-     "docs/tools/browser.md"
-    ]
-   },
    {
     "at": "2026-11-12T01:45:57Z",
     "kind": "openable",
@@ -115948,7 +115833,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-19T00:19:42.191422Z",
+  "at": "2026-11-19T01:21:02.601637Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
