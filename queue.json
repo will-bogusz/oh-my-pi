@@ -104882,7 +104882,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-18T23:49:17Z",
+  "checked": "2026-11-19T00:50:25Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -105008,58 +105008,10 @@
     "merged_at": "2026-11-17T02:40:38Z",
     "findings": []
    },
-   "18987": {
-    "title": "feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy",
-    "merge_commit": "87c9959fe16fa123f26feed25c2816edf1b3ba7d",
-    "merged_at": "2026-11-17T00:27:47Z",
-    "findings": []
-   },
-   "19001": {
-    "title": "fix(browser-relay): say what the relay hid in a driven tab",
-    "merge_commit": "7cd4adbea1f68c49cbfe726f660760ec7ebfd0f0",
-    "merged_at": "2026-11-17T00:27:47Z",
-    "findings": []
-   },
-   "19036": {
-    "title": "fix(natives): stop Linux accessibility reads from freezing apps that show long tables",
-    "merge_commit": "5af131c69274200ee4ba032568e9ccab44291c69",
-    "merged_at": "2026-11-17T00:27:46Z",
-    "findings": []
-   },
-   "19045": {
-    "title": "feat(browser): let observe() settle the effects of the preceding action",
-    "merge_commit": "6f360ba7fe2e5c0cd6883b707ee4ff785b76bed4",
-    "merged_at": "2026-11-17T00:27:46Z",
-    "findings": []
-   },
    "19100": {
     "title": "fix(computer): retain output and screenshots when a run fails",
     "merge_commit": "542454c814a483c0c5605e234134de81d35d297c",
     "merged_at": "2026-11-18T00:31:44Z",
-    "findings": []
-   },
-   "19179": {
-    "title": "fix(natives): close the menu a macOS background key press opens",
-    "merge_commit": "bfa1f8bf3a490f0fb446c10cac1e1b338793d6ec",
-    "merged_at": "2026-11-17T00:27:46Z",
-    "findings": []
-   },
-   "19258": {
-    "title": "fix(natives): refuse macOS element actions on a control a person could not click",
-    "merge_commit": "fd01163c0c7265b72ced0f5a9a349e3c8b60ef08",
-    "merged_at": "2026-11-17T00:27:46Z",
-    "findings": []
-   },
-   "19296": {
-    "title": "fix(natives): keep macOS takeover from taking a typing user's keys",
-    "merge_commit": "665ee2530bc2eb4582b4af2f1d639e8420724fe7",
-    "merged_at": "2026-11-17T00:27:46Z",
-    "findings": []
-   },
-   "19405": {
-    "title": "fix(natives): set macOS sliders and other number controls from setValue",
-    "merge_commit": "d47787163af36022169c0b8af8743919eee0e29f",
-    "merged_at": "2026-11-17T00:27:46Z",
     "findings": []
    },
    "19509": {
@@ -105184,12 +105136,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-12T00:44:35Z",
-    "kind": "openable",
-    "id": "agent-identity",
-    "title": "feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy"
-   },
    {
     "at": "2026-11-12T01:15:20Z",
     "kind": "conflict",
