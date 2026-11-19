@@ -803,6 +803,34 @@ export const cfgComputerBackgroundFallback = register({
 	},
 });
 
+export const cfgComputerDevtools = register({
+	id: "computer.devtools",
+	type: "enum",
+	values: ["launched", "running", "off"] as const,
+	default: "launched",
+	ui: {
+		tab: "tools",
+		group: "Computer",
+		label: "Computer DevTools Route",
+		description:
+			"On Wayland, drive Chromium and Electron windows through their pages' DevTools protocol, which takes typing, scrolling, drags and hover in the background where the desktop offers none",
+		options: [
+			{
+				value: "launched",
+				label: "Apps it opens",
+				description:
+					"apps.open starts Chromium and Electron apps with a local DevTools port (any local process can use it until the app quits) and drives their windows through it",
+			},
+			{
+				value: "running",
+				label: "Also apps you started with a port",
+				description: "Also drive Chromium and Electron apps you started yourself with --remote-debugging-port",
+			},
+			{ value: "off", label: "Off", description: "Never add a DevTools port or use one" },
+		],
+	},
+});
+
 export const cfgImagesQuestionTimeoutMs = register({
 	id: "images.questionTimeoutMs",
 	type: "number",

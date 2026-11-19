@@ -46,12 +46,17 @@ pub struct ApplicationQuery {
 /// folder or URL target opens in its default application, or in `app` (an
 /// application ID, name or path); `reveal` instead shows the file or folder
 /// selected in Finder, which comes to the front.
+///
+/// `args` (Linux only) are appended to the desktop entry's launch command, so
+/// they need a launch: an application that is already running is refused
+/// rather than handed arguments it never sees.
 #[napi(object)]
 #[derive(Clone, Debug, Default)]
 pub struct ApplicationOpenOptions {
 	pub activate: Option<bool>,
 	pub reveal:   Option<bool>,
 	pub app:      Option<String>,
+	pub args:     Option<Vec<String>>,
 }
 
 /// An opened application: its [`Application`] fields and the window it
@@ -251,6 +256,14 @@ pub(crate) fn open(input: &str, options: ApplicationOpenOptions) -> CoreResult<O
 			"apps.open takes reveal or app, not both: reveal shows the item in Finder",
 		));
 	}
+	let launch_args = options.args.as_deref().unwrap_or_default();
+	if !launch_args.is_empty()
+		&& (!cfg!(target_os = "linux") || options.reveal.unwrap_or(false) || options.app.is_some())
+	{
+		return Err(DesktopError::invalid_target(
+			"apps.open launch arguments open a Linux application, not a document",
+		));
+	}
 	// Off macOS no document route exists, and `reveal`/`app` always ask for one:
 	// refuse before the inventory listing, which can fail on its own.
 	#[cfg(not(target_os = "macos"))]
@@ -261,13 +274,21 @@ pub(crate) fn open(input: &str, options: ApplicationOpenOptions) -> CoreResult<O
 	{
 		let apps = platform::list()?;
 		if route(&apps, input, &options) == Route::Document {
+			if !launch_args.is_empty() {
+				return Err(DesktopError::invalid_target(
+					"apps.open launch arguments open a Linux application, not a document",
+				));
+			}
 			return open_document(&apps, input, &options);
 		}
 		let app = application(&apps, input)?;
 		let activate = options.activate.unwrap_or(false);
 		#[cfg(target_os = "macos")]
 		return platform::open(app, activate);
-		#[cfg(not(target_os = "macos"))]
+		#[cfg(target_os = "linux")]
+		return platform::open(app, activate, launch_args)
+			.map(|application| OpenedApplication::new(application, None));
+		#[cfg(target_os = "windows")]
 		return platform::open(app, activate)
 			.map(|application| OpenedApplication::new(application, None));
 	}

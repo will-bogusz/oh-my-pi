@@ -30,6 +30,7 @@ import { clampTimeout } from "./tool-timeouts";
 
 import {
 	cfgComputerBackgroundFallback,
+	cfgComputerDevtools,
 	cfgComputerDisplay,
 	cfgComputerEnabled,
 	cfgComputerMaxHeight,
@@ -253,6 +254,7 @@ function buildComputerSnapshot(session: ToolSession, readOnly: boolean): Compute
 		display: cfgComputerDisplay.get(session.settings),
 		readOnly,
 		backgroundFallback: cfgComputerBackgroundFallback.get(session.settings),
+		devtools: cfgComputerDevtools.get(session.settings),
 		displayTurn: computerTurnInFlight(session.getEvalKernelOwnerId?.() ?? undefined),
 	};
 }

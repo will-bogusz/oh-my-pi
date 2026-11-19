@@ -1213,11 +1213,16 @@ export interface Application {
  * folder or URL target opens in its default application, or in `app` (an
  * application ID, name or path); `reveal` instead shows the file or folder
  * selected in Finder, which comes to the front.
+ *
+ * `args` (Linux only) are appended to the desktop entry's launch command, so
+ * they need a launch: an application that is already running is refused
+ * rather than handed arguments it never sees.
  */
 export interface ApplicationOpenOptions {
   activate?: boolean
   reveal?: boolean
   app?: string
+  args?: Array<string>
 }
 
 /** Filters the native application inventory without requiring screen access. */

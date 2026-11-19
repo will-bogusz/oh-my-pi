@@ -430,6 +430,7 @@ const snapshot = (
 	readOnly,
 	displayTurn,
 	backgroundFallback,
+	devtools: "launched",
 });
 
 async function runWorker(
