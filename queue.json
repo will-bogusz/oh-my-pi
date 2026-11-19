@@ -115473,8 +115473,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-19T18:43:06.053286Z",
-  "host": "goliath",
+  "at": "2026-11-19T18:59:56.608332Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -116155,7 +116155,8 @@
     "title": "fix(catalog): draw Gemini 4 Carbon's snapcompact frames at 1568px on Devin and Factory Droid",
     "action": "wait",
     "reasons": [
-     "needs snapcompact-shape-kdl (queued)"
+     "needs snapcompact-shape-kdl (queued)",
+     "its need snapcompact-shape-kdl conflicts with main in packages/snapcompact/src/snapcompact.ts"
     ],
     "note": "",
     "over": [],
@@ -116176,7 +116177,8 @@
     "title": "fix(catalog,snapcompact,coding-agent): give DeepSeek V4.1 Flash its snapcompact archive as text",
     "action": "wait",
     "reasons": [
-     "needs snapcompact-shape-kdl (queued), #19620 (open)"
+     "needs snapcompact-shape-kdl (queued), #19620 (open)",
+     "its need snapcompact-shape-kdl conflicts with main in packages/snapcompact/src/snapcompact.ts"
     ],
     "note": "",
     "over": [],
@@ -116198,7 +116200,8 @@
     "title": "fix(catalog): give snapcompact readers their lead model's frame shape",
     "action": "wait",
     "reasons": [
-     "needs snapcompact-shape-kdl (queued)"
+     "needs snapcompact-shape-kdl (queued)",
+     "its need snapcompact-shape-kdl conflicts with main in packages/snapcompact/src/snapcompact.ts"
     ],
     "note": "",
     "over": [],
@@ -116313,7 +116316,8 @@
     "title": "refactor(catalog,snapcompact): move snapcompact frame shapes into catalog rules",
     "action": "wait",
     "reasons": [
-     "needs #19620 (open)"
+     "needs #19620 (open)",
+     "conflicts with main in packages/snapcompact/src/snapcompact.ts"
     ],
     "note": "",
     "over": [],
@@ -116690,10 +116694,8 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "wait",
-    "reasons": [
-     "conflicts with main in (branch missing on the fork)"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -116885,7 +116887,7 @@
     "reasons": [
      "needs token-count-policy (queued)",
      "its need token-count-policy conflicts with main in packages/catalog/src/compat/rules/README.md, packages/catalog/src/compat/rules/classes/anthropic.kdl, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/session/session-stats.ts, packages/coding-agent/test/context-fits-model.test.ts",
-     "conflicts with main in crates/natives/data/LICENSE.gemma4, crates/natives/data/gemma4.bin.zst, crates/natives/fixtures/gemma4.json, crates/natives/src/utok/gemma.rs, crates/natives/src/utok/tests/gemma.rs, crates/natives/tools/gen-gemma-fixtures.py, crates/natives/tools/pack-gemma.ts, packages/natives/THIRD-PARTY-NOTICES.txt"
+     "conflicts with main in crates/natives/data/LICENSE.gemma4, crates/natives/data/gemma4.bin.zst, crates/natives/fixtures/gemma4.json, crates/natives/src/utok/gemma.rs, crates/natives/src/utok/tests/gemma.rs, crates/natives/tools/gen-gemma-fixtures.py, crates/natives/tools/pack-gemma.ts, docs/models.md, packages/natives/THIRD-PARTY-NOTICES.txt"
     ],
     "note": "",
     "over": [],
