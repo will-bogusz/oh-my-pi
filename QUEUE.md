@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-19 16:09Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-19 16:19Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-19 15:38Z on goliath; groups below are from it, states from the manifest)
@@ -11,7 +11,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-19
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
 | factory-droid-1100-pin | feat(catalog): identify Factory Droid requests as droid 1.10.0 | factory-droid |  | 5d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-pin) |
-| win-edit-setvalue | fix(natives): write Windows edit values without activating their window | computer |  | 4h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-edit-setvalue) |
+| win-edit-setvalue | fix(natives): write Windows edit values without activating their window | computer |  | 5h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-edit-setvalue) |
 
 ## Conflict-held (17)
 
@@ -54,7 +54,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-19
 | snapcompact-shape-reader-identity | fix(catalog): give snapcompact readers their lead model's frame shape | snapcompact | P2 | 1d | snapcompact-shape-kdl | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-shape-reader-identity) |
 | snapcompact-deepseek-text | fix(catalog,snapcompact,coding-agent): give DeepSeek V4.1 Flash its snapcompact archive as text | snapcompact | P2 | 1d | snapcompact-shape-kdl, snapcompact-rerender-on-switch ([#19620](https://github.com/can1357/oh-my-pi/pull/19620)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-deepseek-text) |
 | snapcompact-carbon-1568 | fix(catalog): draw Gemini 4 Carbon's snapcompact frames at 1568px on Devin and Factory Droid | snapcompact | P2 | 1d | snapcompact-shape-kdl | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-carbon-1568) |
-| win-button-click | fix(natives): click Windows buttons without activating their window | computer |  | 4h | win-edit-setvalue | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-button-click) |
+| win-button-click | fix(natives): click Windows buttons without activating their window | computer |  | 5h | win-edit-setvalue | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-button-click) |
 
 ## Held (9)
 

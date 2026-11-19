@@ -8,11 +8,11 @@ On Windows, `setValue` on a plain text box pulled that app in front of whatever 
 
 | `setValue` on a classic text box | v19.0.0 | This PR |
 |---|---|---|
-| WinForms box, its app in front | written (10/10) | written (10/10) |
-| WinForms box, you idle in another window or it is covered | written, its app raised over yours (20/20) | written, nothing raised (20/20) |
-| WinForms box, you typing in another window | your keys land in its box, 199 of 300 (10/10) | written, your keys stay yours, 0 of 300 lost (9/10; 1 app stall) |
+| WinForms box, its app in front | written (10/10) | written (9/10; 1 unverified: the app's state read failed after its write event) |
+| WinForms box, you idle in another window or it is covered | written, its app raised over yours (20/20) | written, nothing raised (19/20; 1 app stall) |
+| WinForms box, you typing in another window | your keys land in its box, 199 of 300 (10/10) | written, your keys stay yours, 0 of 300 lost (10/10) |
 | Windows 10 Notepad, in front | written (10/10) | written (10/10) |
-| Windows 10 Notepad, not in front | refused: `BackgroundUnavailable … can take foreground` (30/30) | written, nothing raised (29/30; 1 unverified: its text could not be read back) |
+| Windows 10 Notepad, not in front | refused: `BackgroundUnavailable … can take foreground` (30/30) | written, nothing raised (29/30; 1 unverified: the observer's read of Notepad's text timed out) |
 | Rich edit, WPF, XAML and browser fields | unchanged | unchanged |
 
 Reading order: `value_write::route` (which classes take the native route) → `value_write::set_edit` → `Win32Ax::set_value` in `win32/ax.rs`.
@@ -36,7 +36,7 @@ The table is OMP's own `setValue` through the public `computer` route on a Windo
 
 <details><summary>Rig, the user's own text, the edit test</summary>
 
-A WinForms app and the inbox Notepad on the VM; a simulated user typing through the VM's USB keyboard into a window of its own; the foreground recorded by a WinEvent hook; the app's own state as truth; `computer` in its default mode. Across the same 160 WinForms trials, this branch had one app stall (the app stopped answering the harness for 5 s after `setValue` returned ok) and one `click()` whose state read timed out; v19.0.0 had 3 such events.
+A WinForms app and the inbox Notepad on the VM; a simulated user typing through the VM's USB keyboard into a window of its own; the foreground recorded by a WinEvent hook; the app's own state as truth; `computer` in its default mode. An app stall is the test app not answering the harness for 5 s after the call returned ok; it is restarted and the trial counted as not written. Across the same 160 WinForms trials (this PR's cells and the stacked button fix's), this branch had 5 stalls and 1 failed state read, v19.0.0 1; stalls also hit Notepad, read only by the observer (1 here).
 
 The user's window was read before and after every trial. On v19.0.0, 10 of 10 typing trials ended with the user's text missing keys (on average 20 of 30). On this branch no trial changed the user's text other than by the user's own typing: 0 of 80 (WinForms and Notepad).
 
