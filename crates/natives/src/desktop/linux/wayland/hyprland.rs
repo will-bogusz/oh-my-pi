@@ -231,7 +231,7 @@ mod tests {
 		assert_eq!(id(20, "Popup"), None);
 		assert_eq!(id(30, "Same"), None);
 		assert_eq!(id(40, "Other"), None);
-		assert_eq!(client_for_frame(&windows, None, "Editor"), None);
+		assert!(client_for_frame(&windows, None, "Editor").is_none());
 	}
 
 	#[test]
