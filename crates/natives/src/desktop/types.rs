@@ -358,6 +358,52 @@ pub struct DesktopTypeResult {
 	pub focus_return: Option<DesktopFocusReturn>,
 }
 
+/// A window that the app a background action targeted opened, or asked to
+/// activate, while the action ran or shortly after it, and what became of the
+/// user's keyboard. Hyprland only; other backends report none.
+#[napi(object)]
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DesktopWindowOpened {
+	/// The app's window class.
+	pub app:         String,
+	pub pid:         u32,
+	/// The window's title when it was last seen.
+	pub title:       String,
+	/// `false` when an existing window of the app asked to be activated
+	/// rather than a new one opening.
+	pub opened:      bool,
+	/// Milliseconds from the start of the action to the window's appearance
+	/// or activation request.
+	pub after_ms:    u32,
+	/// What happened to keyboard focus.
+	pub focus:       DesktopWindowFocus,
+	/// How long the window held the keyboard before it went back, in
+	/// milliseconds; absent when it never took it or never gave it back.
+	/// Keys the user typed meanwhile went to it.
+	pub held_ms:     Option<u32>,
+	/// The window the user had focused when the action began, as
+	/// `class: title`.
+	pub user_window: String,
+}
+
+/// What a window an action opened did to keyboard focus.
+#[napi(string_enum)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum DesktopWindowFocus {
+	/// It never took focus from the user's window.
+	#[napi(value = "kept")]
+	Kept,
+	/// It took focus and focus went back to the user's window.
+	#[napi(value = "handedBack")]
+	HandedBack,
+	/// The user moved focus elsewhere meanwhile, so it was left as they chose.
+	#[napi(value = "leftAsChosen")]
+	LeftAsChosen,
+	/// It took focus and focus did not go back to the user's window.
+	#[napi(value = "notReturned")]
+	NotReturned,
+}
+
 #[napi(object)]
 #[derive(Debug, Clone, Copy)]
 pub struct DesktopControlState {

@@ -2370,6 +2370,24 @@ impl AtSpiAx {
 			insert_typed_text(connection, &accessible, &name, &object, &toolkit, text).await
 		})
 	}
+
+	/// The process of the application that owns the element: its bus name's
+	/// Unix process ID.
+	pub(crate) fn element_pid(&self, h: &AxHandle) -> CoreResult<u32> {
+		let object = Self::object(h).clone();
+		let name = object
+			.name()
+			.cloned()
+			.ok_or_else(|| DesktopError::ax_failed("AT-SPI object has no bus name"))?;
+		self.request(async {
+			zbus::fdo::DBusProxy::new(&self.connection)
+				.await
+				.map_err(|err| DesktopError::ax_failed(err.to_string()))?
+				.get_connection_unix_process_id(name.into())
+				.await
+				.map_err(|err| DesktopError::ax_failed(format!("AT-SPI application pid: {err}")))
+		})
+	}
 }
 
 /// The toolkit name and version the element's application reports, if any.

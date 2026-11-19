@@ -188,6 +188,12 @@ export const DesktopKeyboardReturn = {
 	FrontOnly: "frontOnly",
 	NotSent: "notSent",
 };
+export const DesktopWindowFocus = {
+	Kept: "kept",
+	HandedBack: "handedBack",
+	LeftAsChosen: "leftAsChosen",
+	NotReturned: "notReturned",
+};
 export const DiffSide = {
 	Old: "Old",
 	New: "New",

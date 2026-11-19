@@ -120,6 +120,13 @@ export declare class DesktopSession {
   axElementAt(target: string, x: number, y: number): Promise<AxNode | undefined | null>
   axFocused(): Promise<AxNode | undefined | null>
   axNode(reference: string): Promise<AxNode>
+  /**
+   * Windows that apps opened or asked to activate around this session's
+   * background actions since the last call, and what each did to the
+   * user's keyboard focus. A window still watched is listed again when its
+   * outcome changes. Hyprland only; empty elsewhere.
+   */
+  takeWindowsOpened(): Promise<Array<DesktopWindowOpened>>
   axAttributes(reference: string): Promise<Array<[string, string]>>
   axChildren(reference: string): Promise<Array<AxNode>>
   axParent(reference: string): Promise<AxNode | undefined | null>
@@ -2042,6 +2049,54 @@ export interface DesktopWindow {
   height: number
   /** Whether the window currently holds input focus. */
   focused: boolean
+}
+
+/** What a window an action opened did to keyboard focus. */
+export declare enum DesktopWindowFocus {
+  /** It never took focus from the user's window. */
+  Kept = 'kept',
+  /** It took focus and focus went back to the user's window. */
+  HandedBack = 'handedBack',
+  /** The user moved focus elsewhere meanwhile, so it was left as they chose. */
+  LeftAsChosen = 'leftAsChosen',
+  /** It took focus and focus did not go back to the user's window. */
+  NotReturned = 'notReturned'
+}
+
+/**
+ * A window that the app a background action targeted opened, or asked to
+ * activate, while the action ran or shortly after it, and what became of the
+ * user's keyboard. Hyprland only; other backends report none.
+ */
+export interface DesktopWindowOpened {
+  /** The app's window class. */
+  app: string
+  pid: number
+  /** The window's title when it was last seen. */
+  title: string
+  /**
+   * `false` when an existing window of the app asked to be activated
+   * rather than a new one opening.
+   */
+  opened: boolean
+  /**
+   * Milliseconds from the start of the action to the window's appearance
+   * or activation request.
+   */
+  afterMs: number
+  /** What happened to keyboard focus. */
+  focus: DesktopWindowFocus
+  /**
+   * How long the window held the keyboard before it went back, in
+   * milliseconds; absent when it never took it or never gave it back.
+   * Keys the user typed meanwhile went to it.
+   */
+  heldMs?: number
+  /**
+   * The window the user had focused when the action began, as
+   * `class: title`.
+   */
+  userWindow: string
 }
 
 /**
