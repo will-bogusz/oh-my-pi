@@ -105025,7 +105025,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-19T04:54:56Z",
+  "checked": "2026-11-19T05:56:10Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -105220,20 +105220,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-12T05:49:49Z",
-    "kind": "unopenable",
-    "id": "relay-hidden-frames-main",
-    "title": "fix(browser-relay): say what the relay hid in a driven tab",
-    "why": "opened as #19001"
-   },
-   {
-    "at": "2026-11-12T05:49:49Z",
-    "kind": "unopenable",
-    "id": "autofill-rows",
-    "title": "fix(natives): own macOS suggestion-list elements by the window that lists them",
-    "why": "opened as #19004"
-   },
    {
     "at": "2026-11-12T09:22:42Z",
     "kind": "merged",
