@@ -2,16 +2,16 @@
 
 On Windows, pressing a plain button pulled its app in front of me, and clicking one while I worked elsewhere said it worked when nothing was clicked. Both now click the button in the background and say ok only once the button has answered its click message.
 
-WinForms button behind your window: `click()` **reported success with nothing clicked in 19 of 20 trials on v19.0.0 → 0 of 19**; `press()` on a button or check box took your foreground in 60 of 60 → 0 of 59.
+WinForms button behind your window: `click()` **reported success with nothing clicked in 19 of 20 trials on v19.0.0 → 0 of 20**; `press()` on a button or check box took your foreground in 60 of 60 → 0 of 60.
 
 > **Windows context.** A classic button (the system `BUTTON` control, used by Win32 dialogs and every WinForms `Button` and `CheckBox`) is its own small window. `BM_CLICK` makes the button run its own click before the message returns, with no activation. UI Automation's `Invoke` activates the window first; a posted press and release is often dropped.
 
 | WinForms button or check box | v19.0.0 | This PR |
 |---|---|---|
-| `press()`, its app in front | clicked (20/20) | clicked (20/20) |
+| `press()`, its app in front | clicked (20/20) | clicked (18/20; 2 app stalls) |
 | `press()`, you idle in another window or it is covered | clicked, its app raised over yours (40/40) | clicked, nothing raised (40/40) |
-| `press()`, you typing elsewhere | your keys land in the app, 385 of 600, and a Space presses the button again (20/20) | clicked once, 0 of 570 keys lost (19/19) |
-| `click()` on the button, covered or you typing | `ok`, nothing clicked (19/20; 1 app stall) | clicked (19/19) |
+| `press()`, you typing elsewhere | your keys land in the app, 385 of 600, and a Space presses the button again (20/20) | clicked once, 0 of 600 keys lost (20/20) |
+| `click()` on the button, covered or you typing | `ok`, nothing clicked (19/20; 1 app stall) | clicked (18/20; 2 app stalls) |
 | a check box that does not change | `ok` | native auto box: `InputFailed`; WinForms box, through `press()`: `AxUnconfirmed` (its app may manage the state) |
 | `press()` on a button whose form is disabled behind a dialog | Invoke tried | refused, nothing sent |
 
@@ -38,9 +38,9 @@ The table is OMP's `press()` and `click()` through the public `computer` route o
 
 <details><summary>Rig, the user's own text, the button test, dialogs</summary>
 
-The WinForms app and a simulated user typing through the VM's USB keyboard into a window of its own; the foreground recorded by a WinEvent hook; the app's own counters as truth; `computer` in its default mode. Across the same 160 WinForms trials, this branch had one `setValue` app stall (the app stopped answering the harness for 5 s) and one focused `click()` whose state read failed after it returned ok; v19.0.0 had 3 such events. Trials whose layout failed are void (2 here).
+The WinForms app and a simulated user typing through the VM's USB keyboard into a window of its own; the foreground recorded by a WinEvent hook; the app's own counters as truth; `computer` in its default mode. An app stall is the test app not answering the harness for 5 s after the call returned ok; it counts as not clicked. Across the same 160 WinForms trials (this PR's cells and the edit fix's), this branch had 5 stalls and 1 failed state read, v19.0.0 1. In refuse mode (n=5 per cell, unfocused, typing, covered), v19.0.0 raised the app in 44 of 44 `press()`/`setValue` trials; this branch in 0 of 45, all clicked or written but one stalled `click()`. WPF buttons (n=5) behave as on v19.0.0: clicked in front, refused behind.
 
-The user's window was read before and after every trial. On v19.0.0, every `press()` trial while the user typed (20/20) ended with keys missing from the user's text. On this branch, 0 of 118 trials changed the user's text other than by the user's own typing.
+The user's window was read before and after every trial. On v19.0.0, every `press()` trial while the user typed (20/20) ended with keys missing from the user's text. On this branch, 0 of 160 trials changed the user's text other than by the user's own typing.
 
 `button_clicks_land_before_returning_and_unchanged_check_boxes_fail` pumps no messages, so `BN_CLICKED` must arrive before `click_button` returns (a posted `BM_CLICK` fails it); it also covers a refused check box, a parent disabled while the button's state is read (no click sent), and a Win32 owner-drawn button kept on the positional click.
 
