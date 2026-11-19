@@ -278,7 +278,6 @@ impl WaylandBackend {
 	}
 
 	fn atspi_windows(&mut self) -> CoreResult<Vec<AtSpiWindow>> {
-		let atspi_stage = crate::desktop::stages::Stage::start("windows.atspi");
 		let listed = self
 			.ax
 			.as_ref()
@@ -289,12 +288,10 @@ impl WaylandBackend {
 					.unwrap_or_else(DesktopError::ax_unsupported)
 			})?
 			.windows()?;
-		drop(atspi_stage);
 		self.unanswered = listed.unanswered;
 		let Some(hyprland) = &self.hyprland else {
 			return Ok(listed.windows);
 		};
-		let _stage = crate::desktop::stages::Stage::start("windows.hyprland");
 		Ok(placed_by_hyprland(listed.windows, hyprland.list()?))
 	}
 
@@ -322,7 +319,6 @@ impl WaylandBackend {
 		if !plain_click && !matches!(ev, PointerEvent::Scroll { .. }) {
 			return None;
 		}
-		let windows_stage = crate::desktop::stages::Stage::start("ax.windows");
 		let windows: Vec<DesktopWindow> = match self.single_window(id) {
 			Some(Ok(window)) => vec![window],
 			Some(Err(error)) => return Some(Err(error)),
@@ -331,7 +327,6 @@ impl WaylandBackend {
 				Err(error) => return Some(Err(error)),
 			},
 		};
-		drop(windows_stage);
 		let Some(window) = windows.iter().find(|window| &window.id == id) else {
 			return Some(Err(DesktopError::window_not_found(format!("Wayland window {id} not found"))));
 		};
@@ -341,7 +336,6 @@ impl WaylandBackend {
 			)));
 		}
 		let ax = self.ax.as_mut()?;
-		let _stage = crate::desktop::stages::Stage::start("ax.route");
 		Some(match *ev {
 			PointerEvent::Click { x, y, .. } => ax.click_at(window, &windows, x, y),
 			PointerEvent::Scroll { x, y, dx, dy } => ax.scroll_at(window, x, y, dx, dy),
@@ -501,7 +495,6 @@ impl Backend for WaylandBackend {
 				return frame.validate_layout(&self.displays);
 			}
 		}
-		let _stage = crate::desktop::stages::Stage::start("frame.layout.portal");
 		// ScreenCast exposes geometry only when opening a stream. Enumeration can
 		// use the last snapshot, but coordinate delivery needs fresh bounds.
 		let geometry = capture::geometry(self.pipewire);
