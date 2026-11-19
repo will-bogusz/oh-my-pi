@@ -1,9 +1,9 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-19 11:21Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-19 11:22Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-19 11:18Z on MacBook-Pro; groups below are from it, states from the manifest)
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-19 11:22Z on MacBook-Pro; groups below are from it, states from the manifest)
 **Counts:** openable now 3, conflict-held 16, stacked 16, held 9, parked 1, open PRs 23; merged 398, closed 44
 
 ## Openable now (3)

@@ -115680,7 +115680,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-19T11:18:28.159780Z",
+  "at": "2026-11-19T11:22:01.513490Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -116972,15 +116972,14 @@
     "title": "fix(natives): click Windows buttons without activating their window",
     "action": "wait",
     "reasons": [
-     "needs win-edit-setvalue (queued)",
-     "conflicts with #19195 in docs/tools/computer.md"
+     "needs win-edit-setvalue (queued)"
     ],
-    "note": "",
+    "note": "accepted pair with #19195: Main (assignment to QueueThirtySeven), 2026-11-19: docs/tools/computer.md only, both add one paragraph after the line-118 paragraph of the desktop section; combined = #19195's macOS background-drag paragraph, then this entry's Windows BM_CLICK paragraph (union, no wording change)",
     "over": [],
-    "paired": [],
-    "blocked_by": [
+    "paired": [
      "#19195"
     ],
+    "blocked_by": [],
     "needs": [
      "win-edit-setvalue"
     ],
