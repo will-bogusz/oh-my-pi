@@ -105176,7 +105176,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-19T20:14:57Z",
+  "checked": "2026-11-19T20:45:12Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -105363,20 +105363,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-12T20:34:02Z",
-    "kind": "unopenable",
-    "id": "win-masks-cfg",
-    "title": "fix(natives): compile pi-natives for Windows again",
-    "why": "opened as #19078"
-   },
-   {
-    "at": "2026-11-12T20:34:02Z",
-    "kind": "unopenable",
-    "id": "x11-takeover-keyboard-state",
-    "title": "fix(natives): type X11 XTest text through a neutral keyboard state",
-    "why": "opened as #19080"
-   },
    {
     "at": "2026-11-12T23:05:54Z",
     "kind": "released",
