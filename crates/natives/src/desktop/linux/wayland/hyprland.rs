@@ -34,6 +34,9 @@ pub(super) struct Hyprland {
 
 #[derive(Debug, Deserialize)]
 struct Workspace {
+	/// 0 when absent: Hyprland 0.57 prints a monitor's `specialWorkspace` with
+	/// no `id` while none is open.
+	#[serde(default)]
 	id: i64,
 }
 
@@ -377,6 +380,19 @@ mod tests {
 		assert_eq!(clients[0].at, [647, 38]);
 		assert_eq!(clients[0].pid, 5754);
 		assert_eq!(clients[0].focus_history_id, 1);
+	}
+
+	#[test]
+	fn a_monitor_without_a_special_workspace_id_parses() {
+		// Hyprland 0.57 leaves `id` out of an unopened special workspace.
+		let monitors: Vec<Monitor> = serde_json::from_str(
+			r#"[{"id":0,"name":"Virtual-1","width":1280,"height":800,"x":0,"y":0,"scale":1.0,
+			"transform":0,"disabled":false,"activeWorkspace":{"id":2,"name":"2"},
+			"specialWorkspace":{"address":"","type":"","name":""}}]"#,
+		)
+		.unwrap();
+		assert_eq!(monitors[0].active_workspace.id, 2);
+		assert_eq!(monitors[0].special_workspace.id, 0);
 	}
 
 	fn client(id: &str, at: (i32, i32, u32, u32), floating: bool, workspace: i64) -> HyprlandWindow {
