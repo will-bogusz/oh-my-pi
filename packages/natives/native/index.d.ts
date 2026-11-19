@@ -2091,7 +2091,7 @@ export interface DesktopWindowOpened {
   /**
    * How long the window held the keyboard before it went back, in
    * milliseconds; absent when it never took it or never gave it back.
-   * Keys the user typed meanwhile went to it.
+   * Any keys the user typed in that time went to it.
    */
   heldMs?: number
   /**

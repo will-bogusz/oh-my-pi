@@ -380,7 +380,7 @@ pub struct DesktopWindowOpened {
 	pub focus:       DesktopWindowFocus,
 	/// How long the window held the keyboard before it went back, in
 	/// milliseconds; absent when it never took it or never gave it back.
-	/// Keys the user typed meanwhile went to it.
+	/// Any keys the user typed in that time went to it.
 	pub held_ms:     Option<u32>,
 	/// The window the user had focused when the action began, as
 	/// `class: title`.

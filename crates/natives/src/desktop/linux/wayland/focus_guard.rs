@@ -519,7 +519,13 @@ impl Watcher {
 		let mut reader = BufReader::new(events);
 		let mut line = Vec::new();
 		let mut clients: HashMap<String, Client> = HashMap::new();
+		// When the bytes of the line being read arrived: a line already whole
+		// in the buffer came with the read that filled it, so the time spent
+		// on earlier lines (client lookups, the hand-back) does not count as
+		// time the window held focus.
+		let mut read_at = Instant::now();
 		while !self.over() {
+			let buffered = reader.buffer().contains(&b'\n');
 			// A timed-out read keeps the bytes it had read in `line`; they are
 			// decoded once the line is whole.
 			match reader.read_until(b'\n', &mut line) {
@@ -529,6 +535,9 @@ impl Watcher {
 					continue;
 				},
 				Err(_) => break,
+			}
+			if !buffered {
+				read_at = Instant::now();
 			}
 			let event = parse(String::from_utf8_lossy(&line).trim_end());
 			line.clear();
@@ -541,7 +550,7 @@ impl Watcher {
 				}
 				clients.get(address).cloned()
 			};
-			let verdict = self.tracker.event(&event, Instant::now(), &mut client);
+			let verdict = self.tracker.event(&event, read_at, &mut client);
 			if verdict == Verdict::HandBack {
 				self.hand_back();
 			}
