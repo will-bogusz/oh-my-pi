@@ -5734,7 +5734,7 @@ describe("computer background fallback", () => {
 		const opening = 'tdlg.py opened a window "Allow access?" 30 ms after the action began';
 		expect(texts(await run(new OpeningSession(), clickTarget, "refuse"))).toEqual([
 			`${opening}; it took the keyboard from the user's window (foot: notes), which got it back at once.`,
-			`${opening}; it took the keyboard from the user's window (foot: notes) for 12 ms before it was handed back: keys the user typed meanwhile went to it.`,
+			`${opening}; it took the keyboard from the user's window (foot: notes) for 12 ms before it was handed back: any keys the user typed in that time went to it.`,
 			`${opening}; it took the keyboard from the user's window (foot: notes) and focus did not go back: the user's typing goes to it.`,
 		]);
 	});

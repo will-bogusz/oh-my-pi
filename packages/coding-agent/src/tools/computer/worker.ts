@@ -653,7 +653,7 @@ export function windowOpenedNote(opened: DesktopWindowOpened): string {
 		case "handedBack":
 			return heldMs === 0
 				? `${what}; it took the keyboard from the user's window (${userWindow}), which got it back at once.`
-				: `${what}; it took the keyboard from the user's window (${userWindow}) for ${heldMs ?? "an unknown number of"} ms before it was handed back: keys the user typed meanwhile went to it.`;
+				: `${what}; it took the keyboard from the user's window (${userWindow}) for ${heldMs ?? "an unknown number of"} ms before it was handed back: any keys the user typed in that time went to it.`;
 		case "leftAsChosen":
 			return `${what}; it took the keyboard from the user's window (${userWindow}), then the user moved focus themselves, so it was left where they put it.`;
 		case "notReturned":
