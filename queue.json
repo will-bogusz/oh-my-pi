@@ -105040,7 +105040,7 @@
    "worktree": null,
    "host": "MacBook-Pro",
    "added": "2026-11-19T11:16:47Z",
-   "updated": "2026-11-19T19:03:08Z",
+   "updated": "2026-11-19T19:03:32Z",
    "note": "",
    "built": [
     {
@@ -105145,7 +105145,8 @@
     }
    ],
    "advanced": "2026-11-19T19:01:21Z",
-   "opened": "2026-11-19T19:03:08Z"
+   "opened": "2026-11-19T19:03:08Z",
+   "readied": "2026-11-19T19:03:32Z"
   },
   {
    "id": "win-button-click",
