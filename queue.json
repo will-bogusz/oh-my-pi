@@ -105176,7 +105176,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-19T18:43:05Z",
+  "checked": "2026-11-19T19:14:06Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -105220,7 +105220,8 @@
    19700,
    19701,
    19702,
-   19748
+   19748,
+   19814
   ],
   "post_merge": {
    "17897": {
@@ -105362,19 +105363,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-12T19:02:34Z",
-    "kind": "openable",
-    "id": "x11-takeover-keyboard-state",
-    "title": "fix(natives): type X11 XTest text through a neutral keyboard state"
-   },
-   {
-    "at": "2026-11-12T19:02:34Z",
-    "kind": "unopenable",
-    "id": "x11-takeover-keyboard-grab",
-    "title": "fix(natives): refuse X11 XTest keys while another client grabs the keyboard",
-    "why": "opened as #19066"
-   },
    {
     "at": "2026-11-12T19:32:37Z",
     "kind": "merged",
@@ -115475,12 +115463,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-19T19:01:36.535725Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-19T19:14:07.588509Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 1,
+   "left": 7
   },
   "rows": [
    {
@@ -115660,6 +115648,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-18T18:46:50Z"
+   },
+   {
+    "id": "win-edit-setvalue",
+    "label": "#19814",
+    "number": 19814,
+    "state": "open",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): write Windows edit values without activating their window",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-19T19:03:06Z"
    },
    {
     "id": "x11-xtest-release",
@@ -116417,6 +116422,7 @@
      "conflicts with #19195 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19504 in docs/computer-use.md",
      "conflicts with #19702 in docs/computer-use.md",
+     "conflicts with #19814 in docs/tools/computer.md",
      "conflicts with #19531 in docs/computer-use.md, docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md",
      "conflicts with #19620 in packages/coding-agent/src/session/session-maintenance.ts",
@@ -116430,6 +116436,7 @@
      "#19195",
      "#19504",
      "#19702",
+     "#19814",
      "#19531",
      "#19618",
      "#19620"
@@ -116451,6 +116458,7 @@
     "reasons": [
      "needs computer-ui-quiet (queued)",
      "conflicts with #19195 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with #19814 in docs/tools/computer.md",
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md",
      "its need computer-ui-quiet conflicts with main in crates/natives/src/desktop/macos/settle.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
@@ -116461,6 +116469,7 @@
     "paired": [],
     "blocked_by": [
      "#19195",
+     "#19814",
      "#19531",
      "#19618"
     ],
@@ -116506,6 +116515,7 @@
     "reasons": [
      "held: Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check | Main 2026-11-12: before it opens, the waiting-key-chord case with the cursor actually drawn (20 trials at a 20 s deadline; CursorDemo's cursor-on arm never drew one, and an early run on the combined tree returned 'Cancelled, input may be partial' 11/11, unexplained), on the polished branch will/desktop-cursor-polish.",
      "conflicts with #19195 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts, packages/natives/native/index.d.ts",
+     "conflicts with #19814 in docs/tools/computer.md",
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md, packages/natives/native/index.d.ts",
      "conflicts with main in crates/natives/src/desktop/backend.rs, crates/natives/src/desktop/cursor.rs, crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/macos/capture.rs, crates/natives/src/desktop/macos/cursor.rs, crates/natives/src/desktop/macos/cursor/helper.m, crates/natives/src/desktop/macos/mod.rs, crates/natives/src/desktop/mod.rs, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/test/tools/computer.test.ts"
@@ -116515,6 +116525,7 @@
     "paired": [],
     "blocked_by": [
      "#19195",
+     "#19814",
      "#19531",
      "#19618"
     ],
@@ -116641,6 +116652,7 @@
     "reasons": [
      "held: Main, 2026-11-12: proposal; opens only after entry A merges and Will has seen the body",
      "conflicts with #19195 in docs/tools/computer.md",
+     "conflicts with #19814 in docs/tools/computer.md",
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md",
      "conflicts with main in crates/natives/src/desktop/win32/edit.rs, crates/natives/src/desktop/win32/input.rs, crates/natives/src/desktop/win32/mod.rs"
@@ -116650,6 +116662,7 @@
     "paired": [],
     "blocked_by": [
      "#19195",
+     "#19814",
      "#19531",
      "#19618"
     ],
@@ -116696,8 +116709,10 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with main in (branch missing on the fork)"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -116737,35 +116752,21 @@
     "title": "fix(natives): click Windows buttons without activating their window",
     "action": "wait",
     "reasons": [
-     "needs win-edit-setvalue (queued)"
+     "needs #19814 (open)",
+     "conflicts with #19814 in crates/natives/src/desktop/win32/value_write.rs"
     ],
     "note": "accepted pair with #19195: Main (assignment to QueueThirtySeven), 2026-11-19: docs/tools/computer.md only, both add one paragraph after the line-118 paragraph of the desktop section; combined = #19195's macOS background-drag paragraph, then this entry's Windows BM_CLICK paragraph (union, no wording change)",
     "over": [],
     "paired": [
      "#19195"
     ],
-    "blocked_by": [],
+    "blocked_by": [
+     "#19814"
+    ],
     "needs": [
      "win-edit-setvalue"
     ],
     "created": "2026-11-19T11:17:04Z"
-   },
-   {
-    "id": "win-edit-setvalue",
-    "label": "win-edit-setvalue",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": null,
-    "title": "fix(natives): write Windows edit values without activating their window",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-19T11:16:47Z"
    },
    {
     "id": "wire-delta-count",
