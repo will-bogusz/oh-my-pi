@@ -105032,7 +105032,7 @@
    "area": "computer",
    "priority": null,
    "needs": [],
-   "base": "57771ae562b9345e0579bceb2d68d585e3e6927e",
+   "base": "4530cba18f6f68c0ba405966cd8dfd1093a03152",
    "body": "bodies/win-edit-setvalue.md",
    "state": "queued",
    "pr": null,
@@ -105040,7 +105040,7 @@
    "worktree": null,
    "host": "MacBook-Pro",
    "added": "2026-11-19T11:16:47Z",
-   "updated": "2026-11-19T19:00:43Z",
+   "updated": "2026-11-19T19:01:21Z",
    "note": "",
    "built": [
     {
@@ -105143,7 +105143,8 @@
      "host": "goliath",
      "tree": "7cb745689f0335fdeee979ef2cdfa40cc496e03d"
     }
-   ]
+   ],
+   "advanced": "2026-11-19T19:01:21Z"
   },
   {
    "id": "win-button-click",
