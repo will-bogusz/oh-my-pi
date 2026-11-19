@@ -1,18 +1,17 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-19 03:59Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-19 04:00Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-19 03:58Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 3, conflict-held 16, stacked 15, held 9, parked 1, open PRs 22; merged 398, closed 44
+**Counts:** openable now 2, conflict-held 16, stacked 15, held 9, parked 1, open PRs 23; merged 398, closed 44
 
-## Openable now (3)
+## Openable now (2)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
 | stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 6d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 | factory-droid-1100-pin | feat(catalog): identify Factory Droid requests as droid 1.10.0 | factory-droid |  | 5d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-pin) |
-| fill-key-events | fix(coding-agent): fire key events after a browser fill for pages that search on keyup | browser | P0 | 2h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/fill-key-events) |
 
 ## Conflict-held (16)
 
@@ -75,7 +74,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-19
 |---|---|---|---|---|---|---|---|---|
 | [#16611](https://github.com/can1357/oh-my-pi/pull/16611) | read-audio-transcripts | feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio | catalog | P2 | 1d | Will, 2026-11-17: parked as draft, not maintained for now; revisit later | not checked or kept fresh | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-audio-transcripts) |
 
-## Open PRs (22)
+## Open PRs (23)
 
 | PR | id | title | area | rank | open | plan | branch |
 |---|---|---|---|---|---|---|---|
@@ -101,3 +100,4 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-19
 | [#19620](https://github.com/can1357/oh-my-pi/pull/19620) | snapcompact-rerender-on-switch | fix(snapcompact,coding-agent): re-render a snapcompact archive in the frame shape of the model reading it | snapcompact | P2 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-rerender-on-switch) |
 | [#19703](https://github.com/can1357/oh-my-pi/pull/19703) | loop-sampler-stop | fix(tui): stopped the loop profiler when the last TUI watchdog stops | tui | P1 | 9h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/loop-sampler-stop) |
 | [#19715](https://github.com/can1357/oh-my-pi/pull/19715) | macos-main-key-tests | test(natives): restore passing macOS native typing tests | computer | P0 | 5h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-main-key-tests) |
+| [#19748](https://github.com/can1357/oh-my-pi/pull/19748) | fill-key-events | fix(coding-agent): fire key events after a browser fill for pages that search on keyup | browser | P0 | 2h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/fill-key-events) |
