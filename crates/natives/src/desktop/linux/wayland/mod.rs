@@ -482,11 +482,12 @@ impl Backend for WaylandBackend {
 		// Hyprland reports its monitors over IPC in under a millisecond: while
 		// every display the last capture recorded is still a monitor with the
 		// same logical place and pixel size, the layout stands without a
-		// portal stream.
+		// portal stream. The IPC only saves time, so a reply it cannot read
+		// leaves the decision to the portal.
 		if let Some(hyprland) = &self.hyprland
 			&& !self.displays.is_empty()
+			&& let Ok(monitors) = hyprland.monitors()
 		{
-			let monitors = hyprland.monitors()?;
 			if self
 				.displays
 				.iter()
