@@ -612,10 +612,7 @@ impl Request {
 	/// Agent activity: everything except status reads and teardown keeps the
 	/// display awake, so captures and input see a lit, unlocked screen.
 	const fn is_activity(&self) -> bool {
-		!matches!(
-			self,
-			Self::Capabilities { .. } | Self::WindowsOpened { .. } | Self::Close { .. }
-		)
+		!matches!(self, Self::Capabilities { .. } | Self::WindowsOpened { .. } | Self::Close { .. })
 	}
 
 	/// The window or element whose app this request reads or acts on, for the
@@ -1618,8 +1615,7 @@ impl Worker {
 				self
 					.backend
 					.as_mut()
-					.map(|backend| backend.take_windows_opened())
-					.unwrap_or_default(),
+					.map_or_default(|backend| backend.take_windows_opened()),
 			)),
 			Request::ListDisplays { .. } => Ok(Response::Displays(self.backend()?.displays()?)),
 			Request::ListWindows { .. } => Ok(Response::Windows(self.backend()?.windows()?)),

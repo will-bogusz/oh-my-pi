@@ -5,9 +5,10 @@
 //! (Omarchy sets it) every window that asks to be activated, so a dialog that
 //! a background press opens takes the keys the user is typing elsewhere, and
 //! a typed Space or Enter answers it. Around each action this watches
-//! Hyprland's event socket; when a window of the acted-on process takes focus
-//! because it appeared, or asked for activation, during the watch, focus goes
-//! back to the user's window. Where the compositor runs a Lua config, the
+//! Hyprland's event socket; when a window of the acted-on process, or of a
+//! desktop portal backend showing a dialog for it, takes focus because it
+//! appeared, or asked for activation, during the watch, focus goes back to
+//! the user's window. Where the compositor runs a Lua config, the
 //! hand-back is also armed inside it (`hl.on("window.active")`), so it runs in
 //! the same compositor turn as the steal and no key reaches the dialog; the
 //! socket watcher then only confirms and reports. Nothing persists: the hook
@@ -43,10 +44,10 @@ use crate::desktop::{
 /// How long an action's call waits after the action returns for a window it
 /// opens, so the call itself reports it. On Omarchy 4.5, GTK and Electron
 /// dialogs appeared 20-55 ms after an AT-SPI press returned and Qt's 115-175
-/// ms; LibreOffice's, 0.3 s and later, are reported by the next call.
+/// ms; `LibreOffice`'s, 0.3 s and later, are reported by the next call.
 const SETTLE: Duration = Duration::from_millis(200);
 /// How long after the action returns the watch keeps handing focus back:
-/// LibreOffice built its Paragraph dialog 0.3-1.7 s after the press.
+/// `LibreOffice` built its Paragraph dialog 0.3-1.7 s after the press.
 const WATCH: Duration = Duration::from_millis(2500);
 /// How long after a window appears, or asks for activation, focus moving to
 /// it counts as the action's doing; later it is the user's click.
@@ -56,6 +57,11 @@ const HOOK_LIFETIME_MS: u32 = 15_000;
 /// How often the watcher checks whether it should stop; the next action's
 /// watch waits up to this long for the previous one to end.
 const POLL: Duration = Duration::from_millis(20);
+/// Window classes of the desktop portal backends (`xdg-desktop-portal-gtk`,
+/// `-kde`, `-gnome`, ...). They show dialogs on an app's behalf: Electron's
+/// file chooser on Omarchy 4.5 is an `xdg-desktop-portal-gtk` window, so a new
+/// one during the watch counts as the action's as well.
+const PORTAL_CLASS: &str = "xdg-desktop-portal";
 
 /// One line of Hyprland's event socket that the guard reads.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -122,6 +128,8 @@ struct Client {
 #[derive(Debug)]
 struct Seen {
 	address:    String,
+	/// The window's own process: the target's, or a portal backend's.
+	pid:        u32,
 	class:      String,
 	title:      String,
 	opened:     bool,
@@ -155,12 +163,18 @@ struct Tracker {
 }
 
 impl Tracker {
-	fn new(user: Client, target: u32, known: HashSet<String>, started: Instant) -> Self {
+	const fn new(user: Client, target: u32, known: HashSet<String>, started: Instant) -> Self {
 		Self { user, target, known, started, seen: Vec::new(), picked: false }
 	}
 
 	fn seen(&mut self, address: &str) -> Option<&mut Seen> {
 		self.seen.iter_mut().find(|seen| seen.address == address)
+	}
+
+	/// Whether `client` shows windows for the acted-on app: its own process,
+	/// or a portal backend.
+	fn for_target(&self, client: &Client) -> bool {
+		client.pid == i64::from(self.target) || client.class.starts_with(PORTAL_CLASS)
 	}
 
 	/// Records a window of the target that appeared, or asked for activation,
@@ -172,6 +186,7 @@ impl Tracker {
 		}
 		self.seen.push(Seen {
 			address:    address.to_owned(),
+			pid:        u32::try_from(client.pid).unwrap_or(self.target),
 			class:      client.class.clone(),
 			title:      client.title.clone(),
 			opened:     !self.known.contains(address),
@@ -194,31 +209,27 @@ impl Tracker {
 	) -> Verdict {
 		match event {
 			Event::Open { address, class, title } => {
-				if self.known.contains(address) || self.seen(address).is_some() {
-					return Verdict::Nothing;
-				}
-				let Some(found) = client(address) else {
-					return Verdict::Nothing;
-				};
-				if found.pid == i64::from(self.target) {
+				if !self.known.contains(address)
+					&& self.seen(address).is_none()
+					&& let Some(found) = client(address)
+				{
 					let found = Client { class: class.clone(), title: title.clone(), ..found };
-					self.note(address, &found, now);
+					if self.for_target(&found) {
+						self.note(address, &found, now);
+					}
 				}
-				Verdict::Nothing
 			},
 			Event::Urgent(address) => {
 				if let Some(found) = client(address)
-					&& found.pid == i64::from(self.target)
+					&& self.for_target(&found)
 				{
 					self.note(address, &found, now);
 				}
-				Verdict::Nothing
 			},
 			Event::Title { address, title } => {
 				if let Some(seen) = self.seen(address) {
 					seen.title.clone_from(title);
 				}
-				Verdict::Nothing
 			},
 			Event::Active(Some(address)) if *address == self.user.address => {
 				for seen in &mut self.seen {
@@ -226,7 +237,6 @@ impl Tracker {
 						seen.held = Some(seen.held.unwrap_or_default() + now.duration_since(at));
 					}
 				}
-				Verdict::Nothing
 			},
 			Event::Active(Some(address)) => {
 				if !self.picked {
@@ -235,7 +245,7 @@ impl Tracker {
 					if !self.known.contains(address)
 						&& self.seen(address).is_none()
 						&& let Some(found) = client(address)
-						&& found.pid == i64::from(self.target)
+						&& self.for_target(&found)
 					{
 						self.note(address, &found, now);
 					}
@@ -248,13 +258,10 @@ impl Tracker {
 					}
 				}
 				self.pick(now);
-				Verdict::Nothing
 			},
-			Event::Active(None) => {
-				self.pick(now);
-				Verdict::Nothing
-			},
+			Event::Active(None) => self.pick(now),
 		}
+		Verdict::Nothing
 	}
 
 	/// The user (or something other than the action) moved focus: what holds
@@ -287,7 +294,7 @@ impl Tracker {
 				};
 				(seen.address.clone(), DesktopWindowOpened {
 					app: seen.class.clone(),
-					pid: self.target,
+					pid: seen.pid,
 					title: seen.title.clone(),
 					opened: seen.opened,
 					after_ms: millis(seen.first.saturating_duration_since(self.started)),
@@ -313,7 +320,7 @@ fn millis(duration: Duration) -> u32 {
 /// `user`, registered as `omp_focus_guard[id]` (a function that removes it).
 fn hook(id: &str, pid: u32, user: &str) -> String {
 	format!(
-		r#"local id, pid, user, fresh_ms = "{id}", {pid}, "{user}", {fresh}
+		r#"local id, pid, user, fresh_ms, portal = "{id}", {pid}, "{user}", {fresh}, "{PORTAL_CLASS}"
 omp_focus_guard = omp_focus_guard or {{}}
 local known, fresh, subs = {{}}, {{}}, {{}}
 for _, w in ipairs(hl.get_windows()) do known[w.address] = true end
@@ -326,14 +333,17 @@ local function freshen(address)
   local n = fresh[address]
   hl.timer(function() if fresh[address] == n then fresh[address] = nil end end, {{ timeout = fresh_ms, type = "oneshot" }})
 end
-subs[1] = hl.on("window.urgent", function(w) if w and w.pid == pid then freshen(w.address) end end)
+local function ours(w)
+  return w.pid == pid or (w.class or ""):find(portal, 1, true) == 1
+end
+subs[1] = hl.on("window.urgent", function(w) if w and ours(w) then freshen(w.address) end end)
 subs[2] = hl.on("window.active", function(w)
   if not w or w.address == user then return end
-  if w.pid == pid and not known[w.address] and not fresh[w.address] then
+  if ours(w) and not known[w.address] and not fresh[w.address] then
     known[w.address] = true
     freshen(w.address)
   end
-  if w.pid == pid and fresh[w.address] then
+  if ours(w) and fresh[w.address] then
     hl.dispatch(hl.dsp.focus({{ window = "address:" .. user }}))
   else
     stop()
@@ -603,11 +613,7 @@ impl GuardedAx {
 
 	/// See [`FocusGuard::take`].
 	pub(super) fn take_windows_opened(&mut self) -> Vec<DesktopWindowOpened> {
-		self
-			.guard
-			.as_mut()
-			.map(FocusGuard::take)
-			.unwrap_or_default()
+		self.guard.as_mut().map_or_default(FocusGuard::take)
 	}
 }
 
@@ -844,6 +850,23 @@ mod tests {
 		assert_eq!(run.at(30, "activewindowv2>>f"), Verdict::Nothing);
 		assert!(run.tracker.report().is_empty());
 		assert!(run.tracker.picked);
+	}
+
+	#[test]
+	fn a_portal_dialog_shown_for_the_app_is_the_actions() {
+		let mut run = Run::new();
+		// Electron's file chooser is the GTK portal backend's window, asking
+		// for activation with the app's token before it maps.
+		run.clients
+			.push(client("0xf", 40, "xdg-desktop-portal-gtk", "Open"));
+		assert_eq!(run.at(110, "urgent>>f"), Verdict::Nothing);
+		assert_eq!(run.at(118, "openwindow>>f,1,xdg-desktop-portal-gtk,Open"), Verdict::Nothing);
+		assert_eq!(run.at(118, "activewindowv2>>f"), Verdict::HandBack);
+		assert_eq!(run.at(119, "activewindowv2>>a"), Verdict::Nothing);
+		let report = run.tracker.report();
+		assert_eq!(report.len(), 1);
+		assert_eq!((report[0].1.pid, report[0].1.app.as_str()), (40, "xdg-desktop-portal-gtk"));
+		assert_eq!(report[0].1.focus, DesktopWindowFocus::HandedBack);
 	}
 
 	#[test]
