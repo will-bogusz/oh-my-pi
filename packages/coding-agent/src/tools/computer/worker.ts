@@ -1649,7 +1649,15 @@ class DevToolsWin extends Win {
 		const at = await this.#call(context, () =>
 			this.#route.click(x, y, native.button, native.count ?? 1, modifierBits(native.modifiers)),
 		);
-		this.#sent(context, `click at CSS (${Math.round(at.x)}, ${Math.round(at.y)})`);
+		const where = `CSS (${Math.round(at.x)}, ${Math.round(at.y)})`;
+		if (at.focused) {
+			context.output.push({
+				type: "text",
+				text: `click focused the text field at ${where} of window ${this.id} through DevTools instead of pressing: a press would make the browser take the user's keyboard on this desktop; no mouse input was sent`,
+			});
+			return;
+		}
+		this.#sent(context, `click at ${where}`);
 	}
 
 	override async doubleClick(x: number, y: number, options?: Omit<ClickOptions, "count">): Promise<void> {

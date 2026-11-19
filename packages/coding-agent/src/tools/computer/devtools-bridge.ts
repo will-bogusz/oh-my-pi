@@ -385,9 +385,13 @@ export class Endpoint {
 	readonly app: string;
 	readonly browser: string;
 	readonly launched: boolean;
+	/** An Electron app rather than a Chromium browser: its presses ask for no window activation. */
+	readonly electron: boolean;
 	readonly #url: string;
 	#connection?: Promise<CdpConnection>;
 	readonly #sessions = new Map<string, Promise<string>>();
+	/** Electron's stand-in window ids, one per page, stable while the page lives. */
+	readonly #pageWindows = new Map<string, number>();
 
 	constructor(found: FoundEndpoint, app: string, launched: boolean) {
 		this.port = found.port;
@@ -395,6 +399,7 @@ export class Endpoint {
 		this.browser = found.browser;
 		this.app = app;
 		this.launched = launched;
+		this.electron = found.browser.startsWith("Electron/");
 		this.#url = found.webSocketDebuggerUrl;
 	}
 
@@ -415,7 +420,11 @@ export class Endpoint {
 		return this.#connection;
 	}
 
-	/** A flat session on page `targetId`, focus-emulated so a background window's page takes keys like a focused one. */
+	/**
+	 * A flat session on page `targetId`. No focus emulation: a background page takes inserted text and keys
+	 * without it, and `Emulation.setFocusEmulationEnabled` would make every tab it touches report itself
+	 * visible, which is how the front tab of a window is told apart.
+	 */
 	session(targetId: string): Promise<string> {
 		let session = this.#sessions.get(targetId);
 		if (!session) {
@@ -425,7 +434,6 @@ export class Endpoint {
 					targetId,
 					flatten: true,
 				});
-				await connection.send("Emulation.setFocusEmulationEnabled", { enabled: true }, sessionId);
 				return sessionId;
 			})();
 			session.catch(() => this.#sessions.delete(targetId));
@@ -448,11 +456,26 @@ export class Endpoint {
 		const byWindow = new Map<number, DevToolsWindow>();
 		for (const info of targetInfos) {
 			if (info.type !== "page" || info.url.startsWith("devtools://")) continue;
-			const located = await connection
+			let located = await connection
 				.send<{ windowId: number; bounds: Record<string, number> }>("Browser.getWindowForTarget", {
 					targetId: info.targetId,
 				})
 				.catch(() => undefined);
+			if (!located && this.electron) {
+				// `Browser.getWindowForTarget` lives in Chrome's browser layer, which Electron does not ship: there a
+				// page is taken as its own BrowserWindow (a window holding several WebContentsViews lists them apart).
+				let windowId = this.#pageWindows.get(info.targetId);
+				if (windowId === undefined) {
+					windowId = this.#pageWindows.size + 1;
+					this.#pageWindows.set(info.targetId, windowId);
+				}
+				const size = await this.send<{ result: { value?: unknown } }>(info.targetId, "Runtime.evaluate", {
+					expression: "[outerWidth, outerHeight]",
+					returnByValue: true,
+				}).catch(() => undefined);
+				const [width = 0, height = 0] = Array.isArray(size?.result.value) ? (size.result.value as number[]) : [];
+				located = { windowId, bounds: { width, height } };
+			}
 			if (!located) continue;
 			let window = byWindow.get(located.windowId);
 			if (!window) {
@@ -581,12 +604,21 @@ export class DevToolsRoute {
 	readonly #endpoint: Endpoint;
 	readonly #frames: Map<string, Frame>;
 	readonly #id: string;
+	/** Why a press would take the user's keyboard here (see {@link activationGrant}); unset where it would not. */
+	readonly #pressTakesFocus: string | undefined;
 
-	constructor(id: string, window: DevToolsWindow, frames: Map<string, Frame>) {
+	constructor(id: string, window: DevToolsWindow, frames: Map<string, Frame>, pressTakesFocus: string | undefined) {
 		this.#id = id;
 		this.window = window;
 		this.#endpoint = window.endpoint;
 		this.#frames = frames;
+		this.#pressTakesFocus = window.endpoint.electron ? undefined : pressTakesFocus;
+	}
+
+	#refusePress(what: string): never {
+		throw new ToolError(
+			`BackgroundUnavailable: ${what} in window ${this.#id}: every mouse or touch press makes the Chromium browser ask the desktop to activate its window, and ${this.#pressTakesFocus}, which would take the user's keyboard; nothing was sent. In the background this window takes move (hover), scroll, type, press and screenshots, and a plain click on a text field focuses it`,
+		);
 	}
 
 	#front(): PageInfo {
@@ -727,11 +759,34 @@ export class DevToolsRoute {
 		});
 	}
 
-	/** The CSS position the call acted at, for its output line. */
-	async click(x: number, y: number, button = "left", count = 1, modifiers = 0): Promise<{ x: number; y: number }> {
+	/**
+	 * The CSS position the call acted at, for its output line; `focused` when the click focused a text field
+	 * without a press, because a press would take the user's keyboard ({@link activationGrant}).
+	 */
+	async click(
+		x: number,
+		y: number,
+		button = "left",
+		count = 1,
+		modifiers = 0,
+	): Promise<{ x: number; y: number; focused?: true }> {
 		const point = this.#css(x, y);
 		const bit = BUTTON_BITS[button];
 		if (bit === undefined) throw new ToolError(`no mouse button named ${JSON.stringify(button)}`);
+		if (this.#pressTakesFocus !== undefined) {
+			if (button !== "left" || count !== 1 || modifiers !== 0) this.#refusePress("this click");
+			// What the click would do to a text field, minus the press: focus it (as `DOM.focus` would).
+			const focused = await this.#endpoint.send<{ result: { value?: unknown } }>(
+				this.#front().targetId,
+				"Runtime.evaluate",
+				{
+					expression: `((x, y) => { let e = document.elementFromPoint(x, y); while (e && e.shadowRoot) { const inner = e.shadowRoot.elementFromPoint(x, y); if (!inner || inner === e) break; e = inner; } if (!e || !(e.isContentEditable || e.tagName === 'TEXTAREA' || (e.tagName === 'INPUT' && !['button','checkbox','radio','range','submit','reset','file','color','image','hidden'].includes(e.type)))) return false; e.focus(); return e.getRootNode().activeElement === e; })(${point.x}, ${point.y})`,
+					returnByValue: true,
+				},
+			);
+			if (focused.result.value !== true) this.#refusePress("a click here (not on a text field)");
+			return { ...point, focused: true };
+		}
 		await this.#mouse("mouseMoved", point, { modifiers });
 		for (let click = 1; click <= count; click++) {
 			await this.#mouse("mousePressed", point, { button, buttons: bit, clickCount: click, modifiers });
@@ -764,6 +819,7 @@ export class DevToolsRoute {
 	async drag(points: Array<[number, number]>, modifiers = 0): Promise<"pointer" | "html"> {
 		if (points.length < 2) throw new ToolError("drag needs at least two points");
 		const path = points.map(([x, y]) => this.#css(x, y));
+		if (this.#pressTakesFocus !== undefined) this.#refusePress("a drag");
 		const targetId = this.#front().targetId;
 		const connection = await this.#endpoint.connection();
 		const sessionId = await this.#endpoint.session(targetId);
@@ -871,12 +927,45 @@ export class DevToolsRoute {
 	}
 }
 
+/**
+ * Why a press in a Chromium browser window would take the user's keyboard on this desktop, or undefined where
+ * it would not. Chromium (the browser, not Electron) asks for its window's activation on every mouse or touch
+ * press it is sent, DevTools ones included; whether that moves the user's focus is the compositor's call.
+ * Hyprland grants it under `misc:focus_on_activate` (Omarchy turns it on); GNOME's focus-stealing prevention and
+ * sway's default (`focus_on_window_activation urgent`) only mark the window. Elsewhere it is unknown, so it
+ * counts as granted.
+ */
+function activationGrant(): string | undefined {
+	if (process.env.HYPRLAND_INSTANCE_SIGNATURE) {
+		const option = Bun.spawnSync(["hyprctl", "-j", "getoption", "misc:focus_on_activate"]).stdout.toString();
+		let parsed: unknown;
+		try {
+			parsed = JSON.parse(option);
+		} catch {
+			return "Hyprland's misc:focus_on_activate could not be read, so it may grant it";
+		}
+		// Hyprland 0.56 (Lua config) reports `bool`; older releases `int`.
+		if (
+			parsed &&
+			typeof parsed === "object" &&
+			(("bool" in parsed && parsed.bool === false) || ("int" in parsed && parsed.int === 0))
+		)
+			return undefined;
+		return "this Hyprland grants it (misc:focus_on_activate is on)";
+	}
+	if ((process.env.XDG_CURRENT_DESKTOP ?? "").toUpperCase().split(":").includes("GNOME")) return undefined;
+	if (process.env.SWAYSOCK) return undefined;
+	return `this desktop (${process.env.XDG_CURRENT_DESKTOP || "unidentified"}) may grant it`;
+}
+
 /** Per-worker registry of DevTools endpoints and the routes they give desktop windows. */
 export class DevToolsBridge {
 	readonly #endpoints = new Map<number, Endpoint>();
 	readonly #frames = new Map<string, Frame>();
 	#routes = new Map<string, DevToolsWindow>();
 	#runningScan?: { at: number; found: FoundEndpoint[] };
+	/** {@link activationGrant}, read when the first window is routed; the compositor setting rarely changes. */
+	#pressTakesFocus?: { reason: string | undefined };
 
 	register(found: FoundEndpoint, app: string, launched: boolean): Endpoint {
 		const existing = this.#endpoints.get(found.pid);
@@ -958,7 +1047,9 @@ export class DevToolsBridge {
 	/** The route of window `id` from the latest {@link merge}. */
 	route(id: string): DevToolsRoute | undefined {
 		const window = this.#routes.get(id);
-		return window ? new DevToolsRoute(id, window, this.#frames) : undefined;
+		if (!window) return undefined;
+		this.#pressTakesFocus ??= { reason: activationGrant() };
+		return new DevToolsRoute(id, window, this.#frames, this.#pressTakesFocus.reason);
 	}
 
 	close(): void {
