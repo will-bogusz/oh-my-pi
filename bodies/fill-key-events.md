@@ -1,6 +1,6 @@
 ## What
 
-Since 19.0.0 `fill` inserts text without any key events, so search boxes that only update on keyup (CyberChef's, for one) showed nothing until the model pressed a key itself; I made fill finish with a keydown and keyup on the field, created in the page so they can't type, click or set off a shortcut.
+Since 19.0.0 `fill` inserts text without any key events, so search boxes that only update on keyup (CyberChef's, for one) showed nothing until the model pressed a key itself; I made fill finish with a keydown and keyup on the field, created in the page so they bring no browser default action, no held modifier and no new user activation.
 
 On CyberChef's operation search, `fill("#search", "to base64")` shows 0 results on 19.0.0 and 3 with this PR, as on 18.22.2, and a 9-character fill takes 1.6 ms on 19.0.0 and 1.8 ms with this PR (4.4 ms on 18.22.2).
 
@@ -16,7 +16,7 @@ On CyberChef's operation search, `fill("#search", "to base64")` shows 0 results 
 
 <details><summary>Where the change is</summary>
 
-`fillViaHandle`'s text-field branch (`packages/coding-agent/src/tools/browser/interactions.ts`): after the insert, `FIELD_KEY_EVENTS` runs on the field through `Runtime.callFunctionOn` on the handle's own session, with the value's last character (a newline or tab skipped), and dispatches the pair only while the field still has focus.
+`fillViaHandle`'s text-field branch (`packages/coding-agent/src/tools/browser/interactions.ts`): after the insert, `FIELD_KEY_EVENTS` runs on the field through `Runtime.callFunctionOn` on the handle's own session, with the value's last non-control code point. It acts only on a `<textarea>` or a text-entry `<input>`, and checks before each of the two events that the field still has focus, never retargeting.
 </details>
 
 ## Why
@@ -28,13 +28,13 @@ Decisions:
 - Puppeteer's `evaluate` is not used to dispatch: it requests a user gesture, which renews activation too.
 - Typing the last character for real, or per-key typing for ASCII again, is rejected: keydown listeners read the value one character short and controlled inputs see several values.
 
-Page-created events are untrusted (`isTrusted: false`, `keyCode` 0), so a page that ignores those still sees none, as on 19.0.0. Non-goals: rich-text editors (no key events on 18.22.2 either), WebKit and Tern tabs (19.0.0 did not change their `fill`).
+Page-created events are untrusted (`isTrusted: false`, `keyCode` and `which` 0), so a page that ignores those still sees none, as on 19.0.0. A page's own keydown and keyup handlers do run, and may do whatever they do on a key (submit, click), as on 18.22.2 where every typed key ran them. This applies to Chromium-backed tabs, relay and CDP-attached included; WebKit, Tern and cmux tabs and rich-text editors keep their earlier paths, unchanged since 18.22.2.
 
 ## Testing
 
-- New test in `browser-interactions.test.ts`, through `tab.fill`: a keyup-only search page gets one `beforeinput`, one `input`, then `keydown`/`keyup` reading the final value, no `keypress`, no doubled text and no renewed activation after its `input` handler spent it; a field whose `input` focuses a button sends that button no key or click. It fails on 19.0.0, with native key events and with `evaluate`.
-- Headless Chromium on macOS through `tab.fill` on 18.22.2, 19.0.0 and this branch: the table above (medians of 4 interleaved runs), plus keydown-with-`setTimeout` and incremental `search` listeners, a hidden background tab and a held Control. Live CyberChef: 3 / 0 / 3 results.
-- Linux, coding-agent's `test/tools/browser*.test.ts`: 1052 pass, 0 fail (1051 on `main`). The full coding-agent suite fails the same three tests on `main` and here (Fireworks fast mode, a git-hooks path, a changelog PTY smoke); three that failed once in the branch's chunked run pass 3 of 3 alone. `bun run check:ts` passes; no Rust is touched.
+- New test in `browser-interactions.test.ts`, through `tab.fill`: a keyup-only search page gets one `beforeinput`, one `input`, then `keydown`/`keyup` reading the final value, no `keypress`, no doubled text and no renewed activation after its `input` handler spent it; a field whose `input` focuses a button sends that button no key or click; a field whose keydown moves focus gets no keyup; a focusable `<div>` passed to `fill` gets no key. It fails on 19.0.0 and on each rejected or weaker variant.
+- Headless Chromium on macOS, 18.22.2 / 19.0.0 / this branch: the table above (medians of 4 interleaved runs), a hidden background tab and a held Control. Live CyberChef: 3 / 0 / 3 results.
+- Linux, `test/tools/browser*.test.ts` at the previous head: 1052 pass, 0 fail (1051 on `main`); the full suite's failures match `main`'s or pass 3 of 3 alone. `bun run check:ts` passes.
 
 ---
 
