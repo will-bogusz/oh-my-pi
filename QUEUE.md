@@ -1,18 +1,20 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-19 11:17Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-19 11:19Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-19 10:32Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 1, conflict-held 17, stacked 15, held 9, parked 1, open PRs 23, queued since the last plan 2; merged 398, closed 44
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-19 11:18Z on MacBook-Pro; groups below are from it, states from the manifest)
+**Counts:** openable now 3, conflict-held 16, stacked 16, held 9, parked 1, open PRs 23; merged 398, closed 44
 
-## Openable now (1)
+## Openable now (3)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
+| stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 6d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 | factory-droid-1100-pin | feat(catalog): identify Factory Droid requests as droid 1.10.0 | factory-droid |  | 5d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-pin) |
+| win-edit-setvalue | fix(natives): write Windows edit values without activating their window | computer |  | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-edit-setvalue) |
 
-## Conflict-held (17)
+## Conflict-held (16)
 
 | id | title | area | priority | age | blocked by | branch |
 |---|---|---|---|---|---|---|
@@ -30,11 +32,10 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-19
 | win-minimised-windows | fix(natives,coding-agent): show a minimized Windows app's window from apps.open instead of launching it again | computer | P2 | 8d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-minimised-windows) |
 | macos-ax-cancel-before-send | fix(natives): send no macOS AX action once its run is cancelled | natives | P2 | 8d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-ax-cancel-before-send) |
 | win-ax-states | fix(natives): expose Windows control state and stale-reference matches | computer | P2 | 8d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-ax-states) |
-| stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 6d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 | macos-web-type-background | fix(natives): type into a background macOS web page field without a takeover | computer | P2 | 4d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19504](https://github.com/can1357/oh-my-pi/pull/19504), [#19702](https://github.com/can1357/oh-my-pi/pull/19702), [#19531](https://github.com/can1357/oh-my-pi/pull/19531), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-web-type-background) |
 | deadline-ranking | feat(ai): rank an account priority by quota deadline | ai/auth | P2 | 1d | [#19623](https://github.com/can1357/oh-my-pi/pull/19623), [#19700](https://github.com/can1357/oh-my-pi/pull/19700), [#19701](https://github.com/can1357/oh-my-pi/pull/19701) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/deadline-ranking) |
 
-## Stacked (15)
+## Stacked (16)
 
 | id | title | area | priority | age | needs | branch |
 |---|---|---|---|---|---|---|
@@ -53,6 +54,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-19
 | snapcompact-shape-reader-identity | fix(catalog): give snapcompact readers their lead model's frame shape | snapcompact | P2 | 1d | snapcompact-shape-kdl | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-shape-reader-identity) |
 | snapcompact-deepseek-text | fix(catalog,snapcompact,coding-agent): give DeepSeek V4.1 Flash its snapcompact archive as text | snapcompact | P2 | 1d | snapcompact-shape-kdl, snapcompact-rerender-on-switch ([#19620](https://github.com/can1357/oh-my-pi/pull/19620)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-deepseek-text) |
 | snapcompact-carbon-1568 | fix(catalog): draw Gemini 4 Carbon's snapcompact frames at 1568px on Devin and Factory Droid | snapcompact | P2 | 1d | snapcompact-shape-kdl | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-carbon-1568) |
+| win-button-click | fix(natives): click Windows buttons without activating their window | computer |  | 0h | win-edit-setvalue | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-button-click) |
 
 ## Held (9)
 
@@ -101,10 +103,3 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-19
 | [#19703](https://github.com/can1357/oh-my-pi/pull/19703) | loop-sampler-stop | fix(tui): stopped the loop profiler when the last TUI watchdog stops | tui | P1 | 16h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/loop-sampler-stop) |
 | [#19715](https://github.com/can1357/oh-my-pi/pull/19715) | macos-main-key-tests | test(natives): restore passing macOS native typing tests | computer | P0 | 13h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-main-key-tests) |
 | [#19748](https://github.com/can1357/oh-my-pi/pull/19748) | fill-key-events | fix(coding-agent): fire key events after a browser fill for pages that search on keyup | browser | P0 | 7h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/fill-key-events) |
-
-## Queued since the last plan (2)
-
-| id | title | area | priority | age | branch |
-|---|---|---|---|---|---|
-| win-edit-setvalue | fix(natives): write Windows edit values without activating their window | computer |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-edit-setvalue) |
-| win-button-click | fix(natives): click Windows buttons without activating their window | computer |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-button-click) |
