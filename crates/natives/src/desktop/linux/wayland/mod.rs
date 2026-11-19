@@ -765,8 +765,7 @@ impl Backend for WaylandBackend {
 		self
 			.ax
 			.as_mut()
-			.map(focus_guard::GuardedAx::take_windows_opened)
-			.unwrap_or_default()
+			.map_or_default(focus_guard::GuardedAx::take_windows_opened)
 	}
 }
 
