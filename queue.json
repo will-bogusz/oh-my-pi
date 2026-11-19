@@ -104628,13 +104628,13 @@
    "needs": [],
    "base": "2421bdb99f84fbc74454eda374747afcbf9c0f4d",
    "body": "bodies/loop-sampler-stop.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19703,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/loop-sampler-stop",
    "host": "MacBook-Pro",
    "added": "2026-11-18T18:13:26Z",
-   "updated": "2026-11-18T22:48:52Z",
+   "updated": "2026-11-19T18:36:59Z",
    "note": "SamplerStop, 2026-11-18: P1 estimate. Production effect is small: after TUI.stop (external editor, session end) the profiler kept sampling but a 2 s timer drained it, so no lasting retention; the real harm is bun test, where 3 Composer-starting files break parked-subagent GC tests later in the process. Root-cause fix plus regression test; profile() pause trick and debug-report limit are what a maintainer may question.",
    "opened": "2026-11-18T18:49:18Z",
    "readied": "2026-11-18T18:49:44Z",
@@ -104666,7 +104666,8 @@
      }
     }
    ],
-   "advanced": "2026-11-18T22:48:52Z"
+   "advanced": "2026-11-18T22:48:52Z",
+   "merged_by": "pr"
   },
   {
    "id": "oxfmt-main-drift",
@@ -104790,13 +104791,13 @@
    "needs": [],
    "base": "003818b57a07994f8644d38d099faa39dda69f59",
    "body": "bodies/macos-main-key-tests.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19715,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.local/state/ovnfs/git/macos-main-key-tests",
    "host": "MacBook-Pro",
    "added": "2026-11-18T21:47:33Z",
-   "updated": "2026-11-18T22:20:57Z",
+   "updated": "2026-11-19T18:36:59Z",
    "note": "P1: main macOS native desktop test job is red from stale Return/Tab expectations introduced by adbb616. Test-only repair: final head passes 720 desktop tests; macOS and Linux rust-check records present; precheck exits 0. Independent review findings fixed in b58302b9c5: omit internal-only changelog (no test needed), reuse Tab fixture (already covered). Opening still owes sibling merged-tree builds.",
    "built": [
     {
@@ -104898,7 +104899,8 @@
      }
     }
    ],
-   "advanced": "2026-11-18T22:20:57Z"
+   "advanced": "2026-11-18T22:20:57Z",
+   "merged_by": "pr"
   },
   {
    "id": "fill-key-events",
