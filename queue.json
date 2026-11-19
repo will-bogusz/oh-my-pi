@@ -75190,7 +75190,7 @@
    "needs": [
     "observe-settle"
    ],
-   "base": "028f1d6b495425022db0a417e4bb134a919cfed3",
+   "base": "f40f335845f0b136453d12fec8d6057011082766",
    "body": "bodies/settle-reads.md",
    "state": "open",
    "pr": 19633,
@@ -75198,7 +75198,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-settle-reads",
    "host": "MacBook-Pro",
    "added": "2026-11-10T18:56:55Z",
-   "updated": "2026-11-18T21:15:29Z",
+   "updated": "2026-11-19T22:52:08Z",
    "note": "",
    "kind": "proposal",
    "built": [
@@ -75585,7 +75585,7 @@
      "host": "MacBook-Pro"
     }
    ],
-   "advanced": "2026-11-18T21:15:29Z",
+   "advanced": "2026-11-19T22:52:08Z",
    "line_loss_overrides": [
     {
      "at": "2026-11-17T23:37:48Z",
