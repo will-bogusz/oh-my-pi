@@ -1,9 +1,9 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-19 04:55Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-19 05:25Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-19 04:24Z on goliath; groups below are from it, states from the manifest)
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-19 05:25Z on goliath; groups below are from it, states from the manifest)
 **Counts:** openable now 1, conflict-held 17, stacked 15, held 9, parked 1, open PRs 23; merged 398, closed 44
 
 ## Openable now (1)
@@ -66,7 +66,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-19
 | desktop-cursor | feat(coding-agent,natives): show each agent's cursor where its computer input lands on macOS | coding-agent | P2 | 8d | Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check \| Main 2026-11-12: before it opens, the waiting-key-chord case with the cursor actually drawn (20 trials at a 20 s deadline; CursorDemo's cursor-on arm never drew one, and an early run on the combined tree returned 'Cancelled, input may be partial' 11/11, unexplained), on the polished branch will/desktop-cursor-polish. | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/desktop-cursor) |
 | win-type-insert | feat(natives): insert typed text into a focused Windows multi-line edit control | computer | P2 | 7d | Main, 2026-11-12: proposal; opens only after entry A merges and Will has seen the body | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-type-insert) |
 | macos-drag-no-change-note | fix(natives): note a macOS background drag that changed nothing readable | computer | P2 | 4d | Main, 2026-11-18: rework against #19195's new drag logic after it merges (not a mechanical restack; drag_control.rs moved) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-drag-no-change-note) |
-| macos-keys-read-cost | perf(natives): prove a macOS key window draws its own content without reading all its children | computer | P2 | 10h | Main, 2026-11-18: needs an independent review and a VM row before it can open; no work on it now | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-keys-read-cost) |
+| macos-keys-read-cost | perf(natives): prove a macOS key window draws its own content without reading all its children | computer | P2 | 11h | Main, 2026-11-18: needs an independent review and a VM row before it can open; no work on it now | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-keys-read-cost) |
 
 ## Parked (1)
 
@@ -99,5 +99,5 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-19
 | [#19615](https://github.com/can1357/oh-my-pi/pull/19615) | wayland-still-capture | fix(natives): keep the Wayland ScreenCast stream open between screenshots on Hyprland and wlroots | natives | P2 | 1d | keep; accepted pair with #19616: Main, 2026-11-18: no conflict since #19615 376a1b8be12 moved the kept-stream consts to wayland/capture/share.rs (git merge-tree clean); the merged tree built and its wayland tests passed 57/57 on goliath (ShareScope) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-still-capture) |
 | [#19620](https://github.com/can1357/oh-my-pi/pull/19620) | snapcompact-rerender-on-switch | fix(snapcompact,coding-agent): re-render a snapcompact archive in the frame shape of the model reading it | snapcompact | P2 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-rerender-on-switch) |
 | [#19703](https://github.com/can1357/oh-my-pi/pull/19703) | loop-sampler-stop | fix(tui): stopped the loop profiler when the last TUI watchdog stops | tui | P1 | 10h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/loop-sampler-stop) |
-| [#19715](https://github.com/can1357/oh-my-pi/pull/19715) | macos-main-key-tests | test(natives): restore passing macOS native typing tests | computer | P0 | 6h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-main-key-tests) |
-| [#19748](https://github.com/can1357/oh-my-pi/pull/19748) | fill-key-events | fix(coding-agent): fire key events after a browser fill for pages that search on keyup | browser | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/fill-key-events) |
+| [#19715](https://github.com/can1357/oh-my-pi/pull/19715) | macos-main-key-tests | test(natives): restore passing macOS native typing tests | computer | P0 | 7h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-main-key-tests) |
+| [#19748](https://github.com/can1357/oh-my-pi/pull/19748) | fill-key-events | fix(coding-agent): fire key events after a browser fill for pages that search on keyup | browser | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/fill-key-events) |
