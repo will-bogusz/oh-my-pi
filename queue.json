@@ -105172,7 +105172,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-19T16:40:00Z",
+  "checked": "2026-11-19T17:41:09Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -105245,40 +105245,10 @@
     "merged_at": "2026-11-18T00:31:44Z",
     "findings": []
    },
-   "19509": {
-    "title": "fix(coding-agent): say once that a macOS background move gives no hover",
-    "merge_commit": "e7bb3ff1c04940608886a6146321587b5fde05df",
-    "merged_at": "2026-11-17T17:39:12Z",
-    "findings": []
-   },
-   "19515": {
-    "title": "fix(natives): count keys moved back to a macOS user's app as theirs",
-    "merge_commit": "9c1b48dc8168cb4f588a39488a5967614760d386",
-    "merged_at": "2026-11-17T17:39:12Z",
-    "findings": []
-   },
    "19516": {
     "title": "fix(natives): read a macOS popup after the option its typed letters choose",
     "merge_commit": "4dbe7c2cf0309753befa9bb73a3f65758bc645b2",
     "merged_at": "2026-11-18T17:12:46Z",
-    "findings": []
-   },
-   "19518": {
-    "title": "feat(browser): accept explicit dropdown option selectors",
-    "merge_commit": "5bad38df5afde14df242df0dab42dc93486e062d",
-    "merged_at": "2026-11-17T17:39:12Z",
-    "findings": []
-   },
-   "19521": {
-    "title": "fix(natives): read each AT-SPI element in two concurrent rounds",
-    "merge_commit": "b3639374207913e0fcd55dd410710b76dfed2d13",
-    "merged_at": "2026-11-17T17:39:12Z",
-    "findings": []
-   },
-   "19524": {
-    "title": "fix(coding-agent): refuse browser keys aimed at a field a modal dialog covers",
-    "merge_commit": "aaa24ea395171af4b567d02ab1d22e4236eb91bc",
-    "merged_at": "2026-11-17T17:39:12Z",
     "findings": []
    },
    "19532": {
@@ -105367,73 +105337,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-12T17:31:18Z",
-    "kind": "openable",
-    "id": "x11-takeover-keyboard-grab",
-    "title": "fix(natives): refuse X11 XTest keys while another client grabs the keyboard"
-   },
-   {
-    "at": "2026-11-12T17:31:18Z",
-    "kind": "openable",
-    "id": "macos-ax-linked-label",
-    "title": "fix(natives): name a macOS control by the label its AXTitleUIElement links to"
-   },
-   {
-    "at": "2026-11-12T17:31:18Z",
-    "kind": "openable",
-    "id": "macos-press-click-hint",
-    "title": "fix(natives): point a refused macOS press at the element's own click"
-   },
-   {
-    "at": "2026-11-12T17:31:18Z",
-    "kind": "unopenable",
-    "id": "ax-row-action",
-    "title": "fix(natives): follow rebuilt macOS table rows without selecting a neighbour",
-    "why": "opened as #19048"
-   },
-   {
-    "at": "2026-11-12T17:31:18Z",
-    "kind": "unopenable",
-    "id": "x11-click-stale-popup",
-    "title": "fix(natives): refuse X11 presses outside an open popup of the app",
-    "why": "opened as #19044"
-   },
-   {
-    "at": "2026-11-12T17:31:18Z",
-    "kind": "unopenable",
-    "id": "observe-settle",
-    "title": "feat(browser): let observe() settle the effects of the preceding action",
-    "why": "opened as #19045"
-   },
-   {
-    "at": "2026-11-12T17:31:18Z",
-    "kind": "unopenable",
-    "id": "atspi-qt-menus",
-    "title": "fix(natives): let Linux menu.select walk into Qt apps' menus",
-    "why": "opened as #19046"
-   },
-   {
-    "at": "2026-11-12T17:31:18Z",
-    "kind": "unopenable",
-    "id": "atspi-value-readback",
-    "title": "fix(natives): read back AT-SPI numeric setValue before reporting success",
-    "why": "opened as #19047"
-   },
-   {
-    "at": "2026-11-12T17:31:18Z",
-    "kind": "unopenable",
-    "id": "atspi-write-timeout-warning",
-    "title": "fix(natives): preserve the empty-field warning on Linux write timeouts",
-    "why": "opened as #19050"
-   },
-   {
-    "at": "2026-11-12T17:31:18Z",
-    "kind": "unopenable",
-    "id": "ax-ref-read-as-followup",
-    "title": "fix(natives): skip unused ref-check reads and recover display refs",
-    "why": "opened as #19054"
-   },
    {
     "at": "2026-11-12T18:31:43Z",
     "kind": "unopenable",
@@ -115552,7 +115455,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-19T16:40:00.889709Z",
+  "at": "2026-11-19T17:41:10.510792Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
