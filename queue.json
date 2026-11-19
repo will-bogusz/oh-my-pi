@@ -105171,7 +105171,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-19T12:36:03Z",
+  "checked": "2026-11-19T13:36:55Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -105370,37 +105370,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-12T13:27:30Z",
-    "kind": "openable",
-    "id": "atspi-huge-children",
-    "title": "fix(natives): stop Linux accessibility reads from freezing apps that show long tables"
-   },
-   {
-    "at": "2026-11-12T13:27:30Z",
-    "kind": "openable",
-    "id": "ax-row-action",
-    "title": "fix(natives): follow rebuilt macOS table rows without selecting a neighbour"
-   },
-   {
-    "at": "2026-11-12T13:27:30Z",
-    "kind": "openable",
-    "id": "x11-click-stale-popup",
-    "title": "fix(natives): refuse X11 presses outside an open popup of the app"
-   },
-   {
-    "at": "2026-11-12T13:27:30Z",
-    "kind": "openable",
-    "id": "macos-press-click-hint",
-    "title": "fix(natives): point a refused macOS press at the element's own click"
-   },
-   {
-    "at": "2026-11-12T13:27:30Z",
-    "kind": "unopenable",
-    "id": "ax-ref-read-as-followup",
-    "title": "fix(natives): skip unused ref-check reads and recover display refs",
-    "why": "plan: wait (conflicts with atspi-huge-children in crates/pi-natives/src/desktop/macos/ax.rs)"
-   },
    {
     "at": "2026-11-12T13:57:47Z",
     "kind": "openable",
@@ -115644,7 +115613,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-19T12:36:04.030212Z",
+  "at": "2026-11-19T13:36:56.568924Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
