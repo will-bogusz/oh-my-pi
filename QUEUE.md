@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-19 08:59Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-19 09:00Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-19 08:30Z on goliath; groups below are from it, states from the manifest)
@@ -100,4 +100,4 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-19
 | [#19620](https://github.com/can1357/oh-my-pi/pull/19620) | snapcompact-rerender-on-switch | fix(snapcompact,coding-agent): re-render a snapcompact archive in the frame shape of the model reading it | snapcompact | P2 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-rerender-on-switch) |
 | [#19703](https://github.com/can1357/oh-my-pi/pull/19703) | loop-sampler-stop | fix(tui): stopped the loop profiler when the last TUI watchdog stops | tui | P1 | 14h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/loop-sampler-stop) |
 | [#19715](https://github.com/can1357/oh-my-pi/pull/19715) | macos-main-key-tests | test(natives): restore passing macOS native typing tests | computer | P0 | 10h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-main-key-tests) |
-| [#19748](https://github.com/can1357/oh-my-pi/pull/19748) | fill-key-events | fix(coding-agent): fire key events after a browser fill for pages that search on keyup | browser | P0 | 4h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/fill-key-events) |
+| [#19748](https://github.com/can1357/oh-my-pi/pull/19748) | fill-key-events | fix(coding-agent): fire key events after a browser fill for pages that search on keyup | browser | P0 | 5h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/fill-key-events) |
