@@ -105025,7 +105025,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-19T04:24:26Z",
+  "checked": "2026-11-19T04:54:56Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -105220,46 +105220,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-12T04:49:02Z",
-    "kind": "openable",
-    "id": "relay-hidden-frames-main",
-    "title": "fix(browser-relay): say what the relay hid in a driven tab"
-   },
-   {
-    "at": "2026-11-12T04:49:02Z",
-    "kind": "openable",
-    "id": "autofill-rows",
-    "title": "fix(natives): own macOS suggestion-list elements by the window that lists them"
-   },
-   {
-    "at": "2026-11-12T04:49:02Z",
-    "kind": "unopenable",
-    "id": "computer-secure-input",
-    "title": "fix(natives,coding-agent): report macOS secure input and stop claiming globalEscape under it",
-    "why": "opened as #18982"
-   },
-   {
-    "at": "2026-11-12T04:49:02Z",
-    "kind": "unopenable",
-    "id": "status-entered-text",
-    "title": "fix(coding-agent): keep text a cell enters out of browser and computer status lines",
-    "why": "opened as #18981"
-   },
-   {
-    "at": "2026-11-12T04:49:02Z",
-    "kind": "unopenable",
-    "id": "tern-kit-password-mask",
-    "title": "fix(browser): mask password values in Tern kit observations",
-    "why": "opened as #18983"
-   },
-   {
-    "at": "2026-11-12T04:49:02Z",
-    "kind": "unopenable",
-    "id": "agent-identity",
-    "title": "feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy",
-    "why": "opened as #18987"
-   },
    {
     "at": "2026-11-12T05:49:49Z",
     "kind": "unopenable",
