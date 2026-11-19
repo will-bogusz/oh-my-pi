@@ -105030,7 +105030,7 @@
    "branch": "will/win-edit-setvalue",
    "title": "fix(natives): write Windows edit values without activating their window",
    "area": "computer",
-   "priority": null,
+   "priority": "P1",
    "needs": [],
    "base": "4530cba18f6f68c0ba405966cd8dfd1093a03152",
    "body": "bodies/win-edit-setvalue.md",
@@ -105040,7 +105040,7 @@
    "worktree": null,
    "host": "MacBook-Pro",
    "added": "2026-11-19T11:16:47Z",
-   "updated": "2026-11-19T19:03:32Z",
+   "updated": "2026-11-19T19:14:02Z",
    "note": "",
    "built": [
     {
