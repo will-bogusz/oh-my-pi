@@ -14,7 +14,6 @@ mod menus;
 #[cfg(target_os = "macos")]
 mod native_helper;
 mod roster;
-mod stages;
 mod text_range;
 mod types;
 #[cfg(any(target_os = "windows", test))]
@@ -922,11 +921,7 @@ impl Worker {
 		target: &Target,
 	) -> CoreResult<(FrameGeometry, Option<DesktopWindow>)> {
 		let frame = self.frame(target)?;
-		{
-			let _stage = stages::Stage::start("frame.layout");
-			self.backend()?.validate_frame_layout(&frame)?;
-		}
-		let _stage = stages::Stage::start("frame.window");
+		self.backend()?.validate_frame_layout(&frame)?;
 		let current = if matches!(target, Target::Window(_)) {
 			Some(self.window(target)?)
 		} else {
@@ -1207,7 +1202,6 @@ impl Worker {
 		if request.is_close() {
 			return Ok(Response::Unit);
 		}
-		let _stage = stages::Stage::start("execute");
 		token.check()?;
 		// Pointer and keyboard input on a desktop with no input route is refused
 		// before it waits for the input lease or resolves its target or frame. A
@@ -1610,10 +1604,7 @@ impl Worker {
 				Ok(Response::Capabilities(caps))
 			},
 			Request::ListDisplays { .. } => Ok(Response::Displays(self.backend()?.displays()?)),
-			Request::ListWindows { .. } => {
-				let _stage = stages::Stage::start("request.windows");
-				Ok(Response::Windows(self.backend()?.windows()?))
-			},
+			Request::ListWindows { .. } => Ok(Response::Windows(self.backend()?.windows()?)),
 			Request::Capture { target, caps, .. } => {
 				Ok(Response::Capture(self.capture_full(target, caps, token)?))
 			},
@@ -1724,9 +1715,7 @@ impl Worker {
 				if options.modifiers != backend::Modifiers::default() {
 					self.validate_keyboard_target(target)?;
 				}
-				let _stage = stages::Stage::start("request.click");
 				let (x, y, frame) = self.map_point(target, *x, *y)?;
-				let _pointer = stages::Stage::start("click.pointer");
 				let event = PointerEvent::Click {
 					x,
 					y,
@@ -1785,9 +1774,7 @@ impl Worker {
 				Ok(Response::Input(control::take_focus_return()))
 			},
 			Request::Scroll { target, x, y, dx, dy, takeover, .. } => {
-				let _stage = stages::Stage::start("request.scroll");
 				let (x, y, frame) = self.map_point(target, *x, *y)?;
-				let _pointer = stages::Stage::start("scroll.pointer");
 				let event = PointerEvent::Scroll { x, y, dx: *dx, dy: *dy };
 				let backend = self.backend()?;
 				if let Some(action) = backend.point_action(target, &event, takeover.mode(), token)? {

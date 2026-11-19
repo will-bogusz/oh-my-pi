@@ -172,10 +172,7 @@ impl AtSpiAx {
 	/// The element of `window` under screen point (`x`, `y`), resolved inside
 	/// that window only: whatever covers the point on screen is not asked.
 	fn hit_in(&mut self, window: &DesktopWindow, x: f64, y: f64) -> CoreResult<Result<ObjectRefOwned, String>> {
-		let root_stage = crate::desktop::stages::Stage::start("hit.root");
 		let root = self.window_root(window)?;
-		drop(root_stage);
-		let _stage = crate::desktop::stages::Stage::start("hit.descend");
 		let root = Self::object(&root).clone();
 		let (x, y) = (x.round() as i32, y.round() as i32);
 		let Self { rt, connection, native, frames, reply_timeout } = self;
@@ -207,10 +204,7 @@ impl AtSpiAx {
 			Ok(hit) => hit,
 			Err(why) => return Ok(PointOutcome::Declined(why)),
 		};
-		let owner_stage = crate::desktop::stages::Stage::start("click.owner");
 		let owner = self.window_id(&AxHandle::AtSpi(hit.clone()), windows);
-		drop(owner_stage);
-		let _stage = crate::desktop::stages::Stage::start("click.act");
 		if !owner.as_ref().is_ok_and(|id| *id == window.id) {
 			return Ok(PointOutcome::Declined(
 				"the element under the point belongs to another window".to_owned(),
@@ -253,7 +247,6 @@ impl AtSpiAx {
 			};
 			let watched = watched_state(kind, target.role);
 			control::check()?;
-			let send_stage = crate::desktop::stages::Stage::start("click.send");
 			let (route, action_name) = match (index, action, kind) {
 				(Some(index), Some(action), _) => {
 					let name = answered("the application", reply_timeout, action.get_name(index))
@@ -313,8 +306,6 @@ impl AtSpiAx {
 			let Some(watched) = watched else {
 				return Ok(done(None));
 			};
-			drop(send_stage);
-			let _readback = crate::desktop::stages::Stage::start("click.readback");
 			let deadline = tokio::time::Instant::now() + STATE_SETTLE;
 			loop {
 				let after = answered("the application", reply_timeout, target.accessible.get_state())
@@ -511,7 +502,7 @@ async fn scroll_bar_route(
 		};
 		if target == before {
 			// At the end already, where a wheel does nothing either.
-			return Ok(done(format!("its {axis} scroll bar is at its end ({before}); nothing moved")).await);
+			return Ok(done(format!("its {axis} scroll bar is at its end ({before:.0}); nothing moved")).await);
 		}
 		control::check()?;
 		answered("the application", reply_timeout, value.set_current_value(target))
@@ -523,7 +514,7 @@ async fn scroll_bar_route(
 				.await?
 				.unwrap_or(before);
 			if now != before {
-				return Ok(done(format!("its {axis} scroll bar moved from {before} to {now}")).await);
+				return Ok(done(format!("its {axis} scroll bar moved from {before:.0} to {now:.0}")).await);
 			}
 			if tokio::time::Instant::now() >= deadline {
 				return Err(DesktopError::ax_unconfirmed(format!(
