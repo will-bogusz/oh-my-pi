@@ -98,7 +98,7 @@ export declare class DesktopSession {
    * coordinate frame.
    */
   captureRegion(target: string, region: CaptureRegion, caps?: CaptureCaps | undefined | null): Promise<DesktopCapture>
-  click(target: string, x: number, y: number, opts?: PointerOptions | undefined | null): Promise<DesktopFocusReturn | undefined | null>
+  click(target: string, x: number, y: number, opts?: PointerOptions | undefined | null): Promise<DesktopPointerResult>
   moveMouse(target: string, x: number, y: number, opts?: PointerOptions | undefined | null): Promise<DesktopFocusReturn | undefined | null>
   /**
    * Drags along `path`. A macOS background left drag across the text of one
@@ -107,7 +107,7 @@ export declare class DesktopSession {
    * back; a drag posted as input resolves to where a takeover left focus.
    */
   drag(target: string, path: Array<DesktopPoint>, opts?: PointerOptions | undefined | null): Promise<DesktopDragResult>
-  scroll(target: string, x: number, y: number, dx: number, dy: number, opts?: PointerOptions | undefined | null): Promise<DesktopFocusReturn | undefined | null>
+  scroll(target: string, x: number, y: number, dx: number, dy: number, opts?: PointerOptions | undefined | null): Promise<DesktopPointerResult>
   typeText(target: string, text: string, opts?: PointerOptions | undefined | null): Promise<DesktopTypeResult>
   keyChord(target: string, keys: Array<string>, opts?: PointerOptions | undefined | null): Promise<DesktopFocusReturn | undefined | null>
   raiseWindow(windowId: string): Promise<undefined>
@@ -1518,6 +1518,30 @@ export interface AxNode {
   childCount: number
 }
 
+/**
+ * What a background window click or scroll did through accessibility
+ * instead of pointer input (Wayland on Hyprland): the element under the
+ * point carried it out, and no pointer event was sent.
+ */
+export interface AxPointAction {
+  /** The element that took it, as `role 'name'`. */
+  element: string
+  /**
+   * How: `action` (the element's own accessibility action), `select`
+   * (selected in its list), `scrollBar` (a scroll bar's value set),
+   * `scrollTo` (a row brought to the list's edge).
+   */
+  route: string
+  /** The action's name, for the `action` route. */
+  action?: string
+  /**
+   * What the element read afterwards (`checked`, `unchecked`, `selected`,
+   * how far the list moved); absent when it exposes no state to read, so
+   * the effect is unconfirmed.
+   */
+  reads?: string
+}
+
 export interface AxQuery {
   role?: string
   title?: string
@@ -1764,10 +1788,37 @@ export interface DesktopCapture {
    * frame. Windows also detects disconnected sessions and secure desktops.
    */
   screenLocked: boolean
+  /**
+   * Other windows over part of a window screenshot, where the backend cuts
+   * window screenshots from the screen and knows its windows' stacking
+   * (Wayland on Hyprland); empty otherwise, and for zoom regions.
+   */
+  coveredBy: Array<DesktopCover>
 }
 
 export interface DesktopControlState {
   active: boolean
+}
+
+/**
+ * Another window over part of a window screenshot. A Wayland window
+ * screenshot is cut from the screen, so where another window covers the
+ * target its pixels are that window's.
+ */
+export interface DesktopCover {
+  title: string
+  app: string
+  /**
+   * Certainly above the target (a floating, pinned or fullscreen window
+   * over a tiled one); otherwise it may be above or below it, which the
+   * compositor does not say.
+   */
+  above: boolean
+  /** The covered part, in this screenshot's pixels. */
+  x: number
+  y: number
+  width: number
+  height: number
 }
 
 /**
@@ -1879,6 +1930,23 @@ export interface DesktopObservation {
 export interface DesktopPoint {
   x: number
   y: number
+}
+
+/**
+ * What a click or scroll call did: carried out through accessibility, or
+ * posted as input.
+ */
+export interface DesktopPointerResult {
+  /**
+   * Set when the call went through the element under the point instead of
+   * pointer input; see [`AxPointAction`].
+   */
+  accessibility?: AxPointAction
+  /**
+   * Where focus ended when the call ran in takeover; see
+   * [`DesktopFocusReturn`].
+   */
+  focusReturn?: DesktopFocusReturn
 }
 
 /**
