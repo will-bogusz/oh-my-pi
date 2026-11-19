@@ -105025,14 +105025,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-19T03:54:10Z",
+  "checked": "2026-11-19T04:24:26Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "fill-key-events": {
-    "since": "2026-11-19T01:52:03Z",
-    "title": "fix(coding-agent): fire key events after a browser fill for pages that search on keyup"
-   },
    "factory-droid-1100-pin": {
     "since": "2026-11-17T00:39:57Z",
     "title": "feat(catalog): identify Factory Droid requests as droid 1.10.0"
@@ -105063,7 +105059,8 @@
    19701,
    19702,
    19703,
-   19715
+   19715,
+   19748
   ],
   "post_merge": {
    "17897": {
@@ -108026,6 +108023,13 @@
     "kind": "openable",
     "id": "fill-key-events",
     "title": "fix(coding-agent): fire key events after a browser fill for pages that search on keyup"
+   },
+   {
+    "at": "2026-11-19T04:24:26Z",
+    "kind": "unopenable",
+    "id": "fill-key-events",
+    "title": "fix(coding-agent): fire key events after a browser fill for pages that search on keyup",
+    "why": "opened as #19748"
    }
   ]
  },
@@ -115864,12 +115868,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-19T03:58:01.274767Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-19T04:24:26.829312Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 1,
+   "left": 7
   },
   "rows": [
    {
@@ -115924,6 +115928,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-17T21:39:00Z"
+   },
+   {
+    "id": "fill-key-events",
+    "label": "#19748",
+    "number": 19748,
+    "state": "open",
+    "area": "browser",
+    "priority": "P0",
+    "title": "fix(coding-agent): fire key events after a browser fill for pages that search on keyup",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-19T04:00:02Z"
    },
    {
     "id": "macos-main-key-tests",
@@ -116264,23 +116285,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-18T18:40:21Z"
-   },
-   {
-    "id": "fill-key-events",
-    "label": "fill-key-events",
-    "number": null,
-    "state": "queued",
-    "area": "browser",
-    "priority": "P0",
-    "title": "fix(coding-agent): fire key events after a browser fill for pages that search on keyup",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-19T01:34:57Z"
    },
    {
     "id": "iphone-mirror-scroll-distance",
@@ -117029,9 +117033,9 @@
     "action": "wait",
     "reasons": [
      "needs r2/relay-own-only (queued)",
+     "conflicts with #19748 in packages/coding-agent/src/tools/browser/interactions.ts",
      "conflicts with #19542 in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19633 in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with fill-key-events in packages/coding-agent/src/tools/browser/interactions.ts",
      "its need r2/relay-own-only conflicts with main in packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-daemon.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/dialogs.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/interactions.ts"
     ],
@@ -117039,9 +117043,9 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#19748",
      "#19542",
-     "#19633",
-     "fill-key-events"
+     "#19633"
     ],
     "needs": [
      "r2/relay-own-only"
@@ -117115,8 +117119,10 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with main in (branch missing on the fork)"
+    ],
     "note": "",
     "over": [],
     "paired": [],
