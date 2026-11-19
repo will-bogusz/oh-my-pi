@@ -104900,10 +104900,14 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-19T01:21:01Z",
+  "checked": "2026-11-19T01:52:03Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
+   "fill-key-events": {
+    "since": "2026-11-19T01:52:03Z",
+    "title": "fix(coding-agent): fire key events after a browser fill for pages that search on keyup"
+   },
    "factory-droid-1100-pin": {
     "since": "2026-11-17T00:39:57Z",
     "title": "feat(catalog): identify Factory Droid requests as droid 1.10.0"
@@ -105154,30 +105158,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-12T01:45:57Z",
-    "kind": "openable",
-    "id": "tern-kit-password-mask",
-    "title": "fix(browser): mask password values in Tern kit observations"
-   },
-   {
-    "at": "2026-11-12T01:45:57Z",
-    "kind": "conflict",
-    "label": "#18353",
-    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
-    "files": [
-     "MODULE.bazel.lock"
-    ]
-   },
-   {
-    "at": "2026-11-12T01:45:57Z",
-    "kind": "conflict",
-    "label": "#18013",
-    "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "files": [
-     "MODULE.bazel.lock"
-    ]
-   },
    {
     "at": "2026-11-12T02:16:56Z",
     "kind": "openable",
@@ -108013,6 +107993,12 @@
     "number": 19699,
     "title": "fix: restored main's lint and type-check job",
     "tag": "v19.0.0"
+   },
+   {
+    "at": "2026-11-19T01:52:03Z",
+    "kind": "openable",
+    "id": "fill-key-events",
+    "title": "fix(coding-agent): fire key events after a browser fill for pages that search on keyup"
    }
   ]
  },
@@ -115851,8 +115837,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-19T01:35:10.019494Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-19T01:52:03.793318Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -117102,8 +117088,10 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with main in (branch missing on the fork)"
+    ],
     "note": "",
     "over": [],
     "paired": [],
