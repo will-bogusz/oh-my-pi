@@ -105171,7 +105171,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-19T14:07:47Z",
+  "checked": "2026-11-19T15:08:21Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -105370,65 +105370,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-12T14:58:26Z",
-    "kind": "openable",
-    "id": "atspi-qt-menus",
-    "title": "fix(natives): let Linux menu.select walk into Qt apps' menus"
-   },
-   {
-    "at": "2026-11-12T14:58:26Z",
-    "kind": "openable",
-    "id": "atspi-value-readback",
-    "title": "fix(natives): read back AT-SPI numeric setValue before reporting success"
-   },
-   {
-    "at": "2026-11-12T14:58:26Z",
-    "kind": "openable",
-    "id": "ax-ref-read-as-followup",
-    "title": "fix(natives): skip unused ref-check reads and recover display refs"
-   },
-   {
-    "at": "2026-11-12T14:58:26Z",
-    "kind": "openable",
-    "id": "win-focus-report",
-    "title": "fix(natives): report where focus went after a Windows takeover"
-   },
-   {
-    "at": "2026-11-12T14:58:26Z",
-    "kind": "unopenable",
-    "id": "atspi-huge-children",
-    "title": "fix(natives): stop Linux accessibility reads from freezing apps that show long tables",
-    "why": "opened as #19036"
-   },
-   {
-    "at": "2026-11-12T14:58:26Z",
-    "kind": "unopenable",
-    "id": "atspi-combo-choice",
-    "title": "fix(natives): choose Linux combo box options without opening their keyboard-grabbing list",
-    "why": "opened as #19034"
-   },
-   {
-    "at": "2026-11-12T14:58:26Z",
-    "kind": "unopenable",
-    "id": "atspi-text-first",
-    "title": "fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility",
-    "why": "opened as #19035"
-   },
-   {
-    "at": "2026-11-12T14:58:26Z",
-    "kind": "unopenable",
-    "id": "win-type-drain",
-    "title": "fix(natives,coding-agent): stop Windows takeover typing from losing text the app had not read yet",
-    "why": "opened as #19037"
-   },
-   {
-    "at": "2026-11-12T14:58:26Z",
-    "kind": "unopenable",
-    "id": "macos-press-click-hint",
-    "title": "fix(natives): point a refused macOS press at the element's own click",
-    "why": "plan: wait (conflicts with ax-ref-read-as-followup in crates/pi-natives/src/desktop/macos/ax.rs)"
-   },
    {
     "at": "2026-11-12T17:31:18Z",
     "kind": "openable",
