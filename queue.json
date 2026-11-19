@@ -105025,7 +105025,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-19T09:31:26Z",
+  "checked": "2026-11-19T10:02:16Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -105220,30 +105220,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-12T09:52:44Z",
-    "kind": "openable",
-    "id": "atspi-huge-children",
-    "title": "fix(natives): stop Linux accessibility reads from freezing apps that show long tables"
-   },
-   {
-    "at": "2026-11-12T09:52:44Z",
-    "kind": "openable",
-    "id": "atspi-text-first",
-    "title": "fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility"
-   },
-   {
-    "at": "2026-11-12T09:52:44Z",
-    "kind": "openable",
-    "id": "macos-ax-linked-label",
-    "title": "fix(natives): name a macOS control by the label its AXTitleUIElement links to"
-   },
-   {
-    "at": "2026-11-12T09:52:44Z",
-    "kind": "openable",
-    "id": "macos-press-click-hint",
-    "title": "fix(natives): point a refused macOS press at the element's own click"
-   },
    {
     "at": "2026-11-12T10:23:33Z",
     "kind": "openable",
