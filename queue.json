@@ -105025,7 +105025,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-19T10:02:16Z",
+  "checked": "2026-11-19T10:32:26Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -105220,52 +105220,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-12T10:23:33Z",
-    "kind": "openable",
-    "id": "win-target-layout",
-    "title": "fix(natives): map Windows keys on the receiving keyboard layout"
-   },
-   {
-    "at": "2026-11-12T10:23:33Z",
-    "kind": "openable",
-    "id": "masked-length-ok",
-    "title": "fix(natives): report a setValue that reads back as a same-length mask as done, not failed"
-   },
-   {
-    "at": "2026-11-12T10:23:33Z",
-    "kind": "openable",
-    "id": "win-focus-report",
-    "title": "fix(natives): report where focus went after a Windows takeover"
-   },
-   {
-    "at": "2026-11-12T10:23:33Z",
-    "kind": "unopenable",
-    "id": "atspi-huge-children",
-    "title": "fix(natives): stop Linux accessibility reads from freezing apps that show long tables",
-    "why": "plan: wait (conflicts with #18892 in crates/pi-natives/src/desktop/ax.rs, crates/pi-natives/src/desktop/mod.rs; conflicts with #18914 in crates/pi-natives/src/desktop/linux/ax.rs)"
-   },
-   {
-    "at": "2026-11-12T10:23:33Z",
-    "kind": "unopenable",
-    "id": "atspi-text-first",
-    "title": "fix(natives): put Linux el.type text into GTK and Qt text fields through accessibility",
-    "why": "plan: wait (conflicts with #18914 in crates/pi-natives/src/desktop/linux/wayland/mod.rs)"
-   },
-   {
-    "at": "2026-11-12T10:23:33Z",
-    "kind": "unopenable",
-    "id": "macos-ax-linked-label",
-    "title": "fix(natives): name a macOS control by the label its AXTitleUIElement links to",
-    "why": "plan: wait (conflicts with #18892 in crates/pi-natives/src/desktop/macos/ax.rs)"
-   },
-   {
-    "at": "2026-11-12T10:23:33Z",
-    "kind": "unopenable",
-    "id": "macos-press-click-hint",
-    "title": "fix(natives): point a refused macOS press at the element's own click",
-    "why": "plan: wait (conflicts with #18892 in crates/pi-natives/src/desktop/macos/ax.rs)"
-   },
    {
     "at": "2026-11-12T10:53:55Z",
     "kind": "openable",
@@ -115654,7 +115608,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-19T09:31:27.433236Z",
+  "at": "2026-11-19T10:32:27.412452Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
