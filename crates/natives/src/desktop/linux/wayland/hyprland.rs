@@ -19,7 +19,7 @@ use super::peer_pid;
 use crate::desktop::{
 	error::{CoreResult, DesktopError},
 	linux::ax::{NativeGeometry, NativeWindows},
-	types::DesktopWindow,
+	types::{DesktopDisplay, DesktopWindow},
 };
 
 /// How long one IPC request may take; Hyprland answers in about a millisecond.
@@ -53,6 +53,13 @@ struct Client {
 	title:            String,
 	#[serde(rename = "focusHistoryID")]
 	focus_history_id: i64,
+	#[serde(default)]
+	floating:         bool,
+	#[serde(default)]
+	pinned:           bool,
+	/// A fullscreen mode number (0 when not fullscreen); a bool before 0.42.
+	#[serde(default)]
+	fullscreen:       serde_json::Value,
 }
 
 #[derive(Debug, Deserialize)]
@@ -60,13 +67,76 @@ struct Client {
 struct Monitor {
 	active_workspace:  Workspace,
 	special_workspace: Workspace,
+	#[serde(default)]
+	x:                 i32,
+	#[serde(default)]
+	y:                 i32,
+	/// The mode's pixel size, before `transform`.
+	#[serde(default)]
+	width:             u32,
+	#[serde(default)]
+	height:            u32,
+	#[serde(default)]
+	scale:             f64,
+	/// `wl_output` transform: odd values turn the monitor a quarter.
+	#[serde(default)]
+	transform:         u32,
+	#[serde(default)]
+	disabled:          bool,
+}
+
+/// A monitor's place in Hyprland's logical layout and its pixel size.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub(super) struct MonitorGeometry {
+	x:            i32,
+	y:            i32,
+	width:        f64,
+	height:       f64,
+	pixel_width:  u32,
+	pixel_height: u32,
+}
+
+impl MonitorGeometry {
+	fn of(monitor: &Monitor) -> Self {
+		let (pixel_width, pixel_height) = if monitor.transform % 2 == 1 {
+			(monitor.height, monitor.width)
+		} else {
+			(monitor.width, monitor.height)
+		};
+		let scale = if monitor.scale > 0.0 { monitor.scale } else { 1.0 };
+		Self {
+			x: monitor.x,
+			y: monitor.y,
+			width: f64::from(pixel_width) / scale,
+			height: f64::from(pixel_height) / scale,
+			pixel_width,
+			pixel_height,
+		}
+	}
+
+	/// Whether this monitor is `display` as a portal capture recorded it:
+	/// the same logical place and size (within the portal's integer
+	/// rounding) and the same pixel size.
+	pub(super) fn shows(&self, display: &DesktopDisplay) -> bool {
+		self.x == display.x
+			&& self.y == display.y
+			&& (self.width - f64::from(display.width)).abs() <= 1.0
+			&& (self.height - f64::from(display.height)).abs() <= 1.0
+			&& self.pixel_width == display.pixel_width
+			&& self.pixel_height == display.pixel_height
+	}
 }
 
 /// One Hyprland client as OMP lists it.
 pub(super) struct HyprlandWindow {
-	pub window:  DesktopWindow,
+	pub window:     DesktopWindow,
 	/// On a workspace some monitor shows, so a screen capture shows it there.
-	pub visible: bool,
+	pub visible:    bool,
+	pub workspace:  i64,
+	pub floating:   bool,
+	/// Floating and shown on every workspace.
+	pub pinned:     bool,
+	pub fullscreen: bool,
 }
 
 impl Hyprland {
@@ -104,6 +174,16 @@ impl Hyprland {
 			.map_err(|err| DesktopError::ax_failed(format!("Hyprland IPC {command}: {err}")))
 	}
 
+	/// Every enabled monitor's geometry.
+	pub(super) fn monitors(&self) -> CoreResult<Vec<MonitorGeometry>> {
+		let monitors: Vec<Monitor> = self.json("j/monitors")?;
+		Ok(monitors
+			.iter()
+			.filter(|monitor| !monitor.disabled)
+			.map(MonitorGeometry::of)
+			.collect())
+	}
+
 	/// Every mapped client, with whether a monitor shows its workspace.
 	pub(super) fn list(&self) -> CoreResult<Vec<HyprlandWindow>> {
 		let clients: Vec<Client> = self.json("j/clients")?;
@@ -131,6 +211,14 @@ impl Hyprland {
 						focused: client.focus_history_id == 0,
 					},
 					visible,
+					workspace: client.workspace.id,
+					floating: client.floating,
+					pinned: client.pinned,
+					fullscreen: match &client.fullscreen {
+						serde_json::Value::Bool(on) => *on,
+						serde_json::Value::Number(mode) => mode.as_i64().is_some_and(|mode| mode != 0),
+						_ => false,
+					},
 				}
 			})
 			.collect())
@@ -158,6 +246,48 @@ pub(super) fn client_for_frame<'a>(
 		[only] => Some(only),
 		_ => None,
 	}
+}
+
+/// The clients over part of `target` on screen, each with whether it is
+/// certainly above it. Hyprland draws floating, pinned and fullscreen windows
+/// over tiled ones, but does not report the order among floating windows (or
+/// among overlapping tiled ones), so those are only possibly above.
+pub(super) fn covering<'a>(
+	clients: &'a [HyprlandWindow],
+	target: &HyprlandWindow,
+) -> Vec<(&'a HyprlandWindow, bool)> {
+	let over = |client: &HyprlandWindow| -> Option<bool> {
+		if client.fullscreen != target.fullscreen {
+			return client.fullscreen.then_some(true);
+		}
+		match (client.floating || client.pinned, target.floating || target.pinned) {
+			(true, false) => Some(true),
+			(false, true) => None,
+			_ => Some(false),
+		}
+	};
+	clients
+		.iter()
+		.filter(|client| {
+			client.window.id != target.window.id
+				&& client.visible
+				&& (client.workspace == target.workspace || client.pinned)
+				&& overlap(&client.window, &target.window).is_some()
+		})
+		.filter_map(|client| over(client).map(|certain| (client, certain)))
+		.collect()
+}
+
+/// The part of `target` that `other` covers, in `target`'s own logical
+/// coordinates: `(x, y, width, height)`.
+pub(super) fn overlap(other: &DesktopWindow, target: &DesktopWindow) -> Option<(i32, i32, u32, u32)> {
+	let right = |window: &DesktopWindow| window.x.saturating_add(window.width as i32);
+	let bottom = |window: &DesktopWindow| window.y.saturating_add(window.height as i32);
+	let left = other.x.max(target.x);
+	let top = other.y.max(target.y);
+	let width = right(other).min(right(target)) - left;
+	let height = bottom(other).min(bottom(target)) - top;
+	(width > 0 && height > 0).then(|| (left - target.x, top - target.y, width as u32, height as u32))
 }
 
 impl NativeWindows for Hyprland {
@@ -247,5 +377,74 @@ mod tests {
 		assert_eq!(clients[0].at, [647, 38]);
 		assert_eq!(clients[0].pid, 5754);
 		assert_eq!(clients[0].focus_history_id, 1);
+	}
+
+	fn client(id: &str, at: (i32, i32, u32, u32), floating: bool, workspace: i64) -> HyprlandWindow {
+		HyprlandWindow {
+			window: DesktopWindow { x: at.0, y: at.1, width: at.2, height: at.3, ..window(id, 1, id) },
+			visible: true,
+			workspace,
+			floating,
+			pinned: false,
+			fullscreen: false,
+		}
+	}
+
+	#[test]
+	fn a_floating_window_over_a_tiled_one_covers_it_and_floating_order_stays_open() {
+		let tiled = client("hyprland:0x1", (12, 38, 600, 400), false, 1);
+		let clients = [
+			client("hyprland:0x1", (12, 38, 600, 400), false, 1),
+			client("hyprland:0x2", (100, 100, 200, 100), true, 1),
+			client("hyprland:0x3", (620, 38, 600, 400), false, 1),
+			client("hyprland:0x4", (100, 100, 200, 100), true, 2),
+		];
+		let covers: Vec<_> = covering(&clients, &tiled)
+			.into_iter()
+			.map(|(client, above)| (client.window.id.as_str(), above))
+			.collect();
+		assert_eq!(covers, [("hyprland:0x2", true)]);
+		// The floating window itself sits above every tiled one.
+		assert!(covering(&clients, &clients[1]).is_empty());
+		let floats = [client("hyprland:0x5", (0, 0, 300, 300), true, 1), client("hyprland:0x6", (50, 50, 300, 300), true, 1)];
+		let covers = covering(&floats, &floats[0]);
+		assert_eq!(covers.len(), 1);
+		assert!(!covers[0].1, "two floating windows' order is unknown");
+		assert_eq!(overlap(&clients[1].window, &tiled.window), Some((88, 62, 200, 100)));
+		assert_eq!(overlap(&clients[2].window, &tiled.window), None);
+	}
+
+	#[test]
+	fn a_monitor_matches_the_portal_display_it_was_captured_as() {
+		let monitor = |width, height, scale, transform| Monitor {
+			active_workspace: Workspace { id: 1 },
+			special_workspace: Workspace { id: 0 },
+			x: 0,
+			y: 0,
+			width,
+			height,
+			scale,
+			transform,
+			disabled: false,
+		};
+		let display = |width, height, pixel_width, pixel_height| DesktopDisplay {
+			id: "wayland-portal-0".to_owned(),
+			name: String::new(),
+			x: 0,
+			y: 0,
+			width,
+			height,
+			scale: f64::from(pixel_width) / f64::from(width),
+			pixel_x: 0,
+			pixel_y: 0,
+			pixel_width,
+			pixel_height,
+			is_primary: true,
+		};
+		assert!(MonitorGeometry::of(&monitor(1280, 800, 1.0, 0)).shows(&display(1280, 800, 1280, 800)));
+		assert!(MonitorGeometry::of(&monitor(2560, 1600, 1.25, 0)).shows(&display(2048, 1280, 2560, 1600)));
+		assert!(MonitorGeometry::of(&monitor(1280, 800, 1.0, 1)).shows(&display(800, 1280, 800, 1280)));
+		assert!(!MonitorGeometry::of(&monitor(1920, 1080, 1.0, 0)).shows(&display(1280, 800, 1280, 800)));
+		assert!(!MonitorGeometry::of(&monitor(2560, 1600, 2.0, 0)).shows(&display(2048, 1280, 2560, 1600)));
 	}
 }

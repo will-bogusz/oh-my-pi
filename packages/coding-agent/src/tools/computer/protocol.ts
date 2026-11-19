@@ -1,5 +1,5 @@
 import type { ImageContent, TextContent } from "@oh-my-pi/pi-ai";
-import type { CaptureRegion, DesktopCapabilities, DesktopScreenState } from "@oh-my-pi/pi-natives";
+import type { CaptureRegion, DesktopCapabilities, DesktopCover, DesktopScreenState } from "@oh-my-pi/pi-natives";
 import * as prompt from "@oh-my-pi/pi-utils/prompt";
 import escapeAfterCallMessage from "../../prompts/tools/computer-escape-after-call.md" with { type: "text" };
 import escapeRefusedMessage from "../../prompts/tools/computer-escape-refused.md" with { type: "text" };
@@ -134,6 +134,8 @@ export interface ComputerScreenshot {
 	target: string;
 	/** The session was locked, disconnected or on a secure desktop when captured. */
 	screenLocked?: true;
+	/** Other windows over part of this window screenshot, which is cut from the screen; their pixels stand in it there. */
+	coveredBy?: DesktopCover[];
 }
 
 /** Clone-safe error metadata returned across the worker boundary. */

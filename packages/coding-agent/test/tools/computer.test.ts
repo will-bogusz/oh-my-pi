@@ -49,6 +49,7 @@ import type {
 	DesktopDragResult,
 	DesktopFocusReturn,
 	DesktopPoint,
+	DesktopPointerResult,
 	DesktopScreenState,
 	DesktopTypeResult,
 	DesktopWindow,
@@ -180,6 +181,7 @@ class FakeNativeSession implements NativeDesktopSession {
 			displays: [display],
 			backend: "fake",
 			screenLocked: this.screenLocked,
+			coveredBy: [],
 		};
 	}
 	async captureRegion(_target: string, _region: CaptureRegion): Promise<DesktopCapture> {
@@ -245,7 +247,7 @@ class FakeNativeSession implements NativeDesktopSession {
 		_x: number,
 		_y: number,
 		_opts?: PointerOptions | null,
-	): Promise<DesktopFocusReturn | null | void> {
+	): Promise<DesktopPointerResult | null | void> {
 		this.clickCount += 1;
 		this.takeovers.push(_opts?.takeover);
 	}
@@ -4614,10 +4616,10 @@ describe("computer background fallback", () => {
 			_x: number,
 			_y: number,
 			opts?: PointerOptions | null,
-		): Promise<DesktopFocusReturn | null | void> {
+		): Promise<DesktopPointerResult | null | void> {
 			this.sent.push(opts);
 			if (opts?.takeover !== true) throw new Error(this.refusal);
-			return this.report;
+			return { focusReturn: this.report ?? undefined };
 		}
 	}
 
@@ -4853,7 +4855,7 @@ describe("computer background fallback", () => {
 				_x: number,
 				_y: number,
 				opts?: PointerOptions | null,
-			): Promise<DesktopFocusReturn | null | void> {
+			): Promise<DesktopPointerResult | null | void> {
 				this.sent.push(opts);
 				throw new Error(opts?.takeover === true ? "InputFailed: window 42 rejected the event" : this.refusal);
 			}

@@ -170,12 +170,31 @@ enum Response {
 	/// An input call's takeover focus report; see
 	/// [`control::take_focus_return`].
 	Input(Option<DesktopFocusReturn>),
+	/// A click or scroll carried out through the accessibility element at its
+	/// point; see [`Backend::point_action`].
+	Pointer(AxPointAction),
 	/// A typing call's result; see [`control::take_text_unconfirmed`].
 	Typed(DesktopTypeResult),
 	Nodes(Vec<AxNode>),
 	Node(Option<AxNode>),
 	Attributes(Vec<(String, String)>),
 	TextSelection(AxTextSelection),
+}
+
+/// `cover` in the pixels of a `width`×`height` screenshot of its target.
+fn screenshot_cover(cover: backend::WindowCover, width: u32, height: u32) -> DesktopCover {
+	let scale_x = f64::from(width) / f64::from(cover.of_width.max(1));
+	let scale_y = f64::from(height) / f64::from(cover.of_height.max(1));
+	let pixels = |points: f64, scale: f64, limit: u32| ((points * scale).round().max(0.0) as u32).min(limit);
+	DesktopCover {
+		title:  cover.title,
+		app:    cover.app,
+		above:  cover.above,
+		x:      pixels(f64::from(cover.x), scale_x, width),
+		y:      pixels(f64::from(cover.y), scale_y, height),
+		width:  pixels(f64::from(cover.width), scale_x, width),
+		height: pixels(f64::from(cover.height), scale_y, height),
+	}
 }
 
 /// The result of the typing call that just ran on this thread.
@@ -850,6 +869,11 @@ impl Worker {
 
 	fn window(&mut self, target: &Target) -> CoreResult<DesktopWindow> {
 		let backend = self.backend()?;
+		if let Target::Window(id) = target
+			&& let Some(found) = backend.find_window(id)
+		{
+			return found;
+		}
 		let windows = backend.windows()?;
 		let found = match target {
 			Target::Window(id) => windows.into_iter().find(|window| window.id == *id),
@@ -1027,6 +1051,12 @@ impl Worker {
 		// land while a later operation holds the worker.
 		let capabilities = self.backend()?.capabilities();
 		*self.capabilities.lock() = Some(capabilities.clone());
+		let covered_by = self
+			.backend()?
+			.window_covers(target)?
+			.into_iter()
+			.map(|cover| screenshot_cover(cover, width, height))
+			.collect();
 		Ok(DesktopCapture {
 			data: Uint8Array::from(png),
 			width,
@@ -1041,6 +1071,7 @@ impl Worker {
 			backend: capabilities.backend,
 			display_server: capabilities.display_server,
 			screen_locked,
+			covered_by,
 		})
 	}
 
@@ -1686,6 +1717,7 @@ impl Worker {
 					backend: capabilities.backend,
 					display_server: capabilities.display_server,
 					screen_locked,
+					covered_by: Vec::new(),
 				}))
 			},
 			Request::Click { target, x, y, options, .. } => {
@@ -1695,19 +1727,21 @@ impl Worker {
 				let _stage = stages::Stage::start("request.click");
 				let (x, y, frame) = self.map_point(target, *x, *y)?;
 				let _pointer = stages::Stage::start("click.pointer");
-				options.click(
-					self.backend()?.as_mut(),
-					target,
-					PointerEvent::Click {
-						x,
-						y,
-						button: options.button,
-						count: options.count,
-						modifiers: options.modifiers,
-					},
-					&frame,
-					token,
-				)?;
+				let event = PointerEvent::Click {
+					x,
+					y,
+					button: options.button,
+					count: options.count,
+					modifiers: options.modifiers,
+				};
+				// A click that chooses a menu item needs the real press.
+				if options.menu.is_none()
+					&& let Some(action) =
+						self.backend()?.point_action(target, &event, options.mode(), token)?
+				{
+					return Ok(Response::Pointer(action));
+				}
+				options.click(self.backend()?.as_mut(), target, event, &frame, token)?;
 				Ok(Response::Input(control::take_focus_return()))
 			},
 			Request::MoveMouse { target, x, y, takeover, .. } => {
@@ -1754,13 +1788,12 @@ impl Worker {
 				let _stage = stages::Stage::start("request.scroll");
 				let (x, y, frame) = self.map_point(target, *x, *y)?;
 				let _pointer = stages::Stage::start("scroll.pointer");
-				self.backend()?.pointer(
-					target,
-					PointerEvent::Scroll { x, y, dx: *dx, dy: *dy },
-					&frame,
-					takeover.mode(),
-					token,
-				)?;
+				let event = PointerEvent::Scroll { x, y, dx: *dx, dy: *dy };
+				let backend = self.backend()?;
+				if let Some(action) = backend.point_action(target, &event, takeover.mode(), token)? {
+					return Ok(Response::Pointer(action));
+				}
+				backend.pointer(target, event, &frame, takeover.mode(), token)?;
 				Ok(Response::Input(control::take_focus_return()))
 			},
 			Request::TypeText { target, text, takeover, .. } => {
@@ -2591,9 +2624,9 @@ impl DesktopSession {
 		x: f64,
 		y: f64,
 		opts: Option<PointerOptions>,
-	) -> Result<task::Promise<Option<DesktopFocusReturn>>> {
+	) -> Result<task::Promise<DesktopPointerResult>> {
 		let o = ParsedPointerOptions::parse(opts).map_err(napi::Error::from)?;
-		Ok(self.input("desktop.click", move |reply| Request::Click {
+		Ok(self.pointing("desktop.click", move |reply| Request::Click {
 			target: Target::parse(&target),
 			x,
 			y,
@@ -2669,11 +2702,11 @@ impl DesktopSession {
 		dx: f64,
 		dy: f64,
 		opts: Option<PointerOptions>,
-	) -> Result<task::Promise<Option<DesktopFocusReturn>>> {
+	) -> Result<task::Promise<DesktopPointerResult>> {
 		let takeover = ParsedPointerOptions::parse(opts)
 			.map_err(napi::Error::from)?
 			.takeover;
-		Ok(self.input("desktop.scroll", move |reply| Request::Scroll {
+		Ok(self.pointing("desktop.scroll", move |reply| Request::Scroll {
 			target: Target::parse(&target),
 			x,
 			y,
@@ -2971,6 +3004,29 @@ impl DesktopSession {
 		task::blocking(label, (), move |_| {
 			match c.call(token, make)? {
 				Response::Input(report) => Ok(report),
+				_ => Err(DesktopError::internal("unexpected desktop worker response")),
+			}
+			.map_err(Into::into)
+		})
+	}
+
+	/// A click or scroll call, resolving to what went through accessibility
+	/// instead of pointer input, or where its takeover left focus.
+	fn pointing(
+		&self,
+		label: &'static str,
+		make: impl FnOnce(Reply) -> Request + Send + 'static,
+	) -> task::Promise<DesktopPointerResult> {
+		let c = Arc::clone(&self.core);
+		let token = c.cancellation.token();
+		task::blocking(label, (), move |_| {
+			match c.call(token, make)? {
+				Response::Input(focus_return) => {
+					Ok(DesktopPointerResult { accessibility: None, focus_return })
+				},
+				Response::Pointer(action) => {
+					Ok(DesktopPointerResult { accessibility: Some(action), focus_return: None })
+				},
 				_ => Err(DesktopError::internal("unexpected desktop worker response")),
 			}
 			.map_err(Into::into)
