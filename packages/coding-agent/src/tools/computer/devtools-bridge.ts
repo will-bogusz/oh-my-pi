@@ -42,6 +42,12 @@ const PORT_POLL_MS = 150;
 export const WHEEL_STEP_PX = 100;
 /** A drag interpolates its segments in steps of about this many CSS pixels, so pages see a moving pointer. */
 const DRAG_STEP_PX = 12;
+/**
+ * How long a mouse event may wait for its answer before the route draws a frame for it. Chromium holds pointer moves
+ * (and moves with a button down) until the page's next frame, and a covered or hidden Wayland window gets no frame
+ * callbacks, so each would wait out Chromium's 5 s input timeout; a 1×1 capture draws that frame.
+ */
+const FRAME_WAIT_MS = 40;
 const CHROMIUM_FILES = ["resources.pak", "chrome_100_percent.pak", "v8_context_snapshot.bin"];
 
 export type LaunchKind = "chromium" | "electron";
@@ -751,12 +757,20 @@ export class DevToolsRoute {
 	}
 
 	async #mouse(type: string, point: { x: number; y: number }, extra: CdpParams = {}): Promise<void> {
-		await this.#endpoint.send(this.#front().targetId, "Input.dispatchMouseEvent", {
+		const targetId = this.#front().targetId;
+		const sent = this.#endpoint.send(targetId, "Input.dispatchMouseEvent", {
 			type,
 			x: point.x,
 			y: point.y,
 			...extra,
 		});
+		const answered = await Promise.race([sent.then(() => true), Bun.sleep(FRAME_WAIT_MS).then(() => false)]);
+		if (answered) return;
+		await this.#endpoint.send(targetId, "Page.captureScreenshot", {
+			format: "png",
+			clip: { x: 0, y: 0, width: 1, height: 1, scale: 1 },
+		});
+		await sent;
 	}
 
 	/**
