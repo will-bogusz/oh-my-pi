@@ -487,14 +487,12 @@ impl Backend for WaylandBackend {
 		if let Some(hyprland) = &self.hyprland
 			&& !self.displays.is_empty()
 			&& let Ok(monitors) = hyprland.monitors()
-		{
-			if self
+			&& self
 				.displays
 				.iter()
 				.all(|display| monitors.iter().any(|monitor| monitor.shows(display)))
-			{
-				return frame.validate_layout(&self.displays);
-			}
+		{
+			return frame.validate_layout(&self.displays);
 		}
 		// ScreenCast exposes geometry only when opening a stream. Enumeration can
 		// use the last snapshot, but coordinate delivery needs fresh bounds.
