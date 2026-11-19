@@ -21,7 +21,7 @@ On CyberChef's operation search, `fill("#search", "to base64")` shows 0 results 
 
 ## Why
 
-19.0.0 changed text-field `fill` from per-key typing to one `Input.insertText`, so a newline no longer presses Enter, controlled inputs see one value and long text takes one round trip. `Input.insertText` fires `beforeinput` and `input` only, and many as-you-type searches wait for `keyup`. On our release benchmark (3 runs each), CyberChef's task took 20 steps on 19.0.0 against 7 on 18.22.2: in every 19.0.0 run the model filled the search box, saw no results, then pressed a key.
+19.0.0 changed text-field `fill` from per-key typing to one `Input.insertText`, so a newline no longer presses Enter, controlled inputs see one value and long text takes one round trip. `Input.insertText` fires `beforeinput` and `input` only, and many as-you-type searches wait for `keyup`. In every 19.0.0 run of CyberChef's task on our release benchmark, the model filled the search box, saw no results, then pressed a key; the agent runs under Testing measure what that cost.
 
 Decisions:
 - Native CDP key events with no text are rejected: they go wherever focus is (a Space after an input handler focused a dialog's button clicked it), a held Control turns them into Ctrl+X, and the key-down renews the page's user activation.
@@ -34,10 +34,20 @@ Page-created events are untrusted (`isTrusted: false`, `keyCode` and `which` 0),
 
 - New test in `browser-interactions.test.ts`, through `tab.fill`: a keyup-only search page gets one `beforeinput`, one `input`, then `keydown`/`keyup` reading the final value, no `keypress`, no doubled text and no renewed activation after its `input` handler spent it; a field whose `input` focuses a button sends that button no key or click; a field whose keydown moves focus gets no keyup; a focusable `<div>` passed to `fill` gets no key. It fails on 19.0.0 and on each rejected or weaker variant.
 - Headless Chromium on macOS, 18.22.2 / 19.0.0 / this branch: the table above (medians of 4 interleaved runs), a hidden background tab and a held Control. Live CyberChef: 3 / 0 / 3 results.
-- Linux, `test/tools/browser*.test.ts` at the previous head: 1052 pass, 0 fail (1051 on `main`); the full suite's failures match `main`'s or pass 3 of 3 alone. `bun run check:ts` passes.
+- Agent runs on CyberChef's task, GPT-6.1 Sol, 19.0.0 and 19.0.0 plus this change interleaved, 3 runs each, same natives; 18.22.2 shown for reference, not interleaved. Measured at 04604c5684c, before the review round limited the events to text controls and added the focus check before each event; those paths are covered by the new test, not by a rerun. In every run with this change the results appeared straight after `fill`.
+
+  | CyberChef task, median of 3 | 18.22.2 | 19.0.0 | this PR |
+  |---|---|---|---|
+  | steps | 7 | 13 | 8 |
+  | tokens | 131.8k | 286.5k | 147.7k |
+  | wall time | 31.3 s | 66.1 s | 34.6 s |
+
+- Six web tasks, 3 runs each on both arms: 36 of 36 runs passed, and none of the 18 runs with this change typed text twice.
+- Linux, this branch merged with the other open PRs that change `packages/coding-agent`: the whole coding-agent test suite fails the same 4 tests as `main` (none of them browser tests), and `bun run check:ts` passes.
 
 ---
 
 - [ ] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
