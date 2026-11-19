@@ -12,7 +12,7 @@ use super::{
 	text_range::TextSelectRequest,
 	types::{
 		AxPointAction, AxTextSelection, CaptureCaps, DesktopCapabilities, DesktopDisplay, DesktopWindow,
-		DisplaySelector, ScreenState, Target,
+		DesktopWindowOpened, DisplaySelector, ScreenState, Target,
 	},
 };
 
@@ -502,6 +502,12 @@ pub trait Backend: Send {
 	}
 	fn raise_window(&mut self, id: &str, token: &OperationToken) -> CoreResult<()>;
 	fn ax(&mut self) -> Option<&mut dyn AxBackend>;
+	/// Windows that apps opened or activated around background actions since
+	/// the last call, and what each did to the user's keyboard focus. Only
+	/// Hyprland watches for them.
+	fn take_windows_opened(&mut self) -> Vec<DesktopWindowOpened> {
+		Vec::new()
+	}
 }
 
 pub trait AxBackend {

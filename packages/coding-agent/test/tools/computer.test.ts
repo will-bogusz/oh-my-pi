@@ -34,7 +34,7 @@ import {
 } from "@oh-my-pi/pi-coding-agent/tools/computer/supervisor";
 import { ComputerWorkerCore, type NativeDesktopSession } from "@oh-my-pi/pi-coding-agent/tools/computer/worker";
 import * as clipboard from "@oh-my-pi/pi-coding-agent/utils/clipboard";
-import { DesktopKeyboardReturn } from "@oh-my-pi/pi-natives";
+import { DesktopKeyboardReturn, DesktopWindowFocus } from "@oh-my-pi/pi-natives";
 import type {
 	ApplicationOpenOptions,
 	AxNode,
@@ -53,6 +53,7 @@ import type {
 	DesktopScreenState,
 	DesktopTypeResult,
 	DesktopWindow,
+	DesktopWindowOpened,
 	HoldOptions as NativeHoldOptions,
 	PointerOptions,
 } from "@oh-my-pi/pi-natives";
@@ -297,6 +298,9 @@ class FakeNativeSession implements NativeDesktopSession {
 	}
 	async axParent(_ref: string): Promise<AxNode | null> {
 		return null;
+	}
+	async takeWindowsOpened(): Promise<DesktopWindowOpened[]> {
+		return [];
 	}
 	async axPerform(_ref: string, _action: string): Promise<void> {}
 	async axSetValue(_ref: string, _value: string): Promise<void> {}
@@ -5776,6 +5780,42 @@ describe("computer background fallback", () => {
 		const front = new RefusingSession();
 		front.report = { handedBack: true, previousPid: 300 };
 		expect(notice(await run(front, clickTarget, "takeover"))).toContain("not confirmed");
+	});
+
+	it("says what each window a background action made its app open did to the user's keyboard, once", async () => {
+		const opened = (focus: DesktopWindowFocus, heldMs?: number): DesktopWindowOpened => ({
+			app: "tdlg.py",
+			pid: 400,
+			title: "Allow access?",
+			opened: true,
+			afterMs: 30,
+			focus,
+			heldMs,
+			userWindow: "foot: notes",
+		});
+		/** Native reports the windows the click opened once each, as the Hyprland guard does. */
+		class OpeningSession extends FakeNativeSession {
+			pending: DesktopWindowOpened[] = [];
+			override async click(target: string, x: number, y: number, opts?: PointerOptions | null) {
+				await super.click(target, x, y, opts);
+				this.pending.push(
+					opened(DesktopWindowFocus.HandedBack, 0),
+					opened(DesktopWindowFocus.HandedBack, 12),
+					opened(DesktopWindowFocus.NotReturned),
+				);
+			}
+			override async takeWindowsOpened(): Promise<DesktopWindowOpened[]> {
+				const taken = this.pending;
+				this.pending = [];
+				return taken;
+			}
+		}
+		const opening = 'tdlg.py opened a window "Allow access?" 30 ms after the action began';
+		expect(texts(await run(new OpeningSession(), clickTarget, "refuse"))).toEqual([
+			`${opening}; it took the keyboard from the user's window (foot: notes), which got it back at once.`,
+			`${opening}; it took the keyboard from the user's window (foot: notes) for 12 ms before it was handed back: keys the user typed meanwhile went to it.`,
+			`${opening}; it took the keyboard from the user's window (foot: notes) and focus did not go back: the user's typing goes to it.`,
+		]);
 	});
 });
 

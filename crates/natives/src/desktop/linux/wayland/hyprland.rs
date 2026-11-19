@@ -161,7 +161,12 @@ impl Hyprland {
 		(peer_pid(&stream) == Some(pid)).then_some(Self { socket })
 	}
 
-	fn request(&self, command: &str) -> CoreResult<Vec<u8>> {
+	/// Hyprland's event socket (`socket2`), beside its request socket.
+	pub(super) fn events_socket(&self) -> PathBuf {
+		self.socket.with_file_name(".socket2.sock")
+	}
+
+	pub(super) fn request(&self, command: &str) -> CoreResult<Vec<u8>> {
 		let failed = |err: std::io::Error| DesktopError::ax_failed(format!("Hyprland IPC: {err}"));
 		let mut stream = UnixStream::connect(&self.socket).map_err(failed)?;
 		stream.set_read_timeout(Some(IPC_TIMEOUT)).map_err(failed)?;
@@ -172,7 +177,7 @@ impl Hyprland {
 		Ok(reply)
 	}
 
-	fn json<T: for<'de> Deserialize<'de>>(&self, command: &str) -> CoreResult<T> {
+	pub(super) fn json<T: for<'de> Deserialize<'de>>(&self, command: &str) -> CoreResult<T> {
 		serde_json::from_slice(&self.request(command)?)
 			.map_err(|err| DesktopError::ax_failed(format!("Hyprland IPC {command}: {err}")))
 	}

@@ -31,6 +31,7 @@ import type {
 	DesktopSessionOptions,
 	DesktopTypeResult,
 	DesktopWindow,
+	DesktopWindowOpened,
 	OpenedApplication,
 	PointerOptions,
 } from "@oh-my-pi/pi-natives";
@@ -129,6 +130,8 @@ export interface NativeDesktopSession {
 	axAttributes(ref: string): Promise<Array<[string, string]>>;
 	axChildren(ref: string): Promise<AxNode[]>;
 	axParent(ref: string): Promise<AxNode | null | undefined>;
+	/** Windows apps opened or asked to activate around background actions since the last call (Hyprland; empty elsewhere). */
+	takeWindowsOpened(): Promise<DesktopWindowOpened[]>;
 	axPerform(ref: string, action: string, menu?: string[] | null): Promise<void>;
 	axSetValue(ref: string, value: string): Promise<void>;
 	axSelectText(ref: string, text: string, opts?: AxSelectTextOptions | null): Promise<AxTextSelection>;
@@ -631,6 +634,30 @@ async function appNames(session: NativeDesktopSession, signal: AbortSignal): Pro
 	} catch (error) {
 		if (error instanceof ToolAbortError) throw error;
 		return new Map();
+	}
+}
+
+/**
+ * Says what a window an app opened around a background action did to the
+ * user's keyboard, from native's reading of the compositor (Hyprland).
+ */
+export function windowOpenedNote(opened: DesktopWindowOpened): string {
+	const { app, title, afterMs, heldMs, userWindow } = opened;
+	const focus: `${DesktopWindowOpened["focus"]}` = opened.focus;
+	const what = opened.opened
+		? `${app} opened a window "${title}" ${afterMs} ms after the action began`
+		: `${app} asked to bring its window "${title}" forward ${afterMs} ms after the action began`;
+	switch (focus) {
+		case "kept":
+			return `${what}; it did not take the keyboard from the user's window (${userWindow}).`;
+		case "handedBack":
+			return heldMs === 0
+				? `${what}; it took the keyboard from the user's window (${userWindow}), which got it back at once.`
+				: `${what}; it took the keyboard from the user's window (${userWindow}) for ${heldMs ?? "an unknown number of"} ms before it was handed back: keys the user typed meanwhile went to it.`;
+		case "leftAsChosen":
+			return `${what}; it took the keyboard from the user's window (${userWindow}), then the user moved focus themselves, so it was left where they put it.`;
+		case "notReturned":
+			return `${what}; it took the keyboard from the user's window (${userWindow}) and focus did not go back: the user's typing goes to it.`;
 	}
 }
 
@@ -1793,6 +1820,8 @@ export class ComputerWorkerCore {
 			session.setRunDeadline(deadline - performance.now());
 			const { displayTurn } = active;
 			if (displayTurn !== undefined && displayTurn > this.#releasedTurn) session.holdDisplayUntilReleased();
+			// Windows a previous run's last action opened after that run returned.
+			await this.#noteWindowsOpened(output);
 			// Under `refuse` no foreground control stands, including a grant the
 			// model acquired before the user chose `refuse`.
 			if (message.session.backgroundFallback === "refuse" && session.controlState().active) session.releaseControl();
@@ -1862,6 +1891,7 @@ export class ComputerWorkerCore {
 			runAc.abort(postmortem.markExpectedCleanupError(new ToolAbortError("Computer run ended")));
 			if (this.#active?.id === message.id) this.#active = null;
 		}
+		await this.#noteWindowsOpened(output);
 		if (failure !== undefined) {
 			this.#transport.send({
 				type: "result",
@@ -1924,19 +1954,39 @@ export class ComputerWorkerCore {
 					const result = Reflect.apply(value, target, args);
 					if (!(result instanceof Promise)) return result;
 					return result.then(
-						settled => {
+						async settled => {
 							// The call finished and its input went out; the stop ends the run after it.
 							this.#checkEscape(undefined, ESCAPE_AFTER_CALL_MESSAGE);
+							await this.#noteWindowsOpened();
 							return settled;
 						},
-						error => {
+						async error => {
 							this.#checkEscape(error);
+							await this.#noteWindowsOpened();
 							throw error;
 						},
 					);
 				};
 			},
 		});
+	}
+
+	/**
+	 * Notes each window an app opened or asked to activate around a background
+	 * action, and what it did to the user's keyboard, as the compositor
+	 * reported it (Hyprland; other backends report none).
+	 */
+	async #noteWindowsOpened(output = this.#runContexts.getStore()?.output): Promise<void> {
+		const session = this.#session;
+		if (!session || !output) return;
+		let opened: DesktopWindowOpened[];
+		try {
+			opened = await session.takeWindowsOpened();
+		} catch {
+			// Only a closed session refuses; the call this follows has already settled.
+			return;
+		}
+		for (const entry of opened) output.push({ type: "text", text: windowOpenedNote(entry) });
 	}
 
 	/**

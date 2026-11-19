@@ -178,6 +178,8 @@ enum Response {
 	Node(Option<AxNode>),
 	Attributes(Vec<(String, String)>),
 	TextSelection(AxTextSelection),
+	/// See [`Backend::take_windows_opened`].
+	WindowsOpened(Vec<DesktopWindowOpened>),
 }
 
 /// `cover` in the pixels of a `width`×`height` screenshot of its target.
@@ -213,6 +215,9 @@ struct QueuedRequest {
 
 enum Request {
 	Capabilities {
+		reply: Reply,
+	},
+	WindowsOpened {
 		reply: Reply,
 	},
 	ListDisplays {
@@ -399,6 +404,7 @@ impl Request {
 	fn reply(self, result: CoreResult<Response>) -> bool {
 		let reply = match self {
 			Self::Capabilities { reply }
+			| Self::WindowsOpened { reply }
 			| Self::ListDisplays { reply }
 			| Self::ListWindows { reply }
 			| Self::Capture { reply, .. }
@@ -530,6 +536,7 @@ impl Request {
 			| Self::AxAttributes { .. }
 			| Self::AxChildren { .. }
 			| Self::AxParent { .. }
+			| Self::WindowsOpened { .. }
 			| Self::Close { .. } => return false,
 		};
 		target.is_some_and(|target| !matches!(target, Target::Window(_)))
@@ -605,7 +612,10 @@ impl Request {
 	/// Agent activity: everything except status reads and teardown keeps the
 	/// display awake, so captures and input see a lit, unlocked screen.
 	const fn is_activity(&self) -> bool {
-		!matches!(self, Self::Capabilities { .. } | Self::Close { .. })
+		!matches!(
+			self,
+			Self::Capabilities { .. } | Self::WindowsOpened { .. } | Self::Close { .. }
+		)
 	}
 
 	/// The window or element whose app this request reads or acts on, for the
@@ -659,6 +669,7 @@ impl Request {
 			| Self::AxAttributes { .. }
 			| Self::AxChildren { .. }
 			| Self::AxParent { .. }
+			| Self::WindowsOpened { .. }
 			| Self::Close { .. } => None,
 		}
 	}
@@ -1649,6 +1660,13 @@ impl Worker {
 				*self.capabilities.lock() = Some(caps.clone());
 				Ok(Response::Capabilities(caps))
 			},
+			Request::WindowsOpened { .. } => Ok(Response::WindowsOpened(
+				self
+					.backend
+					.as_mut()
+					.map(|backend| backend.take_windows_opened())
+					.unwrap_or_default(),
+			)),
 			Request::ListDisplays { .. } => Ok(Response::Displays(self.backend()?.displays()?)),
 			Request::ListWindows { .. } => Ok(Response::Windows(self.backend()?.windows()?)),
 			Request::Capture { target, caps, .. } => {
@@ -2856,6 +2874,23 @@ impl DesktopSession {
 			}
 			.map_err(Into::into)
 		}))
+	}
+
+	/// Windows that apps opened or asked to activate around this session's
+	/// background actions since the last call, and what each did to the
+	/// user's keyboard focus. A window still watched is listed again when its
+	/// outcome changes. Hyprland only; empty elsewhere.
+	#[napi]
+	pub fn take_windows_opened(&self) -> task::Promise<Vec<DesktopWindowOpened>> {
+		let c = Arc::clone(&self.core);
+		let token = c.cancellation.token();
+		task::blocking("desktop.takeWindowsOpened", (), move |_| {
+			match c.call(token, |reply| Request::WindowsOpened { reply })? {
+				Response::WindowsOpened(v) => Ok(v),
+				_ => Err(DesktopError::internal("unexpected response")),
+			}
+			.map_err(Into::into)
+		})
 	}
 
 	#[napi]

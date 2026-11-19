@@ -1,4 +1,5 @@
 mod capture;
+mod focus_guard;
 mod hyprland;
 mod libei;
 mod pipewire;
@@ -25,8 +26,8 @@ use crate::desktop::{
 	keys::KeyName,
 	linux::ax::{self, AtSpiAx, AtSpiWindow, PointOutcome, TextRoute, resolve_focus},
 	types::{
-		AxPointAction, CaptureCaps, DesktopCapabilities, DesktopDisplay, DesktopWindow, DisplaySelector,
-		Target,
+		AxPointAction, CaptureCaps, DesktopCapabilities, DesktopDisplay, DesktopWindow,
+		DesktopWindowOpened, DisplaySelector, Target,
 	},
 };
 
@@ -148,7 +149,7 @@ impl PortalGeometry {
 pub struct WaylandBackend {
 	display:           DisplaySelector,
 	pipewire:          pipewire::Loaded,
-	ax:                Option<AtSpiAx>,
+	ax:                Option<focus_guard::GuardedAx>,
 	ax_error:          Option<DesktopError>,
 	input:             Option<libei::Libei>,
 	/// Why native input can never work here, probed once without a prompt;
@@ -210,6 +211,7 @@ impl WaylandBackend {
 			},
 			Err(err) => (None, Some(err)),
 		};
+		let ax = ax.map(|ax| focus_guard::GuardedAx::new(ax, hyprland.clone()));
 		Self {
 			display,
 			pipewire: pipewire::library(),
@@ -337,7 +339,9 @@ impl WaylandBackend {
 		}
 		let ax = self.ax.as_mut()?;
 		Some(match *ev {
-			PointerEvent::Click { x, y, .. } => ax.click_at(window, &windows, x, y),
+			PointerEvent::Click { x, y, .. } => {
+				ax.guarded(window.pid, |ax| ax.click_at(window, &windows, x, y))
+			},
 			PointerEvent::Scroll { x, y, dx, dy } => ax.scroll_at(window, x, y, dx, dy),
 			_ => return None,
 		})
@@ -735,8 +739,10 @@ impl Backend for WaylandBackend {
 		token: &OperationToken,
 	) -> CoreResult<ElementDelivery> {
 		token.check()?;
-		let route = match (input, &self.ax) {
-			(ElementInput::Text(text), Some(ax)) => Some(ax.type_text(element, text)?),
+		let route = match (input, &mut self.ax) {
+			(ElementInput::Text(text), Some(ax)) => {
+				Some(ax.on_element(element, |ax| ax.type_text(element, text))?)
+			},
 			(ElementInput::Text(_), None) => Some(TextRoute::Absent),
 			(ElementInput::Chord(_), _) => None,
 		};
@@ -753,6 +759,14 @@ impl Backend for WaylandBackend {
 
 	fn ax(&mut self) -> Option<&mut dyn AxBackend> {
 		self.ax.as_mut().map(|ax| ax as &mut dyn AxBackend)
+	}
+
+	fn take_windows_opened(&mut self) -> Vec<DesktopWindowOpened> {
+		self
+			.ax
+			.as_mut()
+			.map(focus_guard::GuardedAx::take_windows_opened)
+			.unwrap_or_default()
 	}
 }
 
