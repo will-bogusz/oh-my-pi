@@ -105032,7 +105032,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "4530cba18f6f68c0ba405966cd8dfd1093a03152",
+   "base": "f40f335845f0b136453d12fec8d6057011082766",
    "body": "bodies/win-edit-setvalue.md",
    "state": "open",
    "pr": 19814,
@@ -105040,7 +105040,7 @@
    "worktree": null,
    "host": "MacBook-Pro",
    "added": "2026-11-19T11:16:47Z",
-   "updated": "2026-11-19T19:50:39Z",
+   "updated": "2026-11-19T22:56:02Z",
    "note": "",
    "built": [
     {
@@ -105144,7 +105144,7 @@
      "tree": "7cb745689f0335fdeee979ef2cdfa40cc496e03d"
     }
    ],
-   "advanced": "2026-11-19T19:50:39Z",
+   "advanced": "2026-11-19T22:56:02Z",
    "opened": "2026-11-19T19:03:08Z",
    "readied": "2026-11-19T19:03:32Z"
   },
