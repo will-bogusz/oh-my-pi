@@ -105038,8 +105038,90 @@
    "worktree": null,
    "host": "MacBook-Pro",
    "added": "2026-11-19T11:16:47Z",
-   "updated": "2026-11-19T11:55:33Z",
-   "note": ""
+   "updated": "2026-11-19T12:03:59Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#17756",
+     "code": "079d9f46e6040e761e5b37c16701b2c37d2a99d0",
+     "with_code": "4aefc67cb62000b42b0df6eb349663a8643bce60",
+     "tip": "d66559dd2d0b773cae980f9667dbbbac9de9207c",
+     "with_tip": "533c8cc508263b4fb0af3110429dfe9ddeb8abb2",
+     "at": "2026-11-19T12:03:59Z",
+     "host": "goliath",
+     "tree": "ec4b6ab9947d6a4e74f505047bc1a4fadec8e9c3"
+    },
+    {
+     "with": "#19195",
+     "code": "079d9f46e6040e761e5b37c16701b2c37d2a99d0",
+     "with_code": "56bc48e70fa4daf9d8b1cce1241872aa370143ed",
+     "tip": "d66559dd2d0b773cae980f9667dbbbac9de9207c",
+     "with_tip": "d518da27a5bf00d7c8b8c37b67e986c08a8702c1",
+     "at": "2026-11-19T12:03:59Z",
+     "host": "goliath",
+     "tree": "ec4b6ab9947d6a4e74f505047bc1a4fadec8e9c3"
+    },
+    {
+     "with": "#19715",
+     "code": "079d9f46e6040e761e5b37c16701b2c37d2a99d0",
+     "with_code": "725dbf8ad5a6909ddd130091e2f477c8bea65f00",
+     "tip": "d66559dd2d0b773cae980f9667dbbbac9de9207c",
+     "with_tip": "129615b88f92508d6cf91165a17f32627903abf2",
+     "at": "2026-11-19T12:03:59Z",
+     "host": "goliath",
+     "tree": "ec4b6ab9947d6a4e74f505047bc1a4fadec8e9c3"
+    },
+    {
+     "with": "#19504",
+     "code": "079d9f46e6040e761e5b37c16701b2c37d2a99d0",
+     "with_code": "f8037e9523c86c49401722f3db522683d3a9b468",
+     "tip": "d66559dd2d0b773cae980f9667dbbbac9de9207c",
+     "with_tip": "fd84926e6437a7951c8762b392889dec87ef6a86",
+     "at": "2026-11-19T12:03:59Z",
+     "host": "goliath",
+     "tree": "ec4b6ab9947d6a4e74f505047bc1a4fadec8e9c3"
+    },
+    {
+     "with": "#19519",
+     "code": "079d9f46e6040e761e5b37c16701b2c37d2a99d0",
+     "with_code": "45a89a2439613d933fe11b03a5fdd65a8dfe8cba",
+     "tip": "d66559dd2d0b773cae980f9667dbbbac9de9207c",
+     "with_tip": "c416a7bcec287d19f52659a9f73831c544f5d0b7",
+     "at": "2026-11-19T12:03:59Z",
+     "host": "goliath",
+     "tree": "ec4b6ab9947d6a4e74f505047bc1a4fadec8e9c3"
+    },
+    {
+     "with": "#19616",
+     "code": "079d9f46e6040e761e5b37c16701b2c37d2a99d0",
+     "with_code": "c2e503bbece19a4d9c701332d58da781cd8f1230",
+     "tip": "d66559dd2d0b773cae980f9667dbbbac9de9207c",
+     "with_tip": "5a451e3f800598ee9ef388378fe437f002a1808d",
+     "at": "2026-11-19T12:03:59Z",
+     "host": "goliath",
+     "tree": "ec4b6ab9947d6a4e74f505047bc1a4fadec8e9c3"
+    },
+    {
+     "with": "#19615",
+     "code": "079d9f46e6040e761e5b37c16701b2c37d2a99d0",
+     "with_code": "0036bb43366a79d0cfba6ea0b6b3e12b5e29c41d",
+     "tip": "d66559dd2d0b773cae980f9667dbbbac9de9207c",
+     "with_tip": "37914bc99cc7f1b5362d5a36a6ed40f4ed485e41",
+     "at": "2026-11-19T12:03:59Z",
+     "host": "goliath",
+     "tree": "ec4b6ab9947d6a4e74f505047bc1a4fadec8e9c3"
+    },
+    {
+     "with": "#19618",
+     "code": "079d9f46e6040e761e5b37c16701b2c37d2a99d0",
+     "with_code": "3a959a39c3120742b133ff2ed29e7708078c2ad8",
+     "tip": "d66559dd2d0b773cae980f9667dbbbac9de9207c",
+     "with_tip": "88e5d649f0381de4592d2e5e61c871fece2337ad",
+     "at": "2026-11-19T12:03:59Z",
+     "host": "goliath",
+     "tree": "ec4b6ab9947d6a4e74f505047bc1a4fadec8e9c3"
+    }
+   ]
   },
   {
    "id": "win-button-click",
