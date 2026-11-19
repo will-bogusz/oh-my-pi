@@ -105174,7 +105174,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-19T17:41:09Z",
+  "checked": "2026-11-19T18:43:05Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -105184,8 +105184,19 @@
    }
   },
   "conflicts": {},
-  "merged_through": "2026-11-18T18:46:52Z",
-  "unreleased": {},
+  "merged_through": "2026-11-19T18:35:27Z",
+  "unreleased": {
+   "19715": {
+    "title": "test(natives): restore passing macOS native typing tests",
+    "merge_commit": "d483aab03b2b9f4ab7701a9801adf4435da3c0f5",
+    "merged_at": "2026-11-19T18:35:27Z"
+   },
+   "19703": {
+    "title": "fix(tui): stopped the loop profiler when the last TUI watchdog stops",
+    "merge_commit": "7073cbe465430def46854349feb6bdc630a276e4",
+    "merged_at": "2026-11-19T18:35:27Z"
+   }
+  },
   "ready": [
    17756,
    19195,
@@ -105207,8 +105218,6 @@
    19700,
    19701,
    19702,
-   19703,
-   19715,
    19748
   ],
   "post_merge": {
@@ -105336,30 +105345,21 @@
     "merge_commit": "5feafa1fd4dca059a6e35bb01cf20a22ceb15c36",
     "merged_at": "2026-11-18T18:46:52Z",
     "findings": []
+   },
+   "19703": {
+    "title": "fix(tui): stopped the loop profiler when the last TUI watchdog stops",
+    "merge_commit": "7073cbe465430def46854349feb6bdc630a276e4",
+    "merged_at": "2026-11-19T18:35:27Z",
+    "findings": []
+   },
+   "19715": {
+    "title": "test(natives): restore passing macOS native typing tests",
+    "merge_commit": "d483aab03b2b9f4ab7701a9801adf4435da3c0f5",
+    "merged_at": "2026-11-19T18:35:27Z",
+    "findings": []
    }
   },
   "events": [
-   {
-    "at": "2026-11-12T18:31:43Z",
-    "kind": "unopenable",
-    "id": "macos-ax-linked-label",
-    "title": "fix(natives): name a macOS control by the label its AXTitleUIElement links to",
-    "why": "opened as #19061"
-   },
-   {
-    "at": "2026-11-12T18:31:43Z",
-    "kind": "unopenable",
-    "id": "macos-press-click-hint",
-    "title": "fix(natives): point a refused macOS press at the element's own click",
-    "why": "opened as #19063"
-   },
-   {
-    "at": "2026-11-12T18:31:43Z",
-    "kind": "unopenable",
-    "id": "win-focus-report",
-    "title": "fix(natives): report where focus went after a Windows takeover",
-    "why": "opened as #19062"
-   },
    {
     "at": "2026-11-12T19:02:34Z",
     "kind": "openable",
@@ -107419,6 +107419,22 @@
     "id": "win-edit-setvalue",
     "title": "fix(natives): write Windows edit values without activating their window",
     "why": "plan: held (held: Main, 2026-11-19: hold until WinMine3's interleaved stall check (v19.0.0 vs round-5 build, n=30/cell, wait-chain + minidump per stall) lands and Main gives the go)"
+   },
+   {
+    "at": "2026-11-19T18:43:05Z",
+    "kind": "merged",
+    "number": 19715,
+    "title": "test(natives): restore passing macOS native typing tests",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-19T18:43:05Z",
+    "kind": "merged",
+    "number": 19703,
+    "title": "fix(tui): stopped the loop profiler when the last TUI watchdog stops",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
    }
   ]
  },
@@ -115457,8 +115473,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-19T18:37:10.441182Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-19T18:43:06.053286Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -116674,8 +116690,10 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with main in (branch missing on the fork)"
+    ],
     "note": "",
     "over": [],
     "paired": [],
