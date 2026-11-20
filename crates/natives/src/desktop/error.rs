@@ -57,13 +57,21 @@ impl ErrorCode {
 
 #[derive(Debug, Clone)]
 pub struct DesktopError {
-	pub code:    ErrorCode,
-	pub message: String,
+	pub code:                 ErrorCode,
+	pub message:              String,
+	/// Known Windows target, without another provider query after dispatch.
+	#[cfg(target_os = "windows")]
+	pub(crate) target_window: Option<usize>,
 }
 
 impl DesktopError {
 	pub(crate) fn new(code: ErrorCode, message: impl Into<String>) -> Self {
-		Self { code, message: message.into() }
+		Self {
+			code,
+			message: message.into(),
+			#[cfg(target_os = "windows")]
+			target_window: None,
+		}
 	}
 
 	pub(crate) fn permission_denied(message: impl Into<String>) -> Self {
