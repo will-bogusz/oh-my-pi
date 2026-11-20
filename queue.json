@@ -107053,8 +107053,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-gemini-image-price-rest",
    "host": "MacBook-Pro",
    "added": "2026-11-20T21:22:43Z",
-   "updated": "2026-11-20T21:22:43Z",
-   "note": ""
+   "updated": "2026-11-20T21:23:01Z",
+   "note": "LaneSnapcompactStack, 2026-11-20: Devin per-image billing for Gemini 4 Hydrogen/Argon and 3.5/3.8 Flash (REPORT.md block A, ~/tmp/adhoc/2026-11-20-devin-gemini-snapcompact/levers/routes). Diff applied as proposed, rules.json regenerated; catalog 1,421 pass; Devin row fails with devin.kdl reverted (every added id falls to unverified 1,120). Frames kept 26 -> 48 for each model, 3.6 Flash control stays 26. Review ReviewGeminiPriceRest: needs-changes at dc0cdfea163, body-only (Argon requests were nonce-varied, not byte-identical; 0 of 50 frame calls), both fixed in the stored body; no code finding. Dup-scan: no duplicate (only our #19883). Opens after #19883 merges.",
+   "kind": "fix"
   }
  ],
  "watch": {
