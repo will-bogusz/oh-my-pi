@@ -9,7 +9,7 @@
 
 ### Changed
 
-- Gemini 4 Carbon on Devin and Factory Droid now reads its snapcompact archive in 1568px frames instead of 2048px, which it copies exactly far more often
+- Gemini 4 Carbon, Neon and Hydrogen on Devin, and Carbon on Factory Droid, now get smaller (1568px instead of 2048px) snapcompact frames whose identifiers and commands they read back more exactly, at the cost of less history per frame
 
 ### Fixed
 

@@ -548,20 +548,32 @@ describe("shape resolution", () => {
 		).toMatchObject({ frameSize: 1932, frameTokenEstimate: 69 * 69 });
 	});
 
-	it("draws Gemini 4 Carbon's frames at 1568px on Devin and Factory, and 2048px elsewhere", async () => {
+	it("draws Gemini 4 Carbon's, Neon's and Hydrogen's frames at 1568px on Devin, Carbon's on Factory, and 2048px elsewhere", async () => {
 		const frameWidth = async (model: snapcompact.ShapeTarget) => {
 			const [frame] = await snapcompact.renderMany("carbon ".repeat(2000), { model, maxFrames: 1 });
 			return decodePng(Buffer.from(frame.data, "base64")).width;
 		};
-		const onDevin = { provider: "devin", api: "devin-agent", id: "gemini-4-carbon" } as const;
-		// Devin also serves Carbon under raw effort uids.
-		const effortOnDevin = { provider: "devin", api: "devin-agent", id: "gemini-4-carbon-high" } as const;
+		const devin = (id: string) => ({ provider: "devin", api: "devin-agent", id }) as const;
 		const onFactory = { provider: "factory-droid", api: "factory-droid-agent", id: "gemini-4-carbon" } as const;
-		for (const model of [onDevin, effortOnDevin, onFactory]) {
+		// Devin also serves these models under raw effort uids.
+		for (const model of [
+			devin("gemini-4-carbon"),
+			devin("gemini-4-carbon-high"),
+			devin("gemini-4-neon"),
+			devin("gemini-4-neon-xhigh"),
+			devin("gemini-4-hydrogen"),
+			devin("gemini-4-hydrogen-low"),
+			onFactory,
+		]) {
 			expect(snapcompact.resolveShape(model)).toMatchObject({ cellWidth: 8, cellHeight: 22, variant: "bw" });
 			expect(await frameWidth(model)).toBe(1568);
 		}
 		expect(await frameWidth({ provider: "google", api: "google-generative-ai", id: "gemini-4-carbon" })).toBe(2048);
+		expect(await frameWidth({ provider: "google", api: "google-generative-ai", id: "gemini-4-neon" })).toBe(2048);
+		// Neon was measured on Devin only.
+		expect(await frameWidth({ provider: "factory-droid", api: "factory-droid-agent", id: "gemini-4-neon" })).toBe(
+			2048,
+		);
 	});
 
 	it("prices frames by the reading model's lineage, not the wire API", () => {
