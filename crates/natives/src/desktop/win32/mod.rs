@@ -120,7 +120,8 @@ impl Backend for Win32Backend {
 	}
 
 	fn takeover_admitted(&mut self) -> CoreResult<bool> {
-		Ok(self.user.as_ref().map_err(Clone::clone)?.admitted())
+		self.user.as_ref().map_err(Clone::clone)?;
+		Ok(activity::admitted())
 	}
 
 	fn displays(&mut self) -> CoreResult<Vec<DesktopDisplay>> {

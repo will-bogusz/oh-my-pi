@@ -138,16 +138,16 @@ impl UserActivity {
 		ADMITTED.set(Some((Arc::clone(&self.listener.presses), count)));
 		Ok(())
 	}
+}
 
-	/// With the input lease held: whether the user has pressed nothing since
-	/// [`Self::admit`] and holds no key or button.
-	pub(super) fn admitted(&self) -> bool {
-		ADMITTED.with_borrow(|admitted| {
-			admitted
-				.as_ref()
-				.is_some_and(|(presses, baseline)| presses.count.load(Ordering::Acquire) == *baseline)
-		}) && !input_held()
-	}
+/// With the input lease held: whether the user has pressed nothing since
+/// [`UserActivity::admit`] and holds no key or button.
+pub(super) fn admitted() -> bool {
+	ADMITTED.with_borrow(|admitted| {
+		admitted
+			.as_ref()
+			.is_some_and(|(presses, baseline)| presses.count.load(Ordering::Acquire) == *baseline)
+	}) && !input_held()
 }
 
 /// Keeps the current thread's takeover watched until dropped.
@@ -268,7 +268,6 @@ fn is_user_press(input: &RAWINPUT) -> bool {
 	match input.header.dwType {
 		// SAFETY: the header says which member Windows filled.
 		RIM_TYPEKEYBOARD => u32::from(unsafe { input.data.keyboard }.Flags) & RI_KEY_BREAK == 0,
-		// SAFETY: as above.
 		RIM_TYPEMOUSE => {
 			u32::from(unsafe { input.data.mouse.Anonymous.Anonymous.usButtonFlags }) & MOUSE_PRESSES != 0
 		},
@@ -385,13 +384,11 @@ fn listen() -> CoreResult<Listener> {
 		.map_err(|error| {
 			DesktopError::input_failed(format!("cannot start watching the user's input: {error}"))
 		})?;
-	match receive_ready.recv().ok().flatten() {
-		Some(id) => Ok(Listener { presses, thread: Some(thread), id }),
-		None => {
-			let _ = thread.join();
-			Err(unwatched())
-		},
-	}
+	let Some(id) = receive_ready.recv().ok().flatten() else {
+		let _ = thread.join();
+		return Err(unwatched());
+	};
+	Ok(Listener { presses, thread: Some(thread), id })
 }
 
 #[cfg(test)]
@@ -406,7 +403,7 @@ mod tests {
 	fn a_takeover_waits_for_the_user_to_pause_and_refuses_once_they_never_do() {
 		let start = Instant::now();
 		let clock = std::cell::Cell::new(start);
-		let typing = presses(Some(start - Duration::from_secs(1)));
+		let typing = presses(start.checked_sub(Duration::from_secs(1)));
 		let error = admit_with(&typing, start + Duration::from_secs(2), || clock.get(), || false, |wait| {
 			// The user keeps typing through every wait.
 			clock.set(clock.get() + wait);
@@ -417,7 +414,7 @@ mod tests {
 		assert_eq!(error.code, crate::desktop::error::ErrorCode::UserIntervened);
 		assert!(error.message.contains("nothing was sent"), "{}", error.message);
 
-		let paused = presses(Some(start - Duration::from_secs(1)));
+		let paused = presses(start.checked_sub(Duration::from_secs(1)));
 		let waited = std::cell::Cell::new(Duration::ZERO);
 		admit_with(&paused, start + Duration::from_secs(30), || start + waited.get(), || false, |wait| {
 			waited.set(waited.get() + wait);
