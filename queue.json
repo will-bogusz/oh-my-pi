@@ -114977,8 +114977,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-20T03:21:47.746506Z",
-  "host": "goliath",
+  "at": "2026-11-20T03:24:16.808968Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -116170,10 +116170,8 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "wait",
-    "reasons": [
-     "conflicts with main in (branch missing on the fork)"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -116213,18 +116211,14 @@
     "title": "fix(natives): click Windows buttons without activating their window",
     "action": "wait",
     "reasons": [
-     "needs #19814 (open)",
-     "conflicts with #19814 in crates/natives/src/desktop/win32/value_write.rs, docs/tools/computer.md",
-     "conflicts with main in crates/natives/src/desktop/win32/value_write.rs, docs/tools/computer.md"
+     "needs #19814 (open)"
     ],
     "note": "accepted pair with #19195: Main (assignment to QueueThirtySeven), 2026-11-19: docs/tools/computer.md only, both add one paragraph after the line-118 paragraph of the desktop section; combined = #19195's macOS background-drag paragraph, then this entry's Windows BM_CLICK paragraph (union, no wording change)",
     "over": [],
     "paired": [
      "#19195"
     ],
-    "blocked_by": [
-     "#19814"
-    ],
+    "blocked_by": [],
     "needs": [
      "win-edit-setvalue"
     ],
