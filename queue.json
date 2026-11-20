@@ -106593,14 +106593,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-20T19:08:32Z",
+  "checked": "2026-11-20T19:39:33Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "hyprland-window-list": {
-    "since": "2026-11-20T19:08:32Z",
-    "title": "fix(natives): read window positions and focus from Hyprland"
-   },
    "win-button-click": {
     "since": "2026-11-20T18:07:37Z",
     "title": "fix(natives): click Windows buttons without activating their window"
@@ -106723,12 +106719,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-13T19:27:17Z",
-    "kind": "openable",
-    "id": "factory-droid-capture-resilience",
-    "title": "test(ai): keep captured Factory Droid parity cases when one case fails"
-   },
    {
     "at": "2026-11-13T19:57:40Z",
     "kind": "unopenable",
@@ -108359,6 +108349,13 @@
     "kind": "openable",
     "id": "hyprland-window-list",
     "title": "fix(natives): read window positions and focus from Hyprland"
+   },
+   {
+    "at": "2026-11-20T19:39:33Z",
+    "kind": "unopenable",
+    "id": "hyprland-window-list",
+    "title": "fix(natives): read window positions and focus from Hyprland",
+    "why": "plan: wait (conflicts with #19871 in crates/natives/src/desktop/mod.rs)"
    }
   ]
  },
@@ -117692,12 +117689,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-20T19:14:51.017065Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-20T19:39:34.675793Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 2,
-   "left": 6
+   "used": 0,
+   "left": 8
   },
   "rows": [
    {
@@ -118992,14 +118989,18 @@
     "area": "computer",
     "priority": null,
     "title": "fix(natives): read window positions and focus from Hyprland",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with #19871 in crates/natives/src/desktop/mod.rs"
+    ],
     "note": "accepted pair with #19615: Main, 2026-11-20: wayland/mod.rs capture: hyprland's before-listing then #19615's shares.capture; combined, a kept stream's newest frame can predate the listing by about one frame",
     "over": [],
     "paired": [
      "#19615"
     ],
-    "blocked_by": [],
+    "blocked_by": [
+     "#19871"
+    ],
     "needs": [],
     "created": "2026-11-20T18:38:26Z"
    },
@@ -119011,8 +119012,10 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with main in (branch missing on the fork)"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -119131,7 +119134,7 @@
     "title": "fix(natives): stop Windows takeovers when the user types or clicks",
     "action": "held",
     "reasons": [
-     "held: Main, 2026-11-20: final-head review needs-changes at 6073806a3fc (fix round WinTakeover3); win-wpf-scroll opens first (ready first)",
+     "held: Main, 2026-11-20: takeover-run hold lifted (final n20 0/20, WinTakeover3); waits for a macOS build host (shared desktop code: control/error/mod/types.rs, macos/skylight.rs), then final-head review, trees, precheck, pre-open line",
      "conflicts with #19870 in crates/natives/src/desktop/win32/mod.rs"
     ],
     "note": "",
@@ -119144,6 +119147,30 @@
     "created": "2026-11-20T12:25:26Z"
    },
    {
+    "id": "win-takeover-selection",
+    "label": "win-takeover-selection",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": null,
+    "title": "fix(natives): keep the user's caret through a Windows takeover's hand-back",
+    "action": "wait",
+    "reasons": [
+     "needs win-takeover-settle (queued)",
+     "conflicts with #19870 in crates/natives/src/desktop/win32/mod.rs"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "#19870"
+    ],
+    "needs": [
+     "win-takeover-settle"
+    ],
+    "created": "2026-11-20T19:28:59Z"
+   },
+   {
     "id": "win-takeover-settle",
     "label": "win-takeover-settle",
     "number": null,
@@ -119154,8 +119181,7 @@
     "action": "wait",
     "reasons": [
      "needs win-takeover-intervene (queued)",
-     "conflicts with #19870 in crates/natives/src/desktop/win32/mod.rs",
-     "conflicts with main in crates/natives/src/desktop/win32/input.rs, crates/natives/src/desktop/win32/mod.rs"
+     "conflicts with #19870 in crates/natives/src/desktop/win32/mod.rs"
     ],
     "note": "",
     "over": [],
@@ -119205,20 +119231,15 @@
     "reasons": [
      "needs win-button-click (queued), #19871 (open)",
      "conflicts with #19195 in docs/tools/computer.md",
-     "conflicts with #19849 in crates/natives/src/desktop/win32/window.rs",
      "conflicts with #19870 in crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md",
-     "conflicts with win-button-click in crates/natives/src/desktop/win32/ax.rs, crates/natives/src/desktop/win32/delivery.rs, crates/natives/src/desktop/win32/input.rs, crates/natives/src/desktop/win32/window.rs, docs/tools/computer.md",
-     "its need #19871 conflicts with main in crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md",
-     "conflicts with main in crates/natives/src/desktop/win32/delivery.rs, crates/natives/src/desktop/win32/input.rs, crates/natives/src/desktop/win32/window.rs"
+     "its need #19871 conflicts with main in crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
      "#19195",
-     "#19849",
-     "#19870",
-     "win-button-click"
+     "#19870"
     ],
     "needs": [
      "win-button-click",
