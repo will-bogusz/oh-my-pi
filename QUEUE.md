@@ -3,18 +3,19 @@
 Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20 19:09Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-11-20 19:08Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 3, conflict-held 17, stacked 17, held 11, parked 1, open PRs 25; merged 404, closed 44
+**Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-11-20 19:08Z on MacBook-Pro; groups below are from it, states from the manifest)
+**Counts:** openable now 4, conflict-held 16, stacked 17, held 11, parked 1, open PRs 25; merged 404, closed 44
 
-## Openable now (3)
+## Openable now (4)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
+| stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 7d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 | factory-droid-1100-pin | feat(catalog): identify Factory Droid requests as droid 1.10.0 | factory-droid |  | 7d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-pin) |
 | win-button-click | fix(natives): click Windows buttons without activating their window | computer |  | 1d | open; accepted pair with #19195: Main (assignment to QueueThirtySeven), 2026-11-19: docs/tools/computer.md only, both add one paragraph after the line-118 paragraph of the desktop section; combined = #19195's macOS background-drag paragraph, then this entry's Windows BM_CLICK paragraph (union, no wording change); accepted pair with #19870: Main, 2026-11-20: docs/tools/computer.md AxUnconfirmed: #19870's sentence plus this entry's WinForms check-box case; combined = both; recheck at #19870's next head. Wording rule (Main): one sentence per platform fact; 'It may already have taken effect: observe ... before repeating it' stays last, unduplicated; whoever merges third reads the paragraph whole; accepted pair with #19849: Main, 2026-11-20: import-list union in win32/window.rs with #19849's three style removals applied, one tests module; combined = both; accepted pair with #19871: Main, 2026-11-20: win32/ax.rs perform arms = #19871's, invoke arm reusing this entry's probe (invoke.unwrap_or_else(get_pattern UIInvokePattern), then control::dispatching(), then invoke); docs/tools/computer.md AxUnconfirmed: this entry's (or the #19870-combined) sentence, then #19871's Windows dispatch line, Main's one-fact-per-sentence rule; BM_CLICK dispatch mark left to win-button-click-fence; tests-over: WbcReview (gpt-6.2-sol) should-fix 5, 2026-11-20: dispatch tests at the AX and pointer entries; each reaches a route no other does (click_button guards incl. reparent/destroy rows; perform's native route + disabled-form refusal; pointer hand-off + owner-drawn exclusion); each fails with its guard reverted on the VM | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-button-click) |
 | hyprland-window-list | fix(natives): read window positions and focus from Hyprland | computer |  | 0h | open; accepted pair with #19615: Main, 2026-11-20: wayland/mod.rs capture: hyprland's before-listing then #19615's shares.capture; combined, a kept stream's newest frame can predate the listing by about one frame | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/hyprland-window-list) |
 
-## Conflict-held (17)
+## Conflict-held (16)
 
 | id | title | area | priority | age | blocked by | branch |
 |---|---|---|---|---|---|---|
@@ -32,7 +33,6 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20
 | win-minimised-windows | fix(natives,coding-agent): show a minimized Windows app's window from apps.open instead of launching it again | computer | P2 | 9d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-minimised-windows) |
 | macos-ax-cancel-before-send | fix(natives): send no macOS AX action once its run is cancelled | natives | P2 | 9d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-ax-cancel-before-send) |
 | win-ax-states | fix(natives): expose Windows control state and stale-reference matches | computer | P2 | 9d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-ax-states) |
-| stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 7d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 | macos-web-type-background | fix(natives): type into a background macOS web page field without a takeover | computer | P2 | 5d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19504](https://github.com/can1357/oh-my-pi/pull/19504), [#19702](https://github.com/can1357/oh-my-pi/pull/19702), [#19871](https://github.com/can1357/oh-my-pi/pull/19871), [#19531](https://github.com/can1357/oh-my-pi/pull/19531), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-web-type-background) |
 | deadline-ranking | feat(ai): rank an account priority by quota deadline | ai/auth | P2 | 2d | [#19623](https://github.com/can1357/oh-my-pi/pull/19623), [#19700](https://github.com/can1357/oh-my-pi/pull/19700), [#19701](https://github.com/can1357/oh-my-pi/pull/19701) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/deadline-ranking) |
 
