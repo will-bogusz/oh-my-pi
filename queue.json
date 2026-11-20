@@ -105271,7 +105271,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-wpf-scroll",
    "host": "MacBook-Pro",
    "added": "2026-11-20T04:27:43Z",
-   "updated": "2026-11-20T16:03:45Z",
+   "updated": "2026-11-20T16:04:24Z",
    "note": "QueueFortyOne.ScrollDeltaReview must-fix (split COM init/activation cutoffs in scroll) declined by Main, 2026-11-20: main's shared automation() path, used unchanged; nit fold of control.rs time_left/reply_deadline skipped by Main (don't touch #19814's merged fn)",
    "rebases_after": [
     19814
@@ -105329,6 +105329,86 @@
      "at": "2026-11-20T16:03:45Z",
      "host": "goliath",
      "tree": "32822a6b97e2419f88e460a4fb4877b2610574f9"
+    },
+    {
+     "with": "#19195",
+     "code": "1699992a48debd8ce62db366fe6e238467f84864",
+     "with_code": "56bc48e70fa4daf9d8b1cce1241872aa370143ed",
+     "tip": "e260d86b5bced96ef2cf3efd9dfbcc4476c4e298",
+     "with_tip": "eba7cada40309ff90e4609626d5ab969a977b952",
+     "at": "2026-11-20T16:04:24Z",
+     "host": "goliath",
+     "tree": "8e70e929c68dbc8222ce650918210fce489820f9"
+    },
+    {
+     "with": "#17756",
+     "code": "1699992a48debd8ce62db366fe6e238467f84864",
+     "with_code": "4aefc67cb62000b42b0df6eb349663a8643bce60",
+     "tip": "e260d86b5bced96ef2cf3efd9dfbcc4476c4e298",
+     "with_tip": "afa2f973ac8db34ea0b2a76e2a54db30c98ba17b",
+     "at": "2026-11-20T16:04:24Z",
+     "host": "goliath",
+     "tree": "8e70e929c68dbc8222ce650918210fce489820f9"
+    },
+    {
+     "with": "#19504",
+     "code": "1699992a48debd8ce62db366fe6e238467f84864",
+     "with_code": "f8037e9523c86c49401722f3db522683d3a9b468",
+     "tip": "e260d86b5bced96ef2cf3efd9dfbcc4476c4e298",
+     "with_tip": "5e0b1bba3c2e034133396dbef995df359a8ed35a",
+     "at": "2026-11-20T16:04:24Z",
+     "host": "goliath",
+     "tree": "8e70e929c68dbc8222ce650918210fce489820f9"
+    },
+    {
+     "with": "#19519",
+     "code": "1699992a48debd8ce62db366fe6e238467f84864",
+     "with_code": "894d4a43226ef5f65da81afd8d8efbf4042664ee",
+     "tip": "e260d86b5bced96ef2cf3efd9dfbcc4476c4e298",
+     "with_tip": "da8a36da61c61d703ada8813287ad6b3a334b33b",
+     "at": "2026-11-20T16:04:24Z",
+     "host": "goliath",
+     "tree": "8e70e929c68dbc8222ce650918210fce489820f9"
+    },
+    {
+     "with": "#19616",
+     "code": "1699992a48debd8ce62db366fe6e238467f84864",
+     "with_code": "c2e503bbece19a4d9c701332d58da781cd8f1230",
+     "tip": "e260d86b5bced96ef2cf3efd9dfbcc4476c4e298",
+     "with_tip": "dca8c475900bd7674b68380bbbe1dcdb41fe3b76",
+     "at": "2026-11-20T16:04:24Z",
+     "host": "goliath",
+     "tree": "8e70e929c68dbc8222ce650918210fce489820f9"
+    },
+    {
+     "with": "#19849",
+     "code": "1699992a48debd8ce62db366fe6e238467f84864",
+     "with_code": "3fb60ca861d279cf47041033fb22abb9fa8e5ce0",
+     "tip": "e260d86b5bced96ef2cf3efd9dfbcc4476c4e298",
+     "with_tip": "edd6f2b48396719c560c1eeb666dd4e511bdc076",
+     "at": "2026-11-20T16:04:24Z",
+     "host": "goliath",
+     "tree": "8e70e929c68dbc8222ce650918210fce489820f9"
+    },
+    {
+     "with": "#19615",
+     "code": "1699992a48debd8ce62db366fe6e238467f84864",
+     "with_code": "0036bb43366a79d0cfba6ea0b6b3e12b5e29c41d",
+     "tip": "e260d86b5bced96ef2cf3efd9dfbcc4476c4e298",
+     "with_tip": "42dd1355fda14177a1daf93bff4fc2a615d6757a",
+     "at": "2026-11-20T16:04:24Z",
+     "host": "goliath",
+     "tree": "8e70e929c68dbc8222ce650918210fce489820f9"
+    },
+    {
+     "with": "#19618",
+     "code": "1699992a48debd8ce62db366fe6e238467f84864",
+     "with_code": "3a959a39c3120742b133ff2ed29e7708078c2ad8",
+     "tip": "e260d86b5bced96ef2cf3efd9dfbcc4476c4e298",
+     "with_tip": "192a898833fa619bf380a94a9e59b977877b9eab",
+     "at": "2026-11-20T16:04:24Z",
+     "host": "goliath",
+     "tree": "8e70e929c68dbc8222ce650918210fce489820f9"
     }
    ]
   },
