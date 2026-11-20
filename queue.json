@@ -117938,6 +117938,11 @@
     "sha": "f6af5880c1cd9c851b522a50f5b17ebd42c431c6",
     "at": "2026-11-20T20:49:27Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "f6af5880c1cd9c851b522a50f5b17ebd42c431c6",
+    "at": "2026-11-20T20:53:39Z",
+    "host": "goliath"
    }
   },
   "490e09b771215a46c8b9095f1ef715b559b14c6f": {
