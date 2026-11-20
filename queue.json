@@ -105307,7 +105307,7 @@
    "needs": [
     "win-edit-setvalue"
    ],
-   "base": "725f8c6f34ce648bec57af31a4e91baea1081a3c",
+   "base": "fbb8085ff432419132c6e3132f36ad857893b1a4",
    "body": "bodies/win-button-click.md",
    "state": "open",
    "pr": 19889,
@@ -105315,7 +105315,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-edit-setvalue",
    "host": "MacBook-Pro",
    "added": "2026-11-19T11:17:04Z",
-   "updated": "2026-11-20T20:10:40Z",
+   "updated": "2026-11-20T21:01:17Z",
    "note": "WbcReview must-fix (b) WinForms radio route: accepted BM_CLICK for WinForms radios \u2014 Main, 2026-11-20: main clicks a hidden retained-ref radio too, with a foreground take; exception measured and removed",
    "rebases_after": [
     19195,
@@ -105329,7 +105329,7 @@
     "19870": "Main, 2026-11-20: docs/tools/computer.md AxUnconfirmed: #19870's sentence plus this entry's WinForms check-box case; combined = both; recheck at #19870's next head. Wording rule (Main): one sentence per platform fact; 'It may already have taken effect: observe ... before repeating it' stays last, unduplicated; whoever merges third reads the paragraph whole",
     "19871": "Main, 2026-11-20: win32/ax.rs perform arms = #19871's, invoke arm reusing this entry's probe (invoke.unwrap_or_else(get_pattern UIInvokePattern), then control::dispatching(), then invoke); docs/tools/computer.md AxUnconfirmed: this entry's (or the #19870-combined) sentence, then #19871's Windows dispatch line, Main's one-fact-per-sentence rule; BM_CLICK dispatch mark left to win-button-click-fence"
    },
-   "advanced": "2026-11-20T16:25:24Z",
+   "advanced": "2026-11-20T21:01:17Z",
    "line_loss_overrides": [
     {
      "at": "2026-11-20T12:47:37Z",
