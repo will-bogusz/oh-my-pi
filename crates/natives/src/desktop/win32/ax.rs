@@ -179,17 +179,13 @@ impl Win32Ax {
 	/// names in a selection container (a WPF combo box or list). Either is read
 	/// back.
 	fn set_number_or_item(&mut self, element: &UIElement, text: &str) -> CoreResult<()> {
-		let root = self.host_root(element).ok_or_else(|| {
-			DesktopError::background_unavailable(
-				"cannot establish the window hosting this UIA element; nothing was sent",
-			)
-		})?;
-		fresh_write(root)?;
 		if let Some(range) = present(element.get_pattern::<UIRangeValuePattern>(), "RangeValue")? {
+			let root = self.write_root(element)?;
 			control::check()?;
 			return Self::set_number(root, &range, text);
 		}
 		if let Some(selection) = present(element.get_pattern::<UISelectionPattern>(), "Selection")? {
+			let root = self.write_root(element)?;
 			control::check()?;
 			return self.select_item(root, element, &selection, text);
 		}
@@ -197,6 +193,16 @@ impl Win32Ax {
 			"this element offers none of UI Automation's Value, RangeValue and Selection patterns, \
 			 so it takes no text, number or item; nothing was written; set it via press/click instead",
 		))
+	}
+
+	fn write_root(&mut self, element: &UIElement) -> CoreResult<HWND> {
+		let root = self.host_root(element).ok_or_else(|| {
+			DesktopError::background_unavailable(
+				"cannot establish the window hosting this UIA element; nothing was sent",
+			)
+		})?;
+		fresh_write(root)?;
+		Ok(root)
 	}
 
 	fn set_number(root: HWND, range: &UIRangeValuePattern, text: &str) -> CoreResult<()> {
@@ -275,6 +281,7 @@ impl Win32Ax {
 		let items = self.selection_items(element)?;
 		if !items.is_empty() {
 			let item = pick(items, text)?;
+			self.preserve_selection(selection, Some(&item.element))?;
 			fresh_write(root)?;
 			item.pattern.select().map_err(|error| {
 				DesktopError::input_failed(format!(
@@ -307,6 +314,7 @@ impl Win32Ax {
 			));
 		};
 		// Before Expand, cancellation or loss of foreground still sent nothing.
+		self.preserve_selection(selection, None)?;
 		fresh_write(root)?;
 		let expanded = expander.expand();
 		let selected = expanded
@@ -351,9 +359,6 @@ impl Win32Ax {
 				item.pattern.select().map_err(|error| {
 					format!("SelectionItem.Select({text:?}) was attempted and failed ({error})")
 				})?;
-				self
-					.confirm_selected(selection, &item.element, text, false)
-					.map_err(|error| error.message)?;
 				Ok(item)
 			});
 		// Expand was attempted, even if it returned an error. Cleanup must not
@@ -472,6 +477,33 @@ impl Win32Ax {
 		}
 		control::check()?;
 		Ok(items)
+	}
+
+	/// Select replaces the whole selection, even in a multiple-selection list.
+	fn preserve_selection(
+		&mut self,
+		selection: &UISelectionPattern,
+		target: Option<&UIElement>,
+	) -> CoreResult<()> {
+		if !selection.can_select_multiple().map_err(ax_error)? {
+			return Ok(());
+		}
+		let selected = selection.get_selection().map_err(ax_error)?;
+		let automation = self.automation()?;
+		for item in selected {
+			if let Some(target) = target
+				&& automation
+					.compare_elements(&item, target)
+					.map_err(ax_error)?
+			{
+				continue;
+			}
+			return Err(DesktopError::ax_failed(
+				"setValue would replace other selected items in this multiple-selection list; nothing \
+				 was changed; press the item or select via click instead",
+			));
+		}
+		Ok(())
 	}
 
 	/// Checks that the container's selection is the item selected, alone.
@@ -867,7 +899,7 @@ impl AxBackend for Win32Ax {
 				}
 				let pattern = element
 					.get_pattern::<UILegacyIAccessiblePattern>()
-					.map_err(pattern_error("LegacyIAccessible"))?;
+					.map_err(ax_error)?;
 				if pattern.get_default_action().map_err(ax_error)?.is_empty() {
 					return Err(DesktopError::ax_failed("UIA element has no default press action"));
 				}
@@ -875,32 +907,32 @@ impl AxBackend for Win32Ax {
 			},
 			"invoke" => element
 				.get_pattern::<UIInvokePattern>()
-				.map_err(pattern_error("Invoke"))?
+				.map_err(ax_error)?
 				.invoke()
 				.map_err(ax_error),
 			"toggle" => element
 				.get_pattern::<UITogglePattern>()
-				.map_err(pattern_error("Toggle"))?
+				.map_err(ax_error)?
 				.toggle()
 				.map_err(ax_error),
 			"expand" => element
 				.get_pattern::<UIExpandCollapsePattern>()
-				.map_err(pattern_error("ExpandCollapse"))?
+				.map_err(ax_error)?
 				.expand()
 				.map_err(ax_error),
 			"collapse" => element
 				.get_pattern::<UIExpandCollapsePattern>()
-				.map_err(pattern_error("ExpandCollapse"))?
+				.map_err(ax_error)?
 				.collapse()
 				.map_err(ax_error),
 			"select" => element
 				.get_pattern::<UISelectionItemPattern>()
-				.map_err(pattern_error("SelectionItem"))?
+				.map_err(ax_error)?
 				.select()
 				.map_err(ax_error),
 			"scrollintoview" => element
 				.get_pattern::<UIScrollItemPattern>()
-				.map_err(pattern_error("ScrollItem"))?
+				.map_err(ax_error)?
 				.scroll_into_view()
 				.map_err(ax_error),
 			other => {
@@ -1076,7 +1108,7 @@ mod tests {
 	/// controls (`level`, `opened`, `selected`, `closed`) and `mark` for each
 	/// mark posted to it.
 	const WPF_VALUES: &str = r#"
-Add-Type -ReferencedAssemblies PresentationFramework,PresentationCore,WindowsBase,System.Xaml -TypeDefinition @'
+Add-Type -ReferencedAssemblies PresentationFramework,PresentationCore,WindowsBase,System.Xaml,System.Windows.Forms,WindowsFormsIntegration,System.Drawing -TypeDefinition @'
 using System;
 using System.Windows;
 using System.Windows.Automation;
@@ -1084,11 +1116,17 @@ using System.Windows.Controls;
 using System.Windows.Interop;
 public static class Fixture {
 	static Window window, other;
+	static ListBox multiple;
 	static bool steal;
 	static void Say(string line) { Console.Out.WriteLine(line); Console.Out.Flush(); }
 	static IntPtr Hook(IntPtr hwnd, int message, IntPtr w, IntPtr l, ref bool handled) {
 		if (message == 0x8007) Say("mark");
 		else if (message == 0x8008) steal = true;
+		else if (message == 0x8009) {
+			string selected = "";
+			foreach (var item in multiple.SelectedItems) selected += item + ",";
+			Say("multiple " + selected);
+		}
 		return IntPtr.Zero;
 	}
 	static ComboBox Combo(string name, params string[] items) {
@@ -1116,10 +1154,35 @@ public static class Fixture {
 		var reset = Combo("Reset", "One", "Two");
 		reset.DropDownClosed += (sender, e) => { reset.SelectedItem = "One"; };
 		panel.Children.Add(reset);
-		window = new Window { Title = "omp test: wpf values", Left = 40, Top = 40, Width = 300, Height = 200, Content = panel };
+		var commit = Combo("Commit", "One", "Two");
+		commit.SelectionChanged += (sender, e) => {
+			if (commit.IsDropDownOpen && (string)commit.SelectedItem == "Two") commit.SelectedItem = "One";
+		};
+		commit.DropDownClosed += (sender, e) => { commit.SelectedItem = "Two"; };
+		panel.Children.Add(commit);
+		multiple = new ListBox { SelectionMode = SelectionMode.Multiple };
+		AutomationProperties.SetName(multiple, "Multiple");
+		foreach (var item in new[] { "Red", "Green", "Blue" }) multiple.Items.Add(item);
+		multiple.SelectedItems.Add("Red");
+		multiple.SelectedItems.Add("Green");
+		panel.Children.Add(multiple);
+		var button = new Button { Content = "OffSide" };
+		AutomationProperties.SetName(button, "OffSide");
+		button.Click += (sender, e) => Say("clicked");
+		var offSide = new System.Windows.Forms.Form {
+			Text = "omp test: off-side", StartPosition = System.Windows.Forms.FormStartPosition.Manual,
+			Left = 360, Top = 40, Width = 240, Height = 140
+		};
+		offSide.Controls.Add(new System.Windows.Forms.Integration.ElementHost {
+			Child = button, Dock = System.Windows.Forms.DockStyle.Fill
+		});
+		window = new Window { Title = "omp test: wpf values", Left = 40, Top = 40, Width = 300, Height = 400, Content = panel };
 		other = new Window { Title = "omp test: wpf other", ShowActivated = false, Left = 360, Top = 40, Width = 240, Height = 140 };
 		window.SourceInitialized += (sender, e) => HwndSource.FromHwnd(Handle(window)).AddHook(Hook);
-		window.ContentRendered += (sender, e) => { other.Show(); Say("ready " + Handle(window) + " " + Handle(other)); };
+		window.ContentRendered += (sender, e) => {
+			offSide.Show(); other.Show(); window.Activate();
+			Say("ready " + Handle(window) + " " + Handle(other) + " " + offSide.Handle);
+		};
 		window.ShowDialog();
 	}
 }
@@ -1203,6 +1266,7 @@ public static class Fixture {
 		assert_eq!(words[0], "ready");
 		let handle = |word: &str| with_exposed_provenance_mut(word.parse::<usize>().unwrap());
 		let (window, other): (HWND, HWND) = (handle(words[1]), handle(words[2]));
+		let off_side: HWND = handle(words[3]);
 		app.window = window;
 		let mut worker = Worker::new(DisplaySelector::Active, Arc::default(), Arc::default());
 		let token = CancellationSource::default().token();
@@ -1211,7 +1275,11 @@ public static class Fixture {
 		let mut set = |name: &str, value: &str| {
 			let query = AxQuery { title: Some(name.to_string()), ..AxQuery::default() };
 			let request = Request::AxQuery {
-				target: Target::Window(window.expose_provenance().to_string()),
+				target: Target::Window(
+					if name == "OffSide" { off_side } else { window }
+						.expose_provenance()
+						.to_string(),
+				),
 				query,
 				reply: flume::unbounded().0,
 			};
@@ -1238,6 +1306,11 @@ public static class Fixture {
 		let error = set("Level", "0.5000000000000001").unwrap_err();
 		assert_eq!(error.code, ErrorCode::AxFailed, "{error}");
 		assert_eq!(app.printed(), Vec::<String>::new());
+
+		let error = set("Multiple", "Blue").unwrap_err();
+		assert_eq!(error.code, ErrorCode::AxFailed, "{error}");
+		app.post(0x8009);
+		assert_eq!(app.printed(), ["multiple Red,Green,"]);
 
 		// A combo box never opened has no items until its list opens: it is
 		// opened, the item selected, and the list closed again.
@@ -1280,6 +1353,16 @@ public static class Fixture {
 		assert!(error.message.contains("selection reads [One]"), "{error}");
 		assert_eq!(app.printed(), ["opened", "selected Two", "closed", "selected One"]);
 
+		// The selected item is restored while open but committed on close.
+		set("Commit", "Two").unwrap();
+		assert_eq!(app.printed(), [
+			"opened",
+			"selected Two",
+			"selected One",
+			"closed",
+			"selected Two"
+		]);
+
 		// The window losing the foreground once the list is open stops the
 		// selection.
 		app.post(STEAL);
@@ -1293,6 +1376,10 @@ public static class Fixture {
 		assert_eq!(foreground(), other);
 
 		// Behind another window nothing is sent.
+		// A covered windowless button in an unguarded WinForms host still
+		// refuses for its missing writable patterns, not its foreground.
+		let error = set("OffSide", "anything").unwrap_err();
+		assert_eq!(error.code, ErrorCode::AxFailed, "{error}");
 		for (name, value) in [("Level", "70"), ("Choice", "Three")] {
 			let error = set(name, value).unwrap_err();
 			assert_eq!(error.code, ErrorCode::BackgroundUnavailable, "{error}");
