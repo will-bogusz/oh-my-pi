@@ -106142,7 +106142,7 @@
    "branch": "will/picker-stale-discovery",
    "title": "fix(coding-agent): refresh discovery from the model picker once the catalog is two hours old",
    "area": "other",
-   "priority": null,
+   "priority": "P1",
    "needs": [],
    "base": "725f8c6f34ce648bec57af31a4e91baea1081a3c",
    "body": "bodies/picker-stale-discovery.md",
@@ -106152,7 +106152,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/picker-stale-discovery",
    "host": "MacBook-Pro",
    "added": "2026-11-20T17:27:00Z",
-   "updated": "2026-11-20T17:53:59Z",
+   "updated": "2026-11-20T18:00:48Z",
    "note": "",
    "built": [
     {
