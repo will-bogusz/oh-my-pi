@@ -105315,7 +105315,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-edit-setvalue",
    "host": "MacBook-Pro",
    "added": "2026-11-19T11:17:04Z",
-   "updated": "2026-11-20T18:24:15Z",
+   "updated": "2026-11-20T18:24:33Z",
    "note": "WbcReview must-fix (b) WinForms radio route: accepted BM_CLICK for WinForms radios \u2014 Main, 2026-11-20: main clicks a hidden retained-ref radio too, with a foreground take; exception measured and removed",
    "rebases_after": [
     19195,
@@ -105415,8 +105415,9 @@
      "with_code": "e608cd824a8447d2fca6ebe64e6b79079f530099",
      "tip": "c34ca837e8f6bbfe45d809dc298459f90402cb54",
      "with_tip": "0c073f5ac413a6101207133b610d1f03abd06668",
-     "at": "2026-11-20T18:24:14Z",
-     "host": "MacBook-Pro"
+     "at": "2026-11-20T18:24:31Z",
+     "host": "goliath",
+     "tree": "b598ef6337c05bb1c8a44458df0060b8777bf5af"
     },
     {
      "with": "#19531",
@@ -105424,8 +105425,9 @@
      "with_code": "d6ffe761e6cb2055157979cb3d54b5c3ba1571d5",
      "tip": "c34ca837e8f6bbfe45d809dc298459f90402cb54",
      "with_tip": "d089703a9887a24936e27adf88c44ee6d54de0ef",
-     "at": "2026-11-20T18:24:15Z",
-     "host": "MacBook-Pro"
+     "at": "2026-11-20T18:24:31Z",
+     "host": "goliath",
+     "tree": "b598ef6337c05bb1c8a44458df0060b8777bf5af"
     }
    ]
   },
