@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20 18:13Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20 18:17Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-11-20 18:07Z on goliath; groups below are from it, states from the manifest)
@@ -12,7 +12,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20
 |---|---|---|---|---|---|---|
 | factory-droid-1100-pin | feat(catalog): identify Factory Droid requests as droid 1.10.0 | factory-droid |  | 7d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-pin) |
 | win-button-click | fix(natives): click Windows buttons without activating their window | computer |  | 1d | open; accepted pair with #19195: Main (assignment to QueueThirtySeven), 2026-11-19: docs/tools/computer.md only, both add one paragraph after the line-118 paragraph of the desktop section; combined = #19195's macOS background-drag paragraph, then this entry's Windows BM_CLICK paragraph (union, no wording change); accepted pair with #19870: Main, 2026-11-20: docs/tools/computer.md AxUnconfirmed: #19870's sentence plus this entry's WinForms check-box case; combined = both; recheck at #19870's next head. Wording rule (Main): one sentence per platform fact; 'It may already have taken effect: observe ... before repeating it' stays last, unduplicated; whoever merges third reads the paragraph whole; accepted pair with #19849: Main, 2026-11-20: import-list union in win32/window.rs with #19849's three style removals applied, one tests module; combined = both; accepted pair with #19871: Main, 2026-11-20: win32/ax.rs perform arms = #19871's, invoke arm reusing this entry's probe (invoke.unwrap_or_else(get_pattern UIInvokePattern), then control::dispatching(), then invoke); docs/tools/computer.md AxUnconfirmed: this entry's (or the #19870-combined) sentence, then #19871's Windows dispatch line, Main's one-fact-per-sentence rule; BM_CLICK dispatch mark left to win-button-click-fence; tests-over: WbcReview (gpt-6.2-sol) should-fix 5, 2026-11-20: dispatch tests at the AX and pointer entries; each reaches a route no other does (click_button guards incl. reparent/destroy rows; perform's native route + disabled-form refusal; pointer hand-off + owner-drawn exclusion); each fails with its guard reverted on the VM | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-button-click) |
-| devin-neon-image-price | fix(catalog): budget Gemini 4 Neon's images on Devin at the 1,089 tokens it bills | catalog |  | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-neon-image-price) |
+| devin-neon-image-price | fix(catalog): budget Gemini 4 Neon's images on Devin at the 1,089 tokens it bills | catalog | P2 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-neon-image-price) |
 
 ## Conflict-held (17)
 

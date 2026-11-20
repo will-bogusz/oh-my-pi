@@ -106261,7 +106261,7 @@
    "branch": "will/devin-neon-image-price",
    "title": "fix(catalog): budget Gemini 4 Neon's images on Devin at the 1,089 tokens it bills",
    "area": "catalog",
-   "priority": null,
+   "priority": "P2",
    "needs": [],
    "base": "725f8c6f34ce648bec57af31a4e91baea1081a3c",
    "body": "bodies/devin-neon-image-price.md",
@@ -106271,7 +106271,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-neon-image-price",
    "host": "MacBook-Pro",
    "added": "2026-11-20T18:00:29Z",
-   "updated": "2026-11-20T18:12:26Z",
+   "updated": "2026-11-20T18:17:57Z",
    "note": "",
    "built": [
     {
