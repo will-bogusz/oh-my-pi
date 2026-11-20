@@ -1150,11 +1150,18 @@ mod foreground {
 					control::wait(left.min(Duration::from_millis(10)))?;
 				}
 			};
+			let mut repair_selection = None;
 			let outcome = control::cleanup(|| -> CoreResult<Front> {
 				// Even when intervention forbids a hand-back, fence the target
 				// before returning so a pending activation has its turn.
 				let mut arrived = was_in_front;
 				let first = (|| -> CoreResult<()> {
+					let budget = UserSelection::budget();
+					let eligible = self
+						.selection
+						.as_ref()
+						.zip(budget)
+						.is_some_and(|(selection, until)| selection.unchanged(until));
 					let front = observe()?;
 					arrived |= front == self.target;
 					if requested
@@ -1167,8 +1174,11 @@ mod foreground {
 						&& remaining(ACTIVATION_TIMEOUT).as_millis() != 0
 					{
 						let _ = window::activate(self.previous)?;
-						let _ =
-							window::wait_for_foreground(self.previous, remaining(ACTIVATION_TIMEOUT))?;
+						if window::wait_for_foreground(self.previous, remaining(ACTIVATION_TIMEOUT))?
+							&& eligible
+						{
+							repair_selection = budget;
+						}
 					}
 					Ok(())
 				})();
@@ -1197,6 +1207,13 @@ mod foreground {
 					},
 				};
 				first?;
+				let budget = UserSelection::budget();
+				let eligible = repair_selection.is_some()
+					|| self
+						.selection
+						.as_ref()
+						.zip(budget)
+						.is_some_and(|(selection, until)| selection.unchanged(until));
 				let front = observe()?;
 				if front == self.previous {
 					return Ok(if fenced {
@@ -1221,13 +1238,20 @@ mod foreground {
 					return Ok(Front::Unconfirmed);
 				}
 				let _ = window::activate(self.previous)?;
-				if window::wait_for_foreground(self.previous, remaining(ACTIVATION_TIMEOUT))? && fenced
-				{
+				let returned =
+					window::wait_for_foreground(self.previous, remaining(ACTIVATION_TIMEOUT))?;
+				if returned && eligible {
+					repair_selection = budget;
+				}
+				if returned && fenced {
 					Ok(Front::Restored)
 				} else {
 					Ok(Front::Unconfirmed)
 				}
 			});
+			if let Some((selection, until)) = self.selection.as_ref().zip(repair_selection) {
+				selection.restore(until);
+			}
 			let activation = if requested {
 				"Windows accepted activating"
 			} else {
@@ -1309,12 +1333,12 @@ mod foreground {
 
 		fn restore(&mut self) -> (CoreResult<()>, bool) {
 			self.armed = false;
-			if let Err(error) = activity::check() {
-				if let Some(cursor) = &mut self.cursor {
-					cursor.0 = None;
-				}
-				return (Err(error), false);
-			}
+			let budget = UserSelection::budget();
+			let eligible = self
+				.selection
+				.as_ref()
+				.zip(budget)
+				.is_some_and(|(selection, until)| selection.unchanged(until));
 			let foreground = control::cleanup(|| {
 				// SAFETY: these functions validate scalar handles. Owned modal
 				// windows qualify for restoration, never for input targeting.
@@ -1347,9 +1371,10 @@ mod foreground {
 			// Return the cursor before the optional cross-thread selection probe.
 			let cursor = self.cursor.as_mut().map_or(Ok(()), CursorGuard::restore);
 			if matches!(foreground, Ok(true))
-				&& let Some(selection) = &self.selection
+				&& eligible
+				&& let Some((selection, until)) = self.selection.as_ref().zip(budget)
 			{
-				selection.restore();
+				selection.restore(until);
 			}
 			let foreground_restored = foreground.is_ok();
 			(super::completed(foreground.map(|_| ()), cursor), foreground_restored)
@@ -1370,8 +1395,9 @@ mod foreground {
 	/// foreground is handed back if the activation selected the field's whole
 	/// text. A `WinForms` text box does that on its first focus since its app
 	/// last set its text, when no mouse button is down and nothing is selected,
-	/// and the user's next key would then replace what they typed. Any other
-	/// change the app makes on activation stands. Only a field that takes
+	/// and the user's next key would then replace what they typed. A focus
+	/// handler deliberately selecting all is indistinguishable; other caret
+	/// and selection changes stand. Only a field that takes
 	/// `EM_SETSEL`, as its `WM_GETDLGCODE` says (the dialog manager's own test),
 	/// on another thread than this one, is watched; WPF, browser and other
 	/// windowless fields have no such message. Positions past 65,535 are left
@@ -1381,7 +1407,6 @@ mod foreground {
 		thread: u32,
 		field:  HWND,
 		caret:  usize,
-		token:  Option<control::OperationToken>,
 	}
 
 	impl UserSelection {
@@ -1395,8 +1420,8 @@ mod foreground {
 				return None;
 			}
 			let field = focus_of(thread)?;
-			let mut user = Self { window, thread, field, caret: 0, token: control::current_token() };
-			let until = user.budget()?;
+			let mut user = Self { window, thread, field, caret: 0 };
+			let until = Self::budget()?;
 			if user.send(field, WM_GETDLGCODE, 0, until)? as u32 & DLGC_HASSETSEL == 0 {
 				return None;
 			}
@@ -1406,17 +1431,18 @@ mod foreground {
 			(start == end && focused == Some(field)).then_some(user)
 		}
 
+		/// The app has not changed the saved caret before OMP's hand-back.
+		fn unchanged(&self, until: Instant) -> bool {
+			self.selection(until) == Some((self.caret, self.caret)) && activity::check().is_ok()
+		}
+
 		/// With the user's window in front again. A message to that window is
 		/// answered once its thread has handled the activation, focus handlers
 		/// included, so the field is read after whatever they selected. Best
 		/// effort: a key the user presses before the write still replaces the
 		/// selection.
-		fn restore(&self) {
-			let Some(until) = self.budget() else {
-				return;
-			};
-			// The saved range was a caret, so a whole non-empty text selected
-			// now is the activation's doing.
+		fn restore(&self, until: Instant) {
+			// The caret was unchanged immediately before OMP's hand-back.
 			let selected_all = self.send(self.window, WM_NULL, 0, until).is_some()
 				&& self
 					.send(self.field, WM_GETTEXTLENGTH, 0, until)
@@ -1428,24 +1454,22 @@ mod foreground {
 			// SAFETY: GetForegroundWindow has no preconditions.
 			let user_in_front = unsafe { GetForegroundWindow() } == self.window;
 			let focused = focus_of(self.thread);
-			if selected_all && user_in_front && focused == Some(self.field) {
+			if selected_all
+				&& user_in_front
+				&& focused == Some(self.field)
+				&& activity::check().is_ok()
+			{
 				let _ = self.send(self.field, EM_SETSEL, self.caret, until);
 			}
 		}
 
 		/// When these messages must have been answered: shortly, and before the
 		/// call's deadline; `None` once the call is cancelled or out of time.
-		fn budget(&self) -> Option<Instant> {
-			let until = Instant::now() + FIELD_BUDGET;
-			let Some(token) = &self.token else {
-				return Some(until);
-			};
-			token.check().ok()?;
-			let until = token
-				.deadline()
-				.and_then(|deadline| deadline.checked_sub(control::DEADLINE_MARGIN))
-				.map_or(until, |deadline| deadline.min(until));
-			(until > Instant::now()).then_some(until)
+		fn budget() -> Option<Instant> {
+			control::check().ok()?;
+			activity::check().ok()?;
+			let left = control::time_left().map_or(FIELD_BUDGET, |left| left.min(FIELD_BUDGET));
+			(!left.is_zero()).then(|| Instant::now() + left)
 		}
 
 		/// Start and end of the field's selection.
@@ -1458,12 +1482,7 @@ mod foreground {
 		/// `EM_SETSEL`, zero otherwise), waiting no later than `until`.
 		fn send(&self, window: HWND, message: u32, wparam: usize, until: Instant) -> Option<usize> {
 			let timeout = until.saturating_duration_since(Instant::now()).as_millis();
-			if timeout == 0
-				|| self
-					.token
-					.as_ref()
-					.is_some_and(|token| token.check().is_err())
-			{
+			if timeout == 0 || control::check().is_err() || activity::check().is_err() {
 				return None;
 			}
 			let mut result = 0;
@@ -1512,6 +1531,9 @@ mod foreground {
 			let Some(point) = self.0.take() else {
 				return Ok(());
 			};
+			if activity::check().is_err() {
+				return Ok(());
+			}
 			// SAFETY: coordinates were returned by GetCursorPos.
 			if unsafe { SetCursorPos(point.x, point.y) } == 0 {
 				return Err(DesktopError::input_failed(
@@ -1524,7 +1546,9 @@ mod foreground {
 
 	impl Drop for CursorGuard {
 		fn drop(&mut self) {
-			if let Some(point) = self.0 {
+			if activity::check().is_ok()
+				&& let Some(point) = self.0
+			{
 				// SAFETY: scalar coordinates previously reported by GetCursorPos.
 				unsafe { SetCursorPos(point.x, point.y) };
 			}

@@ -629,7 +629,8 @@ mod tests {
 			let user = create(USER);
 			use windows_sys::Win32::UI::WindowsAndMessaging::{GWLP_WNDPROC, SetWindowLongPtrW};
 			let on_focus = std::env::var(ON_FOCUS).unwrap_or_default();
-			SELECT_ON_FOCUS.store(!on_focus.is_empty(), Ordering::Release);
+			SELECT_ON_FOCUS.store(matches!(on_focus.as_str(), "all" | "end"), Ordering::Release);
+			SELECT_ON_BLUR.store(on_focus == "away", Ordering::Release);
 			CARET_TO_END.store(on_focus == "end", Ordering::Release);
 			// SAFETY: this thread owns the window, and the procedure lives
 			// until exit.
@@ -671,9 +672,11 @@ mod tests {
 	static SELECT_ON_FOCUS: AtomicBool = AtomicBool::new(false);
 	/// Whether [`user_window_proc`] moves the caret to the end instead.
 	static CARET_TO_END: AtomicBool = AtomicBool::new(false);
+	/// The app changes its selection while its window loses focus.
+	static SELECT_ON_BLUR: AtomicBool = AtomicBool::new(false);
 
-	/// Gives the runner permission to activate the target while the host owns
-	/// the foreground, and optionally models a text box's focus selection.
+	/// Models a text box's focus selection; the inherited subclass separately
+	/// grants the runner permission to activate the target.
 	unsafe extern "system" fn user_window_proc(
 		hwnd: HWND,
 		message: u32,
@@ -683,7 +686,9 @@ mod tests {
 		use windows_sys::Win32::UI::{
 			Controls::EM_SETSEL,
 			Input::KeyboardAndMouse::{GetAsyncKeyState, VK_LBUTTON},
-			WindowsAndMessaging::{CallWindowProcW, WM_GETTEXTLENGTH, WM_SETFOCUS, WNDPROC},
+			WindowsAndMessaging::{
+				CallWindowProcW, WM_GETTEXTLENGTH, WM_KILLFOCUS, WM_SETFOCUS, WNDPROC,
+			},
 		};
 		// SAFETY: USER_PROC holds the procedure SetWindowLongPtrW returned for
 		// this window, stored before the window could receive a message here.
@@ -694,6 +699,9 @@ mod tests {
 		// SAFETY: GetAsyncKeyState takes a scalar virtual key; the messages go
 		// to this window on its own thread.
 		unsafe {
+			if message == WM_KILLFOCUS && SELECT_ON_BLUR.load(Ordering::Acquire) {
+				SendMessageW(hwnd, EM_SETSEL, 0, -1);
+			}
 			if message == WM_SETFOCUS
 				&& SELECT_ON_FOCUS.load(Ordering::Acquire)
 				&& GetAsyncKeyState(VK_LBUTTON.into()) >= 0
@@ -875,10 +883,13 @@ mod tests {
 		// What the user's window does on a keyboard-style focus, and where
 		// their next key lands after a takeover: a select-all is undone, any
 		// other move of the caret is the app's own and stands.
-		for (on_focus, expected) in
-			[("all", "omp Ztest: user window"), ("end", "omp test: user windowZ")]
-		{
-			let windows = Windows::open_with(false, on_focus);
+		for (on_focus, late, expected) in [
+			("all", false, "omp Ztest: user window"),
+			("end", false, "omp test: user windowZ"),
+			("away", false, "Z"),
+			("all", true, "omp Ztest: user window"),
+		] {
+			let mut windows = Windows::open_with(false, on_focus);
 			let (_watch, mut backend) = admitted_backend();
 			let target = backend
 				.windows()
@@ -897,15 +908,28 @@ mod tests {
 			// The user's caret sits after "omp " as they type on.
 			// SAFETY: scalar arguments to a window this test created.
 			unsafe { SendMessageW(windows.user, EM_SETSEL, 4, 4) };
+			if late {
+				// SAFETY: a plain fixture message to a window this test created.
+				unsafe { PostMessageW(windows.target, BUSY, 0, 0) };
+				windows.await_line("busy");
+			}
 			let input = ElementInput::Text("x".to_string());
-			backend
-				.element_input(
-					&element,
-					&input,
-					DeliveryMode::ForegroundReturnFocus,
-					&CancellationSource::default().token(),
-				)
-				.unwrap();
+			let result = backend.element_input(
+				&element,
+				&input,
+				DeliveryMode::ForegroundReturnFocus,
+				&CancellationSource::default().token(),
+			);
+			if late {
+				writeln!(windows.host.stdin.as_mut().unwrap(), "release").unwrap();
+				// SAFETY: this message follows queued fixture activation.
+				unsafe { PostMessageW(windows.target, DRAINED, 0, 0) };
+				windows.await_line("drained");
+				assert_eq!(result.unwrap_err().code, crate::desktop::error::ErrorCode::InputFailed);
+				assert_eq!(Windows::text(windows.target), TARGET);
+			} else {
+				result.unwrap();
+			}
 			// SAFETY: no preconditions.
 			assert_eq!(unsafe { GetForegroundWindow() }, windows.user, "{on_focus}");
 			// SAFETY: scalar arguments to a window this test created.
