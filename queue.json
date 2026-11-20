@@ -104597,8 +104597,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-deepseek-text",
    "host": "MacBook-Pro",
    "added": "2026-11-18T04:50:59Z",
-   "updated": "2026-11-20T17:50:19Z",
-   "note": "LaneSnapcompactStack, 2026-11-20: rebased onto the restacked kdl (a0078fecb18, on origin/main alone, #19591 folded in); rules.json regenerated, CHANGELOG under [Unreleased]; own diff unchanged, so no new review. Base is a local merge of kdl a0078fecb18 and #19620 205ab81cc2b (03ac8048980); rebase on advance. Reader tests 15 pass; compaction suites 443 pass + 2 main-failing; rule reverted -> the text-archive test fails; the sizing test did not fail under a two-line frameCost revert (body's 64.5k figure is for the full sizing revert, not rechecked)."
+   "updated": "2026-11-20T18:04:44Z",
+   "note": "LaneSnapcompactStack, 2026-11-20: rebased onto the restacked kdl (a0078fecb18) merged with #19620 205ab81cc2b (base 03ac8048980, a local merge; rebase on advance). Head e8e4da8d5e7 adds per-line sizing guards: the sizing test requires one render (planner), a render forced past its plan must be cut back by text keeping the planned frames (projection, per-frame price), and a dead-end rebuild test prices frames as text (4 vs 5). Each of the five sizing lines reverted alone fails a test; body's 54.8k / 64.5k (full sizing revert) rechecked. Reader 16, dead-end 13, compaction suites 445 pass + 2 main-failing; rule reverted -> text-archive test fails. Test-only change since the last review."
   },
   {
    "id": "snapcompact-carbon-1568",

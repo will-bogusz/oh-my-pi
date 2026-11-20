@@ -12,8 +12,6 @@ Snapcompact archives older history as frames of 8px text. DeepSeek V4.1 Flash bi
 | Its own snapcompact pass | frames priced as images (~996 tokens each) | each frame priced as the text it holds (~4k tokens), and the result judged by that text |
 | Screenshots, `read` images, pasted images | images | unchanged |
 
-Every other model is unchanged.
-
 Reading order: `axes.ts`, `classes/deepseek.kdl`, `readerTakesArchiveText`; in `session-maintenance.ts`, `archiveReader`, `snapcompactFrameCost`, `#projectSnapcompactContextTokens`, `#textView`.
 
 Non-goals: other DeepSeek lines; snapcompact's opt-in imaging of tool results; a frame layout DeepSeek reads (the best costs text's tokens, below).
@@ -40,9 +38,10 @@ Maintenance: later DeepSeek lines are measured on their own.
 
 ## Testing
 
-- Live, opencode-go at low effort: 60 archived turns with a codename in the archived middle, `/compact` with snapcompact at a 40k threshold, then a question about it. This branch stored 3 frames and sent no images and 60k characters of archive text; the base sent its 5 frames. Both answered `ZEBRA-4417` (a mechanism check).
-- `agent-session-snapcompact-reader.test.ts`: after a switch from GPT, DeepSeek V4.1 Flash's request carries the archive's text and only the user's attached image (with the rule removed, the frames are sent); its own `/compact` with a ~40k-token kept turn lands within 60% of a 100k threshold as read, 54.8k (sizing reverted: 64.5k); and its first `/compact` after a resume commits (judged against frames: `would not reduce context`).
-- `bun test` over the snapcompact suites in `coding-agent`, `snapcompact` and `catalog`: all pass except two `agent-session-snapcompact-no-reduction` cases that fail on the base branch here too (a local catalog context window).
+- Live, opencode-go at low effort: 60 archived turns with a codename in the middle, snapcompact `/compact` at a 40k threshold, then a question about it: this branch sent no images and 60k characters of archive text, the base its 5 frames; both answered `ZEBRA-4417`.
+- `agent-session-snapcompact-reader.test.ts`: after a switch from GPT, DeepSeek V4.1 Flash gets the archive's text and only the user's image; its own `/compact` with a ~40k-token kept turn lands under 60% of a 100k threshold in one render, 54.8k as read (sizing reverted: 64.5k); a render forced past that plan is cut back by text, not to one frame; its first `/compact` after a resume commits (judged as frames: no reduction).
+- `agent-session-snapcompact-frame-dead-end.test.ts`: the dead-end rebuild prices frames as text (4 where image pricing allows 5). Each sizing line, reverted alone, fails one of these tests.
+- Snapcompact suites in `coding-agent`, `snapcompact` and `catalog` pass except two `snapcompact-no-reduction` cases that fail on the base too.
 
 ---
 
