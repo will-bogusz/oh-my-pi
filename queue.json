@@ -115514,6 +115514,11 @@
     "sha": "e0a0d8d61ca8e57404e0c53d8fced8fd80323fed",
     "at": "2026-11-20T07:57:16Z",
     "host": "Wills-MacBook-Pro"
+   },
+   "macos": {
+    "sha": "e0a0d8d61ca8e57404e0c53d8fced8fd80323fed",
+    "at": "2026-11-20T07:57:56Z",
+    "host": "MacBook-Pro"
    }
   }
  },
