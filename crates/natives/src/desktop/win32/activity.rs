@@ -1160,8 +1160,9 @@ mod tests {
 	}
 
 	#[test]
-	fn one_sample_dates_input_on_one_clock_and_startup_skips_omps_own_send() {
-		// GetTickCount64 just past a wrap of its low 32 bits.
+	fn startup_skips_omps_own_send_given_a_coherent_sample_across_tick_wrap() {
+		// A coherent sample just past a wrap of the low 32 bits of
+		// GetTickCount64.
 		let now: u64 = (1 << 32) + 5;
 		let sample = Sample { tick: u32::MAX - 4, now, own: None };
 		assert_eq!(sample.press(), Some(Duration::from_millis(now - 10)));
@@ -1182,7 +1183,7 @@ mod tests {
 		};
 		presses.poll(&mut looked.lock(), sample);
 		assert_eq!(presses.count.load(Ordering::Acquire), 0, "the baseline is the history's tick");
-		// The user's input just after it counts, dated on the same clock.
+		// The user's input just after it counts.
 		presses.poll(&mut looked.lock(), Sample { tick: 2, now: now + 1, own: Some(own) });
 		assert_eq!(presses.count.load(Ordering::Acquire), 1);
 		assert_eq!(*presses.last.lock(), Some(Duration::from_millis((1 << 32) + 2)));
