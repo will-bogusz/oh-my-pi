@@ -105467,13 +105467,15 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-popup-foreground",
    "host": "MacBook-Pro",
    "added": "2026-11-20T04:47:55Z",
-   "updated": "2026-11-20T08:18:03Z",
+   "updated": "2026-11-20T08:18:07Z",
    "note": "",
    "rebases_after": [
-    19814
+    19814,
+    19849
    ],
    "pair_reasons": {
-    "19814": "Main, 2026-11-20: win32/ax.rs set_value match; combined = #19814's ValueRoute::Edit arm unchanged, then this entry's two-closure Pattern arm (lookup, then send); built with #19849 at 3af806637f5, Windows clippy+rustfmt pass"
+    "19814": "Main, 2026-11-20: win32/ax.rs set_value match; combined = #19814's ValueRoute::Edit arm unchanged, then this entry's two-closure Pattern arm (lookup, then send); built with #19849 at 3af806637f5, Windows clippy+rustfmt pass",
+    "19849": "Main, 2026-11-20: win32/window.rs; combined = WindowsAndMessaging import-list union, and one #[cfg(test)] mod tests holding both sides' uses and items (both append a tests module); recheck at #19849's next head"
    }
   },
   {
