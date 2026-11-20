@@ -118463,7 +118463,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-20T22:13:24.940024Z",
+  "at": "2026-11-20T22:43:35.059620Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -119097,6 +119097,27 @@
     ],
     "needs": [],
     "created": "2026-10-19T07:26:45Z"
+   },
+   {
+    "id": "devin-gemini-image-count-80",
+    "label": "devin-gemini-image-count-80",
+    "number": null,
+    "state": "queued",
+    "area": "catalog",
+    "priority": "P2",
+    "title": "fix(catalog): let Gemini on Devin's own host carry 80 images",
+    "action": "wait",
+    "reasons": [
+     "needs snapcompact-carbon-1568 (queued)"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [
+     "snapcompact-carbon-1568"
+    ],
+    "created": "2026-11-20T22:18:48Z"
    },
    {
     "id": "devin-gemini-image-price-rest",
