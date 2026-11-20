@@ -29,7 +29,7 @@ use parking_lot::Mutex;
 use serde::{Deserialize, de::DeserializeOwned};
 
 use super::{
-	focus_guard::{Client, Event, POLL, Shared, Tracker, Verdict, Watch},
+	focus_guard::{Client, Event, POLL, Running, Shared, Tracker, Verdict, Watch},
 	peer_pid,
 };
 use crate::desktop::{
@@ -258,8 +258,8 @@ pub(super) struct SwayGuard {
 	sway:    Sway,
 	/// Watches whose reports have not all been handed to the caller.
 	watches: Vec<Arc<Mutex<Shared>>>,
-	/// The latest watch's thread, while it runs; ended by the next watch.
-	running: Option<(Arc<AtomicBool>, thread::JoinHandle<()>)>,
+	/// The latest watch, while its thread runs; ended by the next watch.
+	running: Option<Running>,
 }
 
 impl SwayGuard {
@@ -283,9 +283,9 @@ impl SwayGuard {
 		out
 	}
 
-	/// Runs `action` on process `pid` under a watch, like the Hyprland guard
-	/// (a refused or failed action returns at once); unwatched when the
-	/// user's focused window is the target's or sway cannot be read.
+	/// Runs `action` on process `pid` under a watch and returns as soon as it
+	/// does, like the Hyprland guard; unwatched when the user's focused window
+	/// is the target's or sway cannot be read.
 	pub(super) fn run<T>(
 		&mut self,
 		pid: u32,
@@ -295,16 +295,13 @@ impl SwayGuard {
 			return action();
 		};
 		let result = action();
-		if result.is_ok() {
-			watch.finish();
-		}
+		watch.end();
 		result
 	}
 
 	fn arm(&mut self, pid: u32) -> Option<Watch> {
-		if let Some((stop, thread)) = self.running.take() {
-			stop.store(true, Ordering::Release);
-			let _ = thread.join();
+		if let Some(previous) = self.running.take() {
+			previous.stop_for(pid);
 		}
 		let mut command = self.sway.connect().ok()?;
 		let tree: Node = command.json(GET_TREE, "").ok()?;
@@ -338,13 +335,13 @@ impl SwayGuard {
 			stop: Arc::clone(&stop),
 			shared: Arc::clone(&shared),
 		};
-		let thread = thread::Builder::new()
+		thread::Builder::new()
 			.name("sway-focus-guard".into())
 			.spawn(move || watcher.watch(events))
 			.ok()?;
-		self.running = Some((stop, thread));
 		self.watches.push(Arc::clone(&shared));
-		Some(Watch { ends, started, shared })
+		self.running = Some(Running { pid, stop, ends: Arc::clone(&ends), started, shared });
+		Some(Watch { ends, started })
 	}
 }
 

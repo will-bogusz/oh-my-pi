@@ -175,10 +175,10 @@ impl Default for ArmedFocusGuard {
 }
 
 impl ArmedFocusGuard {
-	fn finish(self) {
+	fn end(self) {
 		#[cfg(target_os = "linux")]
 		if let Some(watch) = self.watch {
-			watch.finish();
+			watch.end();
 		}
 	}
 }
@@ -2381,8 +2381,8 @@ impl DesktopFocusGuardHandle {
 		self.compositor
 	}
 
-	/// Ends the action, settles its watch and drains the session's pending
-	/// outcomes.
+	/// Ends the action and drains the session's pending outcomes; the watch
+	/// keeps going, and a window that opens later is reported by a later call.
 	#[napi]
 	pub fn finish(&self) -> task::Promise<Vec<DesktopWindowOpened>> {
 		let watch = self.watch.lock().take();
@@ -2392,7 +2392,7 @@ impl DesktopFocusGuardHandle {
 			let Some(watch) = watch else {
 				return Ok(Vec::new());
 			};
-			watch.finish();
+			watch.end();
 			match c.call(token, |reply| Request::WindowsOpened { reply })? {
 				Response::WindowsOpened(v) => Ok(v),
 				_ => Err(DesktopError::internal("unexpected response")),

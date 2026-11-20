@@ -36,8 +36,8 @@ export declare class DesktopFocusGuardHandle {
   get kind(): DesktopFocusGuardKind
   get compositor(): DesktopFocusGuardCompositor | null
   /**
-   * Ends the action, settles its watch and drains the session's pending
-   * outcomes.
+   * Ends the action and drains the session's pending outcomes; the watch
+   * keeps going, and a window that opens later is reported by a later call.
    */
   finish(): Promise<Array<DesktopWindowOpened>>
 }

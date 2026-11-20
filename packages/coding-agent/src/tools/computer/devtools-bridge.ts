@@ -690,7 +690,7 @@ export class DevToolsRoute {
 			if (current) guards.report(await current.finish());
 		};
 		const arm = async () => {
-			// Native guards have external ownership: settle and report before acquiring the next one.
+			// Native guards have external ownership: end and report before acquiring the next one.
 			await finish();
 			started = guards.now();
 			watch = await guards.beginFocusGuard(this.#endpoint.pid);
