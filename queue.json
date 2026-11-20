@@ -105567,7 +105567,7 @@
    "area": "computer",
    "priority": null,
    "needs": [],
-   "base": "34962a6f8e62cca003c24d6fa9a85578d7b23707",
+   "base": "640d6e49cff452a4cb101a0643219736df1a2b23",
    "body": "bodies/win-popup-foreground.md",
    "state": "queued",
    "pr": null,
@@ -105575,7 +105575,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-popup-foreground",
    "host": "MacBook-Pro",
    "added": "2026-11-20T04:47:55Z",
-   "updated": "2026-11-20T12:01:10Z",
+   "updated": "2026-11-20T12:51:18Z",
    "note": "",
    "rebases_after": [
     19814,
@@ -105649,7 +105649,8 @@
      "at": "2026-11-20T12:01:09Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "advanced": "2026-11-20T12:51:18Z"
   },
   {
    "id": "win-uia-set-patterns",
