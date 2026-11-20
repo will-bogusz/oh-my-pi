@@ -105300,10 +105300,18 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-20T03:52:31Z",
+  "checked": "2026-11-20T04:53:31Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
+   "win-occluded-capture": {
+    "since": "2026-11-20T04:53:31Z",
+    "title": "fix(natives,coding-agent): say when a Windows capture or tree of a covered Chromium window may be stale"
+   },
+   "win-wpf-scroll": {
+    "since": "2026-11-20T04:53:31Z",
+    "title": "fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing"
+   },
    "factory-droid-1100-pin": {
     "since": "2026-11-17T00:39:57Z",
     "title": "feat(catalog): identify Factory Droid requests as droid 1.10.0"
@@ -105501,13 +105509,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-13T04:09:56Z",
-    "kind": "unopenable",
-    "id": "stats-spotlight-freeze",
-    "title": "fix(stats,coding-agent): keep the stats dashboard answering while Spotlight rebuilds",
-    "why": "opened as #19118"
-   },
    {
     "at": "2026-11-13T08:45:48Z",
     "kind": "openable",
@@ -107082,6 +107083,18 @@
     "title": "fix(ai): warn when a broker refresh failure outlasts the access token",
     "merged_by": "can1357",
     "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-20T04:53:31Z",
+    "kind": "openable",
+    "id": "win-occluded-capture",
+    "title": "fix(natives,coding-agent): say when a Windows capture or tree of a covered Chromium window may be stale"
+   },
+   {
+    "at": "2026-11-20T04:53:31Z",
+    "kind": "openable",
+    "id": "win-wpf-scroll",
+    "title": "fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing"
    }
   ]
  },
@@ -115063,8 +115076,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-20T04:42:08.023243Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-20T04:53:32.442173Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -116232,7 +116245,7 @@
      "conflicts with #19701 in packages/coding-agent/src/session/agent-session.ts",
      "its need token-count-policy conflicts with main in packages/catalog/src/compat/rules/README.md, packages/catalog/src/compat/rules/classes/anthropic.kdl, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/session/session-stats.ts, packages/coding-agent/test/context-fits-model.test.ts",
      "its need wire-delta-count conflicts with main in packages/agent/src/tokenizer.ts, packages/agent/test/tokenizer.test.ts, packages/ai/src/providers/factory-droid.ts, packages/ai/src/providers/transform-messages.ts, packages/coding-agent/src/session/session-maintenance.ts",
-     "conflicts with main in packages/agent/src/agent.ts, packages/ai/src/providers/factory-droid/gemini.ts, packages/ai/src/providers/google-gemini-cli.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/context-view.ts, packages/coding-agent/test/modes/context-view.test.ts, packages/tui/src/status-line/context-usage.ts, packages/tui/test/context-usage.test.ts"
+     "conflicts with main in packages/agent/src/agent.ts, packages/ai/src/providers/factory-droid/gemini.ts, packages/ai/src/providers/google-gemini-cli.ts, packages/ai/src/providers/openai-responses.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/context-view.ts, packages/coding-agent/test/modes/context-view.test.ts, packages/tui/src/status-line/context-usage.ts, packages/tui/test/context-usage.test.ts"
     ],
     "note": "",
     "over": [],
@@ -116256,8 +116269,10 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with main in (branch missing on the fork)"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -116330,6 +116345,27 @@
     "created": "2026-11-20T04:27:57Z"
    },
    {
+    "id": "win-popup-foreground",
+    "label": "win-popup-foreground",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": null,
+    "title": "fix(natives): press items of the open WPF context menu of the window in front",
+    "action": "wait",
+    "reasons": [
+     "conflicts with win-occluded-capture in crates/natives/src/desktop/win32/window.rs"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "win-occluded-capture"
+    ],
+    "needs": [],
+    "created": "2026-11-20T04:47:55Z"
+   },
+   {
     "id": "win-wpf-scroll",
     "label": "win-wpf-scroll",
     "number": null,
@@ -116337,16 +116373,14 @@
     "area": "computer",
     "priority": null,
     "title": "fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing",
-    "action": "wait",
-    "reasons": [
-     "conflicts with #19814 in crates/natives/src/desktop/win32/ax.rs"
-    ],
-    "note": "",
+    "action": "open",
+    "reasons": [],
+    "note": "accepted pair with #19814: Main, 2026-11-20: import-list union in win32/ax.rs; combined = both",
     "over": [],
-    "paired": [],
-    "blocked_by": [
+    "paired": [
      "#19814"
     ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-20T04:27:43Z"
    },
