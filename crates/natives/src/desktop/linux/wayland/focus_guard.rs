@@ -68,6 +68,13 @@ const WATCH: Duration = Duration::from_millis(2500);
 const FRESH: Duration = Duration::from_millis(50);
 /// When the compositor hook removes itself if this process never does.
 const HOOK_LIFETIME_MS: u32 = 15_000;
+/// How long after a watch is armed an activation request of the acted-on
+/// app's existing window is declined even with the pointer over it. Later,
+/// with the pointer over the window, it is the user's click (Hyprland does
+/// not focus on a click without pointer motion; the app asks for activation
+/// instead), so it is granted and the guard stands down. A user's click on
+/// the acted-on window within this time of an agent action is declined.
+const ACTIVATION_MS: u32 = 300;
 /// How often the watcher checks whether it should stop; the next action's
 /// watch waits up to this long for the previous one to end.
 pub(super) const POLL: Duration = Duration::from_millis(20);
@@ -317,6 +324,16 @@ impl Tracker {
 		}
 	}
 
+	/// The hook stood down because focus went to window `address` for the
+	/// user (their click, or an activation request their click caused).
+	fn stood_down(&mut self, address: &str, now: Instant) {
+		self.pick(now);
+		if let Some(seen) = self.seen(address) {
+			seen.took_focus = true;
+			seen.left = true;
+		}
+	}
+
 	/// The user (or something other than the action) moved focus: what holds
 	/// it now is their choice.
 	fn pick(&mut self, now: Instant) {
@@ -370,10 +387,30 @@ fn millis(duration: Duration) -> u32 {
 	u32::try_from(duration.as_millis()).unwrap_or(u32::MAX)
 }
 
+/// Whether an activation request of an existing window is the user's own:
+/// the pointer (`cursor`, layout coordinates) is over the window (`at`,
+/// `size`) and at least [`ACTIVATION_MS`] have passed since the watch was
+/// armed. A request with the pointer elsewhere no click caused; one in the
+/// first [`ACTIVATION_MS`] is taken for the action's. The compositor hook
+/// runs the same rule in Lua (`users_activation`).
+fn activation_is_users(
+	cursor: (f64, f64),
+	at: (i32, i32),
+	size: (i32, i32),
+	since_arm: Duration,
+) -> bool {
+	let (x, y) = cursor;
+	since_arm >= Duration::from_millis(ACTIVATION_MS.into())
+		&& x >= f64::from(at.0)
+		&& x < f64::from(at.0) + f64::from(size.0)
+		&& y >= f64::from(at.1)
+		&& y < f64::from(at.1) + f64::from(size.1)
+}
+
 /// What the hook needs from Hyprland's Lua API. Evaluated alone it tells
 /// whether the hook can run; it also opens the hook, so a Hyprland whose Lua
 /// lacks any of it refuses the hook and the socket watcher works alone.
-const HOOK_NEEDS: &str = r#"if not (hl.on and hl.timer and hl.dispatch and hl.get_windows and hl.dsp and hl.dsp.focus and hl.dsp.event and hl.dsp.window and hl.dsp.window.set_prop) then error("omp focus guard: this Hyprland's Lua lacks hl.on, hl.timer or hl.dsp.window.set_prop") end"#;
+const HOOK_NEEDS: &str = r#"if not (hl.on and hl.timer and hl.dispatch and hl.get_windows and hl.get_cursor_pos and hl.dsp and hl.dsp.focus and hl.dsp.event and hl.dsp.window and hl.dsp.window.set_prop) then error("omp focus guard: this Hyprland's Lua lacks hl.on, hl.timer, hl.get_cursor_pos or hl.dsp.window.set_prop") end"#;
 
 /// What the hook posts on the event socket (`custom>>`):
 /// `omp-focus-guard,ID,PROPERTY,ADDRESS` when it keeps a window from taking
@@ -396,17 +433,23 @@ const HOOK_EVENT: &str = "omp-focus-guard";
 /// `CWindow::activate`), is handed back from `window.active`. Focus moved for
 /// any input reason (follow-mouse, keybind, a focus dispatch, a click, window
 /// switching, workspaces) is the user's pick: the hook removes itself and
-/// says so on the event socket, so the watcher stands down too. Unmap
-/// fallbacks and ghosts are neither. Reasons are Hyprland 0.56's
-/// `Desktop::eFocusReason` numbers, passed as `window.active`'s second
-/// argument.
+/// says so on the event socket, so the watcher stands down too. So is an
+/// activation request of a window that existed at arming, with the pointer
+/// over it, [`ACTIVATION_MS`] or more after arming ([`activation_is_users`]):
+/// a click without pointer motion focuses nothing in Hyprland, the app asks
+/// for activation instead, and the hook grants it. New windows are kept from
+/// focus for the whole watch. Unmap fallbacks and ghosts are neither.
+/// Reasons are Hyprland 0.56's `Desktop::eFocusReason` numbers, passed as
+/// `window.active`'s second argument.
 fn hook(id: &str, pid: u32, user: &str) -> String {
 	format!(
 		r#"{HOOK_NEEDS}
 local id, pid, user, fresh_ms, portal = "{id}", {pid}, "{user}", {fresh}, "{PORTAL_CLASS}"
 omp_focus_guard = omp_focus_guard or {{}}
-local known, fresh, held, subs = {{}}, {{}}, {{}}, {{}}
-for _, w in ipairs(hl.get_windows()) do known[w.address] = true end
+local known, existing, fresh, held, subs = {{}}, {{}}, {{}}, {{}}, {{}}
+for _, w in ipairs(hl.get_windows()) do known[w.address] = true; existing[w.address] = true end
+local early = true
+hl.timer(function() early = false end, {{ timeout = {activation}, type = "oneshot" }})
 local function prop(address, name, value)
   hl.dispatch(hl.dsp.window.set_prop({{ prop = name, value = value, window = "address:" .. address }}))
 end
@@ -444,6 +487,12 @@ end
 local function ours(w)
   return w.pid == pid or (w.class or ""):find(portal, 1, true) == 1
 end
+-- activation_is_users: an existing window asking with the pointer over it, after the first {activation} ms.
+local function users_activation(w)
+  if early or not existing[w.address] or not w.mapped then return false end
+  local c, at, size = hl.get_cursor_pos(), w.at, w.size
+  return c ~= nil and c.x >= at.x and c.x < at.x + size.x and c.y >= at.y and c.y < at.y + size.y
+end
 subs[1] = hl.on("window.open_early", function(w)
   if w and ours(w) and not known[w.address] then
     known[w.address] = true
@@ -453,10 +502,13 @@ subs[1] = hl.on("window.open_early", function(w)
 end)
 subs[2] = hl.on("window.open", function(w) if w then release(w.address, "no_focus") end end)
 subs[3] = hl.on("window.urgent", function(w)
-  if w and ours(w) then
-    freshen(w.address)
-    hold(w.address, "focus_on_activate", "0")
+  if not (w and ours(w)) then return end
+  if users_activation(w) then
+    stand_down(w.address)
+    return
   end
+  freshen(w.address)
+  hold(w.address, "focus_on_activate", "0")
 end)
 -- eFocusReason: 7 DESKTOP_STATE_CHANGE (activate()), 16 NEW_WINDOW; 0 UNKNOWN, 6 OTHER (an unmap's), 13-15 UNMAP_*, 17 GHOSTS.
 local app_caused, neither = {{ [7] = true, [16] = true }}, {{ [0] = true, [6] = true, [13] = true, [14] = true, [15] = true, [17] = true }}
@@ -470,7 +522,7 @@ subs[4] = hl.on("window.active", function(w, reason)
     known[w.address] = true
     freshen(w.address)
   end
-  if ours(w) and fresh[w.address] then
+  if ours(w) and fresh[w.address] and not (reason == 7 and users_activation(w)) then
     hl.dispatch(hl.dsp.focus({{ window = "address:" .. user }}))
   else
     stand_down(w.address)
@@ -480,6 +532,7 @@ omp_focus_guard[id] = stop
 hl.timer(function() if omp_focus_guard[id] then stop() end end, {{ timeout = {lifetime}, type = "oneshot" }})"#,
 		fresh = FRESH.as_millis(),
 		lifetime = HOOK_LIFETIME_MS,
+		activation = ACTIVATION_MS,
 	)
 }
 
@@ -588,9 +641,10 @@ impl FocusGuard {
 				             without the keyboard, its activation requests are declined, and a window \
 				             that takes focus anyway gives it back in the same compositor turn. Focus \
 				             the user moves themselves (click, keybind, follow-mouse) is left where \
-				             they put it and ends the hook. The hook removes itself within 15 s and \
-				             writes nothing to the config; OMP's event-socket watcher reports what \
-				             each window did."
+				             they put it and ends the hook, except a click on the acted-on window \
+				             within 300 ms of an action, which is declined. The hook removes itself \
+				             within 15 s and writes nothing to the config; OMP's event-socket watcher \
+				             reports what each window did."
 					.to_owned(),
 			};
 		}
@@ -852,18 +906,29 @@ impl Watcher {
 			}
 			match self.hook.as_deref().and_then(|id| hook_line(text, id)) {
 				Some(HookLine::Kept(address)) => self.tracker.hook_kept(&address, read_at, &mut client),
-				Some(HookLine::StoodDown(_)) => {
+				Some(HookLine::StoodDown(address)) => {
 					self.hooked = false;
-					self.tracker.pick(read_at);
+					self.tracker.stood_down(&address, read_at);
 				},
 				None => {
 					if let Some(event) = parse(text) {
-						let verdict = self.tracker.event(&event, read_at, &mut client);
-						if verdict == Verdict::HandBack
-							&& let Event::Active(Some(address)) = &event
+						// Without the hook, the watcher applies its rule for
+						// activation requests itself: the user's own is not
+						// the action's, so focus it brings is left alone.
+						if !self.hooked
+							&& let Event::Urgent(address) = &event
+							&& self.tracker.known.contains(address)
+							&& users_activation(&self.hyprland, address, self.started.elapsed())
 						{
-							let by = self.hand_back();
-							self.tracker.handed_back_by(address, by);
+							self.tracker.pick(read_at);
+						} else {
+							let verdict = self.tracker.event(&event, read_at, &mut client);
+							if verdict == Verdict::HandBack
+								&& let Event::Active(Some(address)) = &event
+							{
+								let by = self.hand_back();
+								self.tracker.handed_back_by(address, by);
+							}
 						}
 					}
 				},
@@ -894,6 +959,34 @@ impl Watcher {
 		let _ = self.hyprland.request(&command);
 		DesktopFocusGuardKind::SocketWatcher
 	}
+}
+
+/// [`activation_is_users`] for window `address` from Hyprland's pointer
+/// position and client list; `false` when either cannot be read.
+fn users_activation(hyprland: &Hyprland, address: &str, since_arm: Duration) -> bool {
+	#[derive(Deserialize)]
+	struct Cursor {
+		x: f64,
+		y: f64,
+	}
+	#[derive(Deserialize)]
+	struct Geometry {
+		address: String,
+		at:      (i32, i32),
+		size:    (i32, i32),
+	}
+	let Ok(cursor) = hyprland.json::<Cursor>("j/cursorpos") else {
+		return false;
+	};
+	let Ok(clients) = hyprland.json::<Vec<Geometry>>("j/clients") else {
+		return false;
+	};
+	clients
+		.iter()
+		.find(|client| client.address == address)
+		.is_some_and(|client| {
+			activation_is_users((cursor.x, cursor.y), client.at, client.size, since_arm)
+		})
 }
 
 /// The guard for the running compositor.
@@ -1402,6 +1495,33 @@ mod tests {
 	}
 
 	#[test]
+	fn an_activation_is_the_users_only_with_the_pointer_over_the_window_after_the_grace() {
+		let (at, size) = ((100, 50), (400, 300));
+		let late = Duration::from_millis(u64::from(ACTIVATION_MS));
+		let early = Duration::from_millis(u64::from(ACTIVATION_MS) - 1);
+		// Inside, after ACTIVATION_MS: the user's click.
+		assert!(activation_is_users((300.0, 200.0), at, size, late));
+		assert!(activation_is_users((100.0, 50.0), at, size, Duration::from_secs(2)));
+		// Inside, within ACTIVATION_MS of arming: taken for the action's.
+		assert!(!activation_is_users((300.0, 200.0), at, size, early));
+		// Outside, at any time: no click caused it.
+		assert!(!activation_is_users((500.0, 200.0), at, size, late));
+		assert!(!activation_is_users((300.0, 350.0), at, size, Duration::from_secs(2)));
+		assert!(!activation_is_users((99.5, 200.0), at, size, late));
+	}
+
+	#[test]
+	fn the_hook_standing_down_for_an_activation_leaves_the_window_as_the_user_chose() {
+		let mut run = Run::new();
+		// Socket order from CWindow::activate: urgent, the hook's line, focus.
+		assert_eq!(run.at(900, "urgent>>b"), Verdict::Nothing);
+		run.tracker
+			.stood_down("0xb", run.t0 + Duration::from_millis(900));
+		assert_eq!(run.at(900, "activewindowv2>>b"), Verdict::Nothing);
+		assert_eq!(run.focus(), vec![("Main".to_owned(), DesktopWindowFocus::LeftAsChosen, None)]);
+	}
+
+	#[test]
 	fn the_hook_holds_focus_properties_only_for_the_turn_and_checks_the_api_first() {
 		let lua = hook("7-1", 20, "0xa");
 		assert!(lua.starts_with(HOOK_NEEDS));
@@ -1418,6 +1538,20 @@ mod tests {
 			r#"hl.on("window.open", function(w) if w then release(w.address, "no_focus") end end)"#
 		));
 		assert!(lua.contains(r#"hold(w.address, "focus_on_activate", "0")"#));
+		// An existing window's activation with the pointer over it, after the
+		// first ACTIVATION_MS, is granted as the user's click.
+		assert!(lua.contains(
+			r#"hl.timer(function() early = false end, { timeout = 300, type = "oneshot" })"#
+		));
+		assert!(lua.contains(
+			"if early or not existing[w.address] or not w.mapped then return false end\n  local c, \
+			 at, size = hl.get_cursor_pos(), w.at, w.size\n  return c ~= nil and c.x >= at.x and c.x \
+			 < at.x + size.x and c.y >= at.y and c.y < at.y + size.y"
+		));
+		assert!(
+			lua.contains("if users_activation(w) then\n    stand_down(w.address)\n    return\n  end")
+		);
+		assert!(lua.contains("and not (reason == 7 and users_activation(w)) then"));
 		// Hand back only what the app caused; any input reason is the user's
 		// pick, posted so the watcher stands down.
 		assert!(lua.contains("local app_caused, neither = { [7] = true, [16] = true }"));
