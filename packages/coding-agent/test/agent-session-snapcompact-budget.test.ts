@@ -25,6 +25,7 @@ import { base64ImageSize } from "@oh-my-pi/pi-agent-core/image-tokens";
 import { buildModel } from "@oh-my-pi/pi-catalog/build";
 import { getBundledModel } from "@oh-my-pi/pi-catalog/models";
 import { toModelSpec } from "@oh-my-pi/pi-catalog/provider-models/bundled-references";
+import { DEVIN_DEFAULT_BASE_URL } from "@oh-my-pi/pi-catalog/wire/devin";
 import { ModelRegistry } from "@oh-my-pi/pi-coding-agent/config/model-registry";
 import { Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
 import type { ExtensionRunner } from "@oh-my-pi/pi-coding-agent/extensibility/extensions";
@@ -33,7 +34,7 @@ import { computeNonMessageTokens } from "@oh-my-pi/pi-tui/status-line/context-us
 import { AgentSession, type AgentSessionEvent } from "@oh-my-pi/pi-coding-agent/session/agent-session";
 import { AuthStorage } from "@oh-my-pi/pi-coding-agent/session/auth-storage";
 import { SessionManager } from "@oh-my-pi/pi-coding-agent/session/session-manager";
-import { cfgSnapcompactShape } from "@oh-my-pi/pi-coding-agent/session/context-settings";
+import { cfgCompactionThresholdTokens, cfgSnapcompactShape } from "@oh-my-pi/pi-coding-agent/session/context-settings";
 import * as snapcompact from "@oh-my-pi/snapcompact";
 
 describe("AgentSession snapcompact frame-budget sizing", () => {
@@ -610,4 +611,33 @@ describe("AgentSession snapcompact frame-budget sizing", () => {
 			);
 		},
 	);
+
+	it("archives 80 Gemini frames on Devin's own host", async () => {
+		authStorage.keys.setRuntime("devin", "test-key");
+		session.agent.setModel(
+			buildModel({
+				id: "gemini-4-carbon",
+				name: "Gemini 4 Carbon",
+				api: "devin-agent",
+				provider: "devin",
+				baseUrl: DEVIN_DEFAULT_BASE_URL,
+				reasoning: true,
+				input: ["text", "image"],
+				cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+				contextWindow: 1_048_576,
+				maxTokens: 64_000,
+			}),
+		);
+		cfgCompactionThresholdTokens.set(session.settings, 300_000);
+		sessionManager.appendMessage({
+			role: "user",
+			content: [{ type: "text", text: "the quick brown fox jumps over the lazy dog. ".repeat(36_000) }],
+			timestamp: 1,
+		});
+		sessionManager.appendMessage({ role: "user", content: "continue", timestamp: 2 });
+		await session.compact(undefined, { mode: "snapcompact" });
+		const entry = sessionManager.getBranch().findLast(e => e.type === "compaction");
+		if (entry?.type !== "compaction") throw new Error("Expected a committed compaction entry");
+		expect(snapcompact.getPreservedArchive(entry.preserveData)?.frames).toHaveLength(80);
+	});
 });

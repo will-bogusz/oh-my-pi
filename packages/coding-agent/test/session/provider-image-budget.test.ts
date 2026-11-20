@@ -299,7 +299,7 @@ describe("provider context image budgets", () => {
 		["Cursor's default route", CURSOR_DEFAULT_MODEL, 20],
 		["the official DeepSeek API", DEEPSEEK_MODEL, 600],
 		["a DeepSeek proxy", DEEPSEEK_PROXY_MODEL, 5],
-		["Gemini on Devin", DEVIN_GEMINI_MODEL, 60],
+		["Gemini on Devin", DEVIN_GEMINI_MODEL, 80],
 		["Gemini through a Devin gateway", DEVIN_GATEWAY_GEMINI_MODEL, 40],
 		["Claude on Devin", DEVIN_CLAUDE_MODEL, 20],
 	] as const)("keeps the newest images up to the count %s allows", (_label, model, budget) => {

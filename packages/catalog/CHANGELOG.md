@@ -10,6 +10,7 @@
 ### Changed
 
 - Devin's Gemini 4 Carbon, Neon and Hydrogen, and Factory Droid's Gemini 4 Carbon, now take 1568px snapcompact frames (`snapcompact-frame-size`) instead of the Gemini class's 2048px
+- Gemini models on Devin's own host now carry up to 80 images per request (`official-image-count-budget`) instead of Devin's 60; Claude stays at 20 and a custom Devin base URL at 40
 
 ### Fixed
 
