@@ -104445,6 +104445,21 @@
      "at": "2026-11-18T17:49:29Z",
      "reason": "Main, 2026-11-18: GitHub CONFLICTING after the 17:57Z merge batch blocks #19620, which four queued PRs wait on"
     }
+   ],
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-20T17:32:29Z",
+     "reason": "LaneSnapcompactStack, 2026-11-20: the three lines are the old view and scan keys, replaced by keys that carry the reader's configured snapcompactShape (PR 19591); review LaneSnapcompactStack.Review19620Rebase found the scan-key gap",
+     "old": "83016bc91d8f4b241f4b489213c4725318357cc9",
+     "new": "205ab81cc2b0fd97d3a58b657bae1445b84034a5",
+     "dropped": {
+      "packages/coding-agent/src/session/session-maintenance.ts": [
+       "\t\tconst scanKey = `${reader.key}|${model.api}|${model.provider}/${model.id}|${this.#archiveTextBudget(model)}|${cfgSnapcompactShape.get(this.#host.settings)}`;",
+       "\t/** What decides `model`'s re-shaped views: its wire, identity, shape setting and budgets. */",
+       "\t\treturn `reader|${model.api}|${model.provider}/${model.id}|${shapeSetting}|${this.#archiveTextBudget(model)}|${snapcompact.frameDataBytesBudget(model)}|${snapcompact.providerFrameBudget(model)}`;"
+      ]
+     }
+    }
    ]
   },
   {
