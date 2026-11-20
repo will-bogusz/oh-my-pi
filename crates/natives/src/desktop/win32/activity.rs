@@ -5,17 +5,19 @@
 //! Raw Input posts a copy of every keyboard and mouse event to a message-only
 //! window of this process wherever the focus is (`RIDEV_INPUTSINK`), naming
 //! the device it came from. Input sent with `SendInput`, this process's own
-//! included, comes from no device and is never the user's. Unlike a low-level
-//! hook, the listener is not in the input path: Windows never waits for it.
+//! included, comes from no device and is never the user's; precision-touchpad
+//! and touchscreen presses also come without one, so they go unseen. Unlike a
+//! low-level hook, the listener is not in the input path: Windows never waits
+//! for it.
 //! Only how many presses there were and when the last one was are kept, never
 //! which key or button, and pointer moves are not counted.
 use std::{
 	cell::RefCell,
 	sync::{
-		Arc, Weak,
+		Arc,
 		atomic::{AtomicU64, Ordering},
 	},
-	thread::{self, JoinHandle},
+	thread,
 	time::{Duration, Instant},
 };
 
@@ -30,15 +32,14 @@ use windows_sys::Win32::{
 				GetAsyncKeyState, GetLastInputInfo, LASTINPUTINFO, VK_CONTROL, VK_LBUTTON, VK_LWIN,
 				VK_MBUTTON, VK_MENU, VK_RBUTTON, VK_RWIN, VK_SHIFT, VK_XBUTTON1, VK_XBUTTON2,
 			},
-			RAWINPUT, RAWINPUTDEVICE, RAWINPUTHEADER, RID_INPUT, RIDEV_INPUTSINK, RIDEV_REMOVE,
-			RIM_TYPEKEYBOARD, RIM_TYPEMOUSE, RegisterRawInputDevices,
+			RAWINPUT, RAWINPUTDEVICE, RAWINPUTHEADER, RID_INPUT, RIDEV_INPUTSINK, RIM_TYPEKEYBOARD,
+			RIM_TYPEMOUSE, RegisterRawInputDevices,
 		},
 		WindowsAndMessaging::{
 			CreateWindowExW, DefWindowProcW, DestroyWindow, DispatchMessageW, GetMessageW,
-			HWND_MESSAGE, MSG, PostThreadMessageW, RI_KEY_BREAK, RI_MOUSE_BUTTON_4_DOWN,
-			RI_MOUSE_BUTTON_5_DOWN, RI_MOUSE_HWHEEL, RI_MOUSE_LEFT_BUTTON_DOWN,
-			RI_MOUSE_MIDDLE_BUTTON_DOWN, RI_MOUSE_RIGHT_BUTTON_DOWN, RI_MOUSE_WHEEL, RegisterClassW,
-			WM_INPUT, WM_QUIT, WNDCLASSW,
+			HWND_MESSAGE, MSG, RI_KEY_BREAK, RI_MOUSE_BUTTON_4_DOWN, RI_MOUSE_BUTTON_5_DOWN,
+			RI_MOUSE_HWHEEL, RI_MOUSE_LEFT_BUTTON_DOWN, RI_MOUSE_MIDDLE_BUTTON_DOWN,
+			RI_MOUSE_RIGHT_BUTTON_DOWN, RI_MOUSE_WHEEL, RegisterClassW, WM_INPUT, WNDCLASSW,
 		},
 	},
 };
@@ -90,40 +91,26 @@ thread_local! {
 	static ACTIVE: RefCell<Option<Baseline>> = const { RefCell::new(None) };
 }
 
-/// The process's one listener: Windows keeps one raw input registration per
-/// device kind and process, so every session shares it.
-static SHARED: Mutex<Weak<Listener>> = Mutex::new(Weak::new());
+/// The process's one listener, started by the first session and kept for the
+/// process's life: Windows keeps one raw input registration per device kind
+/// and process, so a listener stopping while another starts could unregister
+/// the new one's devices.
+static SHARED: Mutex<Option<Arc<Presses>>> = Mutex::new(None);
 
-struct Listener {
-	presses: Arc<Presses>,
-	thread:  Option<JoinHandle<()>>,
-	id:      u32,
-}
-
-impl Drop for Listener {
-	fn drop(&mut self) {
-		// SAFETY: the id is the listener thread's; WM_QUIT carries no data.
-		unsafe { PostThreadMessageW(self.id, WM_QUIT, 0, 0) };
-		if let Some(thread) = self.thread.take() {
-			let _ = thread.join();
-		}
-	}
-}
-
-/// The user's presses since this session started watching.
+/// The user's presses since this process started watching.
 pub(super) struct UserActivity {
-	listener: Arc<Listener>,
+	presses: Arc<Presses>,
 }
 
 impl UserActivity {
 	pub(super) fn start() -> CoreResult<Self> {
 		let mut shared = SHARED.lock();
-		if let Some(listener) = shared.upgrade() {
-			return Ok(Self { listener });
+		if let Some(presses) = shared.as_ref() {
+			return Ok(Self { presses: Arc::clone(presses) });
 		}
-		let listener = Arc::new(listen()?);
-		*shared = Arc::downgrade(&listener);
-		Ok(Self { listener })
+		let presses = listen()?;
+		*shared = Some(Arc::clone(&presses));
+		Ok(Self { presses })
 	}
 
 	/// Waits until the user has pressed no key and button for [`QUIET`] and
@@ -142,9 +129,8 @@ impl UserActivity {
 					.unwrap_or(deadline)
 			},
 		);
-		let count =
-			admit_with(&self.listener.presses, limit, Instant::now, input_held, control::wait)?;
-		ADMITTED.set(Some((Arc::clone(&self.listener.presses), count)));
+		let count = admit_with(&self.presses, limit, Instant::now, input_held, control::wait)?;
+		ADMITTED.set(Some((Arc::clone(&self.presses), count)));
 		Ok(())
 	}
 }
@@ -184,10 +170,9 @@ pub(super) fn start() -> CoreResult<Takeover> {
 		}
 		(presses, baseline)
 	} else {
-		let Some(listener) = SHARED.lock().upgrade() else {
+		let Some(presses) = SHARED.lock().clone() else {
 			return Err(unwatched());
 		};
-		let presses = Arc::clone(&listener.presses);
 		let baseline = admit_with(&presses, Instant::now(), Instant::now, input_held, control::wait)?;
 		(presses, baseline)
 	};
@@ -340,7 +325,7 @@ fn devices(flags: u32, target: HWND) -> [RAWINPUTDEVICE; 2] {
 	})
 }
 
-fn listen() -> CoreResult<Listener> {
+fn listen() -> CoreResult<Arc<Presses>> {
 	let started = Instant::now();
 	let presses =
 		Arc::new(Presses { count: AtomicU64::new(0), last: Mutex::new(last_input_before(started)) });
@@ -352,8 +337,8 @@ fn listen() -> CoreResult<Listener> {
 			LISTENING.set(Some(shared));
 			let class: Vec<u16> = "omp desktop user input\0".encode_utf16().collect();
 			// SAFETY: the class name outlives both calls; a message-only window
-			// needs no instance handle. A class already registered by an
-			// earlier listener is reused.
+			// needs no instance handle. A class an earlier, failed start
+			// registered is reused.
 			let window = unsafe {
 				RegisterClassW(&WNDCLASSW {
 					lpfnWndProc: Some(receive),
@@ -388,33 +373,27 @@ fn listen() -> CoreResult<Listener> {
 					// SAFETY: this thread created the window.
 					unsafe { DestroyWindow(window) };
 				}
-				let _ = ready.send(None);
+				let _ = ready.send(false);
 				return;
 			}
-			// SAFETY: GetCurrentThreadId has no preconditions.
-			let _ = ready.send(Some(unsafe { GetCurrentThreadId() }));
+			let _ = ready.send(true);
 			// SAFETY: MSG is plain storage owned by this thread.
 			let mut message: MSG = unsafe { std::mem::zeroed() };
-			// SAFETY: writable storage; WM_QUIT ends the loop.
+			// SAFETY: writable storage; the loop runs for the process's life.
 			while unsafe { GetMessageW(&raw mut message, std::ptr::null_mut(), 0, 0) } > 0 {
 				// SAFETY: a message this thread's queue returned.
 				unsafe { DispatchMessageW(&raw const message) };
-			}
-			let devices = devices(RIDEV_REMOVE, std::ptr::null_mut());
-			// SAFETY: `devices` outlives the call; this thread created the window.
-			unsafe {
-				RegisterRawInputDevices(devices.as_ptr(), 2, size_of::<RAWINPUTDEVICE>() as u32);
-				DestroyWindow(window);
 			}
 		})
 		.map_err(|error| {
 			DesktopError::input_failed(format!("cannot start watching the user's input: {error}"))
 		})?;
-	let Some(id) = receive_ready.recv().ok().flatten() else {
+	if receive_ready.recv().unwrap_or(false) {
+		Ok(presses)
+	} else {
 		let _ = thread.join();
-		return Err(unwatched());
-	};
-	Ok(Listener { presses, thread: Some(thread), id })
+		Err(unwatched())
+	}
 }
 
 #[cfg(test)]
@@ -542,12 +521,12 @@ mod tests {
 			},
 		};
 		let inputs = [key(0), key(KEYEVENTF_KEYUP), wheel];
-		let before = activity.listener.presses.count.load(Ordering::Acquire);
+		let before = activity.presses.count.load(Ordering::Acquire);
 		// SAFETY: `inputs` is an initialized INPUT slice copied synchronously.
 		let sent =
 			unsafe { SendInput(inputs.len() as u32, inputs.as_ptr(), size_of::<INPUT>() as i32) };
 		assert_eq!(sent as usize, inputs.len());
 		std::thread::sleep(Duration::from_millis(300));
-		assert_eq!(activity.listener.presses.count.load(Ordering::Acquire), before);
+		assert_eq!(activity.presses.count.load(Ordering::Acquire), before);
 	}
 }

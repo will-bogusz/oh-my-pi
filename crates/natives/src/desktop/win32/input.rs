@@ -900,6 +900,7 @@ mod foreground {
 		CoreResult, DesktopError, KeyName, Modifiers, MouseButton, PointerEvent, background, control,
 	};
 	use crate::desktop::{
+		error::ErrorCode,
 		types::DesktopFocusReturn,
 		win32::{
 			activity,
@@ -979,12 +980,12 @@ mod foreground {
 			// Preserve the target's consumption window after any delivery, even
 			// a partial one; a cancel during it leaves sent input reported sent.
 			// The user's own key or click ends it at once, so their next keys go
-			// to their window, and fails the call even when every packet was out.
+			// to their window, and fails the call even when every packet was out,
+			// as does a press during the hand-back.
 			settle(self.settle);
-			let result = result.and_then(|()| activity::check());
 			let restored = self.restore();
 			self.report(restored.is_ok());
-			super::completed(result, restored)
+			super::completed(result.and_then(|()| activity::check()), restored)
 		}
 
 		/// Records for the host where the takeover left the foreground, read
@@ -1114,13 +1115,23 @@ mod foreground {
 	/// Keeps the target in front for `duration` after its input, ending as
 	/// soon as the user presses a key or button.
 	fn settle(duration: Duration) {
+		let _ = hold(duration, |slice| {
+			control::settle(slice);
+			Ok(())
+		});
+	}
+
+	/// Waits `duration` with the takeover's input held, failing as soon as the
+	/// user presses a key or button; `wait` waits one slice.
+	fn hold(duration: Duration, mut wait: impl FnMut(Duration) -> CoreResult<()>) -> CoreResult<()> {
 		let end = Instant::now() + duration;
-		while activity::check().is_ok() {
+		loop {
+			activity::check()?;
 			let left = end.saturating_duration_since(Instant::now());
 			if left.is_zero() {
-				return;
+				return Ok(());
 			}
-			control::settle(left.min(Duration::from_millis(5)));
+			wait(left.min(Duration::from_millis(5)))?;
 		}
 	}
 
@@ -1301,6 +1312,13 @@ mod foreground {
 			},
 		};
 		let result = foreground.run(|target| pointer_active(target, event));
+		// The user's pointer is theirs again once they pressed something.
+		if result
+			.as_ref()
+			.is_err_and(|error| error.code == ErrorCode::UserIntervened)
+		{
+			cursor.0 = None;
+		}
 		super::completed(result, cursor.restore())
 	}
 
@@ -1337,7 +1355,7 @@ mod foreground {
 				let (down, up) = button_flags(button);
 				with_keys(Some(target), &keys, || {
 					send_to(target, &[at, mouse_event(down, 0)])?;
-					let held = control::wait(duration);
+					let held = hold(duration, control::wait);
 					let released = control::cleanup(|| send(&[mouse_event(up, 0)]));
 					super::completed(held, released)
 				})
@@ -1484,7 +1502,7 @@ mod foreground {
 	}
 
 	pub(super) fn hold_keys(id: &str, keys: &[KeyName], duration: Duration) -> CoreResult<()> {
-		with_foreground_keys(id, keys, || Ok(()), || control::wait(duration))
+		with_foreground_keys(id, keys, || Ok(()), || hold(duration, control::wait))
 	}
 
 	fn with_foreground_keys(
@@ -1615,6 +1633,11 @@ mod foreground {
 				)
 			})
 		};
+		// The user pressed something: the call fails with `UserIntervened`
+		// ([`ForegroundGuard::run`]), so no marker goes after their key.
+		if activity::check().is_err() {
+			return None;
+		}
 		if !in_front() {
 			return left();
 		}
