@@ -130,6 +130,9 @@ pub struct DesktopCapabilities {
 	/// The display is asleep, so nothing can be captured until it wakes. Only
 	/// macOS detects this; other backends report `false`.
 	pub display_asleep: bool,
+	/// What keeps the user's keyboard when a background action's app opens a
+	/// window or asks to activate one (Linux Wayland; absent elsewhere).
+	pub focus_guard: Option<DesktopFocusGuard>,
 }
 
 impl DesktopCapabilities {
@@ -155,6 +158,7 @@ impl DesktopCapabilities {
 			display_count: 0,
 			screen_locked: false,
 			display_asleep: false,
+			focus_guard: None,
 		}
 	}
 }
@@ -385,6 +389,38 @@ pub struct DesktopWindowOpened {
 	/// The window the user had focused when the action began, as
 	/// `class: title`.
 	pub user_window: String,
+	/// Which guard kept the keyboard from the window or gave it back; absent
+	/// when none had to.
+	pub guard:       Option<DesktopFocusGuardKind>,
+}
+
+/// What keeps the user's keyboard around background actions, and why that
+/// one.
+#[napi(object)]
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DesktopFocusGuard {
+	pub kind:   DesktopFocusGuardKind,
+	pub reason: String,
+}
+
+/// A guard that keeps the user's keyboard from windows background actions
+/// open.
+#[napi(string_enum)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum DesktopFocusGuardKind {
+	/// A temporary hook inside the compositor (Hyprland's Lua): new windows
+	/// open without the keyboard, activation requests are declined, and a
+	/// window that takes focus anyway gives it back in the same compositor
+	/// turn.
+	#[napi(value = "compositorHook")]
+	CompositorHook,
+	/// OMP watches the compositor's event socket and hands focus back after
+	/// the window took it, so keys typed meanwhile reach that window.
+	#[napi(value = "socketWatcher")]
+	SocketWatcher,
+	/// Nothing guards the keyboard.
+	#[napi(value = "none")]
+	Unguarded,
 }
 
 /// What a window an action opened did to keyboard focus.

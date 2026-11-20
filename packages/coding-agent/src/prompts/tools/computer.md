@@ -116,6 +116,8 @@ Control the host desktop from JavaScript or Python Eval with the global `compute
   - Once the user's Escape stops a call, every later `computer` call you make that turn fails before sending anything:
     stop using the computer and tell the user what you did and what remains.
   - Wayland uses the host interrupt instead of global Escape.
+  - On Linux Wayland, `focusGuard` names what keeps the user's keyboard when a background action opens a dialog
+    (`compositorHook`, `socketWatcher` or `none`) and why; a call's notes name the guard that kept or returned each window.
 </instruction>
 
 <examples>

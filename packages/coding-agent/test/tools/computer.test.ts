@@ -34,7 +34,7 @@ import {
 } from "@oh-my-pi/pi-coding-agent/tools/computer/supervisor";
 import { ComputerWorkerCore, type NativeDesktopSession } from "@oh-my-pi/pi-coding-agent/tools/computer/worker";
 import * as clipboard from "@oh-my-pi/pi-coding-agent/utils/clipboard";
-import { DesktopKeyboardReturn, DesktopWindowFocus } from "@oh-my-pi/pi-natives";
+import { DesktopFocusGuardKind, DesktopKeyboardReturn, DesktopWindowFocus } from "@oh-my-pi/pi-natives";
 import type {
 	ApplicationOpenOptions,
 	AxNode,
@@ -5786,16 +5786,22 @@ describe("computer background fallback", () => {
 		expect(notice(await run(front, clickTarget, "takeover"))).toContain("not confirmed");
 	});
 
-	it("says what each window a background action made its app open did to the user's keyboard, once", async () => {
-		const opened = (focus: DesktopWindowFocus, heldMs?: number): DesktopWindowOpened => ({
+	it("says what each window a background action made its app open did to the user's keyboard, and which guard acted, once", async () => {
+		const opened = (
+			focus: DesktopWindowFocus,
+			guard?: DesktopFocusGuardKind,
+			heldMs?: number,
+			isNew = true,
+		): DesktopWindowOpened => ({
 			app: "tdlg.py",
 			pid: 400,
 			title: "Allow access?",
-			opened: true,
+			opened: isNew,
 			afterMs: 30,
 			focus,
 			heldMs,
 			userWindow: "foot: notes",
+			guard,
 		});
 		/** Native reports the windows the click opened once each, as the Hyprland guard does. */
 		class OpeningSession extends FakeNativeSession {
@@ -5803,9 +5809,12 @@ describe("computer background fallback", () => {
 			override async click(target: string, x: number, y: number, opts?: PointerOptions | null) {
 				await super.click(target, x, y, opts);
 				this.pending.push(
-					opened(DesktopWindowFocus.HandedBack, 0),
-					opened(DesktopWindowFocus.HandedBack, 12),
-					opened(DesktopWindowFocus.NotReturned),
+					opened(DesktopWindowFocus.Kept, DesktopFocusGuardKind.CompositorHook),
+					opened(DesktopWindowFocus.Kept, DesktopFocusGuardKind.CompositorHook, undefined, false),
+					opened(DesktopWindowFocus.Kept),
+					opened(DesktopWindowFocus.HandedBack, DesktopFocusGuardKind.CompositorHook, 0),
+					opened(DesktopWindowFocus.HandedBack, DesktopFocusGuardKind.SocketWatcher, 12),
+					opened(DesktopWindowFocus.NotReturned, DesktopFocusGuardKind.SocketWatcher),
 				);
 			}
 			override async takeWindowsOpened(): Promise<DesktopWindowOpened[]> {
@@ -5815,9 +5824,13 @@ describe("computer background fallback", () => {
 			}
 		}
 		const opening = 'tdlg.py opened a window "Allow access?" 30 ms after the action began';
+		const asking = 'tdlg.py asked to bring its window "Allow access?" forward 30 ms after the action began';
 		expect(texts(await run(new OpeningSession(), clickTarget, "refuse"))).toEqual([
-			`${opening}; it took the keyboard from the user's window (foot: notes), which got it back at once.`,
-			`${opening}; it took the keyboard from the user's window (foot: notes) for 12 ms before it was handed back: any keys the user typed in that time went to it.`,
+			`${opening}; the compositor hook opened it without the keyboard, so the user's window (foot: notes) kept it.`,
+			`${asking}; the compositor hook declined the request, so the user's window (foot: notes) kept the keyboard.`,
+			`${opening}; it did not take the keyboard from the user's window (foot: notes).`,
+			`${opening}; it took the keyboard from the user's window (foot: notes), and the compositor hook gave it back at once.`,
+			`${opening}; it took the keyboard from the user's window (foot: notes) for 12 ms before OMP's socket watcher handed it back: any keys the user typed in that time went to it.`,
 			`${opening}; it took the keyboard from the user's window (foot: notes) and focus did not go back: the user's typing goes to it.`,
 		]);
 	});

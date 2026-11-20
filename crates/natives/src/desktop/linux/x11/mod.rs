@@ -86,6 +86,7 @@ impl Backend for X11Backend {
 			display_count: displays.map_or(0, |items| u32::try_from(items.len()).unwrap_or(u32::MAX)),
 			screen_locked: false,
 			display_asleep: false,
+			focus_guard: None,
 		}
 	}
 

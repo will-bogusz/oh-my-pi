@@ -1787,6 +1787,11 @@ export interface DesktopCapabilities {
    * macOS detects this; other backends report `false`.
    */
   displayAsleep: boolean
+  /**
+   * What keeps the user's keyboard when a background action's app opens a
+   * window or asks to activate one (Linux Wayland; absent elsewhere).
+   */
+  focusGuard?: DesktopFocusGuard
 }
 
 export interface DesktopCapture {
@@ -1890,6 +1895,36 @@ export interface DesktopDragResult {
  * with it, including closed ones, until the key is forgotten.
  */
 export declare function desktopEscapeStops(key: string): number
+
+/**
+ * What keeps the user's keyboard around background actions, and why that
+ * one.
+ */
+export interface DesktopFocusGuard {
+  kind: DesktopFocusGuardKind
+  reason: string
+}
+
+/**
+ * A guard that keeps the user's keyboard from windows background actions
+ * open.
+ */
+export declare enum DesktopFocusGuardKind {
+  /**
+   * A temporary hook inside the compositor (Hyprland's Lua): new windows
+   * open without the keyboard, activation requests are declined, and a
+   * window that takes focus anyway gives it back in the same compositor
+   * turn.
+   */
+  CompositorHook = 'compositorHook',
+  /**
+   * OMP watches the compositor's event socket and hands focus back after
+   * the window took it, so keys typed meanwhile reach that window.
+   */
+  SocketWatcher = 'socketWatcher',
+  /** Nothing guards the keyboard. */
+  Unguarded = 'none'
+}
 
 /**
  * Where focus ended after a takeover input call.
@@ -2122,6 +2157,11 @@ export interface DesktopWindowOpened {
    * `class: title`.
    */
   userWindow: string
+  /**
+   * Which guard kept the keyboard from the window or gave it back; absent
+   * when none had to.
+   */
+  guard?: DesktopFocusGuardKind
 }
 
 /**

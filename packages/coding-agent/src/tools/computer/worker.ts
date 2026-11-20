@@ -655,23 +655,38 @@ async function appNames(session: NativeDesktopSession, signal: AbortSignal): Pro
 	}
 }
 
+/** Who kept or gave back the user's keyboard, as a note's subject. */
+const GUARD_NAMES: Record<`${NonNullable<DesktopWindowOpened["guard"]>}`, string | undefined> = {
+	compositorHook: "the compositor hook",
+	socketWatcher: "OMP's socket watcher",
+	none: undefined,
+};
+
 /**
  * Says what a window an app opened around a background action did to the
- * user's keyboard, from native's reading of the compositor (Hyprland, sway).
+ * user's keyboard, and which guard kept it from the window or gave it back,
+ * from native's reading of the compositor (Hyprland, sway).
  */
 export function windowOpenedNote(opened: DesktopWindowOpened): string {
 	const { app, title, afterMs, heldMs, userWindow } = opened;
 	const focus: `${DesktopWindowOpened["focus"]}` = opened.focus;
+	const guard = opened.guard ? GUARD_NAMES[opened.guard] : undefined;
 	const what = opened.opened
 		? `${app} opened a window "${title}" ${afterMs} ms after the action began`
 		: `${app} asked to bring its window "${title}" forward ${afterMs} ms after the action began`;
 	switch (focus) {
 		case "kept":
-			return `${what}; it did not take the keyboard from the user's window (${userWindow}).`;
-		case "handedBack":
+			if (guard === undefined)
+				return `${what}; it did not take the keyboard from the user's window (${userWindow}).`;
+			return opened.opened
+				? `${what}; ${guard} opened it without the keyboard, so the user's window (${userWindow}) kept it.`
+				: `${what}; ${guard} declined the request, so the user's window (${userWindow}) kept the keyboard.`;
+		case "handedBack": {
+			const by = guard ?? "OMP";
 			return heldMs === 0
-				? `${what}; it took the keyboard from the user's window (${userWindow}), which got it back at once.`
-				: `${what}; it took the keyboard from the user's window (${userWindow}) for ${heldMs ?? "an unknown number of"} ms before it was handed back: any keys the user typed in that time went to it.`;
+				? `${what}; it took the keyboard from the user's window (${userWindow}), and ${by} gave it back at once.`
+				: `${what}; it took the keyboard from the user's window (${userWindow}) for ${heldMs ?? "an unknown number of"} ms before ${by} handed it back: any keys the user typed in that time went to it.`;
+		}
 		case "leftAsChosen":
 			return `${what}; it took the keyboard from the user's window (${userWindow}), then the user moved focus themselves, so it was left where they put it.`;
 		case "notReturned":
