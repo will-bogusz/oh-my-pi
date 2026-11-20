@@ -105223,13 +105223,15 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-edit-setvalue",
    "host": "MacBook-Pro",
    "added": "2026-11-19T11:17:04Z",
-   "updated": "2026-11-20T12:43:53Z",
+   "updated": "2026-11-20T12:44:01Z",
    "note": "",
    "rebases_after": [
-    19195
+    19195,
+    19849
    ],
    "pair_reasons": {
-    "19195": "Main (assignment to QueueThirtySeven), 2026-11-19: docs/tools/computer.md only, both add one paragraph after the line-118 paragraph of the desktop section; combined = #19195's macOS background-drag paragraph, then this entry's Windows BM_CLICK paragraph (union, no wording change)"
+    "19195": "Main (assignment to QueueThirtySeven), 2026-11-19: docs/tools/computer.md only, both add one paragraph after the line-118 paragraph of the desktop section; combined = #19195's macOS background-drag paragraph, then this entry's Windows BM_CLICK paragraph (union, no wording change)",
+    "19849": "Main, 2026-11-20: import-list union in win32/window.rs with #19849's three style removals applied, one tests module; combined = both"
    },
    "advanced": "2026-11-20T12:43:53Z"
   },
