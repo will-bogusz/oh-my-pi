@@ -106239,7 +106239,22 @@
     }
    ],
    "opened": "2026-11-20T17:53:34Z",
-   "readied": "2026-11-20T17:53:58Z"
+   "readied": "2026-11-20T17:53:58Z",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-20T18:01:22Z",
+     "reason": "bot fix 3f169eb584 replaces these branch-added lines: refreshIfStale starts its refresh through #startBackgroundRefresh with keepSuppressedSelectors, and the doc names the built-in TTL",
+     "old": "b04f1388a9656c51bd54ae9d4fa7f51457611fb8",
+     "new": "61c131a71e28942218cad4ea9ce5c6b517b23c30",
+     "dropped": {
+      "packages/coding-agent/src/config/model-registry.ts": [
+       "\t * discovery cache TTL, or runs an offline {@link refresh} if models.yml",
+       "\t\t\t// replay it; only expired ones fetch.",
+       "\t\t\tthis.refreshInBackground(\"online-if-uncached\");"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "devin-neon-image-price",
