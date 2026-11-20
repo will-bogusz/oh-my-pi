@@ -106265,13 +106265,13 @@
    "needs": [],
    "base": "725f8c6f34ce648bec57af31a4e91baea1081a3c",
    "body": "bodies/devin-neon-image-price.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19883,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-neon-image-price",
    "host": "MacBook-Pro",
    "added": "2026-11-20T18:00:29Z",
-   "updated": "2026-11-20T18:17:57Z",
+   "updated": "2026-11-20T18:20:36Z",
    "note": "",
    "built": [
     {
@@ -106292,7 +106292,8 @@
      "at": "2026-11-20T18:12:25Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-20T18:20:36Z"
   }
  ],
  "watch": {
