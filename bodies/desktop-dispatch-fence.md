@@ -4,13 +4,13 @@ I made a Windows UI Automation action whose reply misses the native reply wait r
 
 The caller used to return `Timeout` when its wait for the native worker ended, whatever the worker had done. A fenced request now carries a three-state fence (idle, dispatched, abandoned) changed only by compare-and-swap. The route marks it just before the call that sends its action; when the wait expires the caller either finds the mark (`AxUnconfirmed`: the action may have been sent or may still take effect, inspect before retrying) or closes the fence, after which that request cannot send anything (`Timeout`).
 
-Covered: Windows `press()` without a chord and `perform()` without a menu path, i.e. `Win32Ax::perform` (`press` and its pattern fallbacks, `invoke`, `toggle`, `expand`, `collapse`, `select`, `scrollintoview`). Only those requests allocate a fence. Coordinate clicks, `press(chord)`, `setValue`, focus, menu commands and other platforms keep `main`'s `Timeout`. A fenced caller stops waiting 125 ms before the run's deadline; the run's own abort is separate and does not close the fence. Both docs pages say this. The model guide is unchanged: the error text itself says to inspect before retrying.
+Covered: Windows `press()` without a chord and `perform()` without a menu path (`Win32Ax::perform` and its pattern fallbacks). Only those requests allocate a fence. Coordinate clicks, `press(chord)`, `setValue`, focus, menu commands and other platforms keep `main`'s `Timeout`. A fenced caller stops waiting 125 ms before the run's deadline; the run's own abort is separate and does not close the fence. Both docs pages say this; the model guide is unchanged.
 
 Reading order: `DispatchFence` and `dispatching` in `desktop/control.rs`, `SessionCore::call_with_wait` in `desktop/mod.rs`, the `dispatching()` calls in `win32/ax.rs`.
 
 ## Why
 
-UI Automation's client timeouts did not bound the calls I probed into a busy WPF dispatcher, so a route cannot keep its own call inside the caller's wait. Probe without omp: a WPF window whose dispatcher is blocked for 6 s, and a `CUIAutomation8` client with connection and transaction timeouts set to 1500 ms and read back:
+UI Automation's client timeouts did not bound the calls I probed into a busy WPF dispatcher, so a route cannot keep its own call inside the caller's wait. Probe without omp: WPF dispatcher blocked 6 s, `CUIAutomation8` client timeouts set to 1500 ms and read back:
 
 | call while the dispatcher is blocked | Windows 10 22H2 | Windows 11 |
 |---|---|---|
@@ -19,15 +19,17 @@ UI Automation's client timeouts did not bound the calls I probed into a busy WPF
 | `Toggle` state read, check box | 5/5 waited 5.8 s | 5/5 waited 5.8 s |
 | `LegacyIAccessible.DoDefaultAction`, check box | 5/5 waited 5.8 s | 5/5 waited 5.8 s |
 
-Each row is five ways of holding the element (default client, timed client, timed walker, runtime id, timed cache request). All 40 succeeded once it was free; none ended at 1500 ms.
+Each row covers five ways of holding the element; all 40 succeeded once it was free.
 
 ### Limits
 
-With will/win-button-click also merged, BM_CLICK must mark dispatch before sending; that line is ready as win-button-click-fence and goes in with whichever lands second.
+With will/win-button-click also in `main`, its BM_CLICK route must mark dispatch too; that line is ready as win-button-click-fence.
 
 ## Testing
 
 `a_dispatched_provider_reply_timeout_is_unconfirmed` and `an_abandoned_provider_cannot_dispatch_after_reply_timeout` drive `SessionCore` with an injected provider and an injected end of the caller's wait, one per order: marked then expired is `AxUnconfirmed`; expired then marked is `Timeout` and the mutation never runs. Both pass at this head and fail with the caller's check removed (Linux). Three more cover the on-time reply, the off side (an unfenced `AxPerform` keeps `main`'s deadline and `Timeout`) and nested scopes.
+
+On Windows 10 22H2 (native test exe from `ab7e6cf8acf`), `unfenced_requests_keep_their_native_reply_deadline_and_timeout` and the four fence tests pass.
 
 Live, on a WPF check box pressed through `SessionCore` with a 750 ms reply wait (harness not in this PR), each order run separately at this head and with the caller's check removed:
 
@@ -38,4 +40,5 @@ Live, on a WPF check box pressed through `SessionCore` with a 750 ms reply wait 
 
 The late toggle with the check removed shows the worker was past its last cancellation check, so only the fence stopped it at this head.
 
-`scripts/rust-check` on Windows (cargo-xwin), Linux and macOS: clippy and rustfmt pass on this branch's lines at `64e43749b09`.
+`scripts/rust-check` on Windows (cargo-xwin), Linux and macOS: clippy and rustfmt pass on this branch's lines at `ab7e6cf8acf`.
+
