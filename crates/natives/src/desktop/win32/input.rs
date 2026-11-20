@@ -1445,7 +1445,8 @@ mod foreground {
 			// The caret was unchanged immediately before OMP's hand-back.
 			let selected_all = Self::send(self.window, WM_NULL, 0, until).is_some()
 				&& Self::send(self.field, WM_GETTEXTLENGTH, 0, until).is_some_and(|length| {
-					self.selection(until)
+					self
+						.selection(until)
 						.is_some_and(|(start, end)| start == 0 && end > 0 && end == length)
 				});
 			// SAFETY: GetForegroundWindow has no preconditions.
