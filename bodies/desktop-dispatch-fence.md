@@ -21,6 +21,10 @@ UI Automation's client timeouts did not bound the calls I probed into a busy WPF
 
 Each row is five ways of holding the element (default client, timed client, timed walker, runtime id, timed cache request). All 40 succeeded once it was free; none ended at 1500 ms.
 
+### Limits
+
+With will/win-button-click also merged, BM_CLICK must mark dispatch before sending; that line is ready as win-button-click-fence and goes in with whichever lands second.
+
 ## Testing
 
 `a_dispatched_provider_reply_timeout_is_unconfirmed` and `an_abandoned_provider_cannot_dispatch_after_reply_timeout` drive `SessionCore` with an injected provider and an injected end of the caller's wait, one per order: marked then expired is `AxUnconfirmed`; expired then marked is `Timeout` and the mutation never runs. Both pass at this head and fail with the caller's check removed (Linux). Three more cover the on-time reply, the off side (an unfenced `AxPerform` keeps `main`'s deadline and `Timeout`) and nested scopes.
