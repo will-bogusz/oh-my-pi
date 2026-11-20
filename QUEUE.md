@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20 08:41Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20 08:53Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-20 08:27Z on goliath; groups below are from it, states from the manifest)
@@ -11,7 +11,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
 | factory-droid-1100-pin | feat(catalog): identify Factory Droid requests as droid 1.10.0 | factory-droid |  | 6d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-pin) |
-| win-popup-foreground | fix(natives): press items of the open WPF context menu of the window in front | computer |  | 3h | open; accepted pair with #19814: Main, 2026-11-20: win32/ax.rs set_value match; combined = #19814's ValueRoute::Edit arm unchanged, then this entry's two-closure Pattern arm (lookup, then send); built with #19849 at 3af806637f5, Windows clippy+rustfmt pass; accepted pair with #19849: Main, 2026-11-20: win32/window.rs; combined = WindowsAndMessaging import-list union, and one #[cfg(test)] mod tests holding both sides' uses and items (both append a tests module); recheck at #19849's next head | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-popup-foreground) |
+| win-popup-foreground | fix(natives): press items of the open WPF context menu of the window in front | computer |  | 4h | open; accepted pair with #19814: Main, 2026-11-20: win32/ax.rs set_value match; combined = #19814's ValueRoute::Edit arm unchanged, then this entry's two-closure Pattern arm (lookup, then send); built with #19849 at 3af806637f5, Windows clippy+rustfmt pass; accepted pair with #19849: Main, 2026-11-20: win32/window.rs; combined = WindowsAndMessaging import-list union, and one #[cfg(test)] mod tests holding both sides' uses and items (both append a tests module); recheck at #19849's next head | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-popup-foreground) |
 
 ## Conflict-held (19)
 
