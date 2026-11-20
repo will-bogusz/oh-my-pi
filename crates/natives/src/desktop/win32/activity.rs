@@ -68,12 +68,10 @@ use crate::desktop::{
 pub(super) const READ_AGAIN: &str =
 	"read the window again (win.ax(), win.observe() or win.screenshot()) before acting on it";
 /// Appended to what a watch that polls the session's last input time reports.
-const POLLED: &str = "omp polled the session's last input time instead of watching the user's \
-                      presses, because this process already had a Raw Input receiver of its own, \
-                      which omp leaves in place, or its receivers could not be listed; there a \
-                      pointer move or input another program sent counts too, input during omp's \
-                      own sends does not, and input at the same moment as an omp send may be \
-                      missed";
+const POLLED: &str = "omp watched Windows' last-input timestamp because this process already had \
+                      a Raw Input receiver or its registrations could not be listed; changes are \
+                      unattributed and can include pointer movement or injected input; OMP's \
+                      own-send windows are excluded and can hide coincident user input";
 /// What stopped a takeover that saw the user's own press.
 const PRESSED: &str = "the user pressed a key or clicked during this takeover";
 /// What stopped a takeover that polled the session's last input time.
@@ -460,14 +458,6 @@ pub(super) fn outcome(result: CoreResult<()>) -> CoreResult<()> {
 	}
 }
 
-/// `error`, naming how the current takeover watched the user when it polled.
-pub(super) fn noted(error: DesktopError) -> DesktopError {
-	ACTIVE.with_borrow(|active| match active {
-		Some((presses, _)) => presses.noted(error),
-		None => error,
-	})
-}
-
 /// What stopped the current thread's takeover when its count changed: the
 /// user's own press, or, for a watch that polls, a change of the session's
 /// last input time, which need not have been a press.
@@ -845,7 +835,7 @@ fn listen(seen: Option<Duration>) -> CoreResult<(Arc<Presses>, Listener)> {
 	// below still loses its own; one registering later blinds the watch,
 	// which every check then reports.
 	let mut listed = [RAWINPUTDEVICE::default(); LISTED];
-	if !registrations(&mut listed).is_some_and(|mut existing| existing.next().is_none()) {
+	if registrations(&mut listed).is_none_or(|mut existing| existing.next().is_some()) {
 		let sample = Sample::read().ok_or_else(|| unwatched(UNREADABLE))?;
 		return Ok((Arc::new(Presses::polling(seen, sample)), Listener { running: None }));
 	}
