@@ -106271,7 +106271,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-neon-image-price",
    "host": "MacBook-Pro",
    "added": "2026-11-20T18:00:29Z",
-   "updated": "2026-11-20T18:20:36Z",
+   "updated": "2026-11-20T18:21:01Z",
    "note": "",
    "built": [
     {
@@ -106293,7 +106293,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-11-20T18:20:36Z"
+   "opened": "2026-11-20T18:20:36Z",
+   "readied": "2026-11-20T18:21:01Z"
   }
  ],
  "watch": {
