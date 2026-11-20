@@ -37,8 +37,8 @@ use windows_sys::Win32::{
 				GetAsyncKeyState, GetLastInputInfo, LASTINPUTINFO, VK_CONTROL, VK_LBUTTON, VK_LWIN,
 				VK_MBUTTON, VK_MENU, VK_RBUTTON, VK_RWIN, VK_SHIFT, VK_XBUTTON1, VK_XBUTTON2,
 			},
-			RAWINPUT, RAWINPUTDEVICE, RAWINPUTHEADER, RID_INPUT, RIDEV_INPUTSINK, RIM_TYPEKEYBOARD,
-			RIM_TYPEMOUSE, RIDEV_REMOVE, RegisterRawInputDevices,
+			RAWINPUT, RAWINPUTDEVICE, RAWINPUTHEADER, RID_INPUT, RIDEV_INPUTSINK, RIDEV_REMOVE,
+			RIM_TYPEKEYBOARD, RIM_TYPEMOUSE, RegisterRawInputDevices,
 		},
 		WindowsAndMessaging::{
 			CreateWindowExW, DefWindowProcW, DestroyWindow, DispatchMessageW, HWND_MESSAGE, MSG,
@@ -112,7 +112,7 @@ enum Registration<R> {
 }
 
 struct Watches<R: Unregister> {
-	state: Mutex<Registration<R>>,
+	state:   Mutex<Registration<R>>,
 	changed: Condvar,
 }
 
@@ -172,7 +172,7 @@ struct Watch<'a, R: Unregister> {
 impl<R: Unregister> Drop for Watch<'_, R> {
 	fn drop(&mut self) {
 		let mut state = self.watches.state.lock();
-		let Registration::Live(count, _, _) = &mut *state else {
+		let Registration::Live(count, ..) = &mut *state else {
 			unreachable!("a watch owns a live registration");
 		};
 		*count -= 1;
@@ -221,8 +221,10 @@ pub(super) fn admit() -> CoreResult<()> {
 	let limit = deadline.map_or_else(
 		|| now() + QUIET,
 		|deadline| {
-			now() + deadline.saturating_duration_since(Instant::now())
-				.saturating_sub(control::DEADLINE_MARGIN)
+			now()
+				+ deadline
+					.saturating_duration_since(Instant::now())
+					.saturating_sub(control::DEADLINE_MARGIN)
 		},
 	);
 	let count = admit_with(&presses, limit, now, input_held, control::wait)?;
@@ -237,11 +239,9 @@ pub(super) fn admitted() -> bool {
 		return false;
 	};
 	ADMITTED.with_borrow(|admitted| {
-		admitted
-			.as_ref()
-			.is_some_and(|(presses, baseline)| {
-				Arc::ptr_eq(presses, &current) && presses.count.load(Ordering::Acquire) == *baseline
-			})
+		admitted.as_ref().is_some_and(|(presses, baseline)| {
+			Arc::ptr_eq(presses, &current) && presses.count.load(Ordering::Acquire) == *baseline
+		})
 	}) && !input_held()
 }
 
@@ -395,8 +395,8 @@ fn now() -> Duration {
 #[derive(Clone, Copy)]
 struct OwnSend {
 	before: u32,
-	after: u32,
-	at: Duration,
+	after:  u32,
+	at:     Duration,
 }
 
 static OWN_SEND: Mutex<Option<OwnSend>> = Mutex::new(None);
@@ -494,7 +494,7 @@ impl Drop for StopEvent {
 
 struct Listener {
 	thread: Option<thread::JoinHandle<CoreResult<()>>>,
-	stop: Arc<StopEvent>,
+	stop:   Arc<StopEvent>,
 }
 
 impl Unregister for Listener {
@@ -506,14 +506,16 @@ impl Unregister for Listener {
 		// posted message, signaling cannot fail because the queue is full.
 		if unsafe { SetEvent(self.stop.0 as HANDLE) } == 0 {
 			return Err(DesktopError::input_failed(
-				"Windows input listener teardown failed: SetEvent failed; no further takeover can start \
-				 until OMP restarts",
+				"Windows input listener teardown failed: SetEvent failed; no further takeover can \
+				 start until OMP restarts",
 			));
 		}
-		thread.join().map_err(|_| DesktopError::input_failed(
-			"Windows input listener teardown failed: listener thread panicked; no further takeover can \
-			 start until OMP restarts",
-		))?
+		thread.join().map_err(|_| {
+			DesktopError::input_failed(
+				"Windows input listener teardown failed: listener thread panicked; no further \
+				 takeover can start until OMP restarts",
+			)
+		})?
 	}
 }
 
@@ -575,7 +577,8 @@ fn listen() -> CoreResult<(Arc<Presses>, Listener)> {
 					// SAFETY: this thread created the window.
 					unsafe { DestroyWindow(window) };
 				}
-				// SAFETY: no live window uses this class, even when creation failed.
+				// SAFETY: no live window uses this class, even when creation
+				// failed.
 				unsafe { UnregisterClassW(class.as_ptr(), std::ptr::null_mut()) };
 				let _ = ready.send(None);
 				return Ok(());
@@ -605,7 +608,9 @@ fn listen() -> CoreResult<(Arc<Presses>, Listener)> {
 						break 'listening;
 					}
 					// SAFETY: this thread owns its queue and writable MSG.
-					if unsafe { PeekMessageW(&raw mut message, std::ptr::null_mut(), 0, 0, PM_REMOVE) } == 0 {
+					if unsafe { PeekMessageW(&raw mut message, std::ptr::null_mut(), 0, 0, PM_REMOVE) }
+						== 0
+					{
 						break;
 					}
 					// SAFETY: this queue supplied the message.
@@ -628,9 +633,10 @@ fn listen() -> CoreResult<(Arc<Presses>, Listener)> {
 			LISTENING.set(None);
 			if removed == 0 || destroyed == 0 {
 				return Err(DesktopError::input_failed(format!(
-					"Windows input listener teardown failed: RIDEV_REMOVE={}, DestroyWindow={}; no further \
-					 takeover can start until OMP restarts",
-					removed != 0, destroyed != 0,
+					"Windows input listener teardown failed: RIDEV_REMOVE={}, DestroyWindow={}; no \
+					 further takeover can start until OMP restarts",
+					removed != 0,
+					destroyed != 0,
 				)));
 			}
 			Ok(())
@@ -638,7 +644,7 @@ fn listen() -> CoreResult<(Arc<Presses>, Listener)> {
 		.map_err(|error| {
 			DesktopError::input_failed(format!("cannot start watching the user's input: {error}"))
 		})?;
-	if let Ok(Some(())) = receive_ready.recv() {
+	if receive_ready.recv() == Ok(Some(())) {
 		Ok((presses, Listener { thread: Some(thread), stop }))
 	} else {
 		let _ = thread.join();
@@ -823,8 +829,12 @@ mod tests {
 	fn overlapping_watches_share_one_registration_until_the_last_drop() {
 		let removed = std::cell::Cell::new(0);
 		let watches = Watches::new();
-		let first = watches.watch(|| Ok((Arc::new(presses(None)), Registration(&removed)))).unwrap();
-		let second = watches.watch(|| panic!("must reuse the existing registration")).unwrap();
+		let first = watches
+			.watch(|| Ok((Arc::new(presses(None)), Registration(&removed))))
+			.unwrap();
+		let second = watches
+			.watch(|| panic!("must reuse the existing registration"))
+			.unwrap();
 		drop(first);
 		assert_eq!(removed.get(), 0);
 		drop(second);
@@ -841,7 +851,7 @@ mod tests {
 		assert!(!user_tick(102, own, at));
 		assert!(user_tick(103, own, at));
 		assert!(user_tick(101, own, at + SEND_HISTORY));
-		assert!(user_tick(101, own, at + Duration::from_secs(30 * 24 * 60 * 60)));
+		assert!(user_tick(101, own, at + Duration::from_hours(30 * 24)));
 		assert!(user_tick(0, None, at), "no own input yet");
 		let wrapped = Some(OwnSend { before: u32::MAX, after: 1, at });
 		assert!(!user_tick(u32::MAX, wrapped, at));
@@ -884,9 +894,12 @@ mod tests {
 			}
 		}
 		let watches = Watches::new();
-		let watch = watches.watch(|| Ok((Arc::new(presses(None)), FailedRemoval))).unwrap();
+		let watch = watches
+			.watch(|| Ok((Arc::new(presses(None)), FailedRemoval)))
+			.unwrap();
 		drop(watch);
-		let error = watches.watch(|| panic!("a failed teardown must not register again"))
+		let error = watches
+			.watch(|| panic!("a failed teardown must not register again"))
 			.err()
 			.expect("failed teardown must poison the next start");
 		assert_eq!(error.code, crate::desktop::error::ErrorCode::InputFailed);
@@ -901,22 +914,24 @@ mod tests {
 			let mut count = 0;
 			let size = size_of::<RAWINPUTDEVICE>() as u32;
 			// SAFETY: null buffer queries the required count.
-			assert_eq!(unsafe {
-				GetRegisteredRawInputDevices(std::ptr::null_mut(), &raw mut count, size)
-			}, 0);
+			assert_eq!(
+				unsafe { GetRegisteredRawInputDevices(std::ptr::null_mut(), &raw mut count, size) },
+				0
+			);
 			let mut devices = vec![RAWINPUTDEVICE::default(); count as usize];
 			if count != 0 {
 				// SAFETY: the initialized buffer holds the queried count.
-				let read = unsafe {
-					GetRegisteredRawInputDevices(devices.as_mut_ptr(), &raw mut count, size)
-				};
+				let read =
+					unsafe { GetRegisteredRawInputDevices(devices.as_mut_ptr(), &raw mut count, size) };
 				assert_ne!(read, u32::MAX);
 				devices.truncate(read as usize);
 			}
-			devices.into_iter().filter(|device| {
-				device.usUsagePage == USAGE_PAGE
-					&& [KEYBOARD, MOUSE].contains(&device.usUsage)
-			}).collect()
+			devices
+				.into_iter()
+				.filter(|device| {
+					device.usUsagePage == USAGE_PAGE && [KEYBOARD, MOUSE].contains(&device.usUsage)
+				})
+				.collect()
 		}
 
 		assert!(registered().is_empty());
@@ -942,7 +957,10 @@ mod tests {
 			let _call = UserActivity::start().unwrap();
 			panic!("unwind a real call-scope watch");
 		});
-		assert_eq!(panic.unwrap_err().downcast_ref::<&str>(), Some(&"unwind a real call-scope watch"));
+		assert_eq!(
+			panic.unwrap_err().downcast_ref::<&str>(),
+			Some(&"unwind a real call-scope watch")
+		);
 		assert!(registered().is_empty());
 	}
 }

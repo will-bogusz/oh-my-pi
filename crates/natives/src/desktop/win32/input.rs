@@ -96,7 +96,9 @@ fn keyboard_layout(target: Option<HWND>) -> HKL {
 fn global_button(input: &mut Enigo, button: MouseButton, direction: Direction) -> CoreResult<()> {
 	control::check()?;
 	let before = super::activity::sending();
-	let result = input.button(button_to_enigo(button), direction).map_err(enigo_error);
+	let result = input
+		.button(button_to_enigo(button), direction)
+		.map_err(enigo_error);
 	if result.is_ok() {
 		super::activity::sent(before);
 	}
