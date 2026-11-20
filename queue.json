@@ -107029,7 +107029,7 @@
     "win-uia-set-patterns",
     "desktop-dispatch-fence"
    ],
-   "base": "3a1f7af9f2d9b5a0d24f96e00e94d0748472ce71",
+   "base": "074831fffa0697822628fa67ce1193b05329fcf5",
    "body": "bodies/win-wpf-set-background.md",
    "state": "queued",
    "pr": null,
@@ -107037,7 +107037,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-wpf-set-background",
    "host": "MacBook-Pro",
    "added": "2026-11-20T21:08:35Z",
-   "updated": "2026-11-20T21:16:24Z",
+   "updated": "2026-11-20T23:58:29Z",
    "note": "",
    "hold": "Main, 2026-11-20: held; re-cut on the new semantic-only win-wpf-press (WinWpfRoutes10); current head 022154dbeab is not to be reviewed, run or opened"
   },
