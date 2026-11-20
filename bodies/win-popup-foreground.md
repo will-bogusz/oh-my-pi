@@ -9,10 +9,8 @@ WPF context menu item, app in front, right-click then `press()`: pressed 0/10 �
 | WPF context menu item, `press()` with the app in front | v19.0.1 | this branch |
 |---|---|---|
 | Windows 10 22H2, default mode | pressed 0/10 (refused) | pressed **10/10** |
-| Windows 11, default mode | pressed 0/10 (refused) | pressed **5/5** |
-| Windows 10 22H2, default mode, at the head (`c270cca520f`) | pressed 0/10 (refused) | pressed **10/10** |
-| Windows 11, default mode, at the head (`c270cca520f`) | pressed 0/10 (refused) | pressed **10/10** |
-| either, refuse mode | right-click refused 10/10 | right-click refused 10/10 |
+| Windows 11, default mode | pressed 0/10 (refused) | pressed **10/10** |
+| either, refuse mode (earlier build `ce8c03e8340`) | right-click refused 10/10 | right-click refused 10/10 |
 
 Reading order: `in_front` and `ensure_pattern_safe` in `win32/window.rs`, then `Win32Ax::contained` and `PatternAction` in `win32/ax.rs`.
 
@@ -35,8 +33,8 @@ Limits:
 
 <details><summary>Builds and runs behind the numbers</summary>
 
-- First rows: release v19.0.1 (`f40f335845f`) against an addon of this branch at `ce8c03e8340`, whose popup rule is the one here (the dispatch-time recheck came later), interleaved in 2 rounds of 5 per OS through the harness's right-click then `press()`. A third Windows 11 block of 5 was dropped: its no-action control, a user typing during the call, lost 30 keys.
-- Head rows: v19.0.1 against an addon of `c270cca520f`, interleaved, 2 rounds of 5 per OS (Windows 10 08:39-08:48Z, Windows 11 09:11-09:19Z). Unit test at the head: passed on Windows 10 (05:31Z) and Windows 11 (08:51Z); with the post-lookup recheck removed it failed at the lookup-switch press on both. Windows 11 runs between 07:39 and 08:12Z were discarded: another session's input ran on that guest.
+- Earlier build (refuse-mode row; also pressed 0/10 → 10/10 on Windows 10 and 0/10 → 5/5 on Windows 11 in default mode): release v19.0.1 (`f40f335845f`) against an addon of this branch at `ce8c03e8340`, whose popup rule is the one here (the dispatch-time recheck came later), interleaved in 2 rounds of 5 per OS through the harness's right-click then `press()`. A third Windows 11 block of 5 was dropped: its no-action control, a user typing during the call, lost 30 keys.
+- Head rows: v19.0.1 against an addon of `c270cca520f`, interleaved, 2 rounds of 5 per OS (Windows 10 08:39-08:48Z, Windows 11 09:11-09:19Z). Unit test at the head: passed on Windows 10 (05:31Z) and Windows 11 (08:51Z); with the post-lookup recheck removed it failed at the lookup-switch press on both (Windows 10 05:41Z, Windows 11 08:52Z). Windows 11 runs between 07:39 and 08:12Z were discarded: another session's input ran on that guest.
 - Styles `0x96000000` / `0x08080088`: read with Win32 from the fixture's open menu during a v19.0.0 run.
 - Custom popup probe: `StaysOpen` WPF `Popup` (styles `0x96000000` / `0x08000088`) owned by the window in front, plain and with focusable content, `ValuePattern.SetValue` on its text box and `InvokePattern.Invoke` on its button, n=5 per popup, action and OS, 24 keys typed into the owner's box during each call, foreground polled every 2 ms.
 
