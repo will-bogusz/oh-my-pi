@@ -1,10 +1,10 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20 12:28Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20 12:29Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-20 11:30Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 3, conflict-held 18, stacked 16, held 9, parked 1, open PRs 20, queued since the last plan 1; merged 403, closed 44
+**Counts:** openable now 3, conflict-held 18, stacked 16, held 10, parked 1, open PRs 20; merged 403, closed 44
 
 ## Openable now (3)
 
@@ -35,7 +35,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20
 | stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 7d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 | macos-web-type-background | fix(natives): type into a background macOS web page field without a takeover | computer | P2 | 5d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19504](https://github.com/can1357/oh-my-pi/pull/19504), [#19702](https://github.com/can1357/oh-my-pi/pull/19702), [#19849](https://github.com/can1357/oh-my-pi/pull/19849), [#19531](https://github.com/can1357/oh-my-pi/pull/19531), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-web-type-background) |
 | deadline-ranking | feat(ai): rank an account priority by quota deadline | ai/auth | P2 | 2d | [#19623](https://github.com/can1357/oh-my-pi/pull/19623), [#19700](https://github.com/can1357/oh-my-pi/pull/19700), [#19701](https://github.com/can1357/oh-my-pi/pull/19701) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/deadline-ranking) |
-| win-uia-set-patterns | fix(natives): set WPF sliders and combo boxes through RangeValue and SelectionItem | computer |  | 5h | [#19814](https://github.com/can1357/oh-my-pi/pull/19814), win-popup-foreground | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-uia-set-patterns) |
+| win-uia-set-patterns | fix(natives): set WPF sliders and combo boxes through RangeValue and SelectionItem | computer |  | 6h | [#19814](https://github.com/can1357/oh-my-pi/pull/19814), win-popup-foreground | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-uia-set-patterns) |
 
 ## Stacked (16)
 
@@ -58,7 +58,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20
 | snapcompact-carbon-1568 | fix(catalog): draw Gemini 4 Carbon's snapcompact frames at 1568px on Devin and Factory Droid | snapcompact | P2 | 2d | snapcompact-shape-kdl | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-carbon-1568) |
 | win-button-click | fix(natives): click Windows buttons without activating their window | computer |  | 1d | win-edit-setvalue ([#19814](https://github.com/can1357/oh-my-pi/pull/19814)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-button-click) |
 
-## Held (9)
+## Held (10)
 
 | id | title | area | priority | age | hold | branch |
 |---|---|---|---|---|---|---|
@@ -71,6 +71,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20
 | win-type-insert | feat(natives): insert typed text into a focused Windows multi-line edit control | computer | P2 | 8d | Main, 2026-11-12: proposal; opens only after entry A merges and Will has seen the body | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-type-insert) |
 | macos-drag-no-change-note | fix(natives): note a macOS background drag that changed nothing readable | computer | P2 | 6d | Main, 2026-11-18: rework against #19195's new drag logic after it merges (not a mechanical restack; drag_control.rs moved) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-drag-no-change-note) |
 | macos-keys-read-cost | perf(natives): prove a macOS key window draws its own content without reading all its children | computer | P2 | 1d | Main, 2026-11-18: needs an independent review and a VM row before it can open; no work on it now | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-keys-read-cost) |
+| win-takeover-intervene | fix(natives): stop Windows takeovers when the user types or clicks | computer |  | 0h | WinTakeover2, 2026-11-20: Main asked to scope the Raw Input listener to the takeover call; re-measure and review the delta first | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-takeover-intervene) |
 
 ## Parked (1)
 
@@ -102,9 +103,3 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20
 | [#19620](https://github.com/can1357/oh-my-pi/pull/19620) | snapcompact-rerender-on-switch | fix(snapcompact,coding-agent): re-render a snapcompact archive in the frame shape of the model reading it | snapcompact | P2 | 2d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-rerender-on-switch) |
 | [#19814](https://github.com/can1357/oh-my-pi/pull/19814) | win-edit-setvalue | fix(natives): write Windows edit values without activating their window | computer | P1 | 17h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-edit-setvalue) |
 | [#19849](https://github.com/can1357/oh-my-pi/pull/19849) | win-occluded-capture | fix(natives,coding-agent): say when a Windows capture or tree of a covered Chromium window may be stale | computer | P1 | 4h | keep; accepted pair with #19519: Main, 2026-11-20: adjacent test-only fields in the fake backend; combined = both | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-occluded-capture) |
-
-## Queued since the last plan (1)
-
-| id | title | area | priority | age | branch |
-|---|---|---|---|---|---|
-| win-takeover-intervene | fix(natives): stop Windows takeovers when the user types or clicks | computer |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-takeover-intervene) |
