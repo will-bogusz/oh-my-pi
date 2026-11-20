@@ -50,4 +50,4 @@ Builds: this branch's test binary and release addon cross-built with cargo-xwin;
 
 </details>
 
-`scripts/rust-check` on Windows (cargo-xwin) and Linux passes on this diff; macOS not run on it (no macOS build host).
+`scripts/rust-check` on Windows (cargo-xwin), Linux and macOS passes on this diff.
