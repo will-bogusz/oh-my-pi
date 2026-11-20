@@ -1733,12 +1733,12 @@ mod foreground {
 			unsafe { AttachThreadInput(own, target, 0) };
 			return None;
 		}
-		let before = activity::sending();
+		let send_start = activity::sending();
 		// SAFETY: `marker` is an initialized INPUT slice copied synchronously.
 		let sent =
 			unsafe { SendInput(marker.len() as u32, marker.as_ptr(), size_of::<INPUT>() as i32) };
 		if sent != 0 {
-			activity::sent(before);
+			activity::sent(send_start);
 		}
 		let deadline = Instant::now() + DRAIN_TIMEOUT;
 		let unread = if sent as usize == marker.len() {
