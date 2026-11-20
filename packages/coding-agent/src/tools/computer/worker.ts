@@ -1746,6 +1746,7 @@ class DevToolsWin extends Win {
 			for (const entry of opened) context.output.push({ type: "text", text: windowOpenedNote(entry) });
 		};
 		return {
+			now: () => performance.now(),
 			beginFocusGuard: async pid => {
 				this.#context();
 				throwIfAborted(context.signal);

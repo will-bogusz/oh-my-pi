@@ -25,7 +25,7 @@ const nativeBindings = loadNative();
 // classes
 export const AudioCapture = nativeBindings.AudioCapture ?? missingNativeClass("AudioCapture");
 export const AudioPlayback = nativeBindings.AudioPlayback ?? missingNativeClass("AudioPlayback");
-export const DesktopFocusGuard = nativeBindings.DesktopFocusGuard ?? missingNativeClass("DesktopFocusGuard");
+export const DesktopFocusGuardHandle = nativeBindings.DesktopFocusGuardHandle ?? missingNativeClass("DesktopFocusGuardHandle");
 export const DesktopSession = adaptDesktopSession(nativeBindings.DesktopSession);
 export const DiffStream = nativeBindings.DiffStream ?? missingNativeClass("DiffStream");
 export const DirectoryWatcher = nativeBindings.DirectoryWatcher ?? missingNativeClass("DirectoryWatcher");
@@ -181,6 +181,10 @@ export const AstMatchStrictness = {
 	Relaxed: "relaxed",
 	Signature: "signature",
 	Template: "template",
+};
+export const DesktopFocusGuardCompositor = {
+	Hyprland: "hyprland",
+	Sway: "sway",
 };
 export const DesktopFocusGuardKind = {
 	CompositorHook: "compositorHook",

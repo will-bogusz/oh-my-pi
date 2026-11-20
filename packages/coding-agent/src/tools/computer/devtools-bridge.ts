@@ -32,13 +32,17 @@ import { isChromiumBrowserExecutable, probeCdpResponse } from "../browser/attach
 /** `computer.devtools`: which Chromium and Electron windows the DevTools route may drive. */
 export type DevToolsMode = "launched" | "running" | "off";
 
+export interface DevToolsFocusGuardHandle {
+	readonly kind: string;
+	readonly compositor: string | null | undefined;
+	finish(): Promise<DesktopWindowOpened[]>;
+}
+
 /** Native protection and outcome reporting for a complete DevTools press sequence. */
 export interface DevToolsFocusGuards {
-	beginFocusGuard(pid: number): Promise<{
-		readonly kind: string;
-		readonly compositor: string | null | undefined;
-		finish(): Promise<DesktopWindowOpened[]>;
-	}>;
+	/** Monotonic milliseconds; guard age includes asynchronous acquisition. */
+	now(): number;
+	beginFocusGuard(pid: number): Promise<DevToolsFocusGuardHandle>;
 	report(opened: DesktopWindowOpened[]): void;
 }
 
@@ -55,6 +59,13 @@ interface PressQueue {
 	tail: Promise<void>;
 }
 
+/** Call-scoped state: unrelated hover and scroll calls never borrow a press sequence's guard. */
+interface PressGuard {
+	readonly guarded: boolean;
+	beforeInput(activation: boolean): Promise<void>;
+	inputSent(): void;
+}
+
 /** The launch flag `apps.open` adds: an ephemeral loopback port, published in the process's listening sockets. */
 export const DEVTOOLS_LAUNCH_ARGS = ["--remote-debugging-port=0"];
 
@@ -65,6 +76,8 @@ const PORT_POLL_MS = 150;
 export const WHEEL_STEP_PX = 100;
 /** A drag interpolates its segments in steps of about this many CSS pixels, so pages see a moving pointer. */
 const DRAG_STEP_PX = 12;
+/** Renew before the native hook's fixed 15 s lifetime can expire. */
+const FOCUS_GUARD_RENEW_MS = 13_000;
 /**
  * How long a mouse event may wait for its answer before the route draws a frame for it. Chromium holds pointer moves
  * (and moves with a button down) until the page's next frame, and a covered or hidden Wayland window gets no frame
@@ -652,28 +665,68 @@ export class DevToolsRoute {
 		this.#presses = presses;
 	}
 
-	#refusePress(what: string): never {
+	#refusePress(what: string, inputSent = false): never {
 		throw new ToolError(
-			`BackgroundUnavailable: ${what} in window ${this.#id}: every mouse or touch press makes the Chromium browser ask the desktop to activate its window, and ${this.#pressTakesFocus}, which would take the user's keyboard; nothing was sent. In the background this window takes move (hover), scroll, type, press and screenshots, and a plain click on a text field focuses it`,
+			`BackgroundUnavailable: ${what} in window ${this.#id}: every mouse or touch press makes the Chromium browser ask the desktop to activate its window, and ${this.#pressTakesFocus}, which would take the user's keyboard; ${inputSent ? "the next press was not sent (earlier input was sent)" : "nothing was sent"}. In the background this window takes move (hover), scroll, type, press and screenshots, and a plain click on a text field focuses it`,
 		);
 	}
 
-	async #guardPress<T>(guards: DevToolsFocusGuards | undefined, send: (guarded: boolean) => Promise<T>): Promise<T> {
+	async #guardPress<T>(
+		guards: DevToolsFocusGuards | undefined,
+		send: (guard: PressGuard | undefined) => Promise<T>,
+	): Promise<T> {
 		const onHyprland = !!process.env.HYPRLAND_INSTANCE_SIGNATURE;
-		if (!onHyprland || !guards) return send(false);
+		if (!onHyprland || !guards) return send(undefined);
 		const previous = this.#presses.tail;
 		const { promise, resolve: release } = Promise.withResolvers<void>();
 		this.#presses.tail = promise;
 		await previous;
-		try {
-			const watch = await guards.beginFocusGuard(this.#endpoint.pid);
-			try {
-				return await send(canGuardDevToolsPress(onHyprland, watch.kind, watch.compositor));
-			} finally {
-				guards.report(await watch.finish());
+		let watch: DevToolsFocusGuardHandle | undefined;
+		let started = 0;
+		let inputSent = false;
+		const finish = async () => {
+			const current = watch;
+			watch = undefined;
+			if (current) guards.report(await current.finish());
+		};
+		const arm = async () => {
+			// Native guards have external ownership: settle and report before acquiring the next one.
+			await finish();
+			started = guards.now();
+			watch = await guards.beginFocusGuard(this.#endpoint.pid);
+			if (
+				canGuardDevToolsPress(onHyprland, watch.kind, watch.compositor) &&
+				guards.now() - started >= FOCUS_GUARD_RENEW_MS
+			) {
+				throw new ToolError(
+					`BackgroundUnavailable: focus protection for window ${this.#id} took too long to arm; ${inputSent ? "the next input event was not sent (earlier input was sent)" : "nothing was sent"}`,
+				);
 			}
+		};
+		const guard: PressGuard = {
+			get guarded() {
+				return !!watch && canGuardDevToolsPress(onHyprland, watch.kind, watch.compositor);
+			},
+			beforeInput: async activation => {
+				if (activation || guards.now() - started >= FOCUS_GUARD_RENEW_MS) await arm();
+				if (activation && this.#pressTakesFocus !== undefined && !guard.guarded) {
+					this.#refusePress("the next press", inputSent);
+				}
+			},
+			inputSent: () => {
+				inputSent = true;
+			},
+		};
+		try {
+			// Preserve the browser's no-input refusal and editable-focus fallback before any pointer event.
+			await arm();
+			return await send(guard);
 		} finally {
-			release();
+			try {
+				await finish();
+			} finally {
+				release();
+			}
 		}
 	}
 
@@ -806,8 +859,15 @@ export class DevToolsRoute {
 		return css;
 	}
 
-	async #mouse(type: string, point: { x: number; y: number }, extra: CdpParams = {}): Promise<void> {
+	async #mouse(
+		type: string,
+		point: { x: number; y: number },
+		extra: CdpParams = {},
+		guard?: PressGuard,
+	): Promise<void> {
 		const targetId = this.#front().targetId;
+		await guard?.beforeInput(type === "mousePressed");
+		guard?.inputSent();
 		const sent = this.#endpoint.send(targetId, "Input.dispatchMouseEvent", {
 			type,
 			x: point.x,
@@ -838,8 +898,8 @@ export class DevToolsRoute {
 		const point = this.#css(x, y);
 		const bit = BUTTON_BITS[button];
 		if (bit === undefined) throw new ToolError(`no mouse button named ${JSON.stringify(button)}`);
-		return this.#guardPress<{ x: number; y: number; focused?: true }>(guards, async guarded => {
-			if (this.#pressTakesFocus !== undefined && !guarded) {
+		return this.#guardPress<{ x: number; y: number; focused?: true }>(guards, async guard => {
+			if (this.#pressTakesFocus !== undefined && !guard?.guarded) {
 				if (button !== "left" || count !== 1 || modifiers !== 0) this.#refusePress("this click");
 				// What the click would do to a text field, minus the press: focus it (as `DOM.focus` would).
 				const focused = await this.#endpoint.send<{ result: { value?: unknown } }>(
@@ -853,10 +913,10 @@ export class DevToolsRoute {
 				if (focused.result.value !== true) this.#refusePress("a click here (not on a text field)");
 				return { ...point, focused: true };
 			}
-			await this.#mouse("mouseMoved", point, { modifiers });
+			await this.#mouse("mouseMoved", point, { modifiers }, guard);
 			for (let click = 1; click <= count; click++) {
-				await this.#mouse("mousePressed", point, { button, buttons: bit, clickCount: click, modifiers });
-				await this.#mouse("mouseReleased", point, { button, buttons: 0, clickCount: click, modifiers });
+				await this.#mouse("mousePressed", point, { button, buttons: bit, clickCount: click, modifiers }, guard);
+				await this.#mouse("mouseReleased", point, { button, buttons: 0, clickCount: click, modifiers }, guard);
 			}
 			return point;
 		});
@@ -890,8 +950,8 @@ export class DevToolsRoute {
 	): Promise<"pointer" | "html"> {
 		if (points.length < 2) throw new ToolError("drag needs at least two points");
 		const path = points.map(([x, y]) => this.#css(x, y));
-		return this.#guardPress<"pointer" | "html">(guards, async guarded => {
-			if (this.#pressTakesFocus !== undefined && !guarded) this.#refusePress("a drag");
+		return this.#guardPress<"pointer" | "html">(guards, async guard => {
+			if (this.#pressTakesFocus !== undefined && !guard?.guarded) this.#refusePress("a drag");
 			const targetId = this.#front().targetId;
 			const connection = await this.#endpoint.connection();
 			const sessionId = await this.#endpoint.session(targetId);
@@ -904,8 +964,13 @@ export class DevToolsRoute {
 				.then(() => true)
 				.catch(() => false);
 			try {
-				await this.#mouse("mouseMoved", path[0]!, { modifiers });
-				await this.#mouse("mousePressed", path[0]!, { button: "left", buttons: 1, clickCount: 1, modifiers });
+				await this.#mouse("mouseMoved", path[0]!, { modifiers }, guard);
+				await this.#mouse(
+					"mousePressed",
+					path[0]!,
+					{ button: "left", buttons: 1, clickCount: 1, modifiers },
+					guard,
+				);
 				let at = path[0]!;
 				for (const next of path.slice(1)) {
 					const steps = Math.max(2, Math.ceil(Math.hypot(next.x - at.x, next.y - at.y) / DRAG_STEP_PX));
@@ -915,22 +980,30 @@ export class DevToolsRoute {
 							y: at.y + ((next.y - at.y) * step) / steps,
 						};
 						if (dragData !== undefined) {
-							await this.#endpoint.send(targetId, "Input.dispatchDragEvent", {
-								type: "dragOver",
-								...point,
-								data: dragData,
-								modifiers,
-							});
-						} else {
-							await this.#mouse("mouseMoved", point, { button: "left", buttons: 1, modifiers });
-							if (intercepting) await Bun.sleep(0);
-							if (dragData !== undefined) {
-								await this.#endpoint.send(targetId, "Input.dispatchDragEvent", {
-									type: "dragEnter",
+							await this.#dragInput(
+								targetId,
+								{
+									type: "dragOver",
 									...point,
 									data: dragData,
 									modifiers,
-								});
+								},
+								guard,
+							);
+						} else {
+							await this.#mouse("mouseMoved", point, { button: "left", buttons: 1, modifiers }, guard);
+							if (intercepting) await Bun.sleep(0);
+							if (dragData !== undefined) {
+								await this.#dragInput(
+									targetId,
+									{
+										type: "dragEnter",
+										...point,
+										data: dragData,
+										modifiers,
+									},
+									guard,
+								);
 							}
 						}
 					}
@@ -938,14 +1011,18 @@ export class DevToolsRoute {
 				}
 				if (dragData === undefined && intercepting) await Bun.sleep(30);
 				if (dragData !== undefined) {
-					await this.#endpoint.send(targetId, "Input.dispatchDragEvent", {
-						type: "drop",
-						...at,
-						data: dragData,
-						modifiers,
-					});
+					await this.#dragInput(
+						targetId,
+						{
+							type: "drop",
+							...at,
+							data: dragData,
+							modifiers,
+						},
+						guard,
+					);
 				}
-				await this.#mouse("mouseReleased", at, { button: "left", buttons: 0, clickCount: 1, modifiers });
+				await this.#mouse("mouseReleased", at, { button: "left", buttons: 0, clickCount: 1, modifiers }, guard);
 				return dragData === undefined ? "pointer" : "html";
 			} finally {
 				off();
@@ -953,6 +1030,12 @@ export class DevToolsRoute {
 					await this.#endpoint.send(targetId, "Input.setInterceptDrags", { enabled: false }).catch(() => {});
 			}
 		});
+	}
+
+	async #dragInput(targetId: string, params: CdpParams, guard?: PressGuard): Promise<void> {
+		await guard?.beforeInput(false);
+		guard?.inputSent();
+		await this.#endpoint.send(targetId, "Input.dispatchDragEvent", params);
 	}
 
 	/**

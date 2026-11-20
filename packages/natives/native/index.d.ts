@@ -32,8 +32,9 @@ export declare class AudioPlayback {
  * An external action's compositor guard, sharing its desktop session's
  * reports.
  */
-export declare class DesktopFocusGuard {
-  get kind(): string
+export declare class DesktopFocusGuardHandle {
+  get kind(): DesktopFocusGuardKind
+  get compositor(): DesktopFocusGuardCompositor | null
   /**
    * Ends the action, settles its watch and drains the session's pending
    * outcomes.
@@ -137,7 +138,7 @@ export declare class DesktopSession {
    * Arms the session's compositor guard around input delivered outside the
    * worker.
    */
-  beginFocusGuard(pid: number): Promise<DesktopFocusGuard>
+  beginFocusGuard(pid: number): Promise<DesktopFocusGuardHandle>
   /**
    * Windows that apps opened or asked to activate around this session's
    * background actions since the last call, and what each did to the
@@ -1902,7 +1903,14 @@ export declare function desktopEscapeStops(key: string): number
  */
 export interface DesktopFocusGuard {
   kind: DesktopFocusGuardKind
+  compositor?: DesktopFocusGuardCompositor
   reason: string
+}
+
+/** The compositor providing a focus guard. */
+export declare enum DesktopFocusGuardCompositor {
+  Hyprland = 'hyprland',
+  Sway = 'sway'
 }
 
 /**
