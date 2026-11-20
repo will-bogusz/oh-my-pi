@@ -259,10 +259,12 @@ mod tests {
 		Foundation::HWND,
 		UI::{
 			Input::KeyboardAndMouse::VK_RETURN,
+			Shell::{DefSubclassProc, SetWindowSubclass},
 			WindowsAndMessaging::{
-				CW_USEDEFAULT, CreateWindowExW, DispatchMessageW, ES_AUTOHSCROLL, GetForegroundWindow,
-				GetMessageW, MSG, PostMessageW, SendMessageW, SetForegroundWindow, TranslateMessage,
-				WM_APP, WM_GETTEXT, WM_KEYDOWN, WM_SETTEXT, WS_OVERLAPPEDWINDOW, WS_VISIBLE,
+				AllowSetForegroundWindow, CW_USEDEFAULT, CreateWindowExW, DispatchMessageW,
+				ES_AUTOHSCROLL, GetForegroundWindow, GetMessageW, MSG, PostMessageW, SendMessageW,
+				SetForegroundWindow, TranslateMessage, WM_APP, WM_GETTEXT, WM_KEYDOWN, WM_SETTEXT,
+				WS_OVERLAPPEDWINDOW, WS_VISIBLE,
 			},
 		},
 	};
@@ -285,6 +287,27 @@ mod tests {
 	const HANG: u32 = WM_APP;
 	/// The target's Return moves the foreground to `wParam`.
 	const RETURN_TO: u32 = WM_APP + 1;
+	/// Sent to the user window after it is in front, granting `wParam`'s PID
+	/// permission to activate the target from the runner process.
+	const GRANT_FOREGROUND: u32 = WM_APP + 2;
+
+	unsafe extern "system" fn user_receiver(
+		hwnd: HWND,
+		message: u32,
+		wparam: usize,
+		lparam: isize,
+		_subclass: usize,
+		_data: usize,
+	) -> isize {
+		if message == GRANT_FOREGROUND {
+			// SAFETY: this callback runs on the user window's owning thread;
+			// the runner sends its PID only after this window is in front.
+			return unsafe { AllowSetForegroundWindow(wparam as u32) } as isize;
+		}
+		// SAFETY: this callback forwards the unchanged message to its subclass
+		// chain.
+		unsafe { DefSubclassProc(hwnd, message, wparam, lparam) }
+	}
 
 	/// Two top-level edit windows in another process, as another app's would
 	/// be: the user's window and the takeover target, each on its own thread.
@@ -363,6 +386,15 @@ mod tests {
 				editor: editor as HWND,
 				editor_host,
 			}
+		}
+
+		fn grant_foreground(&self) {
+			// Only the foreground process can grant the runner permission to
+			// activate another window after the runner gave it the foreground.
+			// SAFETY: the host owns this window and the message carries a PID.
+			let granted =
+				unsafe { SendMessageW(self.user, GRANT_FOREGROUND, std::process::id() as usize, 0) };
+			assert_ne!(granted, 0, "the window host could not grant this process the foreground");
 		}
 
 		fn text(window: HWND) -> String {
@@ -491,6 +523,11 @@ mod tests {
 		let (sender, receiver) = std::sync::mpsc::channel();
 		std::thread::spawn(move || {
 			let user = create(USER);
+			// SAFETY: this thread owns the edit window; the callback remains
+			// live until the host exits.
+			unsafe {
+				assert_ne!(SetWindowSubclass(user, Some(user_receiver), 0, 0), 0);
+			}
 			sender.send(user as usize).unwrap();
 			pump();
 		});
@@ -579,6 +616,7 @@ mod tests {
 		// SAFETY: the window belongs to the test host.
 		unsafe { SetForegroundWindow(windows.user) };
 		assert!(window::wait_for_foreground(windows.user, Duration::from_secs(2)).unwrap());
+		windows.grant_foreground();
 		input::element_foreground(
 			&(windows.target as usize).to_string(),
 			&ElementInput::Chord(vec![KeyName::Char('?')]),
@@ -636,6 +674,7 @@ mod tests {
 				window::wait_for_foreground(windows.user, Duration::from_secs(2)).unwrap(),
 				"this process cannot take the foreground; run it from a focused terminal"
 			);
+			windows.grant_foreground();
 			backend
 				.element_input(&element, &input, DeliveryMode::ForegroundReturnFocus, &token)
 				.unwrap();
@@ -695,6 +734,7 @@ mod tests {
 			window::wait_for_foreground(windows.user, Duration::from_secs(2)).unwrap(),
 			"this process cannot take the foreground; run it from a focused terminal"
 		);
+		windows.grant_foreground();
 		// SAFETY: posts a plain message to a window this test's host created.
 		unsafe { PostMessageW(windows.target, HANG, usize::try_from(hang.as_millis()).unwrap(), 0) };
 		let token = CancellationSource::default().token();
@@ -739,6 +779,7 @@ mod tests {
 			window::wait_for_foreground(windows.user, Duration::from_secs(2)).unwrap(),
 			"this process cannot take the foreground; run it from a focused terminal"
 		);
+		windows.grant_foreground();
 		let token = CancellationSource::default().token();
 		control::take_text_unconfirmed();
 		backend
