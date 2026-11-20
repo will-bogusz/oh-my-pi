@@ -105730,7 +105730,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-20T14:33:32Z",
+  "checked": "2026-11-20T15:04:17Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -105940,18 +105940,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-13T14:51:31Z",
-    "kind": "conflict",
-    "label": "#18987",
-    "title": "feat(tui,natives,coding-agent): give each agent a colour and name the input-lock holder in InputBusy",
-    "files": [
-     "docs/theme.md",
-     "packages/tui/src/theme/loader.ts",
-     "packages/tui/src/theme/schema.ts",
-     "packages/tui/src/theme/theme-schema.json"
-    ]
-   },
    {
     "at": "2026-11-13T15:53:06Z",
     "kind": "openable",
