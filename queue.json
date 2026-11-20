@@ -104469,7 +104469,7 @@
    "area": "snapcompact",
    "priority": "P2",
    "needs": [],
-   "base": "725f8c6f34ce648bec57af31a4e91baea1081a3c",
+   "base": "fbb8085ff432419132c6e3132f36ad857893b1a4",
    "body": "bodies/snapcompact-shape-kdl.md",
    "state": "open",
    "pr": 19880,
@@ -104477,7 +104477,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-shape-kdl",
    "host": "MacBook-Pro",
    "added": "2026-11-18T00:47:39Z",
-   "updated": "2026-11-20T17:59:02Z",
+   "updated": "2026-11-20T18:05:42Z",
    "note": "LaneSnapcompactStack, 2026-11-20: restacked on origin/main alone (Main's plan: opens without #19620). Folds in #19591 (ryanskidmore): explicit snapcompact.shape > model snapcompactShape > catalog KDL > 8on22-bw, mirroring resolveImageCountBudget. Dropped the unused snapcompact-middle-variant axis so denseCompanion(high, api) stays as on main and #19620's archiveInShape call composes in either order; pair tree built (typecheck clean; snapcompact 123, compaction suites 440 pass + 2 main-failing). Census vs main: 7,757 built models 0 diffs, 0 with configured snapcompactShape. Review: ReviewKdlRework needs-changes at 7f06a7b (CHANGELOG dup, fixed), ReviewKdlFinal ready at a0078fe.",
    "kind": "proposal",
    "line_loss_overrides": [
@@ -104544,7 +104544,7 @@
      }
     }
    ],
-   "advanced": "2026-11-20T17:49:32Z",
+   "advanced": "2026-11-20T18:05:42Z",
    "built": [
     {
      "with": "#19620",
