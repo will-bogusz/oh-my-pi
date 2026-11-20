@@ -976,7 +976,13 @@ mod foreground {
 					hold(Duration::from_millis(20), control::wait)
 				})();
 				if let Err(error) = activation {
-					if requested && activity::check().is_err() {
+					if !requested {
+						// Nothing was asked of Windows: whatever is in front now is
+						// the user's choice.
+						guard.armed = false;
+						return Err(error);
+					}
+					if activity::check().is_err() {
 						// The user's press cut short the wait for an activation
 						// Windows accepted: let the target's thread take it first, so
 						// the hand-back below sees where it went.
