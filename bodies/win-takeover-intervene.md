@@ -2,13 +2,12 @@
 
 On Windows a `computer` takeover could grab the foreground while I was in the middle of typing, and my keys went into the agent's target window instead of mine, so now it waits for me to pause and stops as soon as I press anything, the way it already works on macOS and X11.
 
-On Windows 11 with the user typing, their keys reaching the target go from 283 in 120 calls to 0 in 118, and Space presses of the target's button from 49 to 0.
+On Windows 11, the packaged v19.0.1 build lost 90 characters from the user's window and activated the target's button 15 extra times while the user typed; this head lost none and made no extra button activations (40 calls per build: 20 default and 20 `takeover: true`). The default-route key-event anomaly below remains under investigation.
 
-| Windows 11, user in their own window | `main` (v19.0.1) | this PR |
+| Windows 11, user typing, head f6a4155c9d6 | v19.0.1 | this PR |
 |---|---|---|
-| User typing as the call starts (default and `takeover: true`; 120 calls on `main`, 118 here) | runs at once (median 0.2-0.5 s); user loses a median 2-4 keys; 283 key events reach the target; Space presses the target's button 49 times | waits until the user pauses, then runs (median 6.4 s); 0 keys lost, 0 reach the target, 0 presses |
-| User starts typing 50 ms into a takeover typing a long line (15 calls) | typing runs on; 44 of the user's characters land in the target | stops with `UserIntervened` at the user's first key (11 of 15; 3 finished before any key, 1 refused by Windows); that one key lands in the target, then the user's window is back |
-| User idle for 6 s (30 calls) | click 0.26 s, type 0.46 s (median) | 0.27 s, 0.45 s: no added wait |
+| Default and `takeover: true`, 40 calls per build | 90 missing user characters; 15 extra button activations | 0 missing characters; 0 extra activations |
+| User idle for 6 s | Click median 253 ms; type 446.5 ms | Click median 263.5 ms; type 443 ms |
 
 > **Windows context.** A takeover brings the target to the front and sends real input, so every key the user presses meanwhile goes to the target. Windows decides call by call whether a process may take the foreground, without saying why. On our Windows 10 guest every call was refused until OMP had once clicked the target app while it was already in front; after that, takeovers went through while the user typed. So users see refusals first, then takeovers mid-typing.
 
@@ -17,35 +16,44 @@ On Windows 11 with the user typing, their keys reaching the target go from 283 i
 ## Why
 
 - **Admission, as on macOS and X11:** the call waits until the user has pressed nothing for 5 s and holds no button or modifier, up to the deadline, else fails with `UserIntervened` having sent nothing.
-- **During the takeover:** each input batch, hold, settle and drain checks the count; a press stops the call with `UserIntervened`, releases what it held and hands the user's window back. The stopping key has landed: one key per intervention.
-- **Limit:** a call Windows will refuse now waits for the pause first (Windows 10: median 0.5 s to 6.8 s). Nothing we measured predicts a refusal; activating first would send the user's keys to the target while waiting.
+- **During the takeover:** each input batch, hold, settle and drain checks the count; a press stops the call with `UserIntervened`, releases what it held and hands the user's window back. The stopping key has landed: one key per intervention. Interrupted typing drops the text not yet sent, never sends it later, and says how many characters went out and that the target was not seen reading them; a release or hand-back Windows refused stays in the same error.
+- **Embedding hosts:** Windows allows one keyboard and one mouse Raw Input registration per process. If the process already has one, OMP leaves it alone (never replaces or removes it) and watches `GetLastInputInfo` instead, which cannot tell input apart, so any input counts; the call's output says so. Teardown removes only registrations that still target OMP's own window.
+- **Cost:** a call Windows will refuse now waits for the pause first. In these Windows 11 typing runs, click medians rose from 218–232.5 ms to 6365.5–6374.5 ms; type medians from 467.5–511 ms to 6346–6369.5 ms. Activating first would send the user's keys to the target while waiting.
 
 <details><summary>Reading order, known gaps, maintenance</summary>
 
 - Read `win32/activity.rs` (`UserActivity::admit`, `start`, `check`, `is_user_press`), then the gates in `win32/input.rs` (`ForegroundGuard`, `send_to`, the drain and settle waits).
 - While a call runs, Raw Input costs one message per input event (pointer moves included) to its listener thread; between calls nothing is registered. Overlapping sessions share one registration. The quiet time before it exists comes from `GetLastInputInfo`, minus OMP's own send windows.
 - Touchpad and touchscreen presses arrive without a device and go unseen; a virtual HID device's keys count as the user's; a `WM_INPUT` still queued can be overtaken by the call's last send. `GetLastInputInfo` counts other programs' injected input as the user's (a longer wait) and an injected old timestamp can make the user look idle earlier; a send window wider than 50 ms suppresses nothing. If Windows fails to remove the registration, takeovers are refused until OMP restarts.
+- A press that arrives after all the text went out gets the generic `UserIntervened`, with the unconfirmed reason when one was known.
+- Windows cannot check and change a Raw Input registration in one step: a host registering in the instant between OMP's check and its registration or removal can still lose its own. In polling mode a send of OMP's that took over 50 ms counts as the user's.
+- A press that stopped one takeover still holds the next one 5 s from it: the last press time outlives the listener, so OMP's own cleanup release, often the session's newest input, cannot hide it.
 - The `SendInput` exclusion relies on Raw Input naming no device for injected input, which Windows does not document. If that changed, OMP's own input would stop every takeover with `UserIntervened`, so the first takeover after such an update shows it.
-- Windows 11 guest procedure: before each call the OMP process was restarted, the procedure in which this guest let it take the foreground (with OMP's own injected key first, it refused). Two calls whose layout left the target in front before the call are left out.
+- Windows 11 guest procedure: before each call the OMP process was restarted. One baseline idle-click trial whose layout left the target in front before the call is left out; the other cells retain all 10 trials.
 
 </details>
 
 ## Testing
 
-Windows 11 guest, v19.0.1 against this branch's addon, interleaved rounds; WPF target, user typing real QEMU input beside it. `takeover: true` rows are logged explicit takeovers. The first table is from the first version, which listened for the process's life; after scoping the listener to the call:
+Windows 11 guest, v19.0.1 against this branch's head (f6a4155c9d6) and its addon, interleaved rounds; WPF target, user typing real QEMU input beside it. `takeover: true` rows are logged explicit takeovers.
 
-| Windows 11, listener scoped to the call (10 calls per cell) | `main` | this PR |
+| Windows 11, head f6a4155c9d6 (10 trials per action cell, except the excluded baseline idle click) | v19.0.1 | this PR |
 |---|---|---|
-| User typing, default mode (20 calls) | 16 ran at once (4 refused by Windows); 41 key events reach the target; Space presses its button 9 times | 19 ran after the pause (median 6.4 s; 1 refused by Windows after it); 0 keys lost, 0 in the target, 0 presses |
-| User typing, `takeover: true` (20 calls) | 20 ran; 58 key events reach the target; 9 presses | 18 ran after the pause; 0, 0, 0 (2 refused by Windows after the pause, no input sent) |
-| User idle (20 calls) | click 0.25 s, type 0.44 s | 0.27 s, 0.42 s |
+| User typing, default mode | 43 target key events; 48 missing user characters; 9 extra button activations | 10 target key events; 0 missing characters; 0 extra activations |
+| User typing, `takeover: true` | 40 target key events; 42 missing user characters; 6 extra button activations | 0 target key events; 0 missing characters; 0 extra activations |
+| User idle | 17/19 foreground takeovers; click/type medians 253/446.5 ms | 17/20 foreground takeovers; click/type medians 263.5/443 ms |
 
-Windows 10 refused every takeover with the user typing on both builds in this procedure, so it only shows nothing else changed (idle: 6 of 8 ran each).
+The 10 remaining default-mode key events are in four click trials: three precede the input call, five occur between call start and the first target-foreground transition, and two follow that transition. The same call-start-to-first-foreground interval contains no key events in nine trace-valid v19.0.1 trials (one never activated). The cause is open; these are not claimed as an unconditional zero.
 
-Unit, Windows 11: the 7 new tests in `win32/activity.rs` pass, including registration balance on every exit path with the real registration. The windowed takeover tests don't reach their end on these guests, `main`'s included (their window host never grants the test process the foreground), so this PR's change to them is unverified live. The prompt's `UserIntervened` line gains the word Windows; no eval was run.
+One idle click's post-action state request timed out, so that reported-success call's target effect is unverified. Build-hash attestation was not available for these runs: hash not recorded on either side.
+
+At f6a4155c9d6 on Windows 11: all 12 activity tests, all 8 foreground-input tests and all 6 ignored windowed takeover tests passed. All six targeted regressions failed in a same-head mutant reverting their six fix sites. Reverting only the windowed fixture's `admitted_backend` setup made all six windowed tests fail.
+
+`rust-check` passed on Linux, macOS and the Windows MSVC target. The TypeScript polling-notice unit test passed (1 test, 8 assertions). No prompt eval was run.
 
 <details><summary>Unit detail</summary>
 
-Built at a056ab9fef0 (later commits: an error message and style). Admission, press classification, own-send history and tick wrap, a stale admission, and register/remove balance on success, refusal, cancel, early error and panic with fake registrations and with the real one (`GetRegisteredRawInputDevices` lists none after the last drop).
+Admission, press classification, own-send history and tick wrap, a stale admission, register/remove balance on success, refusal, cancel, early error and panic with fake registrations and with the real one; a press seen by one registration holding the next admission; a polled watch counting new input except OMP's own send and never moving the last press back; a host's real keyboard registration left in place (the watch polls) and a receiver registered during a call kept at teardown; a failed release kept under `UserIntervened`; interrupted typing's counts, including part of a character; the activation fence skipped once the target is in front.
 
 </details>
+

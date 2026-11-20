@@ -105864,7 +105864,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-takeover-intervene",
    "host": "MacBook-Pro",
    "added": "2026-11-20T12:25:26Z",
-   "updated": "2026-11-20T15:02:19Z",
+   "updated": "2026-11-20T17:27:43Z",
    "note": "TakeoverDeltaReview fa83a834233 finding declined by Main, 2026-11-20: post-drain attribution stated as a limit",
    "advanced": "2026-11-20T14:02:56Z",
    "hold": "Main, 2026-11-20: final-head review needs-changes at 6073806a3fc (fix round WinTakeover3); win-wpf-scroll opens first (ready first)"
