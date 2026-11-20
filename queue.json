@@ -117246,7 +117246,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-20T18:00:52.845979Z",
+  "at": "2026-11-20T18:07:15.454161Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -118568,10 +118568,8 @@
     "area": "computer",
     "priority": null,
     "title": "fix(natives): click Windows buttons without activating their window",
-    "action": "held",
-    "reasons": [
-     "held: Main, 2026-11-20: in its fix round (WinButtonRound, review needs-changes at e06e31d6bf7); ready work opens in the order it becomes ready"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "accepted pair with #19195: Main (assignment to QueueThirtySeven), 2026-11-19: docs/tools/computer.md only, both add one paragraph after the line-118 paragraph of the desktop section; combined = #19195's macOS background-drag paragraph, then this entry's Windows BM_CLICK paragraph (union, no wording change); accepted pair with #19870: Main, 2026-11-20: docs/tools/computer.md AxUnconfirmed: #19870's sentence plus this entry's WinForms check-box case; combined = both; recheck at #19870's next head. Wording rule (Main): one sentence per platform fact; 'It may already have taken effect: observe ... before repeating it' stays last, unduplicated; whoever merges third reads the paragraph whole; accepted pair with #19849: Main, 2026-11-20: import-list union in win32/window.rs with #19849's three style removals applied, one tests module; combined = both; accepted pair with #19871: Main, 2026-11-20: win32/ax.rs perform arms = #19871's, invoke arm reusing this entry's probe (invoke.unwrap_or_else(get_pattern UIInvokePattern), then control::dispatching(), then invoke); docs/tools/computer.md AxUnconfirmed: this entry's (or the #19870-combined) sentence, then #19871's Windows dispatch line, Main's one-fact-per-sentence rule; BM_CLICK dispatch mark left to win-button-click-fence; tests-over: WbcReview (gpt-6.2-sol) should-fix 5, 2026-11-20: dispatch tests at the AX and pointer entries; each reaches a route no other does (click_button guards incl. reparent/destroy rows; perform's native route + disabled-form refusal; pointer hand-off + owner-drawn exclusion); each fails with its guard reverted on the VM",
     "over": [],
     "paired": [
@@ -118623,6 +118621,7 @@
      "needs win-button-click (queued)",
      "conflicts with #19871 in crates/natives/src/desktop/win32/ax.rs",
      "conflicts with #19870 in crates/natives/src/desktop/win32/ax.rs",
+     "conflicts with win-button-click in crates/natives/src/desktop/win32/ax.rs, crates/natives/src/desktop/win32/window.rs",
      "conflicts with main in crates/natives/src/desktop/win32/ax.rs, crates/natives/src/desktop/win32/window.rs"
     ],
     "note": "accepted pair with #19849: Main, 2026-11-20: win32/window.rs; combined = WindowsAndMessaging import-list union, and one #[cfg(test)] mod tests holding both sides' uses and items (both append a tests module); recheck at #19849's next head",
@@ -118632,7 +118631,8 @@
     ],
     "blocked_by": [
      "#19871",
-     "#19870"
+     "#19870",
+     "win-button-click"
     ],
     "needs": [
      "win-button-click"
@@ -118696,7 +118696,8 @@
     "title": "fix(natives): set WPF sliders and combo boxes through RangeValue and SelectionItem",
     "action": "held",
     "reasons": [
-     "held: Main, 2026-11-20: in its fix round (WinWpfRoutes5, review needs-changes at 86d258734d9); takes the recorded ax.rs form with win-wpf-scroll when it follows"
+     "held: Main, 2026-11-20: in its fix round (WinWpfRoutes5, review needs-changes at 86d258734d9); takes the recorded ax.rs form with win-wpf-scroll when it follows",
+     "conflicts with win-button-click in crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md"
     ],
     "note": "accepted pair with #19870: Main, 2026-11-20: win32/ax.rs: two appended blocks (methods then free items each) and uiautomation import unions; combined = both; accepted pair with #19871: Main, 2026-11-20: ax.rs import union; perform arms = #19871's (pattern fetch, dispatch mark, action); this entry's setValue routes stay outside the fence's stated scope until win-wpf-set-background extends it (unfenced setValue keeps main's generic Timeout: AxSetValue is not dispatch_fenced, so it never reaches abandoned_before_dispatch). docs/tools/computer.md AxUnconfirmed paragraph: form brought to Main at #19870's final head",
     "over": [],
@@ -118704,7 +118705,9 @@
      "#19870",
      "#19871"
     ],
-    "blocked_by": [],
+    "blocked_by": [
+     "win-button-click"
+    ],
     "needs": [],
     "created": "2026-11-20T06:29:20Z"
    },
