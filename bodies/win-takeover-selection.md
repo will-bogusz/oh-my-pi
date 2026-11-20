@@ -18,6 +18,6 @@ Related: #16573 refuses background WinForms actions; this repairs the user's car
 
 ## Testing
 
-Windows 11, head f6e300389784: `takeover_hands_back_the_users_caret_where_it_was` passed twice, interleaved with parent 866f44a24a7, which failed twice with the same fixture. The Win32 edit fixture covers select-all on focus, an intentional move to the end, selection changed while unfocused, and caret repair after late-activation recovery.
+At prior head f6e300389784 on Windows 11: `takeover_hands_back_the_users_caret_where_it_was` passed twice, interleaved with parent 866f44a24a7, which failed twice with the same fixture. The Win32 edit fixture covers select-all on focus, an intentional move to the end, selection changed while unfocused, and caret repair after late-activation recovery.
 
-`rust-check` passed on Linux, macOS and the Windows MSVC target. The Windows unit runs predate the harness's build-hash attestation: hash not recorded. The earlier framework-specific WinForms, WPF, Chrome and Notepad matrix was not rerun on this head.
+At that head, `rust-check` passed on Linux, macOS and the Windows MSVC target. The Windows unit runs predate build-hash attestation: hash not recorded. Live checks were not repeated after the C review-fix restack. The earlier framework-specific WinForms, WPF, Chrome and Notepad matrix was not rerun.
