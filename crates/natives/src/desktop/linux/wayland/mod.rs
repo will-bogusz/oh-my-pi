@@ -4,6 +4,7 @@ mod hyprland;
 mod libei;
 mod pipewire;
 mod portal;
+mod sway;
 mod xkb;
 
 use std::{
@@ -211,7 +212,14 @@ impl WaylandBackend {
 			},
 			Err(err) => (None, Some(err)),
 		};
-		let ax = ax.map(|ax| focus_guard::GuardedAx::new(ax, hyprland.clone()));
+		let guard = match &hyprland {
+			Some(hyprland) => {
+				Some(focus_guard::Guard::Hyprland(focus_guard::FocusGuard::new(hyprland.clone())))
+			},
+			None => sway::Sway::detect(compositor_pid)
+				.map(|sway| focus_guard::Guard::Sway(sway::SwayGuard::new(sway))),
+		};
+		let ax = ax.map(|ax| focus_guard::GuardedAx::new(ax, guard));
 		Self {
 			display,
 			pipewire: pipewire::library(),
