@@ -105315,7 +105315,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-edit-setvalue",
    "host": "MacBook-Pro",
    "added": "2026-11-19T11:17:04Z",
-   "updated": "2026-11-20T18:07:11Z",
+   "updated": "2026-11-20T18:24:15Z",
    "note": "WbcReview must-fix (b) WinForms radio route: accepted BM_CLICK for WinForms radios \u2014 Main, 2026-11-20: main clicks a hidden retained-ref radio too, with a foreground take; exception measured and removed",
    "rebases_after": [
     19195,
@@ -105353,7 +105353,81 @@
    "tests_over_override": {
     "reason": "WbcReview (gpt-6.2-sol) should-fix 5, 2026-11-20: dispatch tests at the AX and pointer entries; each reaches a route no other does (click_button guards incl. reparent/destroy rows; perform's native route + disabled-form refusal; pointer hand-off + owner-drawn exclusion); each fails with its guard reverted on the VM",
     "at": "2026-11-20T16:24:33Z"
-   }
+   },
+   "built": [
+    {
+     "with": "#17756",
+     "code": "7c6d448f702aaf7b04c9957655b75402a2238fbc",
+     "with_code": "4aefc67cb62000b42b0df6eb349663a8643bce60",
+     "tip": "c34ca837e8f6bbfe45d809dc298459f90402cb54",
+     "with_tip": "afa2f973ac8db34ea0b2a76e2a54db30c98ba17b",
+     "at": "2026-11-20T18:24:11Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19504",
+     "code": "7c6d448f702aaf7b04c9957655b75402a2238fbc",
+     "with_code": "f8037e9523c86c49401722f3db522683d3a9b468",
+     "tip": "c34ca837e8f6bbfe45d809dc298459f90402cb54",
+     "with_tip": "5e0b1bba3c2e034133396dbef995df359a8ed35a",
+     "at": "2026-11-20T18:24:14Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19519",
+     "code": "7c6d448f702aaf7b04c9957655b75402a2238fbc",
+     "with_code": "894d4a43226ef5f65da81afd8d8efbf4042664ee",
+     "tip": "c34ca837e8f6bbfe45d809dc298459f90402cb54",
+     "with_tip": "da8a36da61c61d703ada8813287ad6b3a334b33b",
+     "at": "2026-11-20T18:24:14Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19616",
+     "code": "7c6d448f702aaf7b04c9957655b75402a2238fbc",
+     "with_code": "c2e503bbece19a4d9c701332d58da781cd8f1230",
+     "tip": "c34ca837e8f6bbfe45d809dc298459f90402cb54",
+     "with_tip": "dca8c475900bd7674b68380bbbe1dcdb41fe3b76",
+     "at": "2026-11-20T18:24:14Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19615",
+     "code": "7c6d448f702aaf7b04c9957655b75402a2238fbc",
+     "with_code": "0036bb43366a79d0cfba6ea0b6b3e12b5e29c41d",
+     "tip": "c34ca837e8f6bbfe45d809dc298459f90402cb54",
+     "with_tip": "42dd1355fda14177a1daf93bff4fc2a615d6757a",
+     "at": "2026-11-20T18:24:14Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19618",
+     "code": "7c6d448f702aaf7b04c9957655b75402a2238fbc",
+     "with_code": "3a959a39c3120742b133ff2ed29e7708078c2ad8",
+     "tip": "c34ca837e8f6bbfe45d809dc298459f90402cb54",
+     "with_tip": "192a898833fa619bf380a94a9e59b977877b9eab",
+     "at": "2026-11-20T18:24:14Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19702",
+     "code": "7c6d448f702aaf7b04c9957655b75402a2238fbc",
+     "with_code": "e608cd824a8447d2fca6ebe64e6b79079f530099",
+     "tip": "c34ca837e8f6bbfe45d809dc298459f90402cb54",
+     "with_tip": "0c073f5ac413a6101207133b610d1f03abd06668",
+     "at": "2026-11-20T18:24:14Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19531",
+     "code": "7c6d448f702aaf7b04c9957655b75402a2238fbc",
+     "with_code": "d6ffe761e6cb2055157979cb3d54b5c3ba1571d5",
+     "tip": "c34ca837e8f6bbfe45d809dc298459f90402cb54",
+     "with_tip": "d089703a9887a24936e27adf88c44ee6d54de0ef",
+     "at": "2026-11-20T18:24:15Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "win-wpf-scroll",
