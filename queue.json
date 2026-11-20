@@ -105724,8 +105724,10 @@
    "title": "fix(natives): press items of the open WPF context menu of the window in front",
    "area": "computer",
    "priority": null,
-   "needs": [],
-   "base": "640d6e49cff452a4cb101a0643219736df1a2b23",
+   "needs": [
+    "win-button-click"
+   ],
+   "base": "c34ca837e8f6bbfe45d809dc298459f90402cb54",
    "body": "bodies/win-popup-foreground.md",
    "state": "queued",
    "pr": null,
@@ -105733,7 +105735,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-popup-foreground",
    "host": "MacBook-Pro",
    "added": "2026-11-20T04:47:55Z",
-   "updated": "2026-11-20T12:51:18Z",
+   "updated": "2026-11-20T17:47:42Z",
    "note": "",
    "rebases_after": [
     19814,
