@@ -116226,8 +116226,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-20T11:30:39.110818Z",
-  "host": "goliath",
+  "at": "2026-11-20T12:31:55.485910Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -116312,8 +116312,10 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): type characters outside the X11 keymap through temporary keycodes",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in crates/natives/src/desktop/mod.rs"
+    ],
     "note": "accepted pair with #19531: Main, 2026-11-17: adjacent unions in x11/mod.rs (mod lines), input.rs use list, X11Input::new fields and foreground_keys_after (watch_releases() then Keymap::xtest); in send_xtest #19519's text_mapping.pressed(keycode) moves into xtest's restructured send_xtest at the same point (after the request is sent, before check(), key presses only), no new logic. Combined form: merge 7b0d2ff0b68, ~/tmp/oh-my-pi/queuethirty/xpair-combined.md; accepted pair with #19849: Main, 2026-11-20: adjacent test-only fields in the fake backend; combined = both",
     "over": [],
     "paired": [
@@ -116363,30 +116365,13 @@
     "created": "2026-11-18T18:46:50Z"
    },
    {
-    "id": "win-edit-setvalue",
-    "label": "#19814",
-    "number": 19814,
-    "state": "open",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives): write Windows edit values without activating their window",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-19T19:03:06Z"
-   },
-   {
     "id": "win-occluded-capture",
     "label": "#19849",
     "number": 19849,
     "state": "open",
     "area": "computer",
     "priority": "P1",
-    "title": "fix(natives,coding-agent): say when a Windows capture or tree of a covered Chromium window may be stale",
+    "title": "fix(natives): count every opaque window as a cover over a Chromium capture",
     "action": "keep",
     "reasons": [],
     "note": "accepted pair with #19519: Main, 2026-11-20: adjacent test-only fields in the fake backend; combined = both",
@@ -116670,15 +116655,13 @@
     "action": "wait",
     "reasons": [
      "conflicts with #19195 in packages/coding-agent/src/tools/computer/worker.ts",
-     "conflicts with #19849 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#19195",
-     "#19849"
+     "#19195"
     ],
     "needs": [],
     "created": "2026-11-11T01:40:14Z"
@@ -116696,7 +116679,6 @@
      "conflicts with #19195 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #19504 in docs/computer-use.md",
      "conflicts with #19702 in docs/computer-use.md",
-     "conflicts with #19849 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #19531 in docs/computer-use.md",
      "conflicts with main in crates/natives/src/desktop/macos/settle.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts"
     ],
@@ -116707,7 +116689,6 @@
      "#19195",
      "#19504",
      "#19702",
-     "#19849",
      "#19531"
     ],
     "needs": [],
@@ -116768,7 +116749,6 @@
      "conflicts with #19195 in docs/computer-use.md",
      "conflicts with #19504 in docs/computer-use.md",
      "conflicts with #19702 in docs/computer-use.md",
-     "conflicts with #19849 in docs/computer-use.md",
      "conflicts with #19531 in docs/computer-use.md",
      "conflicts with main in crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/macos/input.rs, docs/computer-use.md"
     ],
@@ -116779,7 +116759,6 @@
      "#19195",
      "#19504",
      "#19702",
-     "#19849",
      "#19531"
     ],
     "needs": [],
@@ -116987,15 +116966,13 @@
     "action": "wait",
     "reasons": [
      "conflicts with #19195 in packages/coding-agent/src/prompts/tools/computer.md",
-     "conflicts with #19849 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with main in crates/natives/src/desktop/win32/capture.rs, crates/natives/src/desktop/win32/reopen.rs, crates/pi-natives/src/desktop/win32/mod.rs, packages/coding-agent/src/prompts/tools/computer.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#19195",
-     "#19849"
+     "#19195"
     ],
     "needs": [],
     "created": "2026-11-11T09:06:32Z"
@@ -117036,7 +117013,6 @@
      "conflicts with #19195 in docs/computer-use.md",
      "conflicts with #19504 in docs/computer-use.md",
      "conflicts with #19702 in docs/computer-use.md",
-     "conflicts with #19849 in docs/computer-use.md",
      "conflicts with #19531 in docs/computer-use.md",
      "conflicts with main in crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/macos/input.rs, docs/computer-use.md"
     ],
@@ -117047,7 +117023,6 @@
      "#19195",
      "#19504",
      "#19702",
-     "#19849",
      "#19531"
     ],
     "needs": [
@@ -117138,15 +117113,13 @@
     "reasons": [
      "held: Main, 2026-11-11: stays held until #18786 merges with the typed-message guide channel (design check replace); then one property on the computer prelude, drop the wrap variant, re-run its blind legs",
      "conflicts with #19195 in packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with #19849 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with main in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/sdk-computer-prelude-toggle.test.ts, packages/coding-agent/test/tools/computer.test.ts, packages/coding-agent/test/tools/eval-description.test.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#19195",
-     "#19849"
+     "#19195"
     ],
     "needs": [],
     "created": "2026-11-10T19:53:35Z"
@@ -117166,13 +117139,12 @@
      "conflicts with #19195 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19504 in docs/computer-use.md",
      "conflicts with #19702 in docs/computer-use.md",
-     "conflicts with #19814 in docs/tools/computer.md",
-     "conflicts with #19849 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with #19849 in docs/tools/computer.md",
      "conflicts with #19531 in docs/computer-use.md, docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md",
      "conflicts with #19620 in packages/coding-agent/src/session/session-maintenance.ts",
      "its need computer-ui-quiet conflicts with main in crates/natives/src/desktop/macos/settle.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
-     "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/tools/computer.test.ts"
+     "conflicts with main in docs/tools/computer.md, packages/agent/src/agent.ts, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
     "over": [],
@@ -117181,7 +117153,6 @@
      "#19195",
      "#19504",
      "#19702",
-     "#19814",
      "#19849",
      "#19531",
      "#19618",
@@ -117204,8 +117175,7 @@
     "reasons": [
      "needs computer-ui-quiet (queued)",
      "conflicts with #19195 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with #19814 in docs/tools/computer.md",
-     "conflicts with #19849 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with #19849 in docs/tools/computer.md",
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md",
      "its need computer-ui-quiet conflicts with main in crates/natives/src/desktop/macos/settle.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
@@ -117216,7 +117186,6 @@
     "paired": [],
     "blocked_by": [
      "#19195",
-     "#19814",
      "#19849",
      "#19531",
      "#19618"
@@ -117263,8 +117232,7 @@
     "reasons": [
      "held: Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check | Main 2026-11-12: before it opens, the waiting-key-chord case with the cursor actually drawn (20 trials at a 20 s deadline; CursorDemo's cursor-on arm never drew one, and an early run on the combined tree returned 'Cancelled, input may be partial' 11/11, unexplained), on the polished branch will/desktop-cursor-polish.",
      "conflicts with #19195 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts, packages/natives/native/index.d.ts",
-     "conflicts with #19814 in docs/tools/computer.md",
-     "conflicts with #19849 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts, packages/natives/native/index.d.ts",
+     "conflicts with #19849 in docs/tools/computer.md",
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md, packages/natives/native/index.d.ts",
      "conflicts with main in crates/natives/src/desktop/backend.rs, crates/natives/src/desktop/cursor.rs, crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/macos/capture.rs, crates/natives/src/desktop/macos/cursor.rs, crates/natives/src/desktop/macos/cursor/helper.m, crates/natives/src/desktop/macos/mod.rs, crates/natives/src/desktop/mod.rs, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/test/tools/computer.test.ts"
@@ -117274,7 +117242,6 @@
     "paired": [],
     "blocked_by": [
      "#19195",
-     "#19814",
      "#19849",
      "#19531",
      "#19618"
@@ -117400,7 +117367,6 @@
     "reasons": [
      "held: Main, 2026-11-12: proposal; opens only after entry A merges and Will has seen the body",
      "conflicts with #19195 in docs/tools/computer.md",
-     "conflicts with #19814 in docs/tools/computer.md",
      "conflicts with #19849 in docs/tools/computer.md",
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md",
@@ -117411,7 +117377,6 @@
     "paired": [],
     "blocked_by": [
      "#19195",
-     "#19814",
      "#19849",
      "#19531",
      "#19618"
@@ -117459,10 +117424,8 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "wait",
-    "reasons": [
-     "conflicts with main in (branch missing on the fork)"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -117502,8 +117465,8 @@
     "title": "fix(natives): click Windows buttons without activating their window",
     "action": "wait",
     "reasons": [
-     "needs #19814 (open)",
-     "conflicts with #19849 in crates/natives/src/desktop/win32/window.rs"
+     "conflicts with #19849 in crates/natives/src/desktop/win32/window.rs",
+     "conflicts with main in crates/natives/src/desktop/win32/window.rs"
     ],
     "note": "accepted pair with #19195: Main (assignment to QueueThirtySeven), 2026-11-19: docs/tools/computer.md only, both add one paragraph after the line-118 paragraph of the desktop section; combined = #19195's macOS background-drag paragraph, then this entry's Windows BM_CLICK paragraph (union, no wording change)",
     "over": [],
@@ -117513,9 +117476,7 @@
     "blocked_by": [
      "#19849"
     ],
-    "needs": [
-     "win-edit-setvalue"
-    ],
+    "needs": [],
     "created": "2026-11-19T11:17:04Z"
    },
    {
@@ -117526,17 +117487,38 @@
     "area": "computer",
     "priority": null,
     "title": "fix(natives): press items of the open WPF context menu of the window in front",
-    "action": "open",
-    "reasons": [],
-    "note": "accepted pair with #19814: Main, 2026-11-20: win32/ax.rs set_value match; combined = #19814's ValueRoute::Edit arm unchanged, then this entry's two-closure Pattern arm (lookup, then send); built with #19849 at 3af806637f5, Windows clippy+rustfmt pass; accepted pair with #19849: Main, 2026-11-20: win32/window.rs; combined = WindowsAndMessaging import-list union, and one #[cfg(test)] mod tests holding both sides' uses and items (both append a tests module); recheck at #19849's next head",
+    "action": "wait",
+    "reasons": [
+     "conflicts with main in crates/natives/src/desktop/win32/ax.rs, crates/natives/src/desktop/win32/window.rs"
+    ],
+    "note": "accepted pair with #19849: Main, 2026-11-20: win32/window.rs; combined = WindowsAndMessaging import-list union, and one #[cfg(test)] mod tests holding both sides' uses and items (both append a tests module); recheck at #19849's next head",
     "over": [],
     "paired": [
-     "#19814",
      "#19849"
     ],
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-20T04:47:55Z"
+   },
+   {
+    "id": "win-takeover-intervene",
+    "label": "win-takeover-intervene",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": null,
+    "title": "fix(natives): stop Windows takeovers when the user types or clicks",
+    "action": "held",
+    "reasons": [
+     "held: WinTakeover2, 2026-11-20: Main asked to scope the Raw Input listener to the takeover call; re-measure and review the delta first",
+     "conflicts with main in crates/natives/src/desktop/win32/mod.rs"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-20T12:25:26Z"
    },
    {
     "id": "win-uia-set-patterns",
@@ -117548,16 +117530,12 @@
     "title": "fix(natives): set WPF sliders and combo boxes through RangeValue and SelectionItem",
     "action": "wait",
     "reasons": [
-     "conflicts with #19814 in crates/natives/src/desktop/win32/ax.rs",
-     "conflicts with win-popup-foreground in crates/natives/src/desktop/win32/ax.rs"
+     "conflicts with main in crates/natives/src/desktop/win32/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#19814",
-     "win-popup-foreground"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-20T06:29:20Z"
    },
@@ -117569,13 +117547,13 @@
     "area": "computer",
     "priority": null,
     "title": "fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing",
-    "action": "open",
-    "reasons": [],
-    "note": "accepted pair with #19814: Main, 2026-11-20: import-list union in win32/ax.rs; combined = both",
-    "over": [],
-    "paired": [
-     "#19814"
+    "action": "wait",
+    "reasons": [
+     "conflicts with main in crates/natives/src/desktop/control.rs, crates/natives/src/desktop/win32/ax.rs"
     ],
+    "note": "",
+    "over": [],
+    "paired": [],
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-20T04:27:43Z"
