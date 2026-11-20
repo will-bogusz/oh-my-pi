@@ -105037,13 +105037,13 @@
    "needs": [],
    "base": "34962a6f8e62cca003c24d6fa9a85578d7b23707",
    "body": "bodies/win-edit-setvalue.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19814,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-edit-setvalue-pr",
    "host": "MacBook-Pro",
    "added": "2026-11-19T11:16:47Z",
-   "updated": "2026-11-20T01:26:29Z",
+   "updated": "2026-11-20T12:30:35Z",
    "note": "",
    "built": [
     {
@@ -105203,7 +105203,8 @@
       ]
      }
     }
-   ]
+   ],
+   "merged_by": "pr"
   },
   {
    "id": "win-button-click",
