@@ -106884,7 +106884,25 @@
     }
    ],
    "opened": "2026-11-20T21:08:52Z",
-   "readied": "2026-11-20T21:09:15Z"
+   "readied": "2026-11-20T21:09:15Z",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-20T21:19:59Z",
+     "reason": "DevinPrOpener, 2026-11-20: roboomp nit on #19928 replaces the identity object with typed fields spread onto the credential",
+     "old": "bb5bea6ed2b269e254edf7ed890e3bd8eeaa5e83",
+     "new": "1630d6dac4759384da3537682e111ae32c6eb407",
+     "dropped": {
+      "packages/ai/src/registry/oauth/devin.ts": [
+       "\tconst identity = {",
+       "\t\temail: usageReportMetadataValue(report, \"email\"),",
+       "\t\taccountId: usageReportMetadataValue(report, \"accountId\"),",
+       "\t\torgId: usageReportMetadataValue(report, \"orgId\"),",
+       "\t\torgName: usageReportMetadataValue(report, \"orgName\"),",
+       "\t\t...Object.fromEntries(Object.entries(identity).filter(([, value]) => value)),"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "devin-quota-ranking",
