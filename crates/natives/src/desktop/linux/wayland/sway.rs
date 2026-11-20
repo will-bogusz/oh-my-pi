@@ -283,15 +283,21 @@ impl SwayGuard {
 		out
 	}
 
-	/// Runs `action` on process `pid` under a watch, like the Hyprland guard;
-	/// unwatched when the user's focused window is the target's or sway
-	/// cannot be read.
-	pub(super) fn run<T>(&mut self, pid: u32, action: impl FnOnce() -> T) -> T {
+	/// Runs `action` on process `pid` under a watch, like the Hyprland guard
+	/// (a refused or failed action returns at once); unwatched when the
+	/// user's focused window is the target's or sway cannot be read.
+	pub(super) fn run<T>(
+		&mut self,
+		pid: u32,
+		action: impl FnOnce() -> CoreResult<T>,
+	) -> CoreResult<T> {
 		let Some(watch) = self.arm(pid) else {
 			return action();
 		};
 		let result = action();
-		watch.finish();
+		if result.is_ok() {
+			watch.finish();
+		}
 		result
 	}
 

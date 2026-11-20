@@ -718,11 +718,13 @@ impl FocusGuard {
 		}
 	}
 
-	/// Runs `action` on process `pid` under a watch, then waits up to
-	/// [`SETTLE`] for a window it opens. The watch keeps going for [`WATCH`]
-	/// after the action returns. An action on the app the user has focused,
-	/// or one when Hyprland cannot be read, runs unwatched: the first is the
-	/// user's own app, and the second must not stop their work.
+	/// Runs `action` on process `pid` under a watch, then, when the action
+	/// went through, waits up to [`SETTLE`] for a window it opens; a refused
+	/// or failed action sent nothing, so it returns at once. The watch keeps
+	/// going for [`WATCH`] after the action returns. An action on the app the
+	/// user has focused, or one when Hyprland cannot be read, runs unwatched:
+	/// the first is the user's own app, and the second must not stop their
+	/// work.
 	pub(super) fn run<T>(
 		&mut self,
 		pid: u32,
@@ -733,7 +735,9 @@ impl FocusGuard {
 			return action();
 		};
 		let result = action();
-		watch.finish();
+		if result.is_ok() {
+			watch.finish();
+		}
 		result
 	}
 
