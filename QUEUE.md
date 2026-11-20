@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20 16:50Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20 16:53Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-20 16:48Z on MacBook-Pro; groups below are from it, states from the manifest)
@@ -46,7 +46,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20
 | gemma-tokenizer | feat(natives,catalog): count Gemini in the Gemma vocabulary | catalog |  | 17d | token-count-policy | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/gemma-tokenizer) |
 | encoded-prefix-count | fix(ai,agent,tui,coding-agent): count the system prompt and tools as the provider request encodes them | other |  | 17d | token-count-policy, wire-delta-count | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/encoded-prefix-count) |
 | browser-wait-text-regexp | fix(browser): accept a RegExp in waitForText, as waitForUrl does | browser | P2 | 10d | browser-wait-predicate ([#19542](https://github.com/can1357/oh-my-pi/pull/19542)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-wait-text-regexp) |
-| browser-wait-text-rendered | fix(browser): let a scoped waitForText match only text the page renders | browser | P2 | 9d | browser-wait-text-regexp | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-wait-text-rendered) |
+| browser-wait-text-rendered | fix(browser): let a scoped waitForText match only text the page renders | browser | P2 | 10d | browser-wait-text-regexp | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-wait-text-rendered) |
 | act-look-prompt | docs(browser): teach acting and looking in one Eval cell without sleeps | browser | P2 | 9d | settle-reads ([#19633](https://github.com/can1357/oh-my-pi/pull/19633)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-act-look-prompt) |
 | observe-stable-ids | feat(browser): keep observe() ids stable across observations | browser | P2 | 9d | act-look-prompt | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-observe-stable-ids) |
 | factory-droid-1100-models | feat(catalog): add the Factory Droid models droid 1.10.0 serves | factory-droid |  | 6d | factory-droid-1100-pin | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-models) |
