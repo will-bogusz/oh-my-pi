@@ -886,12 +886,12 @@ mod foreground {
 		System::Threading::{AttachThreadInput, GetCurrentThreadId},
 		UI::{
 			Input::KeyboardAndMouse::{
-				GetKeyState, INPUT, INPUT_0, INPUT_KEYBOARD, INPUT_MOUSE, KEYBDINPUT,
-				KEYEVENTF_EXTENDEDKEY, KEYEVENTF_KEYUP, KEYEVENTF_UNICODE, MAPVK_VK_TO_VSC,
-				MOUSEEVENTF_ABSOLUTE, MOUSEEVENTF_HWHEEL, MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_LEFTUP,
-				MOUSEEVENTF_MIDDLEDOWN, MOUSEEVENTF_MIDDLEUP, MOUSEEVENTF_MOVE, MOUSEEVENTF_RIGHTDOWN,
-				MOUSEEVENTF_RIGHTUP, MOUSEEVENTF_VIRTUALDESK, MOUSEEVENTF_WHEEL, MOUSEINPUT,
-				MapVirtualKeyExW, SendInput, VK_RETURN,
+				GetKeyState, GetLastInputInfo, INPUT, INPUT_0, INPUT_KEYBOARD, INPUT_MOUSE, KEYBDINPUT,
+				KEYEVENTF_EXTENDEDKEY, KEYEVENTF_KEYUP, KEYEVENTF_UNICODE, LASTINPUTINFO,
+				MAPVK_VK_TO_VSC, MOUSEEVENTF_ABSOLUTE, MOUSEEVENTF_HWHEEL, MOUSEEVENTF_LEFTDOWN,
+				MOUSEEVENTF_LEFTUP, MOUSEEVENTF_MIDDLEDOWN, MOUSEEVENTF_MIDDLEUP, MOUSEEVENTF_MOVE,
+				MOUSEEVENTF_RIGHTDOWN, MOUSEEVENTF_RIGHTUP, MOUSEEVENTF_VIRTUALDESK, MOUSEEVENTF_WHEEL,
+				MOUSEINPUT, MapVirtualKeyExW, SendInput, VK_RETURN,
 			},
 			WindowsAndMessaging::{
 				GA_ROOTOWNER, GetAncestor, GetCursorPos, GetForegroundWindow, GetSystemMetrics,
@@ -924,6 +924,10 @@ mod foreground {
 	const KEY_SETTLE: Duration = Duration::from_millis(40);
 	/// Longest wait for Windows to confirm the target as foreground.
 	const ACTIVATION_TIMEOUT: Duration = Duration::from_millis(500);
+	/// Longest wait for a target that did not come to the front in time to
+	/// read the activation Windows still owes it, once the user's window has
+	/// the foreground back.
+	const OWED_ACTIVATION_TIMEOUT: Duration = Duration::from_secs(2);
 	/// Time between drag moves.
 	const DRAG_STEP: Duration = Duration::from_millis(16);
 	/// An unassigned virtual key sent behind typed text to see when the target
@@ -934,6 +938,13 @@ mod foreground {
 	/// Longest wait for the target to read typed text before the foreground
 	/// is handed back.
 	const DRAIN_TIMEOUT: Duration = Duration::from_secs(5);
+
+	fn last_input_tick() -> Option<u32> {
+		let mut info =
+			LASTINPUTINFO { cbSize: std::mem::size_of::<LASTINPUTINFO>() as u32, dwTime: 0 };
+		// SAFETY: info is initialized and writable for its declared size.
+		(unsafe { GetLastInputInfo(&raw mut info) } != 0).then_some(info.dwTime)
+	}
 
 	/// Activates the target for foreground input and hands the foreground back
 	/// to the user's window once the target has consumed it.
@@ -962,10 +973,19 @@ mod foreground {
 					"cannot save the current foreground window; no input was sent",
 				));
 			}
+			let last_input = last_input_tick();
 			let mut guard = Self { previous, target, settle, armed: true, _user: user };
 			if previous != target {
+				let mut requested = false;
+				let mut attempted = false;
+				let mut prior_fence = None;
 				let brought = bring_forward(
-					|| window::activate(target),
+					|| {
+						let activation = window::activate(target)?;
+						attempted = activation != window::Activation::AlreadyFront;
+						requested = activation == window::Activation::Requested;
+						Ok(activation == window::Activation::AlreadyFront)
+					},
 					|| window::wait_for_foreground(target, Duration::from_millis(10)),
 					activity::check,
 					|| hold(Duration::from_millis(20), control::wait),
@@ -974,49 +994,203 @@ mod foreground {
 							"Windows refused to activate the exact target window {id}; no input was sent"
 						))
 					},
-					// SAFETY: GetForegroundWindow has no preconditions.
-					|| Self::settle_activation(target, unsafe { GetForegroundWindow() }),
+					|| {
+						// SAFETY: GetForegroundWindow has no preconditions.
+						prior_fence = Some(Self::settle_activation(target, unsafe {
+							GetForegroundWindow()
+						}));
+					},
 				);
-				if let Err((requested, error)) = brought {
-					if !requested {
+				if let Err((_, error)) = brought {
+					if !attempted {
 						// Nothing was asked of Windows: whatever is in front now is
 						// the user's choice.
 						guard.armed = false;
 						return Err(error);
 					}
-					let restored = guard.restore();
-					// A press while Windows decided or during the hand-back is the
-					// reason the user sees, still naming what else failed.
-					return super::completed(activity::outcome(Err(error)), restored).map(|()| guard);
+					let recovered = guard.take_back_owed_activation(
+						id, error.code, last_input, requested, prior_fence,
+					);
+					// Preserve intervention and any recovery failure together.
+					return activity::outcome(Err(recovered)).map(|()| guard);
 				}
 			}
 			Ok(guard)
 		}
 
-		/// Lets the target's thread process an activation request made for it,
-		/// waiting at most [`ACTIVATION_TIMEOUT`] and not at all for a hung
-		/// thread, nor once the target is in front (`front`): the activation is
-		/// done, and the user's next keys must reach their window.
-		fn settle_activation(target: HWND, front: HWND) {
+		/// Fences a pending activation, never one already observed in front.
+		fn settle_activation(target: HWND, front: HWND) -> bool {
 			if front == target {
-				return;
+				return true;
 			}
 			control::cleanup(|| {
+				let timeout = control::time_left()
+					.map_or(ACTIVATION_TIMEOUT, |left| left.min(ACTIVATION_TIMEOUT));
+				if timeout.as_millis() == 0 {
+					return false;
+				}
 				let mut ignored = 0;
-				// SAFETY: WM_NULL carries no pointers; SMTO_ABORTIFHUNG returns at
-				// once for a thread Windows already considers hung.
+				// SAFETY: WM_NULL carries no pointers; the wait is deadline-bounded.
 				unsafe {
 					SendMessageTimeoutW(
-						target,
-						WM_NULL,
-						0,
-						0,
-						SMTO_ABORTIFHUNG,
-						ACTIVATION_TIMEOUT.as_millis() as u32,
-						&raw mut ignored,
-					)
+						target, WM_NULL, 0, 0, SMTO_ABORTIFHUNG,
+						timeout.as_millis() as u32, &raw mut ignored,
+					) != 0
+				}
+			})
+		}
+
+		/// Takes back a pending activation without overriding a user's new
+		/// window choice. Cleanup ignores cancellation, but not the deadline.
+		fn take_back_owed_activation(
+			&mut self,
+			id: &str,
+			code: crate::desktop::error::ErrorCode,
+			last_input: Option<u32>,
+			requested: bool,
+			prior_fence: Option<bool>,
+		) -> DesktopError {
+			enum Front {
+				User,
+				Restored,
+				Other,
+				Unconfirmed,
+			}
+			let remaining = |maximum: Duration| {
+				control::time_left().map_or(maximum, |left| left.min(maximum))
+			};
+			self.armed = false;
+			let target = self.target;
+			// Some window other than the target or one it owns.
+			let other = |front: HWND| {
+				// SAFETY: GetAncestor validates the observed handle.
+				let owner = unsafe { GetAncestor(front, GA_ROOTOWNER) };
+				!front.is_null() && front != target && owner != target
+			};
+			// NULL is a foreground transition, not permission to overwrite it.
+			let observe = || -> CoreResult<HWND> {
+				let until = Instant::now() + remaining(ACTIVATION_TIMEOUT);
+				loop {
+					// SAFETY: GetForegroundWindow has no preconditions.
+					let front = unsafe { GetForegroundWindow() };
+					let left = until.saturating_duration_since(Instant::now());
+					if !front.is_null() || left.is_zero() {
+						return Ok(front);
+					}
+					control::wait(left.min(Duration::from_millis(10)))?;
+				}
+			};
+			let outcome = control::cleanup(|| -> CoreResult<Front> {
+				// Even when intervention forbids a hand-back, fence the target
+				// before returning so a pending activation has its turn.
+				let mut arrived = false;
+				let first = (|| -> CoreResult<()> {
+					let front = observe()?;
+					arrived = front == self.target;
+					if requested
+						&& !front.is_null()
+						&& front != self.previous
+						&& !other(front)
+						&& activity::check().is_ok()
+						&& last_input.is_some()
+						&& last_input_tick() == last_input
+					{
+						let _ = window::activate(self.previous)?;
+						let _ = window::wait_for_foreground(
+							self.previous,
+							remaining(ACTIVATION_TIMEOUT),
+						)?;
+					}
+					Ok(())
+				})();
+				let fenced = match prior_fence {
+					Some(fenced) => fenced,
+					None if arrived => true,
+					None => {
+						let timeout = remaining(OWED_ACTIVATION_TIMEOUT);
+						if timeout.as_millis() == 0 {
+							return Ok(Front::Unconfirmed);
+						}
+						let mut ignored = 0;
+						// SAFETY: WM_NULL carries no pointers; the wait is deadline-bounded.
+						unsafe {
+							SendMessageTimeoutW(
+								self.target, WM_NULL, 0, 0, SMTO_ABORTIFHUNG,
+								timeout.as_millis() as u32, &raw mut ignored,
+							) != 0
+						}
+					},
 				};
+				first?;
+				let front = observe()?;
+				if front == self.previous {
+					return Ok(if fenced {
+						Front::User
+					} else {
+						Front::Unconfirmed
+					});
+				}
+				if other(front) {
+					return Ok(Front::Other);
+				}
+				if front.is_null() {
+					return Ok(Front::Unconfirmed);
+				}
+				// A late target may now be the user's deliberate choice.
+				if !requested
+					|| activity::check().is_err()
+					|| last_input.is_none()
+					|| last_input_tick() != last_input
+				{
+					return Ok(Front::Unconfirmed);
+				}
+				let _ = window::activate(self.previous)?;
+				if window::wait_for_foreground(self.previous, remaining(ACTIVATION_TIMEOUT))? && fenced
+				{
+					Ok(Front::Restored)
+				} else {
+					Ok(Front::Unconfirmed)
+				}
 			});
+			let activation = if requested {
+				"Windows accepted activating"
+			} else {
+				"Windows did not confirm activating"
+			};
+			let outcome = match outcome {
+				Ok(Front::User) => {
+					"the user's window has the foreground after the target read its messages"
+				},
+				Ok(Front::Restored) => {
+					"the target came forward late and the foreground was handed back to the user's \
+					 window"
+				},
+				Ok(Front::Other) => {
+					"another window has the foreground and was left alone; the target may still come \
+					 forward"
+				},
+				Ok(Front::Unconfirmed) => {
+					"the hand-back is unconfirmed; the target may still come forward"
+				},
+				Err(restore) => {
+					return DesktopError::new(
+						code,
+						format!(
+							"{activation} window {id}, but activation was interrupted or \
+							 not confirmed; no input was sent; the hand-back is unconfirmed and the \
+							 target may still come forward: {}",
+							restore.message
+						),
+					);
+				},
+			};
+			DesktopError::new(
+				code,
+				format!(
+					"{activation} window {id}, but activation was interrupted or not \
+					 confirmed; no input was sent; {outcome}"
+				),
+			)
 		}
 
 		fn run(mut self, operation: impl FnOnce(HWND) -> CoreResult<()>) -> CoreResult<()> {
@@ -2351,8 +2525,17 @@ pub(super) fn raise_window(id: &str) -> CoreResult<()> {
 			ShowWindow(hwnd, SW_RESTORE);
 		}
 	}
-	let _ = window::activate(hwnd)?;
-	window::wait_for_foreground(hwnd, Duration::from_millis(500))?.ok_or_else(|| {
-		DesktopError::input_failed(format!("Windows refused to raise window {id} (foreground lock)"))
-	})
+	let activation = window::activate(hwnd)?;
+	if window::wait_for_foreground(hwnd, Duration::from_millis(500))? {
+		return Ok(());
+	}
+	Err(DesktopError::input_failed(match activation {
+		window::Activation::AlreadyFront | window::Activation::Locked => {
+			format!("Windows refused to raise window {id} (foreground lock)")
+		},
+		window::Activation::Requested => format!(
+			"Windows accepted raising window {id}, but it was not in front within 500 ms; it may \
+			 come to the front later when its app reads its messages"
+		),
+	}))
 }

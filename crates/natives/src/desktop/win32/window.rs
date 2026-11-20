@@ -652,15 +652,36 @@ fn executable_is_any(hwnd: HWND, names: &[&str]) -> bool {
 	})
 }
 
+/// What Windows did with a request to bring a window to the front.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(super) enum Activation {
+	/// The window was already the foreground window.
+	AlreadyFront,
+	/// `SetForegroundWindow` returned zero. Still poll: the window can become
+	/// foreground despite that return, but no accepted activation is owed.
+	Locked,
+	/// Windows accepted the request. The target's thread activates the
+	/// window when it next reads messages, so it may not be in front yet.
+	Requested,
+}
+
 /// Requests activation without attaching to an untrusted input queue or
 /// injecting a dummy key into whichever application currently has focus.
-/// Foreground-lock refusal is handled by the caller before it sends input.
-pub(super) fn activate(target: HWND) -> CoreResult<bool> {
+/// `AllowSetForegroundWindow` for this process is no predictor: it fails for
+/// a process Windows still lets set the foreground, such as one started from
+/// the foreground terminal.
+pub(super) fn activate(target: HWND) -> CoreResult<Activation> {
 	control::check()?;
-	// SAFETY: both functions take only OS-validated handles and scalar state.
+	// SAFETY: these functions take only OS-validated handles.
 	unsafe {
-		SetForegroundWindow(target);
-		Ok(GetForegroundWindow() == target)
+		if GetForegroundWindow() == target {
+			return Ok(Activation::AlreadyFront);
+		}
+		Ok(if SetForegroundWindow(target) == 0 {
+			Activation::Locked
+		} else {
+			Activation::Requested
+		})
 	}
 }
 

@@ -249,22 +249,27 @@ impl Backend for Win32Backend {
 #[cfg(all(test, target_os = "windows"))]
 mod tests {
 	use std::{
+		cell::Cell,
 		fmt::Write as _,
 		io::{BufRead, BufReader, Write},
+		os::windows::io::{AsRawHandle, FromRawHandle, OwnedHandle},
 		process::{Child, ChildStdout, Command, Stdio},
+		sync::Arc,
 		time::Duration,
 	};
 
 	use windows_sys::Win32::{
-		Foundation::HWND,
+		Foundation::{HWND, WAIT_FAILED, WAIT_OBJECT_0},
+		System::Threading::{CreateEventW, INFINITE, SetEvent},
 		UI::{
 			Input::KeyboardAndMouse::VK_RETURN,
-			Shell::{DefSubclassProc, SetWindowSubclass},
+			Shell::{DefSubclassProc, RemoveWindowSubclass, SetWindowSubclass},
 			WindowsAndMessaging::{
 				AllowSetForegroundWindow, CW_USEDEFAULT, CreateWindowExW, DispatchMessageW,
-				ES_AUTOHSCROLL, GetForegroundWindow, GetMessageW, MSG, PostMessageW, SendMessageW,
-				SetForegroundWindow, TranslateMessage, WM_APP, WM_GETTEXT, WM_KEYDOWN, WM_SETTEXT,
-				WS_OVERLAPPEDWINDOW, WS_VISIBLE,
+				ES_AUTOHSCROLL, GetForegroundWindow, GetMessageW, MSG, MsgWaitForMultipleObjects,
+				PM_NOREMOVE, PM_QS_SENDMESSAGE, PM_REMOVE, PeekMessageW, PostMessageW, QS_SENDMESSAGE,
+				SendMessageW, SetForegroundWindow, TranslateMessage, WM_APP, WM_GETTEXT, WM_KEYDOWN,
+				WM_NULL, WM_SETTEXT, WS_OVERLAPPEDWINDOW, WS_VISIBLE,
 			},
 		},
 	};
@@ -290,6 +295,31 @@ mod tests {
 	/// Sent to the user window after it is in front, granting `wParam`'s PID
 	/// permission to activate the target from the runner process.
 	const GRANT_FOREGROUND: u32 = WM_APP + 2;
+	/// Stops the target until recovery sends its `WM_NULL` fence or the test
+	/// explicitly releases it after the operation returns.
+	const BUSY: u32 = WM_APP + 3;
+	/// Acknowledges that the target pumped messages after the busy stall.
+	const DRAINED: u32 = WM_APP + 4;
+
+	thread_local! {
+		static BUSY_FENCE_SEEN: Cell<bool> = const { Cell::new(false) };
+	}
+
+	unsafe extern "system" fn busy_receiver(
+		hwnd: HWND,
+		message: u32,
+		wparam: usize,
+		lparam: isize,
+		_subclass: usize,
+		_data: usize,
+	) -> isize {
+		if message == WM_NULL {
+			BUSY_FENCE_SEEN.set(true);
+		}
+		// SAFETY: this callback forwards the unchanged message to its subclass
+		// chain.
+		unsafe { DefSubclassProc(hwnd, message, wparam, lparam) }
+	}
 
 	unsafe extern "system" fn user_receiver(
 		hwnd: HWND,
@@ -339,6 +369,7 @@ mod tests {
 				])
 				.env(HOST, "1")
 				.env("OMP_TAKEOVER_TEST_LAYOUT", if editor { "1" } else { "" })
+				.stdin(Stdio::piped())
 				.stdout(Stdio::piped())
 				.spawn()
 				.unwrap();
@@ -404,6 +435,16 @@ mod tests {
 				unsafe { SendMessageW(window, WM_GETTEXT, buffer.len(), buffer.as_mut_ptr() as isize) };
 			String::from_utf16_lossy(&buffer[..length as usize])
 		}
+
+		fn await_line(&mut self, expected: &str) {
+			assert!(
+				(&mut self.output)
+					.lines()
+					.map_while(Result::ok)
+					.any(|line| line == expected),
+				"window host did not acknowledge {expected}"
+			);
+		}
 	}
 
 	impl Drop for Windows {
@@ -462,6 +503,57 @@ mod tests {
 					}
 					if message.message == RETURN_TO {
 						return_to = message.wParam as HWND;
+						continue;
+					}
+					if message.message == BUSY {
+						BUSY_FENCE_SEEN.set(false);
+						assert_ne!(SetWindowSubclass(message.hwnd, Some(busy_receiver), 0, 0), 0);
+						// SAFETY: no name or security attributes; OwnedHandle
+						// closes the event once the waiter and releaser finish.
+						let release = CreateEventW(std::ptr::null(), 1, 0, std::ptr::null());
+						assert!(!release.is_null());
+						let release = Arc::new(OwnedHandle::from_raw_handle(release));
+						let input_release = Arc::clone(&release);
+						std::thread::spawn(move || {
+							let mut line = String::new();
+							std::io::stdin().read_line(&mut line).unwrap();
+							// The event stays owned throughout this call.
+							assert_ne!(SetEvent(input_release.as_raw_handle()), 0);
+						});
+						println!("busy");
+						std::io::stdout().flush().unwrap();
+						let event = release.as_raw_handle();
+						// SetForegroundWindow can send messages other than the
+						// recovery fence. Dispatch only sent messages so they
+						// cannot release the stall or pump queued activation.
+						while !BUSY_FENCE_SEEN.get() {
+							let wake = MsgWaitForMultipleObjects(1, &event, 0, INFINITE, QS_SENDMESSAGE);
+							assert_ne!(wake, WAIT_FAILED);
+							if wake == WAIT_OBJECT_0 {
+								break;
+							}
+							let mut sent: MSG = std::mem::zeroed();
+							PeekMessageW(
+								&mut sent,
+								std::ptr::null_mut(),
+								0,
+								0,
+								PM_NOREMOVE | PM_QS_SENDMESSAGE,
+							);
+						}
+						assert_ne!(RemoveWindowSubclass(message.hwnd, Some(busy_receiver), 0), 0);
+						continue;
+					}
+					if message.message == DRAINED {
+						// Posted messages precede internal activation events.
+						// Peek until empty before acknowledging the settled queue.
+						let mut queued: MSG = std::mem::zeroed();
+						while PeekMessageW(&mut queued, std::ptr::null_mut(), 0, 0, PM_REMOVE) != 0 {
+							TranslateMessage(&queued);
+							DispatchMessageW(&queued);
+						}
+						println!("drained");
+						std::io::stdout().flush().unwrap();
 						continue;
 					}
 					if message.message == WM_KEYDOWN && hang != 0 {
@@ -827,5 +919,41 @@ mod tests {
 		// the hung one first.
 		let reason = unconfirmed.expect("the call reported the text unconfirmed");
 		assert!(reason.contains("read all the typed text"), "{reason}");
+	}
+
+	#[test]
+	#[ignore = "moves the foreground between windows it opens; run with --ignored from a focused \
+	            terminal in a signed-in desktop session"]
+	fn a_takeover_whose_target_comes_forward_too_late_leaves_the_users_window_in_front() {
+		let mut windows = Windows::open();
+		let (_watch, mut backend) = admitted_backend();
+		// SAFETY: a window handle this test created.
+		unsafe { SetForegroundWindow(windows.user) };
+		assert!(
+			window::wait_for_foreground(windows.user, Duration::from_secs(2)).unwrap(),
+			"this process cannot take the foreground; run it from a focused terminal"
+		);
+		windows.grant_foreground();
+		// SAFETY: posts a plain message to a window this test's host created.
+		unsafe { PostMessageW(windows.target, BUSY, 0, 0) };
+		windows.await_line("busy");
+		let token = CancellationSource::default().token();
+		let result = backend.type_text(
+			&Target::Window((windows.target as usize).to_string()),
+			"late",
+			DeliveryMode::ForegroundReturnFocus,
+			&token,
+		);
+		writeln!(windows.host.stdin.as_mut().unwrap(), "release").unwrap();
+		// SAFETY: this message follows the release and all queued activation.
+		unsafe { PostMessageW(windows.target, DRAINED, 0, 0) };
+		windows.await_line("drained");
+		// SAFETY: no preconditions.
+		assert_eq!(unsafe { GetForegroundWindow() }, windows.user);
+		assert_eq!(Windows::text(windows.target), TARGET);
+		assert_eq!(Windows::text(windows.user), USER);
+		let error = result.unwrap_err();
+		assert_eq!(error.code, crate::desktop::error::ErrorCode::InputFailed);
+		assert!(error.message.contains("Windows accepted activating"), "{}", error.message);
 	}
 }
