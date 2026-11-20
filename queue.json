@@ -105551,7 +105551,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-popup-foreground",
    "host": "MacBook-Pro",
    "added": "2026-11-20T04:47:55Z",
-   "updated": "2026-11-20T09:23:10Z",
+   "updated": "2026-11-20T12:01:10Z",
    "note": "",
    "rebases_after": [
     19814,
@@ -105560,7 +105560,72 @@
    "pair_reasons": {
     "19814": "Main, 2026-11-20: win32/ax.rs set_value match; combined = #19814's ValueRoute::Edit arm unchanged, then this entry's two-closure Pattern arm (lookup, then send); built with #19849 at 3af806637f5, Windows clippy+rustfmt pass",
     "19849": "Main, 2026-11-20: win32/window.rs; combined = WindowsAndMessaging import-list union, and one #[cfg(test)] mod tests holding both sides' uses and items (both append a tests module); recheck at #19849's next head"
-   }
+   },
+   "built": [
+    {
+     "with": "#19195",
+     "code": "f06c65e04eae5384b4ebadf3ca0124755fa32674",
+     "with_code": "56bc48e70fa4daf9d8b1cce1241872aa370143ed",
+     "tip": "c270cca520f961f25581833b4bf771dd797c8fa7",
+     "with_tip": "eba7cada40309ff90e4609626d5ab969a977b952",
+     "at": "2026-11-20T12:01:07Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#17756",
+     "code": "f06c65e04eae5384b4ebadf3ca0124755fa32674",
+     "with_code": "4aefc67cb62000b42b0df6eb349663a8643bce60",
+     "tip": "c270cca520f961f25581833b4bf771dd797c8fa7",
+     "with_tip": "afa2f973ac8db34ea0b2a76e2a54db30c98ba17b",
+     "at": "2026-11-20T12:01:09Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19504",
+     "code": "f06c65e04eae5384b4ebadf3ca0124755fa32674",
+     "with_code": "f8037e9523c86c49401722f3db522683d3a9b468",
+     "tip": "c270cca520f961f25581833b4bf771dd797c8fa7",
+     "with_tip": "5e0b1bba3c2e034133396dbef995df359a8ed35a",
+     "at": "2026-11-20T12:01:09Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19519",
+     "code": "f06c65e04eae5384b4ebadf3ca0124755fa32674",
+     "with_code": "45a89a2439613d933fe11b03a5fdd65a8dfe8cba",
+     "tip": "c270cca520f961f25581833b4bf771dd797c8fa7",
+     "with_tip": "89ddb108ed11352cf2c849d24abab2cb75b4abc2",
+     "at": "2026-11-20T12:01:09Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19616",
+     "code": "f06c65e04eae5384b4ebadf3ca0124755fa32674",
+     "with_code": "c2e503bbece19a4d9c701332d58da781cd8f1230",
+     "tip": "c270cca520f961f25581833b4bf771dd797c8fa7",
+     "with_tip": "dca8c475900bd7674b68380bbbe1dcdb41fe3b76",
+     "at": "2026-11-20T12:01:09Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19615",
+     "code": "f06c65e04eae5384b4ebadf3ca0124755fa32674",
+     "with_code": "0036bb43366a79d0cfba6ea0b6b3e12b5e29c41d",
+     "tip": "c270cca520f961f25581833b4bf771dd797c8fa7",
+     "with_tip": "42dd1355fda14177a1daf93bff4fc2a615d6757a",
+     "at": "2026-11-20T12:01:09Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19618",
+     "code": "f06c65e04eae5384b4ebadf3ca0124755fa32674",
+     "with_code": "3a959a39c3120742b133ff2ed29e7708078c2ad8",
+     "tip": "c270cca520f961f25581833b4bf771dd797c8fa7",
+     "with_tip": "192a898833fa619bf380a94a9e59b977877b9eab",
+     "at": "2026-11-20T12:01:09Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "win-uia-set-patterns",
