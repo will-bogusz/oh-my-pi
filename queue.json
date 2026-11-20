@@ -116270,6 +116270,11 @@
     "sha": "edd6f2b48396719c560c1eeb666dd4e511bdc076",
     "at": "2026-11-20T12:33:36Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "edd6f2b48396719c560c1eeb666dd4e511bdc076",
+    "at": "2026-11-20T12:38:04Z",
+    "host": "goliath"
    }
   }
  },
