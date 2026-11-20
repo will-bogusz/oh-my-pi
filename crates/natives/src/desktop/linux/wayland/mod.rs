@@ -17,7 +17,7 @@ use crate::desktop::{
 	ax::AxHandle,
 	backend::{
 		AxBackend, Backend, DeliveryMode, ElementDelivery, ElementInput, Modifiers, MouseButton,
-		PointerEvent,
+		PointerEvent, WindowCover,
 	},
 	control::{self, OperationToken},
 	error::{CoreResult, DesktopError},
@@ -25,7 +25,8 @@ use crate::desktop::{
 	keys::KeyName,
 	linux::ax::{self, AtSpiAx, AtSpiWindow, PointOutcome, TextRoute, resolve_focus},
 	types::{
-		CaptureCaps, DesktopCapabilities, DesktopDisplay, DesktopWindow, DisplaySelector, Target,
+		AxPointAction, CaptureCaps, DesktopCapabilities, DesktopDisplay, DesktopWindow, DisplaySelector,
+		Target,
 	},
 };
 
@@ -322,9 +323,13 @@ impl WaylandBackend {
 			return None;
 		}
 		let windows_stage = crate::desktop::stages::Stage::start("ax.windows");
-		let windows: Vec<DesktopWindow> = match self.atspi_windows() {
-			Ok(windows) => windows.into_iter().map(|entry| entry.window).collect(),
-			Err(error) => return Some(Err(error)),
+		let windows: Vec<DesktopWindow> = match self.single_window(id) {
+			Some(Ok(window)) => vec![window],
+			Some(Err(error)) => return Some(Err(error)),
+			None => match self.atspi_windows() {
+				Ok(windows) => windows.into_iter().map(|entry| entry.window).collect(),
+				Err(error) => return Some(Err(error)),
+			},
 		};
 		drop(windows_stage);
 		let Some(window) = windows.iter().find(|window| &window.id == id) else {
@@ -342,6 +347,37 @@ impl WaylandBackend {
 			PointerEvent::Scroll { x, y, dx, dy } => ax.scroll_at(window, x, y, dx, dy),
 			_ => return None,
 		})
+	}
+
+	/// The window `id` names, found without listing every application's
+	/// windows (Hyprland only): a Hyprland client, or an AT-SPI frame placed
+	/// where its process's client is ([`hyprland::client_for_frame`]). `None`
+	/// when that cannot tell, so the full listing decides.
+	fn single_window(&self, id: &str) -> Option<CoreResult<DesktopWindow>> {
+		let hyprland = self.hyprland.as_ref()?;
+		let clients = match hyprland.list() {
+			Ok(clients) => clients,
+			Err(error) => return Some(Err(error)),
+		};
+		if id.starts_with("hyprland:") {
+			return clients
+				.into_iter()
+				.find(|client| client.window.id == id)
+				.map(|client| Ok(client.window));
+		}
+		let mut window = match self.ax.as_ref()?.window_by_id(id) {
+			Ok(Some(entry)) => entry.window,
+			Ok(None) => return None,
+			Err(error) => return Some(Err(error)),
+		};
+		let client =
+			hyprland::client_for_frame(clients.iter().map(|client| &client.window), window.pid, &window.title)?;
+		window.x = client.x;
+		window.y = client.y;
+		window.width = client.width;
+		window.height = client.height;
+		window.focused = client.focused;
+		Some(Ok(window))
 	}
 }
 
@@ -449,6 +485,23 @@ impl Backend for WaylandBackend {
 
 	fn validate_frame_layout(&mut self, frame: &FrameGeometry) -> CoreResult<()> {
 		control::check()?;
+		// Hyprland reports its monitors over IPC in under a millisecond: while
+		// every display the last capture recorded is still a monitor with the
+		// same logical place and pixel size, the layout stands without a
+		// portal stream.
+		if let Some(hyprland) = &self.hyprland
+			&& !self.displays.is_empty()
+		{
+			let monitors = hyprland.monitors()?;
+			if self
+				.displays
+				.iter()
+				.all(|display| monitors.iter().any(|monitor| monitor.shows(display)))
+			{
+				return frame.validate_layout(&self.displays);
+			}
+		}
+		let _stage = crate::desktop::stages::Stage::start("frame.layout.portal");
 		// ScreenCast exposes geometry only when opening a stream. Enumeration can
 		// use the last snapshot, but coordinate delivery needs fresh bounds.
 		let geometry = capture::geometry(self.pipewire);
@@ -460,6 +513,51 @@ impl Backend for WaylandBackend {
 		})?;
 		self.displays = vec![geometry.display()];
 		frame.validate_layout(&self.displays)
+	}
+
+	fn find_window(&mut self, id: &str) -> Option<CoreResult<DesktopWindow>> {
+		self.single_window(id)
+	}
+
+	/// On Hyprland, the clients over the target: its screenshot is cut from
+	/// the screen, so their pixels stand in its place there.
+	fn window_covers(&mut self, target: &Target) -> CoreResult<Vec<WindowCover>> {
+		let (Some(hyprland), Target::Window(id)) = (&self.hyprland, target) else {
+			return Ok(Vec::new());
+		};
+		let clients = hyprland.list()?;
+		let own = if id.starts_with("hyprland:") {
+			clients.iter().find(|client| &client.window.id == id)
+		} else {
+			let Some(window) = self.single_window(id).transpose()? else {
+				return Ok(Vec::new());
+			};
+			clients.iter().find(|client| {
+				client.window.pid == window.pid
+					&& (client.window.x, client.window.y, client.window.width, client.window.height)
+						== (window.x, window.y, window.width, window.height)
+			})
+		};
+		let Some(own) = own else {
+			return Ok(Vec::new());
+		};
+		Ok(hyprland::covering(&clients, own)
+			.into_iter()
+			.filter_map(|(client, above)| {
+				let (x, y, width, height) = hyprland::overlap(&client.window, &own.window)?;
+				Some(WindowCover {
+					title: client.window.title.clone(),
+					app: client.window.app.clone(),
+					above,
+					x,
+					y,
+					width,
+					height,
+					of_width: own.window.width,
+					of_height: own.window.height,
+				})
+			})
+			.collect())
 	}
 
 	fn windows(&mut self) -> CoreResult<Vec<DesktopWindow>> {
@@ -549,27 +647,34 @@ impl Backend for WaylandBackend {
 		target: &Target,
 		ev: PointerEvent,
 		_frame: &FrameGeometry,
-		mode: DeliveryMode,
+		_mode: DeliveryMode,
 		token: &OperationToken,
 	) -> CoreResult<()> {
 		token.check()?;
-		let declined = match self.pointer_through_ax(target, &ev, mode) {
-			Some(Ok(PointOutcome::Done)) => return Ok(()),
-			Some(Ok(PointOutcome::Declined(why))) => Some(why),
-			Some(Err(error)) => return Err(error),
-			None => None,
-		};
-		self
-			.run_input(target, "pointer input", |input| input.pointer(ev))
-			.map_err(|mut error| {
-				if let Some(why) = declined {
-					error.message = format!(
-						"{}. Nothing was sent through accessibility either: {why}",
-						error.message
-					);
-				}
-				error
-			})
+		self.run_input(target, "pointer input", |input| input.pointer(ev))
+	}
+
+	fn point_action(
+		&mut self,
+		target: &Target,
+		ev: &PointerEvent,
+		mode: DeliveryMode,
+		token: &OperationToken,
+	) -> CoreResult<Option<AxPointAction>> {
+		token.check()?;
+		match self.pointer_through_ax(target, ev, mode) {
+			None => Ok(None),
+			Some(Ok(PointOutcome::Done(action))) => Ok(Some(action)),
+			Some(Ok(PointOutcome::Declined(why))) => {
+				let mut error = match Self::window_input_error(target, "pointer input") {
+					Err(error) => error,
+					Ok(()) => DesktopError::background_unavailable("Wayland pointer input"),
+				};
+				error.message = format!("{}. Nothing was sent through accessibility either: {why}", error.message);
+				Err(error)
+			},
+			Some(Err(error)) => Err(error),
+		}
 	}
 
 	fn type_text(

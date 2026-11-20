@@ -11,7 +11,7 @@ use super::{
 	menus::DesktopMenuItem,
 	text_range::TextSelectRequest,
 	types::{
-		AxTextSelection, CaptureCaps, DesktopCapabilities, DesktopDisplay, DesktopWindow,
+		AxPointAction, AxTextSelection, CaptureCaps, DesktopCapabilities, DesktopDisplay, DesktopWindow,
 		DisplaySelector, ScreenState, Target,
 	},
 };
@@ -170,6 +170,24 @@ pub enum ElementDelivery {
 	Unfocused(KeyboardFocus),
 }
 
+/// Another window over part of a window target, from the compositor's own
+/// window list; see [`Backend::window_covers`].
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct WindowCover {
+	pub title:     String,
+	pub app:       String,
+	/// Certainly above the target, rather than possibly.
+	pub above:     bool,
+	/// The covered part, in logical points from the target's origin.
+	pub x:         i32,
+	pub y:         i32,
+	pub width:     u32,
+	pub height:    u32,
+	/// The target's logical size, which its screenshot's pixels span.
+	pub of_width:  u32,
+	pub of_height: u32,
+}
+
 /// How a click is sent, as `win.click` and `el.click` ask for it.
 #[derive(Debug, Clone, Copy)]
 pub struct ClickOptions<'a> {
@@ -267,6 +285,17 @@ pub trait Backend: Send {
 	) -> CoreResult<Option<super::ax::WindowRoot>> {
 		Ok(None)
 	}
+	/// Window `id` as [`Self::windows`] lists it, found without listing every
+	/// window; `None` when the backend cannot, so the caller lists them.
+	fn find_window(&mut self, _id: &str) -> Option<CoreResult<DesktopWindow>> {
+		None
+	}
+	/// The other windows over part of window `target` on screen, for a backend
+	/// whose window screenshots are cut from the screen; empty when it cannot
+	/// tell or does not cut them.
+	fn window_covers(&mut self, _target: &Target) -> CoreResult<Vec<WindowCover>> {
+		Ok(Vec::new())
+	}
 	/// The process owning window `id`, found even when the window is off the
 	/// current Space, without listing every window.
 	#[cfg(target_os = "macos")]
@@ -358,6 +387,20 @@ pub trait Backend: Send {
 		_mode: DeliveryMode,
 		_token: &OperationToken,
 	) -> CoreResult<Option<AxTextSelection>> {
+		Ok(None)
+	}
+	/// A background window click or scroll `ev` carried out by the
+	/// accessibility element at its point instead of pointer input, where the
+	/// backend has that route (Wayland on Hyprland). `None` when `ev` is to be
+	/// sent through [`Self::pointer`]; an error, with nothing sent, when the
+	/// route declined it and no other route can send it.
+	fn point_action(
+		&mut self,
+		_target: &Target,
+		_ev: &PointerEvent,
+		_mode: DeliveryMode,
+		_token: &OperationToken,
+	) -> CoreResult<Option<AxPointAction>> {
 		Ok(None)
 	}
 	/// [`Self::pointer`] for a click that opens a menu, then chooses the item

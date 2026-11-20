@@ -10,14 +10,15 @@
 //! action would be a false success.
 
 use super::*;
-use crate::desktop::control;
+use crate::desktop::{control, types::AxPointAction};
 
 /// What a point action did.
 #[derive(Debug, PartialEq, Eq)]
 pub(crate) enum PointOutcome {
-	/// The action was sent and, where the element exposes the state it
-	/// changes, the change was read back.
-	Done,
+	/// The action was sent through accessibility, not as pointer input: which
+	/// element took it, how, and, where the element exposes the state it
+	/// changes, what that state read back.
+	Done(AxPointAction),
 	/// Nothing was sent; why.
 	Declined(String),
 }
@@ -110,6 +111,15 @@ fn took_effect(watched: State, role: Role, before: StateSet, after: StateSet) ->
 	};
 	let stays_on = matches!(role, Role::RadioButton | Role::RadioMenuItem) || watched == State::Selected;
 	on(before) != on(after) || (stays_on && on(after))
+}
+
+/// What `watched` reads in `after`, in the words a user would use.
+fn state_reading(watched: State, after: StateSet) -> String {
+	match watched {
+		State::Selected => "selected".to_owned(),
+		_ if after.contains(State::Checked) || after.contains(State::Pressed) => "checked".to_owned(),
+		_ => "unchecked".to_owned(),
+	}
 }
 
 /// Wheel detents along one axis as pixels: GTK's own wheel step for a
@@ -244,8 +254,11 @@ impl AtSpiAx {
 			let watched = watched_state(kind, target.role);
 			control::check()?;
 			let send_stage = crate::desktop::stages::Stage::start("click.send");
-			match (index, action, kind) {
+			let (route, action_name) = match (index, action, kind) {
 				(Some(index), Some(action), _) => {
+					let name = answered("the application", reply_timeout, action.get_name(index))
+						.await?
+						.unwrap_or_default();
 					let sent = answered("the application", reply_timeout, action.do_action(index))
 						.await?
 						.map_err(|err| DesktopError::ax_failed(format!("AT-SPI action: {err}")))?;
@@ -255,6 +268,7 @@ impl AtSpiAx {
 							target.describe()
 						)));
 					}
+					("action", Some(name))
 				},
 				(_, _, ClickKind::Row) => {
 					let parent = answered("the application", reply_timeout, target.accessible.parent())
@@ -279,6 +293,7 @@ impl AtSpiAx {
 							target.describe()
 						)));
 					}
+					("select", None)
 				},
 				_ => {
 					return Ok(PointOutcome::Declined(format!(
@@ -286,9 +301,17 @@ impl AtSpiAx {
 						target.describe()
 					)));
 				},
-			}
+			};
+			let done = |reads: Option<String>| {
+				PointOutcome::Done(AxPointAction {
+					element: target.describe(),
+					route: route.to_owned(),
+					action: action_name.clone(),
+					reads,
+				})
+			};
 			let Some(watched) = watched else {
-				return Ok(PointOutcome::Done);
+				return Ok(done(None));
 			};
 			drop(send_stage);
 			let _readback = crate::desktop::stages::Stage::start("click.readback");
@@ -297,8 +320,10 @@ impl AtSpiAx {
 				let after = answered("the application", reply_timeout, target.accessible.get_state())
 					.await?
 					.ok();
-				if after.is_some_and(|after| took_effect(watched, target.role, target.states, after)) {
-					return Ok(PointOutcome::Done);
+				if let Some(after) = after
+					&& took_effect(watched, target.role, target.states, after)
+				{
+					return Ok(done(Some(state_reading(watched, after))));
 				}
 				if tokio::time::Instant::now() >= deadline {
 					return Err(DesktopError::ax_unconfirmed(format!(
@@ -330,7 +355,9 @@ impl AtSpiAx {
 		let (vertical, detents) = match (dx == 0.0, dy == 0.0) {
 			(true, false) => (true, dy),
 			(false, true) => (false, dx),
-			(true, true) => return Ok(PointOutcome::Done),
+			(true, true) => {
+				return Ok(PointOutcome::Declined("a scroll of zero detents has nothing to move".to_owned()));
+			},
 			(false, false) => {
 				return Ok(PointOutcome::Declined(
 					"a diagonal scroll has no accessibility route; scroll one axis at a time".to_owned(),
@@ -473,9 +500,18 @@ async fn scroll_bar_route(
 		};
 		let page = f64::from(if vertical { page_height } else { page_width });
 		let target = (before + detent_pixels(page, detents)).clamp(min, max);
+		let axis = if vertical { "vertical" } else { "horizontal" };
+		let done = |reads: String| async move {
+			Some(PointOutcome::Done(AxPointAction {
+				element: described(accessible, reply_timeout).await,
+				route: "scrollBar".to_owned(),
+				action: None,
+				reads: Some(reads),
+			}))
+		};
 		if target == before {
 			// At the end already, where a wheel does nothing either.
-			return Ok(Some(PointOutcome::Done));
+			return Ok(done(format!("its {axis} scroll bar is at its end ({before}); nothing moved")).await);
 		}
 		control::check()?;
 		answered("the application", reply_timeout, value.set_current_value(target))
@@ -487,7 +523,7 @@ async fn scroll_bar_route(
 				.await?
 				.unwrap_or(before);
 			if now != before {
-				return Ok(Some(PointOutcome::Done));
+				return Ok(done(format!("its {axis} scroll bar moved from {before} to {now}")).await);
 			}
 			if tokio::time::Instant::now() >= deadline {
 				return Err(DesktopError::ax_unconfirmed(format!(
@@ -558,8 +594,16 @@ async fn scroll_to_route(
 	else {
 		return Ok(None);
 	};
+	let done = |reads: String| async move {
+		Some(PointOutcome::Done(AxPointAction {
+			element: described(accessible, reply_timeout).await,
+			route: "scrollTo".to_owned(),
+			action: None,
+			reads: Some(reads),
+		}))
+	};
 	if before == start {
-		return Ok(Some(PointOutcome::Done));
+		return Ok(done("the list is at its end; nothing moved".to_owned()).await);
 	}
 	let component = AtSpiAx::component(connection, &target).await.map_err(failed)?;
 	let edge_type = if vertical { atspi::ScrollType::TopEdge } else { atspi::ScrollType::LeftEdge };
@@ -569,11 +613,14 @@ async fn scroll_to_route(
 		.map_err(|err| failed(err.to_string()))?;
 	let deadline = tokio::time::Instant::now() + VALUE_SETTLE;
 	loop {
-		let moved = answered("the application", reply_timeout, component.get_extents(CoordType::Window))
+		let after = answered("the application", reply_timeout, component.get_extents(CoordType::Window))
 			.await?
-			.is_ok_and(|(x, y, ..)| (if vertical { y } else { x }) != before);
-		if moved {
-			return Ok(Some(PointOutcome::Done));
+			.ok()
+			.map(|(x, y, ..)| if vertical { y } else { x });
+		if let Some(after) = after
+			&& after != before
+		{
+			return Ok(done(format!("the list moved {} px", before - after)).await);
 		}
 		if tokio::time::Instant::now() >= deadline {
 			return Err(DesktopError::ax_unconfirmed(
@@ -582,6 +629,19 @@ async fn scroll_to_route(
 			));
 		}
 		tokio::time::sleep(Duration::from_millis(25)).await;
+	}
+}
+
+/// An element as `role 'name'`, for reports; `an element` when it does not
+/// answer.
+async fn described(accessible: &AccessibleProxy<'_>, reply_timeout: Duration) -> String {
+	let Ok(Ok(role)) = answered("the application", reply_timeout, accessible.get_role()).await else {
+		return "an element".to_owned();
+	};
+	let role = normalize_role_atspi(role.name(), false);
+	match answered("the application", reply_timeout, accessible.name()).await {
+		Ok(Ok(name)) if !name.is_empty() => format!("{role} '{name}'"),
+		_ => role,
 	}
 }
 
@@ -672,5 +732,23 @@ mod tests {
 	fn a_detent_is_the_gtk_wheel_step_of_the_viewport() {
 		assert!((detent_pixels(300.0, 1.0) - 44.81).abs() < 0.01);
 		assert!((detent_pixels(300.0, -2.0) + 89.63).abs() < 0.01);
+	}
+
+	#[test]
+	fn a_checked_toggle_reads_checked_and_a_row_reads_selected() {
+		let on = StateSet::new(State::Enabled) | StateSet::new(State::Checked);
+		assert_eq!(state_reading(State::Checked, on), "checked");
+		assert_eq!(state_reading(State::Checked, StateSet::new(State::Pressed)), "checked");
+		assert_eq!(state_reading(State::Checked, StateSet::new(State::Enabled)), "unchecked");
+		assert_eq!(state_reading(State::Selected, StateSet::new(State::Selected)), "selected");
+	}
+
+	#[test]
+	fn a_window_id_names_its_frame_and_nothing_else_does() {
+		let frame = frame_for_window_id("atspi::1.23:/org/a11y/atspi/accessible/1").unwrap();
+		assert_eq!(frame.name_as_str(), Some(":1.23"));
+		assert_eq!(frame.path_as_str(), "/org/a11y/atspi/accessible/1");
+		assert!(frame_for_window_id("hyprland:0x55f6").is_none());
+		assert!(frame_for_window_id("atspi:nobus").is_none());
 	}
 }

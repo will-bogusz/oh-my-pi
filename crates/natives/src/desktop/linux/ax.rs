@@ -505,6 +505,73 @@ impl AtSpiAx {
 		Ok(windows)
 	}
 
+	/// The window an `atspi:` id names, read from its frame alone instead of
+	/// listing every application's windows; fields as [`Self::windows`] fills
+	/// them. `None` when the id is not an `atspi:` one, or its frame is gone
+	/// or is not a top-level window.
+	pub(crate) fn window_by_id(&self, id: &str) -> CoreResult<Option<AtSpiWindow>> {
+		let Some(frame) = frame_for_window_id(id) else {
+			return Ok(None);
+		};
+		self.run(async {
+			let Ok(frame_proxy) = self.reply(frame.as_accessible_proxy(&self.connection)).await? else {
+				return Ok(None);
+			};
+			if !self
+				.reply(frame_proxy.get_role())
+				.await?
+				.is_ok_and(|role| top_level_role(role, true))
+			{
+				return Ok(None);
+			}
+			let title = self.reply(frame_proxy.name()).await?.unwrap_or_default();
+			let state = self.reply(frame_proxy.get_state()).await?.ok();
+			let app_name = match self.reply(frame_proxy.get_application()).await? {
+				Ok(app) => match self.reply(app.as_accessible_proxy(&self.connection)).await? {
+					Ok(app) => self.reply(app.name()).await?.unwrap_or_default(),
+					Err(_) => String::new(),
+				},
+				Err(_) => String::new(),
+			};
+			let pid = match (frame.name(), self.reply(atspi::zbus::fdo::DBusProxy::new(&self.connection)).await?) {
+				(Some(bus_name), Ok(dbus)) => self
+					.reply(dbus.get_connection_unix_process_id(bus_name.clone().into()))
+					.await?
+					.ok(),
+				_ => None,
+			};
+			let Ok(component) = self.reply(Self::component(&self.connection, &frame)).await? else {
+				return Ok(None);
+			};
+			let Ok((x, y, width, height)) = self.reply(component.get_extents(CoordType::Screen)).await? else {
+				return Ok(None);
+			};
+			if width < 16 || height < 16 {
+				return Ok(None);
+			}
+			let position_known = self
+				.reply(component.get_extents(CoordType::Window))
+				.await?
+				.is_ok_and(|(window_x, window_y, ..)| (window_x, window_y) != (x, y));
+			Ok(Some(AtSpiWindow {
+				window: DesktopWindow {
+					id: id.to_owned(),
+					title,
+					app: app_name,
+					pid,
+					x,
+					y,
+					width: width as u32,
+					height: height as u32,
+					focused: state.as_ref().is_some_and(|states| {
+						states.contains(State::Focused) || states.contains(State::Active)
+					}),
+				},
+				position_known,
+			}))
+		})?
+	}
+
 	async fn apps(connection: &Connection) -> Result<Vec<ObjectRefOwned>, String> {
 		// The registry implements too little of the D-Bus properties interface
 		// to cache its properties.
@@ -1424,6 +1491,14 @@ async fn native_window(
 fn atspi_window_id(frame: &ObjectRefOwned) -> String {
 	let name = frame.name().map_or_default(ToString::to_string);
 	format!("atspi:{name}:{}", frame.path())
+}
+
+/// The frame an `atspi:{bus name}:{object path}` window id names.
+fn frame_for_window_id(id: &str) -> Option<ObjectRefOwned> {
+	let (name, path) = id.strip_prefix("atspi:")?.rsplit_once(":/")?;
+	let name = UniqueName::try_from(name.to_owned()).ok()?;
+	let path = atspi::zbus::zvariant::ObjectPath::try_from(format!("/{path}")).ok()?;
+	Some(atspi::ObjectRef::new_owned(name, path))
 }
 
 /// How long a numeric write's read-back waits for the value to arrive, for

@@ -12,6 +12,7 @@ import type {
 	DesktopControlState,
 	HoldOptions as NativeHoldOptions,
 	AxNode,
+	AxPointAction,
 	AxQuery,
 	AxSelectTextOptions,
 	AxSnapshotOptions,
@@ -19,11 +20,13 @@ import type {
 	CaptureRegion,
 	DesktopCapabilities,
 	DesktopCapture,
+	DesktopCover,
 	DesktopDisplay,
 	DesktopDragResult,
 	DesktopFocusReturn,
 	DesktopKeyboardReturn,
 	DesktopPoint,
+	DesktopPointerResult,
 	DesktopScreenState,
 	DesktopSessionOptions,
 	DesktopTypeResult,
@@ -70,6 +73,8 @@ import { describeWindowMiss, matchesWindowApp } from "./window-miss";
 type InputCall = Promise<DesktopFocusReturn | null | void>;
 /** A native typing call; resolves to whether its text was confirmed and its takeover focus report. */
 type TypeCall = Promise<DesktopTypeResult | null | void>;
+/** A native click or scroll; resolves to what went through accessibility, or its takeover focus report. */
+type PointerCall = Promise<DesktopPointerResult | null | void>;
 
 /** Native desktop operations consumed by the script runtime. */
 export interface NativeDesktopSession {
@@ -109,10 +114,10 @@ export interface NativeDesktopSession {
 	releaseControl(): void;
 	controlState(): DesktopControlState;
 	bringToCurrentSpace(windowId: string): Promise<void>;
-	click(target: string, x: number, y: number, opts?: PointerOptions | null): InputCall;
+	click(target: string, x: number, y: number, opts?: PointerOptions | null): PointerCall;
 	moveMouse(target: string, x: number, y: number, opts?: PointerOptions | null): InputCall;
 	drag(target: string, points: DesktopPoint[], opts?: PointerOptions | null): Promise<DesktopDragResult | null | void>;
-	scroll(target: string, x: number, y: number, dx: number, dy: number, opts?: PointerOptions | null): InputCall;
+	scroll(target: string, x: number, y: number, dx: number, dy: number, opts?: PointerOptions | null): PointerCall;
 	typeText(target: string, text: string, opts?: PointerOptions | null): TypeCall;
 	keyChord(target: string, keys: string[], opts?: PointerOptions | null): InputCall;
 	raiseWindow(windowId: string): Promise<void>;
@@ -154,7 +159,7 @@ type InputOptions = { takeover?: boolean };
 type ScreenshotOptions = { silent?: boolean };
 type ScreenshotResult = Pick<
 	ComputerScreenshot,
-	"path" | "width" | "height" | "coordinateWidth" | "coordinateHeight" | "region" | "screenLocked"
+	"path" | "width" | "height" | "coordinateWidth" | "coordinateHeight" | "region" | "screenLocked" | "coveredBy"
 >;
 type MenuOptions = { menu?: string[] };
 type ClickOptions = InputOptions & MenuOptions & { button?: string; count?: number; modifiers?: string[] };
@@ -702,6 +707,55 @@ async function sendType(
 }
 
 /**
+ * The note after a click or scroll that went through the accessibility
+ * element at its point (Wayland on Hyprland): no pointer event was sent, so
+ * it names the element and route, and what the element read afterwards, or
+ * that it exposes nothing to confirm the effect by.
+ */
+function accessibilityNote(method: string, action: AxPointAction): string {
+	const how =
+		action.route === "action"
+			? `ran the "${action.action ?? ""}" accessibility action of ${action.element}`
+			: action.route === "select"
+				? `selected ${action.element} in its list through accessibility`
+				: action.route === "scrollBar"
+					? `set the scroll bar value of ${action.element} through accessibility`
+					: `asked ${action.element} to scroll a row into place through accessibility`;
+	const scrolled = action.route === "scrollBar" || action.route === "scrollTo";
+	const outcome = action.reads
+		? scrolled
+			? `; ${action.reads}`
+			: `; it now reads ${action.reads}`
+		: "; it exposes no state, so the effect is not confirmed";
+	return `${method} was not sent as pointer input: it ${how}${outcome}`;
+}
+
+/** Sends a click or scroll; one that went through accessibility instead of pointer input is noted in the output. */
+async function sendPointer(
+	session: NativeDesktopSession,
+	context: ComputerRunContext,
+	method: string,
+	takeover: boolean | undefined,
+	send: (fallback?: Fallback) => PointerCall,
+	target?: number,
+): Promise<void> {
+	let action: AxPointAction | undefined;
+	await sendInput(
+		session,
+		context,
+		method,
+		takeover,
+		async fallback => {
+			const result = await send(fallback);
+			action = result?.accessibility ?? undefined;
+			return result?.focusReturn;
+		},
+		target,
+	);
+	if (action) context.output.push({ type: "text", text: accessibilityNote(method, action) });
+}
+
+/**
  * Sends one window input call. A model-supplied `takeover: true` is refused
  * under `computer.backgroundFallback: "refuse"`. When the background route
  * throws `BackgroundUnavailable`, which native raises only before any of the
@@ -796,6 +850,22 @@ async function captureScreenshot(
 	return await emitScreenshot(context, frame, options);
 }
 
+/**
+ * The note for a window screenshot that other windows cover in part: it is
+ * cut from the screen (Wayland), so their pixels stand in the target's there.
+ */
+function coverNote(covers: DesktopCover[]): string | undefined {
+	if (covers.length === 0) return undefined;
+	const parts = covers.map(
+		cover =>
+			`"${cover.title}" (${cover.app}) ${cover.above ? "covers" : "may cover"} x=${cover.x} y=${cover.y} ${cover.width}×${cover.height}`,
+	);
+	const unsure = covers.some(cover => !cover.above)
+		? ' ("may cover": the compositor does not say which of two floating windows is on top)'
+		: "";
+	return `this window screenshot is cut from the screen, and other windows lie over part of it: ${parts.join("; ")}${unsure}. Those pixels show the other window, not this one; a click there still goes to this window.`;
+}
+
 async function emitScreenshot(
 	context: ComputerRunContext,
 	frame: DesktopCapture,
@@ -813,6 +883,7 @@ async function emitScreenshot(
 		...(frame.region ? { region: frame.region } : {}),
 	};
 	if (frame.screenLocked) result.screenLocked = true;
+	if (frame.coveredBy.length > 0) result.coveredBy = frame.coveredBy;
 	const scaled = frame.width !== frame.sourceWidth || frame.height !== frame.sourceHeight;
 	context.screenshots.push({
 		...result,
@@ -828,7 +899,9 @@ async function emitScreenshot(
 			: `screenshot ${frame.target} ${dimensions}; ${coordinates} → ${destination}`;
 		context.output.push({
 			type: "text",
-			text: frame.screenLocked ? `${captured}\n${screenLockedCaptureNotice()}` : captured,
+			text: [captured, frame.screenLocked ? screenLockedCaptureNotice() : undefined, coverNote(frame.coveredBy)]
+				.filter(Boolean)
+				.join("\n"),
 		});
 		context.output.push({
 			type: "image",
@@ -1321,7 +1394,7 @@ class Win extends WindowAccess {
 		const native = pointerOptions(options);
 		refusePointerMenu(this.#session, context, "click", native, `window ${this.id}`);
 		refuseMenuPress(this.#session, context, native);
-		await sendInput(
+		await sendPointer(
 			this.#session,
 			context,
 			"click",
@@ -1337,7 +1410,7 @@ class Win extends WindowAccess {
 		const native = { ...pointerOptions(options), count: 2 };
 		refusePointerMenu(this.#session, context, "doubleClick", native, `window ${this.id}`);
 		refuseMenuPress(this.#session, context, native);
-		await sendInput(
+		await sendPointer(
 			this.#session,
 			context,
 			"doubleClick",
@@ -1415,7 +1488,7 @@ class Win extends WindowAccess {
 		const dx = options.dx ?? 0;
 		const dy = options.dy ?? 0;
 		const native = pointerOptions(options);
-		await sendInput(
+		await sendPointer(
 			this.#session,
 			context,
 			"scroll",

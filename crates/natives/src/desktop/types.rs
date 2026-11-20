@@ -43,6 +43,25 @@ pub struct DesktopWindow {
 	pub focused: bool,
 }
 
+/// Another window over part of a window screenshot. A Wayland window
+/// screenshot is cut from the screen, so where another window covers the
+/// target its pixels are that window's.
+#[napi(object)]
+#[derive(Debug, Clone)]
+pub struct DesktopCover {
+	pub title:  String,
+	pub app:    String,
+	/// Certainly above the target (a floating, pinned or fullscreen window
+	/// over a tiled one); otherwise it may be above or below it, which the
+	/// compositor does not say.
+	pub above:  bool,
+	/// The covered part, in this screenshot's pixels.
+	pub x:      u32,
+	pub y:      u32,
+	pub width:  u32,
+	pub height: u32,
+}
+
 #[napi(object)]
 pub struct DesktopCapture {
 	pub data:              Uint8Array,
@@ -67,6 +86,10 @@ pub struct DesktopCapture {
 	/// a display capture shows the lock screen and a window capture its last
 	/// frame. Windows also detects disconnected sessions and secure desktops.
 	pub screen_locked:     bool,
+	/// Other windows over part of a window screenshot, where the backend cuts
+	/// window screenshots from the screen and knows its windows' stacking
+	/// (Wayland on Hyprland); empty otherwise, and for zoom regions.
+	pub covered_by:        Vec<DesktopCover>,
 }
 
 #[napi(object)]
@@ -287,6 +310,39 @@ pub struct DesktopDragResult {
 	/// Where focus ended when the drag ran in takeover; see
 	/// [`DesktopFocusReturn`].
 	pub focus_return: Option<DesktopFocusReturn>,
+}
+
+/// What a background window click or scroll did through accessibility
+/// instead of pointer input (Wayland on Hyprland): the element under the
+/// point carried it out, and no pointer event was sent.
+#[napi(object)]
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct AxPointAction {
+	/// The element that took it, as `role 'name'`.
+	pub element: String,
+	/// How: `action` (the element's own accessibility action), `select`
+	/// (selected in its list), `scrollBar` (a scroll bar's value set),
+	/// `scrollTo` (a row brought to the list's edge).
+	pub route:   String,
+	/// The action's name, for the `action` route.
+	pub action:  Option<String>,
+	/// What the element read afterwards (`checked`, `unchecked`, `selected`,
+	/// how far the list moved); absent when it exposes no state to read, so
+	/// the effect is unconfirmed.
+	pub reads:   Option<String>,
+}
+
+/// What a click or scroll call did: carried out through accessibility, or
+/// posted as input.
+#[napi(object)]
+#[derive(Debug, Clone)]
+pub struct DesktopPointerResult {
+	/// Set when the call went through the element under the point instead of
+	/// pointer input; see [`AxPointAction`].
+	pub accessibility: Option<AxPointAction>,
+	/// Where focus ended when the call ran in takeover; see
+	/// [`DesktopFocusReturn`].
+	pub focus_return:  Option<DesktopFocusReturn>,
 }
 
 /// What a typing call did.
