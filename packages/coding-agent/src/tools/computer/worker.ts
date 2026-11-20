@@ -621,7 +621,7 @@ function refuseMenuPress(
  * `lastInputPolled`).
  */
 const LAST_INPUT_POLLED =
-	"omp watched for the user's input through Windows' last input time: this process already has a Raw Input receiver of its own, which omp left in place, or its receivers could not be listed; omp could not tell input apart, so any input counted";
+	"omp watched Windows' last-input timestamp because this process already had a Raw Input receiver or its registrations could not be listed; changes are unattributed and can include pointer movement or injected input; OMP's own-send windows are excluded and can hide coincident user input";
 
 /** Native's `refuseMenu` refusal; its first group is the press, as `refuseMenu`'s `call`. */
 const MENU_CONTROL_REFUSAL =

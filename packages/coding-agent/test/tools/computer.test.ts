@@ -5830,8 +5830,9 @@ describe("computer background fallback", () => {
 		expect(notice(await run(front, clickTarget, "takeover"))).toContain("not confirmed");
 	});
 
-	it("says when a Windows takeover watched the last input time instead of the user's presses", async () => {
-		const polled = "omp watched for the user's input through Windows' last input time";
+	it("reports unattributed Windows polling and its own-send exclusion instead of user presses", async () => {
+		const polled =
+			"omp watched Windows' last-input timestamp because this process already had a Raw Input receiver or its registrations could not be listed; changes are unattributed and can include pointer movement or injected input; OMP's own-send windows are excluded and can hide coincident user input";
 		const explicit = 'await (await desktop.window("42")).click(1, 2, { takeover: true })';
 		const native = new RefusingSession();
 		native.report = { handedBack: true, previousPid: 300, frontPid: 300, lastInputPolled: true };

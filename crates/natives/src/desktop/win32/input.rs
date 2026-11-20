@@ -1140,9 +1140,28 @@ mod foreground {
 		}
 	}
 
+	/// A failed packet retains the accepted prefix for text progress accounting.
+	#[derive(Debug)]
+	struct SendFailure {
+		sent:  usize,
+		error: DesktopError,
+	}
+
+	impl From<DesktopError> for SendFailure {
+		fn from(error: DesktopError) -> Self {
+			Self { sent: 0, error }
+		}
+	}
+
+	impl From<SendFailure> for DesktopError {
+		fn from(failure: SendFailure) -> Self {
+			failure.error
+		}
+	}
+
 	/// Every delivery batch rechecks the exact HWND so user focus changes or
 	/// newly opened sibling/modal windows never become silent input targets.
-	fn send_to(target: HWND, events: &[INPUT]) -> CoreResult<()> {
+	fn send_to(target: HWND, events: &[INPUT]) -> Result<(), SendFailure> {
 		control::check()?;
 		ensure_foreground(target)?;
 		send(events)
@@ -1228,7 +1247,7 @@ mod foreground {
 		settle().map_err(|error| (true, error))
 	}
 
-	fn send(events: &[INPUT]) -> CoreResult<()> {
+	fn send(events: &[INPUT]) -> Result<(), SendFailure> {
 		control::check()?;
 		if events.is_empty() {
 			return Ok(());
@@ -1267,6 +1286,7 @@ mod foreground {
 				))),
 				cleanup,
 			)
+			.map_err(|error| SendFailure { sent: sent as usize, error })
 		}
 	}
 
@@ -1358,7 +1378,7 @@ mod foreground {
 	/// it. Enigo's Windows absolute move normalizes only to the primary display;
 	/// use the same virtual-desktop packet as window takeover on every monitor.
 	pub(super) fn move_pointer(x: f64, y: f64) -> CoreResult<()> {
-		send(&[move_event(x, y)?])
+		send(&[move_event(x, y)?]).map_err(Into::into)
 	}
 
 	/// Absolute move to a physical desktop coordinate across the virtual
@@ -1445,6 +1465,7 @@ mod foreground {
 				with_modifiers(target, modifiers, || {
 					(0..count).try_for_each(|_| {
 						send_to(target, &[at, mouse_event(down, 0), mouse_event(up, 0)])
+							.map_err(Into::into)
 					})
 				})
 			},
@@ -1454,11 +1475,11 @@ mod foreground {
 				with_keys(Some(target), &keys, || {
 					send_to(target, &[at, mouse_event(down, 0)])?;
 					let held = hold(duration, control::wait);
-					let released = control::cleanup(|| send(&[mouse_event(up, 0)]));
+					let released = control::cleanup(|| send(&[mouse_event(up, 0)]).map_err(Into::into));
 					super::completed(held, released)
 				})
 			},
-			PointerEvent::Move { x, y } => send_to(target, &[move_event(x, y)?]),
+			PointerEvent::Move { x, y } => send_to(target, &[move_event(x, y)?]).map_err(Into::into),
 			PointerEvent::Drag { path, button, modifiers, mut keys } => {
 				control::add_modifiers(&mut keys, modifiers);
 				let Some(&(x, y)) = path.first() else {
@@ -1470,11 +1491,11 @@ mod foreground {
 					send_to(target, &[start, mouse_event(down, 0)])?;
 					let movement = path.iter().skip(1).try_for_each(|&(x, y)| {
 						control::wait(DRAG_STEP)?;
-						send_to(target, &[move_event(x, y)?])
+						send_to(target, &[move_event(x, y)?]).map_err(Into::into)
 					});
 					// Releases must still reach the system input state when
 					// focus changed or the operation was cancelled during a drag.
-					let release = control::cleanup(|| send(&[mouse_event(up, 0)]));
+					let release = control::cleanup(|| send(&[mouse_event(up, 0)]).map_err(Into::into));
 					super::completed(movement, release)
 				})
 			},
@@ -1558,7 +1579,8 @@ mod foreground {
 			let mut released = Ok(());
 			// Releases are the reverse of presses; skip the uninserted suffix.
 			for release in &releases[releases.len() - held..] {
-				released = super::completed(released, send(std::slice::from_ref(release)));
+				released =
+					super::completed(released, send(std::slice::from_ref(release)).map_err(Into::into));
 			}
 			released
 		});
@@ -1683,7 +1705,9 @@ mod foreground {
 	/// Bounded packets preserve short-send accounting without constructing an
 	/// uninterruptible `SendInput` batch proportional to the entire text.
 	pub(super) fn type_desktop(text: &str) -> CoreResult<()> {
-		send_graphemes(text, super::keyboard_layout(None), send).map_err(|(_, error)| error)
+		send_graphemes(text, super::keyboard_layout(None), send)
+			.map(|_| ())
+			.map_err(|(_, error)| error)
 	}
 
 	/// How far typing got before it stopped: graphemes sent whole, and whether
@@ -1696,25 +1720,27 @@ mod foreground {
 	fn send_graphemes(
 		text: &str,
 		layout: super::HKL,
-		mut send: impl FnMut(&[INPUT]) -> CoreResult<()>,
-	) -> Result<(), (Typed, DesktopError)> {
+		mut send: impl FnMut(&[INPUT]) -> Result<(), SendFailure>,
+	) -> Result<usize, (Typed, DesktopError)> {
 		let mut events = [unicode_event(0, false); 4];
-		for (typed, grapheme) in graphemes_str(text).enumerate() {
+		let mut typed = 0;
+		for grapheme in graphemes_str(text) {
 			control::check().map_err(|error| ((typed, false), error))?;
 			for (unit, char) in text_units(grapheme).enumerate() {
 				send(text_events(char, &mut events, layout))
-					.map_err(|error| ((typed, unit > 0), error))?;
+					.map_err(|failure| ((typed, unit > 0 || failure.sent != 0), failure.error))?;
 			}
+			typed += 1;
 		}
 		// Every unit is out: a cancel now stops the next call.
-		Ok(())
+		Ok(typed)
 	}
 
 	/// The user's press that stopped typing `total` characters into `name`
 	/// once `typed` had gone out, saying how much went and that the rest was
 	/// dropped; any other failure passes through.
 	fn stopped_typing(
-		error: DesktopError,
+		mut error: DesktopError,
 		(typed, part): Typed,
 		total: usize,
 		name: &str,
@@ -1741,10 +1767,13 @@ mod foreground {
 				 so some may have reached the window in front"
 			)
 		};
-		activity::noted(DesktopError::user_intervened(format!(
-			"the user pressed a key or clicked during this takeover{what}; nothing more was sent; {}",
-			activity::READ_AGAIN
-		)))
+		error.message = format!(
+			"{}{what}; nothing more was sent; {}; {}",
+			activity::interruption(),
+			activity::READ_AGAIN,
+			error.message,
+		);
+		error
 	}
 
 	/// Waits until the thread that owns `root`'s focused control has read
@@ -1871,18 +1900,34 @@ mod foreground {
 			return Ok(());
 		}
 		let name = format!("window {id}");
-		let total = graphemes_str(text).count();
+		let mut typed = None;
 		let mut unread = None;
 		let result = ForegroundGuard::activate(id, KEY_SETTLE)?.run(|target| {
 			focus()?;
-			send_graphemes(text, super::keyboard_layout(Some(target)), |events| {
+			let total = match send_graphemes(text, super::keyboard_layout(Some(target)), |events| {
 				send_to(target, events)
-			})
-			.map_err(|(typed, error)| stopped_typing(error, typed, total, &name))?;
+			}) {
+				Ok(total) => total,
+				Err((progress, error)) => {
+					typed = Some(progress);
+					return Err(error);
+				},
+			};
+			typed = Some((total, false));
 			let closing_return = text.ends_with(['\r', '\n']);
-			unread = drain(target, &name, closing_return)
-				.map_err(|error| stopped_typing(error, (total, false), total, &name))?;
+			unread = drain(target, &name, closing_return)?;
+			// A later press retains the generic post-drain outcome.
+			typed = None;
 			Ok(())
+		});
+		// Settle or hand-back can observe the press after a short packet failed.
+		// Preserve that packet's error and attach progress only after
+		// composition.
+		let result = result.map_err(|error| match typed {
+			Some(typed) if error.code == ErrorCode::UserIntervened => {
+				stopped_typing(error, typed, graphemes_str(text).count(), &name)
+			},
+			_ => error,
 		});
 		match (result, unread) {
 			(Ok(()), Some(reason)) => {
@@ -1939,7 +1984,7 @@ mod foreground {
 			let (typed, error) = send_graphemes("abcde", std::ptr::null_mut(), |_| {
 				packets += 1;
 				if packets == 3 {
-					Err(DesktopError::user_intervened("pressed"))
+					Err(DesktopError::user_intervened("pressed").into())
 				} else {
 					Ok(())
 				}
@@ -1961,7 +2006,7 @@ mod foreground {
 			let (typed, error) = send_graphemes("e\u{301}x", std::ptr::null_mut(), |_| {
 				packets += 1;
 				if packets == 2 {
-					Err(DesktopError::user_intervened("pressed"))
+					Err(DesktopError::user_intervened("pressed").into())
 				} else {
 					Ok(())
 				}
@@ -2000,6 +2045,36 @@ mod foreground {
 				(error.code, error.message.as_str()),
 				(ErrorCode::InputFailed, "foreground left")
 			);
+
+			// Windows accepts the next packet's first event, then a press is
+			// observed while the guard settles or hands the foreground back.
+			let mut packets = 0;
+			let (typed, short) = send_graphemes("abc", std::ptr::null_mut(), |_| {
+				packets += 1;
+				if packets == 2 {
+					Err(SendFailure {
+						sent:  1,
+						error: DesktopError::input_failed("short packet; release also failed"),
+					})
+				} else {
+					Ok(())
+				}
+			})
+			.unwrap_err();
+			assert_eq!((typed, packets), ((1, true), 2));
+			let error = activity::with_press_for_test(|| {
+				let error = activity::outcome(Err(short)).unwrap_err();
+				stopped_typing(error, typed, 3, "window 7")
+			});
+			assert_eq!(error.code, ErrorCode::UserIntervened);
+			for said in [
+				"1 of the 3 characters and part of the next",
+				"the rest were dropped and will not be sent",
+				"some of it may have reached the window in front",
+				"short packet; release also failed",
+			] {
+				assert!(error.message.contains(said), "{said:?} in {}", error.message);
+			}
 		}
 
 		#[test]
@@ -2087,10 +2162,16 @@ mod foreground {
 			source.cancel();
 			control::with_token_for_test(&token, || {
 				let cancelled = token.check().unwrap_err().message;
-				assert_eq!(send(&[]).unwrap_err().message, cancelled);
-				assert_eq!(send_to(std::ptr::null_mut(), &[]).unwrap_err().message, cancelled);
+				assert_eq!(send(&[]).unwrap_err().error.message, cancelled);
+				assert_eq!(
+					send_to(std::ptr::null_mut(), &[])
+						.unwrap_err()
+						.error
+						.message,
+					cancelled
+				);
 				control::cleanup(|| assert!(send(&[]).is_ok()));
-				assert_eq!(send(&[]).unwrap_err().message, cancelled);
+				assert_eq!(send(&[]).unwrap_err().error.message, cancelled);
 			});
 			control::with_token_for_test(&source.token(), || assert!(send(&[]).is_ok()));
 		}

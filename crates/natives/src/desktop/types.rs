@@ -252,10 +252,11 @@ pub struct DesktopFocusReturn {
 	/// What a macOS takeover did with the user's keyboard; absent elsewhere and
 	/// when it did not reach the hand-back.
 	pub keyboard:          Option<DesktopKeyboardReturn>,
-	/// True when a Windows takeover watched the session's last input time,
-	/// where a pointer move counts as the user's too, instead of their key and
-	/// button presses: the process already had its own Raw Input receiver,
-	/// which is left in place. Absent otherwise.
+	/// True when a Windows takeover polled unattributed last-input changes
+	/// because Raw Input registrations existed or could not be listed.
+	/// Changes can include pointer moves or injected input. OMP's own-send
+	/// windows are excluded and can hide coincident user input. Absent
+	/// otherwise.
 	pub last_input_polled: Option<bool>,
 }
 
