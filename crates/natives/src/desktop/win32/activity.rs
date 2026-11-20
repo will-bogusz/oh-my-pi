@@ -914,10 +914,9 @@ mod tests {
 			let mut count = 0;
 			let size = size_of::<RAWINPUTDEVICE>() as u32;
 			// SAFETY: null buffer queries the required count.
-			assert_eq!(
-				unsafe { GetRegisteredRawInputDevices(std::ptr::null_mut(), &raw mut count, size) },
-				0
-			);
+			let queried =
+				unsafe { GetRegisteredRawInputDevices(std::ptr::null_mut(), &raw mut count, size) };
+			assert_eq!(queried, 0);
 			let mut devices = vec![RAWINPUTDEVICE::default(); count as usize];
 			if count != 0 {
 				// SAFETY: the initialized buffer holds the queried count.
