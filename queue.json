@@ -118514,7 +118514,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-20T22:43:35.059620Z",
+  "at": "2026-11-20T23:43:57.939653Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -120144,7 +120144,7 @@
      "conflicts with #19870 in crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md",
      "its need #19871 conflicts with main in crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md"
     ],
-    "note": "",
+    "note": "tests-over: ReviewWpfPressCut10, 2026-11-20: one signed-in WPF fixture test whose rows each reach a distinct branch (reviewer's request)",
     "over": [],
     "paired": [],
     "blocked_by": [
