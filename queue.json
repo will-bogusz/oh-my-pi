@@ -115081,8 +115081,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-20T04:53:32.442173Z",
-  "host": "goliath",
+  "at": "2026-11-20T05:06:49.993028Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -116274,10 +116274,8 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "wait",
-    "reasons": [
-     "conflicts with main in (branch missing on the fork)"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -116359,12 +116357,14 @@
     "title": "fix(natives): press items of the open WPF context menu of the window in front",
     "action": "wait",
     "reasons": [
+     "conflicts with #19814 in crates/natives/src/desktop/win32/ax.rs",
      "conflicts with win-occluded-capture in crates/natives/src/desktop/win32/window.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#19814",
      "win-occluded-capture"
     ],
     "needs": [],
