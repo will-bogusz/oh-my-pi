@@ -6,7 +6,8 @@ I made `scroll` on a WPF window stop reporting success for a wheel the window dr
 
 | WPF window, `scroll` one notch, n=10 per cell | v19.0.1 | this branch |
 |---|---|---|
-| list in front | false `ok` 10/10 / 10/10 | scrolled **10/10** / **10/10** |
+| list in front | false `ok` 10/10 / 10/10 per mode | scrolled **10/10** / **10/10** per mode (default and refuse) |
+| list in front, rows of mixed heights | false `ok` 10/10 / 10/10 (PR base, same posted wheel) | scrolled and confirmed **10/10** / **10/10** |
 | list behind (beside or covered), refuse mode | false `ok` 20/20 / 20/20 | `BackgroundUnavailable` **20/20** / **20/20**, nothing sent |
 | list behind, default mode | false `ok` 20/20 / 20/20 | takeover scrolled **0/20** / **10/20**; Windows refused the takeover's activation in the rest (`InputFailed`, nothing scrolled); no false `ok` |
 | point with no scroll container, refuse mode | false `ok` 30/30 / 30/30 | `BackgroundUnavailable` **30/30** / **30/30**, nothing sent |
@@ -14,7 +15,7 @@ I made `scroll` on a WPF window stop reporting success for a wheel the window dr
 
 Windows 10 22H2 / Windows 11.
 
-Reading order: `pointer` in `win32/input.rs`; `scroll_at_point`, `Sample::moved_to`, `ScrollRun` in `win32/ax.rs`.
+Reading order: `pointer` in `win32/input.rs`; `scroll_at_point`, `content_child`, `ScrollRun::step` in `win32/ax.rs`.
 
 ## Why
 
@@ -22,25 +23,25 @@ Reading order: `pointer` in `win32/input.rs`; `scroll_at_point`, `Sample::moved_
 
 Decisions:
 - A posted wheel to a WPF window is never reported `ok`.
-- In front, over a UI Automation scroll container, the scroll goes through `ScrollPattern`, one step per wheel-setting increment, each axis on its own. A step counts when the offset moved the requested way; rows added or removed during the step do not count. No movement is `InputFailed`.
-- A cutoff before the reply deadline is checked around every UI Automation call: past it, `AxUnconfirmed` if a step was sent.
-- Every other WPF scroll (behind other windows, no container under the point, a Chromium/WebView2 child window, WPF hosted in a non-WPF window, wheel scrolling set to 0, a provider failure before any step) is `BackgroundUnavailable` with nothing sent, as `main` answers other WPF pointer input, so `computer.backgroundFallback` decides.
+- In front, over a UI Automation scroll container, the scroll goes through `ScrollPattern`, one step per wheel-setting increment, each axis on its own.
+- A step counts once the container's child under the point moves on screen the requested way. Unmoved for 500 ms is `InputFailed`; no such child, a move the other way, or the cutoff before the reply deadline is `AxUnconfirmed`.
+- Every other WPF scroll (behind, no container under the point, a Chromium/WebView2 child window, WPF hosted in a non-WPF window, wheel scrolling set to 0, a provider failure before any step) is `BackgroundUnavailable` with nothing sent, so `computer.backgroundFallback` decides.
 - A non-WPF child window under the point (a hosted WinForms list) keeps `main`'s posted wheel.
 
-Limits: a blocked provider can hold one call past the cutoff (`main`'s `Timeout`). A default-mode takeover wheel over a point where nothing scrolls reports `ok`, as `main`'s takeover scroll does in any window. XAML hosts: not measured.
+Why content: `ScrollPattern`'s percent also moved on 70/80 resize-only changes per OS, and a `ListBox` exposes no scroll bar to UI Automation; the child under the point moved on 80/80 one-notch steps per OS (equal rows, mixed heights, a growing pixel-scrolled list, a plain `ScrollViewer`) and held on 80/80 resize-only changes.
+
+Limits: a blocked provider can hold one call past the cutoff (`main`'s `Timeout`). With no scroll container, default mode delivers a real wheel and reports it delivered; whether the content moved is not read back, as for any takeover scroll. Screen positions are compared: a window moved mid-step reads as a step, a viewer child that does not scroll as no movement, and a failed child read at a range end refuses. XAML hosts: not measured.
 
 ## Testing
 
-`wpf_scrolls_go_through_ui_automation_in_front_and_report_what_moved` (ignored: needs a desktop) drives `Request::Scroll` on a WPF list beside a hosted WinForms list: behind, `BackgroundUnavailable` with nothing sent; the WinForms list takes the posted wheel; in front, one notch moves by the wheel setting, at the end or with rows added `InputFailed`, no container `BackgroundUnavailable`. It passes on Windows 10 and 11 and fails on both with this round's `ax.rs` and `input.rs` reverted; the `win32::ax` unit tests pass.
-
-**Rows of different heights.** A `ListBox` scrolls by item, so the rows in view, and its view size, change as it scrolls. Ten one-notch scrolls per OS on mixed-height rows: the previous head reported `AxUnconfirmed` **10/10** on Windows 10 and **10/10** on 11; this head confirms **10/10** and **10/10**. With wheel scrolling set to 0, a takeover wheel still scrolled 3/3 per OS.
+`wpf_scrolls_go_through_ui_automation_in_front_and_report_what_moved` (ignored) covers the routes beside a hosted WinForms list; it passes on Windows 10 and 11. `wpf_scroll_deadline_and_offset_readback` feeds `ScrollRun::step` the review's cases (five short rows replacing a tall one, rows removed as the view shrinks, a torn reading); it passes on both OS, and the previous read-back gets 5 of its 9 wrong. Rust and worker tests pin the unsent suffix.
 
 <details><summary>Builds and runs behind the numbers</summary>
 
-- Cells: release v19.0.1 against an addon built from `6c5747aa540`, harness `scroll` (`dy: 3`), 2 rounds of 5 per cell, conditions in front, beside (unfocused) and covered, modes default (`omp`) and refuse (`omp-refuse`); `PM-scroll-canvas` is the fixture's Canvas border, which has no scroll container. Windows 11 17:05-17:24Z, Windows 10 17:12-17:33Z. No trial lost a user key.
-- `verified build: ref v19.0.1 sha f40f335845f… natives pi_natives.win32-x64-baseline.node sha256 20098A21…81661` (v19.0.1 side, both OS); branch side: same ref with the addon, `sha256 808D0A87…62B345` (both OS).
-- Variable-height runs: an ignored measurement test on a scratch branch (this head plus the test, and the previous head plus the test), not part of the PR.
+- Cells: release v19.0.1 against an addon built from `4dd113f40f8` (plus test-only scratch commits), harness `scroll` on `PM-scroll-list` in front, default (`omp`) and refuse (`omp-refuse`), 2 rounds of 5. Windows 10 19:23-19:33Z, Windows 11 19:29-19:37Z. No trial took the foreground, lost a user key or moved the pointer. Behind/no-container rows: unchanged from the previous head's runs (this round does not touch routing).
+- `verified build: ref v19.0.1 sha f40f335845f… natives pi_natives.win32-x64-baseline.node sha256 20098A21…81661` (v19.0.1 side, both OS); branch side: same ref with the addon, `sha256 D2BF1161…EB66D` (both OS).
+- Mixed heights and the content measurements: ignored test-only measurements on a scratch branch (this head, and the PR base for the mixed-height row), not part of the PR.
 
 </details>
 
-`scripts/rust-check` on Windows (cargo-xwin), Linux and macOS: pass, recorded at `6c5747aa540`.
+`scripts/rust-check` on Windows (cargo-xwin) and Linux: pass, recorded at `fe0a416586`; macOS: pending a host.
