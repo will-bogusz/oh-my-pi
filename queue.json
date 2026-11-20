@@ -117237,12 +117237,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-20T17:50:34.848624Z",
+  "at": "2026-11-20T18:00:52.845979Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 1,
-   "left": 7
+   "used": 2,
+   "left": 6
   },
   "rows": [
    {
@@ -117412,6 +117412,23 @@
     "created": "2026-11-20T16:50:25Z"
    },
    {
+    "id": "picker-stale-discovery",
+    "label": "#19878",
+    "number": 19878,
+    "state": "open",
+    "area": "other",
+    "priority": "P1",
+    "title": "fix(coding-agent): refresh discovery from the model picker once the catalog is two hours old",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-20T17:53:33Z"
+   },
+   {
     "id": "x11-xtest-release",
     "label": "#19531",
     "number": 19531,
@@ -117501,6 +117518,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-20T16:06:33Z"
+   },
+   {
+    "id": "snapcompact-shape-kdl",
+    "label": "#19880",
+    "number": 19880,
+    "state": "open",
+    "area": "snapcompact",
+    "priority": "P2",
+    "title": "refactor(catalog,snapcompact): move snapcompact frame shapes into catalog rules",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-20T17:58:36Z"
    },
    {
     "id": "browser-wait-predicate",
@@ -117931,7 +117965,7 @@
     "title": "fix(catalog): draw Gemini 4 Carbon's snapcompact frames at 1568px on Devin and Factory Droid",
     "action": "wait",
     "reasons": [
-     "needs snapcompact-shape-kdl (queued)"
+     "needs #19880 (open)"
     ],
     "note": "",
     "over": [],
@@ -117952,7 +117986,7 @@
     "title": "fix(catalog,snapcompact,coding-agent): give DeepSeek V4.1 Flash its snapcompact archive as text",
     "action": "wait",
     "reasons": [
-     "needs snapcompact-shape-kdl (queued), #19620 (open)"
+     "needs #19880 (open), #19620 (open)"
     ],
     "note": "",
     "over": [],
@@ -117974,7 +118008,7 @@
     "title": "fix(catalog): give snapcompact readers their lead model's frame shape",
     "action": "wait",
     "reasons": [
-     "needs snapcompact-shape-kdl (queued)"
+     "needs #19880 (open)"
     ],
     "note": "",
     "over": [],
@@ -118080,23 +118114,6 @@
      "macos-keys-no-press"
     ],
     "created": "2026-11-18T18:02:46Z"
-   },
-   {
-    "id": "snapcompact-shape-kdl",
-    "label": "snapcompact-shape-kdl",
-    "number": null,
-    "state": "queued",
-    "area": "snapcompact",
-    "priority": "P2",
-    "title": "refactor(catalog,snapcompact): move snapcompact frame shapes into catalog rules",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-18T00:47:39Z"
    },
    {
     "id": "browser-action-outcome",
@@ -118447,6 +118464,23 @@
     "created": "2026-11-12T04:40:13Z"
    },
    {
+    "id": "devin-neon-image-price",
+    "label": "devin-neon-image-price",
+    "number": null,
+    "state": "queued",
+    "area": "catalog",
+    "priority": null,
+    "title": "fix(catalog): budget Gemini 4 Neon's images on Devin at the 1,089 tokens it bills",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-20T18:00:29Z"
+   },
+   {
     "id": "encoded-prefix-count",
     "label": "encoded-prefix-count",
     "number": null,
@@ -118477,23 +118511,6 @@
      "wire-delta-count"
     ],
     "created": "2026-11-03T01:54:17Z"
-   },
-   {
-    "id": "picker-stale-discovery",
-    "label": "picker-stale-discovery",
-    "number": null,
-    "state": "queued",
-    "area": "other",
-    "priority": null,
-    "title": "fix(coding-agent): refresh discovery from the model picker once the catalog is two hours old",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-20T17:27:00Z"
    },
    {
     "id": "stats-live-appends",
@@ -118824,7 +118841,7 @@
     "action": "wait",
     "reasons": [
      "conflicts with #19620 in packages/coding-agent/src/session/session-maintenance.ts",
-     "conflicts with snapcompact-shape-kdl in packages/catalog/src/compat/rules/README.md, packages/catalog/src/compat/rules/classes/anthropic.kdl, packages/catalog/src/compat/rules/classes/glm.kdl, packages/catalog/src/compat/rules/classes/kimi.kdl, packages/catalog/src/compat/rules/classes/openai.kdl",
+     "conflicts with #19880 in packages/catalog/src/compat/rules/README.md, packages/catalog/src/compat/rules/classes/anthropic.kdl, packages/catalog/src/compat/rules/classes/glm.kdl, packages/catalog/src/compat/rules/classes/kimi.kdl, packages/catalog/src/compat/rules/classes/openai.kdl",
      "conflicts with main in packages/catalog/src/compat/rules/README.md, packages/catalog/src/compat/rules/classes/anthropic.kdl, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/session/session-stats.ts, packages/coding-agent/test/context-fits-model.test.ts"
     ],
     "note": "",
@@ -118832,7 +118849,7 @@
     "paired": [],
     "blocked_by": [
      "#19620",
-     "snapcompact-shape-kdl"
+     "#19880"
     ],
     "needs": [],
     "created": "2026-11-03T01:24:37Z"
