@@ -117837,6 +117837,13 @@
     "at": "2026-11-20T20:08:21Z",
     "host": "goliath"
    }
+  },
+  "cb6f33fd1eeb53eeafd462b43067de6e02c33886": {
+   "linux": {
+    "sha": "cbbeb9c70ad0e47fbb5a0a17f98a61916f069eb2",
+    "at": "2026-11-20T20:11:23Z",
+    "host": "goliath"
+   }
   }
  },
  "plan": {
