@@ -1,19 +1,18 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20 17:52Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20 17:53Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-20 17:50Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 4, conflict-held 16, stacked 17, held 12, parked 1, open PRs 21; merged 404, closed 44
+**Counts:** openable now 3, conflict-held 16, stacked 17, held 12, parked 1, open PRs 22; merged 404, closed 44
 
-## Openable now (4)
+## Openable now (3)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
 | stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 7d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 | factory-droid-1100-pin | feat(catalog): identify Factory Droid requests as droid 1.10.0 | factory-droid |  | 7d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-pin) |
 | snapcompact-shape-kdl | refactor(catalog,snapcompact): move snapcompact frame shapes into catalog rules | snapcompact | P2 | 2d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-shape-kdl) |
-| picker-stale-discovery | fix(coding-agent): refresh discovery from the model picker once the catalog is two hours old | other |  | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/picker-stale-discovery) |
 
 ## Conflict-held (16)
 
@@ -81,7 +80,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20
 |---|---|---|---|---|---|---|---|---|
 | [#16611](https://github.com/can1357/oh-my-pi/pull/16611) | read-audio-transcripts | feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio | catalog | P2 | 2d | Will, 2026-11-17: parked as draft, not maintained for now; revisit later | not checked or kept fresh | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-audio-transcripts) |
 
-## Open PRs (21)
+## Open PRs (22)
 
 | PR | id | title | area | rank | open | plan | branch |
 |---|---|---|---|---|---|---|---|
@@ -106,3 +105,4 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20
 | [#19870](https://github.com/can1357/oh-my-pi/pull/19870) | win-wpf-scroll | fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing | computer | P2 | 1h | keep; accepted pair with #19871: Main, 2026-11-20: win32/ax.rs import union; docs/tools/computer.md AxUnconfirmed: #19870's rewritten sentence, then this entry's Windows dispatch line; combined = both | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-wpf-scroll) |
 | [#19849](https://github.com/can1357/oh-my-pi/pull/19849) | win-occluded-capture | fix(natives): count every opaque window as a cover over a Chromium capture | computer | P1 | 10h | keep; accepted pair with #19519: Main, 2026-11-20: adjacent test-only fields in the fake backend; combined = both | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-occluded-capture) |
 | [#19871](https://github.com/can1357/oh-my-pi/pull/19871) | desktop-dispatch-fence | fix(natives): report Windows UIA actions unconfirmed when their reply times out after dispatch | computer | P1 | 1h | keep; accepted pair with #19870: Main, 2026-11-20: win32/ax.rs import union; docs/tools/computer.md AxUnconfirmed: #19870's rewritten sentence, then this entry's Windows dispatch line; combined = both; tests-over: WinWpfRoutes6, 2026-11-20: the final-head review asked for the action off side through the caller and deadline-free teardown; the four session tests each reach a distinct branch (marked then expired, abandoned, on time, unfenced) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/desktop-dispatch-fence) |
+| [#19878](https://github.com/can1357/oh-my-pi/pull/19878) | picker-stale-discovery | fix(coding-agent): refresh discovery from the model picker once the catalog is two hours old | other |  | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/picker-stale-discovery) |
