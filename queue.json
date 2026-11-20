@@ -105498,7 +105498,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-20T08:27:52Z",
+  "checked": "2026-11-20T08:58:31Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -105704,12 +105704,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-13T08:45:48Z",
-    "kind": "openable",
-    "id": "macos-scroll-direction",
-    "title": "fix(natives): scroll down for a positive dy on macOS, as on Windows and Linux"
-   },
    {
     "at": "2026-11-13T12:49:10Z",
     "kind": "openable",
@@ -115700,12 +115694,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-20T08:27:53.385676Z",
+  "at": "2026-11-20T08:58:31.742182Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 1,
-   "left": 7
+   "used": 0,
+   "left": 8
   },
   "rows": [
    {
