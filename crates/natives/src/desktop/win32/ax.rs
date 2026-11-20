@@ -822,7 +822,11 @@ public static class FenceFixture {
 					.core
 					.call(fixture.core.cancellation.token(), |reply| Request::AxQuery {
 						target: Target::Window(fixture.hwnd.to_string()),
-						query: AxQuery { title: Some("Fence checkbox".into()), ..AxQuery::default() },
+						query: AxQuery {
+							role: Some("checkbox".into()),
+							title: Some("Fence checkbox".into()),
+							..AxQuery::default()
+						},
 						reply,
 					})
 					.expect("find WPF checkbox through SessionCore");
