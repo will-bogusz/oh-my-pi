@@ -58,8 +58,14 @@ const SETTLE: Duration = Duration::from_millis(200);
 /// `LibreOffice` built its Paragraph dialog 0.3-1.7 s after the press.
 const WATCH: Duration = Duration::from_millis(2500);
 /// How long after a window appears, or asks for activation, focus moving to
-/// it counts as the action's doing; later it is the user's click.
-const FRESH: Duration = Duration::from_millis(500);
+/// it counts as the action's doing; later it is the user's click. Hyprland
+/// focuses a window in the turn that maps or activates it: over 2,027
+/// measured steals (Omarchy 4.5, 0.56 and 0.57) focus came 0-10 ms after the
+/// window's `openwindow` or `urgent` event. The socket says nothing about
+/// clicks, so the watcher alone takes a user's click on the app within this
+/// window for the app's; the compositor hook reads Hyprland's focus reason
+/// instead and never does.
+const FRESH: Duration = Duration::from_millis(50);
 /// When the compositor hook removes itself if this process never does.
 const HOOK_LIFETIME_MS: u32 = 15_000;
 /// How often the watcher checks whether it should stop; the next action's
@@ -225,8 +231,11 @@ impl Tracker {
 	) -> Verdict {
 		match event {
 			Event::Open { address, class, title } => {
-				if !self.known.contains(address)
-					&& self.seen(address).is_none()
+				if let Some(seen) = self.seen(address) {
+					// It asked for activation before it mapped (Electron's
+					// dialogs): Hyprland focuses it when it maps.
+					seen.fresh = now;
+				} else if !self.known.contains(address)
 					&& let Some(found) = client(address)
 				{
 					let found = Client { class: class.clone(), title: title.clone(), ..found };
@@ -366,8 +375,11 @@ fn millis(duration: Duration) -> u32 {
 /// lacks any of it refuses the hook and the socket watcher works alone.
 const HOOK_NEEDS: &str = r#"if not (hl.on and hl.timer and hl.dispatch and hl.get_windows and hl.dsp and hl.dsp.focus and hl.dsp.event and hl.dsp.window and hl.dsp.window.set_prop) then error("omp focus guard: this Hyprland's Lua lacks hl.on, hl.timer or hl.dsp.window.set_prop") end"#;
 
-/// What the hook posts on the event socket (`custom>>`) when it keeps a
-/// window from taking the keyboard: `omp-focus-guard,ID,PROPERTY,ADDRESS`.
+/// What the hook posts on the event socket (`custom>>`):
+/// `omp-focus-guard,ID,PROPERTY,ADDRESS` when it keeps a window from taking
+/// the keyboard, `omp-focus-guard,ID,stood_down,ADDRESS` when focus moved to
+/// a window for a reason the action did not cause (the user's click, a
+/// keybind, follow-mouse, a workspace switch) and the hook removed itself.
 const HOOK_EVENT: &str = "omp-focus-guard";
 
 /// The compositor-side guard for process `pid` and the user's window
@@ -379,8 +391,15 @@ const HOOK_EVENT: &str = "omp-focus-guard";
 /// `focus_on_activate = 0` from `window.urgent` until the turn ends, which
 /// `CWindow::activate` reads right after emitting it. Each override is also
 /// released by a 1 ms timer and when the hook stops, so none outlives the
-/// turn. A window that takes focus anyway while fresh is handed back from
-/// `window.active`.
+/// turn. A window that takes focus anyway while fresh, for a reason the app
+/// causes (`NEW_WINDOW` when it maps, `DESKTOP_STATE_CHANGE` from
+/// `CWindow::activate`), is handed back from `window.active`. Focus moved for
+/// any input reason (follow-mouse, keybind, a focus dispatch, a click, window
+/// switching, workspaces) is the user's pick: the hook removes itself and
+/// says so on the event socket, so the watcher stands down too. Unmap
+/// fallbacks and ghosts are neither. Reasons are Hyprland 0.56's
+/// `Desktop::eFocusReason` numbers, passed as `window.active`'s second
+/// argument.
 fn hook(id: &str, pid: u32, user: &str) -> String {
 	format!(
 		r#"{HOOK_NEEDS}
@@ -413,6 +432,10 @@ local function stop()
   end
   omp_focus_guard[id] = nil
 end
+local function stand_down(address)
+  stop()
+  hl.dispatch(hl.dsp.event("{HOOK_EVENT}," .. id .. ",stood_down," .. address))
+end
 local function freshen(address)
   fresh[address] = (fresh[address] or 0) + 1
   local n = fresh[address]
@@ -435,8 +458,14 @@ subs[3] = hl.on("window.urgent", function(w)
     hold(w.address, "focus_on_activate", "0")
   end
 end)
-subs[4] = hl.on("window.active", function(w)
-  if not w or w.address == user then return end
+-- eFocusReason: 7 DESKTOP_STATE_CHANGE (activate()), 16 NEW_WINDOW; 0 UNKNOWN, 6 OTHER (an unmap's), 13-15 UNMAP_*, 17 GHOSTS.
+local app_caused, neither = {{ [7] = true, [16] = true }}, {{ [0] = true, [6] = true, [13] = true, [14] = true, [15] = true, [17] = true }}
+subs[4] = hl.on("window.active", function(w, reason)
+  if not w or w.address == user or neither[reason] then return end
+  if not app_caused[reason] then
+    stand_down(w.address)
+    return
+  end
   if ours(w) and not known[w.address] and not fresh[w.address] then
     known[w.address] = true
     freshen(w.address)
@@ -444,7 +473,7 @@ subs[4] = hl.on("window.active", function(w)
   if ours(w) and fresh[w.address] then
     hl.dispatch(hl.dsp.focus({{ window = "address:" .. user }}))
   else
-    stop()
+    stand_down(w.address)
   end
 end)
 omp_focus_guard[id] = stop
@@ -458,16 +487,31 @@ fn unhook(id: &str) -> String {
 	format!(r#"if omp_focus_guard and omp_focus_guard["{id}"] then omp_focus_guard["{id}"]() end"#)
 }
 
-/// The window the hook `id` kept from taking the keyboard, from an event
-/// socket line it posted.
-fn kept_by_hook(line: &str, id: &str) -> Option<String> {
+/// What the hook `id` posted on the event socket.
+#[derive(Debug, PartialEq, Eq)]
+enum HookLine {
+	/// It kept this window from taking the keyboard.
+	Kept(String),
+	/// Focus went to this window for a reason the action did not cause; the
+	/// hook removed itself.
+	StoodDown(String),
+}
+
+fn hook_line(line: &str, id: &str) -> Option<HookLine> {
 	let data = line
 		.strip_prefix("custom>>")?
 		.strip_prefix(HOOK_EVENT)?
 		.strip_prefix(',')?;
 	let mut parts = data.splitn(3, ',');
-	let (hook, prop, window) = (parts.next()?, parts.next()?, parts.next()?);
-	(hook == id && matches!(prop, "no_focus" | "focus_on_activate")).then(|| address(window))
+	let (hook, what, window) = (parts.next()?, parts.next()?, parts.next()?);
+	if hook != id {
+		return None;
+	}
+	match what {
+		"no_focus" | "focus_on_activate" => Some(HookLine::Kept(address(window))),
+		"stood_down" => Some(HookLine::StoodDown(address(window))),
+		_ => None,
+	}
 }
 
 /// What one action's watch has seen, shared between its thread and the
@@ -542,9 +586,11 @@ impl FocusGuard {
 				reason:     "Hyprland runs a Lua config, so each background action installs a \
 				             temporary hook in it (hyprctl eval): the acted-on app's new windows open \
 				             without the keyboard, its activation requests are declined, and a window \
-				             that takes focus anyway gives it back in the same compositor turn. The \
-				             hook removes itself within 15 s and writes nothing to the config; OMP's \
-				             event-socket watcher reports what each window did."
+				             that takes focus anyway gives it back in the same compositor turn. Focus \
+				             the user moves themselves (click, keybind, follow-mouse) is left where \
+				             they put it and ends the hook. The hook removes itself within 15 s and \
+				             writes nothing to the config; OMP's event-socket watcher reports what \
+				             each window did."
 					.to_owned(),
 			};
 		}
@@ -555,7 +601,9 @@ impl FocusGuard {
 				"Hyprland refused the Lua hook (hyprctl eval: {}), as it does with a hyprlang config: \
 				 OMP's event-socket watcher hands focus back after a window a background action opens \
 				 has taken it, a few milliseconds later, so keys the user types in that time go to \
-				 that window.",
+				 that window. The socket does not say why focus moved: a click on the acted-on app \
+				 within 50 ms of its window appearing or asking for activation is taken for the app's \
+				 and handed back.",
 				self.refusal.as_deref().unwrap_or("no reply")
 			),
 		}
@@ -665,6 +713,7 @@ impl FocusGuard {
 		let shared = Arc::new(Mutex::new(Shared::default()));
 		let watcher = Watcher {
 			hyprland: self.hyprland.clone(),
+			hooked: hook_id.is_some(),
 			hook: hook_id,
 			tracker: Tracker::new(user, pid, known, started),
 			started,
@@ -744,6 +793,10 @@ struct Watcher {
 	hyprland: Hyprland,
 	/// The compositor hook's id, when Hyprland took it.
 	hook:     Option<String>,
+	/// The hook is still installed: Hyprland has not reloaded its config
+	/// (which drops it) and its lifetime has not run out. While it is, the
+	/// hook alone decides hand-backs, since only it sees why focus moved.
+	hooked:   bool,
 	tracker:  Tracker,
 	started:  Instant,
 	ends:     Arc<AtomicU64>,
@@ -792,18 +845,28 @@ impl Watcher {
 				}
 				clients.get(address).cloned()
 			};
-			if let Some(id) = &self.hook
-				&& let Some(address) = kept_by_hook(text, id)
+			if text.starts_with("configreloaded>>")
+				|| self.started.elapsed() >= Duration::from_millis(HOOK_LIFETIME_MS.into())
 			{
-				self.tracker.hook_kept(&address, read_at, &mut client);
-			} else if let Some(event) = parse(text) {
-				let verdict = self.tracker.event(&event, read_at, &mut client);
-				if verdict == Verdict::HandBack
-					&& let Event::Active(Some(address)) = &event
-				{
-					let by = self.hand_back();
-					self.tracker.handed_back_by(address, by);
-				}
+				self.hooked = false;
+			}
+			match self.hook.as_deref().and_then(|id| hook_line(text, id)) {
+				Some(HookLine::Kept(address)) => self.tracker.hook_kept(&address, read_at, &mut client),
+				Some(HookLine::StoodDown(_)) => {
+					self.hooked = false;
+					self.tracker.pick(read_at);
+				},
+				None => {
+					if let Some(event) = parse(text) {
+						let verdict = self.tracker.event(&event, read_at, &mut client);
+						if verdict == Verdict::HandBack
+							&& let Event::Active(Some(address)) = &event
+						{
+							let by = self.hand_back();
+							self.tracker.handed_back_by(address, by);
+						}
+					}
+				},
 			}
 			line.clear();
 			self.shared.lock().report = self.tracker.report();
@@ -813,16 +876,16 @@ impl Watcher {
 		shared.done = true;
 	}
 
-	/// Puts focus back on the user's window unless the compositor hook
-	/// already did; says which did.
+	/// Puts focus back on the user's window unless the compositor hook is
+	/// installed; says which guard did. The hook hands back in the same
+	/// compositor turn, or stands down when the user picked the window (it
+	/// then posts so, and the watcher stands down too), so the watcher never
+	/// overrides it.
 	fn hand_back(&self) -> DesktopFocusGuardKind {
-		let user = &self.tracker.user.address;
-		if self.hook.is_some()
-			&& let Ok(active) = self.hyprland.json::<Client>("j/activewindow")
-			&& active.address == *user
-		{
+		if self.hooked {
 			return DesktopFocusGuardKind::CompositorHook;
 		}
+		let user = &self.tracker.user.address;
 		let command = if self.hook.is_some() {
 			format!(r#"dispatch hl.dsp.focus({{ window = "address:{user}" }})"#)
 		} else {
@@ -1265,8 +1328,10 @@ mod tests {
 		// Hyprland posts openwindow before window.open_early runs the hook,
 		// which posts what it held.
 		assert_eq!(run.at(30, "openwindow>>d,1,tdlg.py,Allow?"), Verdict::Nothing);
-		let kept =
-			kept_by_hook("custom>>omp-focus-guard,7-1,no_focus,d", "7-1").expect("the hook's line");
+		let Some(HookLine::Kept(kept)) = hook_line("custom>>omp-focus-guard,7-1,no_focus,d", "7-1")
+		else {
+			panic!("the hook's line");
+		};
 		run.tracker
 			.hook_kept(&kept, run.t0 + Duration::from_millis(30), &mut lookup);
 		let report = run.tracker.report();
@@ -1293,13 +1358,47 @@ mod tests {
 	#[test]
 	fn only_this_watchs_hook_lines_count() {
 		assert_eq!(
-			kept_by_hook("custom>>omp-focus-guard,7-1,focus_on_activate,55f6", "7-1"),
-			Some("0x55f6".to_owned())
+			hook_line("custom>>omp-focus-guard,7-1,focus_on_activate,55f6", "7-1"),
+			Some(HookLine::Kept("0x55f6".to_owned()))
 		);
-		assert_eq!(kept_by_hook("custom>>omp-focus-guard,7-2,no_focus,55f6", "7-1"), None);
-		assert_eq!(kept_by_hook("custom>>omp-focus-guard,7-1,opacity,55f6", "7-1"), None);
-		assert_eq!(kept_by_hook("custom>>something else", "7-1"), None);
-		assert_eq!(kept_by_hook("openwindow>>55f6,1,a,b", "7-1"), None);
+		assert_eq!(
+			hook_line("custom>>omp-focus-guard,7-1,stood_down,55f6", "7-1"),
+			Some(HookLine::StoodDown("0x55f6".to_owned()))
+		);
+		assert_eq!(hook_line("custom>>omp-focus-guard,7-2,no_focus,55f6", "7-1"), None);
+		assert_eq!(hook_line("custom>>omp-focus-guard,7-1,opacity,55f6", "7-1"), None);
+		assert_eq!(hook_line("custom>>something else", "7-1"), None);
+		assert_eq!(hook_line("openwindow>>55f6,1,a,b", "7-1"), None);
+	}
+
+	#[test]
+	fn the_users_click_on_the_app_right_after_the_action_is_left_where_they_put_it() {
+		// The app asked for activation (Chromium after a CDP press); the user
+		// clicks it 100 ms later: past FRESH, so the watcher alone leaves it.
+		let mut run = Run::new();
+		assert_eq!(run.at(1, "urgent>>b"), Verdict::Nothing);
+		assert_eq!(run.at(100, "activewindowv2>>b"), Verdict::Nothing);
+		assert!(run.tracker.picked);
+		assert_eq!(run.tracker.report()[0].1.focus, DesktopWindowFocus::Kept);
+
+		// Within FRESH the socket cannot tell a click from the app; under the
+		// hook the watcher defers, and the hook's stood_down line ends the
+		// watch with the window left as the user chose.
+		let mut run = Run::new();
+		assert_eq!(run.at(1, "urgent>>b"), Verdict::Nothing);
+		assert_eq!(run.at(5, "activewindowv2>>b"), Verdict::HandBack);
+		run.tracker.pick(run.t0 + Duration::from_millis(5));
+		assert_eq!(run.at(300, "openwindow>>d,1,tdlg.py,Allow?"), Verdict::Nothing);
+		assert_eq!(run.at(300, "activewindowv2>>d"), Verdict::Nothing);
+		assert_eq!(run.focus()[0].1, DesktopWindowFocus::LeftAsChosen);
+	}
+
+	#[test]
+	fn a_window_that_asked_for_activation_before_mapping_is_fresh_when_it_maps() {
+		let mut run = Run::new();
+		assert_eq!(run.at(10, "urgent>>d"), Verdict::Nothing);
+		assert_eq!(run.at(300, "openwindow>>d,1,tdlg.py,Allow?"), Verdict::Nothing);
+		assert_eq!(run.at(300, "activewindowv2>>d"), Verdict::HandBack);
 	}
 
 	#[test]
@@ -1307,7 +1406,7 @@ mod tests {
 		let lua = hook("7-1", 20, "0xa");
 		assert!(lua.starts_with(HOOK_NEEDS));
 		assert!(lua.contains(
-			r#"local id, pid, user, fresh_ms, portal = "7-1", 20, "0xa", 500, "xdg-desktop-portal""#
+			r#"local id, pid, user, fresh_ms, portal = "7-1", 20, "0xa", 50, "xdg-desktop-portal""#
 		));
 		// Set before Hyprland decides a new window's focus, released after it.
 		assert!(lua.contains(
@@ -1319,6 +1418,17 @@ mod tests {
 			r#"hl.on("window.open", function(w) if w then release(w.address, "no_focus") end end)"#
 		));
 		assert!(lua.contains(r#"hold(w.address, "focus_on_activate", "0")"#));
+		// Hand back only what the app caused; any input reason is the user's
+		// pick, posted so the watcher stands down.
+		assert!(lua.contains("local app_caused, neither = { [7] = true, [16] = true }"));
+		assert!(
+			lua.contains(
+				"if not app_caused[reason] then\n    stand_down(w.address)\n    return\n  end"
+			)
+		);
+		assert!(
+			lua.contains(r#"hl.dsp.event("omp-focus-guard," .. id .. ",stood_down," .. address)"#)
+		);
 		// Every hold ends within the turn, or 1 ms later, and when the hook
 		// stops.
 		assert!(lua.contains(
