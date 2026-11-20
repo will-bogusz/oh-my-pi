@@ -104477,7 +104477,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-shape-kdl",
    "host": "MacBook-Pro",
    "added": "2026-11-18T00:47:39Z",
-   "updated": "2026-11-20T17:49:32Z",
+   "updated": "2026-11-20T17:49:44Z",
    "note": "LaneSnapcompactStack, 2026-11-20: restacked on origin/main alone (Main's plan: opens without #19620). Folds in #19591 (ryanskidmore): explicit snapcompact.shape > model snapcompactShape > catalog KDL > 8on22-bw, mirroring resolveImageCountBudget. Dropped the unused snapcompact-middle-variant axis so denseCompanion(high, api) stays as on main and #19620's archiveInShape call composes in either order; pair tree built (typecheck clean; snapcompact 123, compaction suites 440 pass + 2 main-failing). Census vs main: 7,757 built models 0 diffs, 0 with configured snapcompactShape. Review: ReviewKdlRework needs-changes at 7f06a7b (CHANGELOG dup, fixed), ReviewKdlFinal ready at a0078fe.",
    "kind": "proposal",
    "line_loss_overrides": [
@@ -104544,7 +104544,18 @@
      }
     }
    ],
-   "advanced": "2026-11-20T17:49:32Z"
+   "advanced": "2026-11-20T17:49:32Z",
+   "built": [
+    {
+     "with": "#19620",
+     "code": "258beddba9ede87e23252997107f6a1752196731",
+     "with_code": "3f31de9f48fc13ac289d41080fa450515af2a5ea",
+     "tip": "a0078fecb1842eceed362b538e6a9d0b698ca2c2",
+     "with_tip": "205ab81cc2b0fd97d3a58b657bae1445b84034a5",
+     "at": "2026-11-20T17:49:41Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "snapcompact-shape-reader-identity",
