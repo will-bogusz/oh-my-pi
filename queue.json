@@ -105709,32 +105709,20 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-20T13:02:30Z",
+  "checked": "2026-11-20T13:33:09Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "win-button-click": {
-    "since": "2026-11-20T13:02:30Z",
-    "title": "fix(natives): click Windows buttons without activating their window"
-   },
-   "win-uia-set-patterns": {
-    "since": "2026-11-20T13:02:30Z",
-    "title": "fix(natives): set WPF sliders and combo boxes through RangeValue and SelectionItem"
+   "win-wpf-scroll": {
+    "since": "2026-11-20T13:33:09Z",
+    "title": "fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing"
    },
    "factory-droid-1100-pin": {
     "since": "2026-11-17T00:39:57Z",
     "title": "feat(catalog): identify Factory Droid requests as droid 1.10.0"
    }
   },
-  "conflicts": {
-   "#19519": {
-    "since": "2026-11-20T12:32:15Z",
-    "title": "fix(natives): type characters outside the X11 keymap through temporary keycodes",
-    "files": [
-     "crates/natives/src/desktop/mod.rs"
-    ]
-   }
-  },
+  "conflicts": {},
   "merged_through": "2026-11-20T12:29:05Z",
   "unreleased": {
    "19748": {
@@ -105931,51 +105919,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-13T13:20:12Z",
-    "kind": "merged",
-    "number": 19118,
-    "title": "fix(stats,coding-agent): keep the stats dashboard answering while Spotlight rebuilds",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-13T13:20:12Z",
-    "kind": "merged",
-    "number": 19115,
-    "title": "fix(stats): close Traces background jobs when they finish, so idle time and turn ends show",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-13T13:20:12Z",
-    "kind": "merged",
-    "number": 19114,
-    "title": "fix(stats): count every answered message in the Frustration per-model table",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-13T13:20:12Z",
-    "kind": "merged",
-    "number": 19094,
-    "title": "fix(coding-agent): fail a click whose frame the page removed while the button was down",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-13T13:20:12Z",
-    "kind": "openable",
-    "id": "macos-drag-confirm",
-    "title": "fix(natives): stop macOS background drags reporting moves that did not happen"
-   },
-   {
-    "at": "2026-11-13T13:20:12Z",
-    "kind": "unopenable",
-    "id": "macos-scroll-direction",
-    "title": "fix(natives): scroll down for a positive dy on macOS, as on Windows and Linux",
-    "why": "opened as #19165"
-   },
    {
     "at": "2026-11-13T14:51:31Z",
     "kind": "conflict",
@@ -107574,6 +107517,26 @@
     "kind": "openable",
     "id": "win-uia-set-patterns",
     "title": "fix(natives): set WPF sliders and combo boxes through RangeValue and SelectionItem"
+   },
+   {
+    "at": "2026-11-20T13:33:09Z",
+    "kind": "openable",
+    "id": "win-wpf-scroll",
+    "title": "fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing"
+   },
+   {
+    "at": "2026-11-20T13:33:09Z",
+    "kind": "unopenable",
+    "id": "win-button-click",
+    "title": "fix(natives): click Windows buttons without activating their window",
+    "why": "plan: held (held: Main, 2026-11-20: in its fix round (WinButtonRound, review needs-changes at e06e31d6bf7); ready work opens in the order it becomes ready)"
+   },
+   {
+    "at": "2026-11-20T13:33:09Z",
+    "kind": "unopenable",
+    "id": "win-uia-set-patterns",
+    "title": "fix(natives): set WPF sliders and combo boxes through RangeValue and SelectionItem",
+    "why": "plan: held (held: Main, 2026-11-20: in its fix round (WinWpfRoutes5, review needs-changes at 86d258734d9); takes the recorded ax.rs form with win-wpf-scroll when it follows)"
    }
   ]
  },
@@ -116423,8 +116386,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-20T13:10:48.293869Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-20T13:33:09.960226Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -117619,8 +117582,10 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with main in (branch missing on the fork)"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -117658,8 +117623,10 @@
     "area": "computer",
     "priority": null,
     "title": "fix(natives): click Windows buttons without activating their window",
-    "action": "open",
-    "reasons": [],
+    "action": "held",
+    "reasons": [
+     "held: Main, 2026-11-20: in its fix round (WinButtonRound, review needs-changes at e06e31d6bf7); ready work opens in the order it becomes ready"
+    ],
     "note": "accepted pair with #19195: Main (assignment to QueueThirtySeven), 2026-11-19: docs/tools/computer.md only, both add one paragraph after the line-118 paragraph of the desktop section; combined = #19195's macOS background-drag paragraph, then this entry's Windows BM_CLICK paragraph (union, no wording change); accepted pair with #19849: Main, 2026-11-20: import-list union in win32/window.rs with #19849's three style removals applied, one tests module; combined = both",
     "over": [],
     "paired": [
@@ -117680,7 +117647,6 @@
     "title": "fix(natives): press items of the open WPF context menu of the window in front",
     "action": "wait",
     "reasons": [
-     "conflicts with win-button-click in crates/natives/src/desktop/win32/ax.rs, crates/natives/src/desktop/win32/window.rs",
      "conflicts with main in crates/natives/src/desktop/win32/ax.rs, crates/natives/src/desktop/win32/window.rs"
     ],
     "note": "accepted pair with #19849: Main, 2026-11-20: win32/window.rs; combined = WindowsAndMessaging import-list union, and one #[cfg(test)] mod tests holding both sides' uses and items (both append a tests module); recheck at #19849's next head",
@@ -117688,9 +117654,7 @@
     "paired": [
      "#19849"
     ],
-    "blocked_by": [
-     "win-button-click"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-20T04:47:55Z"
    },
@@ -117722,8 +117686,10 @@
     "area": "computer",
     "priority": null,
     "title": "fix(natives): set WPF sliders and combo boxes through RangeValue and SelectionItem",
-    "action": "open",
-    "reasons": [],
+    "action": "held",
+    "reasons": [
+     "held: Main, 2026-11-20: in its fix round (WinWpfRoutes5, review needs-changes at 86d258734d9); takes the recorded ax.rs form with win-wpf-scroll when it follows"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -117739,18 +117705,12 @@
     "area": "computer",
     "priority": null,
     "title": "fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing",
-    "action": "wait",
-    "reasons": [
-     "conflicts with win-button-click in docs/tools/computer.md",
-     "conflicts with win-uia-set-patterns in crates/natives/src/desktop/win32/ax.rs"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "win-button-click",
-     "win-uia-set-patterns"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-20T04:27:43Z"
    },
