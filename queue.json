@@ -106613,7 +106613,7 @@
   {
    "id": "hyprland-window-list",
    "branch": "will/hyprland-window-list",
-   "title": "fix(natives): read window positions and focus from Hyprland",
+   "title": "fix(natives): list Hyprland window positions for native Wayland apps",
    "area": "computer",
    "priority": null,
    "needs": [],
@@ -106625,14 +106625,15 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/hyprland-window-list",
    "host": "MacBook-Pro",
    "added": "2026-11-20T18:38:26Z",
-   "updated": "2026-11-20T18:40:47Z",
+   "updated": "2026-11-20T19:56:49Z",
    "note": "",
    "rebases_after": [
     19615
    ],
    "pair_reasons": {
     "19615": "Main, 2026-11-20: wayland/mod.rs capture: hyprland's before-listing then #19615's shares.capture; combined, a kept stream's newest frame can predate the listing by about one frame"
-   }
+   },
+   "hold": "LinuxUpstream2, 2026-11-20: delta review ReviewHyprList (gpt-6.2-sol) on 50e036edcd6 needs-changes, 3 must-fixes in new code (positional j/clients rows accepted; Hyprland::detect connects at backend startup and caches a failed probe; accept-queue test hits the FD limit); parked for Main/Will"
   },
   {
    "id": "win-wpf-press",

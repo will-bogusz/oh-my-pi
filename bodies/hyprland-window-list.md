@@ -1,33 +1,41 @@
 ## What
 
-I kept seeing the `computer` tool on Hyprland put every app window in the screen's top-left corner, so window screenshots were refused and element positions were wrong; this asks Hyprland where its windows are, read-only, and leaves other desktops alone.
+I kept seeing `computer.windows()` on Hyprland list every native Wayland window at the screen's top-left corner; this takes those windows' positions and sizes from Hyprland, read-only. What you get: listed positions for the windows their toolkit can't place. What you don't get yet: screenshots and crops of those windows still refuse exactly as on `main`, and their element bounds stay window-relative; that is a follow-up.
 
-On Omarchy (Hyprland 0.56.2), `computer.windows()` bounds matching Hyprland's go from **0/30 → 30/30**, and a window screenshot from refused 10/10 → the window's own 621×750 pixels 10/10.
+On Omarchy (Hyprland 0.56.2), listed bounds equal to Hyprland's go from **0/20 → 20/20**.
 
-| Omarchy 4.5, n=10 alternating builds | `main` | this PR |
+| Omarchy 4.5, n=10, builds alternating | `main` | this PR |
 |---|---|---|
-| Window bounds equal to `hyprctl clients` | 0/30 (all at 0,0) | 30/30 |
-| Windows listed (GTK 3 app, Files, foot terminal) | 20/30, the terminal never | 30/30 |
-| Focused window agrees with Hyprland's | 5/10 | 10/10 |
-| `win.screenshot()` of the GTK 3 window | 0/10: "no known screen position" | 10/10, 621×750 |
-| A button's `bounds()` inside its window | 0/10 | 10/10 |
-| GNOME 50.6, six calls × 3 rounds | | byte-identical to `main` |
+| `windows()` bounds equal to `hyprctl clients` (a GTK 3 app and Files) | 0/20, all at 0,0 | 20/20 |
+| Two windows of one process with one title | 0,0 (20/20) | 0,0 (20/20), as `main` |
+| Same cell's `ax()` tree and a button's `bounds()` | | identical to `main` 10/10 |
+| `windows()`, median (range 6-64 ms both) | 13.5 ms | 11.4 ms |
+| Hyprland stopped during the call (n=5) | 8 ms | same list as `main` 5/5, 1.05 s |
+| GNOME 50, six calls × 3 rounds | | byte-identical to `main` |
 
-> **Hyprland context.** A native Wayland app cannot learn where the compositor put it, so over accessibility (AT-SPI) it reports positions relative to its own window. Hyprland knows each window's position, size, workspace and process, and serves that on a local socket (`hyprctl -j clients`). OMP already places GTK 4 windows this way on X11, from the X server's window list.
+> **Hyprland context.** A native Wayland app cannot learn where the compositor put it, so over accessibility (AT-SPI) its window reads 0,0. Hyprland knows each window's position, size, process and title, and serves them on a local socket.
+
+**Compatibility:** on Hyprland, only `x`, `y`, `width` and `height` of windows whose toolkit gives no position change, in `windows()` and the handles `computer.window()` returns. All else is as on `main`.
 
 ## Why
 
-- **Read only, from the real compositor.** Three reads (`j/clients`, `j/monitors`, `j/activewindow`), nothing written. Used only when the Wayland socket's peer is a `Hyprland` process that also owns the IPC socket, checked on every connection; 1 s deadline per read.
-- **Never guessed.** A window takes a Hyprland client only when it is its process's only client, or its only one with that title.
-- **Unchanged where a wrong answer acts.** Display keyboard input keeps `main`'s check (window focus is not keyboard focus). A window screenshot is refused if the window moved or changed workspace across the frame. If the socket does not answer, windows list as on `main`.
-- **First step of a larger prototype.** Left out: skipping the per-call portal check via Hyprland's monitors (about 100 ms a call), covering-window reports, background clicks through accessibility, and keeping dialogs from taking the keyboard.
-- **Maintenance.** Hyprland's JSON is unversioned; 0.57 dropped workspace ids, so workspaces match by name, and the test pins recorded output. An unreadable reply falls back to `main`'s list.
+- **Only the caller's list.** A new `Backend::listed_windows` serves `computer.windows()`; Wayland asks Hyprland there only. Captures, frames, AX roots and input keep reading `windows()`, AT-SPI's list, with no request.
+- **Read only.** One request (`j/clients`), only when a listed window has no position, only to the `Hyprland` process serving the Wayland socket (peer credentials, every connection).
+- **Never guessed.** A window takes a client only when exactly one Hyprland window of its process has its title.
+- **Falls back whole.** No socket, no answer within 1 s (connect to last byte; the connect never waits), a reply over 16 MiB, a missing key or a negative size: the list is `main`'s.
+- **Maintenance.** Hyprland's JSON is unversioned; this reads five long-standing keys (`mapped`, `at`, `size`, `pid`, `title`), pinned by a test on recorded 0.56.2 output.
 
-Limits: `j/clients` gives a moving window's destination, so a screenshot mid-animation can be cut from there. Nested Hyprland and scaled XWayland not run.
+Limits: a window being moved or resized is reported where Hyprland is taking it.
 
 ## Testing
 
-- `cargo test -p omp-natives --lib desktop::linux` on Linux: 139 passed. New tests read recorded 0.56.2 JSON with 0.57 workspaces through a fake socket, pin window ownership and the crop, and pin element placement (fails with it reverted).
-- Live, this head against `main`, only the addon swapped: a GTK 3 window and foot tiled on workspace 1, Files on 2, focus moved each trial. One `computer` cell per build: `windows()`, the GTK window's `screenshot()` and a button's `bounds()`, checked against `hyprctl` read right after. A script answered the screen-share picker, as a person picks the monitor.
-- Not run: Hyprland 0.57 live, multiple monitors.
+- `cargo test -p omp-natives --lib desktop` on Linux: 364 passed (36 ignored, need Xvfb). New tests read recorded `j/clients` through a fake socket, refuse truncated, keyless and negative-size replies and a socket nobody accepts on, and pin which window takes which client. Undoing the change fails two: placement with placement off, and `only_the_caller_gets_the_listing_and_internal_lookups_read_the_backend` with the listing served by `windows()`.
+- Live, this head against `main`, only the addon swapped: a GTK 3 window and a foot terminal on workspace 1, Files on 2, one GTK 3 process with two windows titled `TWIN`, focus moved each trial; one cell per build (`windows()`, the GTK 3 window's `ax()` and a button's `bounds()`), `hyprctl` read right after. Stopped: SIGSTOP before each cell, SIGCONT after; the list's SHA-256 matched `main`'s each trial. GNOME: SHA-256 per call.
+- Not run: Hyprland 0.57, multiple monitors, macOS (shared code gains one defaulted trait method).
 - `rust-check` on Linux and Windows.
+
+---
+
+- [ ] `bun check` passes
+- [ ] Tested locally
+- [ ] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
