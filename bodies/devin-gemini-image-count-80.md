@@ -11,7 +11,9 @@ I raised the image count for Gemini models on Devin's own host from 60 to 80 per
 
 Neon and Hydrogen get the same numbers once Devin's price for them is verified (a scratch merge with #19883 and the Hydrogen measurement). Until then omp plans their frames at a 5,024-token estimate and they stop at 26 frames either way.
 
-It is one rule in `providers/devin.kdl`: `official-image-count-budget 80` for the `gemini` class. Claude on Devin keeps its 20, other Devin models 60, a configured custom base URL 40. Like the existing 60, the official budget follows the configured URL, so it also applies when Devin's sign-in reroutes chat to another server; the byte budget and request limit apply there unchanged.
+It is one rule in `providers/devin.kdl`: `official-image-count-budget 80` for the `gemini` class. Claude on Devin keeps its 20, other Devin models 60, a configured custom base URL 40.
+
+Limits: an account whose sign-in reroutes chat to another server gets this host's budgets, here 80 Gemini images, on a server that wasn't measured, as it already gets 60 today.
 
 Non-goals: going past 80, where snapcompact's own `MAX_FRAMES_DEFAULT` (80) binds as well.
 
