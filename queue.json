@@ -115010,7 +115010,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-20T04:30:18.482707Z",
+  "at": "2026-11-20T04:42:08.023243Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -116265,17 +116265,14 @@
     "area": "computer",
     "priority": null,
     "title": "fix(natives,coding-agent): say when a Windows capture or tree of a covered Chromium window may be stale",
-    "action": "wait",
-    "reasons": [
-     "conflicts with #19519 in crates/natives/src/desktop/mod.rs",
-     "conflicts with main in crates/natives/src/desktop/mod.rs"
-    ],
-    "note": "",
+    "action": "open",
+    "reasons": [],
+    "note": "accepted pair with #19519: Main, 2026-11-20: adjacent test-only fields in the fake backend; combined = both",
     "over": [],
-    "paired": [],
-    "blocked_by": [
+    "paired": [
      "#19519"
     ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-20T04:27:57Z"
    },
