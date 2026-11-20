@@ -27,6 +27,7 @@
 - Fixed Windows window captures and accessibility trees of a fully covered window passing as current: for Chromium-based browsers and Electron apps, which can stop drawing while covered, they now report `covered` ([#19849](https://github.com/can1357/oh-my-pi/pull/19849) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed Windows `computer` `setValue` on a classic text box (Win32 and WinForms, including Windows 10 Notepad) bringing its window in front of yours, so the keys you typed next went into that box ([#19814](https://github.com/can1357/oh-my-pi/pull/19814) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed Windows `computer` `press()` on a classic button or check box (Win32 and WinForms) bringing its app in front of yours, and `click()` on one reporting success without clicking it ([#19889](https://github.com/can1357/oh-my-pi/pull/19889) by [@will-bogusz](https://github.com/will-bogusz))
+- Fixed `press()` on Windows refusing an item of a WPF app's open context menu with `BackgroundUnavailable` ("can take foreground") while that app's window held the foreground
 
 ## [19.0.1] - 2026-11-19
 
