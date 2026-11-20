@@ -106549,6 +106549,27 @@
    "pair_reasons": {
     "19615": "Main, 2026-11-20: wayland/mod.rs capture: hyprland's before-listing then #19615's shares.capture; combined, a kept stream's newest frame can predate the listing by about one frame"
    }
+  },
+  {
+   "id": "win-wpf-press",
+   "branch": "will/win-wpf-press",
+   "title": "fix(natives): press WPF controls behind other windows through their default action",
+   "area": "computer",
+   "priority": null,
+   "needs": [
+    "win-button-click",
+    "desktop-dispatch-fence"
+   ],
+   "base": "3119be97ee8a4e20f31d6d45db50de11104d3e60",
+   "body": "bodies/win-wpf-press.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-wpf-press",
+   "host": "MacBook-Pro",
+   "added": "2026-11-20T19:14:08Z",
+   "updated": "2026-11-20T19:14:08Z",
+   "note": ""
   }
  ],
  "watch": {
