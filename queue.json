@@ -107075,8 +107075,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-gemini-image-count-80",
    "host": "MacBook-Pro",
    "added": "2026-11-20T22:18:48Z",
-   "updated": "2026-11-20T22:18:48Z",
-   "note": ""
+   "updated": "2026-11-20T22:18:56Z",
+   "note": "LaneSnapcompactStack, 2026-11-20: Gemini class official-image-count-budget 80 on Devin (Claude 20, others 60, custom baseUrl 40). Synthetic compaction (scratch ~/checkouts/sc-budget80, harness test/zz-budget.test.ts): Carbon 1568px keeps 1.52M at 80 vs 1.14M at 60 (1.54M history; all kept at 2048/60) and 1.52M vs 1.13M (3.98M; 1.94M at 2048/60). Neon/Hydrogen need verified price first (else 26 frames). Tests: real compaction 80 frames + budget table row, both fail reverted; catalog 1,421, snapcompact 124. Review ReviewDevinGeminiCount80: needs-changes at 590fab87b22 (body/test, fixed) and still needs-changes at ba63e70e203 on ONE point, declined pending Main/Will: a GetUserJwt customApiServerUrl reroute (pi-ai devin.ts:241-244) gets 80 instead of 60, as it already gets 60 instead of 40 and the official byte budget; fixing needs the effective endpoint resolved before the clamps (design change). Body states it. Opens after snapcompact-carbon-1568.",
+   "kind": "fix"
   }
  ],
  "watch": {
