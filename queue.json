@@ -107002,7 +107002,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-20T20:10:43Z",
+  "checked": "2026-11-20T21:12:04Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -107061,7 +107061,9 @@
    19880,
    19883,
    19884,
-   19889
+   19889,
+   19928,
+   19929
   ],
   "post_merge": {
    "18632": {
@@ -107125,13 +107127,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-13T20:58:55Z",
-    "kind": "unopenable",
-    "id": "macos-drag-confirm",
-    "title": "fix(natives): stop macOS background drags reporting moves that did not happen",
-    "why": "opened as #19195"
-   },
    {
     "at": "2026-11-13T22:52:46Z",
     "kind": "openable",
@@ -118293,12 +118288,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-20T20:57:28.060148Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-20T21:12:05.728182Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 1,
-   "left": 7
+   "used": 2,
+   "left": 6
   },
   "rows": [
    {
@@ -118336,6 +118331,40 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-20T18:20:35Z"
+   },
+   {
+    "id": "devin-org-identity",
+    "label": "#19928",
+    "number": 19928,
+    "state": "open",
+    "area": "broker",
+    "priority": "P0",
+    "title": "fix(ai,catalog): store Devin login identity scoped by organization",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-20T21:08:51Z"
+   },
+   {
+    "id": "devin-quota-ranking",
+    "label": "#19929",
+    "number": 19929,
+    "state": "open",
+    "area": "broker",
+    "priority": "P0",
+    "title": "fix(ai): rank Devin logins by quota before their on-demand balance",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-20T21:10:19Z"
    },
    {
     "id": "iphone-mirror-pointer",
@@ -119591,40 +119620,6 @@
     "created": "2026-11-12T04:40:13Z"
    },
    {
-    "id": "devin-org-identity",
-    "label": "devin-org-identity",
-    "number": null,
-    "state": "queued",
-    "area": "broker",
-    "priority": null,
-    "title": "fix(ai,catalog): store Devin login identity scoped by organization",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-20T20:47:34Z"
-   },
-   {
-    "id": "devin-quota-ranking",
-    "label": "devin-quota-ranking",
-    "number": null,
-    "state": "queued",
-    "area": "broker",
-    "priority": null,
-    "title": "fix(ai): rank Devin logins by quota before their on-demand balance",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-20T20:55:11Z"
-   },
-   {
     "id": "encoded-prefix-count",
     "label": "encoded-prefix-count",
     "number": null,
@@ -119685,8 +119680,10 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with main in (branch missing on the fork)"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -119753,7 +119750,8 @@
     "action": "wait",
     "reasons": [
      "needs #19889 (open)",
-     "conflicts with #19871 in crates/natives/src/desktop/win32/ax.rs"
+     "conflicts with #19871 in crates/natives/src/desktop/win32/ax.rs",
+     "conflicts with #19870 in crates/natives/src/desktop/win32/ax.rs"
     ],
     "note": "accepted pair with #19849: Main, 2026-11-20: win32/window.rs; combined = WindowsAndMessaging import-list union, and one #[cfg(test)] mod tests holding both sides' uses and items (both append a tests module); recheck at #19849's next head",
     "over": [],
@@ -119761,7 +119759,8 @@
      "#19849"
     ],
     "blocked_by": [
-     "#19871"
+     "#19871",
+     "#19870"
     ],
     "needs": [
      "win-button-click"
@@ -119890,6 +119889,36 @@
      "desktop-dispatch-fence"
     ],
     "created": "2026-11-20T19:14:08Z"
+   },
+   {
+    "id": "win-wpf-set-background",
+    "label": "win-wpf-set-background",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": null,
+    "title": "fix(natives): set WPF text boxes, sliders and combo boxes behind other windows",
+    "action": "wait",
+    "reasons": [
+     "needs win-wpf-press (queued), win-uia-set-patterns (queued), #19871 (open)",
+     "conflicts with #19195 in docs/tools/computer.md",
+     "conflicts with #19870 in crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md",
+     "its need win-uia-set-patterns conflicts with main in crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md",
+     "its need #19871 conflicts with main in crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "#19195",
+     "#19870"
+    ],
+    "needs": [
+     "win-wpf-press",
+     "win-uia-set-patterns",
+     "desktop-dispatch-fence"
+    ],
+    "created": "2026-11-20T21:08:35Z"
    },
    {
     "id": "wire-delta-count",

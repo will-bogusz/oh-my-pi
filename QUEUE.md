@@ -3,17 +3,16 @@
 Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20 21:12Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-20 20:57Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 2, conflict-held 16, stacked 19, held 12, parked 1, open PRs 28, queued since the last plan 1; merged 404, closed 44
+**Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-11-20 21:12Z on goliath; groups below are from it, states from the manifest)
+**Counts:** openable now 1, conflict-held 17, stacked 20, held 12, parked 1, open PRs 28; merged 404, closed 44
 
-## Openable now (2)
+## Openable now (1)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
-| stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 7d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 | factory-droid-1100-pin | feat(catalog): identify Factory Droid requests as droid 1.10.0 | factory-droid |  | 7d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-pin) |
 
-## Conflict-held (16)
+## Conflict-held (17)
 
 | id | title | area | priority | age | blocked by | branch |
 |---|---|---|---|---|---|---|
@@ -31,10 +30,11 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20
 | win-minimised-windows | fix(natives,coding-agent): show a minimized Windows app's window from apps.open instead of launching it again | computer | P2 | 9d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-minimised-windows) |
 | macos-ax-cancel-before-send | fix(natives): send no macOS AX action once its run is cancelled | natives | P2 | 9d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-ax-cancel-before-send) |
 | win-ax-states | fix(natives): expose Windows control state and stale-reference matches | computer | P2 | 9d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-ax-states) |
+| stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 7d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 | macos-web-type-background | fix(natives): type into a background macOS web page field without a takeover | computer | P2 | 6d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19504](https://github.com/can1357/oh-my-pi/pull/19504), [#19702](https://github.com/can1357/oh-my-pi/pull/19702), [#19871](https://github.com/can1357/oh-my-pi/pull/19871), [#19531](https://github.com/can1357/oh-my-pi/pull/19531), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-web-type-background) |
 | deadline-ranking | feat(ai): rank an account priority by quota deadline | ai/auth | P2 | 2d | [#19623](https://github.com/can1357/oh-my-pi/pull/19623), [#19700](https://github.com/can1357/oh-my-pi/pull/19700), [#19701](https://github.com/can1357/oh-my-pi/pull/19701) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/deadline-ranking) |
 
-## Stacked (19)
+## Stacked (20)
 
 | id | title | area | priority | age | needs | branch |
 |---|---|---|---|---|---|---|
@@ -57,6 +57,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20
 | win-button-click-fence | fix(natives): mark dispatch before a fenced BM_CLICK | computer |  | 4h | win-button-click ([#19889](https://github.com/can1357/oh-my-pi/pull/19889)), desktop-dispatch-fence ([#19871](https://github.com/can1357/oh-my-pi/pull/19871)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-button-click-fence) |
 | win-wpf-press | fix(natives): press WPF controls behind other windows through their default action | computer |  | 1h | win-button-click ([#19889](https://github.com/can1357/oh-my-pi/pull/19889)), desktop-dispatch-fence ([#19871](https://github.com/can1357/oh-my-pi/pull/19871)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-wpf-press) |
 | win-takeover-selection | fix(natives): keep the user's caret through a Windows takeover's hand-back | computer |  | 1h | win-takeover-settle | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-takeover-selection) |
+| win-wpf-set-background | fix(natives): set WPF text boxes, sliders and combo boxes behind other windows | computer |  | 0h | win-wpf-press, win-uia-set-patterns, desktop-dispatch-fence ([#19871](https://github.com/can1357/oh-my-pi/pull/19871)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-wpf-set-background) |
 
 ## Held (12)
 
@@ -111,11 +112,5 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20
 | [#19878](https://github.com/can1357/oh-my-pi/pull/19878) | picker-stale-discovery | fix(coding-agent,tui): refresh discovery from the model picker once the catalog is two hours old | other | P1 | 3h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/picker-stale-discovery) |
 | [#19883](https://github.com/can1357/oh-my-pi/pull/19883) | devin-neon-image-price | fix(catalog): budget Gemini 4 Neon's images on Devin at the 1,089 tokens it bills | catalog | P0 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-neon-image-price) |
 | [#19884](https://github.com/can1357/oh-my-pi/pull/19884) | atspi-alert-windows | fix(natives): list GTK message dialogs as windows on Wayland | computer | P1 | 2h | keep; tests-over: LinuxUpstream, 2026-11-20: one test reaching three branches (Alert listing through windows(), shared-title refusal in window_id, an in-window alert's owner); 45 of its lines are a fake GTK 3 app with children, application, parent and pid that no existing fixture provides | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-alert-windows) |
-| [#19928](https://github.com/can1357/oh-my-pi/pull/19928) | devin-org-identity | fix(ai,catalog): store Devin login identity scoped by organization | broker | P0 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-org-identity) |
-| [#19929](https://github.com/can1357/oh-my-pi/pull/19929) | devin-quota-ranking | fix(ai): rank Devin logins by quota before their on-demand balance | broker | P0 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-quota-ranking) |
-
-## Queued since the last plan (1)
-
-| id | title | area | priority | age | branch |
-|---|---|---|---|---|---|
-| win-wpf-set-background | fix(natives): set WPF text boxes, sliders and combo boxes behind other windows | computer |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-wpf-set-background) |
+| [#19928](https://github.com/can1357/oh-my-pi/pull/19928) | devin-org-identity | fix(ai,catalog): store Devin login identity scoped by organization | broker | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-org-identity) |
+| [#19929](https://github.com/can1357/oh-my-pi/pull/19929) | devin-quota-ranking | fix(ai): rank Devin logins by quota before their on-demand balance | broker | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-quota-ranking) |
