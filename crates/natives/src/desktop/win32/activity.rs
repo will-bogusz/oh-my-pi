@@ -24,7 +24,7 @@ use std::{
 use parking_lot::Mutex;
 use windows_sys::Win32::{
 	Foundation::{HWND, LPARAM, LRESULT, WPARAM},
-	System::{SystemInformation::GetTickCount, Threading::GetCurrentThreadId},
+	System::SystemInformation::GetTickCount,
 	UI::{
 		Input::{
 			GetRawInputData, HRAWINPUT,
