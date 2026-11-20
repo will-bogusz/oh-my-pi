@@ -44,6 +44,7 @@ describe("AgentSession snapcompact frame dead-end rescue", () => {
 		authStorage = await AuthStorage.create(":memory:");
 		authStorage.keys.setRuntime("anthropic", "test-key");
 		authStorage.keys.setRuntime("fireworks", "test-key");
+		authStorage.keys.setRuntime("opencode-go", "test-key");
 		modelRegistry = new ModelRegistry(authStorage);
 	});
 
@@ -416,6 +417,62 @@ describe("AgentSession snapcompact frame dead-end rescue", () => {
 		expect(atCeiling.frames).toBe(Math.floor(atCeiling.budget / snapcompact.FRAME_TOKEN_ESTIMATE));
 		expect(atPrice.frames).toBeGreaterThan(atCeiling.frames);
 		expect(atPrice.frames).toBeLessThan(SEEDED_FRAME_COUNT);
+	});
+	it("rebuilds a reader of the archive's text at the text each frame holds", async () => {
+		// DeepSeek V4.1 Flash reads the archive's text in place of its frames (catalog `snapcompact-text-archive`).
+		const deepseek = getBundledModel("opencode-go", "deepseek-v4.1-flash");
+		if (!deepseek) throw new Error("Expected bundled opencode-go/deepseek-v4.1-flash");
+		const shape = snapcompact.resolveShape(deepseek);
+		const textPerFrame = Math.ceil((snapcompact.geometry(shape).capacity * 1.15) / 4);
+		expect(textPerFrame).toBeGreaterThan(snapcompact.plannedFrameTokens(shape));
+
+		// A kept tool result before the archive leaves room for fewer text-priced frames than the
+		// host's image-count budget (5), so the frame price, not that cap, decides the count.
+		await createSession({
+			frameCount: SEEDED_FRAME_COUNT,
+			model: deepseek,
+			preArchiveKeptText: "kept output line\n".repeat(5_000),
+		});
+		const branch = sessionManager.getBranch();
+		const [firstEntry] = branch;
+		if (firstEntry?.type !== "message") throw new Error("Expected the seeded user turn first");
+		const keptTokens = branch.reduce(
+			(sum, entry) => (entry.type === "message" ? sum + session.agent.tokenizer.countMessage(entry.message) : sum),
+			0,
+		);
+		// The 80% recovery band of the 60k trigger, less the fixed context, the kept
+		// entries, the archive's text edges and the summary template.
+		const budget =
+			Math.floor(60_000 * 0.8) -
+			computeNonMessageTokens(session, session.agent.tokenizer, session.settings.revision) -
+			keptTokens -
+			Math.ceil((2 * snapcompact.geometry(shape).capacity * 1.15) / 4) -
+			2000;
+		const frames = Math.floor(budget / textPerFrame);
+		expect(frames).toBeGreaterThan(0);
+		expect(frames).toBeLessThan(Math.min(5, Math.floor(budget / snapcompact.plannedFrameTokens(shape))));
+		vi.spyOn(session.agent, "prompt").mockImplementation(async () => {});
+		vi.spyOn(session.agent, "continue").mockResolvedValue();
+		let rebuilt = false;
+		vi.spyOn(session, "getContextUsage").mockImplementation(() =>
+			rebuilt
+				? { tokens: 30000, contextWindow: 200000, percent: 15 }
+				: { tokens: 190000, contextWindow: 200000, percent: 95 },
+		);
+		const compactSpy = vi.spyOn(snapcompact, "compact").mockImplementation(async () => {
+			rebuilt = true;
+			return {
+				summary: "Rebuilt archive at a smaller frame budget.",
+				shortSummary: "rebuilt snapcompact archive",
+				firstKeptEntryId: firstEntry.id,
+				tokensBefore: 150_000,
+				details: { readFiles: [], modifiedFiles: [] },
+				preserveData: makeArchivePreserveData(1),
+			};
+		});
+		await triggerMaintenance();
+
+		expect(compactSpy.mock.calls[0]?.[1]?.maxFrames).toBe(frames);
 	});
 	it("rebuilds the just-written archive when a completed pass dead-ends on its own frames", async () => {
 		// POST-PASS shape (observed live on 17.0.8): compaction ran and wrote a

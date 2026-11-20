@@ -479,13 +479,15 @@ describe("snapcompact archive read by another model", () => {
 		expectOriginalIntact(latestCompaction(sessionManager), original);
 	});
 
-	it("sizes DeepSeek V4.1 Flash's own snapcompact archive by the text it reads, not by its frames", async () => {
+	/**
+	 * Archived turns plus a kept turn of ~40k tokens: under 60% of the 100k threshold that leaves room for about
+	 * two frames' worth of archive text, where five frames would fit priced as images.
+	 */
+	function startDeepseekSizing() {
 		const sessionManager = SessionManager.inMemory();
 		for (let pass = 0; pass < 3; pass++) {
 			for (const message of archivedTurns()) sessionManager.appendMessage(message);
 		}
-		// A kept turn of ~40k tokens leaves room under 60% of the 100k threshold for about two frames' worth of
-		// archive text; priced as images, five frames would fit.
 		sessionManager.appendMessage({
 			role: "user",
 			content: `Kept turn: ${"lorem ipsum ".repeat(13_333)}`,
@@ -502,11 +504,37 @@ describe("snapcompact archive read by another model", () => {
 				}),
 			},
 		);
+		return { sessionManager, session };
+	}
+
+	it("sizes DeepSeek V4.1 Flash's own snapcompact archive by the text it reads, not by its frames", async () => {
+		const { sessionManager, session } = startDeepseekSizing();
+		const compactSpy = vi.spyOn(snapcompact, "compact");
 
 		await session.compact(undefined, { mode: "snapcompact" });
 		const entry = latestCompaction(sessionManager);
 		expect(entry.method).toBe("snapcompact");
 		expect(entry.tokensAfter).toBeLessThanOrEqual(60_000);
+		// Planned at the text each frame holds, the first render already fits: no re-render.
+		expect(compactSpy).toHaveBeenCalledTimes(1);
+	});
+
+	it("cuts a DeepSeek V4.1 Flash archive rendered past its plan back by the text each frame holds", async () => {
+		const { sessionManager, session } = startDeepseekSizing();
+		const render = snapcompact.compact;
+		const compactSpy = vi.spyOn(snapcompact, "compact");
+		// The first render ignores the planned frame cap, as a renderer that overshoots it would.
+		compactSpy.mockImplementationOnce((preparation, options) => render(preparation, { ...options, maxFrames: 5 }));
+
+		await session.compact(undefined, { mode: "snapcompact" });
+		const entry = latestCompaction(sessionManager);
+		expect(entry.method).toBe("snapcompact");
+		// Measured as the text it reads, the overshoot is cut back under the target...
+		expect(entry.tokensAfter).toBeLessThanOrEqual(60_000);
+		// ...at the text each frame holds, so it keeps at least the frames the plan fit, not one.
+		const planned = compactSpy.mock.calls[0]?.[1]?.maxFrames ?? 0;
+		expect(planned).toBeGreaterThan(1);
+		expect(snapcompact.getPreservedArchive(entry.preserveData)!.frames.length).toBeGreaterThanOrEqual(planned);
 	});
 
 	it("judges DeepSeek V4.1 Flash's first pass after a resume against the archive text it reads", async () => {
