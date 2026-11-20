@@ -105450,7 +105450,47 @@
     }
    ],
    "opened": "2026-11-20T07:39:20Z",
-   "readied": "2026-11-20T07:39:46Z"
+   "readied": "2026-11-20T07:39:46Z",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-20T09:07:37Z",
+     "reason": "QueueForty, 2026-11-20: roboomp finding 4639782779 moves COVERED_TREE_NOTE from Rust (mod.rs) to TypeScript (computer-covered-tree.md); window.rs doc comment rewritten for the WS_EX_TRANSPARENT rule and test helper imports/HWND_TOP -> HWND_TOPMOST (finding 4639782775)",
+     "old": "06c69d4219647706f03f128b205019e7a0d6eef1",
+     "new": "010b5ac92b1549bb772725632a7a9d0c655367a1",
+     "dropped": {
+      "crates/natives/src/desktop/mod.rs": [
+       "/// Closing line of a tree read from a Chromium window that appeared fully",
+       "/// covered around the read.",
+       "const COVERED_TREE_NOTE: &str =",
+       "\t\"\u2026 covered: this window appeared fully covered around the read, and Chromium can stop updating \\",
+       "\t the tree of a window it finds covered, so this tree and the window's screenshot may be stale; \\",
+       "\t while it stays covered, do not wait and read it again by any route (screenshot, ax(), find), \\",
+       "\t since those may be stale too. To see its current state, read the page with the browser tool \\",
+       "\t if it is connected to this app; otherwise raise() the window (it comes in front of the user's \\",
+       "\t windows and takes their keyboard; Windows refuses it while they are using another window) and \\",
+       "\t read it again, checking for the state you expect rather than trusting the first read after \\",
+       "\t it; otherwise go on without it, telling the user what you could not confirm\";",
+       "\t\tif covered_before || self.backend()?.window_covered(&window.id) {",
+       "\t\t\tif !snapshot.text.is_empty() {",
+       "\t\t\t\tsnapshot.text.push('\\n');",
+       "\t\t\tsnapshot.text.push_str(COVERED_TREE_NOTE);",
+       "\t\t\t\tassert_eq!(tree.text.ends_with(COVERED_TREE_NOTE), covered, \"{}\", tree.text);"
+      ],
+      "crates/natives/src/desktop/win32/window.rs": [
+       "/// The screen rectangle `hwnd` hides what lies under: none unless it is",
+       "/// visible, not minimized, not cloaked (another virtual desktop, a suspended",
+       "/// UWP frame), not click-through and not see-through layered; its frame, cut",
+       "/// to a rectangular window region, and none for an empty or shaped one.",
+       "\t\t\tCreateWindowExW, DefWindowProcW, DestroyWindow, HWND_TOP, RegisterClassW, SWP_NOACTIVATE,",
+       "\t\t\tSWP_NOMOVE, SWP_NOSIZE, SWP_NOZORDER, SWP_SHOWWINDOW, SetLayeredWindowAttributes,",
+       "\t\t\tSetWindowLongW, SetWindowPos, WNDCLASSW, WS_OVERLAPPEDWINDOW,",
+       "\t/// is `frame`, shown without activation above every window made before it.",
+       "\t\t\t\tHWND_TOP,",
+       "\t\t\tSetWindowLongW(cover, GWL_EXSTYLE, WS_EX_LAYERED as i32);"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "win-popup-foreground",
