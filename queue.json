@@ -107035,6 +107035,26 @@
    "updated": "2026-11-20T21:16:24Z",
    "note": "",
    "hold": "Main, 2026-11-20: held; re-cut on the new semantic-only win-wpf-press (WinWpfRoutes10); current head 022154dbeab is not to be reviewed, run or opened"
+  },
+  {
+   "id": "devin-gemini-image-price-rest",
+   "branch": "will/devin-gemini-image-price-rest",
+   "title": "fix(catalog): budget Devin's other measured Gemini models at the 1,089 tokens it bills per image",
+   "area": "catalog",
+   "priority": "P2",
+   "needs": [
+    "devin-neon-image-price"
+   ],
+   "base": "d12a5ffe991dbc225963c9dd848f927b7a6b58a3",
+   "body": "bodies/devin-gemini-image-price-rest.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-gemini-image-price-rest",
+   "host": "MacBook-Pro",
+   "added": "2026-11-20T21:22:43Z",
+   "updated": "2026-11-20T21:22:43Z",
+   "note": ""
   }
  ],
  "watch": {
