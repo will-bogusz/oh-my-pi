@@ -114987,8 +114987,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-20T02:50:57.982306Z",
-  "host": "goliath",
+  "at": "2026-11-20T03:16:57.143938Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -116180,10 +116180,8 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "wait",
-    "reasons": [
-     "conflicts with main in (branch missing on the fork)"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
