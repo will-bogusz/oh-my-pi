@@ -105489,6 +105489,50 @@
        "\t\t\tSetWindowLongW(cover, GWL_EXSTYLE, WS_EX_LAYERED as i32);"
       ]
      }
+    },
+    {
+     "at": "2026-11-20T10:57:17Z",
+     "reason": "QueueForty, 2026-11-20: final-review round on #19849: occluder walk rewritten without the Vec (finding 4), WS_POPUP/WS_EX_TOOLWINDOW guards change imports and the fully_covered doc (findings 1-2), docs line reworded (finding 5)",
+     "old": "010b5ac92b1549bb772725632a7a9d0c655367a1",
+     "new": "5a3f19facee5ab584a32de276553c5b7fc681cdb",
+     "dropped": {
+      "crates/natives/src/desktop/win32/window.rs": [
+       "\t\t\t\tGetAncestor, GetClassNameW, GetForegroundWindow, GetGUIThreadInfo,",
+       "\t\t\t\tWS_EX_LAYERED, WS_EX_TRANSPARENT,",
+       "/// on a display outside the visible, opaque windows above it in the z-order.",
+       "/// False when any of that cannot be read.",
+       "\tlet (Some(frame), Some(displays), Some(above)) =",
+       "\t\t(frame_bounds(hwnd), displays(), occluders_above(hwnd))",
+       "\telse {",
+       "\tlet mut kind = shown.combine(&displays, RGN_AND);",
+       "\tfor rect in above {",
+       "\t\tif kind != SIMPLEREGION && kind != COMPLEXREGION {",
+       "\t\tlet Some(cover) = Region::new(rect) else {",
+       "\t\tkind = shown.combine(&cover, RGN_DIFF);",
+       "\tkind == NULLREGION",
+       "/// The screen rectangles hiding what lies under them of every top-level",
+       "/// window above `hwnd`, from one top-to-bottom pass over the z-order; `None`",
+       "/// when the pass does not reach `hwnd`.",
+       "fn occluders_above(hwnd: HWND) -> Option<Vec<RECT>> {",
+       "\t\tfound:  bool,",
+       "\t\trects:  Vec<RECT>,",
+       "\t\t\twalk.found = true;",
+       "\t\twalk.rects.extend(occluder(window));",
+       "\t\tBOOL::from(true)",
+       "\tlet mut walk = Walk { target: hwnd, found: false, rects: Vec::new() };",
+       "\t// address of `walk`, which outlives it.",
+       "\twalk.found.then_some(walk.rects)",
+       "/// occlusion check counts it: none unless it is visible, not minimized, not",
+       "/// `WS_EX_TRANSPARENT` and not see-through layered; its frame, cut to a",
+       "/// rectangular window region, and none for an empty or shaped one.",
+       "\t\t// Chromium skips such a window as an occluder even when it is opaque",
+       "\t\t// (`IsWindowVisibleAndFullyOpaque` in ui/gfx/win/hwnd_util.cc), so it",
+       "\t\t// keeps drawing under it and its reads stay current."
+      ],
+      "docs/tools/computer.md": [
+       "On Windows, a screenshot or zoom of a window drawn by Chromium (Chrome, Edge, Electron apps) that appeared fully covered around the read (other windows over all of it, or off every display) sets `covered: true` and adds a note to its status text, and that window's `ax()` ends with a `\u2026 covered:` line. `silent: true` leaves out the status text and its note, not the `covered` property. The mark comes from window geometry, not from the app: Chromium can stop drawing and updating its accessibility tree while it finds itself covered, and Windows then returns the last frame it drew, so either read may be stale, and repeating it while the window stays covered does not help. The note names the ways to a current view, least disruptive first: the browser tool when it is connected to that app, then `raise()` (which brings the window in front of the user's and takes their keyboard, and which Windows refuses while the user is using another window) and a read that checks for the expected state rather than trusting the first unmarked one, else telling the user what could not be confirmed. Nothing is refused; a window with any part showing, and other apps' windows, carry no mark."
+      ]
+     }
     }
    ]
   },
