@@ -23,12 +23,12 @@ use std::{
 	time::{Duration, Instant},
 };
 
-use parking_lot::Mutex;
+use parking_lot::{Condvar, Mutex};
 use windows_sys::Win32::{
-	Foundation::{HWND, LPARAM, LRESULT, WPARAM},
+	Foundation::{CloseHandle, HANDLE, HWND, LPARAM, LRESULT, WAIT_OBJECT_0, WPARAM},
 	System::{
 		SystemInformation::{GetTickCount, GetTickCount64},
-		Threading::GetCurrentThreadId,
+		Threading::{CreateEventW, INFINITE, SetEvent, WaitForSingleObject},
 	},
 	UI::{
 		Input::{
@@ -41,11 +41,11 @@ use windows_sys::Win32::{
 			RIM_TYPEMOUSE, RIDEV_REMOVE, RegisterRawInputDevices,
 		},
 		WindowsAndMessaging::{
-			CreateWindowExW, DefWindowProcW, DestroyWindow, DispatchMessageW, GetMessageW,
-			HWND_MESSAGE, MSG, PostThreadMessageW, RI_KEY_BREAK, RI_MOUSE_BUTTON_4_DOWN,
-			RI_MOUSE_BUTTON_5_DOWN, RI_MOUSE_HWHEEL, RI_MOUSE_LEFT_BUTTON_DOWN,
-			RI_MOUSE_MIDDLE_BUTTON_DOWN, RI_MOUSE_RIGHT_BUTTON_DOWN, RI_MOUSE_WHEEL, RegisterClassW,
-			UnregisterClassW, WM_INPUT, WM_QUIT, WNDCLASSW,
+			CreateWindowExW, DefWindowProcW, DestroyWindow, DispatchMessageW, HWND_MESSAGE, MSG,
+			MsgWaitForMultipleObjects, PM_REMOVE, PeekMessageW, QS_ALLINPUT, RI_KEY_BREAK,
+			RI_MOUSE_BUTTON_4_DOWN, RI_MOUSE_BUTTON_5_DOWN, RI_MOUSE_HWHEEL,
+			RI_MOUSE_LEFT_BUTTON_DOWN, RI_MOUSE_MIDDLE_BUTTON_DOWN, RI_MOUSE_RIGHT_BUTTON_DOWN,
+			RI_MOUSE_WHEEL, RegisterClassW, UnregisterClassW, WM_INPUT, WNDCLASSW,
 		},
 	},
 };
@@ -97,15 +97,22 @@ thread_local! {
 	static ACTIVE: RefCell<Option<Baseline>> = const { RefCell::new(None) };
 }
 
-/// Serializes both transitions: a new watch cannot register until the old
-/// listener has removed its devices and its thread has ended.
+/// A transition excludes new registrations without holding the state lock
+/// while the listener starts or joins. Waiters release it through the condvar.
+enum Registration<R> {
+	Idle,
+	Changing,
+	Live(usize, Arc<Presses>, R),
+}
+
 struct Watches<R> {
-	state: Mutex<Option<(usize, Arc<Presses>, R)>>,
+	state: Mutex<Registration<R>>,
+	changed: Condvar,
 }
 
 impl<R> Watches<R> {
 	const fn new() -> Self {
-		Self { state: Mutex::new(None) }
+		Self { state: Mutex::new(Registration::Idle), changed: Condvar::new() }
 	}
 
 	fn watch(
@@ -113,13 +120,40 @@ impl<R> Watches<R> {
 		register: impl FnOnce() -> CoreResult<(Arc<Presses>, R)>,
 	) -> CoreResult<Watch<'_, R>> {
 		let mut state = self.state.lock();
-		if state.is_none() {
-			let (presses, registration) = register()?;
-			*state = Some((0, presses, registration));
+		loop {
+			match &mut *state {
+				Registration::Live(count, presses, _) => {
+					*count += 1;
+					return Ok(Watch { watches: self, presses: Arc::clone(presses) });
+				},
+				Registration::Changing => self.changed.wait(&mut state),
+				Registration::Idle => break,
+			}
 		}
-		let (count, presses, _) = state.as_mut().expect("registered above");
-		*count += 1;
-		Ok(Watch { watches: self, presses: Arc::clone(presses) })
+		*state = Registration::Changing;
+		drop(state);
+		let registered = register();
+		let mut state = self.state.lock();
+		let result = match registered {
+			Ok((presses, registration)) => {
+				let watch = Watch { watches: self, presses: Arc::clone(&presses) };
+				*state = Registration::Live(1, presses, registration);
+				Ok(watch)
+			},
+			Err(error) => {
+				*state = Registration::Idle;
+				Err(error)
+			},
+		};
+		self.changed.notify_all();
+		result
+	}
+
+	fn presses(&self) -> Option<Arc<Presses>> {
+		match &*self.state.lock() {
+			Registration::Live(_, presses, _) => Some(Arc::clone(presses)),
+			Registration::Idle | Registration::Changing => None,
+		}
 	}
 }
 
@@ -131,13 +165,19 @@ struct Watch<'a, R> {
 impl<R> Drop for Watch<'_, R> {
 	fn drop(&mut self) {
 		let mut state = self.watches.state.lock();
-		let (count, _, _) = state.as_mut().expect("a watch owns a registration");
+		let Registration::Live(count, _, _) = &mut *state else {
+			unreachable!("a watch owns a live registration");
+		};
 		*count -= 1;
-		if *count == 0 {
-			// Drop the registration under the lock: remove and join before
-			// another session can register the same process-wide devices.
-			*state = None;
+		if *count != 0 {
+			return;
 		}
+		let registration = std::mem::replace(&mut *state, Registration::Changing);
+		drop(state);
+		// Listener drop signals an independent event and joins its thread.
+		drop(registration);
+		*self.watches.state.lock() = Registration::Idle;
+		self.watches.changed.notify_all();
 	}
 }
 
@@ -161,12 +201,7 @@ impl Drop for UserActivity {
 /// The worker's call-scope watch already owns the registration.
 pub(super) fn admit() -> CoreResult<()> {
 	ADMITTED.set(None);
-	let presses = WATCHES
-		.state
-		.lock()
-		.as_ref()
-		.map(|(_, presses, _)| Arc::clone(presses))
-		.ok_or_else(unwatched)?;
+	let presses = WATCHES.presses().ok_or_else(unwatched)?;
 	let deadline = control::current_token().and_then(|token| token.deadline());
 	let limit = deadline.map_or_else(
 		|| now() + QUIET,
@@ -183,10 +218,15 @@ pub(super) fn admit() -> CoreResult<()> {
 /// With the input lease held: whether the user has pressed nothing since
 /// [`admit`] and holds no key or button.
 pub(super) fn admitted() -> bool {
+	let Some(current) = WATCHES.presses() else {
+		return false;
+	};
 	ADMITTED.with_borrow(|admitted| {
 		admitted
 			.as_ref()
-			.is_some_and(|(presses, baseline)| presses.count.load(Ordering::Acquire) == *baseline)
+			.is_some_and(|(presses, baseline)| {
+				Arc::ptr_eq(presses, &current) && presses.count.load(Ordering::Acquire) == *baseline
+			})
 	}) && !input_held()
 }
 
@@ -221,8 +261,13 @@ fn start_with<R>(
 	wait: impl FnMut(Duration) -> CoreResult<()>,
 ) -> CoreResult<Takeover<R>> {
 	ACTIVE.set(None);
-	let baseline = if let Some((presses, baseline)) = ADMITTED.take() {
-		if presses.count.load(Ordering::Acquire) != baseline || held() {
+	let baseline = if let Some((admitted, baseline)) = ADMITTED.take() {
+		// The Arc's identity is the registration generation: an old baseline
+		// retains its allocation, so a later registration cannot reuse it.
+		if !Arc::ptr_eq(&presses, &admitted)
+			|| admitted.count.load(Ordering::Acquire) != baseline
+			|| held()
+		{
 			return Err(DesktopError::user_intervened(
 				"the user pressed or is holding a key or button as the takeover was starting, so none \
 				 started; nothing was sent; try again once they pause",
@@ -312,14 +357,14 @@ fn input_held() -> bool {
 
 /// When the user last pressed anything before the listener started, from the
 /// session's last input time, which counts injected input too.
-/// Other processes' injected input can only lengthen admission's wait.
+/// Injected timestamps can move history backward, admitting earlier or later.
 fn last_input_before(started: Duration) -> Option<Duration> {
 	let mut info = LASTINPUTINFO { cbSize: size_of::<LASTINPUTINFO>() as u32, dwTime: 0 };
 	// SAFETY: `info` is writable and its size is set.
 	if unsafe { GetLastInputInfo(&raw mut info) } == 0 {
 		return None;
 	}
-	if !user_tick(info.dwTime, OWN_SEND.load(Ordering::Acquire)) {
+	if !user_tick(info.dwTime, *OWN_SEND.lock(), started) {
 		return None;
 	}
 	// SAFETY: GetTickCount has no preconditions; both ticks wrap together.
@@ -332,17 +377,34 @@ fn now() -> Duration {
 	Duration::from_millis(unsafe { GetTickCount64() })
 }
 
-// The high bit distinguishes no SendInput yet from a send at tick zero.
-static OWN_SEND: AtomicU64 = AtomicU64::new(0);
-
-pub(super) fn sent() {
-	// SAFETY: GetTickCount has no preconditions.
-	let tick = unsafe { GetTickCount() };
-	OWN_SEND.store((1_u64 << 32) | u64::from(tick), Ordering::Release);
+#[derive(Clone, Copy)]
+struct OwnSend {
+	before: u32,
+	after: u32,
+	at: Duration,
 }
 
-fn user_tick(last: u32, own: u64) -> bool {
-	own == 0 || (last.wrapping_sub(own as u32) as i32) > 0
+static OWN_SEND: Mutex<Option<OwnSend>> = Mutex::new(None);
+const SEND_HISTORY: Duration = Duration::from_secs(60);
+
+pub(super) fn sending() -> u32 {
+	// SAFETY: GetTickCount has no preconditions.
+	unsafe { GetTickCount() }
+}
+
+pub(super) fn sent(before: u32) {
+	let after = sending();
+	*OWN_SEND.lock() = Some(OwnSend { before, after, at: now() });
+}
+
+fn user_tick(last: u32, own: Option<OwnSend>, at: Duration) -> bool {
+	let Some(own) = own else {
+		return true;
+	};
+	// A user press during SendInput itself is attributed to OMP. Only that
+	// batch's bounded tick window is suppressed, never earlier/later input.
+	at.saturating_sub(own.at) >= SEND_HISTORY
+		|| last.wrapping_sub(own.before) > own.after.wrapping_sub(own.before)
 }
 
 /// Whether `input` is a key or button press from a device, which is the user's.
@@ -404,16 +466,25 @@ fn devices(flags: u32, target: HWND) -> [RAWINPUTDEVICE; 2] {
 	})
 }
 
+struct StopEvent(isize);
+
+impl Drop for StopEvent {
+	fn drop(&mut self) {
+		// SAFETY: the last owner closes the event after the listener joins.
+		unsafe { CloseHandle(self.0 as HANDLE) };
+	}
+}
+
 struct Listener {
 	thread: Option<thread::JoinHandle<()>>,
-	id: u32,
+	stop: Arc<StopEvent>,
 }
 
 impl Drop for Listener {
 	fn drop(&mut self) {
-		// SAFETY: the live listener published its thread id after creating
-		// its window/queue. WM_QUIT ends its loop; join acknowledges removal.
-		unsafe { PostThreadMessageW(self.id, WM_QUIT, 0, 0) };
+		// SAFETY: both owners retain this valid manual-reset event. Unlike a
+		// posted message, signaling cannot fail because the queue is full.
+		unsafe { SetEvent(self.stop.0 as HANDLE) };
 		if let Some(thread) = self.thread.take() {
 			let _ = thread.join();
 		}
@@ -421,6 +492,13 @@ impl Drop for Listener {
 }
 
 fn listen() -> CoreResult<(Arc<Presses>, Listener)> {
+	// SAFETY: null security/name, manual reset, initially unsignaled.
+	let event = unsafe { CreateEventW(std::ptr::null(), 1, 0, std::ptr::null()) };
+	if event.is_null() {
+		return Err(unwatched());
+	}
+	let stop = Arc::new(StopEvent(event as isize));
+	let stopping = Arc::clone(&stop);
 	let presses = Arc::new(Presses { count: AtomicU64::new(0), last: Mutex::new(None) });
 	let (ready, receive_ready) = flume::bounded(1);
 	let shared = Arc::clone(&presses);
@@ -477,30 +555,51 @@ fn listen() -> CoreResult<(Arc<Presses>, Listener)> {
 					*presses.last.lock() = last_input_before(now());
 				}
 			});
-			// SAFETY: no preconditions; the window above created this queue.
-			let _ = ready.send(Some(unsafe { GetCurrentThreadId() }));
-			// SAFETY: MSG is plain storage owned by this thread.
+			let _ = ready.send(Some(()));
+			// SAFETY: MSG is writable storage; the event lives through join.
 			let mut message: MSG = unsafe { std::mem::zeroed() };
-			// SAFETY: writable storage; WM_QUIT ends this call's listener.
-			while unsafe { GetMessageW(&raw mut message, std::ptr::null_mut(), 0, 0) } > 0 {
-				// SAFETY: a message this thread's queue returned.
-				unsafe { DispatchMessageW(&raw const message) };
+			let event = stopping.0 as HANDLE;
+			'listening: loop {
+				// SAFETY: one valid event; pump all queued input after waking.
+				if unsafe { MsgWaitForMultipleObjects(1, &event, 0, INFINITE, QS_ALLINPUT) }
+					!= WAIT_OBJECT_0 + 1
+				{
+					break;
+				}
+				loop {
+					// SAFETY: checking the event between messages bounds shutdown
+					// even when input arrives faster than the queue can drain.
+					if unsafe { WaitForSingleObject(event, 0) } == WAIT_OBJECT_0 {
+						break 'listening;
+					}
+					// SAFETY: this thread owns its queue and writable MSG.
+					if unsafe { PeekMessageW(&raw mut message, std::ptr::null_mut(), 0, 0, PM_REMOVE) } == 0 {
+						break;
+					}
+					// SAFETY: this queue supplied the message.
+					unsafe { DispatchMessageW(&raw const message) };
+				}
 			}
 			let devices = devices(RIDEV_REMOVE, std::ptr::null_mut());
 			// SAFETY: removal requires a null target. Both removal and window
 			// destruction run on the thread which registered/created them.
-			unsafe {
-				RegisterRawInputDevices(devices.as_ptr(), 2, size_of::<RAWINPUTDEVICE>() as u32);
-				DestroyWindow(window);
-				UnregisterClassW(class.as_ptr(), std::ptr::null_mut());
-			}
+			let removed = unsafe {
+				RegisterRawInputDevices(devices.as_ptr(), 2, size_of::<RAWINPUTDEVICE>() as u32)
+			};
+			// SAFETY: this thread owns the window and its class.
+			let destroyed = unsafe { DestroyWindow(window) };
+			// A failed removal can leave an enumerated registration, but
+			// destroying its target still ends delivery to this process.
+			assert!(removed != 0 || destroyed != 0, "cannot stop Raw Input delivery");
+			// SAFETY: no live window uses the class after destruction.
+			unsafe { UnregisterClassW(class.as_ptr(), std::ptr::null_mut()) };
 			LISTENING.set(None);
 		})
 		.map_err(|error| {
 			DesktopError::input_failed(format!("cannot start watching the user's input: {error}"))
 		})?;
-	if let Ok(Some(id)) = receive_ready.recv() {
-		Ok((presses, Listener { thread: Some(thread), id }))
+	if let Ok(Some(())) = receive_ready.recv() {
+		Ok((presses, Listener { thread: Some(thread), stop }))
 	} else {
 		let _ = thread.join();
 		Err(unwatched())
@@ -687,12 +786,95 @@ mod tests {
 	}
 
 	#[test]
-	fn history_at_or_before_our_send_is_not_the_users_input() {
-		let own = (1_u64 << 32) | 100;
-		assert!(!user_tick(99, own));
-		assert!(!user_tick(100, own));
-		assert!(user_tick(101, own));
-		assert!(user_tick(0, 0), "no own input yet");
-		assert!(user_tick(1, (1_u64 << 32) | u64::from(u32::MAX)));
+	fn history_suppresses_only_a_recent_send_window_including_tick_wrap() {
+		let at = Duration::from_secs(100);
+		let own = Some(OwnSend { before: 100, after: 102, at });
+		assert!(user_tick(99, own, at));
+		assert!(!user_tick(100, own, at));
+		assert!(!user_tick(101, own, at));
+		assert!(!user_tick(102, own, at));
+		assert!(user_tick(103, own, at));
+		assert!(user_tick(101, own, at + SEND_HISTORY));
+		assert!(user_tick(101, own, at + Duration::from_secs(30 * 24 * 60 * 60)));
+		assert!(user_tick(0, None, at), "no own input yet");
+		let wrapped = Some(OwnSend { before: u32::MAX, after: 1, at });
+		assert!(!user_tick(u32::MAX, wrapped, at));
+		assert!(!user_tick(0, wrapped, at));
+		assert!(!user_tick(1, wrapped, at));
+		assert!(user_tick(u32::MAX - 1, wrapped, at));
+		assert!(user_tick(2, wrapped, at));
+	}
+
+	#[test]
+	fn admission_from_a_dropped_registration_cannot_watch_a_new_takeover() {
+		let removed = std::cell::Cell::new(0);
+		let watches = Watches::new();
+		let register = || Ok((Arc::new(presses(None)), Registration(&removed)));
+		let first = watches.watch(register).unwrap();
+		let clock = || Duration::from_secs(100);
+		let count = admit_with(&first.presses, clock(), clock, || false, |_| Ok(())).unwrap();
+		ADMITTED.set(Some((Arc::clone(&first.presses), count)));
+		drop(first);
+		let second = watches.watch(register).unwrap();
+		let presses = Arc::clone(&second.presses);
+		let error = start_with(second, presses, clock, || false, |_| Ok(()))
+			.err()
+			.expect("the admission belongs to a removed registration");
+		assert_eq!(error.code, crate::desktop::error::ErrorCode::UserIntervened);
+		assert!(ACTIVE.with_borrow(Option::is_none));
+		assert_eq!(removed.get(), 2);
+	}
+
+	#[test]
+	fn real_registration_is_removed_after_last_drop_cancel_and_unwind() {
+		use windows_sys::Win32::UI::Input::GetRegisteredRawInputDevices;
+
+		fn registered() -> Vec<RAWINPUTDEVICE> {
+			let mut count = 0;
+			let size = size_of::<RAWINPUTDEVICE>() as u32;
+			// SAFETY: null buffer queries the required count.
+			assert_eq!(unsafe {
+				GetRegisteredRawInputDevices(std::ptr::null_mut(), &raw mut count, size)
+			}, 0);
+			let mut devices = vec![RAWINPUTDEVICE::default(); count as usize];
+			if count != 0 {
+				// SAFETY: the initialized buffer holds the queried count.
+				let read = unsafe {
+					GetRegisteredRawInputDevices(devices.as_mut_ptr(), &raw mut count, size)
+				};
+				assert_ne!(read, u32::MAX);
+				devices.truncate(read as usize);
+			}
+			devices.into_iter().filter(|device| {
+				device.usUsagePage == USAGE_PAGE
+					&& [KEYBOARD, MOUSE].contains(&device.usUsage)
+			}).collect()
+		}
+
+		assert!(registered().is_empty());
+		let first = UserActivity::start().unwrap();
+		assert_eq!(registered().len(), 2);
+		let second = UserActivity::start().unwrap();
+		drop(first);
+		assert_eq!(registered().len(), 2);
+		drop(second);
+		assert!(registered().is_empty(), "removal must not merely destroy the target window");
+
+		let source = control::CancellationSource::default();
+		let token = source.token();
+		let cancelled = control::with_token_for_test(&token, || -> CoreResult<()> {
+			let _call = UserActivity::start()?;
+			source.cancel();
+			control::check()
+		});
+		assert_eq!(cancelled.unwrap_err().code, crate::desktop::error::ErrorCode::Cancelled);
+		assert!(registered().is_empty());
+
+		let panic = std::panic::catch_unwind(|| {
+			let _call = UserActivity::start().unwrap();
+			panic!("unwind a real call-scope watch");
+		});
+		assert!(panic.is_err());
+		assert!(registered().is_empty());
 	}
 }
