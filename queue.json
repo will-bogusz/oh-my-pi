@@ -105894,7 +105894,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/desktop-dispatch-fence",
    "host": "MacBook-Pro",
    "added": "2026-11-20T15:50:23Z",
-   "updated": "2026-11-20T16:08:05Z",
+   "updated": "2026-11-20T16:16:30Z",
    "note": "",
    "tests_over_override": {
     "reason": "WinWpfRoutes6, 2026-11-20: the final-head review asked for the action off side through the caller and deadline-free teardown; the four session tests each reach a distinct branch (marked then expired, abandoned, on time, unfenced)",
@@ -105905,7 +105905,29 @@
    ],
    "pair_reasons": {
     "19870": "Main, 2026-11-20: win32/ax.rs import union; docs/tools/computer.md AxUnconfirmed: #19870's rewritten sentence, then this entry's Windows dispatch line; combined = both"
-   }
+   },
+   "built": [
+    {
+     "with": "#19702",
+     "code": "7916847c67de715b9f3990cde272024d3d17e90b",
+     "with_code": "e608cd824a8447d2fca6ebe64e6b79079f530099",
+     "tip": "ab7e6cf8acfb5d3b79ac33cfd413473dbcccf9dc",
+     "with_tip": "0c073f5ac413a6101207133b610d1f03abd06668",
+     "at": "2026-11-20T16:16:29Z",
+     "host": "goliath",
+     "tree": "88fa76ca74b4d3c2c160e19214d6725a9c6209e6"
+    },
+    {
+     "with": "#19531",
+     "code": "7916847c67de715b9f3990cde272024d3d17e90b",
+     "with_code": "d6ffe761e6cb2055157979cb3d54b5c3ba1571d5",
+     "tip": "ab7e6cf8acfb5d3b79ac33cfd413473dbcccf9dc",
+     "with_tip": "d089703a9887a24936e27adf88c44ee6d54de0ef",
+     "at": "2026-11-20T16:16:29Z",
+     "host": "goliath",
+     "tree": "88fa76ca74b4d3c2c160e19214d6725a9c6209e6"
+    }
+   ]
   }
  ],
  "watch": {
