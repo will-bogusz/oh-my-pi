@@ -665,4 +665,278 @@ mod tests {
 			assert!(coordinate_click_supported(role), "{role:?}");
 		}
 	}
+
+	/// Live evidence harness for the dispatch fence (not part of the PR): a
+	/// WPF check box whose dispatcher a test blocks, pressed through
+	/// `SessionCore` with a 750 ms reply wait, one order per test.
+	mod live_fence {
+		use std::{
+			io::{BufRead, BufReader, Write},
+			process::{Child, Command, Stdio},
+			ptr::with_exposed_provenance_mut,
+			sync::{Arc, atomic::AtomicU32},
+			thread::{self, JoinHandle},
+			time::{Duration, Instant},
+		};
+
+		use windows_sys::Win32::UI::WindowsAndMessaging::PostMessageW;
+
+		use super::super::super::super::{
+			Request, Response, SessionCore,
+			error::{DesktopError, ErrorCode},
+			types::{AxQuery, DisplaySelector, Target},
+		};
+
+		const SCRIPT: &str = r#"
+$ErrorActionPreference = 'Stop'
+Add-Type -AssemblyName PresentationFramework,PresentationCore,WindowsBase,System.Xaml
+Add-Type -ReferencedAssemblies PresentationFramework,PresentationCore,WindowsBase,System.Xaml -TypeDefinition @'
+using System;
+using System.Threading;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Interop;
+using System.Windows.Threading;
+
+public static class FenceFixture {
+    static readonly ManualResetEventSlim Gate = new ManualResetEventSlim(false);
+    static Window Window;
+    static CheckBox Box;
+    static int Toggles;
+    static bool BlockChecked = true;
+
+    static void WaitForRelease() {
+        if (!Gate.Wait(TimeSpan.FromSeconds(30)))
+            throw new TimeoutException("fixture gate was not released");
+    }
+
+    static IntPtr Hook(IntPtr hwnd, int message, IntPtr w, IntPtr l, ref bool handled) {
+        if (message == 0x8001) {
+            handled = true;
+            Console.WriteLine("BLOCKED");
+            WaitForRelease();
+        }
+        return IntPtr.Zero;
+    }
+
+    public static void Run() {
+        Console.SetOut(new System.IO.StreamWriter(Console.OpenStandardOutput()) { AutoFlush = true });
+        Window = new Window {
+            Title = "OMP AX dispatch fence fixture",
+            Width = 320, Height = 160
+        };
+        Box = new CheckBox {
+            Content = "Fence checkbox", Margin = new Thickness(24)
+        };
+        Box.Checked += delegate {
+            Toggles++;
+            if (BlockChecked) {
+                Console.WriteLine("CHECKED");
+                WaitForRelease();
+            }
+        };
+        Box.Unchecked += delegate { Toggles++; };
+        Window.Content = Box;
+        Window.SourceInitialized += delegate {
+            HwndSource.FromHwnd(new WindowInteropHelper(Window).Handle).AddHook(Hook);
+        };
+        Window.Loaded += delegate {
+            Window.Activate();
+            Console.WriteLine("READY " + new WindowInteropHelper(Window).Handle.ToInt64());
+        };
+        var commands = new Thread(delegate() {
+            string command;
+            while ((command = Console.ReadLine()) != null) {
+                if (command == "release") {
+                    Gate.Set();
+                } else if (command == "arm") {
+                    Gate.Reset();
+                    Console.WriteLine("ARMED");
+                } else if (command == "reset") {
+                    Window.Dispatcher.BeginInvoke(new Action(delegate {
+                        BlockChecked = false;
+                        Box.IsChecked = false;
+                        Toggles = 0;
+                        Console.WriteLine("RESET");
+                    }));
+                } else if (command == "state") {
+                    Window.Dispatcher.BeginInvoke(DispatcherPriority.SystemIdle, new Action(delegate {
+                        Console.WriteLine("STATE " + Box.IsChecked + " " + Toggles);
+                    }));
+                }
+            }
+            Gate.Set();
+        });
+        commands.IsBackground = true;
+        commands.Start();
+        new Application().Run(Window);
+    }
+}
+'@
+[FenceFixture]::Run()
+"#;
+
+		struct Fixture {
+			child:     Child,
+			lines:     flume::Receiver<String>,
+			reader:    Option<JoinHandle<()>>,
+			hwnd:      usize,
+			core:      Arc<SessionCore>,
+			reference: String,
+		}
+
+		impl Fixture {
+			fn start() -> Self {
+				let mut child = Command::new("powershell.exe")
+					.args(["-NoLogo", "-NoProfile", "-NonInteractive", "-STA", "-Command", SCRIPT])
+					.stdin(Stdio::piped())
+					.stdout(Stdio::piped())
+					.stderr(Stdio::inherit())
+					.spawn()
+					.expect("start WPF PowerShell fixture");
+				let stdout = child.stdout.take().expect("fixture stdout");
+				let (lines_tx, lines) = flume::unbounded();
+				let reader = thread::spawn(move || {
+					for line in BufReader::new(stdout).lines() {
+						let Ok(line) = line else { break };
+						if lines_tx.send(line).is_err() {
+							break;
+						}
+					}
+				});
+				let core = SessionCore::with_operation_timeout(
+					DisplaySelector::parse(None),
+					Arc::new(AtomicU32::new(0)),
+					None,
+					Duration::from_secs(30),
+				);
+				let mut fixture =
+					Self { child, lines, reader: Some(reader), hwnd: 0, core, reference: String::new() };
+				let ready = fixture.line();
+				fixture.hwnd = ready
+					.strip_prefix("READY ")
+					.expect("fixture window ready event")
+					.parse()
+					.expect("fixture HWND");
+				let nodes = fixture
+					.core
+					.call(fixture.core.cancellation.token(), |reply| Request::AxQuery {
+						target: Target::Window(fixture.hwnd.to_string()),
+						query: AxQuery { title: Some("Fence checkbox".into()), ..AxQuery::default() },
+						reply,
+					})
+					.expect("find WPF checkbox through SessionCore");
+				let Response::Nodes(nodes) = nodes else {
+					panic!("expected AX query nodes");
+				};
+				assert_eq!(nodes.len(), 1, "fixture has exactly one checkbox");
+				fixture.reference = nodes[0].ref_.clone();
+				fixture
+			}
+
+			fn line(&self) -> String {
+				self
+					.lines
+					.recv_timeout(Duration::from_secs(30))
+					.expect("WPF fixture did not report its next event")
+			}
+
+			fn command(&mut self, command: &str) {
+				let stdin = self.child.stdin.as_mut().expect("fixture stdin");
+				writeln!(stdin, "{command}").expect("write fixture command");
+				stdin.flush().expect("flush fixture command");
+			}
+
+			/// Presses with a 750 ms reply wait.
+			fn press(&mut self) -> DesktopError {
+				Arc::get_mut(&mut self.core)
+					.expect("sole session owner")
+					.operation_timeout = Duration::from_millis(750);
+				let start = Instant::now();
+				let result =
+					self
+						.core
+						.call(self.core.cancellation.token(), |reply| Request::AxPerform {
+							reference: self.reference.clone(),
+							action: "press".into(),
+							menu: None,
+							reply,
+						});
+				eprintln!("FENCE press returned after {:?}", start.elapsed());
+				Arc::get_mut(&mut self.core)
+					.expect("sole session owner")
+					.operation_timeout = Duration::from_secs(30);
+				let Err(error) = result else {
+					panic!("blocked press must time out")
+				};
+				error
+			}
+
+			/// Releases the gate, lets the worker and the provider drain, and
+			/// returns the box's state once the dispatcher is idle.
+			fn release_and_state(&mut self) -> String {
+				self.command("release");
+				self
+					.core
+					.call(self.core.cancellation.token(), |reply| Request::AxNode {
+						reference: self.reference.clone(),
+						reply,
+					})
+					.expect("worker and provider drain after the timeout");
+				self.command("state");
+				let state = self.line();
+				eprintln!("FENCE {state}");
+				state
+			}
+		}
+
+		impl Drop for Fixture {
+			fn drop(&mut self) {
+				// Also releases either dispatcher gate when an assertion unwinds.
+				if let Some(mut stdin) = self.child.stdin.take() {
+					let _ = writeln!(stdin, "release");
+					let _ = stdin.flush();
+				}
+				let _ = self.child.kill();
+				let _ = self.child.wait();
+				if let Some(reader) = self.reader.take() {
+					let _ = reader.join();
+				}
+			}
+		}
+
+		#[test]
+		#[ignore = "requires a signed-in Windows desktop and Windows PowerShell with WPF"]
+		fn a_press_blocked_in_its_checked_handler_is_unconfirmed_and_toggles_once() {
+			let mut fixture = Fixture::start();
+			// Toggle has entered the provider; its reply is withheld by Checked.
+			let error = fixture.press();
+			eprintln!("FENCE dispatched order: {:?}", error.code);
+			assert_eq!(fixture.line(), "CHECKED");
+			assert_eq!(fixture.release_and_state(), "STATE True 1");
+			assert_eq!(error.code, ErrorCode::AxUnconfirmed, "{error}");
+		}
+
+		#[test]
+		#[ignore = "requires a signed-in Windows desktop and Windows PowerShell with WPF"]
+		fn a_press_whose_dispatcher_was_blocked_first_times_out_and_never_toggles() {
+			let mut fixture = Fixture::start();
+			fixture.command("reset");
+			assert_eq!(fixture.line(), "RESET");
+			fixture.command("arm");
+			assert_eq!(fixture.line(), "ARMED");
+			// SAFETY: HWND belongs to the live fixture; the hook accepts this
+			// application-private message without pointer parameters.
+			assert_ne!(
+				unsafe { PostMessageW(with_exposed_provenance_mut(fixture.hwnd), 0x8001, 0, 0) },
+				0
+			);
+			assert_eq!(fixture.line(), "BLOCKED");
+			let error = fixture.press();
+			eprintln!("FENCE undispatched order: {:?}", error.code);
+			let state = fixture.release_and_state();
+			assert_eq!(error.code, ErrorCode::Timeout, "{error}");
+			assert_eq!(state, "STATE False 0", "an abandoned press must not toggle later");
+		}
+	}
 }
