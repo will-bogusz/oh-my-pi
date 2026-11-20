@@ -303,7 +303,11 @@ class FakeNativeSession implements NativeDesktopSession {
 		return [];
 	}
 	async beginFocusGuard(_pid: number) {
-		return { kind: "none", finish: async (): Promise<DesktopWindowOpened[]> => [] };
+		return {
+			kind: DesktopFocusGuardKind.Unguarded,
+			compositor: null,
+			finish: async (): Promise<DesktopWindowOpened[]> => [],
+		};
 	}
 	async axPerform(_ref: string, _action: string): Promise<void> {}
 	async axSetValue(_ref: string, _value: string): Promise<void> {}

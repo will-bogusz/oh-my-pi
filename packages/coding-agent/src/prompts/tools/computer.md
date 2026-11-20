@@ -117,7 +117,7 @@ Control the host desktop from JavaScript or Python Eval with the global `compute
     stop using the computer and tell the user what you did and what remains.
   - Wayland uses the host interrupt instead of global Escape.
   - On Linux Wayland, `focusGuard` names what keeps the user's keyboard when a background action opens a dialog
-    (`compositorHook`, `socketWatcher` or `none`) and why; a call's notes name the guard that kept or returned each window.
+    (`compositorHook`, `socketWatcher` or `none`), its compositor (`hyprland` or `sway` when known), and why. Socket watchers return focus only after it was taken; intervening keys can go to that window. A call's notes name the guard that kept or returned each window.
 </instruction>
 
 <examples>
@@ -226,7 +226,7 @@ await win.click(120, 48, button="right")
 - Wayland: per-window native input and `.raise()` are unavailable; use AX, or desktop input after focusing the target yourself.
   - Chromium and Electron apps opened with `computer.apps.open` get a DevTools route: their windows (listed as `devtools:…` when the desktop does not list them) take screenshots, clicks, `type` (any Unicode), `press`, `scroll`, `drag` and `move` (hover) in the background through the page, covered or not.
     Their screenshot is the page viewport, without the browser's tabs and toolbar. An app that was already running has no route; the `apps.open` output says so.
-    Chromium browsers (not Electron) ask the desktop for focus on every press. Where the desktop grants activation, clicks and drags are refused; on Hyprland only, an armed native in-compositor hook lifts that refusal for the browser's pid and the call reports window-focus outcomes. A socket watcher or unavailable guard does not lift it. A plain click on a text field focuses it instead; hover, scroll, `type` and `press` still work.
+    Chromium browsers (not Electron) ask the desktop for focus on every press. Where the desktop grants activation, clicks and drags are refused. On Hyprland, only an actually armed native handle reporting `kind: "compositorHook"` and `compositor: "hyprland"` lifts that refusal for the browser's pid, with window-focus outcomes reported. Socket watchers never lift it, including on sway. A plain click on a text field focuses it instead; hover, scroll, `type` and `press` still work.
 - macOS `screenLocked` (in `capabilities()`, a screenshot result, or a run's leading `Note:`):
   - A display capture shows the lock screen and a window capture that window's last frame.
   - Keystrokes, takeover and AX fail until someone unlocks, while background clicks still reach the app.

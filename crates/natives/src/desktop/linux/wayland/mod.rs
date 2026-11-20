@@ -169,7 +169,7 @@ pub struct WaylandBackend {
 	/// positions, focus, and pixel clicks and scrolls through AT-SPI.
 	hyprland:             Option<hyprland::Hyprland>,
 	/// Created only without AT-SPI; otherwise `GuardedAx` owns the sole guard.
-	fallback_focus_guard: Option<focus_guard::FocusGuard>,
+	fallback_focus_guard: Option<focus_guard::Guard>,
 }
 
 /// Reads the compositor's PID from the peer credentials of its Wayland socket.
@@ -222,7 +222,10 @@ impl WaylandBackend {
 			None => sway::Sway::detect(compositor_pid)
 				.map(|sway| focus_guard::Guard::Sway(sway::SwayGuard::new(sway))),
 		};
-		let ax = ax.map(|ax| focus_guard::GuardedAx::new(ax, guard));
+		let (ax, fallback_focus_guard) = match ax {
+			Some(ax) => (Some(focus_guard::GuardedAx::new(ax, guard)), None),
+			None => (None, guard),
+		};
 		Self {
 			display,
 			pipewire: pipewire::library(),
@@ -234,7 +237,7 @@ impl WaylandBackend {
 			compositor_pid,
 			unanswered: Vec::new(),
 			hyprland,
-			fallback_focus_guard: None,
+			fallback_focus_guard,
 		}
 	}
 
@@ -488,12 +491,13 @@ impl Backend for WaylandBackend {
 			display_count: self.displays.len() as u32,
 			screen_locked: false,
 			display_asleep: false,
-			focus_guard: Some(
-				self.ax.as_mut().map_or_else(
-					focus_guard::GuardedAx::without_ax,
-					focus_guard::GuardedAx::focus_guard,
-				),
-			),
+			focus_guard: Some(match &mut self.ax {
+				Some(ax) => ax.focus_guard(),
+				None => self
+					.fallback_focus_guard
+					.as_mut()
+					.map_or_else(focus_guard::GuardedAx::without_guard, focus_guard::Guard::describe),
+			}),
 		}
 	}
 
@@ -796,13 +800,10 @@ impl Backend for WaylandBackend {
 		if let Some(ax) = &mut self.ax {
 			return ax.begin_focus_guard(pid);
 		}
-		let Some(hyprland) = &self.hyprland else {
-			return Ok(crate::desktop::ArmedFocusGuard::default());
-		};
 		self
 			.fallback_focus_guard
-			.get_or_insert_with(|| focus_guard::FocusGuard::new(hyprland.clone()))
-			.begin(pid)
+			.as_mut()
+			.map_or_else(|| Ok(crate::desktop::ArmedFocusGuard::default()), |guard| guard.begin(pid))
 	}
 
 	fn take_windows_opened(&mut self) -> Vec<DesktopWindowOpened> {
@@ -811,7 +812,7 @@ impl Backend for WaylandBackend {
 			None => self
 				.fallback_focus_guard
 				.as_mut()
-				.map_or_default(focus_guard::FocusGuard::take),
+				.map_or_default(focus_guard::Guard::take),
 		}
 	}
 }

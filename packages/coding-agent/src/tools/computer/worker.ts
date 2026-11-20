@@ -24,7 +24,7 @@ import type {
 	DesktopDisplay,
 	DesktopDragResult,
 	DesktopFocusReturn,
-	DesktopFocusGuard,
+	DesktopFocusGuardHandle,
 	DesktopKeyboardReturn,
 	DesktopPoint,
 	DesktopPointerResult,
@@ -146,7 +146,7 @@ export interface NativeDesktopSession {
 	/** Windows apps opened or asked to activate around background actions since the last call (Hyprland, sway; empty elsewhere). */
 	takeWindowsOpened(): Promise<DesktopWindowOpened[]>;
 	/** Arms compositor protection for a JS-side press sequence; finishing returns window focus outcomes. */
-	beginFocusGuard(pid: number): Promise<DesktopFocusGuard>;
+	beginFocusGuard(pid: number): Promise<DesktopFocusGuardHandle>;
 	axPerform(ref: string, action: string, menu?: string[] | null): Promise<void>;
 	axSetValue(ref: string, value: string): Promise<void>;
 	axSelectText(ref: string, text: string, opts?: AxSelectTextOptions | null): Promise<AxTextSelection>;

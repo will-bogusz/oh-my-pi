@@ -34,6 +34,7 @@ interface GuardReport {
 function fixture(
 	options: {
 		kind?: string;
+		compositor?: string | null;
 		editable?: boolean;
 		electron?: boolean;
 		safePress?: boolean;
@@ -110,7 +111,8 @@ function fixture(
 			await Promise.resolve();
 			events.push("armed");
 			return {
-				kind: options.kind ?? "Hyprland hook",
+				kind: options.kind ?? "compositorHook",
+				compositor: options.compositor === undefined ? "hyprland" : options.compositor,
 				async finish() {
 					events.push("finish");
 					await Promise.resolve();
@@ -143,8 +145,12 @@ function expectReported(f: GuardReport): void {
 describe("DevTools focus guard", () => {
 	it("lifts browser press refusal only for an actual Hyprland hook on Hyprland", () => {
 		for (const onHyprland of [false, true]) {
-			for (const kind of ["Hyprland hook", "Hyprland socket watcher", "none", "Sway hook"]) {
-				expect(canGuardDevToolsPress(onHyprland, kind)).toBe(onHyprland && kind === "Hyprland hook");
+			for (const kind of ["compositorHook", "socketWatcher", "none"]) {
+				for (const compositor of ["hyprland", "sway", null, undefined]) {
+					expect(canGuardDevToolsPress(onHyprland, kind, compositor)).toBe(
+						onHyprland && kind === "compositorHook" && compositor === "hyprland",
+					);
+				}
 			}
 		}
 	});
@@ -176,16 +182,20 @@ describe("DevTools focus guard", () => {
 		expectReported(f);
 	});
 
-	it.each(["Hyprland socket watcher", "none"])("%s preserves browser refusal and editable-field focus", async kind => {
+	it.each([
+		{ kind: "socketWatcher", compositor: "hyprland" },
+		{ kind: "none", compositor: "hyprland" },
+		{ kind: "compositorHook", compositor: "sway" },
+	])("$kind/$compositor preserves browser refusal and editable-field focus", async guard => {
 		process.env.HYPRLAND_INSTANCE_SIGNATURE = "test-hyprland";
-		const refused = fixture({ kind });
+		const refused = fixture(guard);
 		expect(String(await rejectionOf(refused.route.click(40, 60, "left", 1, 0, refused.guards)))).toContain(
 			"BackgroundUnavailable",
 		);
 		expect(refused.calls.map(call => call.method)).toEqual(["Runtime.evaluate"]);
 		expectReported(refused);
 
-		const editable = fixture({ kind, editable: true });
+		const editable = fixture({ ...guard, editable: true });
 		expect(await editable.route.click(40, 60, "left", 1, 0, editable.guards)).toEqual({
 			x: 20,
 			y: 30,
@@ -194,7 +204,7 @@ describe("DevTools focus guard", () => {
 		expect(editable.calls.map(call => call.method)).toEqual(["Runtime.evaluate"]);
 		expectReported(editable);
 
-		const drag = fixture({ kind });
+		const drag = fixture(guard);
 		expect(
 			String(
 				await rejectionOf(
@@ -248,7 +258,7 @@ describe("DevTools focus guard", () => {
 	it.each(["electron", "safe browser"])("also reports outcomes for an already-safe %s press", async mode => {
 		process.env.HYPRLAND_INSTANCE_SIGNATURE = "test-hyprland";
 		const f = fixture({
-			kind: "Hyprland socket watcher",
+			kind: "socketWatcher",
 			electron: mode === "electron",
 			safePress: mode === "safe browser",
 		});
@@ -276,6 +286,7 @@ describe("DevTools focus guard", () => {
 			const watch = await begin(pid);
 			return {
 				kind: watch.kind,
+				compositor: watch.compositor,
 				async finish() {
 					entered.resolve();
 					await release.promise;
@@ -298,7 +309,7 @@ describe("DevTools focus guard", () => {
 
 	it("does not arm or lift browser refusal outside Hyprland, even with a supplied hook", async () => {
 		delete process.env.HYPRLAND_INSTANCE_SIGNATURE;
-		const f = fixture({ kind: "Hyprland hook" });
+		const f = fixture({ kind: "compositorHook" });
 		expect(String(await rejectionOf(f.route.click(40, 60, "right", 1, 0, f.guards)))).toContain(
 			"BackgroundUnavailable",
 		);

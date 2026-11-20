@@ -4,6 +4,7 @@
 
 ### Added
 
+- Wayland computer capabilities identify each guard's compositor, and window-action notes distinguish hook prevention from socket-watcher hand-back.
 - DevTools browser clicks and drags can use an armed Hyprland compositor hook, reporting window-focus outcomes while retaining refusal without that hook.
 - Added a coloured extension status variant to `omp gallery --segment status` ([#19727](https://github.com/can1357/oh-my-pi/pull/19727) by [@robfeldmann](https://github.com/robfeldmann))
 - Extensions can identify which eval cell or kernel-defined tool dispatched a nested tool: `tool_call` and `tool_result` now include an optional `parentToolCallId` ([#19823](https://github.com/can1357/oh-my-pi/pull/19823) by [@baekjosh](https://github.com/baekjosh)).

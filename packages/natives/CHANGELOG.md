@@ -4,6 +4,7 @@
 
 ### Added
 
+- Added compositor-tagged focus-guard capabilities that distinguish Hyprland prevention hooks from Hyprland and sway socket watchers.
 - Added `DesktopSession.beginFocusGuard(pid)` handles for guarding external input and reading resulting window-focus outcomes.
 
 ### Fixed

@@ -399,8 +399,9 @@ pub struct DesktopWindowOpened {
 #[napi(object)]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DesktopFocusGuard {
-	pub kind:   DesktopFocusGuardKind,
-	pub reason: String,
+	pub kind:       DesktopFocusGuardKind,
+	pub compositor: Option<DesktopFocusGuardCompositor>,
+	pub reason:     String,
 }
 
 /// A guard that keeps the user's keyboard from windows background actions
@@ -421,6 +422,16 @@ pub enum DesktopFocusGuardKind {
 	/// Nothing guards the keyboard.
 	#[napi(value = "none")]
 	Unguarded,
+}
+
+/// The compositor providing a focus guard.
+#[napi(string_enum)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum DesktopFocusGuardCompositor {
+	#[napi(value = "hyprland")]
+	Hyprland,
+	#[napi(value = "sway")]
+	Sway,
 }
 
 /// What a window an action opened did to keyboard focus.

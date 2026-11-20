@@ -157,15 +157,17 @@ impl DisplayAwake {
 
 /// An armed backend watch, transferred to the caller without moving its owner.
 pub(crate) struct ArmedFocusGuard {
-	kind:  &'static str,
+	kind:       DesktopFocusGuardKind,
+	compositor: Option<DesktopFocusGuardCompositor>,
 	#[cfg(target_os = "linux")]
-	watch: Option<linux::wayland::FocusGuardWatch>,
+	watch:      Option<linux::wayland::FocusGuardWatch>,
 }
 
 impl Default for ArmedFocusGuard {
 	fn default() -> Self {
 		Self {
-			kind: "none",
+			kind: DesktopFocusGuardKind::Unguarded,
+			compositor: None,
 			#[cfg(target_os = "linux")]
 			watch: None,
 		}
@@ -2360,17 +2362,23 @@ pub fn close_desktop_event_taps() {
 /// An external action's compositor guard, sharing its desktop session's
 /// reports.
 #[napi]
-pub struct DesktopFocusGuard {
-	core:  Arc<SessionCore>,
-	kind:  &'static str,
-	watch: Mutex<Option<ArmedFocusGuard>>,
+pub struct DesktopFocusGuardHandle {
+	core:       Arc<SessionCore>,
+	kind:       DesktopFocusGuardKind,
+	compositor: Option<DesktopFocusGuardCompositor>,
+	watch:      Mutex<Option<ArmedFocusGuard>>,
 }
 
 #[napi]
-impl DesktopFocusGuard {
+impl DesktopFocusGuardHandle {
 	#[napi(getter)]
-	pub const fn kind(&self) -> &'static str {
+	pub const fn kind(&self) -> DesktopFocusGuardKind {
 		self.kind
+	}
+
+	#[napi(getter)]
+	pub const fn compositor(&self) -> Option<DesktopFocusGuardCompositor> {
+		self.compositor
 	}
 
 	/// Ends the action, settles its watch and drains the session's pending
@@ -2958,15 +2966,16 @@ impl DesktopSession {
 	/// Arms the session's compositor guard around input delivered outside the
 	/// worker.
 	#[napi]
-	pub fn begin_focus_guard(&self, pid: u32) -> task::Promise<DesktopFocusGuard> {
+	pub fn begin_focus_guard(&self, pid: u32) -> task::Promise<DesktopFocusGuardHandle> {
 		let c = Arc::clone(&self.core);
 		let token = c.cancellation.token();
 		task::blocking("desktop.beginFocusGuard", (), move |_| {
 			match c.call(token, |reply| Request::BeginFocusGuard { pid, reply })? {
-				Response::FocusGuard(watch) => Ok(DesktopFocusGuard {
-					core:  Arc::clone(&c),
-					kind:  watch.kind,
-					watch: Mutex::new(Some(watch)),
+				Response::FocusGuard(watch) => Ok(DesktopFocusGuardHandle {
+					core:       Arc::clone(&c),
+					kind:       watch.kind,
+					compositor: watch.compositor,
+					watch:      Mutex::new(Some(watch)),
 				}),
 				_ => Err(DesktopError::internal("unexpected response")),
 			}

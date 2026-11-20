@@ -34,13 +34,21 @@ export type DevToolsMode = "launched" | "running" | "off";
 
 /** Native protection and outcome reporting for a complete DevTools press sequence. */
 export interface DevToolsFocusGuards {
-	beginFocusGuard(pid: number): Promise<{ readonly kind: string; finish(): Promise<DesktopWindowOpened[]> }>;
+	beginFocusGuard(pid: number): Promise<{
+		readonly kind: string;
+		readonly compositor: string | null | undefined;
+		finish(): Promise<DesktopWindowOpened[]>;
+	}>;
 	report(opened: DesktopWindowOpened[]): void;
 }
 
 /** The sole switch lifting activation refusal; socket watchers cannot prevent stolen keys. */
-export function canGuardDevToolsPress(onHyprland: boolean, kind: string): boolean {
-	return onHyprland && kind === "Hyprland hook";
+export function canGuardDevToolsPress(
+	onHyprland: boolean,
+	kind: string,
+	compositor: string | null | undefined,
+): boolean {
+	return onHyprland && kind === "compositorHook" && compositor === "hyprland";
 }
 
 interface PressQueue {
@@ -660,7 +668,7 @@ export class DevToolsRoute {
 		try {
 			const watch = await guards.beginFocusGuard(this.#endpoint.pid);
 			try {
-				return await send(canGuardDevToolsPress(onHyprland, watch.kind));
+				return await send(canGuardDevToolsPress(onHyprland, watch.kind, watch.compositor));
 			} finally {
 				guards.report(await watch.finish());
 			}

@@ -44,8 +44,8 @@ use crate::desktop::{
 	linux::ax::AtSpiAx,
 	text_range::TextSelectRequest,
 	types::{
-		AxTextSelection, DesktopFocusGuard, DesktopFocusGuardKind, DesktopWindow, DesktopWindowFocus,
-		DesktopWindowOpened,
+		AxTextSelection, DesktopFocusGuard, DesktopFocusGuardCompositor, DesktopFocusGuardKind,
+		DesktopWindow, DesktopWindowFocus, DesktopWindowOpened,
 	},
 };
 
@@ -163,13 +163,13 @@ pub(super) enum Verdict {
 
 /// The guard's reading of the events, apart from any IO, so it can be tested.
 pub(super) struct Tracker {
-	user:    Client,
-	target:  u32,
-	known:   HashSet<String>,
-	started: Instant,
-	seen:    Vec<Seen>,
+	pub(super) user: Client,
+	target:          u32,
+	known:           HashSet<String>,
+	started:         Instant,
+	seen:            Vec<Seen>,
 	/// The user moved focus somewhere the action did not: no more hand-backs.
-	picked:  bool,
+	picked:          bool,
 }
 
 impl Tracker {
@@ -302,7 +302,7 @@ impl Tracker {
 	}
 
 	/// Focus went back from window `address`, put there by `by`.
-	fn handed_back_by(&mut self, address: &str, by: DesktopFocusGuardKind) {
+	pub(super) fn handed_back_by(&mut self, address: &str, by: DesktopFocusGuardKind) {
 		if let Some(seen) = self.seen(address) {
 			seen.guard = Some(by);
 		}
@@ -500,7 +500,15 @@ pub(super) struct FocusGuard {
 
 impl FocusGuard {
 	pub(super) const fn new(hyprland: Hyprland) -> Self {
-		Self { hyprland, lua: None, refusal: None, watches: Vec::new(), running: None, next_id: 0, external: None }
+		Self {
+			hyprland,
+			lua: None,
+			refusal: None,
+			watches: Vec::new(),
+			running: None,
+			next_id: 0,
+			external: None,
+		}
 	}
 
 	/// Records Hyprland's answer to Lua sent with `hyprctl eval`.
@@ -529,19 +537,21 @@ impl FocusGuard {
 		}
 		if self.lua == Some(true) {
 			return DesktopFocusGuard {
-				kind:   DesktopFocusGuardKind::CompositorHook,
-				reason: "Hyprland runs a Lua config, so each background action installs a temporary \
-				         hook in it (hyprctl eval): the acted-on app's new windows open without the \
-				         keyboard, its activation requests are declined, and a window that takes \
-				         focus anyway gives it back in the same compositor turn. The hook removes \
-				         itself within 15 s and writes nothing to the config; OMP's event-socket \
-				         watcher reports what each window did."
+				kind:       DesktopFocusGuardKind::CompositorHook,
+				compositor: Some(DesktopFocusGuardCompositor::Hyprland),
+				reason:     "Hyprland runs a Lua config, so each background action installs a \
+				             temporary hook in it (hyprctl eval): the acted-on app's new windows open \
+				             without the keyboard, its activation requests are declined, and a window \
+				             that takes focus anyway gives it back in the same compositor turn. The \
+				             hook removes itself within 15 s and writes nothing to the config; OMP's \
+				             event-socket watcher reports what each window did."
 					.to_owned(),
 			};
 		}
 		DesktopFocusGuard {
-			kind:   DesktopFocusGuardKind::SocketWatcher,
-			reason: format!(
+			kind:       DesktopFocusGuardKind::SocketWatcher,
+			compositor: Some(DesktopFocusGuardCompositor::Hyprland),
+			reason:     format!(
 				"Hyprland refused the Lua hook (hyprctl eval: {}), as it does with a hyprlang config: \
 				 OMP's event-socket watcher hands focus back after a window a background action opens \
 				 has taken it, a few milliseconds later, so keys the user types in that time go to \
@@ -585,17 +595,24 @@ impl FocusGuard {
 	pub(super) fn begin(&mut self, pid: u32) -> CoreResult<crate::desktop::ArmedFocusGuard> {
 		self.admit()?;
 		let Some(watch) = self.arm(pid) else {
-			return Ok(crate::desktop::ArmedFocusGuard::default());
+			return Ok(crate::desktop::ArmedFocusGuard {
+				compositor: Some(DesktopFocusGuardCompositor::Hyprland),
+				..Default::default()
+			});
 		};
 		self.external = Some(Arc::clone(&watch.ends));
-		Ok(crate::desktop::ArmedFocusGuard { kind: self.kind(), watch: Some(watch) })
+		Ok(crate::desktop::ArmedFocusGuard {
+			kind:       self.kind(),
+			compositor: Some(DesktopFocusGuardCompositor::Hyprland),
+			watch:      Some(watch),
+		})
 	}
 
-	const fn kind(&self) -> &'static str {
+	const fn kind(&self) -> DesktopFocusGuardKind {
 		match self.lua {
-			Some(true) => "Hyprland hook",
-			Some(false) => "Hyprland socket watcher",
-			None => "none",
+			Some(true) => DesktopFocusGuardKind::CompositorHook,
+			Some(false) => DesktopFocusGuardKind::SocketWatcher,
+			None => DesktopFocusGuardKind::Unguarded,
 		}
 	}
 
@@ -830,19 +847,49 @@ impl Guard {
 		}
 	}
 
-	fn take(&mut self) -> Vec<DesktopWindowOpened> {
+	pub(super) fn take(&mut self) -> Vec<DesktopWindowOpened> {
 		match self {
 			Self::Hyprland(guard) => guard.take(),
 			Self::Sway(guard) => guard.take(),
 		}
 	}
 
-	/// Which guard keeps the user's keyboard, for capabilities.
-	#[allow(dead_code, reason = "capabilities name the active guard once that lands")]
-	pub(super) const fn kind(&self) -> &'static str {
+	/// Which guard runs background actions.
+	pub(super) const fn kind(&self) -> DesktopFocusGuardKind {
 		match self {
 			Self::Hyprland(guard) => guard.kind(),
-			Self::Sway(_) => "sway watcher",
+			Self::Sway(_) => DesktopFocusGuardKind::SocketWatcher,
+		}
+	}
+
+	pub(super) const fn compositor(&self) -> DesktopFocusGuardCompositor {
+		match self {
+			Self::Hyprland(_) => DesktopFocusGuardCompositor::Hyprland,
+			Self::Sway(_) => DesktopFocusGuardCompositor::Sway,
+		}
+	}
+
+	pub(super) fn describe(&mut self) -> DesktopFocusGuard {
+		match self {
+			Self::Hyprland(guard) => guard.describe(),
+			Self::Sway(_) => DesktopFocusGuard {
+				kind:       self.kind(),
+				compositor: Some(self.compositor()),
+				reason:     "OMP's sway IPC watcher hands focus back after a window a background \
+				             action opens takes it. It does not prevent focus from moving, so keys \
+				             typed before focus returns go to that window."
+					.to_owned(),
+			},
+		}
+	}
+
+	pub(super) fn begin(&mut self, pid: u32) -> CoreResult<crate::desktop::ArmedFocusGuard> {
+		match self {
+			Self::Hyprland(guard) => guard.begin(pid),
+			Self::Sway(_) => Ok(crate::desktop::ArmedFocusGuard {
+				compositor: Some(self.compositor()),
+				..Default::default()
+			}),
 		}
 	}
 }
@@ -864,8 +911,8 @@ impl GuardedAx {
 		pid: u32,
 	) -> CoreResult<crate::desktop::ArmedFocusGuard> {
 		match &mut self.guard {
-			Some(Guard::Hyprland(guard)) => guard.begin(pid),
-			Some(Guard::Sway(_)) | None => Ok(crate::desktop::ArmedFocusGuard::default()),
+			Some(guard) => guard.begin(pid),
+			None => Ok(crate::desktop::ArmedFocusGuard::default()),
 		}
 	}
 
@@ -910,20 +957,19 @@ impl GuardedAx {
 	pub(super) fn focus_guard(&mut self) -> DesktopFocusGuard {
 		match &mut self.guard {
 			Some(guard) => guard.describe(),
-			None => DesktopFocusGuard {
-				kind:   DesktopFocusGuardKind::Unguarded,
-				reason: "The compositor is not Hyprland: a window a background action opens takes the \
-				         keyboard if the compositor gives it focus, and OMP does not give it back."
-					.to_owned(),
-			},
+			None => Self::without_guard(),
 		}
 	}
 
-	/// [`Self::focus_guard`] when AT-SPI is unavailable.
-	pub(super) fn without_ax() -> DesktopFocusGuard {
+	/// No guard is available for the compositor.
+	pub(super) fn without_guard() -> DesktopFocusGuard {
 		DesktopFocusGuard {
-			kind:   DesktopFocusGuardKind::Unguarded,
-			reason: "AT-SPI is unavailable, so no background action runs to guard.".to_owned(),
+			kind:       DesktopFocusGuardKind::Unguarded,
+			compositor: None,
+			reason:     "The compositor is neither Hyprland nor sway: a window a background action \
+			             opens takes the keyboard if the compositor gives it focus, and OMP does not \
+			             give it back."
+				.to_owned(),
 		}
 	}
 }

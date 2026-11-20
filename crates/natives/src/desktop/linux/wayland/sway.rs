@@ -34,7 +34,7 @@ use super::{
 };
 use crate::desktop::{
 	error::{CoreResult, DesktopError},
-	types::DesktopWindowOpened,
+	types::{DesktopFocusGuardKind, DesktopWindowOpened},
 };
 
 /// How long one IPC request may take; sway answers in about a millisecond.
@@ -368,6 +368,7 @@ impl Watcher {
 		// watcher): a message already whole in the buffer came with the read
 		// that filled it.
 		let mut read_at = Instant::now();
+		let mut handing_back: Option<String> = None;
 		while !self.over() {
 			let (kind, body, fresh) = match events.next() {
 				Ok(Some(message)) => message,
@@ -380,6 +381,17 @@ impl Watcher {
 			let Some(event) = parse(kind, &body, &mut self.clients) else {
 				continue;
 			};
+			if let Event::Active(address) = &event {
+				if address.as_ref() == Some(&self.tracker.user.address)
+					&& let Some(window) = handing_back.take()
+				{
+					self
+						.tracker
+						.handed_back_by(&window, DesktopFocusGuardKind::SocketWatcher);
+				} else {
+					handing_back = None;
+				}
+			}
 			let (clients, command) = (&mut self.clients, &mut self.command);
 			let mut client = |address: &str| {
 				if !clients.contains_key(address) {
@@ -390,10 +402,15 @@ impl Watcher {
 				}
 				clients.get(address).cloned()
 			};
-			if self.tracker.event(&event, read_at, &mut client) == Verdict::HandBack {
-				let _ = self
+			if self.tracker.event(&event, read_at, &mut client) == Verdict::HandBack
+				&& let Event::Active(Some(address)) = &event
+				&& self
 					.command
-					.json::<Vec<Success>>(RUN_COMMAND, &self.hand_back);
+					.json::<Vec<Success>>(RUN_COMMAND, &self.hand_back)
+					.is_ok_and(|replies| {
+						!replies.is_empty() && replies.iter().all(|reply| reply.success)
+					}) {
+				handing_back = Some(address.clone());
 			}
 			self.shared.lock().report = self.tracker.report();
 		}
@@ -475,20 +492,28 @@ mod tests {
 			feed(&mut tracker, 50, WINDOW_EVENT, change("new", dialog.clone())),
 			Verdict::Nothing
 		);
+		let kept = &tracker.report()[0].1;
+		assert_eq!((kept.focus, kept.guard), (DesktopWindowFocus::Kept, None));
 		assert_eq!(
 			feed(&mut tracker, 50, WINDOW_EVENT, change("focus", dialog.clone())),
 			Verdict::HandBack
 		);
 		let typist = window(5, 10, "typist", "foot");
 		assert_eq!(feed(&mut tracker, 51, WINDOW_EVENT, change("focus", typist)), Verdict::Nothing);
+		tracker.handed_back_by("13", DesktopFocusGuardKind::SocketWatcher);
 		// The user clicks the dialog two seconds later: their choice.
 		assert_eq!(feed(&mut tracker, 2050, WINDOW_EVENT, change("focus", dialog)), Verdict::Nothing);
 		let report: Vec<_> = tracker
 			.report()
 			.into_iter()
-			.map(|(_, r)| (r.title, r.focus, r.held_ms))
+			.map(|(_, r)| (r.title, r.focus, r.held_ms, r.guard))
 			.collect();
-		assert_eq!(report, [("Allow?".to_owned(), DesktopWindowFocus::HandedBack, Some(1))]);
+		assert_eq!(report, [(
+			"Allow?".to_owned(),
+			DesktopWindowFocus::HandedBack,
+			Some(1),
+			Some(DesktopFocusGuardKind::SocketWatcher),
+		)]);
 		// A workspace switch is a pick too.
 		assert_eq!(
 			parse(WORKSPACE_EVENT, br#"{"change":"focus"}"#, &mut HashMap::new()),
