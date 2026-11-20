@@ -1156,7 +1156,10 @@ mod foreground {
 				// before returning so a pending activation has its turn.
 				let mut arrived = was_in_front;
 				let first = (|| -> CoreResult<()> {
-					let budget = self.selection.as_ref().and_then(|_| UserSelection::budget());
+					let budget = self
+						.selection
+						.as_ref()
+						.and_then(|_| UserSelection::budget());
 					let eligible = self
 						.selection
 						.as_ref()
@@ -1207,7 +1210,10 @@ mod foreground {
 					},
 				};
 				first?;
-				let budget = self.selection.as_ref().and_then(|_| UserSelection::budget());
+				let budget = self
+					.selection
+					.as_ref()
+					.and_then(|_| UserSelection::budget());
 				let eligible = repair_selection.is_some()
 					|| self
 						.selection
@@ -1333,7 +1339,10 @@ mod foreground {
 
 		fn restore(&mut self) -> (CoreResult<()>, bool) {
 			self.armed = false;
-			let budget = self.selection.as_ref().and_then(|_| UserSelection::budget());
+			let budget = self
+				.selection
+				.as_ref()
+				.and_then(|_| UserSelection::budget());
 			let eligible = self
 				.selection
 				.as_ref()
