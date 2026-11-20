@@ -105701,7 +105701,33 @@
    "updated": "2026-11-20T16:00:54Z",
    "note": "",
    "advanced": "2026-11-20T12:56:28Z",
-   "hold": "Main, 2026-11-20: in its fix round (WinWpfRoutes5, review needs-changes at 86d258734d9); takes the recorded ax.rs form with win-wpf-scroll when it follows"
+   "hold": "Main, 2026-11-20: in its fix round (WinWpfRoutes5, review needs-changes at 86d258734d9); takes the recorded ax.rs form with win-wpf-scroll when it follows",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-20T16:01:27Z",
+     "reason": "WinWpfRoutes6 B round, 2026-11-20: UiaReview fixes (perform diagnostics nit reverted to main, selection confirm reworked, windowless refusal no longer BackgroundUnavailable; docs line rewritten to match)",
+     "old": "86d258734d98c3e7924bb111bbb5245c341e6362",
+     "new": "50086f38c575b11b602b6b77d8c3173c74b49f27",
+     "dropped": {
+      "crates/natives/src/desktop/win32/ax.rs": [
+       "\t\t\t\t\t.confirm_selected(selection, &item.element, text, false)",
+       "\t\t\t\t\t.map_err(pattern_error(\"LegacyIAccessible\"))?;",
+       "\t\t\t\t.map_err(pattern_error(\"Invoke\"))?",
+       "\t\t\t\t.map_err(pattern_error(\"Toggle\"))?",
+       "\t\t\t\t.map_err(pattern_error(\"ExpandCollapse\"))?",
+       "\t\t\t\t.map_err(pattern_error(\"SelectionItem\"))?",
+       "\t\t\t\t.map_err(pattern_error(\"ScrollItem\"))?",
+       "Add-Type -ReferencedAssemblies PresentationFramework,PresentationCore,WindowsBase,System.Xaml -TypeDefinition @'",
+       "\t\twindow = new Window { Title = \"omp test: wpf values\", Left = 40, Top = 40, Width = 300, Height = 200, Content = panel };",
+       "\t\twindow.ContentRendered += (sender, e) => { other.Show(); Say(\"ready \" + Handle(window) + \" \" + Handle(other)); };",
+       "\t\t\t\ttarget: Target::Window(window.expose_provenance().to_string()),"
+      ],
+      "docs/tools/computer.md": [
+       "On Windows, a windowless control without a text value takes a number or an item instead, through UI Automation. Its hosting window must already own the foreground, regardless of toolkit (otherwise `BackgroundUnavailable`, with nothing sent); `setValue` does not automatically take over. A range control (a WPF slider) takes plain decimal text within its range, at most 15 significant digits, and must read back as that number. A selection container (a WPF combo box or list) takes the exact name of one of the items it currently exposes; virtualized offscreen rows are not searched. A combo box exposing no items yet is opened, the item selected and the list closed again, also when selection fails, while the window remains in front. If it loses the foreground, no further input is sent and `InputFailed` reports the partial result and list state. The selection is read back only after a full 150 ms post-close settling period; this bounded observation does not guarantee every deferred handler has finished. If the operation cannot cover that full period or waiting is interrupted, `AxUnconfirmed` reports that the item was selected but could not be confirmed. If the selection differs after settling, `AxFailed` names what it reads and warns against blindly retrying. Otherwise unavailable or differing read-back after a write throws `InputFailed`. A control offering none of Value, RangeValue and Selection reports `AxFailed`, naming them."
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "win-takeover-intervene",
