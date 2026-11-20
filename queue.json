@@ -118807,5 +118807,11 @@
     "wake": ""
    }
   ]
+ },
+ "opening": {
+  "id": "picker-stale-discovery",
+  "token": "4f55d0f0faff43c9ad66e783dda62625",
+  "host": "MacBook-Pro",
+  "at": "2026-11-20T17:52:48Z"
  }
 }
