@@ -105482,6 +105482,90 @@
        "- On macOS and for Windows WPF scrolling, `AxUnconfirmed` means an accessibility action may already have taken effect."
       ]
      }
+    },
+    {
+     "at": "2026-11-20T19:46:01Z",
+     "reason": "QueueFortyThree, 2026-11-20: bot round 1 fixes replace the WPF Unsupported refusal (roboomp 4644734918/929) and the view-size read-back (4644734942); docs rewritten to match",
+     "old": "d6ce975f2282de7c1c2bddb08a25589be6414a4a",
+     "new": "0a18b91412c3380bbae5ee9e9496c98e28ea8a51",
+     "dropped": {
+      "crates/natives/src/desktop/win32/ax.rs": [
+       "\t\tfor (across, notches, setting) in",
+       "\t\t\t[(true, horizontal, SPI_GETWHEELSCROLLCHARS), (false, vertical, SPI_GETWHEELSCROLLLINES)]",
+       "\t\t\tlet (amount, steps) = wheel_amount(notches, wheel_setting(setting));",
+       "\t\t\t\t\tfound = bind_scroll_candidate(pattern, root.expose_provenance(), || {",
+       "\t\t\t\t\t\t\t\twindow::root(with_exposed_provenance_mut(raw as usize)).expose_provenance(),",
+       "\t\t\tlet Some(pattern) = found else {",
+       "\t\t\t\t\t|run| {",
+       "\t\t\t\t\t\tlet view = run.call(|| {",
+       "\t\t\t\t\t\t\t\tpattern.get_horizontal_view_size()",
+       "\t\t\t\t\t\t\t\tpattern.get_vertical_view_size()",
+       "\t\t\t\t\t\t\t\tErrorCode::Unsupported,",
+       "\t\t\t\t\t\t\t\t\"bring WPF in front or use takeover: true\",",
+       "\t\t\t\t\t\tOk(Sample { position, view })",
+       "\tview:     f64,",
+       "\t\tlet (code, delivery) = if self.sent {",
+       "\t\t\t(ErrorCode::AxUnconfirmed, \"scroll sent, not confirmed\")",
+       "\t\t\t(code, \"nothing was sent\")",
+       "\t\tDesktopError::new(code, format!(\"{reason}; {delivery}; inspect before retrying\"))",
+       "\t\t\t\tformat!(",
+       "\t\t\t\t\t\"UI Automation unavailable ({error}); bring WPF in front or use takeover: true\"",
+       "\t\tmut sample: impl FnMut(&Self) -> CoreResult<Sample>,",
+       "\t\tlet before = sample(self)?;",
+       "\t\t\treturn Err(",
+       "\t\t\t\tself.failure(ErrorCode::Unsupported, \"no WPF scroll position; use takeover: true\"),",
+       "\t\t\tlet after = sample(self)?;",
+       "\t\t\tif (after.view - before.view).abs() > f64::EPSILON {",
+       "\t\t\t\treturn Err(self.failure(ErrorCode::AxFailed, \"the list's size changed\"));",
+       "\t\t\tlet movement = after.position - before.position;",
+       "\t\t\tif after.position >= 0.0 && ((forward && movement > 0.0) || (!forward && movement < 0.0)) {",
+       "\t\t\t\t\t\"a sent scroll step did not move; inspect before retrying\",",
+       "\tfn wpf_provider_failure_before_send_is_unsupported() {",
+       "\t\tassert_eq!(error.code, ErrorCode::Unsupported);",
+       "\tfn wpf_scroll_deadline_and_position_readback() {",
+       "\t\tfor (case, initial, growth, expected, reads, sends) in [",
+       "\t\t\t(\"expired\", 50.0, 0.0_f64, Err(Timeout), 0, 0),",
+       "\t\t\t(\"late\", 50.0, 0.0, Err(AxUnconfirmed), 3, 1),",
+       "\t\t\t(\"resize\", 50.0, 10.0, Err(AxUnconfirmed), 4, 1),",
+       "\t\t\t(\"moved\", 50.0, 0.0, Ok(true), 4, 1),",
+       "\t\t\t(\"end\", 100.0, 0.0, Err(InputFailed), 2, 0),",
+       "\t\t\t\t\tlet change = f64::from(u8::from(run.sent));",
+       "\t\t\t\t\tlet mut values = [initial + change, growth.mul_add(change, 10.0)].into_iter();",
+       "\t\t\t\t\tlet mut read = || {",
+       "\t\t\t\t\t\tOk::<_, DesktopError>(values.next().unwrap())",
+       "\t\t\t\t\tOk(Sample { position: run.call(&mut read)?, view: run.call(read)? })",
+       "\t\t\t\t|_| panic!(\"these samples settle without waiting\"),"
+      ],
+      "crates/natives/src/desktop/win32/input.rs": [
+       "\t\tif kind == EventKind::MouseScroll && is_wpf_class(class) {",
+       "\t\t\treturn wpf_scroll_unsupported(id, class);",
+       "\tfn wpf_scroll_unsupported(id: &str, class: &str) -> DesktopError {",
+       "\t\tDesktopError::unsupported(format!(",
+       "\t\t\t\"window {id} ({class}) drops posted wheels; bring it to the front for scrolling over a \\",
+       "\t\t\t scroll container, or use takeover: true; no input was sent\"",
+       "\t/// window holds the foreground, its scrolls go to the UI Automation scroll",
+       "\t/// container under the point; behind other windows they are refused",
+       "\t/// ([`wpf_scroll_unsupported`]).",
+       "\t\tlet wpf_scroll = kind == EventKind::MouseScroll && is_wpf_class(&class);",
+       "\t\tif wpf_scroll && window::has_chromium_descendant(root) {",
+       "\t\t\treturn Err(wpf_scroll_unsupported(id, &class));",
+       "\t\t\t\tlet (target, _) = match child_under(root, point) {",
+       "\t\t\t\t\tErr(_) if wpf_scroll => return Err(wpf_scroll_unsupported(id, &class)),",
+       "\t\t\t\t\tresult => result?,",
+       "\t\t\t\t\tif (horizontal != 0 || vertical != 0)",
+       "\t\t\t\t\t\t&& ax.scroll_at_point(root, point, horizontal, vertical)?",
+       "\t\t\t\t\t{"
+      ],
+      "crates/natives/src/desktop/win32/mod.rs": [
+       "\t\tassert_eq!(error.code, ErrorCode::Unsupported, \"{error}\");",
+       "\t\tassert_eq!(error.code, ErrorCode::AxUnconfirmed, \"{error}\");",
+       "\t\tassert!(error.message.contains(\"list\") && error.message.contains(\"size\"), \"{error}\");"
+      ],
+      "docs/tools/computer.md": [
+       "On Windows, WPF ignores posted wheel input. While the target window holds the foreground, `scroll` uses the UI Automation scroll containers under the point without moving the pointer, choosing each requested axis independently. Hosted non-WPF child windows keep their normal posted-wheel route. A WPF-drawn point behind other windows, an unmappable point, or no usable scroll container throws `Unsupported` with nothing sent: bring the target window forward or explicitly use `takeover: true`. `Unsupported` never triggers automatic takeover. Inspect the target window before retrying partial `InputFailed` or `AxUnconfirmed` errors; input may already have taken effect.",
+       "`AxUnconfirmed` means an accessibility action was requested but its outcome could not be confirmed. On macOS, the app may not have replied in time or messaging failed, for example because the action opened a modal dialog, or the app answered with an attribute error that does not apply to actions, as Preview does after following a PDF link and Finder after opening an item. On Windows, a WPF scroll may have been sent without its movement being confirmed, including when the container's view size changed. It may already have taken effect: observe the named app/window on macOS or the target window on Windows before repeating it."
+      ]
+     }
     }
    ],
    "built": [
