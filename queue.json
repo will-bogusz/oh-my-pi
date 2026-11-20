@@ -105270,7 +105270,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-occluded-capture",
    "host": "MacBook-Pro",
    "added": "2026-11-20T04:27:57Z",
-   "updated": "2026-11-20T07:36:11Z",
+   "updated": "2026-11-20T07:37:36Z",
    "note": "",
    "rebases_after": [
     19519
@@ -105429,6 +105429,24 @@
      "at": "2026-11-20T07:36:11Z",
      "host": "goliath",
      "tree": "ba399e02493a8b803ad82eac7e60ff225013bcaf"
+    },
+    {
+     "with": "#19702",
+     "code": "41c9920234aaec9e4d3818e0e3b745b6abb09024",
+     "with_code": "e608cd824a8447d2fca6ebe64e6b79079f530099",
+     "tip": "26fd3aba28a007bcdf1ec3bde90d47f0b8f42bf2",
+     "with_tip": "0c073f5ac413a6101207133b610d1f03abd06668",
+     "at": "2026-11-20T07:37:34Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19701",
+     "code": "41c9920234aaec9e4d3818e0e3b745b6abb09024",
+     "with_code": "ee683a22eebb363ada645b7a7da414c8c3e71a56",
+     "tip": "26fd3aba28a007bcdf1ec3bde90d47f0b8f42bf2",
+     "with_tip": "3704154aa9143ed620ccb6f77be94b68551a3a70",
+     "at": "2026-11-20T07:37:36Z",
+     "host": "MacBook-Pro"
     }
    ]
   },
