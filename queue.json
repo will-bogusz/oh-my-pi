@@ -117994,7 +117994,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-20T20:53:10.382417Z",
+  "at": "2026-11-20T20:57:28.060148Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -119307,6 +119307,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-20T20:47:34Z"
+   },
+   {
+    "id": "devin-quota-ranking",
+    "label": "devin-quota-ranking",
+    "number": null,
+    "state": "queued",
+    "area": "broker",
+    "priority": null,
+    "title": "fix(ai): rank Devin logins by quota before their on-demand balance",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-20T20:55:11Z"
    },
    {
     "id": "encoded-prefix-count",
