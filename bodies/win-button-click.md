@@ -4,7 +4,7 @@ On Windows, pressing a plain button pulled its app in front of me, and clicking 
 
 WinForms button behind your window: `click()` **reported success with nothing clicked in 19 of 20 trials on v19.0.0 → none (19 clicked, 1 unverified)**; `press()` on a button or check box took your foreground in 60 of 60 → 0 of 60.
 
-> **Windows context.** A classic button (the system `BUTTON` control, used by Win32 dialogs and every WinForms `Button`, `CheckBox` and `RadioButton`) is its own small window. `BM_CLICK` makes the button run its own click before the message returns, with no activation. UI Automation's `Invoke` activates the window first; a posted press and release is often dropped.
+> **Windows context.** A classic button (the system `BUTTON` control: Win32 dialogs, WinForms `Button`, `CheckBox`, `RadioButton`) is its own small window. `BM_CLICK` runs its click before returning, with no activation; UI Automation's `Invoke` activates the window first, and a posted press is often dropped.
 
 | WinForms button or check box | v19.0.0 | This PR |
 |---|---|---|
@@ -17,27 +17,35 @@ WinForms button behind your window: `click()` **reported success with nothing cl
 
 *Unverified*: the harness could not read the app's state within 5 s of the ok; the outcome is unknown.
 
-Reading order: `window::native_button` and `window::click_button`, then their callers in `win32/ax.rs` and `win32/input.rs`.
+Reading order: `window::native_button`, `window::click_button`, then their callers in `ax.rs` and `input.rs`.
 
 ## Why
 
-Refs #16572, which reported both on WinForms. Related: #16573 refuses these actions (sending them to takeover); this keeps them in the background.
+Refs #16572, which reported both on WinForms. Related: #16573 sends these actions to takeover; this keeps them in the background.
 
 Decisions:
-- `BM_CLICK` is sent and waited for (at most 3 s, within the operation's deadline), not posted. Refused by Windows: `InputFailed`, nothing clicked; unanswered in time: `InputFailed` worded as possibly taken.
-- An automatic check box must read a changed state after the click (via Toggle for WinForms); one gone before it can be read is possibly clicked.
-- Just before the send the button must still be enabled up to, and inside, the top-level window it was found in; otherwise nothing is sent.
-- An explicit `invoke` asks for the `Invoke` pattern once: a failed lookup is main's error, never a second lookup reaching `Invoke`, which takes the foreground.
+- `BM_CLICK` is sent and waited for (at most 3 s, within the operation's deadline), not posted. Refused: `InputFailed`, nothing clicked; unanswered in time: `InputFailed`, possibly taken.
+- An automatic check box must read a changed state after the click (Toggle for WinForms); one gone before the read is possibly clicked.
+- Just before the send the button must still be enabled up to, and inside, the top-level window it was found in.
+- An explicit `invoke` looks up the `Invoke` pattern once; a failed lookup is main's error, never a retry reaching `Invoke`.
 
 Limits:
 - A push button's ok means its click message was answered, not that the app acted, as with main's `Invoke`.
 - A single unmodified left background `click()` on a button becomes its click message, not a press at the point: WinForms `MouseDown`/`MouseUp` handlers do not run, and a WinForms radio is selected even if validation would cancel a mouse click. Owner-drawn system buttons keep the point.
+- With #19871 also in `main`, this BM_CLICK route must mark dispatch too; that line is ready as win-button-click-fence.
 
 Maintenance: documented button messages, stable since Windows NT.
 
 ## Testing
 
-The table is OMP's `press()` and `click()` through the public `computer` route on a Windows 10 22H2 VM: v19.0.0's published addon against this head's release build (`f80f77bb012`), same VM and day, n=10 per probe and condition.
+Above: `press()` and `click()` through the public `computer` route on a Windows 10 22H2 VM, v19.0.0's addon against this branch's release build (`f80f77bb012`; the rebase onto `725f8c6f34` left the diff unchanged), n=10. Windows 11 25H2, addon hash read back per side, n=5:
+
+| WinForms button or check box, Windows 11 | v19.0.0 | This PR |
+|---|---|---|
+| `press()` in the background: foreground taken | 30/30 | 0/30, clicked 30/30 |
+| `press()`, you typing: your keys lost | 179 of 300 | 0 of 300 |
+| `click()`, covered or you typing | `ok`, nothing clicked (9/10; 1 unverified) | clicked (10/10) |
+| `press()`/`click()`, its app in front | clicked (15/15) | clicked (15/15) |
 
 <details><summary>Rig, the user's own text, the unit tests, dialogs</summary>
 
@@ -53,7 +61,7 @@ Without OMP, `BM_CLICK` acted 6/6 with no foreground change; `Invoke` took the f
 
 </details>
 
-- `natives-test.exe desktop::win32::` at `f80f77bb012` on the VM's desktop session: 47 passed, 7 ignored.
+- `natives-test.exe desktop::win32::` at `f80f77bb012` on each VM's desktop session: 47 passed, 7 ignored on Windows 10 and on Windows 11.
 - `scripts/rust-check` on Windows (cargo-xwin), Linux and macOS at `f80f77bb012`: clippy and rustfmt clean on the branch's lines.
 
 Not run: behaviour on macOS and Linux (the change is Windows-only; they were compiled and linted).
