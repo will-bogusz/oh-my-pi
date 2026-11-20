@@ -1689,6 +1689,7 @@ function pageFrame(target: string, page: PageCapture, region?: CaptureRegion): D
 		displays: [],
 		backend: "devtools",
 		screenLocked: false,
+		coveredBy: [],
 	};
 }
 
