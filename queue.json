@@ -105223,7 +105223,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-edit-setvalue",
    "host": "MacBook-Pro",
    "added": "2026-11-19T11:17:04Z",
-   "updated": "2026-11-20T12:47:44Z",
+   "updated": "2026-11-20T13:21:51Z",
    "note": "",
    "rebases_after": [
     19195,
@@ -105253,7 +105253,8 @@
       ]
      }
     }
-   ]
+   ],
+   "hold": "Main, 2026-11-20: in its fix round (WinButtonRound, review needs-changes at e06e31d6bf7); ready work opens in the order it becomes ready"
   },
   {
    "id": "win-wpf-scroll",
