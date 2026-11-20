@@ -996,9 +996,8 @@ mod foreground {
 					},
 					|| {
 						// SAFETY: GetForegroundWindow has no preconditions.
-						prior_fence = Some(Self::settle_activation(target, unsafe {
-							GetForegroundWindow()
-						}));
+						prior_fence =
+							Some(Self::settle_activation(target, unsafe { GetForegroundWindow() }));
 					},
 				);
 				if let Err((_, error)) = brought {
@@ -1009,7 +1008,11 @@ mod foreground {
 						return Err(error);
 					}
 					let recovered = guard.take_back_owed_activation(
-						id, error.code, last_input, requested, prior_fence,
+						id,
+						error.code,
+						last_input,
+						requested,
+						prior_fence,
 					);
 					// Preserve intervention and any recovery failure together.
 					return activity::outcome(Err(recovered)).map(|()| guard);
@@ -1024,17 +1027,23 @@ mod foreground {
 				return true;
 			}
 			control::cleanup(|| {
-				let timeout = control::time_left()
-					.map_or(ACTIVATION_TIMEOUT, |left| left.min(ACTIVATION_TIMEOUT));
+				let timeout =
+					control::time_left().map_or(ACTIVATION_TIMEOUT, |left| left.min(ACTIVATION_TIMEOUT));
 				if timeout.as_millis() == 0 {
 					return false;
 				}
 				let mut ignored = 0;
-				// SAFETY: WM_NULL carries no pointers; the wait is deadline-bounded.
+				// SAFETY: WM_NULL carries no pointers; the wait is
+				// deadline-bounded.
 				unsafe {
 					SendMessageTimeoutW(
-						target, WM_NULL, 0, 0, SMTO_ABORTIFHUNG,
-						timeout.as_millis() as u32, &raw mut ignored,
+						target,
+						WM_NULL,
+						0,
+						0,
+						SMTO_ABORTIFHUNG,
+						timeout.as_millis() as u32,
+						&raw mut ignored,
 					) != 0
 				}
 			})
@@ -1056,9 +1065,8 @@ mod foreground {
 				Other,
 				Unconfirmed,
 			}
-			let remaining = |maximum: Duration| {
-				control::time_left().map_or(maximum, |left| left.min(maximum))
-			};
+			let remaining =
+				|maximum: Duration| control::time_left().map_or(maximum, |left| left.min(maximum));
 			self.armed = false;
 			let target = self.target;
 			// Some window other than the target or one it owns.
@@ -1096,10 +1104,8 @@ mod foreground {
 						&& last_input_tick() == last_input
 					{
 						let _ = window::activate(self.previous)?;
-						let _ = window::wait_for_foreground(
-							self.previous,
-							remaining(ACTIVATION_TIMEOUT),
-						)?;
+						let _ =
+							window::wait_for_foreground(self.previous, remaining(ACTIVATION_TIMEOUT))?;
 					}
 					Ok(())
 				})();
@@ -1112,11 +1118,17 @@ mod foreground {
 							return Ok(Front::Unconfirmed);
 						}
 						let mut ignored = 0;
-						// SAFETY: WM_NULL carries no pointers; the wait is deadline-bounded.
+						// SAFETY: WM_NULL carries no pointers; the wait is
+						// deadline-bounded.
 						unsafe {
 							SendMessageTimeoutW(
-								self.target, WM_NULL, 0, 0, SMTO_ABORTIFHUNG,
-								timeout.as_millis() as u32, &raw mut ignored,
+								self.target,
+								WM_NULL,
+								0,
+								0,
+								SMTO_ABORTIFHUNG,
+								timeout.as_millis() as u32,
+								&raw mut ignored,
 							) != 0
 						}
 					},
@@ -1176,9 +1188,9 @@ mod foreground {
 					return DesktopError::new(
 						code,
 						format!(
-							"{activation} window {id}, but activation was interrupted or \
-							 not confirmed; no input was sent; the hand-back is unconfirmed and the \
-							 target may still come forward: {}",
+							"{activation} window {id}, but activation was interrupted or not confirmed; \
+							 no input was sent; the hand-back is unconfirmed and the target may still \
+							 come forward: {}",
 							restore.message
 						),
 					);
@@ -1187,8 +1199,8 @@ mod foreground {
 			DesktopError::new(
 				code,
 				format!(
-					"{activation} window {id}, but activation was interrupted or not \
-					 confirmed; no input was sent; {outcome}"
+					"{activation} window {id}, but activation was interrupted or not confirmed; no \
+					 input was sent; {outcome}"
 				),
 			)
 		}
