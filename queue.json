@@ -106271,8 +106271,28 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-neon-image-price",
    "host": "MacBook-Pro",
    "added": "2026-11-20T18:00:29Z",
-   "updated": "2026-11-20T18:00:29Z",
-   "note": ""
+   "updated": "2026-11-20T18:12:26Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#19880",
+     "code": "f5df6b5a46caa46d880853ecac68c91227b1b298",
+     "with_code": "245964753c73e11932c639d96176f4391cf9bca2",
+     "tip": "0cdac5726afc593e82a906c54731dbb21a4aa70b",
+     "with_tip": "b01e9c6d012ff37428dc28f259a4a0803bb7432b",
+     "at": "2026-11-20T18:12:21Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "factory-droid-1100-pin",
+     "code": "f5df6b5a46caa46d880853ecac68c91227b1b298",
+     "with_code": "2ce01c8d9d3dfcc120b3ef5dbca0d7384e45e2c5",
+     "tip": "0cdac5726afc593e82a906c54731dbb21a4aa70b",
+     "with_tip": "3336d0c48fe7e24ff937dcba4743738472ed1c1f",
+     "at": "2026-11-20T18:12:25Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   }
  ],
  "watch": {
