@@ -32,6 +32,6 @@ Live, on a WPF check box pressed through `SessionCore` with a 750 ms reply wait 
 | `Checked` handler blocks after the toggle began | `AxUnconfirmed`, box toggled once: Windows 11 3/3, Windows 10 3/3 | `Timeout`, box toggled once: Windows 11 3/3, Windows 10 3/3 |
 | dispatcher blocked before the press | `Timeout`, box never toggled: Windows 11 3/3, Windows 10 3/3 | `Timeout`, box toggled late: Windows 11 3/3, Windows 10 3/3 |
 
-Every press returned after 750 to 765 ms. The late toggle with the check removed shows the worker was already past its last cancellation check when the caller gave up, so only the fence stopped it at this head.
+Every press returned after 750 to 765 ms. The late toggle with the check removed shows the worker was past its last cancellation check, so only the fence stopped it at this head.
 
 `scripts/rust-check` on Windows (cargo-xwin), Linux and macOS: clippy and rustfmt pass on this branch's lines at `64e43749b09`.
