@@ -1,10 +1,10 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20 13:54Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20 13:56Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-20 13:33Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 2, conflict-held 18, stacked 15, held 11, parked 1, open PRs 19, queued since the last plan 1; merged 404, closed 44
+**Counts:** openable now 2, conflict-held 18, stacked 15, held 11, parked 1, open PRs 19, queued since the last plan 2; merged 404, closed 44
 
 ## Openable now (2)
 
@@ -102,8 +102,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20
 | [#19620](https://github.com/can1357/oh-my-pi/pull/19620) | snapcompact-rerender-on-switch | fix(snapcompact,coding-agent): re-render a snapcompact archive in the frame shape of the model reading it | snapcompact | P2 | 2d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-rerender-on-switch) |
 | [#19849](https://github.com/can1357/oh-my-pi/pull/19849) | win-occluded-capture | fix(natives): count every opaque window as a cover over a Chromium capture | computer | P1 | 6h | keep; accepted pair with #19519: Main, 2026-11-20: adjacent test-only fields in the fake backend; combined = both | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-occluded-capture) |
 
-## Queued since the last plan (1)
+## Queued since the last plan (2)
 
 | id | title | area | priority | age | branch |
 |---|---|---|---|---|---|
 | win-takeover-intervene | fix(natives): stop Windows takeovers when the user types or clicks | computer |  | 1h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-takeover-intervene) |
+| win-takeover-settle | fix(natives): stop Windows takeovers of a busy app bringing it forward after the call failed | computer |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-takeover-settle) |

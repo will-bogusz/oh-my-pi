@@ -105705,6 +105705,26 @@
    "added": "2026-11-20T12:25:26Z",
    "updated": "2026-11-20T13:54:22Z",
    "note": ""
+  },
+  {
+   "id": "win-takeover-settle",
+   "branch": "will/win-takeover-settle",
+   "title": "fix(natives): stop Windows takeovers of a busy app bringing it forward after the call failed",
+   "area": "computer",
+   "priority": null,
+   "needs": [
+    "win-takeover-intervene"
+   ],
+   "base": "b636e19d10b664950d600505d194337bbeef42f0",
+   "body": "bodies/win-takeover-settle.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-takeover-settle",
+   "host": "MacBook-Pro",
+   "added": "2026-11-20T13:55:57Z",
+   "updated": "2026-11-20T13:55:57Z",
+   "note": ""
   }
  ],
  "watch": {
