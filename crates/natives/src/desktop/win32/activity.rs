@@ -25,17 +25,20 @@ use windows_sys::Win32::{
 	System::{SystemInformation::GetTickCount, Threading::GetCurrentThreadId},
 	UI::{
 		Input::{
-			GetRawInputData, HRAWINPUT, KeyboardAndMouse::{
+			GetRawInputData, HRAWINPUT,
+			KeyboardAndMouse::{
 				GetAsyncKeyState, GetLastInputInfo, LASTINPUTINFO, VK_CONTROL, VK_LBUTTON, VK_LWIN,
 				VK_MBUTTON, VK_MENU, VK_RBUTTON, VK_RWIN, VK_SHIFT, VK_XBUTTON1, VK_XBUTTON2,
-			}, RAWINPUT, RAWINPUTDEVICE, RAWINPUTHEADER, RID_INPUT, RIDEV_INPUTSINK, RIDEV_REMOVE,
+			},
+			RAWINPUT, RAWINPUTDEVICE, RAWINPUTHEADER, RID_INPUT, RIDEV_INPUTSINK, RIDEV_REMOVE,
 			RIM_TYPEKEYBOARD, RIM_TYPEMOUSE, RegisterRawInputDevices,
 		},
 		WindowsAndMessaging::{
-			CreateWindowExW, DefWindowProcW, DestroyWindow, DispatchMessageW, GetMessageW, HWND_MESSAGE,
-			MSG, PostThreadMessageW, RI_KEY_BREAK, RI_MOUSE_BUTTON_4_DOWN, RI_MOUSE_BUTTON_5_DOWN,
-			RI_MOUSE_HWHEEL, RI_MOUSE_LEFT_BUTTON_DOWN, RI_MOUSE_MIDDLE_BUTTON_DOWN,
-			RI_MOUSE_RIGHT_BUTTON_DOWN, RI_MOUSE_WHEEL, RegisterClassW, WM_INPUT, WM_QUIT, WNDCLASSW,
+			CreateWindowExW, DefWindowProcW, DestroyWindow, DispatchMessageW, GetMessageW,
+			HWND_MESSAGE, MSG, PostThreadMessageW, RI_KEY_BREAK, RI_MOUSE_BUTTON_4_DOWN,
+			RI_MOUSE_BUTTON_5_DOWN, RI_MOUSE_HWHEEL, RI_MOUSE_LEFT_BUTTON_DOWN,
+			RI_MOUSE_MIDDLE_BUTTON_DOWN, RI_MOUSE_RIGHT_BUTTON_DOWN, RI_MOUSE_WHEEL, RegisterClassW,
+			WM_INPUT, WM_QUIT, WNDCLASSW,
 		},
 	},
 };
@@ -131,10 +134,16 @@ impl UserActivity {
 	pub(super) fn admit(&self) -> CoreResult<()> {
 		ADMITTED.set(None);
 		let deadline = control::current_token().and_then(|token| token.deadline());
-		let limit = deadline.map_or(Instant::now() + QUIET, |deadline| {
-			deadline.checked_sub(control::DEADLINE_MARGIN).unwrap_or(deadline)
-		});
-		let count = admit_with(&self.listener.presses, limit, Instant::now, input_held, control::wait)?;
+		let limit = deadline.map_or_else(
+			|| Instant::now() + QUIET,
+			|deadline| {
+				deadline
+					.checked_sub(control::DEADLINE_MARGIN)
+					.unwrap_or(deadline)
+			},
+		);
+		let count =
+			admit_with(&self.listener.presses, limit, Instant::now, input_held, control::wait)?;
 		ADMITTED.set(Some((Arc::clone(&self.listener.presses), count)));
 		Ok(())
 	}
@@ -166,24 +175,21 @@ impl Drop for Takeover {
 /// the input lease is held, so a user still active refuses it at once.
 pub(super) fn start() -> CoreResult<Takeover> {
 	ACTIVE.set(None);
-	let baseline = match ADMITTED.take() {
-		Some((presses, baseline)) => {
-			if presses.count.load(Ordering::Acquire) != baseline || input_held() {
-				return Err(DesktopError::user_intervened(
-					"the user pressed or is holding a key or button as the takeover was starting, \
-					 so none started; nothing was sent; try again once they pause",
-				));
-			}
-			(presses, baseline)
-		},
-		None => {
-			let Some(listener) = SHARED.lock().upgrade() else {
-				return Err(unwatched());
-			};
-			let presses = Arc::clone(&listener.presses);
-			let baseline = admit_with(&presses, Instant::now(), Instant::now, input_held, control::wait)?;
-			(presses, baseline)
-		},
+	let baseline = if let Some((presses, baseline)) = ADMITTED.take() {
+		if presses.count.load(Ordering::Acquire) != baseline || input_held() {
+			return Err(DesktopError::user_intervened(
+				"the user pressed or is holding a key or button as the takeover was starting, so none \
+				 started; nothing was sent; try again once they pause",
+			));
+		}
+		(presses, baseline)
+	} else {
+		let Some(listener) = SHARED.lock().upgrade() else {
+			return Err(unwatched());
+		};
+		let presses = Arc::clone(&listener.presses);
+		let baseline = admit_with(&presses, Instant::now(), Instant::now, input_held, control::wait)?;
+		(presses, baseline)
 	};
 	ACTIVE.set(Some(baseline));
 	Ok(Takeover(()))
@@ -222,7 +228,11 @@ fn admit_with(
 		let holding = held();
 		let count = presses.count.load(Ordering::Acquire);
 		let now = now();
-		let last = if holding { Some(now) } else { *presses.last.lock() };
+		let last = if holding {
+			Some(now)
+		} else {
+			*presses.last.lock()
+		};
 		let Some(last) = last else {
 			return Ok(count);
 		};
@@ -241,10 +251,21 @@ fn admit_with(
 /// Whether the user holds a mouse button or a modifier, which would change
 /// what the takeover's own input does.
 fn input_held() -> bool {
-	[VK_LBUTTON, VK_RBUTTON, VK_MBUTTON, VK_XBUTTON1, VK_XBUTTON2, VK_SHIFT, VK_CONTROL, VK_MENU, VK_LWIN, VK_RWIN]
-		.into_iter()
-		// SAFETY: GetAsyncKeyState takes a scalar virtual key.
-		.any(|key| unsafe { GetAsyncKeyState(key.into()) } < 0)
+	[
+		VK_LBUTTON,
+		VK_RBUTTON,
+		VK_MBUTTON,
+		VK_XBUTTON1,
+		VK_XBUTTON2,
+		VK_SHIFT,
+		VK_CONTROL,
+		VK_MENU,
+		VK_LWIN,
+		VK_RWIN,
+	]
+	.into_iter()
+	// SAFETY: GetAsyncKeyState takes a scalar virtual key.
+	.any(|key| unsafe { GetAsyncKeyState(key.into()) } < 0)
 }
 
 /// When the user last pressed anything before the listener started, from the
@@ -269,13 +290,20 @@ fn is_user_press(input: &RAWINPUT) -> bool {
 		// SAFETY: the header says which member Windows filled.
 		RIM_TYPEKEYBOARD => u32::from(unsafe { input.data.keyboard }.Flags) & RI_KEY_BREAK == 0,
 		RIM_TYPEMOUSE => {
-			u32::from(unsafe { input.data.mouse.Anonymous.Anonymous.usButtonFlags }) & MOUSE_PRESSES != 0
+			// SAFETY: as above.
+			let flags = unsafe { input.data.mouse.Anonymous.Anonymous.usButtonFlags };
+			u32::from(flags) & MOUSE_PRESSES != 0
 		},
 		_ => false,
 	}
 }
 
-unsafe extern "system" fn receive(window: HWND, message: u32, wparam: WPARAM, lparam: LPARAM) -> LRESULT {
+unsafe extern "system" fn receive(
+	window: HWND,
+	message: u32,
+	wparam: WPARAM,
+	lparam: LPARAM,
+) -> LRESULT {
 	if message == WM_INPUT {
 		let mut input = RAWINPUT::default();
 		let mut size = size_of::<RAWINPUT>() as u32;
@@ -314,10 +342,8 @@ fn devices(flags: u32, target: HWND) -> [RAWINPUTDEVICE; 2] {
 
 fn listen() -> CoreResult<Listener> {
 	let started = Instant::now();
-	let presses = Arc::new(Presses {
-		count: AtomicU64::new(0),
-		last:  Mutex::new(last_input_before(started)),
-	});
+	let presses =
+		Arc::new(Presses { count: AtomicU64::new(0), last: Mutex::new(last_input_before(started)) });
 	let (ready, receive_ready) = flume::bounded(1);
 	let shared = Arc::clone(&presses);
 	let thread = thread::Builder::new()
@@ -404,30 +430,48 @@ mod tests {
 		let start = Instant::now();
 		let clock = std::cell::Cell::new(start);
 		let typing = presses(start.checked_sub(Duration::from_secs(1)));
-		let error = admit_with(&typing, start + Duration::from_secs(2), || clock.get(), || false, |wait| {
-			// The user keeps typing through every wait.
-			clock.set(clock.get() + wait);
-			typing.record(clock.get());
-			Ok(())
-		})
+		let error = admit_with(
+			&typing,
+			start + Duration::from_secs(2),
+			|| clock.get(),
+			|| false,
+			|wait| {
+				// The user keeps typing through every wait.
+				clock.set(clock.get() + wait);
+				typing.record(clock.get());
+				Ok(())
+			},
+		)
 		.unwrap_err();
 		assert_eq!(error.code, crate::desktop::error::ErrorCode::UserIntervened);
 		assert!(error.message.contains("nothing was sent"), "{}", error.message);
 
 		let paused = presses(start.checked_sub(Duration::from_secs(1)));
 		let waited = std::cell::Cell::new(Duration::ZERO);
-		admit_with(&paused, start + Duration::from_secs(30), || start + waited.get(), || false, |wait| {
-			waited.set(waited.get() + wait);
-			Ok(())
-		})
+		admit_with(
+			&paused,
+			start + Duration::from_secs(30),
+			|| start + waited.get(),
+			|| false,
+			|wait| {
+				waited.set(waited.get() + wait);
+				Ok(())
+			},
+		)
 		.unwrap();
 		assert_eq!(waited.get(), Duration::from_secs(4));
 
 		let mut waits = 0;
-		admit_with(&presses(None), start, || start, || false, |_| {
-			waits += 1;
-			Ok(())
-		})
+		admit_with(
+			&presses(None),
+			start,
+			|| start,
+			|| false,
+			|_| {
+				waits += 1;
+				Ok(())
+			},
+		)
 		.unwrap();
 		assert_eq!(waits, 0, "an idle user adds no wait");
 	}
@@ -467,27 +511,41 @@ mod tests {
 	#[ignore = "sends input to the desktop: run with --ignored in a signed-in desktop session"]
 	fn the_listener_does_not_count_input_this_process_sends() {
 		use windows_sys::Win32::UI::Input::KeyboardAndMouse::{
-			INPUT, INPUT_0, INPUT_KEYBOARD, INPUT_MOUSE, KEYBDINPUT, KEYEVENTF_KEYUP, MOUSEEVENTF_WHEEL,
-			MOUSEINPUT, SendInput,
+			INPUT, INPUT_0, INPUT_KEYBOARD, INPUT_MOUSE, KEYBDINPUT, KEYEVENTF_KEYUP,
+			MOUSEEVENTF_WHEEL, MOUSEINPUT, SendInput,
 		};
 		let activity = UserActivity::start().unwrap();
 		let key = |flags| INPUT {
 			r#type:    INPUT_KEYBOARD,
 			Anonymous: INPUT_0 {
 				// 0xE8 is unassigned: it types nothing.
-				ki: KEYBDINPUT { wVk: 0xE8, wScan: 0, dwFlags: flags, time: 0, dwExtraInfo: 0 },
+				ki: KEYBDINPUT {
+					wVk:         0xe8,
+					wScan:       0,
+					dwFlags:     flags,
+					time:        0,
+					dwExtraInfo: 0,
+				},
 			},
 		};
 		let wheel = INPUT {
 			r#type:    INPUT_MOUSE,
 			Anonymous: INPUT_0 {
-				mi: MOUSEINPUT { dx: 0, dy: 0, mouseData: 0, dwFlags: MOUSEEVENTF_WHEEL, time: 0, dwExtraInfo: 0 },
+				mi: MOUSEINPUT {
+					dx:          0,
+					dy:          0,
+					mouseData:   0,
+					dwFlags:     MOUSEEVENTF_WHEEL,
+					time:        0,
+					dwExtraInfo: 0,
+				},
 			},
 		};
 		let inputs = [key(0), key(KEYEVENTF_KEYUP), wheel];
 		let before = activity.listener.presses.count.load(Ordering::Acquire);
 		// SAFETY: `inputs` is an initialized INPUT slice copied synchronously.
-		let sent = unsafe { SendInput(inputs.len() as u32, inputs.as_ptr(), size_of::<INPUT>() as i32) };
+		let sent =
+			unsafe { SendInput(inputs.len() as u32, inputs.as_ptr(), size_of::<INPUT>() as i32) };
 		assert_eq!(sent as usize, inputs.len());
 		std::thread::sleep(Duration::from_millis(300));
 		assert_eq!(activity.listener.presses.count.load(Ordering::Acquire), before);

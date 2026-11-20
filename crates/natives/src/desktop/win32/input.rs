@@ -934,7 +934,8 @@ mod foreground {
 		target:   HWND,
 		settle:   Duration,
 		armed:    bool,
-		/// Watches the user's presses until the guard is gone ([`activity::check`]).
+		/// Watches the user's presses until the guard is gone
+		/// ([`activity::check`]).
 		_user:    activity::Takeover,
 	}
 
@@ -1656,8 +1657,9 @@ mod foreground {
 				if !in_front() {
 					break left();
 				}
-				// The user's key or click fails the call ([`ForegroundGuard::run`]);
-				// their next keys must not wait here for the target.
+				// The user's key or click fails the call
+				// ([`ForegroundGuard::run`]); their next keys must not wait here
+				// for the target.
 				if activity::check().is_err() {
 					break None;
 				}
