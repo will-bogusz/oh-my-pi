@@ -105179,7 +105179,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-20T00:18:10Z",
+  "checked": "2026-11-20T00:49:17Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -105189,8 +105189,24 @@
    }
   },
   "conflicts": {},
-  "merged_through": "2026-11-19T18:35:27Z",
-  "unreleased": {},
+  "merged_through": "2026-11-20T00:19:38Z",
+  "unreleased": {
+   "19748": {
+    "title": "fix(coding-agent): fire key events after a browser fill for pages that search on keyup",
+    "merge_commit": "b832944e598a22cbe022394a7e02b181f58f26c9",
+    "merged_at": "2026-11-20T00:19:37Z"
+   },
+   "19611": {
+    "title": "fix(coding-agent): keep the image omission note on evicted Responses computer results",
+    "merge_commit": "9c1d2879708db7357554ceb63de326e524a4c94b",
+    "merged_at": "2026-11-20T00:19:38Z"
+   },
+   "19590": {
+    "title": "fix(ai): warn when a broker refresh failure outlasts the access token",
+    "merge_commit": "35a313ec2bf11512eb4816d718fbd373689bc2ca",
+    "merged_at": "2026-11-20T00:19:38Z"
+   }
+  },
   "ready": [
    17756,
    19195,
@@ -105199,9 +105215,7 @@
    19519,
    19531,
    19542,
-   19590,
    19592,
-   19611,
    19615,
    19616,
    19618,
@@ -105212,7 +105226,6 @@
    19700,
    19701,
    19702,
-   19748,
    19814
   ],
   "post_merge": {
@@ -105245,12 +105258,6 @@
      }
     ]
    },
-   "19100": {
-    "title": "fix(computer): retain output and screenshots when a run fails",
-    "merge_commit": "542454c814a483c0c5605e234134de81d35d297c",
-    "merged_at": "2026-11-18T00:31:44Z",
-    "findings": []
-   },
    "19516": {
     "title": "fix(natives): read a macOS popup after the option its typed letters choose",
     "merge_commit": "4dbe7c2cf0309753befa9bb73a3f65758bc645b2",
@@ -105267,6 +105274,12 @@
     "title": "docs(auth-gateway): describe reclaim moving warm pins back",
     "merge_commit": "0e9db07d6cf4c2f21c53df6ba92aff5ea3034143",
     "merged_at": "2026-11-18T17:12:46Z",
+    "findings": []
+   },
+   "19590": {
+    "title": "fix(ai): warn when a broker refresh failure outlasts the access token",
+    "merge_commit": "35a313ec2bf11512eb4816d718fbd373689bc2ca",
+    "merged_at": "2026-11-20T00:19:38Z",
     "findings": []
    },
    "19596": {
@@ -105317,6 +105330,12 @@
     "merged_at": "2026-11-18T17:12:46Z",
     "findings": []
    },
+   "19611": {
+    "title": "fix(coding-agent): keep the image omission note on evicted Responses computer results",
+    "merge_commit": "9c1d2879708db7357554ceb63de326e524a4c94b",
+    "merged_at": "2026-11-20T00:19:38Z",
+    "findings": []
+   },
    "19619": {
     "title": "fix(catalog): carry Devin's measured image limits",
     "merge_commit": "7d72a0224f7e35ee63e2cc699e0777b0a80d297b",
@@ -105351,6 +105370,12 @@
     "title": "test(natives): restore passing macOS native typing tests",
     "merge_commit": "d483aab03b2b9f4ab7701a9801adf4435da3c0f5",
     "merged_at": "2026-11-19T18:35:27Z",
+    "findings": []
+   },
+   "19748": {
+    "title": "fix(coding-agent): fire key events after a browser fill for pages that search on keyup",
+    "merge_commit": "b832944e598a22cbe022394a7e02b181f58f26c9",
+    "merged_at": "2026-11-20T00:19:37Z",
     "findings": []
    }
   },
@@ -106918,6 +106943,30 @@
     "number": 19703,
     "title": "fix(tui): stopped the loop profiler when the last TUI watchdog stops",
     "tag": "v19.0.1"
+   },
+   {
+    "at": "2026-11-20T00:49:17Z",
+    "kind": "merged",
+    "number": 19748,
+    "title": "fix(coding-agent): fire key events after a browser fill for pages that search on keyup",
+    "merged_by": "can1357",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-20T00:49:17Z",
+    "kind": "merged",
+    "number": 19611,
+    "title": "fix(coding-agent): keep the image omission note on evicted Responses computer results",
+    "merged_by": "can1357",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-20T00:49:17Z",
+    "kind": "merged",
+    "number": 19590,
+    "title": "fix(ai): warn when a broker refresh failure outlasts the access token",
+    "merged_by": "can1357",
+    "maintainer_commits": 0
    }
   ]
  },
@@ -114857,7 +114906,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-19T23:47:17.108400Z",
+  "at": "2026-11-20T00:49:17.903470Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -114900,40 +114949,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-13T20:28:59Z"
-   },
-   {
-    "id": "broker-refresh-failure-loud",
-    "label": "#19590",
-    "number": 19590,
-    "state": "open",
-    "area": "broker",
-    "priority": "P0",
-    "title": "fix(ai): warn when a broker refresh failure outlasts the access token",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-17T21:39:00Z"
-   },
-   {
-    "id": "fill-key-events",
-    "label": "#19748",
-    "number": 19748,
-    "state": "open",
-    "area": "browser",
-    "priority": "P0",
-    "title": "fix(coding-agent): fire key events after a browser fill for pages that search on keyup",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-19T04:00:02Z"
    },
    {
     "id": "macos-handback-typed",
@@ -114987,23 +115002,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-17T04:19:37Z"
-   },
-   {
-    "id": "image-eviction-notice",
-    "label": "#19611",
-    "number": 19611,
-    "state": "open",
-    "area": "other",
-    "priority": "P1",
-    "title": "fix(coding-agent): keep the image omission note on evicted Responses computer results",
-    "action": "keep",
-    "reasons": [],
-    "note": "tests-over: LaneImageDropNotice, 2026-11-18: four distinct branches (archive run grouping; notice bytes charged against the body-limit room; a grown notice charged once; count-clamp notice extended by the byte clamp), the last two asked for by roboomp; each fails with its branch removed",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-18T00:45:52Z"
    },
    {
     "id": "wayland-share-picker-deadline",
@@ -115453,7 +115451,7 @@
     "reasons": [
      "conflicts with #19542 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19633 in packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with main in packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-daemon.test.ts"
+     "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-daemon.test.ts"
     ],
     "note": "",
     "over": [],
@@ -115478,7 +115476,7 @@
      "needs r2/relay-own-only (queued)",
      "conflicts with #19542 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19633 in packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "its need r2/relay-own-only conflicts with main in packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-daemon.test.ts"
+     "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-daemon.test.ts"
     ],
     "note": "",
     "over": [],
@@ -115505,7 +115503,7 @@
      "needs r2/relay-popup-owned (queued), r2/page-waiting (queued)",
      "conflicts with #19542 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19633 in packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "its need r2/relay-popup-owned conflicts with main in packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-daemon.test.ts",
+     "its need r2/relay-popup-owned conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-daemon.test.ts",
      "its need r2/page-waiting conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/dialogs.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts"
     ],
@@ -116015,17 +116013,15 @@
     "action": "wait",
     "reasons": [
      "needs r2/relay-own-only (queued)",
-     "conflicts with #19748 in packages/coding-agent/src/tools/browser/interactions.ts",
      "conflicts with #19542 in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19633 in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "its need r2/relay-own-only conflicts with main in packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-daemon.test.ts",
+     "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-daemon.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/dialogs.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/interactions.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#19748",
      "#19542",
      "#19633"
     ],
