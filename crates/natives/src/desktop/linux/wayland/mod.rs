@@ -330,7 +330,9 @@ impl WaylandBackend {
 			},
 		};
 		let Some(window) = windows.iter().find(|window| &window.id == id) else {
-			return Some(Err(DesktopError::window_not_found(format!("Wayland window {id} not found"))));
+			return Some(Err(DesktopError::window_not_found(format!(
+				"Wayland window {id} not found"
+			))));
 		};
 		if !window.id.starts_with("atspi:") {
 			return Some(Ok(PointOutcome::Declined(
@@ -368,8 +370,11 @@ impl WaylandBackend {
 			Ok(None) => return None,
 			Err(error) => return Some(Err(error)),
 		};
-		let client =
-			hyprland::client_for_frame(clients.iter().map(|client| &client.window), window.pid, &window.title)?;
+		let client = hyprland::client_for_frame(
+			clients.iter().map(|client| &client.window),
+			window.pid,
+			&window.title,
+		)?;
 		window.x = client.x;
 		window.y = client.y;
 		window.width = client.width;
@@ -398,7 +403,11 @@ fn placed_by_hyprland(
 				.filter(|(index, _)| !claimed[*index])
 				.map(|(_, client)| &client.window);
 			let matched = hyprland::client_for_frame(free, entry.window.pid, &entry.window.title)
-				.and_then(|window| clients.iter().position(|client| client.window.id == window.id));
+				.and_then(|window| {
+					clients
+						.iter()
+						.position(|client| client.window.id == window.id)
+				});
 			entry.window.focused = false;
 			if let Some(index) = matched {
 				let client = &clients[index];
@@ -418,7 +427,10 @@ fn placed_by_hyprland(
 			.into_iter()
 			.zip(claimed)
 			.filter(|(_, claimed)| !claimed)
-			.map(|(client, _)| AtSpiWindow { window: client.window, position_known: client.visible }),
+			.map(|(client, _)| AtSpiWindow {
+				window:         client.window,
+				position_known: client.visible,
+			}),
 	);
 	placed
 }
@@ -666,7 +678,8 @@ impl Backend for WaylandBackend {
 					Err(error) => error,
 					Ok(()) => DesktopError::background_unavailable("Wayland pointer input"),
 				};
-				error.message = format!("{}. Nothing was sent through accessibility either: {why}", error.message);
+				error.message =
+					format!("{}. Nothing was sent through accessibility either: {why}", error.message);
 				Err(error)
 			},
 			Some(Err(error)) => Err(error),

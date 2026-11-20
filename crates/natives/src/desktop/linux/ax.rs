@@ -514,7 +514,10 @@ impl AtSpiAx {
 			return Ok(None);
 		};
 		self.run(async {
-			let Ok(frame_proxy) = self.reply(frame.as_accessible_proxy(&self.connection)).await? else {
+			let Ok(frame_proxy) = self
+				.reply(frame.as_accessible_proxy(&self.connection))
+				.await?
+			else {
 				return Ok(None);
 			};
 			if !self
@@ -527,23 +530,36 @@ impl AtSpiAx {
 			let title = self.reply(frame_proxy.name()).await?.unwrap_or_default();
 			let state = self.reply(frame_proxy.get_state()).await?.ok();
 			let app_name = match self.reply(frame_proxy.get_application()).await? {
-				Ok(app) => match self.reply(app.as_accessible_proxy(&self.connection)).await? {
+				Ok(app) => match self
+					.reply(app.as_accessible_proxy(&self.connection))
+					.await?
+				{
 					Ok(app) => self.reply(app.name()).await?.unwrap_or_default(),
 					Err(_) => String::new(),
 				},
 				Err(_) => String::new(),
 			};
-			let pid = match (frame.name(), self.reply(atspi::zbus::fdo::DBusProxy::new(&self.connection)).await?) {
+			let pid = match (
+				frame.name(),
+				self
+					.reply(atspi::zbus::fdo::DBusProxy::new(&self.connection))
+					.await?,
+			) {
 				(Some(bus_name), Ok(dbus)) => self
 					.reply(dbus.get_connection_unix_process_id(bus_name.clone().into()))
 					.await?
 					.ok(),
 				_ => None,
 			};
-			let Ok(component) = self.reply(Self::component(&self.connection, &frame)).await? else {
+			let Ok(component) = self
+				.reply(Self::component(&self.connection, &frame))
+				.await?
+			else {
 				return Ok(None);
 			};
-			let Ok((x, y, width, height)) = self.reply(component.get_extents(CoordType::Screen)).await? else {
+			let Ok((x, y, width, height)) =
+				self.reply(component.get_extents(CoordType::Screen)).await?
+			else {
 				return Ok(None);
 			};
 			if width < 16 || height < 16 {
@@ -1017,11 +1033,18 @@ impl AtSpiAx {
 		if depth == 32 {
 			return Ok(None);
 		}
-		let mut candidates = Self::children_containing(connection, &node, x, y, reply_timeout).await?;
+		let mut candidates =
+			Self::children_containing(connection, &node, x, y, reply_timeout).await?;
 		while let Some(candidate) = candidates.pop() {
-			let leaf =
-				Box::pin(Self::descend_by_extents(connection, candidate, x, y, reply_timeout, depth + 1))
-					.await?;
+			let leaf = Box::pin(Self::descend_by_extents(
+				connection,
+				candidate,
+				x,
+				y,
+				reply_timeout,
+				depth + 1,
+			))
+			.await?;
 			if let Some(leaf) = leaf
 				&& !Self::empty_pane(connection, &leaf, reply_timeout).await?
 			{
@@ -1098,7 +1121,11 @@ impl AtSpiAx {
 				(Some(_), _) => {
 					let mut candidates =
 						Self::children_containing(connection, &current, x, y, reply_timeout).await?;
-					if candidates.len() == 1 { candidates.pop() } else { None }
+					if candidates.len() == 1 {
+						candidates.pop()
+					} else {
+						None
+					}
 				},
 			};
 			let Some(child) = child else {
@@ -1132,15 +1159,16 @@ impl AtSpiAx {
 			let Ok(component) = Self::component(connection, &current).await else {
 				return Ok(false);
 			};
-			let inside = answered("the application", reply_timeout, component.get_extents(CoordType::Window))
-				.await?
-				.is_ok_and(|(left, top, width, height)| {
-					// A container that cannot say where it is (GTK 3's scrolled
-					// viewport) clips nothing it can be checked against.
-					left == i32::MIN
-						|| top == i32::MIN
-						|| Placement { x: left, y: top, width, height }.contains(x, y)
-				});
+			let inside =
+				answered("the application", reply_timeout, component.get_extents(CoordType::Window))
+					.await?
+					.is_ok_and(|(left, top, width, height)| {
+						// A container that cannot say where it is (GTK 3's scrolled
+						// viewport) clips nothing it can be checked against.
+						left == i32::MIN
+							|| top == i32::MIN
+							|| Placement { x: left, y: top, width, height }.contains(x, y)
+					});
 			if !inside {
 				return Ok(false);
 			}
@@ -1206,20 +1234,22 @@ impl AtSpiAx {
 			.await?
 			.unwrap_or_default()
 			.max(0);
-		let child_at = async |index: i32| -> CoreResult<Option<(ObjectRefOwned, (i32, i32, i32, i32))>> {
-			let Ok(child) =
-				answered("the application", reply_timeout, accessible.get_child_at_index(index)).await?
-			else {
-				return Ok(None);
+		let child_at =
+			async |index: i32| -> CoreResult<Option<(ObjectRefOwned, (i32, i32, i32, i32))>> {
+				let Ok(child) =
+					answered("the application", reply_timeout, accessible.get_child_at_index(index))
+						.await?
+				else {
+					return Ok(None);
+				};
+				let Ok(component) = Self::component(connection, &child).await else {
+					return Ok(None);
+				};
+				Ok(answered("the application", reply_timeout, component.get_extents(CoordType::Window))
+					.await?
+					.ok()
+					.map(|extents| (child, extents)))
 			};
-			let Ok(component) = Self::component(connection, &child).await else {
-				return Ok(None);
-			};
-			Ok(answered("the application", reply_timeout, component.get_extents(CoordType::Window))
-				.await?
-				.ok()
-				.map(|extents| (child, extents)))
-		};
 		let indices: Vec<i32> = if count <= SCANNED {
 			(0..count).collect()
 		} else {
@@ -1228,7 +1258,9 @@ impl AtSpiAx {
 			while low < high {
 				let middle = low + (high - low) / 2;
 				match child_at(middle).await? {
-					Some((_, (_, top, _, height))) if top.saturating_add(height) <= y => low = middle + 1,
+					Some((_, (_, top, _, height))) if top.saturating_add(height) <= y => {
+						low = middle + 1
+					},
 					Some(_) => high = middle,
 					None => break,
 				}
@@ -1247,7 +1279,9 @@ impl AtSpiAx {
 			if unknown {
 				let container = answered("the application", reply_timeout, proxy.get_role())
 					.await?
-					.is_ok_and(|role| matches!(role, Role::Viewport | Role::ScrollPane | Role::Panel | Role::Filler));
+					.is_ok_and(|role| {
+						matches!(role, Role::Viewport | Role::ScrollPane | Role::Panel | Role::Filler)
+					});
 				let parent_of_more = answered("the application", reply_timeout, proxy.child_count())
 					.await?
 					.is_ok_and(|children| children > 0);

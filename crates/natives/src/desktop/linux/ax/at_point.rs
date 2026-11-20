@@ -79,7 +79,8 @@ fn clickable(kind: ClickKind, states: StateSet) -> Result<(), &'static str> {
 	if states.contains(State::Editable) {
 		return Err("editable (a click there places a caret)");
 	}
-	if states.contains(State::HasPopup) || (kind == ClickKind::Control && states.contains(State::Expandable))
+	if states.contains(State::HasPopup)
+		|| (kind == ClickKind::Control && states.contains(State::Expandable))
 	{
 		return Err("opens a popup");
 	}
@@ -109,7 +110,8 @@ fn took_effect(watched: State, role: Role, before: StateSet, after: StateSet) ->
 	let on = |states: StateSet| {
 		states.contains(watched) || (watched == State::Checked && states.contains(State::Pressed))
 	};
-	let stays_on = matches!(role, Role::RadioButton | Role::RadioMenuItem) || watched == State::Selected;
+	let stays_on =
+		matches!(role, Role::RadioButton | Role::RadioMenuItem) || watched == State::Selected;
 	on(before) != on(after) || (stays_on && on(after))
 }
 
@@ -144,15 +146,24 @@ struct Element<'a> {
 impl Element<'_> {
 	fn describe(&self) -> String {
 		let role = normalize_role_atspi(self.role.name(), false);
-		if self.name.is_empty() { role } else { format!("{role} '{}'", self.name) }
+		if self.name.is_empty() {
+			role
+		} else {
+			format!("{role} '{}'", self.name)
+		}
 	}
 }
 
-async fn element(connection: &Connection, object: ObjectRefOwned, reply_timeout: Duration) -> CoreResult<Element<'_>> {
+async fn element(
+	connection: &Connection,
+	object: ObjectRefOwned,
+	reply_timeout: Duration,
+) -> CoreResult<Element<'_>> {
 	const AT: &str = "AT-SPI element at point";
-	let accessible = answered("the application", reply_timeout, object.clone().into_accessible_proxy(connection))
-		.await?
-		.map_err(|err| ax_error(AT, err))?;
+	let accessible =
+		answered("the application", reply_timeout, object.clone().into_accessible_proxy(connection))
+			.await?
+			.map_err(|err| ax_error(AT, err))?;
 	let role = answered("the application", reply_timeout, accessible.get_role())
 		.await?
 		.map_err(|err| ax_error(AT, err))?;
@@ -171,16 +182,25 @@ async fn element(connection: &Connection, object: ObjectRefOwned, reply_timeout:
 impl AtSpiAx {
 	/// The element of `window` under screen point (`x`, `y`), resolved inside
 	/// that window only: whatever covers the point on screen is not asked.
-	fn hit_in(&mut self, window: &DesktopWindow, x: f64, y: f64) -> CoreResult<Result<ObjectRefOwned, String>> {
+	fn hit_in(
+		&mut self,
+		window: &DesktopWindow,
+		x: f64,
+		y: f64,
+	) -> CoreResult<Result<ObjectRefOwned, String>> {
 		let root = self.window_root(window)?;
 		let root = Self::object(&root).clone();
 		let (x, y) = (x.round() as i32, y.round() as i32);
 		let Self { rt, connection, native, frames, reply_timeout } = self;
 		let connection = &*connection;
 		rt.block_on(cancellable(async {
-			let Some(placement) = frames.claim(connection, native.as_deref(), &root, x, y).await? else {
+			let Some(placement) = frames
+				.claim(connection, native.as_deref(), &root, x, y)
+				.await?
+			else {
 				return Ok(Err(
-					"the point is outside the window, or the window's place on screen is unknown".to_owned(),
+					"the point is outside the window, or the window's place on screen is unknown"
+						.to_owned(),
 				));
 			};
 			Ok(Self::descend(connection, root, placement, x, y, *reply_timeout)
@@ -217,7 +237,10 @@ impl AtSpiAx {
 			let hit_description = target.describe();
 			let mut kind = click_kind(target.role);
 			let mut climbed = 0;
-			while kind.is_none() && decorative(target.role, target.children) && climbed < LEAF_TO_CONTROL {
+			while kind.is_none()
+				&& decorative(target.role, target.children)
+				&& climbed < LEAF_TO_CONTROL
+			{
 				let parent = answered("the application", reply_timeout, target.accessible.parent())
 					.await?
 					.map_err(|err| DesktopError::ax_failed(format!("AT-SPI parent: {err}")))?;
@@ -242,7 +265,9 @@ impl AtSpiAx {
 			}
 			let action = Self::action(connection, &target.object).await.ok();
 			let index = match &action {
-				Some(action) => resolve_action(action, &target.accessible, "press").await.ok(),
+				Some(action) => resolve_action(action, &target.accessible, "press")
+					.await
+					.ok(),
 				None => None,
 			};
 			let watched = watched_state(kind, target.role);
@@ -267,13 +292,17 @@ impl AtSpiAx {
 					let parent = answered("the application", reply_timeout, target.accessible.parent())
 						.await?
 						.map_err(|err| DesktopError::ax_failed(format!("AT-SPI parent: {err}")))?;
-					let index = answered("the application", reply_timeout, target.accessible.get_index_in_parent())
-						.await?
-						.map_err(|err| DesktopError::ax_failed(format!("AT-SPI row index: {err}")))?;
+					let index = answered(
+						"the application",
+						reply_timeout,
+						target.accessible.get_index_in_parent(),
+					)
+					.await?
+					.map_err(|err| DesktopError::ax_failed(format!("AT-SPI row index: {err}")))?;
 					let Some(selection) = selection(connection, &parent).await else {
 						return Ok(PointOutcome::Declined(format!(
-							"the point is on {}, which has no action and whose list takes no \
-							 accessible selection",
+							"the point is on {}, which has no action and whose list takes no accessible \
+							 selection",
 							target.describe()
 						)));
 					};
@@ -319,8 +348,8 @@ impl AtSpiAx {
 				if tokio::time::Instant::now() >= deadline {
 					return Err(DesktopError::ax_unconfirmed(format!(
 						"carried the click out on {} through accessibility, but its state did not \
-						 change within {} ms; the click may not have taken effect: inspect the \
-						 target before clicking again",
+						 change within {} ms; the click may not have taken effect: inspect the target \
+						 before clicking again",
 						target.describe(),
 						STATE_SETTLE.as_millis()
 					)));
@@ -333,8 +362,8 @@ impl AtSpiAx {
 	/// Scrolls the scrollable element under screen point (`x`, `y`) of
 	/// `window` by `dx`/`dy` wheel detents (positive: right/down): its scroll
 	/// bar's value (GTK), or else `ScrollTo` on the child that far into a
-	/// list that advertises scroll actions (Chromium). A detent is GTK's own wheel
-	/// step, `page^(2/3)` pixels of a `page`-pixel viewport.
+	/// list that advertises scroll actions (Chromium). A detent is GTK's own
+	/// wheel step, `page^(2/3)` pixels of a `page`-pixel viewport.
 	pub(crate) fn scroll_at(
 		&mut self,
 		window: &DesktopWindow,
@@ -347,7 +376,9 @@ impl AtSpiAx {
 			(true, false) => (true, dy),
 			(false, true) => (false, dx),
 			(true, true) => {
-				return Ok(PointOutcome::Declined("a scroll of zero detents has nothing to move".to_owned()));
+				return Ok(PointOutcome::Declined(
+					"a scroll of zero detents has nothing to move".to_owned(),
+				));
 			},
 			(false, false) => {
 				return Ok(PointOutcome::Declined(
@@ -365,16 +396,19 @@ impl AtSpiAx {
 			const AT: &str = "AT-SPI scroll";
 			let mut current = hit;
 			for _ in 0..SCROLL_DEPTH {
-				let accessible = answered("the application", reply_timeout, current.as_accessible_proxy(connection))
-					.await?
-					.map_err(|err| ax_error(AT, err))?;
+				let accessible =
+					answered("the application", reply_timeout, current.as_accessible_proxy(connection))
+						.await?
+						.map_err(|err| ax_error(AT, err))?;
 				if let Some(outcome) =
-					scroll_bar_route(connection, &current, &accessible, vertical, detents, reply_timeout).await?
+					scroll_bar_route(connection, &current, &accessible, vertical, detents, reply_timeout)
+						.await?
 				{
 					return Ok(outcome);
 				}
 				if let Some(outcome) =
-					scroll_to_route(connection, &current, &accessible, vertical, detents, reply_timeout).await?
+					scroll_to_route(connection, &current, &accessible, vertical, detents, reply_timeout)
+						.await?
 				{
 					return Ok(outcome);
 				}
@@ -442,7 +476,8 @@ async fn scroll_bar_route(
 		.await?
 		.ok()
 		.and_then(|count| u32::try_from(count).ok());
-	let Ok((children, _)) = answered("the application", reply_timeout, children_of(accessible, count, 32)).await?
+	let Ok((children, _)) =
+		answered("the application", reply_timeout, children_of(accessible, count, 32)).await?
 	else {
 		return Ok(None);
 	};
@@ -456,7 +491,11 @@ async fn scroll_bar_route(
 		let Ok(states) = child_proxy.get_state().await else {
 			continue;
 		};
-		let axis = if vertical { State::Vertical } else { State::Horizontal };
+		let axis = if vertical {
+			State::Vertical
+		} else {
+			State::Horizontal
+		};
 		if !states.contains(axis) || !states.contains(State::Showing) {
 			continue;
 		}
@@ -472,7 +511,8 @@ async fn scroll_bar_route(
 			.build()
 			.await
 			.map_err(failed)?;
-		let Ok(before) = answered("the application", reply_timeout, value.current_value()).await? else {
+		let Ok(before) = answered("the application", reply_timeout, value.current_value()).await?
+		else {
 			continue;
 		};
 		let (Ok(min), Ok(max)) = futures::join!(value.minimum_value(), value.maximum_value()) else {
@@ -495,14 +535,17 @@ async fn scroll_bar_route(
 		let done = |reads: String| async move {
 			Some(PointOutcome::Done(AxPointAction {
 				element: described(accessible, reply_timeout).await,
-				route: "scrollBar".to_owned(),
-				action: None,
-				reads: Some(reads),
+				route:   "scrollBar".to_owned(),
+				action:  None,
+				reads:   Some(reads),
 			}))
 		};
 		if target == before {
 			// At the end already, where a wheel does nothing either.
-			return Ok(done(format!("its {axis} scroll bar is at its end ({before:.0}); nothing moved")).await);
+			return Ok(done(format!(
+				"its {axis} scroll bar is at its end ({before:.0}); nothing moved"
+			))
+			.await);
 		}
 		control::check()?;
 		answered("the application", reply_timeout, value.set_current_value(target))
@@ -514,12 +557,14 @@ async fn scroll_bar_route(
 				.await?
 				.unwrap_or(before);
 			if now != before {
-				return Ok(done(format!("its {axis} scroll bar moved from {before:.0} to {now:.0}")).await);
+				return Ok(
+					done(format!("its {axis} scroll bar moved from {before:.0} to {now:.0}")).await
+				);
 			}
 			if tokio::time::Instant::now() >= deadline {
 				return Err(DesktopError::ax_unconfirmed(format!(
-					"set the scroll bar to {target} through accessibility, but it still reads {before}; \
-					 the scroll may not have taken effect"
+					"set the scroll bar to {target} through accessibility, but it still reads \
+					 {before}; the scroll may not have taken effect"
 				)));
 			}
 			tokio::time::sleep(Duration::from_millis(25)).await;
@@ -546,7 +591,11 @@ async fn scroll_to_route(
 	let Ok(names) = answered("the application", reply_timeout, action_names(&action)).await? else {
 		return Ok(None);
 	};
-	let advertised = if vertical { ["scrollup", "scrolldown"] } else { ["scrollleft", "scrollright"] };
+	let advertised = if vertical {
+		["scrollup", "scrolldown"]
+	} else {
+		["scrollleft", "scrollright"]
+	};
 	if !names
 		.iter()
 		.any(|name| advertised.iter().any(|safe| folds_to(name, safe)))
@@ -562,7 +611,11 @@ async fn scroll_to_route(
 	else {
 		return Ok(None);
 	};
-	let (start, page) = if vertical { (top, height) } else { (left, width) };
+	let (start, page) = if vertical {
+		(top, height)
+	} else {
+		(left, width)
+	};
 	let wanted = start + detent_pixels(f64::from(page), detents).round() as i32;
 	let count = answered("the application", reply_timeout, accessible.child_count())
 		.await?
@@ -588,26 +641,33 @@ async fn scroll_to_route(
 	let done = |reads: String| async move {
 		Some(PointOutcome::Done(AxPointAction {
 			element: described(accessible, reply_timeout).await,
-			route: "scrollTo".to_owned(),
-			action: None,
-			reads: Some(reads),
+			route:   "scrollTo".to_owned(),
+			action:  None,
+			reads:   Some(reads),
 		}))
 	};
 	if before == start {
 		return Ok(done("the list is at its end; nothing moved".to_owned()).await);
 	}
-	let component = AtSpiAx::component(connection, &target).await.map_err(failed)?;
-	let edge_type = if vertical { atspi::ScrollType::TopEdge } else { atspi::ScrollType::LeftEdge };
+	let component = AtSpiAx::component(connection, &target)
+		.await
+		.map_err(failed)?;
+	let edge_type = if vertical {
+		atspi::ScrollType::TopEdge
+	} else {
+		atspi::ScrollType::LeftEdge
+	};
 	control::check()?;
 	answered("the application", reply_timeout, component.scroll_to(edge_type))
 		.await?
 		.map_err(|err| failed(err.to_string()))?;
 	let deadline = tokio::time::Instant::now() + VALUE_SETTLE;
 	loop {
-		let after = answered("the application", reply_timeout, component.get_extents(CoordType::Window))
-			.await?
-			.ok()
-			.map(|(x, y, ..)| if vertical { y } else { x });
+		let after =
+			answered("the application", reply_timeout, component.get_extents(CoordType::Window))
+				.await?
+				.ok()
+				.map(|(x, y, ..)| if vertical { y } else { x });
 		if let Some(after) = after
 			&& after != before
 		{
@@ -626,7 +686,8 @@ async fn scroll_to_route(
 /// An element as `role 'name'`, for reports; `an element` when it does not
 /// answer.
 async fn described(accessible: &AccessibleProxy<'_>, reply_timeout: Duration) -> String {
-	let Ok(Ok(role)) = answered("the application", reply_timeout, accessible.get_role()).await else {
+	let Ok(Ok(role)) = answered("the application", reply_timeout, accessible.get_role()).await
+	else {
 		return "an element".to_owned();
 	};
 	let role = normalize_role_atspi(role.name(), false);
@@ -645,7 +706,9 @@ async fn child_edge(
 	vertical: bool,
 	reply_timeout: Duration,
 ) -> CoreResult<Option<(ObjectRefOwned, i32)>> {
-	let Ok(child) = answered("the application", reply_timeout, parent.get_child_at_index(index)).await? else {
+	let Ok(child) =
+		answered("the application", reply_timeout, parent.get_child_at_index(index)).await?
+	else {
 		return Ok(None);
 	};
 	let Ok(component) = AtSpiAx::component(connection, &child).await else {
@@ -711,7 +774,12 @@ mod tests {
 		assert!(took_effect(State::Checked, Role::CheckBox, off, checked));
 		assert!(took_effect(State::Checked, Role::CheckBox, checked, off));
 		assert!(!took_effect(State::Checked, Role::CheckBox, off, off));
-		assert!(took_effect(State::Checked, Role::ToggleButton, off, off | StateSet::new(State::Pressed)));
+		assert!(took_effect(
+			State::Checked,
+			Role::ToggleButton,
+			off,
+			off | StateSet::new(State::Pressed)
+		));
 		assert!(took_effect(State::Checked, Role::RadioButton, checked, checked));
 		let selected = off | StateSet::new(State::Selected);
 		assert!(took_effect(State::Selected, Role::ListItem, off, selected));

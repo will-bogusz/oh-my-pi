@@ -186,7 +186,8 @@ enum Response {
 fn screenshot_cover(cover: backend::WindowCover, width: u32, height: u32) -> DesktopCover {
 	let scale_x = f64::from(width) / f64::from(cover.of_width.max(1));
 	let scale_y = f64::from(height) / f64::from(cover.of_height.max(1));
-	let pixels = |points: f64, scale: f64, limit: u32| ((points * scale).round().max(0.0) as u32).min(limit);
+	let pixels =
+		|points: f64, scale: f64, limit: u32| ((points * scale).round().max(0.0) as u32).min(limit);
 	DesktopCover {
 		title:  cover.title,
 		app:    cover.app,
@@ -1786,7 +1787,9 @@ impl Worker {
 				// A click that chooses a menu item needs the real press.
 				if options.menu.is_none()
 					&& let Some(action) =
-						self.backend()?.point_action(target, &event, options.mode(), token)?
+						self
+							.backend()?
+							.point_action(target, &event, options.mode(), token)?
 				{
 					return Ok(Response::Pointer(action));
 				}

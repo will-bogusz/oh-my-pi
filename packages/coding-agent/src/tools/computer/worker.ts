@@ -2313,16 +2313,21 @@ export class ComputerWorkerCore {
 		const getContext = this.#currentRunContext;
 		const devtools = this.#devtools;
 		// Wayland is the one backend without background input for these windows; X11, macOS and Windows have their own.
-		const devtoolsMode = () => (session.capabilities.backend === "wayland" ? getContext().snapshot.devtools : "off");
+		const devtoolsMode = () => {
+			const context = getContext();
+			return session.capabilities.backend === "wayland" ? context.snapshot.devtools : "off";
+		};
 		const makeWin = (window: DesktopWindow): Win => {
 			const route = devtools.route(window.id);
 			return route ? new DevToolsWin(session, getContext, window, route) : new Win(session, getContext, window);
 		};
 		const el = (node: AxNode): El => new El(session, getContext, node);
 		const listWindows = async (filter: WindowFilter | undefined, signal: AbortSignal) => {
+			const mode = getContext().snapshot.devtools;
 			const windows = await devtools.merge(
 				await nativeCall(signal, () => session.listWindows()),
-				devtoolsMode(),
+				// Launch registration is already Wayland-only; only discovery needs a backend check here.
+				mode === "running" ? devtoolsMode() : mode,
 				signal,
 			);
 			let appPids: Set<number> | undefined;

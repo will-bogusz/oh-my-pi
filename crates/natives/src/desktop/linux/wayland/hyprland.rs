@@ -106,7 +106,11 @@ impl MonitorGeometry {
 		} else {
 			(monitor.width, monitor.height)
 		};
-		let scale = if monitor.scale > 0.0 { monitor.scale } else { 1.0 };
+		let scale = if monitor.scale > 0.0 {
+			monitor.scale
+		} else {
+			1.0
+		};
 		Self {
 			x: monitor.x,
 			y: monitor.y,
@@ -170,7 +174,9 @@ impl Hyprland {
 		let failed = |err: std::io::Error| DesktopError::ax_failed(format!("Hyprland IPC: {err}"));
 		let mut stream = UnixStream::connect(&self.socket).map_err(failed)?;
 		stream.set_read_timeout(Some(IPC_TIMEOUT)).map_err(failed)?;
-		stream.set_write_timeout(Some(IPC_TIMEOUT)).map_err(failed)?;
+		stream
+			.set_write_timeout(Some(IPC_TIMEOUT))
+			.map_err(failed)?;
 		stream.write_all(command.as_bytes()).map_err(failed)?;
 		let mut reply = Vec::new();
 		stream.read_to_end(&mut reply).map_err(failed)?;
@@ -288,7 +294,10 @@ pub(super) fn covering<'a>(
 
 /// The part of `target` that `other` covers, in `target`'s own logical
 /// coordinates: `(x, y, width, height)`.
-pub(super) fn overlap(other: &DesktopWindow, target: &DesktopWindow) -> Option<(i32, i32, u32, u32)> {
+pub(super) fn overlap(
+	other: &DesktopWindow,
+	target: &DesktopWindow,
+) -> Option<(i32, i32, u32, u32)> {
 	let right = |window: &DesktopWindow| window.x.saturating_add(window.width as i32);
 	let bottom = |window: &DesktopWindow| window.y.saturating_add(window.height as i32);
 	let left = other.x.max(target.x);
@@ -427,7 +436,10 @@ mod tests {
 		assert_eq!(covers, [("hyprland:0x2", true)]);
 		// The floating window itself sits above every tiled one.
 		assert!(covering(&clients, &clients[1]).is_empty());
-		let floats = [client("hyprland:0x5", (0, 0, 300, 300), true, 1), client("hyprland:0x6", (50, 50, 300, 300), true, 1)];
+		let floats = [
+			client("hyprland:0x5", (0, 0, 300, 300), true, 1),
+			client("hyprland:0x6", (50, 50, 300, 300), true, 1),
+		];
 		let covers = covering(&floats, &floats[0]);
 		assert_eq!(covers.len(), 1);
 		assert!(!covers[0].1, "two floating windows' order is unknown");
@@ -462,10 +474,20 @@ mod tests {
 			pixel_height,
 			is_primary: true,
 		};
-		assert!(MonitorGeometry::of(&monitor(1280, 800, 1.0, 0)).shows(&display(1280, 800, 1280, 800)));
-		assert!(MonitorGeometry::of(&monitor(2560, 1600, 1.25, 0)).shows(&display(2048, 1280, 2560, 1600)));
-		assert!(MonitorGeometry::of(&monitor(1280, 800, 1.0, 1)).shows(&display(800, 1280, 800, 1280)));
-		assert!(!MonitorGeometry::of(&monitor(1920, 1080, 1.0, 0)).shows(&display(1280, 800, 1280, 800)));
-		assert!(!MonitorGeometry::of(&monitor(2560, 1600, 2.0, 0)).shows(&display(2048, 1280, 2560, 1600)));
+		assert!(
+			MonitorGeometry::of(&monitor(1280, 800, 1.0, 0)).shows(&display(1280, 800, 1280, 800))
+		);
+		assert!(
+			MonitorGeometry::of(&monitor(2560, 1600, 1.25, 0)).shows(&display(2048, 1280, 2560, 1600))
+		);
+		assert!(
+			MonitorGeometry::of(&monitor(1280, 800, 1.0, 1)).shows(&display(800, 1280, 800, 1280))
+		);
+		assert!(
+			!MonitorGeometry::of(&monitor(1920, 1080, 1.0, 0)).shows(&display(1280, 800, 1280, 800))
+		);
+		assert!(
+			!MonitorGeometry::of(&monitor(2560, 1600, 2.0, 0)).shows(&display(2048, 1280, 2560, 1600))
+		);
 	}
 }

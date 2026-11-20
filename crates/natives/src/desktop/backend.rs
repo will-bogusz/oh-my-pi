@@ -11,8 +11,8 @@ use super::{
 	menus::DesktopMenuItem,
 	text_range::TextSelectRequest,
 	types::{
-		AxPointAction, AxTextSelection, CaptureCaps, DesktopCapabilities, DesktopDisplay, DesktopWindow,
-		DesktopWindowOpened, DisplaySelector, ScreenState, Target,
+		AxPointAction, AxTextSelection, CaptureCaps, DesktopCapabilities, DesktopDisplay,
+		DesktopWindow, DesktopWindowOpened, DisplaySelector, ScreenState, Target,
 	},
 };
 
