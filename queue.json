@@ -106526,14 +106526,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-20T18:07:37Z",
+  "checked": "2026-11-20T18:38:19Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "devin-neon-image-price": {
-    "since": "2026-11-20T18:07:37Z",
-    "title": "fix(catalog): budget Gemini 4 Neon's images on Devin at the 1,089 tokens it bills"
-   },
    "win-button-click": {
     "since": "2026-11-20T18:07:37Z",
     "title": "fix(natives): click Windows buttons without activating their window"
@@ -106590,7 +106586,9 @@
    19870,
    19871,
    19878,
-   19880
+   19880,
+   19883,
+   19884
   ],
   "post_merge": {
    "18632": {
@@ -106666,13 +106664,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-13T18:26:45Z",
-    "kind": "unopenable",
-    "id": "factory-droid-config-update-upstreams",
-    "title": "fix(catalog): keep GPT-6 effort changes off configuration_update on Factory Droid Bedrock and Snowflake",
-    "why": "opened as #19188"
-   },
    {
     "at": "2026-11-13T18:57:03Z",
     "kind": "unopenable",
@@ -108303,6 +108294,13 @@
     "id": "picker-stale-discovery",
     "title": "fix(coding-agent): refresh discovery from the model picker once the catalog is two hours old",
     "why": "opened as #19878"
+   },
+   {
+    "at": "2026-11-20T18:38:19Z",
+    "kind": "unopenable",
+    "id": "devin-neon-image-price",
+    "title": "fix(catalog): budget Gemini 4 Neon's images on Devin at the 1,089 tokens it bills",
+    "why": "opened as #19883"
    }
   ]
  },
@@ -117555,12 +117553,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-20T18:25:36.901157Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-20T18:38:20.070098Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 3,
-   "left": 5
+   "used": 4,
+   "left": 4
   },
   "rows": [
    {
@@ -117762,6 +117760,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-20T17:53:33Z"
+   },
+   {
+    "id": "atspi-alert-windows",
+    "label": "#19884",
+    "number": 19884,
+    "state": "open",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): list GTK message dialogs as windows on Wayland",
+    "action": "keep",
+    "reasons": [],
+    "note": "tests-over: LinuxUpstream, 2026-11-20: one test reaching three branches (Alert listing through windows(), shared-title refusal in window_id, an in-window alert's owner); 45 of its lines are a fake GTK 3 app with children, application, parent and pid that no existing fixture provides",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-20T18:33:40Z"
    },
    {
     "id": "x11-xtest-release",
@@ -118799,23 +118814,6 @@
     "created": "2026-11-12T04:40:13Z"
    },
    {
-    "id": "atspi-alert-windows",
-    "label": "atspi-alert-windows",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": null,
-    "title": "fix(natives): list GTK message dialogs as windows on Wayland",
-    "action": "open",
-    "reasons": [],
-    "note": "tests-over: LinuxUpstream, 2026-11-20: one test reaching three branches (Alert listing through windows(), shared-title refusal in window_id, an in-window alert's owner); 45 of its lines are a fake GTK 3 app with children, application, parent and pid that no existing fixture provides",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-20T18:24:54Z"
-   },
-   {
     "id": "encoded-prefix-count",
     "label": "encoded-prefix-count",
     "number": null,
@@ -118855,8 +118853,10 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with main in (branch missing on the fork)"
+    ],
     "note": "",
     "over": [],
     "paired": [],
