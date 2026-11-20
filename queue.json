@@ -105149,7 +105149,61 @@
    ],
    "advanced": "2026-11-19T22:56:02Z",
    "opened": "2026-11-19T19:03:08Z",
-   "readied": "2026-11-19T19:03:32Z"
+   "readied": "2026-11-19T19:03:32Z",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-20T01:26:12Z",
+     "reason": "ModifiedFlag for Main, 2026-11-20: 9d75bc4eaf8 deliberately removes 907ad70c5f4's WinForms class gate on EM_SETMODIFY, its WinForms-named test case and with_class_name's pub(super); measured on Windows 10 22H2 that UI Automation and a keystroke leave Modified TRUE on both box kinds",
+     "old": "907ad70c5f400ef83b0ab248b9c6d15452cd1e19",
+     "new": "d167b01d485206cca95eba7bb8b80cfca9e9db14",
+     "dropped": {
+      "crates/natives/src/desktop/win32/value_write.rs": [
+       "/// one call that returns whether the edit took the value. A single-line edit",
+       "/// tells its app with `EN_CHANGE`; a multi-line one does not, so its unchanged",
+       "/// parent and ID are notified explicitly. Only a native Win32 EDIT is marked",
+       "/// modified first, preserving Notepad's document change without dirtying",
+       "/// `WinForms`. The system's UI Automation proxy for these classes activates the",
+       "/// control's window to set a value, taking the foreground and the user's next",
+       "/// keys; these messages need neither focus nor activation. `password` is UI",
+       "\t\tif super::window::with_class_name(hwnd, |class| class.eq_ignore_ascii_case(\"Edit\")) {",
+       "\t\tstatic CLEAR_MODIFIED: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };",
+       "\t\t\t\tif CLEAR_MODIFIED.with(std::cell::Cell::get) {",
+       "\t\t\t\t\t\t\twindows_sys::Win32::UI::Controls::EM_SETMODIFY,",
+       "\t\t\t\tES_UPPERCASE, GWLP_USERDATA, GWLP_WNDPROC, GetClassInfoW, GetWindowTextW,",
+       "\t\t\t\tRegisterClassW, SendMessageW, SetWindowLongPtrW, UnregisterClassW, WM_SETTEXT,",
+       "\t\t\t\tWNDCLASSW, WNDPROC, WS_CHILD, WS_OVERLAPPED,",
+       "\t\t\t// text changed; the multi-line one is marked modified, as after a",
+       "\t\t\t// paste.",
+       "\t\t\t\tCLEAR_MODIFIED.with(|clear| clear.set(style == ES_AUTOHSCROLL));",
+       "\t\t\t\t\tSendMessageW(edit, EM_GETMODIFY, 0, 0),",
+       "\t\t\t\t\tisize::from(style == ES_MULTILINE),",
+       "\t\t\t\t\t\"style {style:#x}\"",
+       "\t\t\tCLEAR_MODIFIED.with(|clear| clear.set(false));",
+       "\t\t\t// A WinForms-named superclass retains EDIT's native behavior but",
+       "\t\t\t// must keep a programmatic multiline write clean.",
+       "\t\t\tlet class = wide(\"WindowsForms10.EDIT.app.omp-value-write-test\");",
+       "\t\t\tlet mut definition = WNDCLASSW::default();",
+       "\t\t\tassert_ne!(GetClassInfoW(std::ptr::null_mut(), wide(\"EDIT\").as_ptr(), &mut definition), 0);",
+       "\t\t\tdefinition.hInstance = std::ptr::null_mut();",
+       "\t\t\tdefinition.lpszClassName = class.as_ptr();",
+       "\t\t\tassert_ne!(RegisterClassW(&definition), 0);",
+       "\t\t\tlet forms_edit = CreateWindowExW(",
+       "\t\t\t\tclass.as_ptr(),",
+       "\t\t\t\tWS_CHILD | ES_MULTILINE as u32,",
+       "\t\t\tassert!(!forms_edit.is_null());",
+       "\t\t\tset_edit(forms_edit, \"new value\", true, Some(false)).unwrap();",
+       "\t\t\tassert_eq!(read(forms_edit), \"new value\");",
+       "\t\t\tassert_eq!(SendMessageW(forms_edit, EM_GETMODIFY, 0, 0), 0);",
+       "\t\t\tassert_eq!(changes(), 1);",
+       "\t\t\tDestroyWindow(forms_edit);",
+       "\t\t\tassert_ne!(UnregisterClassW(class.as_ptr(), std::ptr::null_mut()), 0);"
+      ],
+      "crates/natives/src/desktop/win32/window.rs": [
+       "pub(super) fn with_class_name<R>(hwnd: HWND, inspect: impl FnOnce(&str) -> R) -> R {"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "win-button-click",
