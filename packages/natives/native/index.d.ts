@@ -1844,6 +1844,13 @@ export interface DesktopFocusReturn {
    * when it did not reach the hand-back.
    */
   keyboard?: DesktopKeyboardReturn
+  /**
+   * True when a Windows takeover watched the session's last input time,
+   * where a pointer move counts as the user's too, instead of their key and
+   * button presses: the process already had its own Raw Input receiver,
+   * which is left in place. Absent otherwise.
+   */
+  lastInputPolled?: boolean
 }
 
 /**

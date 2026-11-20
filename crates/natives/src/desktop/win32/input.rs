@@ -95,13 +95,11 @@ fn keyboard_layout(target: Option<HWND>) -> HKL {
 
 fn global_button(input: &mut Enigo, button: MouseButton, direction: Direction) -> CoreResult<()> {
 	control::check()?;
-	let before = super::activity::sending();
+	let sending = super::activity::sending();
 	let result = input
 		.button(button_to_enigo(button), direction)
 		.map_err(enigo_error);
-	if result.is_ok() {
-		super::activity::sent(before);
-	}
+	sending.sent(result.is_ok());
 	result
 }
 
@@ -192,19 +190,19 @@ fn global_pointer(input: &mut Enigo, event: PointerEvent) -> CoreResult<()> {
 			let vertical = scroll_steps(dy);
 			if horizontal != 0 {
 				control::check()?;
-				let before = super::activity::sending();
+				let sending = super::activity::sending();
 				input
 					.scroll(horizontal, Axis::Horizontal)
 					.map_err(enigo_error)?;
-				super::activity::sent(before);
+				sending.sent(true);
 			}
 			if vertical != 0 {
 				control::check()?;
-				let before = super::activity::sending();
+				let sending = super::activity::sending();
 				input
 					.scroll(vertical, Axis::Vertical)
 					.map_err(enigo_error)?;
-				super::activity::sent(before);
+				sending.sent(true);
 			}
 			Ok(())
 		},
@@ -966,42 +964,30 @@ mod foreground {
 			}
 			let mut guard = Self { previous, target, settle, armed: true, _user: user };
 			if previous != target {
-				let mut requested = false;
-				let activation = (|| {
-					activity::check()?;
-					let _ = window::activate(target)?;
-					requested = true;
-					// Waits in slices so the user's press ends the wait.
-					let end = Instant::now() + ACTIVATION_TIMEOUT;
-					while !window::wait_for_foreground(target, Duration::from_millis(10))? {
-						activity::check()?;
-						if Instant::now() >= end {
-							return Err(DesktopError::input_failed(format!(
-								"Windows refused to activate the exact target window {id}; no input was \
-								 sent"
-							)));
-						}
-					}
-					hold(Duration::from_millis(20), control::wait)
-				})();
-				if let Err(error) = activation {
+				let brought = bring_forward(
+					|| window::activate(target),
+					|| window::wait_for_foreground(target, Duration::from_millis(10)),
+					activity::check,
+					|| hold(Duration::from_millis(20), control::wait),
+					|| {
+						DesktopError::input_failed(format!(
+							"Windows refused to activate the exact target window {id}; no input was sent"
+						))
+					},
+					// SAFETY: GetForegroundWindow has no preconditions.
+					|| Self::settle_activation(target, unsafe { GetForegroundWindow() }),
+				);
+				if let Err((requested, error)) = brought {
 					if !requested {
 						// Nothing was asked of Windows: whatever is in front now is
 						// the user's choice.
 						guard.armed = false;
 						return Err(error);
 					}
-					if activity::check().is_err() {
-						// The user's press cut short the wait for an activation
-						// Windows accepted: let the target's thread take it first, so
-						// the hand-back below sees where it went.
-						Self::settle_activation(target);
-					}
 					let restored = guard.restore();
 					// A press while Windows decided or during the hand-back is the
-					// reason the user sees.
-					let error = activity::check().err().unwrap_or(error);
-					return super::completed(Err(error), restored).map(|()| guard);
+					// reason the user sees, still naming what else failed.
+					return super::completed(activity::outcome(Err(error)), restored).map(|()| guard);
 				}
 			}
 			Ok(guard)
@@ -1009,8 +995,12 @@ mod foreground {
 
 		/// Lets the target's thread process an activation request made for it,
 		/// waiting at most [`ACTIVATION_TIMEOUT`] and not at all for a hung
-		/// thread.
-		fn settle_activation(target: HWND) {
+		/// thread, nor once the target is in front (`front`): the activation is
+		/// done, and the user's next keys must reach their window.
+		fn settle_activation(target: HWND, front: HWND) {
+			if front == target {
+				return;
+			}
 			control::cleanup(|| {
 				let mut ignored = 0;
 				// SAFETY: WM_NULL carries no pointers; SMTO_ABORTIFHUNG returns at
@@ -1041,9 +1031,9 @@ mod foreground {
 			settle(self.settle);
 			let restored = self.restore();
 			self.report(restored.is_ok());
-			// A press since the takeover started is the outcome, whatever else
-			// failed meanwhile.
-			let result = activity::check().and(result);
+			// A press since the takeover started is the outcome; what else failed
+			// meanwhile, a release Windows refused among it, stays in its message.
+			let result = activity::outcome(result);
 			super::completed(result, restored)
 		}
 
@@ -1063,6 +1053,7 @@ mod foreground {
 				handed_back: restored && self.previous != self.target,
 				previous_pid: window::process_id(self.previous),
 				front_pid: window::process_id(front),
+				last_input_polled: activity::polled().then_some(true),
 				..Default::default()
 			});
 		}
@@ -1194,19 +1185,60 @@ mod foreground {
 		}
 	}
 
+	/// Asks Windows to bring the target forward (`request`, which says whether
+	/// it is in front already), waits for it in slices (`arrived`), then lets
+	/// it settle (`settle`), all ending at the user's first press (`check`). On
+	/// failure, also says whether Windows was asked. A press that cut short the
+	/// wait for an activation Windows had accepted runs `fence` first, so the
+	/// hand-back sees where the activation went; once the target was seen in
+	/// front, nothing is pending and the hand-back starts at once.
+	fn bring_forward(
+		request: impl FnOnce() -> CoreResult<bool>,
+		mut arrived: impl FnMut() -> CoreResult<bool>,
+		check: impl Fn() -> CoreResult<()>,
+		settle: impl FnOnce() -> CoreResult<()>,
+		refused: impl FnOnce() -> DesktopError,
+		fence: impl FnOnce(),
+	) -> Result<(), (bool, DesktopError)> {
+		let in_front = check()
+			.and_then(|()| request())
+			.map_err(|error| (false, error))?;
+		let end = Instant::now() + ACTIVATION_TIMEOUT;
+		let pending = (!in_front).then(|| {
+			loop {
+				match arrived() {
+					Ok(true) => break None,
+					Ok(false) => {},
+					Err(error) => break Some(error),
+				}
+				if let Err(error) = check() {
+					break Some(error);
+				}
+				if Instant::now() >= end {
+					break Some(refused());
+				}
+			}
+		});
+		if let Some(error) = pending.flatten() {
+			if check().is_err() {
+				fence();
+			}
+			return Err((true, error));
+		}
+		settle().map_err(|error| (true, error))
+	}
+
 	fn send(events: &[INPUT]) -> CoreResult<()> {
 		control::check()?;
 		if events.is_empty() {
 			return Ok(());
 		}
-		let before = activity::sending();
+		let sending = activity::sending();
 		// SAFETY: `events` is an initialized INPUT slice copied synchronously by
 		// Win32.
 		let sent =
 			unsafe { SendInput(events.len() as u32, events.as_ptr(), size_of::<INPUT>() as i32) };
-		if sent != 0 {
-			activity::sent(before);
-		}
+		sending.sent(sent != 0);
 		if sent as usize == events.len() {
 			Ok(())
 		} else {
@@ -1217,11 +1249,11 @@ mod foreground {
 			let cleanup = control::cleanup(|| {
 				let mut cleanup = Ok(());
 				for release in releases.iter().rev() {
-					let before = activity::sending();
+					let sending = activity::sending();
 					// SAFETY: release is one initialized INPUT copied synchronously.
-					if unsafe { SendInput(1, release, size_of::<INPUT>() as i32) } == 1 {
-						activity::sent(before);
-					} else {
+					let released = unsafe { SendInput(1, release, size_of::<INPUT>() as i32) } == 1;
+					sending.sent(released);
+					if !released {
 						cleanup =
 							Err(DesktopError::input_failed("SendInput could not release inserted input"));
 					}
@@ -1651,24 +1683,68 @@ mod foreground {
 	/// Bounded packets preserve short-send accounting without constructing an
 	/// uninterruptible `SendInput` batch proportional to the entire text.
 	pub(super) fn type_desktop(text: &str) -> CoreResult<()> {
-		send_text(None, text)
+		send_graphemes(text, super::keyboard_layout(None), send).map_err(|(_, error)| error)
 	}
 
-	fn send_text(target: Option<HWND>, text: &str) -> CoreResult<()> {
-		let layout = super::keyboard_layout(target);
+	/// How far typing got before it stopped: graphemes sent whole, and whether
+	/// part of the next one went too.
+	type Typed = (usize, bool);
+
+	/// Sends `text` a grapheme at a time through `send`. On failure, also
+	/// says how far it got ([`Typed`]); nothing after it is sent, then or
+	/// later.
+	fn send_graphemes(
+		text: &str,
+		layout: super::HKL,
+		mut send: impl FnMut(&[INPUT]) -> CoreResult<()>,
+	) -> Result<(), (Typed, DesktopError)> {
 		let mut events = [unicode_event(0, false); 4];
-		for grapheme in graphemes_str(text) {
-			control::check()?;
-			for unit in text_units(grapheme) {
-				let events = text_events(unit, &mut events, layout);
-				match target {
-					Some(target) => send_to(target, events)?,
-					None => send(events)?,
-				}
+		for (typed, grapheme) in graphemes_str(text).enumerate() {
+			control::check().map_err(|error| ((typed, false), error))?;
+			for (unit, char) in text_units(grapheme).enumerate() {
+				send(text_events(char, &mut events, layout))
+					.map_err(|error| ((typed, unit > 0), error))?;
 			}
 		}
 		// Every unit is out: a cancel now stops the next call.
 		Ok(())
+	}
+
+	/// The user's press that stopped typing `total` characters into `name`
+	/// once `typed` had gone out, saying how much went and that the rest was
+	/// dropped; any other failure passes through.
+	fn stopped_typing(
+		error: DesktopError,
+		(typed, part): Typed,
+		total: usize,
+		name: &str,
+	) -> DesktopError {
+		if error.code != ErrorCode::UserIntervened {
+			return error;
+		}
+		let what = if typed == 0 && !part {
+			format!(" before any of the {total} characters went to {name}, so none was typed")
+		} else if typed < total {
+			let went = match (typed, part) {
+				(0, _) => format!("part of the first of the {total} characters"),
+				(_, true) => format!("{typed} of the {total} characters and part of the next"),
+				(_, false) => format!("{typed} of the {total} characters"),
+			};
+			format!(
+				", so typing stopped after {went} went to {name}; the rest were dropped and will not \
+				 be sent, and {name} was not seen reading what was sent, so some of it may have \
+				 reached the window in front"
+			)
+		} else {
+			format!(
+				" after all {total} characters went to {name}, before it was seen reading them all, \
+				 so some may have reached the window in front"
+			)
+		};
+		activity::noted(DesktopError::user_intervened(format!(
+			"the user pressed a key or clicked during this takeover{what}; nothing more was sent; {}",
+			activity::READ_AGAIN
+		)))
 	}
 
 	/// Waits until the thread that owns `root`'s focused control has read
@@ -1687,8 +1763,10 @@ mod foreground {
 	/// would tie this thread to it, and it would not read the marker anyway.
 	/// Returns why the target was not seen reading the text: it could not be
 	/// waited for (hung, or not joinable), the wait ran out or was cancelled,
-	/// or the foreground left it.
-	fn drain(root: HWND, name: &str, closing_return: bool) -> Option<String> {
+	/// or the foreground left it. The user's press ends the wait at once with
+	/// their `UserIntervened`: their next keys must not wait here for the
+	/// target, and no marker goes after their key.
+	fn drain(root: HWND, name: &str, closing_return: bool) -> CoreResult<Option<String>> {
 		// SAFETY: GetForegroundWindow has no preconditions.
 		let in_front = || window::root(unsafe { GetForegroundWindow() }) == root;
 		let left = || {
@@ -1700,15 +1778,15 @@ mod foreground {
 			})
 		};
 		if !in_front() {
-			return left();
+			return Ok(left());
 		}
 		let reader = window::focused_descendant(root).unwrap_or(root);
 		// SAFETY: IsHungAppWindow only reads the window's responsiveness state.
 		if unsafe { IsHungAppWindow(reader) } != 0 {
-			return Some(format!(
+			return Ok(Some(format!(
 				"{name} is not responding, so omp could not wait for it to read the typed text; the \
 				 rest may reach whichever window is in front next"
-			));
+			)));
 		}
 		// SAFETY: a null process-id pointer is permitted; Win32 validates the
 		// handle.
@@ -1718,65 +1796,58 @@ mod foreground {
 		// SAFETY: scalar thread ids; failure is reported and leaves nothing to
 		// undo.
 		if target == 0 || target == own || unsafe { AttachThreadInput(own, target, 1) } == 0 {
-			return Some(format!(
+			return Ok(Some(format!(
 				"could not wait for {name} to read the typed text (its input thread cannot be joined)"
-			));
+			)));
 		}
 		// SAFETY: no preconditions.
 		let before = unsafe { GetKeyState(i32::from(DRAIN_KEY)) } & 1;
 		let layout = super::keyboard_layout(Some(reader));
 		let marker = [key_event(DRAIN_KEY, false, layout), key_event(DRAIN_KEY, true, layout)];
 		// The text is out, so the marker goes even after a cancel that came
-		// since; the wait below ends on it. A press by the user instead fails
-		// the call with `UserIntervened` ([`ForegroundGuard::run`]), so no
-		// marker goes after their key.
-		if activity::check().is_err() {
+		// since; the wait below ends on it.
+		if let Err(pressed) = activity::check() {
 			// SAFETY: detaches the pair attached above.
 			unsafe { AttachThreadInput(own, target, 0) };
-			return None;
+			return Err(pressed);
 		}
-		let send_start = activity::sending();
+		let sending = activity::sending();
 		// SAFETY: `marker` is an initialized INPUT slice copied synchronously.
 		let sent =
 			unsafe { SendInput(marker.len() as u32, marker.as_ptr(), size_of::<INPUT>() as i32) };
-		if sent != 0 {
-			activity::sent(send_start);
-		}
+		sending.sent(sent != 0);
 		let deadline = Instant::now() + DRAIN_TIMEOUT;
 		let unread = if sent as usize == marker.len() {
 			loop {
 				// SAFETY: no preconditions.
 				if unsafe { GetKeyState(i32::from(DRAIN_KEY)) } & 1 != before {
-					break None;
+					break Ok(None);
 				}
 				if !in_front() {
-					break left();
+					break Ok(left());
 				}
-				// The user's key or click fails the call
-				// ([`ForegroundGuard::run`]); their next keys must not wait here
-				// for the target.
-				if activity::check().is_err() {
-					break None;
+				if let Err(pressed) = activity::check() {
+					break Err(pressed);
 				}
 				if control::check().is_err() {
-					break Some(format!(
+					break Ok(Some(format!(
 						"the call was cancelled before {name} had read all the typed text"
-					));
+					)));
 				}
 				if Instant::now() >= deadline {
-					break Some(format!(
+					break Ok(Some(format!(
 						"{name} had not read all the typed text {} s after it was sent; the rest may \
 						 reach whichever window is in front next",
 						DRAIN_TIMEOUT.as_secs()
-					));
+					)));
 				}
 				std::thread::sleep(Duration::from_millis(1));
 			}
 		} else {
-			Some(format!(
+			Ok(Some(format!(
 				"could not wait for {name} to read the typed text (Windows refused the key marking \
 				 its end)"
-			))
+			)))
 		};
 		// SAFETY: detaches the pair attached above.
 		unsafe { AttachThreadInput(own, target, 0) };
@@ -1786,7 +1857,9 @@ mod foreground {
 	/// Takeover text for window `id`; `focus` runs under the foreground guard
 	/// as in [`key_chord`]. The foreground goes back once the target has read
 	/// the text ([`drain`]); when that cannot be seen, the call succeeds with
-	/// the reason recorded by [`control::report_text_unconfirmed`].
+	/// the reason recorded by [`control::report_text_unconfirmed`]. The user's
+	/// press drops whatever had not gone out yet and fails the call saying how
+	/// much had, along with that reason when it came after the wait.
 	pub(super) fn type_text(
 		id: &str,
 		text: &str,
@@ -1797,15 +1870,34 @@ mod foreground {
 		if text.is_empty() {
 			return Ok(());
 		}
-		ForegroundGuard::activate(id, KEY_SETTLE)?.run(|target| {
+		let name = format!("window {id}");
+		let total = graphemes_str(text).count();
+		let mut unread = None;
+		let result = ForegroundGuard::activate(id, KEY_SETTLE)?.run(|target| {
 			focus()?;
-			send_text(Some(target), text)?;
+			send_graphemes(text, super::keyboard_layout(Some(target)), |events| {
+				send_to(target, events)
+			})
+			.map_err(|(typed, error)| stopped_typing(error, typed, total, &name))?;
 			let closing_return = text.ends_with(['\r', '\n']);
-			if let Some(reason) = drain(target, &format!("window {id}"), closing_return) {
-				control::report_text_unconfirmed(reason);
-			}
+			unread = drain(target, &name, closing_return)
+				.map_err(|error| stopped_typing(error, (total, false), total, &name))?;
 			Ok(())
-		})
+		});
+		match (result, unread) {
+			(Ok(()), Some(reason)) => {
+				control::report_text_unconfirmed(reason);
+				Ok(())
+			},
+			(Err(mut error), Some(reason)) if error.code == ErrorCode::UserIntervened => {
+				error
+					.message
+					.push_str("; the typed text was not confirmed before that: ");
+				error.message.push_str(&reason);
+				Err(error)
+			},
+			(result, _) => result,
+		}
 	}
 
 	#[cfg(test)]
@@ -1839,6 +1931,153 @@ mod foreground {
 			assert!(!called.get(), "focus callbacks must not undo the user's window switch");
 			// SAFETY: GetForegroundWindow has no preconditions.
 			assert_eq!(unsafe { GetForegroundWindow() }, previous);
+		}
+
+		#[test]
+		fn a_press_while_typing_drops_the_rest_and_says_how_much_went() {
+			let mut packets = 0;
+			let (typed, error) = send_graphemes("abcde", std::ptr::null_mut(), |_| {
+				packets += 1;
+				if packets == 3 {
+					Err(DesktopError::user_intervened("pressed"))
+				} else {
+					Ok(())
+				}
+			})
+			.unwrap_err();
+			assert_eq!((typed, packets), ((2, false), 3), "nothing goes after the press");
+			let error = stopped_typing(error, typed, 5, "window 7");
+			assert_eq!(error.code, ErrorCode::UserIntervened);
+			for said in [
+				"after 2 of the 5 characters went to window 7",
+				"the rest were dropped and will not be sent",
+				"some of it may have reached the window in front",
+			] {
+				assert!(error.message.contains(said), "{said:?} in {}", error.message);
+			}
+
+			// A press between the two packets of the first character.
+			let mut packets = 0;
+			let (typed, error) = send_graphemes("e\u{301}x", std::ptr::null_mut(), |_| {
+				packets += 1;
+				if packets == 2 {
+					Err(DesktopError::user_intervened("pressed"))
+				} else {
+					Ok(())
+				}
+			})
+			.unwrap_err();
+			assert_eq!(typed, (0, true));
+			let error = stopped_typing(error, typed, 2, "window 7");
+			assert!(
+				error
+					.message
+					.contains("after part of the first of the 2 characters went"),
+				"{}",
+				error.message
+			);
+
+			// The press during the wait for the target to read all of it.
+			let error =
+				stopped_typing(DesktopError::user_intervened("pressed"), (5, false), 5, "window 7");
+			assert!(
+				error
+					.message
+					.contains("after all 5 characters went to window 7, before it was seen"),
+				"{}",
+				error.message
+			);
+			let error =
+				stopped_typing(DesktopError::user_intervened("pressed"), (0, false), 5, "window 7");
+			assert!(error.message.contains("so none was typed"), "{}", error.message);
+			let error = stopped_typing(
+				DesktopError::input_failed("foreground left"),
+				(2, false),
+				5,
+				"window 7",
+			);
+			assert_eq!(
+				(error.code, error.message.as_str()),
+				(ErrorCode::InputFailed, "foreground left")
+			);
+		}
+
+		#[test]
+		fn a_press_once_the_target_is_in_front_skips_the_activation_fence() {
+			use std::cell::Cell;
+
+			let pressed = Cell::new(false);
+			let fenced = Cell::new(false);
+			let check = || {
+				if pressed.get() {
+					Err(DesktopError::user_intervened("pressed"))
+				} else {
+					Ok(())
+				}
+			};
+			// In front at once; the press comes while it settles.
+			let (requested, error) = bring_forward(
+				|| Ok(false),
+				|| Ok(true),
+				check,
+				|| {
+					pressed.set(true);
+					check()
+				},
+				|| unreachable!("the target came forward"),
+				|| fenced.set(true),
+			)
+			.unwrap_err();
+			assert!(requested);
+			assert_eq!(error.code, ErrorCode::UserIntervened);
+			assert!(!fenced.get(), "nothing is pending once the target was seen in front");
+
+			// Windows reports the target in front as it is asked.
+			pressed.set(false);
+			let (requested, _) = bring_forward(
+				|| Ok(true),
+				|| unreachable!("the request saw the target in front"),
+				check,
+				|| {
+					pressed.set(true);
+					check()
+				},
+				|| unreachable!("the target came forward"),
+				|| fenced.set(true),
+			)
+			.unwrap_err();
+			assert!(requested && !fenced.get());
+
+			// The press comes while Windows has not yet shown the target in front.
+			pressed.set(false);
+			let (requested, error) = bring_forward(
+				|| Ok(false),
+				|| {
+					pressed.set(true);
+					Ok(false)
+				},
+				check,
+				|| unreachable!("the target never came forward"),
+				|| unreachable!("the press ended the wait"),
+				|| fenced.set(true),
+			)
+			.unwrap_err();
+			assert!(requested);
+			assert_eq!(error.code, ErrorCode::UserIntervened);
+			assert!(fenced.get(), "a pending activation is fenced before the hand-back");
+
+			// A press before the request asks nothing of Windows.
+			fenced.set(false);
+			let (requested, _) = bring_forward(
+				|| unreachable!("pressed before the request"),
+				|| unreachable!(),
+				check,
+				|| unreachable!(),
+				|| unreachable!(),
+				|| fenced.set(true),
+			)
+			.unwrap_err();
+			assert!(!requested && !fenced.get());
 		}
 
 		#[test]

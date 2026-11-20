@@ -5829,6 +5829,21 @@ describe("computer background fallback", () => {
 		front.report = { handedBack: true, previousPid: 300 };
 		expect(notice(await run(front, clickTarget, "takeover"))).toContain("not confirmed");
 	});
+
+	it("says when a Windows takeover watched the last input time instead of the user's presses", async () => {
+		const polled = "omp watched for the user's input through Windows' last input time";
+		const explicit = 'await (await desktop.window("42")).click(1, 2, { takeover: true })';
+		const native = new RefusingSession();
+		native.report = { handedBack: true, previousPid: 300, frontPid: 300, lastInputPolled: true };
+		expect(notice(await run(native, clickTarget, "takeover"))).toContain(polled);
+		expect(texts(await run(native, explicit, "takeover"))).toEqual([
+			expect.stringContaining(`click took over; ${polled}`),
+		]);
+
+		native.report = { handedBack: true, previousPid: 300, frontPid: 300 };
+		expect(notice(await run(native, clickTarget, "takeover"))).not.toContain(polled);
+		expect(texts(await run(native, explicit, "takeover"))).toEqual([]);
+	});
 });
 
 describe("window() waiting for a window to appear", () => {

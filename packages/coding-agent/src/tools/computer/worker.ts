@@ -616,6 +616,13 @@ function refuseMenuPress(
 	}
 }
 
+/**
+ * Said when a Windows takeover could not listen for the user's presses (native's
+ * `lastInputPolled`).
+ */
+const LAST_INPUT_POLLED =
+	"omp watched for the user's input through Windows' last input time: this process already has a Raw Input receiver of its own, which omp left in place, or its receivers could not be listed; omp could not tell input apart, so any input counted";
+
 /** Native's `refuseMenu` refusal; its first group is the press, as `refuseMenu`'s `call`. */
 const MENU_CONTROL_REFUSAL =
 	/^BackgroundUnavailable: (the .+, which (?:lands|starts) on a menu button or popup button,) would open its menu; nothing was sent$/;
@@ -732,7 +739,9 @@ async function sendInput(
 		);
 	}
 	try {
-		await nativeCall(context.signal, () => send());
+		const report = await nativeCall(context.signal, () => send());
+		if (report?.lastInputPolled)
+			context.output.push({ type: "text", text: `${method} took over; ${LAST_INPUT_POLLED}` });
 		return;
 	} catch (error) {
 		if (!(error instanceof ToolError) || !error.message.startsWith(BACKGROUND_UNAVAILABLE)) throw error;
@@ -774,7 +783,7 @@ async function sendInput(
 		const focus = await focusReport(session, context.signal, report, target);
 		context.output.push({
 			type: "text",
-			text: `${method} ran in takeover because ${why}; the input was ${confirmed() ? "delivered" : "sent"}, and ${focus}`,
+			text: `${method} ran in takeover because ${why}; the input was ${confirmed() ? "delivered" : "sent"}, and ${focus}${report?.lastInputPolled ? `; ${LAST_INPUT_POLLED}` : ""}`,
 		});
 	}
 }

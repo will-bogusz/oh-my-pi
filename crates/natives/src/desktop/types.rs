@@ -244,14 +244,19 @@ pub struct HoldOptions {
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub struct DesktopFocusReturn {
 	/// Whether the takeover handed the front back to the app front before it.
-	pub handed_back:  bool,
+	pub handed_back:       bool,
 	/// The process front before the takeover.
-	pub previous_pid: Option<u32>,
+	pub previous_pid:      Option<u32>,
 	/// The process front once the takeover ended; absent when unreadable.
-	pub front_pid:    Option<u32>,
+	pub front_pid:         Option<u32>,
 	/// What a macOS takeover did with the user's keyboard; absent elsewhere and
 	/// when it did not reach the hand-back.
-	pub keyboard:     Option<DesktopKeyboardReturn>,
+	pub keyboard:          Option<DesktopKeyboardReturn>,
+	/// True when a Windows takeover watched the session's last input time,
+	/// where a pointer move counts as the user's too, instead of their key and
+	/// button presses: the process already had its own Raw Input receiver,
+	/// which is left in place. Absent otherwise.
+	pub last_input_polled: Option<bool>,
 }
 
 /// What a macOS takeover did to give the user back their keyboard. Nothing

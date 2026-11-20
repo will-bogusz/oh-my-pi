@@ -298,7 +298,7 @@ pub(crate) fn is_cleaning_up() -> bool {
 	CLEANUP.get()
 }
 
-#[cfg(any(target_os = "linux", windows))]
+#[cfg(target_os = "linux")]
 pub(crate) fn current_token() -> Option<OperationToken> {
 	if CLEANUP.get() {
 		None

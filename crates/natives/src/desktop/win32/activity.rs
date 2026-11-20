@@ -10,9 +10,16 @@
 //! low-level hook, the listener is not in the input path: Windows never waits
 //! for it. Registration, the message-only window and its thread exist only
 //! from a takeover call's admission until that call returns. Overlapping
-//! admissions share them; the last watch removes them synchronously.
-//! Only how many presses there were and when the last one was are kept, never
-//! which key or button, and pointer moves are not counted.
+//! admissions share them; the last watch removes them synchronously, and the
+//! time of the last press it saw outlives it, so a takeover that stopped at a
+//! press still holds the next one back. Only how many presses there were and
+//! when the last one was are kept, never which key or button, and pointer
+//! moves are not counted.
+//!
+//! Windows keeps one keyboard and one mouse registration per process. When the
+//! process already has one (an embedding host's), it is left alone: the watch
+//! polls the session's last input time instead, where a pointer move counts as
+//! the user's too, and says so.
 use std::{
 	cell::RefCell,
 	sync::{
@@ -20,10 +27,10 @@ use std::{
 		atomic::{AtomicU64, Ordering},
 	},
 	thread,
-	time::{Duration, Instant},
+	time::Duration,
 };
 
-use parking_lot::{Condvar, Mutex};
+use parking_lot::{Condvar, Mutex, MutexGuard};
 use windows_sys::Win32::{
 	Foundation::{CloseHandle, HANDLE, HWND, LPARAM, LRESULT, WAIT_OBJECT_0, WPARAM},
 	System::{
@@ -32,7 +39,7 @@ use windows_sys::Win32::{
 	},
 	UI::{
 		Input::{
-			GetRawInputData, HRAWINPUT,
+			GetRawInputData, GetRegisteredRawInputDevices, HRAWINPUT,
 			KeyboardAndMouse::{
 				GetAsyncKeyState, GetLastInputInfo, LASTINPUTINFO, VK_CONTROL, VK_LBUTTON, VK_LWIN,
 				VK_MBUTTON, VK_MENU, VK_RBUTTON, VK_RWIN, VK_SHIFT, VK_XBUTTON1, VK_XBUTTON2,
@@ -52,11 +59,16 @@ use windows_sys::Win32::{
 
 use crate::desktop::{
 	control::{self, USER_QUIET as QUIET},
-	error::{CoreResult, DesktopError},
+	error::{CoreResult, DesktopError, ErrorCode},
 };
 
-const READ_AGAIN: &str =
+pub(super) const READ_AGAIN: &str =
 	"read the window again (win.ax(), win.observe() or win.screenshot()) before acting on it";
+/// Appended to what a watch that polls the session's last input time reports.
+const POLLED: &str = "omp watched the session's last input time instead of the user's presses, \
+                      because this process already has a Raw Input receiver of its own, which omp \
+                      leaves in place, or its receivers could not be listed; omp could not tell \
+                      input apart, so any input counted";
 /// How often a takeover waiting on a key or button the user holds checks
 /// whether they have let go.
 const HELD_POLL: Duration = Duration::from_millis(50);
@@ -74,14 +86,70 @@ const KEYBOARD: u16 = 6;
 const MOUSE: u16 = 2;
 
 struct Presses {
-	count: AtomicU64,
-	last:  Mutex<Option<Duration>>,
+	count:  AtomicU64,
+	last:   Mutex<Option<Duration>>,
+	/// Without a Raw Input listener, the session's last input tick already
+	/// looked at; `None` while listening.
+	polled: Option<Mutex<u32>>,
 }
 
 impl Presses {
+	fn new(last: Option<Duration>, polled: Option<u32>) -> Arc<Self> {
+		Arc::new(Self {
+			count:  AtomicU64::new(0),
+			last:   Mutex::new(last),
+			polled: polled.map(Mutex::new),
+		})
+	}
+
 	fn record(&self, at: Duration) {
-		*self.last.lock() = Some(at);
+		let mut last = self.last.lock();
+		*last = (*last).max(Some(at));
 		self.count.fetch_add(1, Ordering::AcqRel);
+	}
+
+	/// A polling watch counts the session's newest input as a press unless it
+	/// came from OMP's own last send; a listening one has nothing to do.
+	fn refresh(&self) {
+		let Some(looked) = &self.polled else {
+			return;
+		};
+		let mut looked = looked.lock();
+		// Read while OMP's send record is held, so no send is seen before it
+		// is recorded, by this thread or another.
+		let own = OWN_SEND.lock();
+		let Some(tick) = last_input_tick() else {
+			return;
+		};
+		self.poll(&mut looked, tick, *own, now(), idle_since(tick));
+	}
+
+	/// Counts `tick`, the session's last input `idle` ago, as a press unless
+	/// it was already `looked` at or came from OMP's own send (`own`).
+	fn poll(
+		&self,
+		looked: &mut u32,
+		tick: u32,
+		own: Option<OwnSend>,
+		now: Duration,
+		idle: Duration,
+	) {
+		if tick == *looked {
+			return;
+		}
+		*looked = tick;
+		if user_tick(tick, own, now) {
+			self.record(now.saturating_sub(idle));
+		}
+	}
+
+	/// `error` from this watch, naming how it watched when it polled.
+	fn noted(&self, mut error: DesktopError) -> DesktopError {
+		if self.polled.is_some() {
+			error.message.push_str("; ");
+			error.message.push_str(POLLED);
+		}
+		error
 	}
 }
 
@@ -104,8 +172,10 @@ trait Unregister {
 
 /// A transition excludes new registrations without holding the state lock
 /// while the listener starts or joins. Waiters release it through the condvar.
+/// `Idle` keeps the last press the previous registration knew of: OMP's own
+/// input since then may hide it from the session's history.
 enum Registration<R> {
-	Idle,
+	Idle(Option<Duration>),
 	Changing,
 	Live(usize, Arc<Presses>, R),
 	Failed(DesktopError),
@@ -118,15 +188,16 @@ struct Watches<R: Unregister> {
 
 impl<R: Unregister> Watches<R> {
 	const fn new() -> Self {
-		Self { state: Mutex::new(Registration::Idle), changed: Condvar::new() }
+		Self { state: Mutex::new(Registration::Idle(None)), changed: Condvar::new() }
 	}
 
+	/// `register` starts a registration from the last press already known.
 	fn watch(
 		&self,
-		register: impl FnOnce() -> CoreResult<(Arc<Presses>, R)>,
+		register: impl FnOnce(Option<Duration>) -> CoreResult<(Arc<Presses>, R)>,
 	) -> CoreResult<Watch<'_, R>> {
 		let mut state = self.state.lock();
-		loop {
+		let seen = loop {
 			match &mut *state {
 				Registration::Live(count, presses, _) => {
 					*count += 1;
@@ -134,12 +205,12 @@ impl<R: Unregister> Watches<R> {
 				},
 				Registration::Changing => self.changed.wait(&mut state),
 				Registration::Failed(error) => return Err(error.clone()),
-				Registration::Idle => break,
+				Registration::Idle(seen) => break *seen,
 			}
-		}
+		};
 		*state = Registration::Changing;
 		drop(state);
-		let registered = register();
+		let registered = register(seen);
 		let mut state = self.state.lock();
 		let result = match registered {
 			Ok((presses, registration)) => {
@@ -148,7 +219,7 @@ impl<R: Unregister> Watches<R> {
 				Ok(watch)
 			},
 			Err(error) => {
-				*state = Registration::Idle;
+				*state = Registration::Idle(seen);
 				Err(error)
 			},
 		};
@@ -159,7 +230,7 @@ impl<R: Unregister> Watches<R> {
 	fn presses(&self) -> Option<Arc<Presses>> {
 		match &*self.state.lock() {
 			Registration::Live(_, presses, _) => Some(Arc::clone(presses)),
-			Registration::Idle | Registration::Changing | Registration::Failed(_) => None,
+			Registration::Idle(_) | Registration::Changing | Registration::Failed(_) => None,
 		}
 	}
 }
@@ -189,7 +260,7 @@ impl<R: Unregister> Drop for Watch<'_, R> {
 			_ => unreachable!("the last watch removed a live registration"),
 		};
 		*self.watches.state.lock() = match result {
-			Ok(()) => Registration::Idle,
+			Ok(()) => Registration::Idle(*self.presses.last.lock()),
 			Err(error) => Registration::Failed(error),
 		};
 		self.watches.changed.notify_all();
@@ -217,16 +288,7 @@ impl Drop for UserActivity {
 pub(super) fn admit() -> CoreResult<()> {
 	ADMITTED.set(None);
 	let presses = WATCHES.presses().ok_or_else(unwatched)?;
-	let deadline = control::current_token().and_then(|token| token.deadline());
-	let limit = deadline.map_or_else(
-		|| now() + QUIET,
-		|deadline| {
-			now()
-				+ deadline
-					.saturating_duration_since(Instant::now())
-					.saturating_sub(control::DEADLINE_MARGIN)
-		},
-	);
+	let limit = now() + control::time_left().unwrap_or(QUIET);
 	let count = admit_with(&presses, limit, now, input_held, control::wait)?;
 	ADMITTED.set(Some((presses, count)));
 	Ok(())
@@ -238,6 +300,7 @@ pub(super) fn admitted() -> bool {
 	let Some(current) = WATCHES.presses() else {
 		return false;
 	};
+	current.refresh();
 	ADMITTED.with_borrow(|admitted| {
 		admitted.as_ref().is_some_and(|(presses, baseline)| {
 			Arc::ptr_eq(presses, &current) && presses.count.load(Ordering::Acquire) == *baseline
@@ -276,6 +339,7 @@ fn start_with<R>(
 	wait: impl FnMut(Duration) -> CoreResult<()>,
 ) -> CoreResult<Takeover<R>> {
 	ACTIVE.set(None);
+	presses.refresh();
 	let baseline = if let Some((admitted, baseline)) = ADMITTED.take() {
 		// The Arc's identity is the registration generation: an old baseline
 		// retains its allocation, so a later registration cannot reuse it.
@@ -283,10 +347,10 @@ fn start_with<R>(
 			|| admitted.count.load(Ordering::Acquire) != baseline
 			|| held()
 		{
-			return Err(DesktopError::user_intervened(
+			return Err(presses.noted(DesktopError::user_intervened(
 				"the user pressed or is holding a key or button as the takeover was starting, so none \
 				 started; nothing was sent; try again once they pause",
-			));
+			)));
 		}
 		(presses, baseline)
 	} else {
@@ -301,14 +365,52 @@ fn start_with<R>(
 /// thread's takeover started ([`start`]); outside one there is nothing to
 /// compare.
 pub(super) fn check() -> CoreResult<()> {
-	ACTIVE.with_borrow(|active| match active {
-		Some((presses, baseline)) if presses.count.load(Ordering::Acquire) != *baseline => {
-			Err(DesktopError::user_intervened(format!(
-				"the user pressed a key or clicked during this takeover; input sent before that may \
-				 already have landed, and nothing more was sent; {READ_AGAIN}"
-			)))
+	ACTIVE.with_borrow(|active| {
+		let Some((presses, baseline)) = active else {
+			return Ok(());
+		};
+		presses.refresh();
+		if presses.count.load(Ordering::Acquire) == *baseline {
+			return Ok(());
+		}
+		Err(presses.noted(DesktopError::user_intervened(format!(
+			"the user pressed a key or clicked during this takeover; input sent before that may \
+			 already have landed, and nothing more was sent; {READ_AGAIN}"
+		))))
+	})
+}
+
+/// A takeover's `result`, unless the user has pressed something since it
+/// started: then `UserIntervened`, still saying whatever else failed (a
+/// release Windows refused, a hand-back it refused).
+pub(super) fn outcome(result: CoreResult<()>) -> CoreResult<()> {
+	match (check(), result) {
+		(Ok(()), result) => result,
+		(Err(_), Err(error)) if error.code == ErrorCode::UserIntervened => Err(error),
+		(Err(mut pressed), Err(error)) => {
+			pressed.message.push_str("; before that: ");
+			pressed.message.push_str(&error.message);
+			Err(pressed)
 		},
-		_ => Ok(()),
+		(Err(pressed), Ok(())) => Err(pressed),
+	}
+}
+
+/// `error`, naming how the current takeover watched the user when it polled.
+pub(super) fn noted(error: DesktopError) -> DesktopError {
+	ACTIVE.with_borrow(|active| match active {
+		Some((presses, _)) => presses.noted(error),
+		None => error,
+	})
+}
+
+/// Whether the current takeover polls the session's last input time, the
+/// process already having its own Raw Input receiver.
+pub(super) fn polled() -> bool {
+	ACTIVE.with_borrow(|active| {
+		active
+			.as_ref()
+			.is_some_and(|(presses, _)| presses.polled.is_some())
 	})
 }
 
@@ -327,6 +429,7 @@ fn admit_with(
 	mut wait: impl FnMut(Duration) -> CoreResult<()>,
 ) -> CoreResult<u64> {
 	loop {
+		presses.refresh();
 		let holding = held();
 		let count = presses.count.load(Ordering::Acquire);
 		let now = now();
@@ -343,7 +446,7 @@ fn admit_with(
 			return Ok(count);
 		}
 		if now >= limit {
-			return Err(control::still_active_refusal(idle));
+			return Err(presses.noted(control::still_active_refusal(idle)));
 		}
 		let quiet = (last + QUIET).min(limit).saturating_sub(now);
 		wait(if holding { HELD_POLL.min(quiet) } else { quiet })?;
@@ -374,17 +477,23 @@ fn input_held() -> bool {
 /// session's last input time, which counts injected input too.
 /// Injected timestamps can move history backward, admitting earlier or later.
 fn last_input_before(started: Duration) -> Option<Duration> {
+	let tick = last_input_tick()?;
+	if !user_tick(tick, *OWN_SEND.lock(), started) {
+		return None;
+	}
+	started.checked_sub(idle_since(tick))
+}
+
+/// The session's last input tick, from any source.
+fn last_input_tick() -> Option<u32> {
 	let mut info = LASTINPUTINFO { cbSize: size_of::<LASTINPUTINFO>() as u32, dwTime: 0 };
 	// SAFETY: `info` is writable and its size is set.
-	if unsafe { GetLastInputInfo(&raw mut info) } == 0 {
-		return None;
-	}
-	if !user_tick(info.dwTime, *OWN_SEND.lock(), started) {
-		return None;
-	}
+	(unsafe { GetLastInputInfo(&raw mut info) } != 0).then_some(info.dwTime)
+}
+
+fn idle_since(tick: u32) -> Duration {
 	// SAFETY: GetTickCount has no preconditions; both ticks wrap together.
-	let idle = unsafe { GetTickCount() }.wrapping_sub(info.dwTime);
-	started.checked_sub(Duration::from_millis(idle.into()))
+	Duration::from_millis(unsafe { GetTickCount() }.wrapping_sub(tick).into())
 }
 
 fn now() -> Duration {
@@ -403,14 +512,29 @@ static OWN_SEND: Mutex<Option<OwnSend>> = Mutex::new(None);
 const SEND_HISTORY: Duration = Duration::from_secs(60);
 const MAX_SEND_WINDOW_MS: u32 = 50;
 
-pub(super) fn sending() -> u32 {
-	// SAFETY: GetTickCount has no preconditions.
-	unsafe { GetTickCount() }
+/// OMP's input on its way out. It holds the record of OMP's sends until
+/// [`Sending::sent`], so a poll never reads the session's last input between
+/// a send and its record.
+pub(super) struct Sending {
+	own:    MutexGuard<'static, Option<OwnSend>>,
+	before: u32,
 }
 
-pub(super) fn sent(before: u32) {
-	let after = sending();
-	*OWN_SEND.lock() = Some(OwnSend { before, after, at: now() });
+pub(super) fn sending() -> Sending {
+	let own = OWN_SEND.lock();
+	// SAFETY: GetTickCount has no preconditions.
+	Sending { own, before: unsafe { GetTickCount() } }
+}
+
+impl Sending {
+	/// Ends the send, recording it when Windows `inserted` any of it.
+	pub(super) fn sent(mut self, inserted: bool) {
+		if inserted {
+			// SAFETY: GetTickCount has no preconditions.
+			let after = unsafe { GetTickCount() };
+			*self.own = Some(OwnSend { before: self.before, after, at: now() });
+		}
+	}
 }
 
 fn user_tick(last: u32, own: Option<OwnSend>, at: Duration) -> bool {
@@ -483,6 +607,31 @@ fn devices(flags: u32, target: HWND) -> [RAWINPUTDEVICE; 2] {
 	})
 }
 
+/// The process's keyboard and mouse Raw Input registrations, whoever made
+/// them; `None` when Windows cannot list them.
+fn registrations() -> Option<Vec<RAWINPUTDEVICE>> {
+	let size = size_of::<RAWINPUTDEVICE>() as u32;
+	let mut count = 0;
+	// SAFETY: a null buffer asks only for the count.
+	if unsafe { GetRegisteredRawInputDevices(std::ptr::null_mut(), &raw mut count, size) } != 0 {
+		return None;
+	}
+	let mut devices = vec![RAWINPUTDEVICE::default(); count as usize];
+	if count != 0 {
+		// SAFETY: the buffer holds `count` initialized entries.
+		let read =
+			unsafe { GetRegisteredRawInputDevices(devices.as_mut_ptr(), &raw mut count, size) };
+		if read == u32::MAX {
+			return None;
+		}
+		devices.truncate(read as usize);
+	}
+	devices.retain(|device| {
+		device.usUsagePage == USAGE_PAGE && [KEYBOARD, MOUSE].contains(&device.usUsage)
+	});
+	Some(devices)
+}
+
 struct StopEvent(isize);
 
 impl Drop for StopEvent {
@@ -492,19 +641,20 @@ impl Drop for StopEvent {
 	}
 }
 
+/// The listener thread and the event that stops it; a polling watch has
+/// neither.
 struct Listener {
-	thread: Option<thread::JoinHandle<CoreResult<()>>>,
-	stop:   Arc<StopEvent>,
+	running: Option<(thread::JoinHandle<CoreResult<()>>, Arc<StopEvent>)>,
 }
 
 impl Unregister for Listener {
 	fn unregister(&mut self) -> CoreResult<()> {
-		let Some(thread) = self.thread.take() else {
+		let Some((thread, stop)) = self.running.take() else {
 			return Ok(());
 		};
 		// SAFETY: both owners retain this valid manual-reset event. Unlike a
 		// posted message, signaling cannot fail because the queue is full.
-		if unsafe { SetEvent(self.stop.0 as HANDLE) } == 0 {
+		if unsafe { SetEvent(stop.0 as HANDLE) } == 0 {
 			return Err(DesktopError::input_failed(
 				"Windows input listener teardown failed: SetEvent failed; no further takeover can \
 				 start until OMP restarts",
@@ -525,7 +675,20 @@ impl Drop for Listener {
 	}
 }
 
-fn listen() -> CoreResult<(Arc<Presses>, Listener)> {
+/// Starts watching from `seen`, the last press an earlier registration saw,
+/// or the session's history when that is newer.
+fn listen(seen: Option<Duration>) -> CoreResult<(Arc<Presses>, Listener)> {
+	// Windows keeps one keyboard and one mouse registration per process, and
+	// none is OMP's while no watch is live: one that exists belongs to the
+	// embedding host, which would stop receiving its input if it were
+	// replaced. A host registering between this read and the registration
+	// below still loses its own.
+	if !matches!(registrations(), Some(existing) if existing.is_empty()) {
+		let tick = last_input_tick().ok_or_else(unwatched)?;
+		let last = seen.max(last_input_before(now()));
+		return Ok((Presses::new(last, Some(tick)), Listener { running: None }));
+	}
+
 	// SAFETY: null security/name, manual reset, initially unsignaled.
 	let event = unsafe { CreateEventW(std::ptr::null(), 1, 0, std::ptr::null()) };
 	if event.is_null() {
@@ -533,7 +696,7 @@ fn listen() -> CoreResult<(Arc<Presses>, Listener)> {
 	}
 	let stop = Arc::new(StopEvent(event as isize));
 	let stopping = Arc::clone(&stop);
-	let presses = Arc::new(Presses { count: AtomicU64::new(0), last: Mutex::new(None) });
+	let presses = Presses::new(None, None);
 	let (ready, receive_ready) = flume::bounded(1);
 	let shared = Arc::clone(&presses);
 	let thread = thread::Builder::new()
@@ -587,7 +750,7 @@ fn listen() -> CoreResult<(Arc<Presses>, Listener)> {
 			// startup is covered by history or by the queue, never neither.
 			LISTENING.with_borrow(|presses| {
 				if let Some(presses) = presses {
-					*presses.last.lock() = last_input_before(now());
+					*presses.last.lock() = seen.max(last_input_before(now()));
 				}
 			});
 			let _ = ready.send(Some(()));
@@ -617,26 +780,50 @@ fn listen() -> CoreResult<(Arc<Presses>, Listener)> {
 					unsafe { DispatchMessageW(&raw const message) };
 				}
 			}
-			let devices = devices(RIDEV_REMOVE, std::ptr::null_mut());
-			// SAFETY: removal requires a null target. Both removal and window
-			// destruction run on the thread which registered/created them.
-			let removed = unsafe {
-				RegisterRawInputDevices(devices.as_ptr(), 2, size_of::<RAWINPUTDEVICE>() as u32)
-			};
+			// Removes only what this listener registered: a registration that
+			// now targets another window was made since by someone else.
+			let removed = registrations()
+				.ok_or("reading the registrations failed")
+				.and_then(|current| {
+					let owned = current
+						.into_iter()
+						.filter(|device| device.hwndTarget == window)
+						.map(|device| RAWINPUTDEVICE {
+							dwFlags: RIDEV_REMOVE,
+							hwndTarget: std::ptr::null_mut(),
+							..device
+						})
+						.collect::<Vec<_>>();
+					// SAFETY: removal requires a null target. Both removal and
+					// window destruction run on the thread which registered/created
+					// them.
+					let ok = owned.is_empty()
+						|| unsafe {
+							RegisterRawInputDevices(
+								owned.as_ptr(),
+								owned.len() as u32,
+								size_of::<RAWINPUTDEVICE>() as u32,
+							)
+						} != 0;
+					ok.then_some(()).ok_or("RIDEV_REMOVE failed")
+				});
 			// SAFETY: this thread owns the window and its class.
-			let destroyed = unsafe { DestroyWindow(window) };
+			let destroyed = unsafe { DestroyWindow(window) } != 0;
 			// Destroying the target ends delivery even if removal fails, but
 			// its stale registration is not clean: the joined result poisons
 			// the watch state and refuses all later takeovers.
 			// SAFETY: no live window uses the class after destruction.
 			unsafe { UnregisterClassW(class.as_ptr(), std::ptr::null_mut()) };
 			LISTENING.set(None);
-			if removed == 0 || destroyed == 0 {
+			let failures = [removed.err(), (!destroyed).then_some("DestroyWindow failed")]
+				.into_iter()
+				.flatten()
+				.collect::<Vec<_>>();
+			if !failures.is_empty() {
 				return Err(DesktopError::input_failed(format!(
-					"Windows input listener teardown failed: RIDEV_REMOVE={}, DestroyWindow={}; no \
-					 further takeover can start until OMP restarts",
-					removed != 0,
-					destroyed != 0,
+					"Windows input listener teardown failed: {}; no further takeover can start until \
+					 OMP restarts",
+					failures.join(", "),
 				)));
 			}
 			Ok(())
@@ -645,7 +832,7 @@ fn listen() -> CoreResult<(Arc<Presses>, Listener)> {
 			DesktopError::input_failed(format!("cannot start watching the user's input: {error}"))
 		})?;
 	if receive_ready.recv() == Ok(Some(())) {
-		Ok((presses, Listener { thread: Some(thread), stop }))
+		Ok((presses, Listener { running: Some((thread, stop)) }))
 	} else {
 		let _ = thread.join();
 		Err(unwatched())
@@ -657,7 +844,7 @@ mod tests {
 	use super::*;
 
 	fn presses(last: Option<Duration>) -> Presses {
-		Presses { count: AtomicU64::new(0), last: Mutex::new(last) }
+		Presses { count: AtomicU64::new(0), last: Mutex::new(last), polled: None }
 	}
 
 	#[test]
@@ -764,7 +951,7 @@ mod tests {
 		let registered = std::cell::Cell::new(0);
 		let removed = std::cell::Cell::new(0);
 		let watches = Watches::new();
-		let register = || {
+		let register = |_| {
 			registered.set(registered.get() + 1);
 			Ok((Arc::new(presses(None)), Registration(&removed)))
 		};
@@ -830,10 +1017,10 @@ mod tests {
 		let removed = std::cell::Cell::new(0);
 		let watches = Watches::new();
 		let first = watches
-			.watch(|| Ok((Arc::new(presses(None)), Registration(&removed))))
+			.watch(|_| Ok((Arc::new(presses(None)), Registration(&removed))))
 			.unwrap();
 		let second = watches
-			.watch(|| panic!("must reuse the existing registration"))
+			.watch(|_| panic!("must reuse the existing registration"))
 			.unwrap();
 		drop(first);
 		assert_eq!(removed.get(), 0);
@@ -869,7 +1056,7 @@ mod tests {
 	fn admission_from_a_dropped_registration_cannot_watch_a_new_takeover() {
 		let removed = std::cell::Cell::new(0);
 		let watches = Watches::new();
-		let register = || Ok((Arc::new(presses(None)), Registration(&removed)));
+		let register = |_| Ok((Arc::new(presses(None)), Registration(&removed)));
 		let first = watches.watch(register).unwrap();
 		let clock = || Duration::from_secs(100);
 		let count = admit_with(&first.presses, clock(), clock, || false, |_| Ok(())).unwrap();
@@ -895,11 +1082,11 @@ mod tests {
 		}
 		let watches = Watches::new();
 		let watch = watches
-			.watch(|| Ok((Arc::new(presses(None)), FailedRemoval)))
+			.watch(|_| Ok((Arc::new(presses(None)), FailedRemoval)))
 			.unwrap();
 		drop(watch);
 		let error = watches
-			.watch(|| panic!("a failed teardown must not register again"))
+			.watch(|_| panic!("a failed teardown must not register again"))
 			.err()
 			.expect("failed teardown must poison the next start");
 		assert_eq!(error.code, crate::desktop::error::ErrorCode::InputFailed);
@@ -907,32 +1094,153 @@ mod tests {
 	}
 
 	#[test]
-	fn real_registration_is_removed_after_last_drop_cancel_and_unwind() {
-		use windows_sys::Win32::UI::Input::GetRegisteredRawInputDevices;
+	fn a_press_seen_before_the_last_watch_dropped_still_holds_the_next_admission() {
+		let removed = std::cell::Cell::new(0);
+		let watches = Watches::new();
+		// The release OMP sent after the press is the session's last input, so
+		// history has nothing of the user's to add.
+		let register =
+			|seen: Option<Duration>| Ok((Arc::new(presses(seen.max(None))), Registration(&removed)));
+		let pressed = Duration::from_secs(100);
+		let stopped = watches.watch(register).unwrap();
+		stopped.presses.record(pressed);
+		drop(stopped);
+		assert_eq!(removed.get(), 1);
 
-		fn registered() -> Vec<RAWINPUTDEVICE> {
-			let mut count = 0;
-			let size = size_of::<RAWINPUTDEVICE>() as u32;
-			// SAFETY: null buffer queries the required count.
-			let queried =
-				unsafe { GetRegisteredRawInputDevices(std::ptr::null_mut(), &raw mut count, size) };
-			assert_eq!(queried, 0);
-			let mut devices = vec![RAWINPUTDEVICE::default(); count as usize];
-			if count != 0 {
-				// SAFETY: the initialized buffer holds the queried count.
-				let read =
-					unsafe { GetRegisteredRawInputDevices(devices.as_mut_ptr(), &raw mut count, size) };
-				assert_ne!(read, u32::MAX);
-				devices.truncate(read as usize);
-			}
-			devices
-				.into_iter()
-				.filter(|device| {
-					device.usUsagePage == USAGE_PAGE && [KEYBOARD, MOUSE].contains(&device.usUsage)
-				})
-				.collect()
+		let next = watches.watch(register).unwrap();
+		let at = pressed + Duration::from_secs(1);
+		let waited = std::cell::Cell::new(Duration::ZERO);
+		admit_with(
+			&next.presses,
+			at + QUIET,
+			|| at + waited.get(),
+			|| false,
+			|wait| {
+				waited.set(waited.get() + wait);
+				Ok(())
+			},
+		)
+		.unwrap();
+		assert_eq!(waited.get(), Duration::from_secs(4), "5 s from the press, not from the release");
+	}
+
+	#[test]
+	fn a_press_keeps_what_else_failed_in_the_takeover() {
+		let presses = Arc::new(presses(None));
+		let _takeover =
+			start_with((), Arc::clone(&presses), || Duration::ZERO, || false, |_| Ok(())).unwrap();
+		outcome(Err(DesktopError::input_failed("Windows refused the hand-back"))).unwrap_err();
+		presses.record(Duration::ZERO);
+
+		let error =
+			outcome(Err(DesktopError::input_failed("SendInput could not release inserted input")))
+				.unwrap_err();
+		assert_eq!(error.code, ErrorCode::UserIntervened);
+		assert!(error.message.contains("pressed a key or clicked"), "{}", error.message);
+		assert!(
+			error
+				.message
+				.ends_with("before that: SendInput could not release inserted input")
+		);
+
+		// A hold the press stopped already said its release failed.
+		let held = "the user pressed a key or clicked during this takeover; cleanup also failed: \
+		            SendInput could not release inserted input";
+		let error = outcome(Err(DesktopError::user_intervened(held))).unwrap_err();
+		assert_eq!((error.code, error.message.as_str()), (ErrorCode::UserIntervened, held));
+
+		let error = outcome(Ok(())).unwrap_err();
+		assert_eq!(error.code, ErrorCode::UserIntervened);
+	}
+
+	/// Real registrations are the process's own: tests making them take turns.
+	static REAL: Mutex<()> = Mutex::new(());
+
+	fn registered() -> Vec<(u16, u32, HWND)> {
+		registrations()
+			.unwrap()
+			.into_iter()
+			.map(|device| (device.usUsage, device.dwFlags, device.hwndTarget))
+			.collect()
+	}
+
+	/// A keyboard receiver following the focus, as an embedding host might
+	/// register; removed again on drop.
+	struct Host;
+
+	impl Host {
+		fn register() -> Self {
+			assert!(Self::change(0), "the host's registration");
+			Self
 		}
 
+		fn change(flags: u32) -> bool {
+			let device = RAWINPUTDEVICE {
+				usUsagePage: USAGE_PAGE,
+				usUsage:     KEYBOARD,
+				dwFlags:     flags,
+				hwndTarget:  std::ptr::null_mut(),
+			};
+			// SAFETY: one initialized device outlives the call.
+			let changed = unsafe {
+				RegisterRawInputDevices(&raw const device, 1, size_of::<RAWINPUTDEVICE>() as u32)
+			};
+			changed != 0
+		}
+	}
+
+	impl Drop for Host {
+		fn drop(&mut self) {
+			Self::change(RIDEV_REMOVE);
+		}
+	}
+
+	#[test]
+	fn a_poll_counts_new_input_except_omps_own_and_keeps_the_newest_press() {
+		let at = Duration::from_secs(100);
+		let presses = Presses::new(Some(at), Some(10));
+		let mut looked = 10;
+		let own = Some(OwnSend { before: 20, after: 22, at });
+		presses.poll(&mut looked, 10, own, at, Duration::ZERO);
+		presses.poll(&mut looked, 21, own, at, Duration::ZERO);
+		assert_eq!(presses.count.load(Ordering::Acquire), 0, "unchanged, then OMP's own send");
+		assert_eq!(looked, 21);
+		presses.poll(&mut looked, 30, own, at + Duration::from_secs(2), Duration::from_secs(1));
+		assert_eq!(presses.count.load(Ordering::Acquire), 1);
+		assert_eq!(*presses.last.lock(), Some(at + Duration::from_secs(1)));
+		// An older sample read late never moves the last press back.
+		presses.record(at);
+		assert_eq!(*presses.last.lock(), Some(at + Duration::from_secs(1)));
+	}
+
+	#[test]
+	fn a_hosts_own_registration_is_left_in_place_and_the_watch_polls() {
+		let _real = REAL.lock();
+		let host_keyboard = [(KEYBOARD, 0, std::ptr::null_mut())];
+		{
+			let _host = Host::register();
+			assert_eq!(registered(), host_keyboard);
+			{
+				let call = UserActivity::start().unwrap();
+				assert!(call.0.presses.polled.is_some(), "a host's receiver is never replaced");
+				assert_eq!(registered(), host_keyboard);
+			}
+			assert_eq!(registered(), host_keyboard, "nothing of the host's is removed");
+		}
+		assert!(registered().is_empty());
+
+		// A host that registers while OMP listens keeps its receiver.
+		let call = UserActivity::start().unwrap();
+		assert!(call.0.presses.polled.is_none());
+		assert_eq!(registered().len(), 2);
+		let _host = Host::register();
+		drop(call);
+		assert_eq!(registered(), host_keyboard);
+	}
+
+	#[test]
+	fn real_registration_is_removed_after_last_drop_cancel_and_unwind() {
+		let _real = REAL.lock();
 		assert!(registered().is_empty());
 		let first = UserActivity::start().unwrap();
 		assert_eq!(registered().len(), 2);

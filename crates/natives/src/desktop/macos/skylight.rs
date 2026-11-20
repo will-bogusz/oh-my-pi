@@ -2619,6 +2619,7 @@ fn report_focus_return(
 		previous_pid: previous.and_then(pid),
 		front_pid: front_pid().and_then(pid),
 		keyboard,
+		last_input_polled: None,
 	});
 }
 
