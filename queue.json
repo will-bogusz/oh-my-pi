@@ -106973,6 +106973,28 @@
      "tree": "667e496ce999348e2d2c1a714eccc53c55bfe2cb"
     }
    ]
+  },
+  {
+   "id": "win-wpf-set-background",
+   "branch": "will/win-wpf-set-background",
+   "title": "fix(natives): set WPF text boxes, sliders and combo boxes behind other windows",
+   "area": "computer",
+   "priority": null,
+   "needs": [
+    "win-wpf-press",
+    "win-uia-set-patterns",
+    "desktop-dispatch-fence"
+   ],
+   "base": "3a1f7af9f2d9b5a0d24f96e00e94d0748472ce71",
+   "body": "bodies/win-wpf-set-background.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-wpf-set-background",
+   "host": "MacBook-Pro",
+   "added": "2026-11-20T21:08:35Z",
+   "updated": "2026-11-20T21:08:35Z",
+   "note": ""
   }
  ],
  "watch": {
