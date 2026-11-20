@@ -1,10 +1,10 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20 21:12Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20 21:16Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-11-20 21:12Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 1, conflict-held 17, stacked 20, held 12, parked 1, open PRs 28; merged 404, closed 44
+**Counts:** openable now 1, conflict-held 17, stacked 19, held 13, parked 1, open PRs 28; merged 404, closed 44
 
 ## Openable now (1)
 
@@ -34,7 +34,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20
 | macos-web-type-background | fix(natives): type into a background macOS web page field without a takeover | computer | P2 | 6d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19504](https://github.com/can1357/oh-my-pi/pull/19504), [#19702](https://github.com/can1357/oh-my-pi/pull/19702), [#19871](https://github.com/can1357/oh-my-pi/pull/19871), [#19531](https://github.com/can1357/oh-my-pi/pull/19531), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-web-type-background) |
 | deadline-ranking | feat(ai): rank an account priority by quota deadline | ai/auth | P2 | 2d | [#19623](https://github.com/can1357/oh-my-pi/pull/19623), [#19700](https://github.com/can1357/oh-my-pi/pull/19700), [#19701](https://github.com/can1357/oh-my-pi/pull/19701) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/deadline-ranking) |
 
-## Stacked (20)
+## Stacked (19)
 
 | id | title | area | priority | age | needs | branch |
 |---|---|---|---|---|---|---|
@@ -55,11 +55,10 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20
 | win-popup-foreground | fix(natives): press items of the open WPF context menu of the window in front | computer |  | 16h | win-button-click ([#19889](https://github.com/can1357/oh-my-pi/pull/19889)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-popup-foreground) |
 | win-takeover-settle | fix(natives): stop Windows takeovers of a busy app bringing it forward after the call failed | computer |  | 7h | win-takeover-intervene | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-takeover-settle) |
 | win-button-click-fence | fix(natives): mark dispatch before a fenced BM_CLICK | computer |  | 4h | win-button-click ([#19889](https://github.com/can1357/oh-my-pi/pull/19889)), desktop-dispatch-fence ([#19871](https://github.com/can1357/oh-my-pi/pull/19871)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-button-click-fence) |
-| win-wpf-press | fix(natives): press WPF controls behind other windows through their default action | computer |  | 1h | win-button-click ([#19889](https://github.com/can1357/oh-my-pi/pull/19889)), desktop-dispatch-fence ([#19871](https://github.com/can1357/oh-my-pi/pull/19871)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-wpf-press) |
+| win-wpf-press | fix(natives): press WPF controls behind other windows through their default action | computer |  | 2h | win-button-click ([#19889](https://github.com/can1357/oh-my-pi/pull/19889)), desktop-dispatch-fence ([#19871](https://github.com/can1357/oh-my-pi/pull/19871)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-wpf-press) |
 | win-takeover-selection | fix(natives): keep the user's caret through a Windows takeover's hand-back | computer |  | 1h | win-takeover-settle | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-takeover-selection) |
-| win-wpf-set-background | fix(natives): set WPF text boxes, sliders and combo boxes behind other windows | computer |  | 0h | win-wpf-press, win-uia-set-patterns, desktop-dispatch-fence ([#19871](https://github.com/can1357/oh-my-pi/pull/19871)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-wpf-set-background) |
 
-## Held (12)
+## Held (13)
 
 | id | title | area | priority | age | hold | branch |
 |---|---|---|---|---|---|---|
@@ -75,6 +74,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20
 | win-uia-set-patterns | fix(natives): set WPF sliders and combo boxes through RangeValue and SelectionItem | computer |  | 14h | Main, 2026-11-20: in its fix round (WinWpfRoutes5, review needs-changes at 86d258734d9); takes the recorded ax.rs form with win-wpf-scroll when it follows | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-uia-set-patterns) |
 | win-takeover-intervene | fix(natives): stop Windows takeovers when the user types or clicks | computer |  | 8h | Main, 2026-11-20: takeover-run hold lifted (final n20 0/20, WinTakeover3); waits for a macOS build host (shared desktop code: control/error/mod/types.rs, macos/skylight.rs), then final-head review, trees, precheck, pre-open line | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-takeover-intervene) |
 | hyprland-window-list | fix(natives): list Hyprland window positions for native Wayland apps | computer |  | 2h | LinuxUpstream2, 2026-11-20: delta review ReviewHyprList (gpt-6.2-sol) on 50e036edcd6 needs-changes, 3 must-fixes in new code (positional j/clients rows accepted; Hyprland::detect connects at backend startup and caches a failed probe; accept-queue test hits the FD limit); parked for Main/Will | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/hyprland-window-list) |
+| win-wpf-set-background | fix(natives): set WPF text boxes, sliders and combo boxes behind other windows | computer |  | 0h | Main, 2026-11-20: held; re-cut on the new semantic-only win-wpf-press (WinWpfRoutes10); current head 022154dbeab is not to be reviewed, run or opened | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-wpf-set-background) |
 
 ## Parked (1)
 
