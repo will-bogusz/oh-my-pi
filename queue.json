@@ -105271,7 +105271,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-wpf-scroll",
    "host": "MacBook-Pro",
    "added": "2026-11-20T04:27:43Z",
-   "updated": "2026-11-20T15:53:11Z",
+   "updated": "2026-11-20T16:03:45Z",
    "note": "QueueFortyOne.ScrollDeltaReview must-fix (split COM init/activation cutoffs in scroll) declined by Main, 2026-11-20: main's shared automation() path, used unchanged; nit fold of control.rs time_left/reply_deadline skipped by Main (don't touch #19814's merged fn)",
    "rebases_after": [
     19814
@@ -105307,6 +105307,28 @@
        "- On macOS and for Windows WPF scrolling, `AxUnconfirmed` means an accessibility action may already have taken effect."
       ]
      }
+    }
+   ],
+   "built": [
+    {
+     "with": "#19702",
+     "code": "1699992a48debd8ce62db366fe6e238467f84864",
+     "with_code": "e608cd824a8447d2fca6ebe64e6b79079f530099",
+     "tip": "e260d86b5bced96ef2cf3efd9dfbcc4476c4e298",
+     "with_tip": "0c073f5ac413a6101207133b610d1f03abd06668",
+     "at": "2026-11-20T16:03:45Z",
+     "host": "goliath",
+     "tree": "32822a6b97e2419f88e460a4fb4877b2610574f9"
+    },
+    {
+     "with": "#19531",
+     "code": "1699992a48debd8ce62db366fe6e238467f84864",
+     "with_code": "d6ffe761e6cb2055157979cb3d54b5c3ba1571d5",
+     "tip": "e260d86b5bced96ef2cf3efd9dfbcc4476c4e298",
+     "with_tip": "d089703a9887a24936e27adf88c44ee6d54de0ef",
+     "at": "2026-11-20T16:03:45Z",
+     "host": "goliath",
+     "tree": "32822a6b97e2419f88e460a4fb4877b2610574f9"
     }
    ]
   },
