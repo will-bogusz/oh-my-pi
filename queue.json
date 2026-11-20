@@ -104479,7 +104479,71 @@
    "added": "2026-11-18T00:47:39Z",
    "updated": "2026-11-20T17:49:03Z",
    "note": "LaneSnapcompactStack, 2026-11-20: restacked on origin/main alone (Main's plan: opens without #19620). Folds in #19591 (ryanskidmore): explicit snapcompact.shape > model snapcompactShape > catalog KDL > 8on22-bw, mirroring resolveImageCountBudget. Dropped the unused snapcompact-middle-variant axis so denseCompanion(high, api) stays as on main and #19620's archiveInShape call composes in either order; pair tree built (typecheck clean; snapcompact 123, compaction suites 440 pass + 2 main-failing). Census vs main: 7,757 built models 0 diffs, 0 with configured snapcompactShape. Review: ReviewKdlRework needs-changes at 7f06a7b (CHANGELOG dup, fixed), ReviewKdlFinal ready at a0078fe.",
-   "kind": "proposal"
+   "kind": "proposal",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-20T17:49:25Z",
+     "reason": "LaneSnapcompactStack, 2026-11-20: dropped lines are the unused snapcompact-middle-variant axis (DEFAULT_MIDDLE_VARIANT, axis, policy field, docs) and resolveShape's old doc text, replaced for the #19591 precedence; Main asked for denseCompanion to stay as on main",
+     "old": "495a582070a024db23680d35a7562f935b9829cc",
+     "new": "a0078fecb1842eceed362b538e6a9d0b698ca2c2",
+     "dropped": {
+      "docs/compaction.md": [
+       "- The discarded history is serialized, whitespace-collapsed, and printed onto model-aware PNG frames (frame width fixed per shape; frame height hugs the rows actually printed) using bundled public-domain pixel fonts. The shape \u2014 and frame size \u2014 come from the reading model's catalog `snapcompact-variant` and `snapcompact-frame-size` rules (`packages/catalog/src/compat/rules/classes/*.kdl`), keyed by its lineage: Claude reads X.org `8x13` glyphs on an 11px advance (extra letter-spacing, black ink \u2014 `11on16-bw`; high-res lines \u2014 Opus 4.7+, Fable, Mythos \u2014 get 1932px frames under Anthropic's 4,784 visual-token cap, older lines stay at 1568px), Gemini reads `8x13` glyphs on a 22px pitch (extra leading, black ink \u2014 `8on22-bw` at 2048px, since Gemini bills a fixed per-image budget at any pixel size), GPT/Codex and Kimi read the same `8on22-bw` shape at 1568px (GPT's patch billing is area-proportional, so larger frames cannot improve chars per token; Kimi's processor downscales past 1792px), and GLM reads `8x13` glyphs on a 16px pitch (`8on16-bw` at 1568px). A Claude routed through Vertex or OpenRouter keeps its Claude shape. Auto selection is also font-aware (`resolveShapeForText`): when the model-default font cannot safely render the transcript, or wide CJK glyphs dominate it and the `silver16-bw` grid can render it safely, auto switches to `silver16-bw`; forced variants are never overridden. Readers no lineage rule covers fall back by wire API (Anthropic Messages and Bedrock \u2192 `11on16-bw`, every other wire \u2192 `8on22-bw`), and the denser middle of a long archive uses `snapcompact-middle-variant` (unassigned: `8on16-bw`); the per-frame token estimate follows the reading model's lineage, from its catalog `image-tokenization` rule (a Claude behind Vertex or OpenRouter is priced as Claude, and Opus/Sonnet/Haiku before 4.7 under the standard 1,568-token tier), falling back to the catalog rule for the wire API carrying the request when the lineage has none, computed for the resolved frame size. OpenAI-compatible wires also get the `detail: \"original\"` hint. The `snapcompact.shape` setting (default `auto`) forces one of the research-eval variants instead: square grids (`8x8r`/`8x8u`/`6x6u`/`5x8` \u00d7 sentence-hue/black ink) or the per-model eval winners (`6x12-dim`, `8x13-bw`, `8on16-bw`, `8on22-bw`, `11on16-bw`, `silver16-bw` \u2014 the embedded Silver TrueType font on a 16px grid for CJK and other non-Latin text \u2014 and the two-column word-wrapped `doc-8on16-bw`/`-sent`/`-sent-dim`, where `dim` prints stopwords in gray). A forced variant keeps its geometry but is re-priced for the reading model's image billing. A host that downscales images before the model reads them (catalog `image-max-edge`; Cursor fits Claude and GPT images into 1024\u00d71024) gets frames no wider than that edge, forced variants included. The same setting governs inline system-prompt/tool-result imaging (`snapcompact.systemPrompt`, `snapcompact.toolResults`)."
+      ],
+      "packages/catalog/src/compat/axes.ts": [
+       " * Snapcompact frame variants a reader's rules may pick (`snapcompact-variant`,",
+       " * `snapcompact-middle-variant`): the research names of the layouts",
+       " * `@oh-my-pi/snapcompact` renders (its `SHAPE_VARIANTS` keys).",
+       "\t * Denser variant for the middle of a long archive (same frame size, so the",
+       "\t * same per-frame bill, more chars per frame). Unassigned: `8on16-bw`.",
+       "\t\"snapcompact-middle-variant\": {",
+       "\t\tkey: \"snapcompactMiddleVariant\","
+      ],
+      "packages/catalog/src/compat/image-tokenization.ts": [
+       "\t/** `snapcompact-middle-variant`: the denser layout of a long archive's middle. */",
+       "\tmiddleVariant?: SnapcompactVariant;",
+       "\tconst {",
+       "\t\tsnapcompactVariant: variant,",
+       "\t\tsnapcompactFrameSize: frameSize,",
+       "\t\tsnapcompactMiddleVariant: middleVariant,",
+       "\t} = resolveImageAxes(target);",
+       "\t\t...(isSnapcompactVariant(middleVariant) && { middleVariant }),"
+      ],
+      "packages/catalog/src/compat/rules/README.md": [
+       "`snapcompact-variant`, `snapcompact-frame-size` and `snapcompact-middle-variant` set the frames a reader's snapcompact archive is drawn in: the layout of its edge frames (one of the `SHAPE_VARIANTS` names in `@oh-my-pi/snapcompact`), their edge in pixels when the reader reads larger frames than the variant's own at no extra cost, and the denser layout of a long archive's middle. Snapcompact reads them through `resolveSnapcompactShape`. Lineage rules live in `classes/*.kdl`; [`providers/snapcompact-shape.kdl`](providers/snapcompact-shape.kdl) holds the Anthropic-wire fallback and the residue for rows the taxonomy leaves unclassified. Unassigned: `8on22-bw` edges at their own 1568px and an `8on16-bw` middle; frames never exceed `image-max-edge`."
+      ],
+      "packages/catalog/src/compat/rules/providers/snapcompact-shape.kdl": [
+       "//",
+       "// No rule sets `snapcompact-middle-variant`, so every reader's foveated middle",
+       "// is the unassigned `8on16-bw`: same pixels as the edges (identical per-frame",
+       "// bill) but a tighter 8px cell, ~40% more chars per frame. Re-measured 2026-11",
+       "// (300 paired questions per reader): no measurable loss on Opus 5.5 / Fable",
+       "// 5.2 at 1932px (\u0394F1 -.008/-.010), but -.03 to -.10 F1 on Haiku 5.5, GPT-6.1",
+       "// Sol, Grok 4.7 and Gemini 4 Carbon; it only renders once an archive outgrows",
+       "// its frame budget."
+      ],
+      "packages/snapcompact/src/snapcompact.ts": [
+       "/** Foveated-middle variant for readers no `snapcompact-middle-variant` rule covers. */",
+       "const DEFAULT_MIDDLE_VARIANT = \"8on16-bw\" satisfies ShapeVariantName;",
+       " * `\"auto\"`) forces that geometry; otherwise the reader's catalog",
+       " * `snapcompact-variant` and `snapcompact-frame-size` rules select its",
+       " * lineage's eval-winning shape and frame size, so a Claude behind Vertex or",
+       " * OpenRouter still reads Claude's. Either way the frame is no wider than the",
+       " * host's catalog `image-max-edge`. Billing (token estimate, detail hint) is",
+       " * computed for the resolved frame size from the model's catalog image rule.",
+       " * Accepts a full pi-ai `Model` or any `{ api, id }` subset.",
+       "\tconst policy = model ? resolveSnapcompactShape(model) : undefined;",
+       "/** Denser companion of `high` for the foveated archive middle: the reader's",
+       " *  `snapcompact-middle-variant` at the same frame size (identical per-frame",
+       " *  bill) with a tighter cell. Returns `high` unchanged for doc layouts,",
+       " *  TrueType Unicode shapes, or when no denser variant exists (foveation off). */",
+       "function denseCompanion(high: Shape, reader: ShapeTarget | undefined): Shape {",
+       "\t\t...SHAPE_VARIANTS[(reader && resolveSnapcompactShape(reader).middleVariant) ?? DEFAULT_MIDDLE_VARIANT],",
+       "\t\tconst low = denseCompanion(high, options?.model);"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "snapcompact-shape-reader-identity",
