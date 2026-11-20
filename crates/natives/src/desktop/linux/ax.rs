@@ -68,6 +68,17 @@ pub(crate) trait NativeWindows: Send + Sync {
 	/// The current geometry of native window `id`; `None` once it is gone or
 	/// off screen (unmapped, minimized).
 	fn geometry(&self, id: &str) -> Option<NativeGeometry>;
+	/// Whether toolkits here answer screen coordinates with window ones
+	/// (native Wayland clients, which cannot learn where they are), so every
+	/// frame whose screen and window origins agree is placed by its window.
+	fn screen_is_window_relative(&self) -> bool {
+		false
+	}
+	/// The native window showing an AT-SPI frame of process `pid` titled
+	/// `title`.
+	fn window_for_frame(&self, pid: u32, title: &str) -> CoreResult<String> {
+		native_window_for_frame(&self.windows()?, pid, title)
+	}
 }
 
 /// What a tree walk learns about frames, kept from one `window_root` to the
@@ -987,7 +998,8 @@ impl FrameCache {
 		if width < 0 || height < 0 {
 			return None;
 		}
-		if (x, y) == (0, 0)
+		let relative = native.is_some_and(|native| native.screen_is_window_relative());
+		if ((x, y) == (0, 0) || relative)
 			&& let Some(native) = native
 			&& let Some(frame) = self.frame(connection, object).await
 			&& let Some(placement) = self.placement(connection, native, &frame).await
@@ -1017,7 +1029,7 @@ impl FrameCache {
 		y: i32,
 	) -> CoreResult<Option<Option<Placement>>> {
 		if let Some(native) = native
-			&& self.unplaced(connection, frame).await
+			&& self.unplaced(connection, native, frame).await
 		{
 			let placement = self.placement(connection, native, frame).await;
 			return Ok(placement
@@ -1041,7 +1053,7 @@ impl FrameCache {
 		native: &dyn NativeWindows,
 		frame: &ObjectRefOwned,
 	) -> Option<Placement> {
-		if !self.unplaced(connection, frame).await {
+		if !self.unplaced(connection, native, frame).await {
 			return None;
 		}
 		let (.., width, height) = AtSpiAx::component(connection, frame)
@@ -1056,22 +1068,32 @@ impl FrameCache {
 
 	/// Whether `frame`'s toolkit answers screen coordinates with window ones.
 	/// GTK4 puts its frames at screen `0,0` and answers `Contains` true even
-	/// for a point above and left of them.
-	async fn unplaced(&mut self, connection: &zbus::Connection, frame: &ObjectRefOwned) -> bool {
+	/// for a point above and left of them. Where `native` says every toolkit
+	/// does (native Wayland clients), it is any frame whose screen and window
+	/// origins agree; an `XWayland` client reports its real screen position.
+	async fn unplaced(
+		&mut self,
+		connection: &zbus::Connection,
+		native: &dyn NativeWindows,
+		frame: &ObjectRefOwned,
+	) -> bool {
 		if let Some(&unplaced) = self.unplaced.get(frame) {
 			return unplaced;
 		}
 		let Ok(component) = AtSpiAx::component(connection, frame).await else {
 			return false;
 		};
-		let unplaced = component
-			.get_extents(CoordType::Screen)
-			.await
-			.is_ok_and(|(x, y, ..)| (x, y) == (0, 0))
-			&& component
-				.contains(-1, -1, CoordType::Screen)
-				.await
-				.unwrap_or(false);
+		let screen = component.get_extents(CoordType::Screen).await;
+		let unplaced = if native.screen_is_window_relative() {
+			let window = component.get_extents(CoordType::Window).await;
+			matches!((screen, window), (Ok((sx, sy, ..)), Ok((wx, wy, ..))) if (sx, sy) == (wx, wy))
+		} else {
+			screen.is_ok_and(|(x, y, ..)| (x, y) == (0, 0))
+				&& component
+					.contains(-1, -1, CoordType::Screen)
+					.await
+					.unwrap_or(false)
+		};
 		self.unplaced.insert(frame.clone(), unplaced);
 		unplaced
 	}
@@ -1176,7 +1198,7 @@ async fn native_window(
 		.get_connection_unix_process_id(frame.name()?.clone().into())
 		.await
 		.ok()?;
-	native_window_for_frame(&native.windows().ok()?, pid, &title).ok()
+	native.window_for_frame(pid, &title).ok()
 }
 
 fn atspi_window_id(frame: &ObjectRefOwned) -> String {
@@ -1666,6 +1688,20 @@ impl AxBackend for AtSpiAx {
 		let failed = |err: String| DesktopError::ax_failed(format!("AT-SPI window root: {err}"));
 		self
 			.run(async {
+				// A window only Hyprland lists is found here by its title; that
+				// title must name it alone among its process's windows, or the
+				// frame found may be a sibling's.
+				if let Some(native) = self.native.as_deref()
+					&& native.screen_is_window_relative()
+					&& !win.id.starts_with("atspi:")
+					&& win.pid.is_none_or(|pid| {
+						native.window_for_frame(pid, &win.title).ok().as_deref() != Some(win.id.as_str())
+					}) {
+					return Err(failed(format!(
+						"window '{}' is not the only window of its process with that title",
+						win.title
+					)));
+				}
 				let app = self.app_for_window(win).await?;
 				let frames = Self::frames(&self.connection, &app, self.reply_timeout).await?;
 				let mut matches = Vec::new();
@@ -3949,6 +3985,74 @@ mod tests {
 			Some(Some(shown)),
 		]);
 		assert_eq!(found, [Some("/downloads".to_owned()), Some("/open".to_owned())]);
+	}
+
+	/// A display server whose native clients cannot learn their position
+	/// (Hyprland), so every toolkit answers screen coordinates with window ones.
+	struct WindowRelative(Native);
+
+	impl NativeWindows for WindowRelative {
+		fn windows(&self) -> CoreResult<Vec<DesktopWindow>> {
+			self.0.windows()
+		}
+
+		fn geometry(&self, id: &str) -> Option<NativeGeometry> {
+			self.0.geometry(id)
+		}
+
+		fn screen_is_window_relative(&self) -> bool {
+			true
+		}
+	}
+
+	#[test]
+	fn native_wayland_elements_are_placed_by_their_window_where_no_toolkit_knows_its_place() {
+		let rt = Builder::new_current_thread().enable_all().build().unwrap();
+		let bounds = rt.block_on(async {
+			// A GTK 3 window on Wayland: screen and window extents agree and
+			// `Contains` is honest. An `XWayland` frame reports where it is.
+			let (server, client) = serve(vec![
+				("/app", node(Role::Application, "app", "/null"), None),
+				(
+					"/frame",
+					node(Role::Frame, "Desktop", "/app"),
+					Some(Extents::placed((0, 0, 890, 550), (0, 0, 890, 550))),
+				),
+				(
+					"/ok",
+					node(Role::Button, "OK", "/frame"),
+					Some(Extents::placed((15, 3, 67, 46), (15, 3, 67, 46))),
+				),
+				(
+					"/x11",
+					node(Role::Frame, "Editor", "/app"),
+					Some(Extents::placed((640, 120, 890, 550), (0, 0, 890, 550))),
+				),
+			])
+			.await;
+			let windows = [("42", "Desktop", 300, 200), ("43", "Editor", 640, 120)];
+			let x11 = Native::new(&windows);
+			let wayland = WindowRelative(Native::new(&windows));
+			let mut bounds = Vec::new();
+			for native in [&x11 as &dyn NativeWindows, &wayland] {
+				let mut cache = FrameCache::default();
+				for path in ["/frame", "/ok", "/x11"] {
+					bounds.push(read_bounds(&mut cache, &client, Some(native), path).await);
+				}
+			}
+			drop(server);
+			bounds
+		});
+		assert_eq!(bounds, [
+			// Read as screen positions (X11's rule): the window-relative
+			// answers stay where the toolkit put them.
+			Some((0.0, 0.0, 890.0, 550.0)),
+			Some((15.0, 3.0, 67.0, 46.0)),
+			Some((640.0, 120.0, 890.0, 550.0)),
+			Some((300.0, 200.0, 890.0, 550.0)),
+			Some((315.0, 203.0, 67.0, 46.0)),
+			Some((640.0, 120.0, 890.0, 550.0)),
+		]);
 	}
 
 	mod unanswered {

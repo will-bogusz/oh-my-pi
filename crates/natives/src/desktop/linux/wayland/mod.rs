@@ -1,4 +1,5 @@
 mod capture;
+mod hyprland;
 mod libei;
 mod pipewire;
 mod portal;
@@ -157,6 +158,9 @@ pub struct WaylandBackend {
 	/// Bus names of the applications that did not answer the last window
 	/// listing, whose windows it therefore left out.
 	unanswered:        Vec<String>,
+	/// Hyprland's IPC when the compositor is Hyprland: real window positions
+	/// and focus, which its native Wayland clients cannot report themselves.
+	hyprland:          Option<hyprland::Hyprland>,
 }
 
 /// Reads the compositor's PID from the peer credentials of its Wayland socket.
@@ -167,7 +171,11 @@ fn compositor_pid() -> Option<u32> {
 	} else {
 		PathBuf::from(std::env::var_os("XDG_RUNTIME_DIR")?).join(display)
 	};
-	let socket = UnixStream::connect(path).ok()?;
+	peer_pid(&UnixStream::connect(path).ok()?)
+}
+
+/// The PID of the process at the other end of a connected Unix socket.
+fn peer_pid(socket: &UnixStream) -> Option<u32> {
 	let mut credentials = libc::ucred { pid: 0, uid: 0, gid: 0 };
 	let mut length = size_of::<libc::ucred>() as libc::socklen_t;
 	// SAFETY: `credentials` and `length` are live, correctly sized out-params
@@ -189,8 +197,13 @@ impl WaylandBackend {
 		// Remove the world-readable RemoteDesktop restore token that pre-#7884
 		// builds wrote during read-only calls; nothing reads it anymore (#7884).
 		portal::remove_orphaned_remote_desktop_token();
+		let compositor_pid = compositor_pid();
+		let hyprland = hyprland::Hyprland::detect(compositor_pid);
 		let (ax, ax_error) = match AtSpiAx::new() {
-			Ok(ax) => (Some(ax), None),
+			Ok(ax) => match &hyprland {
+				Some(hyprland) => (Some(ax.with_native_windows(Box::new(hyprland.clone()))), None),
+				None => (Some(ax), None),
+			},
 			Err(err) => (None, Some(err)),
 		};
 		Self {
@@ -201,8 +214,9 @@ impl WaylandBackend {
 			input: None,
 			input_unavailable: OnceCell::new(),
 			displays: Vec::new(),
-			compositor_pid: compositor_pid(),
+			compositor_pid,
 			unanswered: Vec::new(),
+			hyprland,
 		}
 	}
 
@@ -263,6 +277,86 @@ impl WaylandBackend {
 		self.unanswered = listed.unanswered;
 		Ok(listed.windows)
 	}
+
+	/// The windows `windows()` and window captures see: placed where
+	/// Hyprland's clients are on Hyprland, and otherwise (or while its IPC
+	/// does not answer) as AT-SPI lists them. `true` when Hyprland placed them.
+	fn listed_windows(&mut self) -> CoreResult<(Vec<AtSpiWindow>, bool)> {
+		let windows = self.atspi_windows()?;
+		match self.hyprland.as_ref().map(hyprland::Hyprland::list) {
+			Some(Ok(clients)) => Ok((placed_by_hyprland(windows, clients), true)),
+			_ => Ok((windows, false)),
+		}
+	}
+
+	/// The listed window `id` names.
+	fn listed_window(&mut self, target: &Target, id: &str) -> CoreResult<AtSpiWindow> {
+		let (windows, _) = self.listed_windows()?;
+		windows
+			.into_iter()
+			.find(|entry| entry.window.id == id)
+			.ok_or_else(|| {
+				self.missing_window(target).unwrap_or_else(|| {
+					DesktopError::window_not_found(format!("Wayland window {id} not found"))
+				})
+			})
+	}
+}
+
+/// AT-SPI `windows` placed where Hyprland's `clients` are: a frame takes the
+/// geometry and focus of its process's client ([`hyprland::client_for_frame`])
+/// (GTK4 keeps a frame's last drawn size while its workspace is hidden), and
+/// its position counts as known while a monitor shows it. A client several
+/// frames match goes to the one with its title, or else to none. Clients no
+/// frame matched (apps without AT-SPI, such as terminals) are listed as well.
+fn placed_by_hyprland(
+	mut windows: Vec<AtSpiWindow>,
+	clients: Vec<hyprland::HyprlandWindow>,
+) -> Vec<AtSpiWindow> {
+	let matched: Vec<Option<usize>> = windows
+		.iter()
+		.map(|entry| {
+			let all = clients.iter().map(|client| &client.window);
+			let window = hyprland::client_for_frame(all, entry.window.pid, &entry.window.title)?;
+			clients
+				.iter()
+				.position(|client| client.window.id == window.id)
+		})
+		.collect();
+	// Hyprland's focus replaces AT-SPI's; an unplaced frame has none.
+	for entry in &mut windows {
+		entry.window.focused = false;
+	}
+	let mut claimed = vec![false; clients.len()];
+	for (index, client) in clients.iter().enumerate() {
+		let mut frames: Vec<usize> = (0..windows.len())
+			.filter(|&frame| matched[frame] == Some(index))
+			.collect();
+		claimed[index] = !frames.is_empty();
+		if frames.len() > 1 {
+			frames.retain(|&frame| windows[frame].window.title == client.window.title);
+		}
+		if let [frame] = frames[..] {
+			let entry = &mut windows[frame];
+			entry.window.x = client.window.x;
+			entry.window.y = client.window.y;
+			entry.window.width = client.window.width;
+			entry.window.height = client.window.height;
+			entry.window.focused = client.window.focused;
+			entry.position_known = client.visible;
+		}
+	}
+	windows.extend(
+		clients
+			.into_iter()
+			.zip(claimed)
+			.filter(|(_, claimed)| !claimed)
+			.map(|(client, _)| AtSpiWindow {
+				window:         client.window,
+				position_known: client.visible,
+			}),
+	);
+	windows
 }
 
 impl Backend for WaylandBackend {
@@ -338,8 +432,9 @@ impl Backend for WaylandBackend {
 	}
 
 	fn windows(&mut self) -> CoreResult<Vec<DesktopWindow>> {
-		let mut windows = self.atspi_windows()?;
-		if let Some(ax) = self.ax.as_ref() {
+		let (mut windows, placed) = self.listed_windows()?;
+		// Hyprland's client list already says which window has focus.
+		if !placed && let Some(ax) = self.ax.as_ref() {
 			resolve_focus(&mut windows, self.compositor_pid, !self.unanswered.is_empty(), |window| {
 				ax.holds_focus(window)
 			});
@@ -389,6 +484,13 @@ impl Backend for WaylandBackend {
 		_caps: &CaptureCaps,
 		selector: Option<&DisplaySelector>,
 	) -> CoreResult<(RgbaImage, FrameGeometry)> {
+		// Hyprland places a window by where it is when listed, so the listing
+		// on each side of the frame must agree: a window that moved, resized
+		// or changed workspace in between would be cut from the wrong pixels.
+		let before = match target {
+			Target::Window(id) if self.hyprland.is_some() => Some(self.listed_window(target, id)?),
+			_ => None,
+		};
 		let (image, geometry) = capture::capture(self.pipewire)?;
 		self.displays = vec![geometry.display()];
 		let explicit = target.display_selector();
@@ -401,15 +503,17 @@ impl Backend for WaylandBackend {
 				Ok((image, FrameGeometry::for_displays(&selected)))
 			},
 			Target::Window(id) => {
-				let entry = self
-					.atspi_windows()?
-					.into_iter()
-					.find(|entry| &entry.window.id == id)
-					.ok_or_else(|| {
-						self.missing_window(target).unwrap_or_else(|| {
-							DesktopError::window_not_found(format!("Wayland window {id} not found"))
-						})
-					})?;
+				let entry = self.listed_window(target, id)?;
+				if before.is_some_and(|before| {
+					(before.window.x, before.window.y, before.window.width, before.window.height)
+						!= (entry.window.x, entry.window.y, entry.window.width, entry.window.height)
+						|| before.position_known != entry.position_known
+				}) {
+					return Err(DesktopError::capture_failed(format!(
+						"Wayland window {id} moved, resized or changed workspace while the screen was \
+						 captured; take the screenshot again"
+					)));
+				}
 				let ((x, y, width, height), frame) = geometry.window_crop(&entry)?;
 				let cropped = image::imageops::crop_imm(&image, x, y, width, height).to_image();
 				Ok((cropped, frame))
@@ -569,6 +673,7 @@ mod tests {
 			displays:          Vec::new(),
 			compositor_pid:    None,
 			unanswered:        Vec::new(),
+			hyprland:          None,
 		}
 	}
 	/// Holds `LIBEI_ENV_LOCK` with `LIBEI_SOCKET` set to a test's value (removed
@@ -892,6 +997,77 @@ mod tests {
 			},
 			position_known,
 		}
+	}
+
+	#[test]
+	fn hyprland_places_frames_where_their_clients_are_and_lists_clients_without_frames() {
+		let frame = |id: &str, pid, title: &str| AtSpiWindow {
+			window:         DesktopWindow {
+				id: id.into(),
+				pid: Some(pid),
+				title: title.into(),
+				focused: true,
+				..portal_window(0, 0, 600, 400, false).window
+			},
+			position_known: false,
+		};
+		let client =
+			|address: &str, pid, title: &str, x, focused, visible| hyprland::HyprlandWindow {
+				window: DesktopWindow {
+					id: format!("hyprland:{address}"),
+					pid: Some(pid),
+					title: title.into(),
+					focused,
+					..portal_window(x, 38, 621, 750, false).window
+				},
+				visible,
+			};
+		let placed = placed_by_hyprland(
+			vec![
+				frame("atspi:a", 10, "Editor"),
+				frame("atspi:b", 20, "Notes"),
+				frame("atspi:c", 30, "Gone"),
+				// Two windows of one process: the second frame's title changed.
+				frame("atspi:d", 50, "Compose"),
+				frame("atspi:e", 50, "Draft"),
+				// One window and a hidden dialog frame of another process.
+				frame("atspi:f", 60, "Find"),
+				frame("atspi:g", 60, "Viewer"),
+			],
+			vec![
+				// The title changed since AT-SPI read it; one client per process.
+				client("0x1", 10, "Editor — draft", 647, false, true),
+				// On a workspace no monitor shows.
+				client("0x2", 20, "Notes", 12, false, false),
+				// A terminal: no AT-SPI frame.
+				client("0x3", 40, "foot", 12, true, true),
+				client("0x4", 50, "Inbox", 12, false, true),
+				client("0x5", 50, "Compose", 647, false, true),
+				client("0x6", 60, "Viewer", 647, false, true),
+			],
+		);
+		let listed: Vec<_> = placed
+			.iter()
+			.map(|e| {
+				(e.window.id.as_str(), e.window.x, e.window.width, e.window.focused, e.position_known)
+			})
+			.collect();
+		assert_eq!(listed, [
+			("atspi:a", 647, 621, false, true),
+			("atspi:b", 12, 621, false, false),
+			("atspi:c", 0, 600, false, false),
+			("atspi:d", 647, 621, false, true),
+			// Never the other client of its process by elimination.
+			("atspi:e", 0, 600, false, false),
+			("atspi:f", 0, 600, false, false),
+			("atspi:g", 647, 621, false, true),
+			("hyprland:0x3", 12, 621, true, true),
+			("hyprland:0x4", 12, 621, false, true),
+		]);
+		// A placed window's screenshot is cut from where Hyprland shows it.
+		let geometry = PortalGeometry::new(Some((0, 0)), Some((1280, 800)), 1280, 800);
+		assert_eq!(geometry.window_crop(&placed[0]).unwrap().0, (647, 38, 621, 750));
+		assert!(geometry.window_crop(&placed[1]).is_err());
 	}
 
 	#[test]
