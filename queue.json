@@ -106019,6 +106019,27 @@
    "advanced": "2026-11-20T16:49:10Z",
    "opened": "2026-11-20T16:50:26Z",
    "readied": "2026-11-20T16:50:49Z"
+  },
+  {
+   "id": "win-button-click-fence",
+   "branch": "will/win-button-click-fence",
+   "title": "fix(natives): mark dispatch before a fenced BM_CLICK",
+   "area": "computer",
+   "priority": null,
+   "needs": [
+    "win-button-click",
+    "desktop-dispatch-fence"
+   ],
+   "base": "122293e0ac6c42afc6719a98b8503430eb2a884b",
+   "body": "bodies/win-button-click-fence.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-button-click-fence",
+   "host": "MacBook-Pro",
+   "added": "2026-11-20T17:01:38Z",
+   "updated": "2026-11-20T17:01:38Z",
+   "note": ""
   }
  ],
  "watch": {
