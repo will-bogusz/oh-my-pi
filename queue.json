@@ -105318,7 +105318,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-20T05:55:31Z",
+  "checked": "2026-11-20T06:56:59Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -115298,7 +115298,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-20T06:26:25.637329Z",
+  "at": "2026-11-20T06:57:00.025647Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -116588,6 +116588,27 @@
     ],
     "needs": [],
     "created": "2026-11-20T04:47:55Z"
+   },
+   {
+    "id": "win-uia-set-patterns",
+    "label": "win-uia-set-patterns",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": null,
+    "title": "fix(natives): set WPF sliders and combo boxes through RangeValue and SelectionItem",
+    "action": "wait",
+    "reasons": [
+     "conflicts with #19814 in crates/natives/src/desktop/win32/ax.rs"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "#19814"
+    ],
+    "needs": [],
+    "created": "2026-11-20T06:29:20Z"
    },
    {
     "id": "win-wpf-scroll",
