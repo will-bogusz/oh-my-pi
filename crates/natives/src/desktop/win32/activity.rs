@@ -506,11 +506,13 @@ impl Unregister for Listener {
 		// posted message, signaling cannot fail because the queue is full.
 		if unsafe { SetEvent(self.stop.0 as HANDLE) } == 0 {
 			return Err(DesktopError::input_failed(
-				"Windows input listener teardown failed: SetEvent failed; no further takeover can start",
+				"Windows input listener teardown failed: SetEvent failed; no further takeover can start \
+				 until OMP restarts",
 			));
 		}
 		thread.join().map_err(|_| DesktopError::input_failed(
-			"Windows input listener teardown failed: listener thread panicked; no further takeover can start",
+			"Windows input listener teardown failed: listener thread panicked; no further takeover can \
+			 start until OMP restarts",
 		))?
 	}
 }
@@ -626,7 +628,8 @@ fn listen() -> CoreResult<(Arc<Presses>, Listener)> {
 			LISTENING.set(None);
 			if removed == 0 || destroyed == 0 {
 				return Err(DesktopError::input_failed(format!(
-					"Windows input listener teardown failed: RIDEV_REMOVE={}, DestroyWindow={}; no further takeover can start",
+					"Windows input listener teardown failed: RIDEV_REMOVE={}, DestroyWindow={}; no further \
+					 takeover can start until OMP restarts",
 					removed != 0, destroyed != 0,
 				)));
 			}
