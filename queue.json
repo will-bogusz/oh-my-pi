@@ -118301,5 +118301,11 @@
     "wake": ""
    }
   ]
+ },
+ "opening": {
+  "id": "win-wpf-scroll",
+  "token": "4a409a744b414192b9d958817817a0b8",
+  "host": "MacBook-Pro",
+  "at": "2026-11-20T16:05:56Z"
  }
 }
