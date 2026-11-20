@@ -105690,7 +105690,7 @@
    "area": "computer",
    "priority": null,
    "needs": [],
-   "base": "640d6e49cff452a4cb101a0643219736df1a2b23",
+   "base": "2be72551c1987fa2c21753a15950f2367d8bfea9",
    "body": "bodies/win-uia-set-patterns.md",
    "state": "queued",
    "pr": null,
@@ -105698,9 +105698,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-uia-set-patterns",
    "host": "MacBook-Pro",
    "added": "2026-11-20T06:29:20Z",
-   "updated": "2026-11-20T16:00:54Z",
+   "updated": "2026-11-20T16:01:33Z",
    "note": "",
-   "advanced": "2026-11-20T12:56:28Z",
+   "advanced": "2026-11-20T16:01:33Z",
    "hold": "Main, 2026-11-20: in its fix round (WinWpfRoutes5, review needs-changes at 86d258734d9); takes the recorded ax.rs form with win-wpf-scroll when it follows",
    "line_loss_overrides": [
     {
