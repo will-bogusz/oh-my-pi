@@ -979,14 +979,22 @@ mod foreground {
 				let mut requested = false;
 				let mut attempted = false;
 				let mut prior_fence = None;
+				let arrived = std::cell::Cell::new(false);
 				let brought = bring_forward(
 					|| {
 						let activation = window::activate(target)?;
 						attempted = activation != window::Activation::AlreadyFront;
 						requested = activation == window::Activation::Requested;
+						arrived.set(activation == window::Activation::AlreadyFront);
 						Ok(activation == window::Activation::AlreadyFront)
 					},
-					|| window::wait_for_foreground(target, Duration::from_millis(10)),
+					|| {
+						let front = window::wait_for_foreground(target, Duration::from_millis(10))?;
+						if front {
+							arrived.set(true);
+						}
+						Ok(front)
+					},
 					activity::check,
 					|| hold(Duration::from_millis(20), control::wait),
 					|| {
@@ -1013,9 +1021,18 @@ mod foreground {
 						last_input,
 						requested,
 						prior_fence,
+						arrived.get(),
 					);
-					// Preserve intervention and any recovery failure together.
-					return activity::outcome(Err(recovered)).map(|()| guard);
+					// Keep c's reread guidance and polling disclosure intact.
+					let error = if error.code == ErrorCode::UserIntervened {
+						let mut error = error;
+						error.message.push_str("; ");
+						error.message.push_str(&recovered.message);
+						error
+					} else {
+						recovered
+					};
+					return activity::outcome(Err(error)).map(|()| guard);
 				}
 			}
 			Ok(guard)
@@ -1058,6 +1075,7 @@ mod foreground {
 			last_input: Option<u32>,
 			requested: bool,
 			prior_fence: Option<bool>,
+			was_in_front: bool,
 		) -> DesktopError {
 			enum Front {
 				User,
@@ -1091,10 +1109,10 @@ mod foreground {
 			let outcome = control::cleanup(|| -> CoreResult<Front> {
 				// Even when intervention forbids a hand-back, fence the target
 				// before returning so a pending activation has its turn.
-				let mut arrived = false;
+				let mut arrived = was_in_front;
 				let first = (|| -> CoreResult<()> {
 					let front = observe()?;
-					arrived = front == self.target;
+					arrived |= front == self.target;
 					if requested
 						&& !front.is_null()
 						&& front != self.previous
@@ -1102,6 +1120,7 @@ mod foreground {
 						&& activity::check().is_ok()
 						&& last_input.is_some()
 						&& last_input_tick() == last_input
+						&& remaining(ACTIVATION_TIMEOUT).as_millis() != 0
 					{
 						let _ = window::activate(self.previous)?;
 						let _ =
@@ -1153,6 +1172,7 @@ mod foreground {
 					|| activity::check().is_err()
 					|| last_input.is_none()
 					|| last_input_tick() != last_input
+					|| remaining(ACTIVATION_TIMEOUT).as_millis() == 0
 				{
 					return Ok(Front::Unconfirmed);
 				}
@@ -2542,7 +2562,11 @@ pub(super) fn raise_window(id: &str) -> CoreResult<()> {
 		return Ok(());
 	}
 	Err(DesktopError::input_failed(match activation {
-		window::Activation::AlreadyFront | window::Activation::Locked => {
+		window::Activation::AlreadyFront => format!(
+			"window {id} was already in front when observed but did not stay there; no activation was \
+			 requested"
+		),
+		window::Activation::Locked => {
 			format!("Windows refused to raise window {id} (foreground lock)")
 		},
 		window::Activation::Requested => format!(
