@@ -120018,5 +120018,11 @@
     "wake": ""
    }
   ]
+ },
+ "opening": {
+  "id": "devin-org-identity",
+  "token": "bbc64fd54ba9427fa35831cc2ce731ce",
+  "host": "MacBook-Pro",
+  "at": "2026-11-20T21:08:03Z"
  }
 }
