@@ -95,9 +95,11 @@ fn keyboard_layout(target: Option<HWND>) -> HKL {
 
 fn global_button(input: &mut Enigo, button: MouseButton, direction: Direction) -> CoreResult<()> {
 	control::check()?;
-	input
-		.button(button_to_enigo(button), direction)
-		.map_err(enigo_error)
+	let result = input.button(button_to_enigo(button), direction).map_err(enigo_error);
+	if result.is_ok() {
+		super::activity::sent();
+	}
+	result
 }
 
 fn with_global_keys(
@@ -190,12 +192,14 @@ fn global_pointer(input: &mut Enigo, event: PointerEvent) -> CoreResult<()> {
 				input
 					.scroll(horizontal, Axis::Horizontal)
 					.map_err(enigo_error)?;
+				super::activity::sent();
 			}
 			if vertical != 0 {
 				control::check()?;
 				input
 					.scroll(vertical, Axis::Vertical)
 					.map_err(enigo_error)?;
+				super::activity::sent();
 			}
 			Ok(())
 		},
@@ -1194,6 +1198,9 @@ mod foreground {
 		// Win32.
 		let sent =
 			unsafe { SendInput(events.len() as u32, events.as_ptr(), size_of::<INPUT>() as i32) };
+		if sent != 0 {
+			activity::sent();
+		}
 		if sent as usize == events.len() {
 			Ok(())
 		} else {
@@ -1205,7 +1212,9 @@ mod foreground {
 				let mut cleanup = Ok(());
 				for release in releases.iter().rev() {
 					// SAFETY: release is one initialized INPUT copied synchronously.
-					if unsafe { SendInput(1, release, size_of::<INPUT>() as i32) } != 1 {
+					if unsafe { SendInput(1, release, size_of::<INPUT>() as i32) } == 1 {
+						activity::sent();
+					} else {
 						cleanup =
 							Err(DesktopError::input_failed("SendInput could not release inserted input"));
 					}
@@ -1722,6 +1731,9 @@ mod foreground {
 		// SAFETY: `marker` is an initialized INPUT slice copied synchronously.
 		let sent =
 			unsafe { SendInput(marker.len() as u32, marker.as_ptr(), size_of::<INPUT>() as i32) };
+		if sent != 0 {
+			activity::sent();
+		}
 		let deadline = Instant::now() + DRAIN_TIMEOUT;
 		let unread = if sent as usize == marker.len() {
 			loop {

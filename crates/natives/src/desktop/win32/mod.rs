@@ -1,5 +1,5 @@
 #[cfg(target_os = "windows")]
-mod activity;
+pub(crate) mod activity;
 #[cfg(target_os = "windows")]
 mod ax;
 #[cfg(target_os = "windows")]
@@ -54,10 +54,6 @@ pub(crate) struct Win32Backend {
 	display:      DisplaySelector,
 	global_input: Enigo,
 	ax:           Win32Ax,
-	/// The user's presses, watched from the session's start so the first
-	/// takeover knows how long they have paused; a failure to watch refuses
-	/// takeovers, not the session.
-	user:         CoreResult<activity::UserActivity>,
 }
 
 #[cfg(target_os = "windows")]
@@ -68,7 +64,7 @@ impl Win32Backend {
 		// coordinate regime.
 		let global_input = input::create_global_input()?;
 		let _ = capture::displays()?;
-		Ok(Self { display, global_input, ax: Win32Ax::new(), user: activity::UserActivity::start() })
+		Ok(Self { display, global_input, ax: Win32Ax::new() })
 	}
 }
 
@@ -116,11 +112,10 @@ impl Backend for Win32Backend {
 	}
 
 	fn admit_takeover(&mut self) -> CoreResult<()> {
-		self.user.as_ref().map_err(Clone::clone)?.admit()
+		activity::admit()
 	}
 
 	fn takeover_admitted(&mut self) -> CoreResult<bool> {
-		self.user.as_ref().map_err(Clone::clone)?;
 		Ok(activity::admitted())
 	}
 
@@ -552,14 +547,12 @@ mod tests {
 		}
 	}
 
-	/// A backend whose user-activity listener runs, once the user has left
-	/// the keyboard and mouse alone for 5 s, as a session's worker waits
-	/// before a takeover: the key or click that started this test is the
-	/// user's.
-	fn admitted_backend() -> Win32Backend {
+	/// A call-scope watch and backend admitted after the user pauses.
+	fn admitted_backend() -> (activity::UserActivity, Win32Backend) {
+		let watch = activity::UserActivity::start().unwrap();
 		let mut backend = Win32Backend::new(DisplaySelector::Active).unwrap();
 		backend.admit_takeover().unwrap();
-		backend
+		(watch, backend)
 	}
 
 	#[test]
@@ -582,7 +575,7 @@ mod tests {
 			assert_eq!(frame as usize & 0xffff, 0x0409, "frame layout");
 			assert_eq!(child as usize & 0xffff, 0x0407, "child layout");
 		}
-		let _backend = admitted_backend();
+		let (_watch, _backend) = admitted_backend();
 		// SAFETY: the window belongs to the test host.
 		unsafe { SetForegroundWindow(windows.user) };
 		assert!(window::wait_for_foreground(windows.user, Duration::from_secs(2)).unwrap());
@@ -623,7 +616,7 @@ mod tests {
 	            terminal in a signed-in desktop session"]
 	fn element_takeover_hands_the_foreground_back_to_the_users_window() {
 		let windows = Windows::open();
-		let mut backend = admitted_backend();
+		let (_watch, mut backend) = admitted_backend();
 		let target = backend
 			.windows()
 			.unwrap()
@@ -690,7 +683,7 @@ mod tests {
 	/// user's window in front; returns the call's result and its unconfirmed
 	/// report.
 	fn type_into_busy_target(windows: &Windows, hang: Duration) -> (CoreResult<()>, Option<String>) {
-		let mut backend = admitted_backend();
+		let (_watch, mut backend) = admitted_backend();
 		let empty = wide("");
 		// SAFETY: WM_SETTEXT copies the NUL-terminated string before it
 		// returns; the handles are windows this test's host created.
@@ -733,7 +726,7 @@ mod tests {
 
 	fn type_with_return_moving_foreground(text: &str) -> Option<String> {
 		let windows = Windows::open();
-		let mut backend = admitted_backend();
+		let (_watch, mut backend) = admitted_backend();
 		let empty = wide("");
 		// SAFETY: these handles belong to the test host; WM_SETTEXT copies
 		// the string synchronously and RETURN_TO carries a window handle.

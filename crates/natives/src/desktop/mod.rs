@@ -1284,6 +1284,14 @@ impl Worker {
 		{
 			ax.settle(&handle)?;
 		}
+		// Admission can fail before a lease exists. This native call-scope
+		// guard also drops on those returns and on unwinding; no session
+		// retains a Windows input registration between takeover calls.
+		#[cfg(target_os = "windows")]
+		let _user_activity = request
+			.takes_over_a_window()
+			.then(win32::activity::UserActivity::start)
+			.transpose()?;
 		let lease = if !request.is_mutation() {
 			None
 		} else if request.takes_over_a_window() {
