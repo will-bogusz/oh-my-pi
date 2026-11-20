@@ -32,6 +32,11 @@ import {
 	registerComputerController,
 	resumeComputerUseForOwner,
 } from "@oh-my-pi/pi-coding-agent/tools/computer/supervisor";
+import {
+	DevToolsBridge,
+	DevToolsRoute,
+	type DevToolsWindow,
+} from "@oh-my-pi/pi-coding-agent/tools/computer/devtools-bridge";
 import { ComputerWorkerCore, type NativeDesktopSession } from "@oh-my-pi/pi-coding-agent/tools/computer/worker";
 import * as clipboard from "@oh-my-pi/pi-coding-agent/utils/clipboard";
 import { DesktopFocusGuardKind, DesktopKeyboardReturn, DesktopWindowFocus } from "@oh-my-pi/pi-natives";
@@ -1751,6 +1756,70 @@ describe("computer worker round trips", () => {
 		expect(result.payload.screenshots).toHaveLength(1);
 		expect(result.payload.screenshots[0]).toMatchObject({ width: 64, height: 32, target: "desktop" });
 		expect(result.payload.screenshots[0]?.path).toMatch(/omp-computer-.*\.png$/);
+	});
+
+	it("emits a DevTools-routed window screenshot through the worker without native screen covers", async () => {
+		const transport = new MemoryTransport();
+		const native = new FakeNativeSession();
+		const capture = vi.spyOn(native, "capture");
+		const png = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Wl6VSEAAAAASUVORK5CYII=";
+		const commands: string[] = [];
+		const endpoint = {
+			async send(_target: string, method: string) {
+				commands.push(method);
+				if (method === "Runtime.evaluate") return { result: { value: [0, 0, 1, 1] } };
+				if (method === "Page.captureScreenshot") return { data: png };
+				throw new Error(`Unexpected CDP command: ${method}`);
+			},
+		};
+		const page = { targetId: "cdp-page", title: "Editor", url: "https://example.com/" };
+		const window: DevToolsWindow = {
+			endpoint: endpoint as unknown as DevToolsWindow["endpoint"],
+			windowId: 7,
+			pages: [page],
+			front: page,
+			bounds: { left: 0, top: 0, width: 1, height: 1 },
+		};
+		const route = new DevToolsRoute("42", window, new Map(), undefined);
+		const routed = vi
+			.spyOn(DevToolsBridge.prototype, "route")
+			.mockImplementation(id => (id === "42" ? route : undefined));
+		new ComputerWorkerCore(transport, () => native);
+		let screenshotPath: string | undefined;
+		try {
+			const result = await runWorker(
+				transport,
+				"devtools-capture",
+				'await (await desktop.window("42")).screenshot()',
+			);
+			if (!result.ok) throw new Error(result.error.message);
+			screenshotPath = result.payload.screenshots[0]?.path;
+			expect(result.payload.screenshots).toHaveLength(1);
+			expect(result.payload.screenshots[0]).toMatchObject({
+				target: "42",
+				width: 1,
+				height: 1,
+				sourceWidth: 1,
+				sourceHeight: 1,
+				coordinateWidth: 1,
+				coordinateHeight: 1,
+			});
+			expect(result.payload.screenshots[0]).not.toHaveProperty("coveredBy");
+			expect(result.payload.displays).toContainEqual({
+				type: "image",
+				data: png,
+				mimeType: "image/png",
+				detail: "original",
+			});
+			expect(commands).toEqual(["Runtime.evaluate", "Page.captureScreenshot"]);
+			expect(capture).not.toHaveBeenCalled();
+		} finally {
+			routed.mockRestore();
+			capture.mockRestore();
+			transport.inbound({ type: "close" });
+			await transport.waitFor(message => message.type === "closed");
+			if (screenshotPath) await Bun.file(screenshotPath).delete();
+		}
 	});
 
 	it("reports source dimensions when a screenshot is scaled", async () => {

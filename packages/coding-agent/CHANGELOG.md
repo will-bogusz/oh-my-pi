@@ -16,6 +16,7 @@
 
 ### Fixed
 
+- DevTools-routed window screenshots supply empty native screen-cover metadata instead of failing during screenshot emission.
 - DevTools renews Hyprland focus guards before each press and during long input sequences, preventing a timed-out handle from authorizing later presses.
 - Computer window lookup avoids unnecessary native capability probes when DevTools routing is limited to apps it launched.
 - `read` suggests the line-range syntax for `file:1:2` when `file` exists, directly or by unique suffix, but `file:1` does not ([#19821](https://github.com/can1357/oh-my-pi/pull/19821) by [@baekjosh](https://github.com/baekjosh)).
