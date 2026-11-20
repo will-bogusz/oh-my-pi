@@ -105730,13 +105730,13 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-20T14:03:27Z",
+  "checked": "2026-11-20T14:33:32Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "win-takeover-intervene": {
-    "since": "2026-11-20T14:03:27Z",
-    "title": "fix(natives): stop Windows takeovers when the user types or clicks"
+   "win-wpf-scroll": {
+    "since": "2026-11-20T14:33:32Z",
+    "title": "fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing"
    },
    "factory-droid-1100-pin": {
     "since": "2026-11-17T00:39:57Z",
@@ -107571,6 +107571,19 @@
     "id": "win-wpf-scroll",
     "title": "fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing",
     "why": "plan: wait (conflicts with win-takeover-intervene in crates/natives/src/desktop/win32/mod.rs)"
+   },
+   {
+    "at": "2026-11-20T14:33:32Z",
+    "kind": "openable",
+    "id": "win-wpf-scroll",
+    "title": "fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing"
+   },
+   {
+    "at": "2026-11-20T14:33:32Z",
+    "kind": "unopenable",
+    "id": "win-takeover-intervene",
+    "title": "fix(natives): stop Windows takeovers when the user types or clicks",
+    "why": "plan: held (held: Main, 2026-11-20: final-head review needs-changes at 6073806a3fc (fix round WinTakeover3); win-wpf-scroll opens first (ready first))"
    }
   ]
  },
@@ -116476,8 +116489,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-20T14:07:58.577603Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-20T14:33:33.382888Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -117673,8 +117686,10 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with main in (branch missing on the fork)"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -117755,8 +117770,10 @@
     "area": "computer",
     "priority": null,
     "title": "fix(natives): stop Windows takeovers when the user types or clicks",
-    "action": "open",
-    "reasons": [],
+    "action": "held",
+    "reasons": [
+     "held: Main, 2026-11-20: final-head review needs-changes at 6073806a3fc (fix round WinTakeover3); win-wpf-scroll opens first (ready first)"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -117775,15 +117792,12 @@
     "action": "wait",
     "reasons": [
      "needs win-takeover-intervene (queued)",
-     "conflicts with win-takeover-intervene in crates/natives/src/desktop/win32/input.rs, crates/natives/src/desktop/win32/mod.rs",
      "conflicts with main in crates/natives/src/desktop/win32/input.rs, crates/natives/src/desktop/win32/mod.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "win-takeover-intervene"
-    ],
+    "blocked_by": [],
     "needs": [
      "win-takeover-intervene"
     ],
@@ -117816,16 +117830,12 @@
     "area": "computer",
     "priority": null,
     "title": "fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing",
-    "action": "wait",
-    "reasons": [
-     "conflicts with win-takeover-intervene in crates/natives/src/desktop/win32/mod.rs"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "win-takeover-intervene"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-20T04:27:43Z"
    },
