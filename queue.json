@@ -117363,6 +117363,11 @@
     "sha": "369ec59b8bfd5dab6b4feee46fd69bf1b2214741",
     "at": "2026-11-20T18:23:11Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "369ec59b8bfd5dab6b4feee46fd69bf1b2214741",
+    "at": "2026-11-20T18:24:34Z",
+    "host": "goliath"
    }
   },
   "68ec467ca6e3ad04e6d2bc23cde90a787d6ae431": {
