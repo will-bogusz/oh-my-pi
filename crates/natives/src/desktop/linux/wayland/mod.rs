@@ -1,4 +1,5 @@
 mod capture;
+mod hyprland;
 mod libei;
 mod pipewire;
 mod portal;
@@ -157,6 +158,9 @@ pub struct WaylandBackend {
 	/// Bus names of the applications that did not answer the last window
 	/// listing, whose windows it therefore left out.
 	unanswered:        Vec<String>,
+	/// Hyprland's IPC when the compositor is Hyprland: the window positions
+	/// its native Wayland clients cannot report themselves.
+	hyprland:          Option<hyprland::Hyprland>,
 }
 
 /// Reads the compositor's PID from the peer credentials of its Wayland socket.
@@ -167,7 +171,11 @@ fn compositor_pid() -> Option<u32> {
 	} else {
 		PathBuf::from(std::env::var_os("XDG_RUNTIME_DIR")?).join(display)
 	};
-	let socket = UnixStream::connect(path).ok()?;
+	peer_pid(&UnixStream::connect(path).ok()?)
+}
+
+/// The PID of the process at the other end of a connected Unix socket.
+fn peer_pid(socket: &UnixStream) -> Option<u32> {
 	let mut credentials = libc::ucred { pid: 0, uid: 0, gid: 0 };
 	let mut length = size_of::<libc::ucred>() as libc::socklen_t;
 	// SAFETY: `credentials` and `length` are live, correctly sized out-params
@@ -189,6 +197,7 @@ impl WaylandBackend {
 		// Remove the world-readable RemoteDesktop restore token that pre-#7884
 		// builds wrote during read-only calls; nothing reads it anymore (#7884).
 		portal::remove_orphaned_remote_desktop_token();
+		let compositor_pid = compositor_pid();
 		let (ax, ax_error) = match AtSpiAx::new() {
 			Ok(ax) => (Some(ax), None),
 			Err(err) => (None, Some(err)),
@@ -201,8 +210,9 @@ impl WaylandBackend {
 			input: None,
 			input_unavailable: OnceCell::new(),
 			displays: Vec::new(),
-			compositor_pid: compositor_pid(),
+			compositor_pid,
 			unanswered: Vec::new(),
+			hyprland: hyprland::Hyprland::detect(compositor_pid),
 		}
 	}
 
@@ -263,6 +273,31 @@ impl WaylandBackend {
 		self.unanswered = listed.unanswered;
 		Ok(listed.windows)
 	}
+}
+
+/// The listed windows: a window whose toolkit gives no screen position takes
+/// the place and size of the one Hyprland client of its process and title
+/// ([`hyprland::client_for`]), and every other field stays AT-SPI's. Without
+/// `clients` the list is AT-SPI's as is.
+fn listed(
+	windows: Vec<AtSpiWindow>,
+	clients: Option<&[hyprland::HyprlandClient]>,
+) -> Vec<DesktopWindow> {
+	windows
+		.into_iter()
+		.map(|AtSpiWindow { mut window, position_known }| {
+			if !position_known
+				&& let Some(client) =
+					clients.and_then(|clients| hyprland::client_for(clients, window.pid, &window.title))
+			{
+				window.x = client.x;
+				window.y = client.y;
+				window.width = client.width;
+				window.height = client.height;
+			}
+			window
+		})
+		.collect()
 }
 
 impl Backend for WaylandBackend {
@@ -344,7 +379,14 @@ impl Backend for WaylandBackend {
 				ax.holds_focus(window)
 			});
 		}
-		Ok(windows.into_iter().map(|entry| entry.window).collect())
+		// Hyprland is asked only for a window its toolkit cannot place; when it
+		// does not answer, the list is AT-SPI's as on any Wayland desktop.
+		let clients = windows
+			.iter()
+			.any(|entry| !entry.position_known)
+			.then(|| self.hyprland.as_ref()?.clients().ok())
+			.flatten();
+		Ok(listed(windows, clients.as_deref()))
 	}
 
 	fn missing_window(&self, target: &Target) -> Option<DesktopError> {
@@ -569,6 +611,7 @@ mod tests {
 			displays:          Vec::new(),
 			compositor_pid:    None,
 			unanswered:        Vec::new(),
+			hyprland:          None,
 		}
 	}
 	/// Holds `LIBEI_ENV_LOCK` with `LIBEI_SOCKET` set to a test's value (removed
@@ -892,6 +935,63 @@ mod tests {
 			},
 			position_known,
 		}
+	}
+
+	#[test]
+	fn hyprland_places_only_windows_without_a_position_and_only_by_their_own_client() {
+		let window = |id: &str, pid, title: &str, position_known| AtSpiWindow {
+			window: DesktopWindow {
+				id: id.into(),
+				pid: Some(pid),
+				title: title.into(),
+				focused: id == "atspi:a",
+				..portal_window(0, 0, 600, 400, position_known).window
+			},
+			position_known,
+		};
+		let client = |pid, title: &str| hyprland::HyprlandClient {
+			pid,
+			title: title.into(),
+			x: 647,
+			y: 38,
+			width: 621,
+			height: 750,
+		};
+		let windows = || {
+			vec![
+				window("atspi:a", 10, "Editor", false),
+				// A toolkit that knows its position keeps it.
+				window("atspi:b", 20, "Xterm", true),
+				// The title changed since AT-SPI read it.
+				window("atspi:c", 30, "Draft", false),
+				// Two clients of one process with this title: neither.
+				window("atspi:d", 40, "Same", false),
+				window("atspi:e", 50, "Gone", false),
+			]
+		};
+		let clients = [
+			client(10, "Editor"),
+			client(20, "Xterm"),
+			client(30, "Inbox"),
+			client(40, "Same"),
+			client(40, "Same"),
+		];
+		let placed: Vec<_> = listed(windows(), Some(&clients))
+			.into_iter()
+			.map(|window| {
+				(window.id, (window.x, window.y, window.width, window.height), window.focused)
+			})
+			.collect();
+		assert_eq!(placed, [
+			("atspi:a".to_owned(), (647, 38, 621, 750), true),
+			("atspi:b".to_owned(), (0, 0, 600, 400), false),
+			("atspi:c".to_owned(), (0, 0, 600, 400), false),
+			("atspi:d".to_owned(), (0, 0, 600, 400), false),
+			("atspi:e".to_owned(), (0, 0, 600, 400), false),
+		]);
+		// Without an answer from Hyprland, AT-SPI's list field for field.
+		let unplaced: Vec<_> = windows().into_iter().map(|entry| entry.window).collect();
+		assert_eq!(format!("{:?}", listed(windows(), None)), format!("{unplaced:?}"));
 	}
 
 	#[test]
