@@ -17,6 +17,7 @@
 
 ### Fixed
 
+- Fixed Windows `computer` takeovers starting while you type or click and typing on into the target after you do: a takeover now waits until you have paused for 5 s, and stops with `UserIntervened` when you press a key or button during it, handing your window back
 - Fixed the native addon failing to load when HOME, PI_NATIVES_DIR or the install directory contains `?` ([#19763](https://github.com/can1357/oh-my-pi/pull/19763) by [@sjawhar](https://github.com/sjawhar))
 - `commitCreate()` now reports a HEAD that moves after the expected-HEAD check, such as from a `commit-msg` hook, as a `HeadMoved` error instead of a generic `Backend` failure ([#19393](https://github.com/can1357/oh-my-pi/pull/19393) by [@eggpeat](https://github.com/eggpeat))
 - Fixed macOS window reads losing a window once it is minimized: an AX snapshot or query of that exact window ID still reads its tree, marks the root `(minimized)`, and keeps its refs inspection-only until a visible read of the restored window completes; menu reads and commands report `WindowUnavailable` instead of restoring it or using a sibling's menu ([#19825](https://github.com/can1357/oh-my-pi/pull/19825) by [@baekjosh](https://github.com/baekjosh))

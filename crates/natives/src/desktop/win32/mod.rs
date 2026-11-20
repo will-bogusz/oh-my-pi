@@ -1,4 +1,6 @@
 #[cfg(target_os = "windows")]
+mod activity;
+#[cfg(target_os = "windows")]
 mod ax;
 #[cfg(target_os = "windows")]
 mod capture;
@@ -52,6 +54,10 @@ pub(crate) struct Win32Backend {
 	display:      DisplaySelector,
 	global_input: Enigo,
 	ax:           Win32Ax,
+	/// The user's presses, watched from the session's start so the first
+	/// takeover knows how long they have paused; a failure to watch refuses
+	/// takeovers, not the session.
+	user:         CoreResult<activity::UserActivity>,
 }
 
 #[cfg(target_os = "windows")]
@@ -62,7 +68,7 @@ impl Win32Backend {
 		// coordinate regime.
 		let global_input = input::create_global_input()?;
 		let _ = capture::displays()?;
-		Ok(Self { display, global_input, ax: Win32Ax::new() })
+		Ok(Self { display, global_input, ax: Win32Ax::new(), user: activity::UserActivity::start() })
 	}
 }
 
@@ -107,6 +113,14 @@ impl Backend for Win32Backend {
 
 	fn window_covered(&mut self, id: &str) -> bool {
 		capture::window_covered(id)
+	}
+
+	fn admit_takeover(&mut self) -> CoreResult<()> {
+		self.user.as_ref().map_err(Clone::clone)?.admit()
+	}
+
+	fn takeover_admitted(&mut self) -> CoreResult<bool> {
+		Ok(self.user.as_ref().map_err(Clone::clone)?.admitted())
 	}
 
 	fn displays(&mut self) -> CoreResult<Vec<DesktopDisplay>> {

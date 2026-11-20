@@ -41,14 +41,14 @@ pub(crate) use macos::{
 pub(crate) const DEADLINE_MARGIN: Duration = Duration::from_millis(250);
 
 /// How long the user leaves the keyboard and pointer alone before a takeover
-/// brings its target in front of them (X11 and macOS), and leaves an app alone
-/// before a read of it shows what they left there (macOS).
-#[cfg(any(target_os = "linux", target_os = "macos"))]
+/// brings its target in front of them (X11, macOS and Windows), and leaves an
+/// app alone before a read of it shows what they left there (macOS).
+#[cfg(any(target_os = "linux", target_os = "macos", windows))]
 pub(crate) const USER_QUIET: Duration = Duration::from_secs(5);
 
 /// The refusal of a takeover whose user was still active shortly before the
 /// run's deadline, their last press `idle` ago.
-#[cfg(any(target_os = "linux", target_os = "macos"))]
+#[cfg(any(target_os = "linux", target_os = "macos", windows))]
 pub(crate) fn still_active_refusal(idle: Duration) -> DesktopError {
 	DesktopError::user_intervened(format!(
 		"the user is still typing, clicking or holding input (last activity {:.1} s ago), so no \
@@ -298,7 +298,7 @@ pub(crate) fn is_cleaning_up() -> bool {
 	CLEANUP.get()
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(any(target_os = "linux", windows))]
 pub(crate) fn current_token() -> Option<OperationToken> {
 	if CLEANUP.get() {
 		None

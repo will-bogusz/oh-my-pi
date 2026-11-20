@@ -902,6 +902,7 @@ mod foreground {
 	use crate::desktop::{
 		types::DesktopFocusReturn,
 		win32::{
+			activity,
 			delivery::{TextUnit, text_units},
 			window,
 		},
@@ -933,11 +934,16 @@ mod foreground {
 		target:   HWND,
 		settle:   Duration,
 		armed:    bool,
+		/// Watches the user's presses until the guard is gone ([`activity::check`]).
+		_user:    activity::Takeover,
 	}
 
 	impl ForegroundGuard {
 		fn activate(id: &str, settle: Duration) -> CoreResult<Self> {
 			control::check()?;
+			// Fails when the user pressed something since the takeover was
+			// admitted: nothing has come forward yet.
+			let user = activity::start()?;
 			let target = background::hwnd(id)?;
 			background::ensure_integrity(id, target)?;
 			// SAFETY: GetForegroundWindow has no preconditions.
@@ -947,7 +953,7 @@ mod foreground {
 					"cannot save the current foreground window; no input was sent",
 				));
 			}
-			let mut guard = Self { previous, target, settle, armed: true };
+			let mut guard = Self { previous, target, settle, armed: true, _user: user };
 			if previous != target {
 				let activation = (|| {
 					let _ = window::activate(target)?;
@@ -971,7 +977,10 @@ mod foreground {
 				.and_then(|()| operation(self.target));
 			// Preserve the target's consumption window after any delivery, even
 			// a partial one; a cancel during it leaves sent input reported sent.
-			control::settle(self.settle);
+			// The user's own key or click ends it at once, so their next keys go
+			// to their window, and fails the call even when every packet was out.
+			settle(self.settle);
+			let result = result.and_then(|()| activity::check());
 			let restored = self.restore();
 			self.report(restored.is_ok());
 			super::completed(result, restored)
@@ -1088,8 +1097,10 @@ mod foreground {
 	}
 
 	/// Check before activation-capable callbacks as well as input delivery:
-	/// element `SetFocus` must not undo a user switch during activation settle.
+	/// element `SetFocus` must not undo a user switch during activation settle,
+	/// and nothing more goes once the user has pressed a key or button.
 	fn ensure_foreground(target: HWND) -> CoreResult<()> {
+		activity::check()?;
 		// SAFETY: GetForegroundWindow has no preconditions.
 		if unsafe { GetForegroundWindow() } != target {
 			return Err(DesktopError::input_failed(
@@ -1097,6 +1108,19 @@ mod foreground {
 			));
 		}
 		Ok(())
+	}
+
+	/// Keeps the target in front for `duration` after its input, ending as
+	/// soon as the user presses a key or button.
+	fn settle(duration: Duration) {
+		let end = Instant::now() + duration;
+		while activity::check().is_ok() {
+			let left = end.saturating_duration_since(Instant::now());
+			if left.is_zero() {
+				return;
+			}
+			control::settle(left.min(Duration::from_millis(5)));
+		}
 	}
 
 	fn send(events: &[INPUT]) -> CoreResult<()> {
@@ -1632,6 +1656,11 @@ mod foreground {
 				if !in_front() {
 					break left();
 				}
+				// The user's key or click fails the call ([`ForegroundGuard::run`]);
+				// their next keys must not wait here for the target.
+				if activity::check().is_err() {
+					break None;
+				}
 				if control::check().is_err() {
 					break Some(format!(
 						"the call was cancelled before {name} had read all the typed text"
@@ -1698,7 +1727,13 @@ mod foreground {
 			let target = unsafe { GetDesktopWindow() };
 			assert_ne!(previous, target);
 			let called = Cell::new(false);
-			let guard = ForegroundGuard { previous, target, settle: Duration::ZERO, armed: true };
+			let guard = ForegroundGuard {
+				previous,
+				target,
+				settle: Duration::ZERO,
+				armed: true,
+				_user: activity::Takeover::default(),
+			};
 			let result = guard.run(|_| {
 				called.set(true);
 				Ok(())

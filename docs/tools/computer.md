@@ -224,7 +224,7 @@ On Windows, a screenshot or zoom of a window drawn by Chromium (Chrome, Edge, El
 
 Native errors are surfaced as `ToolError` text prefixed by the stable code name:
 
-- `PermissionDenied`, `CaptureFailed`, `InputFailed`, `BackgroundUnavailable`, `InputBusy`, `Cancelled`, `UserIntervened` (macOS or X11)
+- `PermissionDenied`, `CaptureFailed`, `InputFailed`, `BackgroundUnavailable`, `InputBusy`, `Cancelled`, `UserIntervened` (macOS, Windows or X11)
 - `WindowNotFound`, `InvalidTarget`, `InvalidKey`, `InvalidCoordinateFrame`
 - `StaleRef`, `AxUnsupported`, `AxFailed`, `AxUnconfirmed`, `Timeout`, `Closed`, `Internal`
 - `Unsupported`, `SpaceUnsupported`, `SpaceMoveDenied`
@@ -240,6 +240,8 @@ If a run or helper fails after producing text or screenshots, Eval shows that pa
 On X11, `UserIntervened` means a window or element takeover could not observe 5 s without a key or button press before its admission deadline, or the user pressed a key or button during the takeover, including its focus hand-back. A new listener must observe the first quiet interval too. Core XTEST presses from remote users count after subtracting this session's own presses. OMP's MPX devices do not count. Both activity observation and physical emergency Escape require XI2.2 so grabs do not hide raw events. Startup or runtime observation failure refuses or stops takeover rather than sending unwatched input; inspection remains available.
 
 X11 takeover also requires every core key and pointer button to be released, including holds begun before the listener started. It reads the server's current device state before admission and rechecks after acquiring the input lease, so a quiet but still-held modifier or drag cannot admit takeover.
+
+On Windows, `UserIntervened` means a window or element takeover, explicit or the fallback rerun alike, could not observe 5 s without a key, mouse button or wheel press, or with a mouse button or modifier still held, before its admission deadline; or the user pressed one during the takeover, including its settle and the wait for the target to read typed text. Keys sent before it may have landed, nothing more is sent, and the foreground goes back to the user's window if the target still has it. A Raw Input listener started with the session counts presses from input devices; anything sent with `SendInput`, OMP's own included, has no device and never counts, and pointer moves do not count. It keeps only a count and the time of the last press, never which key or button. Unlike a low-level hook it is not in the input path. Presses before the session started come from the session's last-input time. If the listener cannot start, takeovers are refused and inspection remains available.
 
 On activation failure, X11 takeover restores the captured core focus even if the window manager's active-window property has not caught up; it always asks the window manager to restore the user's window, and does not overwrite a newer core-focus switch away from the target. A press or Escape after the activation request was sent waits up to 800 ms for the window manager to act on it, then hands the user's window back. It does not warp the pointer back after the user presses or while a button is held.
 
