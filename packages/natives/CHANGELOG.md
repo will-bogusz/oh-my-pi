@@ -20,6 +20,7 @@
 
 ### Fixed
 
+- Fixed Windows menu-less AX `press()` and `perform()` on native buttons clicking after an unsent reply timeout, and reporting `Timeout` instead of `AxUnconfirmed` after dispatch began.
 - The `sed` shell builtin accepts grouped scripts such as `1{h;d};2{G}` without a semicolon before the closing brace.
 - Fixed the native addon failing to load when HOME, PI_NATIVES_DIR or the install directory contains `?` ([#19763](https://github.com/can1357/oh-my-pi/pull/19763) by [@sjawhar](https://github.com/sjawhar))
 - `commitCreate()` now reports a HEAD that moves after the expected-HEAD check, such as from a `commit-msg` hook, as a `HeadMoved` error instead of a generic `Backend` failure ([#19393](https://github.com/can1357/oh-my-pi/pull/19393) by [@eggpeat](https://github.com/eggpeat))

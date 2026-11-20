@@ -809,7 +809,14 @@ pub(super) fn click_button(hwnd: HWND, top: HWND) -> CoreResult<()> {
 	// A click that may have landed is reported as `InputFailed` with wording
 	// that says so, not `AxUnconfirmed`: naming its target would query the same
 	// possibly blocked app again.
-	match send(BM_CLICK) {
+	let click_wait = operation_wait_ms();
+	let clicked = if click_wait == 0 {
+		Err(Unanswered::Undelivered)
+	} else {
+		control::dispatching()?;
+		send_message_within(hwnd, BM_CLICK, 0, 0, false, click_wait)
+	};
+	match clicked {
 		Ok(_) => {},
 		Err(Unanswered::NoAnswer) => {
 			return Err(DesktopError::input_failed(format!(
@@ -1116,6 +1123,8 @@ pub(super) mod tests {
 		static DESTROY_ON_CLICK: Cell<bool> = const { Cell::new(false) };
 		static CLICK_MESSAGES: Cell<usize> = const { Cell::new(0) };
 		static PRESSED_AT: Cell<Option<(i32, i32)>> = const { Cell::new(None) };
+		static REPLY_END: std::cell::RefCell<Option<(u32, control::DispatchFence)>> = const { std::cell::RefCell::new(None) };
+		static REPLY_SENT: Cell<Option<bool>> = const { Cell::new(None) };
 	}
 
 	unsafe extern "system" fn counting_parent(
@@ -1140,6 +1149,12 @@ pub(super) mod tests {
 		wparam: WPARAM,
 		lparam: LPARAM,
 	) -> LRESULT {
+		REPLY_END.with_borrow_mut(|pending| {
+			if pending.as_ref().is_some_and(|(at, _)| *at == message) {
+				let (_, fence) = pending.take().unwrap();
+				REPLY_SENT.with(|sent| sent.set(Some(fence.abandon_reply())));
+			}
+		});
 		if message == BM_GETCHECK {
 			if DISABLE_ON_CHECK.with(|disable| disable.replace(false)) {
 				// SAFETY: this fixture owns the button and its parent.
@@ -1339,6 +1354,34 @@ pub(super) mod tests {
 			let error = click_button(refuses, parent).unwrap_err();
 			assert!(matches!(error.code, ErrorCode::InputFailed), "{error:?}");
 			assert_eq!(check(refuses), BST_UNCHECKED as isize);
+
+			// End the reply wait on either side of BM_CLICK's dispatch point.
+			// An idle fence suppresses the click; a sent fence cannot promise
+			// that the app will not act after the caller stops waiting.
+			for (at, sent) in [(BM_GETCHECK, false), (BM_CLICK, true)] {
+				let source = control::CancellationSource::default();
+				let mut token = source.token();
+				token.fence_dispatch();
+				REPLY_END.with_borrow_mut(|pending| {
+					*pending = Some((at, token.dispatch_fence().unwrap()));
+				});
+				REPLY_SENT.with(|reply| reply.set(None));
+				CLICK_MESSAGES.with(|clicks| clicks.set(0));
+				let result = {
+					let _scope = token.enter();
+					click_button(refuses, parent)
+				};
+				assert_eq!(REPLY_SENT.with(Cell::get), Some(sent));
+				assert_eq!(click_messages(), usize::from(sent));
+				assert_eq!(
+					result.unwrap_err().code,
+					if sent {
+						ErrorCode::InputFailed
+					} else {
+						ErrorCode::Timeout
+					},
+				);
+			}
 
 			// The pre-read can synchronously disable the form. Recheck before
 			// delivery, not only when classifying the original target.
