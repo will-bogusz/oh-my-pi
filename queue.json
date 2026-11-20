@@ -118393,7 +118393,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-20T21:12:05.728182Z",
+  "at": "2026-11-20T21:42:34.882698Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -119027,6 +119027,27 @@
     ],
     "needs": [],
     "created": "2026-10-19T07:26:45Z"
+   },
+   {
+    "id": "devin-gemini-image-price-rest",
+    "label": "devin-gemini-image-price-rest",
+    "number": null,
+    "state": "queued",
+    "area": "catalog",
+    "priority": "P2",
+    "title": "fix(catalog): budget Devin's other measured Gemini models at the 1,089 tokens it bills per image",
+    "action": "wait",
+    "reasons": [
+     "needs #19883 (open)"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [
+     "devin-neon-image-price"
+    ],
+    "created": "2026-11-20T21:22:43Z"
    },
    {
     "id": "macos-ax-cancel-before-send",
@@ -119882,15 +119903,14 @@
     "title": "fix(natives): stop Windows takeovers when the user types or clicks",
     "action": "held",
     "reasons": [
-     "held: Main, 2026-11-20: takeover-run hold lifted (final n20 0/20, WinTakeover3); waits for a macOS build host (shared desktop code: control/error/mod/types.rs, macos/skylight.rs), then final-head review, trees, precheck, pre-open line",
-     "conflicts with #19870 in crates/natives/src/desktop/win32/mod.rs"
+     "held: Main, 2026-11-20: takeover-run hold lifted (final n20 0/20, WinTakeover3); waits for a macOS build host (shared desktop code: control/error/mod/types.rs, macos/skylight.rs), then final-head review, trees, precheck, pre-open line"
     ],
-    "note": "",
+    "note": "accepted pair with #19870: Main, 2026-11-20: win32/mod.rs tests-module import list only; combined = union of both WindowsAndMessaging imports",
     "over": [],
-    "paired": [],
-    "blocked_by": [
+    "paired": [
      "#19870"
     ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-20T12:25:26Z"
    },
@@ -120003,8 +120023,9 @@
     "area": "computer",
     "priority": null,
     "title": "fix(natives): set WPF text boxes, sliders and combo boxes behind other windows",
-    "action": "wait",
+    "action": "held",
     "reasons": [
+     "held: Main, 2026-11-20: held; re-cut on the new semantic-only win-wpf-press (WinWpfRoutes10); current head 022154dbeab is not to be reviewed, run or opened",
      "needs win-wpf-press (queued), win-uia-set-patterns (queued), #19871 (open)",
      "conflicts with #19195 in docs/tools/computer.md",
      "conflicts with #19870 in crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md",

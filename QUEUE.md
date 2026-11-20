@@ -1,10 +1,10 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20 21:41Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20 21:43Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-11-20 21:12Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 1, conflict-held 17, stacked 19, held 13, parked 1, open PRs 28, queued since the last plan 1; merged 404, closed 44
+**Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-11-20 21:42Z on goliath; groups below are from it, states from the manifest)
+**Counts:** openable now 1, conflict-held 17, stacked 20, held 13, parked 1, open PRs 28; merged 404, closed 44
 
 ## Openable now (1)
 
@@ -34,7 +34,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20
 | macos-web-type-background | fix(natives): type into a background macOS web page field without a takeover | computer | P2 | 6d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19504](https://github.com/can1357/oh-my-pi/pull/19504), [#19702](https://github.com/can1357/oh-my-pi/pull/19702), [#19871](https://github.com/can1357/oh-my-pi/pull/19871), [#19531](https://github.com/can1357/oh-my-pi/pull/19531), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-web-type-background) |
 | deadline-ranking | feat(ai): rank an account priority by quota deadline | ai/auth | P2 | 3d | [#19623](https://github.com/can1357/oh-my-pi/pull/19623), [#19700](https://github.com/can1357/oh-my-pi/pull/19700), [#19701](https://github.com/can1357/oh-my-pi/pull/19701) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/deadline-ranking) |
 
-## Stacked (19)
+## Stacked (20)
 
 | id | title | area | priority | age | needs | branch |
 |---|---|---|---|---|---|---|
@@ -57,6 +57,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20
 | win-button-click-fence | fix(natives): mark dispatch before a fenced BM_CLICK | computer |  | 4h | win-button-click ([#19889](https://github.com/can1357/oh-my-pi/pull/19889)), desktop-dispatch-fence ([#19871](https://github.com/can1357/oh-my-pi/pull/19871)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-button-click-fence) |
 | win-wpf-press | fix(natives): press WPF controls behind other windows through their default action | computer |  | 2h | win-button-click ([#19889](https://github.com/can1357/oh-my-pi/pull/19889)), desktop-dispatch-fence ([#19871](https://github.com/can1357/oh-my-pi/pull/19871)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-wpf-press) |
 | win-takeover-selection | fix(natives): keep the user's caret through a Windows takeover's hand-back | computer |  | 2h | win-takeover-settle | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-takeover-selection) |
+| devin-gemini-image-price-rest | fix(catalog): budget Devin's other measured Gemini models at the 1,089 tokens it bills per image | catalog | P2 | 0h | devin-neon-image-price ([#19883](https://github.com/can1357/oh-my-pi/pull/19883)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-gemini-image-price-rest) |
 
 ## Held (13)
 
@@ -114,9 +115,3 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20
 | [#19884](https://github.com/can1357/oh-my-pi/pull/19884) | atspi-alert-windows | fix(natives): list GTK message dialogs as windows on Wayland | computer | P1 | 3h | keep; tests-over: LinuxUpstream, 2026-11-20: one test reaching three branches (Alert listing through windows(), shared-title refusal in window_id, an in-window alert's owner); 45 of its lines are a fake GTK 3 app with children, application, parent and pid that no existing fixture provides | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-alert-windows) |
 | [#19928](https://github.com/can1357/oh-my-pi/pull/19928) | devin-org-identity | fix(ai,catalog): store Devin login identity scoped by organization | broker | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-org-identity) |
 | [#19929](https://github.com/can1357/oh-my-pi/pull/19929) | devin-quota-ranking | fix(ai): rank Devin logins by quota before their on-demand balance | broker | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-quota-ranking) |
-
-## Queued since the last plan (1)
-
-| id | title | area | priority | age | branch |
-|---|---|---|---|---|---|
-| devin-gemini-image-price-rest | fix(catalog): budget Devin's other measured Gemini models at the 1,089 tokens it bills per image | catalog | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-gemini-image-price-rest) |
