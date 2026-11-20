@@ -22,15 +22,23 @@ The catalog is the bottom layer under #19591's per-model field (by ryanskidmore)
 
 **Beyond the migration:** a custom model now gets the shape of the lineage the catalog classifies it as. On `main` a gateway model `my-opus` with `requestModelId: claude-opus-5-5` got `8on22-bw` at 1568px; here it gets Claude's `11on16-bw` at 1932px.
 
-Reading order: `axes.ts`, `classes/*.kdl` (with eval evidence), `providers/snapcompact-shape.kdl` (wire fallback and residue), `resolveSnapcompactShape` in `image-tokenization.ts`, then `resolveShape` in `snapcompact.ts`.
+Reading order: `axes.ts`, `classes/*.kdl`, `providers/snapcompact-shape.kdl` (wire fallback and residue), `resolveSnapcompactShape` in `image-tokenization.ts`, then `resolveShape` in `snapcompact.ts`.
 
 ## Why
 
-`AGENTS.md` keeps model-conditional policy out of TypeScript, and this was snapcompact's last such table. `snapcompactShape` is one user's override for one model; the rules are omp's defaults, which nobody should have to configure.
+`AGENTS.md` keeps model-conditional policy out of TypeScript, and this was snapcompact's last such table. A regex reads only the model id; three measured results need more, and each lands as its own follow-up on these rules:
+
+| Measured | The rule needs |
+|---|---|
+| 337 of the 7,757 models below get another lineage's layout: Devin Fusion pairings matched by their sidekick's name, OpenAI o-series behind Anthropic-compatible gateways, GLM rows whose ids omit "glm" | the catalog identity, which already prices their frames |
+| Gemini 4 Carbon on Devin copies 85% of dense archive lines exactly at 1568px, 23% at 2048px; measured only on Devin and Factory Droid | a per-host frame size |
+| DeepSeek V4.1 Flash answers archive questions at .535 F1 from frames, .919 from the archive's text | a "no frames" rule |
+
+`snapcompactShape` is one user's override for one model; the rules are omp's defaults, which nobody should have to configure.
 
 - Two scalar axes, not one object: each cascades on its own, so a host override sets only the frame size.
 - The wire fallback (Anthropic Messages and Bedrock read Claude's layout) is an `on-api` rule at `priority=-1`, as `image-tokenization` does it.
-- Where the regex and the catalog identity disagree on a catalog model, residue keeps the regex's result; four groups the regex misread (Devin Fusion pairings, o-series behind Anthropic-compatible gateways, Abliteration's GLM rows) are commented for a follow-up.
+- Where the regex and the catalog identity disagree, residue in `providers/snapcompact-shape.kdl` keeps the regex's result, so no shape changes here; the first follow-up removes it.
 - Rejected: `*claude*`-style globs on every wire, which would move id matching into KDL.
 
 Removed: `idealShapeVariant()` and `IdealShape`.
