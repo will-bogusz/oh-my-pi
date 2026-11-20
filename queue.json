@@ -117401,12 +117401,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-20T18:18:27.862808Z",
+  "at": "2026-11-20T18:24:48.722802Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 2,
-   "left": 6
+   "used": 3,
+   "left": 5
   },
   "rows": [
    {
@@ -117425,6 +117425,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-13T20:28:59Z"
+   },
+   {
+    "id": "devin-neon-image-price",
+    "label": "#19883",
+    "number": 19883,
+    "state": "open",
+    "area": "catalog",
+    "priority": "P0",
+    "title": "fix(catalog): budget Gemini 4 Neon's images on Devin at the 1,089 tokens it bills",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-20T18:20:35Z"
    },
    {
     "id": "iphone-mirror-pointer",
@@ -117940,23 +117957,6 @@
     ],
     "needs": [],
     "created": "2026-10-19T07:26:45Z"
-   },
-   {
-    "id": "devin-neon-image-price",
-    "label": "devin-neon-image-price",
-    "number": null,
-    "state": "queued",
-    "area": "catalog",
-    "priority": "P2",
-    "title": "fix(catalog): budget Gemini 4 Neon's images on Devin at the 1,089 tokens it bills",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-20T18:00:29Z"
    },
    {
     "id": "macos-ax-cancel-before-send",
