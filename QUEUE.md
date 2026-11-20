@@ -1,18 +1,17 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20 17:57Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20 17:58Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-20 17:50Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 3, conflict-held 16, stacked 17, held 12, parked 1, open PRs 22; merged 404, closed 44
+**Counts:** openable now 2, conflict-held 16, stacked 17, held 12, parked 1, open PRs 23; merged 404, closed 44
 
-## Openable now (3)
+## Openable now (2)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
 | stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 7d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 | factory-droid-1100-pin | feat(catalog): identify Factory Droid requests as droid 1.10.0 | factory-droid |  | 7d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-pin) |
-| snapcompact-shape-kdl | refactor(catalog,snapcompact): move snapcompact frame shapes into catalog rules | snapcompact | P2 | 2d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-shape-kdl) |
 
 ## Conflict-held (16)
 
@@ -50,9 +49,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20
 | act-look-prompt | docs(browser): teach acting and looking in one Eval cell without sleeps | browser | P2 | 9d | settle-reads ([#19633](https://github.com/can1357/oh-my-pi/pull/19633)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-act-look-prompt) |
 | observe-stable-ids | feat(browser): keep observe() ids stable across observations | browser | P2 | 9d | act-look-prompt | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-observe-stable-ids) |
 | factory-droid-1100-models | feat(catalog): add the Factory Droid models droid 1.10.0 serves | factory-droid |  | 7d | factory-droid-1100-pin | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-models) |
-| snapcompact-shape-reader-identity | fix(catalog): give snapcompact readers their lead model's frame shape | snapcompact | P2 | 2d | snapcompact-shape-kdl | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-shape-reader-identity) |
-| snapcompact-deepseek-text | fix(catalog,snapcompact,coding-agent): give DeepSeek V4.1 Flash its snapcompact archive as text | snapcompact | P2 | 2d | snapcompact-shape-kdl, snapcompact-rerender-on-switch ([#19620](https://github.com/can1357/oh-my-pi/pull/19620)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-deepseek-text) |
-| snapcompact-carbon-1568 | fix(catalog): draw Gemini 4 Carbon's snapcompact frames at 1568px on Devin and Factory Droid | snapcompact | P2 | 2d | snapcompact-shape-kdl | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-carbon-1568) |
+| snapcompact-shape-reader-identity | fix(catalog): give snapcompact readers their lead model's frame shape | snapcompact | P2 | 2d | snapcompact-shape-kdl ([#19880](https://github.com/can1357/oh-my-pi/pull/19880)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-shape-reader-identity) |
+| snapcompact-deepseek-text | fix(catalog,snapcompact,coding-agent): give DeepSeek V4.1 Flash its snapcompact archive as text | snapcompact | P2 | 2d | snapcompact-shape-kdl ([#19880](https://github.com/can1357/oh-my-pi/pull/19880)), snapcompact-rerender-on-switch ([#19620](https://github.com/can1357/oh-my-pi/pull/19620)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-deepseek-text) |
+| snapcompact-carbon-1568 | fix(catalog): draw Gemini 4 Carbon's snapcompact frames at 1568px on Devin and Factory Droid | snapcompact | P2 | 2d | snapcompact-shape-kdl ([#19880](https://github.com/can1357/oh-my-pi/pull/19880)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-carbon-1568) |
 | win-popup-foreground | fix(natives): press items of the open WPF context menu of the window in front | computer |  | 13h | win-button-click | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-popup-foreground) |
 | win-takeover-settle | fix(natives): stop Windows takeovers of a busy app bringing it forward after the call failed | computer |  | 4h | win-takeover-intervene | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-takeover-settle) |
 | win-button-click-fence | fix(natives): mark dispatch before a fenced BM_CLICK | computer |  | 0h | win-button-click, desktop-dispatch-fence ([#19871](https://github.com/can1357/oh-my-pi/pull/19871)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-button-click-fence) |
@@ -80,7 +79,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20
 |---|---|---|---|---|---|---|---|---|
 | [#16611](https://github.com/can1357/oh-my-pi/pull/16611) | read-audio-transcripts | feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio | catalog | P2 | 2d | Will, 2026-11-17: parked as draft, not maintained for now; revisit later | not checked or kept fresh | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-audio-transcripts) |
 
-## Open PRs (22)
+## Open PRs (23)
 
 | PR | id | title | area | rank | open | plan | branch |
 |---|---|---|---|---|---|---|---|
@@ -102,6 +101,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20
 | [#19616](https://github.com/can1357/oh-my-pi/pull/19616) | wayland-share-picker-deadline | fix(natives): wait for the Wayland screen-share picker until the call's deadline | natives | P1 | 2d | keep; accepted pair with #19615: Main, 2026-11-18: no conflict since #19615 376a1b8be12 moved the kept-stream consts to wayland/capture/share.rs (git merge-tree clean); the merged tree built and its wayland tests passed 57/57 on goliath (ShareScope) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-share-picker-deadline) |
 | [#19615](https://github.com/can1357/oh-my-pi/pull/19615) | wayland-still-capture | fix(natives): keep the Wayland ScreenCast stream open between screenshots on Hyprland and wlroots | natives | P2 | 2d | keep; accepted pair with #19616: Main, 2026-11-18: no conflict since #19615 376a1b8be12 moved the kept-stream consts to wayland/capture/share.rs (git merge-tree clean); the merged tree built and its wayland tests passed 57/57 on goliath (ShareScope) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-still-capture) |
 | [#19620](https://github.com/can1357/oh-my-pi/pull/19620) | snapcompact-rerender-on-switch | fix(snapcompact,coding-agent): re-render a snapcompact archive in the frame shape of the model reading it | snapcompact | P2 | 2d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-rerender-on-switch) |
+| [#19880](https://github.com/can1357/oh-my-pi/pull/19880) | snapcompact-shape-kdl | refactor(catalog,snapcompact): move snapcompact frame shapes into catalog rules | snapcompact | P2 | 2d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-shape-kdl) |
 | [#19870](https://github.com/can1357/oh-my-pi/pull/19870) | win-wpf-scroll | fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing | computer | P2 | 1h | keep; accepted pair with #19871: Main, 2026-11-20: win32/ax.rs import union; docs/tools/computer.md AxUnconfirmed: #19870's rewritten sentence, then this entry's Windows dispatch line; combined = both | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-wpf-scroll) |
 | [#19849](https://github.com/can1357/oh-my-pi/pull/19849) | win-occluded-capture | fix(natives): count every opaque window as a cover over a Chromium capture | computer | P1 | 10h | keep; accepted pair with #19519: Main, 2026-11-20: adjacent test-only fields in the fake backend; combined = both | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-occluded-capture) |
 | [#19871](https://github.com/can1357/oh-my-pi/pull/19871) | desktop-dispatch-fence | fix(natives): report Windows UIA actions unconfirmed when their reply times out after dispatch | computer | P1 | 1h | keep; accepted pair with #19870: Main, 2026-11-20: win32/ax.rs import union; docs/tools/computer.md AxUnconfirmed: #19870's rewritten sentence, then this entry's Windows dispatch line; combined = both; tests-over: WinWpfRoutes6, 2026-11-20: the final-head review asked for the action off side through the caller and deadline-free teardown; the four session tests each reach a distinct branch (marked then expired, abandoned, on time, unfenced) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/desktop-dispatch-fence) |
