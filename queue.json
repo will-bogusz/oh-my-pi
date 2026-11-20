@@ -105297,6 +105297,24 @@
    "added": "2026-11-20T04:47:55Z",
    "updated": "2026-11-20T04:47:55Z",
    "note": ""
+  },
+  {
+   "id": "win-uia-set-patterns",
+   "branch": "will/win-uia-set-patterns",
+   "title": "fix(natives): set WPF sliders and combo boxes through RangeValue and SelectionItem",
+   "area": "computer",
+   "priority": null,
+   "needs": [],
+   "base": "f40f335845f0b136453d12fec8d6057011082766",
+   "body": "bodies/win-uia-set-patterns.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-uia-set-patterns",
+   "host": "MacBook-Pro",
+   "added": "2026-11-20T06:29:20Z",
+   "updated": "2026-11-20T06:29:20Z",
+   "note": ""
   }
  ],
  "watch": {
