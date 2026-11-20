@@ -107037,9 +107037,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-wpf-set-background",
    "host": "MacBook-Pro",
    "added": "2026-11-20T21:08:35Z",
-   "updated": "2026-11-20T23:58:29Z",
-   "note": "",
-   "hold": "Main, 2026-11-20: held; re-cut on the new semantic-only win-wpf-press (WinWpfRoutes10); current head 022154dbeab is not to be reviewed, run or opened"
+   "updated": "2026-11-20T23:59:00Z",
+   "note": ""
   },
   {
    "id": "devin-gemini-image-price-rest",
