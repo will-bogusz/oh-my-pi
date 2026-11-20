@@ -958,6 +958,7 @@ mod foreground {
 			let mut guard = Self { previous, target, settle, armed: true, _user: user };
 			if previous != target {
 				let activation = (|| {
+					activity::check()?;
 					let _ = window::activate(target)?;
 					if !window::wait_for_foreground(target, ACTIVATION_TIMEOUT)? {
 						return Err(DesktopError::input_failed(format!(
@@ -967,6 +968,8 @@ mod foreground {
 					control::wait(Duration::from_millis(20))
 				})();
 				if let Err(error) = activation {
+					// A press while Windows decided is the reason the user sees.
+					let error = activity::check().err().unwrap_or(error);
 					return super::completed(Err(error), guard.restore()).map(|()| guard);
 				}
 			}
@@ -985,7 +988,10 @@ mod foreground {
 			settle(self.settle);
 			let restored = self.restore();
 			self.report(restored.is_ok());
-			super::completed(result.and_then(|()| activity::check()), restored)
+			// A press since the takeover started is the outcome, whatever else
+			// failed meanwhile.
+			let result = activity::check().and(result);
+			super::completed(result, restored)
 		}
 
 		/// Records for the host where the takeover left the foreground, read
@@ -1633,11 +1639,6 @@ mod foreground {
 				)
 			})
 		};
-		// The user pressed something: the call fails with `UserIntervened`
-		// ([`ForegroundGuard::run`]), so no marker goes after their key.
-		if activity::check().is_err() {
-			return None;
-		}
 		if !in_front() {
 			return left();
 		}
@@ -1666,7 +1667,14 @@ mod foreground {
 		let layout = super::keyboard_layout(Some(reader));
 		let marker = [key_event(DRAIN_KEY, false, layout), key_event(DRAIN_KEY, true, layout)];
 		// The text is out, so the marker goes even after a cancel that came
-		// since; the wait below ends on it.
+		// since; the wait below ends on it. A press by the user instead fails
+		// the call with `UserIntervened` ([`ForegroundGuard::run`]), so no
+		// marker goes after their key.
+		if activity::check().is_err() {
+			// SAFETY: detaches the pair attached above.
+			unsafe { AttachThreadInput(own, target, 0) };
+			return None;
+		}
 		// SAFETY: `marker` is an initialized INPUT slice copied synchronously.
 		let sent =
 			unsafe { SendInput(marker.len() as u32, marker.as_ptr(), size_of::<INPUT>() as i32) };
