@@ -1,48 +1,40 @@
 ## What
 
-I switched Gemini 4 Carbon on Devin and Factory Droid to 1568px snapcompact frames, because at 2048px it copied under a third of an archive's lines exactly.
+I switched Gemini 4 Carbon, Neon and Hydrogen on Devin, and Carbon on Factory Droid, to 1568px snapcompact frames. On Devin, all three answered 80–90% of exact questions about an archive right at 2048px and 97–99% at 1568px.
 
-Exact copies of dense archive lines: 30% → 84% (20 matched seeds over both hosts), with no loss of recall on real transcripts.
+Snapcompact draws archived history into image frames. Devin bills these models a flat ~1,090 tokens per frame whatever its size, so 2048px packs the most text per bill: an `8on22-bw` frame holds 23,808 characters at 2048px and 13,916 at 1568px. These models misread the denser one, identifiers and commands worst.
 
-Snapcompact draws archived history into image frames. Gemini bills every frame about the same (~1,089 tokens) at any size, so a larger frame packs more text into the same bill, but Carbon reads a frame exactly only up to ~15k characters: a 2048px `8on22-bw` frame holds 23.8k, a 1568px one 13.9k.
-
-| Gemini 4 Carbon on | Before | Now |
+| On | Before | Now |
 |---|---|---|
-| Devin (`gemini-4-carbon` and its raw effort uids `-low`, `-medium`, `-high`), Factory Droid (`gemini-4-carbon`) | `8on22-bw` at 2048px | `8on22-bw` at 1568px |
-| Google, Vertex, OpenRouter and every other host | `8on22-bw` at 2048px | unchanged |
+| Devin: `gemini-4-carbon`, `gemini-4-neon`, `gemini-4-hydrogen` and their raw effort uids | `8on22-bw` at 2048px | `8on22-bw` at 1568px |
+| Factory Droid: `gemini-4-carbon` | `8on22-bw` at 2048px | `8on22-bw` at 1568px |
+| Other Gemini defaults (Google, Vertex, OpenRouter; Neon and Hydrogen off Devin) | `8on22-bw` at 2048px | unchanged |
 
-It is one rule in `classes/gemini.kdl`, inside the class-wide 2048px block.
+It is one rule in `classes/gemini.kdl`, inside the class-wide 2048px block. The same shape draws these readers' opt-in `snapcompact.systemPrompt` and `snapcompact.toolResults` images, so those can use more, smaller images.
 
-Non-goals: other Gemini lines and hosts (not measured enough), and the stretched 13x21 layout that measured slightly better still (it needs a renderer change first).
+Non-goals: other Gemini lines and hosts (not measured), and denser stretched-glyph layouts Carbon and Neon could read (they need a renderer change).
 
 ## Why
 
-Measured 2026-11-17 on Devin's agent wire and Factory's Google wire, medium effort. The copy task: the reader transcribes 12 tagged lines (URLs, hashes, UUIDs, paths) of a synthetic session log drawn into the frames; "exact" is the share copied verbatim.
+Measured 2026-11-20 on Devin, medium effort: 158 exact-answer questions on three real archives, each answer a string from the imaged middle, graded by script. Every layout re-renders the same stored text; plain text scored 1.00 on every question asked.
 
-| | 2048px (before) | 1568px (now) |
-|---|---|---|
-| characters per frame | 23,808 | 13,916 |
-| exact lines, Devin / Factory (10 seeds each) | .225 / .367 | .850 / .825 |
-| pooled Δ exact vs 2048, bootstrap 95% CI | ref | +.542 [.454, .629] |
-| real-transcript QA F1, Devin / Factory (300 paired questions each) | .949 / .932 | .932 / .960 |
-| strict-agentic recall, Devin / Factory | .933 / .927 | .960 / 1.000 |
+| Answered exactly right | 2048px | 1568px | Identifiers | 1568 − 2048, paired, 95% CI |
+|---|---|---|---|---|
+| Hydrogen (3 archives, 2 reps, 316 answers) | .804 | .968 | .60 → .94 | +.165 [+.111, +.218] |
+| Neon (3 archives, 2 reps, 316 answers) | .902 | .981 | .71 → .96 | +.079 [+.044, +.117] |
+| Carbon (1 rep, partial) | .891 (110 answers) | .991 (107 answers) | .79 → .96 | +.119 [+.051, +.203] (59 questions) |
 
-On QA, Factory improved at 1568 (F1 +.028 [.001, .062], strict +.073 [.027, .133], chunk bootstrap) and Devin's differences sit inside noise. The class rule chose 2048 on QA alone; the exact-copy loss decides it.
+Devin's weekly quota cut Carbon's run short: each layout covers two of the three archives, sharing one, where the paired difference is taken. The comparison changes pixels, density and glyph size together; Hydrogen needs about 14k characters per frame or fewer. For Factory, the evidence is an earlier synthetic copy task on Carbon: dense identifier lines copied exactly .367 → .825 (Devin .225 → .850).
 
-**Cost:** a 1568px frame holds 42% fewer characters for the same bill, so an archive bound by its frame count covers less history. Factory caps an archive at 5 frames: 70k characters of frames instead of 119k. Characters read exactly per frame still rise, from ~7.1k to ~11.7k.
-
-Budgets: frames shrink (60 full frames measured ~4.6 MB of base64 against ~7.9 MB), so every byte cap still holds. Related: #19619 gives Devin's own host a 60-image budget and a 12 MB frame share; Carbon archives there stay bound by the image count at either size (the byte cap allows 107 frames at 1568px, 70 at 2048px), well under Devin's 32 MB request limit. On a custom Devin base URL (40 images, the default 3 MB frame share) they stay byte-bound: 26 frames at 1568px, 17 at 2048px. The per-frame token price #19619 records (1,089) does not depend on frame size.
-
-Maintenance: a change in how Gemini bills or resamples images calls for re-running the copy task; the fix stays this one rule.
+**Cost:** uniform `8on22-bw` frames hold 1.7× more at 2048px. In a synthetic compaction at a 300K trigger, Carbon at Devin's 60-frame budget kept 1.13M characters instead of 1.94M of 3.9M, and 1.54M of history, kept whole before, kept 1.14M. Neon and Hydrogen are planned at omp's 5,024-token estimate here, not their price (Related: #19883), so they stopped at 26 frames either way, keeping 487k instead of 822k. Devin accepted 80 frames (5.4 MB) in one request; the 5-vs-80 comparison used only 16 fixed recent questions. Per call: Hydrogen $0.157 → $0.128; Neon $0.244 → $0.300, thinking more (11.3k → 14.3k output tokens); Carbon on its shared archive 39% cheaper in 41.5% of the time.
 
 ## Testing
 
-- `bun test packages/snapcompact/test/snapcompact.test.ts -t "Gemini 4 Carbon"`: renders one Carbon frame per host and decodes its PNG. Devin frames (logical id and the `-high` effort uid) and Factory frames are 1568px wide in the 8x22 cell, Google's 2048px. With the rule removed, or the effort uid dropped from it, it fails (`Expected: 1568, Received: 2048`).
-- `resolveShape()` on this branch: Carbon on Devin and Factory 1568px; Carbon on Google, Gemini 3.7 Flash on Devin and Factory, and Gemini 4 Argon on Factory 2048px.
-- `bun test packages/snapcompact/test/snapcompact.test.ts`: 124 pass. A model's configured `snapcompactShape` still wins over this rule.
+- `bun test packages/snapcompact/test/snapcompact.test.ts -t "Hydrogen's frames"`: renders one frame per model and host and decodes its PNG. Carbon, Neon and Hydrogen on Devin (logical ids and effort uids) and Carbon on Factory are 1568px wide; Carbon and Neon on Google and Neon on Factory 2048px. With the Neon or the Hydrogen ids removed from the rule, it fails (`Expected: 1568, Received: 2048`).
+- `bun test packages/snapcompact/test/snapcompact.test.ts`: 124 pass; a configured `snapcompactShape` still wins over this rule. `bun test packages/catalog/test`: 1,421 pass.
 
 ---
 
-- [x] `bun check` passes (snapcompact typecheck, oxlint, oxfmt)
+- [ ] `bun check` passes: `main` itself fails its `oxfmt --check` (20 untouched files); catalog and snapcompact typecheck, oxlint and oxfmt on the changed files pass
 - [x] Tested locally
 - [x] CHANGELOG updated

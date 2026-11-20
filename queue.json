@@ -104643,13 +104643,13 @@
   {
    "id": "snapcompact-carbon-1568",
    "branch": "will/snapcompact-carbon-1568",
-   "title": "fix(catalog): draw Gemini 4 Carbon's snapcompact frames at 1568px on Devin and Factory Droid",
+   "title": "fix(catalog): draw Gemini 4 Carbon, Neon and Hydrogen snapcompact frames at 1568px on Devin, and Carbon's on Factory Droid",
    "area": "snapcompact",
    "priority": "P2",
    "needs": [
     "snapcompact-shape-kdl"
    ],
-   "base": "a0078fecb1842eceed362b538e6a9d0b698ca2c2",
+   "base": "b01e9c6d012ff37428dc28f259a4a0803bb7432b",
    "body": "bodies/snapcompact-carbon-1568.md",
    "state": "queued",
    "pr": null,
@@ -104657,8 +104657,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-carbon-1568",
    "host": "MacBook-Pro",
    "added": "2026-11-18T04:51:10Z",
-   "updated": "2026-11-20T17:50:15Z",
-   "note": "LaneSnapcompactStack, 2026-11-20: rebased onto the restacked kdl (a0078fecb18, on origin/main alone, #19591 folded in); rules.json regenerated, CHANGELOG under [Unreleased]; own diff unchanged, so no new review. snapcompact 124 pass, catalog 1,421; Carbon test fails with either commit's rule reverted (Received: 2048)."
+   "updated": "2026-11-20T22:03:49Z",
+   "note": "LaneSnapcompactStack, 2026-11-20: extended to Gemini 4 Neon and Hydrogen on Devin (all effort uids) on the 158-question real-archive study (~/tmp/adhoc/2026-11-20-devin-gemini-snapcompact/levers/REPORT.md): exact .804->.968 Hydrogen, .902->.981 Neon, .891->.991 Carbon (partial, 1 rep). Factory stays Carbon-only. Rebased onto kdl b01e9c6d012 (#19880). Test fails with Neon or Hydrogen ids removed (Received: 2048); snapcompact 124, catalog 1,421. Body rewritten around the three-model table; cost from a synthetic compaction (Carbon 60 frames: 1.13M vs 1.94M chars kept). Review ReviewCarbonNeonHydrogen: needs-changes at ee09efde76a (body/comment wording), ready at 4de9bdeaaab. Opens after #19880 merges.",
+   "kind": "fix"
   },
   {
    "id": "export-viewer-regen",
