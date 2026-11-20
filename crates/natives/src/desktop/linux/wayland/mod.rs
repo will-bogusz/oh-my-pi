@@ -168,7 +168,7 @@ pub struct WaylandBackend {
 	/// Hyprland's IPC when the compositor is Hyprland: real window
 	/// positions, focus, and pixel clicks and scrolls through AT-SPI.
 	hyprland:             Option<hyprland::Hyprland>,
-	/// Created only without AT-SPI; otherwise GuardedAx owns the sole guard.
+	/// Created only without AT-SPI; otherwise `GuardedAx` owns the sole guard.
 	fallback_focus_guard: Option<focus_guard::FocusGuard>,
 }
 

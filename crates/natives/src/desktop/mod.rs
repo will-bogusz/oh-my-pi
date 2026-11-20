@@ -2369,7 +2369,7 @@ pub struct DesktopFocusGuard {
 #[napi]
 impl DesktopFocusGuard {
 	#[napi(getter)]
-	pub fn kind(&self) -> &'static str {
+	pub const fn kind(&self) -> &'static str {
 		self.kind
 	}
 
