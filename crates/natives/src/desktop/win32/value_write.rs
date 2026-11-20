@@ -153,16 +153,19 @@ pub(super) enum Unanswered {
 	NoAnswer,
 }
 
-/// Sends `message` and waits up to 3 s for its result.
+/// Sends a value message after transport preflight, marking only mutations.
 #[cfg(target_os = "windows")]
-fn send_message(
+fn send_value_message(
 	target: windows_sys::Win32::Foundation::HWND,
 	message: u32,
 	wparam: usize,
 	lparam: isize,
 	pointer: bool,
-) -> Result<isize, Unanswered> {
-	send_message_within(target, message, wparam, lparam, pointer, 3000)
+	wait_ms: u32,
+) -> CoreResult<Result<isize, Unanswered>> {
+	send_message_guarded(target, message, wparam, lparam, pointer, wait_ms, || {
+		value_dispatch(message)
+	})
 }
 
 /// How long a message of the current operation may wait for its answer: 3 s,
@@ -183,6 +186,21 @@ pub(super) fn send_message_within(
 	pointer: bool,
 	wait_ms: u32,
 ) -> Result<isize, Unanswered> {
+	// This caller supplies no dispatch guard; buttons keep their own policy.
+	send_message_guarded(target, message, wparam, lparam, pointer, wait_ms, || Ok(()))
+		.expect("an unguarded native message has no dispatch refusal")
+}
+
+#[cfg(target_os = "windows")]
+fn send_message_guarded(
+	target: windows_sys::Win32::Foundation::HWND,
+	message: u32,
+	wparam: usize,
+	lparam: isize,
+	pointer: bool,
+	wait_ms: u32,
+	before_send: impl FnOnce() -> CoreResult<()>,
+) -> CoreResult<Result<isize, Unanswered>> {
 	use windows_sys::Win32::{
 		Foundation::{ERROR_ACCESS_DENIED, ERROR_INVALID_WINDOW_HANDLE, GetLastError, SetLastError},
 		System::Threading::{GetCurrentProcessId, GetCurrentThreadId},
@@ -196,13 +214,14 @@ pub(super) fn send_message_within(
 			process == GetCurrentProcessId() && thread != GetCurrentThreadId()
 		};
 		if local_other_thread {
-			return Err(Unanswered::OtherThread);
+			return Ok(Err(Unanswered::OtherThread));
 		}
 	}
 	if wait_ms == 0 {
-		return Err(Unanswered::Undelivered);
+		return Ok(Err(Unanswered::Undelivered));
 	}
 	let mut result = 0;
+	before_send()?;
 	// SAFETY: pointer-bearing system messages are marshalled for another
 	// process. Same-thread dispatch is synchronous; same-process dispatch
 	// to another thread is refused above before a buffer can outlive us.
@@ -212,13 +231,27 @@ pub(super) fn send_message_within(
 		SendMessageTimeoutW(target, message, wparam, lparam, SMTO_ABORTIFHUNG, wait_ms, &mut result)
 	};
 	if answered != 0 {
-		return Ok(result as isize);
+		return Ok(Ok(result as isize));
 	}
 	// SAFETY: GetLastError reads this thread's last error.
-	match unsafe { GetLastError() } {
+	Ok(match unsafe { GetLastError() } {
 		ERROR_ACCESS_DENIED | ERROR_INVALID_WINDOW_HANDLE => Err(Unanswered::Undelivered),
 		_ => Err(Unanswered::NoAnswer),
+	})
+}
+
+/// Reads do not claim dispatch; native value mutations must claim it before
+/// sending.
+#[cfg(target_os = "windows")]
+fn value_dispatch(message: u32) -> CoreResult<()> {
+	use windows_sys::Win32::UI::{
+		Controls::EM_SETMODIFY,
+		WindowsAndMessaging::{CB_SETCURSEL, WM_COMMAND, WM_SETTEXT},
+	};
+	if matches!(message, CB_SETCURSEL | WM_SETTEXT | WM_COMMAND | EM_SETMODIFY) {
+		super::super::control::dispatching()?;
 	}
+	Ok(())
 }
 
 #[cfg(target_os = "windows")]
@@ -242,8 +275,8 @@ pub(super) fn set_combo(
 	let failed = || combo_failure(writing.get());
 	let send = |target, message, wparam, lparam| {
 		let pointer = matches!(message, CB_FINDSTRINGEXACT | WM_SETTEXT | WM_GETTEXT);
-		send_message(target, message, wparam, lparam, pointer).map_err(
-			|unanswered| match unanswered {
+		send_value_message(target, message, wparam, lparam, pointer, 3000)?.map_err(|unanswered| {
+			match unanswered {
 				Unanswered::OtherThread => DesktopError::ax_failed(if writing.get() {
 					"the combo box's value could not be confirmed safely; pointer-bearing messages to \
 					 another thread in this process are unsafe after a timeout; the value may already \
@@ -254,8 +287,8 @@ pub(super) fn set_combo(
 					 use press/click instead"
 				}),
 				Unanswered::Undelivered | Unanswered::NoAnswer => failed(),
-			},
-		)
+			}
+		})
 	};
 	if text.contains('\0') {
 		return Err(failed());
@@ -423,7 +456,7 @@ pub(super) fn set_edit(
 	}
 	let writing = std::cell::Cell::new(false);
 	let send = |target, message, wparam, lparam, pointer| {
-		send_message_within(target, message, wparam, lparam, pointer, operation_wait_ms()).map_err(
+		send_value_message(target, message, wparam, lparam, pointer, operation_wait_ms())?.map_err(
 			|unanswered| match unanswered {
 				// A message never delivered changed nothing.
 				Unanswered::Undelivered | Unanswered::OtherThread if !writing.get() => {
@@ -720,6 +753,83 @@ mod tests {
 		let original = ORIGINAL_EDIT_PROC.with(|proc| proc.get());
 		// SAFETY: the test saved this edit's original procedure.
 		unsafe { CallWindowProcW(original, hwnd, message, wparam, lparam) }
+	}
+
+	#[cfg(target_os = "windows")]
+	#[test]
+	fn native_value_messages_fence_mutations_but_not_reads() {
+		use windows_sys::Win32::UI::{
+			Controls::EM_SETMODIFY,
+			WindowsAndMessaging::{CB_SETCURSEL, WM_COMMAND, WM_GETTEXT, WM_SETTEXT},
+		};
+
+		use super::super::super::{control::CancellationSource, error::ErrorCode};
+
+		let source = CancellationSource::default();
+		for message in [CB_SETCURSEL, WM_SETTEXT, WM_COMMAND, EM_SETMODIFY] {
+			let mut token = source.token();
+			token.fence_dispatch();
+			let _scope = token.enter();
+			value_dispatch(WM_GETTEXT).unwrap();
+			assert!(!token.dispatch_fence().unwrap().abandon_reply());
+			assert_eq!(value_dispatch(message).unwrap_err().code, ErrorCode::Timeout);
+
+			let mut sent = source.token();
+			sent.fence_dispatch();
+			let _scope = sent.enter();
+			value_dispatch(message).unwrap();
+			assert!(sent.dispatch_fence().unwrap().abandon_reply());
+		}
+	}
+
+	#[cfg(target_os = "windows")]
+	#[test]
+	fn native_value_transport_refusals_leave_dispatch_idle() {
+		use windows_sys::Win32::UI::WindowsAndMessaging::{
+			CreateWindowExW, DestroyWindow, WM_SETTEXT,
+		};
+
+		use super::super::super::control::CancellationSource;
+
+		let (ready, window) = std::sync::mpsc::channel();
+		let (release, done) = std::sync::mpsc::channel::<()>();
+		let owner = std::thread::spawn(move || {
+			let class: Vec<u16> = "STATIC\0".encode_utf16().collect();
+			// SAFETY: a standard hidden control owned and destroyed by this
+			// thread.
+			let hwnd = unsafe {
+				CreateWindowExW(
+					0,
+					class.as_ptr(),
+					std::ptr::null(),
+					0,
+					0,
+					0,
+					10,
+					10,
+					std::ptr::null_mut(),
+					std::ptr::null_mut(),
+					std::ptr::null_mut(),
+					std::ptr::null(),
+				)
+			};
+			assert!(!hwnd.is_null());
+			ready.send(hwnd.expose_provenance()).unwrap();
+			let _ = done.recv();
+			// SAFETY: this thread owns the control.
+			unsafe { DestroyWindow(hwnd) };
+		});
+		let hwnd = std::ptr::with_exposed_provenance_mut(window.recv().unwrap());
+		for (pointer, wait_ms) in [(false, 0), (true, 3000)] {
+			let mut token = CancellationSource::default().token();
+			token.fence_dispatch();
+			let _scope = token.enter();
+			let result = send_value_message(hwnd, WM_SETTEXT, 0, 0, pointer, wait_ms).unwrap();
+			assert!(matches!(result, Err(Unanswered::Undelivered | Unanswered::OtherThread)));
+			assert!(!token.dispatch_fence().unwrap().abandon_reply());
+		}
+		drop(release);
+		owner.join().unwrap();
 	}
 
 	#[cfg(target_os = "windows")]

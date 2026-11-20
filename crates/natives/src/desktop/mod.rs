@@ -421,7 +421,8 @@ impl Request {
 	/// Only routes that mark their mutation boundary may change timeout
 	/// outcomes.
 	const fn dispatch_fenced(&self) -> bool {
-		cfg!(target_os = "windows") && matches!(self, Self::AxPerform { menu: None, .. })
+		cfg!(target_os = "windows")
+			&& matches!(self, Self::AxPerform { menu: None, .. } | Self::AxSetValue { .. })
 	}
 
 	/// Requests that can send input or move focus, which hold the input lease.
@@ -4413,6 +4414,29 @@ mod capture_tests {
 			// Not the fenced caller's outcome: nothing here was dispatch-fenced.
 			assert_ne!(error.message, control::abandoned_before_dispatch().message);
 		}
+	}
+
+	#[test]
+	fn dispatch_fencing_participates_only_in_windows_ax_actions_without_menus_and_set_value() {
+		let (reply, _) = flume::bounded(1);
+		let action = |menu| Request::AxPerform {
+			reference: "e1".into(),
+			action: "press".into(),
+			menu,
+			reply: reply.clone(),
+		};
+		assert_eq!(action(None).dispatch_fenced(), cfg!(target_os = "windows"));
+		assert!(!action(Some(vec!["Open".into()])).dispatch_fenced());
+		assert_eq!(
+			Request::AxSetValue {
+				reference: "e1".into(),
+				value:     "replacement".into(),
+				reply:     reply.clone(),
+			}
+			.dispatch_fenced(),
+			cfg!(target_os = "windows")
+		);
+		assert!(!Request::ListWindows { reply }.dispatch_fenced());
 	}
 
 	#[test]
