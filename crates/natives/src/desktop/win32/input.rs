@@ -2563,8 +2563,8 @@ pub(super) fn raise_window(id: &str) -> CoreResult<()> {
 	}
 	Err(DesktopError::input_failed(match activation {
 		window::Activation::AlreadyFront => format!(
-			"window {id} was already in front when observed but did not stay there; no activation was \
-			 requested"
+			"window {id} was already in front when observed but did not stay there; no activation \
+			 was requested"
 		),
 		window::Activation::Locked => {
 			format!("Windows refused to raise window {id} (foreground lock)")
