@@ -25,10 +25,10 @@ A model told a stale picture is current acts on it, and covered browsers are nor
 
 - Mark, not refuse: other apps' covered windows are current.
 - Only Chromium windows: no generic signal exists (Windows.Graphics.Capture delivers frames whether or not the app drew).
-- No fresh-frame route: `PrintWindow` and Windows.Graphics.Capture return the old frame (0/30 each, 10 and 11); routes that work fake a system-wide event, change how the user's app runs, or are the browser tool's.
-- The note tells the model not to wait and re-read while covered, and to check the expected state after a `raise()` rather than trust the first unmarked read.
+- No fresh-frame route: `PrintWindow` and Windows.Graphics.Capture return the old frame (0/30 each); what works fakes a system-wide event, changes how the user's app runs, or is the browser tool.
+- The note says not to re-read while covered, and to check the expected state after a `raise()` rather than trust the first unmarked read.
 
-Limits: covers count as Chromium counts them (not click-through, tool or popup windows), but the geometry only approximates Chromium's, and a window being dragged over the target counts while Chromium ignores it: a mark can appear on a window Chromium kept drawing, and no mark doesn't prove freshness.
+Limits: every opaque window counts as a cover. Under click-through, tool and popup covers Chromium usually keeps drawing, so the mark there is needless caution, kept since one taking a counted cover's place leaves the page paused. A window dragged over the target counts while Chromium ignores it; the geometry is approximate, so no mark doesn't prove freshness.
 
 ## Testing
 
@@ -110,24 +110,24 @@ Windows 10 `PM-shot` fix rows ran ddaed5d's TypeScript with 5c95347's addon in b
 
 One column outside the cover (n=5): Chrome current 5/5 and 4/4 (one void), Electron 5/5 and 5/5; fully covered 0/20.
 
-<details><summary>Cover kinds Chromium skips (Windows 10, opaque user window fully over the target, n=4-5 per fixture)</summary>
+<details><summary>Covers Chromium's next pass skips (Windows 10, opaque user window fully over the target, n=4-5 per fixture; measured with a build that skipped them)</summary>
 
-| cover | Chrome and Electron: page visible, read current, no mark |
+| cover | Chrome and Electron: page visible and read current |
 |---|---|
 | `WS_EX_TRANSPARENT` | 10/10 |
 | `WS_EX_TOOLWINDOW` | 8/8 (visible 18/18) |
 | `WS_POPUP` | 8/8 |
-| plain (control) | 0/16: stale 15/16, marked 16/16 |
+| plain (control) | stale 15/16 |
 
-A cover that turns into a popup while covering stays counted by Chromium until any other window event (its own events are ignored): visible 0/10 before one, 8/8 after.
+A cover that turns into a popup while covering leaves the page hidden until another window event (Chromium ignores a popup's own events): visible 0/10 before one, 8/8 after. This PR marks all four.
 
 </details>
 
-`raise()` while the user worked elsewhere: refused 75/75 (`InputFailed … (foreground lock)`).
+`raise()` while the user worked elsewhere: refused 75/75 (foreground lock).
 
 Sample set (`omp -p`, covered Chrome after a background Save, a task needing a current look; Haiku 5.5 and GPT-6.1 Sol, n=3 per cell): `main` re-read the window 18/18; this PR re-read 0/24, told the user what it could not confirm 18/18 with them typing, and with them away raised Chrome 5/6. A draft saying only "do not read it again" left Haiku re-reading by `find` or wait-then-read 2/12.
 
-Unit tests: 223 passed on Windows 10 (this head), 222 on 11 (ddaed5d); the window test toggles each skipped cover kind; the worker tests fail with `worker.ts` reverted.
+Unit tests: 223 passed on Windows 10 (this head), 222 on 11 (ddaed5d); click-through, tool and popup covers mark; the worker tests fail with `worker.ts` reverted.
 
 ---
 
