@@ -53,11 +53,13 @@ One idle click in the original interleaved table had a post-action state request
 
 The six historical windowed cases use a fixture foreground grant: allowed delivery/drain, not physical intervention or unassisted activation.
 
-Current Rust diff `45d60dd75b`: `rust-check` passed on Linux and Windows MSVC; macOS not run (no host). Live checks below are at f6a4155c9d6 and were not repeated after review corrections. No prompt eval was run.
+`rust-check` passed on Linux, Windows MSVC and macOS at this head. Live checks below are at f6a4155c9d6 and were not repeated after review corrections. No prompt eval was run. No test covers the order of the two reads in `Sample::read`: that needs a clock seam the code lacks.
 
 <details><summary>Unit detail</summary>
 
-At f6a4155c9d6, `rust-check` also passed on macOS and the TypeScript polling-notice unit passed (1 test, 8 assertions). The updated regression assertions have not been run.
+At f6a4155c9d6 the TypeScript polling-notice unit passed (1 test, 8 assertions); its later assertion change has not been run.
+
+At 0cb0303d6c5 (later commits only rename or move test code) on Windows 11, `desktop::win32::` passed 60 with 7 ignored, and each of the 6 ignored windowed takeover tests passed run alone. Six guard controls, each run in a fresh process, pass on this head and fail with their fix reverted: a receiver taken during a takeover, a host's own registration left in place, the polling watch's wording, a press while typing (reverted twice: accepted-prefix accounting and error recreation), and the kept failure suffix.
 
 
 At f6a4155c9d6 on Windows 11: all 12 activity tests, all 8 foreground-input tests and all 6 ignored windowed takeover tests passed. All six targeted regressions failed in a same-head mutant reverting their six fix sites. Reverting only the windowed fixture's `admitted_backend` setup made all six windowed tests fail.
