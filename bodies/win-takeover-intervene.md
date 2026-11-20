@@ -36,8 +36,8 @@ Windows 11 guest, v19.0.1 against this branch's addon, interleaved rounds; WPF t
 
 | Windows 11, listener scoped to the call (10 calls per cell) | `main` | this PR |
 |---|---|---|
-| User typing, default mode (20 calls) | 16 ran at once; 41 key events reach the target; Space presses its button 9 times | 19 ran after the pause (median 6.4 s); 0 keys lost, 0 in the target, 0 presses |
-| User typing, `takeover: true` (20 calls) | 20 ran; 58 key events reach the target; 9 presses | 18 ran after the pause; 0, 0, 0 |
+| User typing, default mode (20 calls) | 16 ran at once (4 refused by Windows); 41 key events reach the target; Space presses its button 9 times | 19 ran after the pause (median 6.4 s; 1 refused by Windows after it); 0 keys lost, 0 in the target, 0 presses |
+| User typing, `takeover: true` (20 calls) | 20 ran; 58 key events reach the target; 9 presses | 18 ran after the pause; 0, 0, 0 (2 refused by Windows after the pause, no input sent) |
 | User idle (20 calls) | click 0.25 s, type 0.44 s | 0.27 s, 0.42 s |
 
 Windows 10 refused every takeover with the user typing on both builds in this procedure, so it only shows nothing else changed (idle: 6 of 8 ran each).
