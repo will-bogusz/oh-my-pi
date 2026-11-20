@@ -10,6 +10,7 @@
 ### Changed
 
 - Gemini 4 Carbon, Neon and Hydrogen on Devin, and Carbon on Factory Droid, now get smaller (1568px instead of 2048px) snapcompact frames whose identifiers and commands they read back more exactly, at the cost of less history per frame
+- Gemini models on Devin's own host now take up to 80 images per request instead of 60, so a snapcompact archive keeps up to 80 frames of history; Claude stays at 20 and a custom Devin base URL at 40
 
 ### Fixed
 

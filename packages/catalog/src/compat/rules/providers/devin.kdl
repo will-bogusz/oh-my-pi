@@ -201,6 +201,13 @@ provider "devin" {
 		image-count-budget 20
 		official-image-count-budget 20
 	}
+	// Gemini counts images only against context, and Devin's own host accepts a
+	// full 80-frame snapcompact archive (snapcompact's own frame ceiling) in one
+	// request. The inline image byte budget still bounds the bytes; a custom
+	// baseUrl keeps the provider's 40.
+	class "gemini" {
+		official-image-count-budget 80
+	}
 	class "openai" {
 		family "gpt" {
 			revision ">=5.6 <7" {
