@@ -502,9 +502,14 @@ pub trait Backend: Send {
 	}
 	fn raise_window(&mut self, id: &str, token: &OperationToken) -> CoreResult<()>;
 	fn ax(&mut self) -> Option<&mut dyn AxBackend>;
+	/// Arms this session's compositor guard around an externally delivered
+	/// action.
+	fn begin_focus_guard(&mut self, _pid: u32) -> CoreResult<super::ArmedFocusGuard> {
+		Ok(super::ArmedFocusGuard::default())
+	}
 	/// Windows that apps opened or activated around background actions since
-	/// the last call, and what each did to the user's keyboard focus. Only
-	/// Hyprland watches for them.
+	/// the last call, and what each did to the user's keyboard focus.
+	/// Hyprland and sway watch for them.
 	fn take_windows_opened(&mut self) -> Vec<DesktopWindowOpened> {
 		Vec::new()
 	}

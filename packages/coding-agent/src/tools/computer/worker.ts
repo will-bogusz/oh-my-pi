@@ -24,6 +24,7 @@ import type {
 	DesktopDisplay,
 	DesktopDragResult,
 	DesktopFocusReturn,
+	DesktopFocusGuard,
 	DesktopKeyboardReturn,
 	DesktopPoint,
 	DesktopPointerResult,
@@ -55,6 +56,7 @@ import {
 	DEVTOOLS_LAUNCH_ARGS,
 	DevToolsBridge,
 	type DevToolsRoute,
+	type DevToolsFocusGuards,
 	findNewEndpoint,
 	launchKind,
 	listeningPorts,
@@ -143,6 +145,8 @@ export interface NativeDesktopSession {
 	axParent(ref: string): Promise<AxNode | null | undefined>;
 	/** Windows apps opened or asked to activate around background actions since the last call (Hyprland, sway; empty elsewhere). */
 	takeWindowsOpened(): Promise<DesktopWindowOpened[]>;
+	/** Arms compositor protection for a JS-side press sequence; finishing returns window focus outcomes. */
+	beginFocusGuard(pid: number): Promise<DesktopFocusGuard>;
 	axPerform(ref: string, action: string, menu?: string[] | null): Promise<void>;
 	axSetValue(ref: string, value: string): Promise<void>;
 	axSelectText(ref: string, text: string, opts?: AxSelectTextOptions | null): Promise<AxTextSelection>;
@@ -1682,6 +1686,7 @@ function pageFrame(target: string, page: PageCapture, region?: CaptureRegion): D
 class DevToolsWin extends Win {
 	readonly #route: DevToolsRoute;
 	readonly #context: RunContextAccessor;
+	readonly #session: NativeDesktopSession;
 
 	constructor(
 		session: NativeDesktopSession,
@@ -1692,6 +1697,7 @@ class DevToolsWin extends Win {
 		super(session, getContext, window);
 		this.#route = route;
 		this.#context = getContext;
+		this.#session = session;
 	}
 
 	#input(method: string, takeover: boolean | undefined): ComputerRunContext {
@@ -1717,6 +1723,29 @@ class DevToolsWin extends Win {
 				`the DevTools route to window ${this.id} failed: ${error instanceof Error ? error.message : String(error)}`,
 			);
 		}
+	}
+
+	#pressGuards(context: ComputerRunContext): DevToolsFocusGuards | undefined {
+		if (!process.env.HYPRLAND_INSTANCE_SIGNATURE) return undefined;
+		const report = (opened: DesktopWindowOpened[]) => {
+			for (const entry of opened) context.output.push({ type: "text", text: windowOpenedNote(entry) });
+		};
+		return {
+			beginFocusGuard: async pid => {
+				this.#context();
+				throwIfAborted(context.signal);
+				const watch = await this.#session.beginFocusGuard(pid);
+				try {
+					this.#context();
+					throwIfAborted(context.signal);
+				} catch (error) {
+					report(await watch.finish());
+					throw error;
+				}
+				return watch;
+			},
+			report,
+		};
 	}
 
 	#sent(context: ComputerRunContext, what: string): void {
@@ -1759,7 +1788,14 @@ class DevToolsWin extends Win {
 		if (native.menu)
 			throw new ToolError(`click on window ${this.id}: the DevTools route opens no native menus; nothing was sent`);
 		const at = await this.#call(context, () =>
-			this.#route.click(x, y, native.button, native.count ?? 1, modifierBits(native.modifiers)),
+			this.#route.click(
+				x,
+				y,
+				native.button,
+				native.count ?? 1,
+				modifierBits(native.modifiers),
+				this.#pressGuards(context),
+			),
 		);
 		const where = `CSS (${Math.round(at.x)}, ${Math.round(at.y)})`;
 		if (at.focused) {
@@ -1777,7 +1813,7 @@ class DevToolsWin extends Win {
 		const native = pointerOptions(options);
 		const context = this.#input("doubleClick", native.takeover);
 		const at = await this.#call(context, () =>
-			this.#route.click(x, y, native.button, 2, modifierBits(native.modifiers)),
+			this.#route.click(x, y, native.button, 2, modifierBits(native.modifiers), this.#pressGuards(context)),
 		);
 		this.#sent(context, `double click at CSS (${Math.round(at.x)}, ${Math.round(at.y)})`);
 	}
@@ -1794,7 +1830,9 @@ class DevToolsWin extends Win {
 		strictOptions(options, dragOptionsKeys, "drag");
 		const native = pointerOptions(options);
 		const context = this.#input("drag", native.takeover);
-		const kind = await this.#call(context, () => this.#route.drag(points, modifierBits(native.modifiers)));
+		const kind = await this.#call(context, () =>
+			this.#route.drag(points, modifierBits(native.modifiers), this.#pressGuards(context)),
+		);
 		this.#sent(context, kind === "html" ? "drag (as an HTML drag and drop the page started)" : "drag");
 		return undefined;
 	}

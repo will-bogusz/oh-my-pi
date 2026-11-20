@@ -155,6 +155,32 @@ impl DisplayAwake {
 	}
 }
 
+/// An armed backend watch, transferred to the caller without moving its owner.
+pub(crate) struct ArmedFocusGuard {
+	kind:  &'static str,
+	#[cfg(target_os = "linux")]
+	watch: Option<linux::wayland::FocusGuardWatch>,
+}
+
+impl Default for ArmedFocusGuard {
+	fn default() -> Self {
+		Self {
+			kind: "none",
+			#[cfg(target_os = "linux")]
+			watch: None,
+		}
+	}
+}
+
+impl ArmedFocusGuard {
+	fn finish(self) {
+		#[cfg(target_os = "linux")]
+		if let Some(watch) = self.watch {
+			watch.finish();
+		}
+	}
+}
+
 enum Response {
 	Capabilities(DesktopCapabilities),
 	Displays(Vec<DesktopDisplay>),
@@ -180,6 +206,7 @@ enum Response {
 	TextSelection(AxTextSelection),
 	/// See [`Backend::take_windows_opened`].
 	WindowsOpened(Vec<DesktopWindowOpened>),
+	FocusGuard(ArmedFocusGuard),
 }
 
 /// `cover` in the pixels of a `width`×`height` screenshot of its target.
@@ -219,6 +246,10 @@ enum Request {
 		reply: Reply,
 	},
 	WindowsOpened {
+		reply: Reply,
+	},
+	BeginFocusGuard {
+		pid:   u32,
 		reply: Reply,
 	},
 	ListDisplays {
@@ -406,6 +437,7 @@ impl Request {
 		let reply = match self {
 			Self::Capabilities { reply }
 			| Self::WindowsOpened { reply }
+			| Self::BeginFocusGuard { reply, .. }
 			| Self::ListDisplays { reply }
 			| Self::ListWindows { reply }
 			| Self::Capture { reply, .. }
@@ -538,6 +570,7 @@ impl Request {
 			| Self::AxChildren { .. }
 			| Self::AxParent { .. }
 			| Self::WindowsOpened { .. }
+			| Self::BeginFocusGuard { .. }
 			| Self::Close { .. } => return false,
 		};
 		target.is_some_and(|target| !matches!(target, Target::Window(_)))
@@ -613,7 +646,13 @@ impl Request {
 	/// Agent activity: everything except status reads and teardown keeps the
 	/// display awake, so captures and input see a lit, unlocked screen.
 	const fn is_activity(&self) -> bool {
-		!matches!(self, Self::Capabilities { .. } | Self::WindowsOpened { .. } | Self::Close { .. })
+		!matches!(
+			self,
+			Self::Capabilities { .. }
+				| Self::WindowsOpened { .. }
+				| Self::BeginFocusGuard { .. }
+				| Self::Close { .. }
+		)
 	}
 
 	/// The window or element whose app this request reads or acts on, for the
@@ -668,6 +707,7 @@ impl Request {
 			| Self::AxChildren { .. }
 			| Self::AxParent { .. }
 			| Self::WindowsOpened { .. }
+			| Self::BeginFocusGuard { .. }
 			| Self::Close { .. } => None,
 		}
 	}
@@ -1664,6 +1704,9 @@ impl Worker {
 					.as_mut()
 					.map_or_default(|backend| backend.take_windows_opened()),
 			)),
+			Request::BeginFocusGuard { pid, .. } => {
+				Ok(Response::FocusGuard(self.backend()?.begin_focus_guard(*pid)?))
+			},
 			Request::ListDisplays { .. } => Ok(Response::Displays(self.backend()?.displays()?)),
 			Request::ListWindows { .. } => Ok(Response::Windows(self.backend()?.windows()?)),
 			Request::Capture { target, caps, .. } => {
@@ -2314,6 +2357,43 @@ pub fn close_desktop_event_taps() {
 	control::close_event_taps();
 }
 
+/// An external action's compositor guard, sharing its desktop session's
+/// reports.
+#[napi]
+pub struct DesktopFocusGuard {
+	core:  Arc<SessionCore>,
+	kind:  &'static str,
+	watch: Mutex<Option<ArmedFocusGuard>>,
+}
+
+#[napi]
+impl DesktopFocusGuard {
+	#[napi(getter)]
+	pub fn kind(&self) -> &'static str {
+		self.kind
+	}
+
+	/// Ends the action, settles its watch and drains the session's pending
+	/// outcomes.
+	#[napi]
+	pub fn finish(&self) -> task::Promise<Vec<DesktopWindowOpened>> {
+		let watch = self.watch.lock().take();
+		let c = Arc::clone(&self.core);
+		let token = c.cancellation.token();
+		task::blocking("desktop.focusGuard.finish", (), move |_| {
+			let Some(watch) = watch else {
+				return Ok(Vec::new());
+			};
+			watch.finish();
+			match c.call(token, |reply| Request::WindowsOpened { reply })? {
+				Response::WindowsOpened(v) => Ok(v),
+				_ => Err(DesktopError::internal("unexpected response")),
+			}
+			.map_err(Into::into)
+		})
+	}
+}
+
 /// Persistent, serialized native desktop capture/input/accessibility session.
 #[napi]
 pub struct DesktopSession {
@@ -2875,10 +2955,29 @@ impl DesktopSession {
 		}))
 	}
 
+	/// Arms the session's compositor guard around input delivered outside the
+	/// worker.
+	#[napi]
+	pub fn begin_focus_guard(&self, pid: u32) -> task::Promise<DesktopFocusGuard> {
+		let c = Arc::clone(&self.core);
+		let token = c.cancellation.token();
+		task::blocking("desktop.beginFocusGuard", (), move |_| {
+			match c.call(token, |reply| Request::BeginFocusGuard { pid, reply })? {
+				Response::FocusGuard(watch) => Ok(DesktopFocusGuard {
+					core:  Arc::clone(&c),
+					kind:  watch.kind,
+					watch: Mutex::new(Some(watch)),
+				}),
+				_ => Err(DesktopError::internal("unexpected response")),
+			}
+			.map_err(Into::into)
+		})
+	}
+
 	/// Windows that apps opened or asked to activate around this session's
 	/// background actions since the last call, and what each did to the
 	/// user's keyboard focus. A window still watched is listed again when its
-	/// outcome changes. Hyprland only; empty elsewhere.
+	/// outcome changes. Hyprland and sway only; empty elsewhere.
 	#[napi]
 	pub fn take_windows_opened(&self) -> task::Promise<Vec<DesktopWindowOpened>> {
 		let c = Arc::clone(&self.core);

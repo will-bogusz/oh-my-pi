@@ -35,7 +35,7 @@ use super::{hyprland::Hyprland, sway::SwayGuard};
 use crate::desktop::{
 	ax::{AxHandle, AxProps, WalkBounds},
 	backend::AxBackend,
-	error::CoreResult,
+	error::{CoreResult, DesktopError},
 	linux::ax::AtSpiAx,
 	text_range::TextSelectRequest,
 	types::{AxTextSelection, DesktopWindow, DesktopWindowFocus, DesktopWindowOpened},
@@ -386,11 +386,13 @@ pub(super) struct FocusGuard {
 	/// The latest watch's thread, while it runs; ended by the next watch.
 	running:  Option<(Arc<AtomicBool>, thread::JoinHandle<()>)>,
 	next_id:  u64,
+	/// The external action owns the watch while its deadline remains unbounded.
+	external: Option<Arc<AtomicU64>>,
 }
 
 impl FocusGuard {
 	pub(super) const fn new(hyprland: Hyprland) -> Self {
-		Self { hyprland, lua: None, watches: Vec::new(), running: None, next_id: 0 }
+		Self { hyprland, lua: None, watches: Vec::new(), running: None, next_id: 0, external: None }
 	}
 
 	/// What windows actions opened did to focus, each outcome once: a window
@@ -410,12 +412,48 @@ impl FocusGuard {
 		out
 	}
 
+	fn admit(&self) -> CoreResult<()> {
+		if self
+			.external
+			.as_ref()
+			.is_some_and(|ends| ends.load(Ordering::Acquire) == u64::MAX)
+		{
+			return Err(DesktopError::background_unavailable(
+				"an external background action still owns the Hyprland focus guard; nothing was sent",
+			));
+		}
+		Ok(())
+	}
+
+	/// Uses the same hook IDs and watcher as accessibility actions.
+	pub(super) fn begin(&mut self, pid: u32) -> CoreResult<crate::desktop::ArmedFocusGuard> {
+		self.admit()?;
+		let Some(watch) = self.arm(pid) else {
+			return Ok(crate::desktop::ArmedFocusGuard::default());
+		};
+		self.external = Some(Arc::clone(&watch.ends));
+		Ok(crate::desktop::ArmedFocusGuard { kind: self.kind(), watch: Some(watch) })
+	}
+
+	const fn kind(&self) -> &'static str {
+		match self.lua {
+			Some(true) => "Hyprland hook",
+			Some(false) => "Hyprland socket watcher",
+			None => "none",
+		}
+	}
+
 	/// Runs `action` on process `pid` under a watch, then waits up to
 	/// [`SETTLE`] for a window it opens. The watch keeps going for [`WATCH`]
 	/// after the action returns. An action on the app the user has focused,
 	/// or one when Hyprland cannot be read, runs unwatched: the first is the
 	/// user's own app, and the second must not stop their work.
-	pub(super) fn run<T>(&mut self, pid: u32, action: impl FnOnce() -> T) -> T {
+	pub(super) fn run<T>(
+		&mut self,
+		pid: u32,
+		action: impl FnOnce() -> CoreResult<T>,
+	) -> CoreResult<T> {
+		self.admit()?;
 		let Some(watch) = self.arm(pid) else {
 			return action();
 		};
@@ -474,8 +512,16 @@ impl FocusGuard {
 	}
 }
 
+impl Drop for FocusGuard {
+	fn drop(&mut self) {
+		if let Some((stop, _)) = &self.running {
+			stop.store(true, Ordering::Release);
+		}
+	}
+}
+
 /// One action's watch, until its action returns.
-pub(super) struct Watch {
+pub(crate) struct Watch {
 	/// Nanoseconds after `started` at which the watch ends; `u64::MAX` while
 	/// the action runs.
 	pub(super) ends:    Arc<AtomicU64>,
@@ -484,13 +530,22 @@ pub(super) struct Watch {
 }
 
 impl Watch {
+	/// Ends an abandoned action without waiting on the JS garbage collector's
+	/// thread.
+	fn end(&self) {
+		let ends = self.started.elapsed() + WATCH;
+		let _ = self.ends.compare_exchange(
+			u64::MAX,
+			u64::try_from(ends.as_nanos()).unwrap_or(u64::MAX - 1),
+			Ordering::AcqRel,
+			Ordering::Acquire,
+		);
+	}
+
 	/// Marks the action done, then waits up to [`SETTLE`] for a window it
 	/// opens, and once one has, a moment for its focus outcome.
-	pub(super) fn finish(self) {
-		let ends = self.started.elapsed() + WATCH;
-		self
-			.ends
-			.store(u64::try_from(ends.as_nanos()).unwrap_or(u64::MAX), Ordering::Release);
+	pub(crate) fn finish(self) {
+		self.end();
 		let until = Instant::now() + SETTLE;
 		let seen = || !self.shared.lock().report.is_empty();
 		while Instant::now() < until && !seen() {
@@ -500,6 +555,12 @@ impl Watch {
 		if seen() {
 			thread::sleep(Duration::from_millis(20));
 		}
+	}
+}
+
+impl Drop for Watch {
+	fn drop(&mut self) {
+		self.end();
 	}
 }
 
@@ -592,7 +653,7 @@ pub(super) enum Guard {
 }
 
 impl Guard {
-	fn run<T>(&mut self, pid: u32, action: impl FnOnce() -> T) -> T {
+	fn run<T>(&mut self, pid: u32, action: impl FnOnce() -> CoreResult<T>) -> CoreResult<T> {
 		match self {
 			Self::Hyprland(guard) => guard.run(pid, action),
 			Self::Sway(guard) => guard.run(pid, action),
@@ -610,8 +671,7 @@ impl Guard {
 	#[allow(dead_code, reason = "capabilities name the active guard once that lands")]
 	pub(super) const fn kind(&self) -> &'static str {
 		match self {
-			Self::Hyprland(FocusGuard { lua: Some(false), .. }) => "Hyprland socket watcher",
-			Self::Hyprland(_) => "Hyprland hook",
+			Self::Hyprland(guard) => guard.kind(),
 			Self::Sway(_) => "sway watcher",
 		}
 	}
@@ -629,13 +689,28 @@ impl GuardedAx {
 		Self { ax, guard }
 	}
 
+	pub(super) fn begin_focus_guard(
+		&mut self,
+		pid: u32,
+	) -> CoreResult<crate::desktop::ArmedFocusGuard> {
+		match &mut self.guard {
+			Some(Guard::Hyprland(guard)) => guard.begin(pid),
+			Some(Guard::Sway(_)) | None => Ok(crate::desktop::ArmedFocusGuard::default()),
+		}
+	}
+
 	/// Runs `action` under the guard for process `pid`; unguarded when the
 	/// process is unknown or the compositor has no guard.
 	pub(super) fn guarded<T>(
 		&mut self,
 		pid: Option<u32>,
-		action: impl FnOnce(&mut AtSpiAx) -> T,
-	) -> T {
+		action: impl FnOnce(&mut AtSpiAx) -> CoreResult<T>,
+	) -> CoreResult<T> {
+		if pid.is_none()
+			&& let Some(Guard::Hyprland(guard)) = &self.guard
+		{
+			guard.admit()?;
+		}
 		match (&mut self.guard, pid) {
 			(Some(guard), Some(pid)) => guard.run(pid, || action(&mut self.ax)),
 			_ => action(&mut self.ax),
@@ -646,8 +721,8 @@ impl GuardedAx {
 	pub(super) fn on_element<T>(
 		&mut self,
 		h: &AxHandle,
-		action: impl FnOnce(&mut AtSpiAx) -> T,
-	) -> T {
+		action: impl FnOnce(&mut AtSpiAx) -> CoreResult<T>,
+	) -> CoreResult<T> {
 		let pid = if self.guard.is_some() {
 			self.ax.element_pid(h).ok()
 		} else {
@@ -773,6 +848,23 @@ mod tests {
 
 	const USER: &str = "0xa";
 	const TARGET: u32 = 20;
+
+	#[test]
+	fn abandoned_watch_gets_a_bounded_end() {
+		let ends = Arc::new(AtomicU64::new(u64::MAX));
+		drop(Watch { ends: Arc::clone(&ends), started: Instant::now(), shared: Arc::default() });
+		assert_ne!(ends.load(Ordering::Acquire), u64::MAX);
+	}
+
+	#[test]
+	fn ending_or_dropping_a_finished_watch_preserves_its_deadline() {
+		let ends = Arc::new(AtomicU64::new(123));
+		let watch =
+			Watch { ends: Arc::clone(&ends), started: Instant::now(), shared: Arc::default() };
+		watch.end();
+		drop(watch);
+		assert_eq!(ends.load(Ordering::Acquire), 123);
+	}
 
 	fn client(address: &str, pid: i64, class: &str, title: &str) -> Client {
 		Client { address: address.to_owned(), pid, class: class.to_owned(), title: title.to_owned() }

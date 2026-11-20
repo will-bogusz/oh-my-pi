@@ -3,8 +3,8 @@
  *
  * Wayland gives an agent no background keyboard, wheel, drag or hover for another client's window, and
  * Chromium-based apps do not join AT-SPI while the desktop's accessibility switch is off. Their pages do
- * answer the Chrome DevTools Protocol, inside the renderer: input dispatched there changes the page and
- * nothing else, so the user's own pointer, keyboard and focus are untouched on every compositor.
+ * answer the Chrome DevTools Protocol inside the renderer, without the user's physical pointer or keyboard.
+ * Browser presses can still request compositor activation; those requests are guarded or refused below.
  *
  * Reach is the hard part, not the input. An endpoint exists only when the app was started with
  * `--remote-debugging-port`, and a running instance cannot be given one: `apps.open` adds the flag when it
@@ -25,12 +25,27 @@
  */
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import type { DesktopWindow } from "@oh-my-pi/pi-natives";
+import type { DesktopWindow, DesktopWindowOpened } from "@oh-my-pi/pi-natives";
 import { ToolError } from "@oh-my-pi/pi-tui/tools/tool-errors";
 import { isChromiumBrowserExecutable, probeCdpResponse } from "../browser/attach";
 
 /** `computer.devtools`: which Chromium and Electron windows the DevTools route may drive. */
 export type DevToolsMode = "launched" | "running" | "off";
+
+/** Native protection and outcome reporting for a complete DevTools press sequence. */
+export interface DevToolsFocusGuards {
+	beginFocusGuard(pid: number): Promise<{ readonly kind: string; finish(): Promise<DesktopWindowOpened[]> }>;
+	report(opened: DesktopWindowOpened[]): void;
+}
+
+/** The sole switch lifting activation refusal; socket watchers cannot prevent stolen keys. */
+export function canGuardDevToolsPress(onHyprland: boolean, kind: string): boolean {
+	return onHyprland && kind === "Hyprland hook";
+}
+
+interface PressQueue {
+	tail: Promise<void>;
+}
 
 /** The launch flag `apps.open` adds: an ephemeral loopback port, published in the process's listening sockets. */
 export const DEVTOOLS_LAUNCH_ARGS = ["--remote-debugging-port=0"];
@@ -612,19 +627,46 @@ export class DevToolsRoute {
 	readonly #id: string;
 	/** Why a press would take the user's keyboard here (see {@link activationGrant}); unset where it would not. */
 	readonly #pressTakesFocus: string | undefined;
+	readonly #presses: PressQueue;
 
-	constructor(id: string, window: DevToolsWindow, frames: Map<string, Frame>, pressTakesFocus: string | undefined) {
+	constructor(
+		id: string,
+		window: DevToolsWindow,
+		frames: Map<string, Frame>,
+		pressTakesFocus: string | undefined,
+		presses: PressQueue = { tail: Promise.resolve() },
+	) {
 		this.#id = id;
 		this.window = window;
 		this.#endpoint = window.endpoint;
 		this.#frames = frames;
 		this.#pressTakesFocus = window.endpoint.electron ? undefined : pressTakesFocus;
+		this.#presses = presses;
 	}
 
 	#refusePress(what: string): never {
 		throw new ToolError(
 			`BackgroundUnavailable: ${what} in window ${this.#id}: every mouse or touch press makes the Chromium browser ask the desktop to activate its window, and ${this.#pressTakesFocus}, which would take the user's keyboard; nothing was sent. In the background this window takes move (hover), scroll, type, press and screenshots, and a plain click on a text field focuses it`,
 		);
+	}
+
+	async #guardPress<T>(guards: DevToolsFocusGuards | undefined, send: (guarded: boolean) => Promise<T>): Promise<T> {
+		const onHyprland = !!process.env.HYPRLAND_INSTANCE_SIGNATURE;
+		if (!onHyprland || !guards) return send(false);
+		const previous = this.#presses.tail;
+		const { promise, resolve: release } = Promise.withResolvers<void>();
+		this.#presses.tail = promise;
+		await previous;
+		try {
+			const watch = await guards.beginFocusGuard(this.#endpoint.pid);
+			try {
+				return await send(canGuardDevToolsPress(onHyprland, watch.kind));
+			} finally {
+				guards.report(await watch.finish());
+			}
+		} finally {
+			release();
+		}
 	}
 
 	#front(): PageInfo {
@@ -783,30 +825,33 @@ export class DevToolsRoute {
 		button = "left",
 		count = 1,
 		modifiers = 0,
+		guards?: DevToolsFocusGuards,
 	): Promise<{ x: number; y: number; focused?: true }> {
 		const point = this.#css(x, y);
 		const bit = BUTTON_BITS[button];
 		if (bit === undefined) throw new ToolError(`no mouse button named ${JSON.stringify(button)}`);
-		if (this.#pressTakesFocus !== undefined) {
-			if (button !== "left" || count !== 1 || modifiers !== 0) this.#refusePress("this click");
-			// What the click would do to a text field, minus the press: focus it (as `DOM.focus` would).
-			const focused = await this.#endpoint.send<{ result: { value?: unknown } }>(
-				this.#front().targetId,
-				"Runtime.evaluate",
-				{
-					expression: `((x, y) => { let e = document.elementFromPoint(x, y); while (e && e.shadowRoot) { const inner = e.shadowRoot.elementFromPoint(x, y); if (!inner || inner === e) break; e = inner; } if (!e || !(e.isContentEditable || e.tagName === 'TEXTAREA' || (e.tagName === 'INPUT' && !['button','checkbox','radio','range','submit','reset','file','color','image','hidden'].includes(e.type)))) return false; e.focus(); return e.getRootNode().activeElement === e; })(${point.x}, ${point.y})`,
-					returnByValue: true,
-				},
-			);
-			if (focused.result.value !== true) this.#refusePress("a click here (not on a text field)");
-			return { ...point, focused: true };
-		}
-		await this.#mouse("mouseMoved", point, { modifiers });
-		for (let click = 1; click <= count; click++) {
-			await this.#mouse("mousePressed", point, { button, buttons: bit, clickCount: click, modifiers });
-			await this.#mouse("mouseReleased", point, { button, buttons: 0, clickCount: click, modifiers });
-		}
-		return point;
+		return this.#guardPress<{ x: number; y: number; focused?: true }>(guards, async guarded => {
+			if (this.#pressTakesFocus !== undefined && !guarded) {
+				if (button !== "left" || count !== 1 || modifiers !== 0) this.#refusePress("this click");
+				// What the click would do to a text field, minus the press: focus it (as `DOM.focus` would).
+				const focused = await this.#endpoint.send<{ result: { value?: unknown } }>(
+					this.#front().targetId,
+					"Runtime.evaluate",
+					{
+						expression: `((x, y) => { let e = document.elementFromPoint(x, y); while (e && e.shadowRoot) { const inner = e.shadowRoot.elementFromPoint(x, y); if (!inner || inner === e) break; e = inner; } if (!e || !(e.isContentEditable || e.tagName === 'TEXTAREA' || (e.tagName === 'INPUT' && !['button','checkbox','radio','range','submit','reset','file','color','image','hidden'].includes(e.type)))) return false; e.focus(); return e.getRootNode().activeElement === e; })(${point.x}, ${point.y})`,
+						returnByValue: true,
+					},
+				);
+				if (focused.result.value !== true) this.#refusePress("a click here (not on a text field)");
+				return { ...point, focused: true };
+			}
+			await this.#mouse("mouseMoved", point, { modifiers });
+			for (let click = 1; click <= count; click++) {
+				await this.#mouse("mousePressed", point, { button, buttons: bit, clickCount: click, modifiers });
+				await this.#mouse("mouseReleased", point, { button, buttons: 0, clickCount: click, modifiers });
+			}
+			return point;
+		});
 	}
 
 	async move(x: number, y: number, modifiers = 0): Promise<{ x: number; y: number }> {
@@ -830,67 +875,76 @@ export class DevToolsRoute {
 	 * events: Chromium would otherwise hand the drag to the compositor, which on Wayland has no pointer grab
 	 * for synthetic input and would tie the drop to the user's real pointer.
 	 */
-	async drag(points: Array<[number, number]>, modifiers = 0): Promise<"pointer" | "html"> {
+	async drag(
+		points: Array<[number, number]>,
+		modifiers = 0,
+		guards?: DevToolsFocusGuards,
+	): Promise<"pointer" | "html"> {
 		if (points.length < 2) throw new ToolError("drag needs at least two points");
 		const path = points.map(([x, y]) => this.#css(x, y));
-		if (this.#pressTakesFocus !== undefined) this.#refusePress("a drag");
-		const targetId = this.#front().targetId;
-		const connection = await this.#endpoint.connection();
-		const sessionId = await this.#endpoint.session(targetId);
-		let dragData: unknown;
-		const off = connection.on((method, params, from) => {
-			if (method === "Input.dragIntercepted" && from === sessionId) dragData = params.data;
-		});
-		const intercepting = await this.#endpoint
-			.send(targetId, "Input.setInterceptDrags", { enabled: true })
-			.then(() => true)
-			.catch(() => false);
-		try {
-			await this.#mouse("mouseMoved", path[0]!, { modifiers });
-			await this.#mouse("mousePressed", path[0]!, { button: "left", buttons: 1, clickCount: 1, modifiers });
-			let at = path[0]!;
-			for (const next of path.slice(1)) {
-				const steps = Math.max(2, Math.ceil(Math.hypot(next.x - at.x, next.y - at.y) / DRAG_STEP_PX));
-				for (let step = 1; step <= steps; step++) {
-					const point = { x: at.x + ((next.x - at.x) * step) / steps, y: at.y + ((next.y - at.y) * step) / steps };
-					if (dragData !== undefined) {
-						await this.#endpoint.send(targetId, "Input.dispatchDragEvent", {
-							type: "dragOver",
-							...point,
-							data: dragData,
-							modifiers,
-						});
-					} else {
-						await this.#mouse("mouseMoved", point, { button: "left", buttons: 1, modifiers });
-						if (intercepting) await Bun.sleep(0);
+		return this.#guardPress<"pointer" | "html">(guards, async guarded => {
+			if (this.#pressTakesFocus !== undefined && !guarded) this.#refusePress("a drag");
+			const targetId = this.#front().targetId;
+			const connection = await this.#endpoint.connection();
+			const sessionId = await this.#endpoint.session(targetId);
+			let dragData: unknown;
+			const off = connection.on((method, params, from) => {
+				if (method === "Input.dragIntercepted" && from === sessionId) dragData = params.data;
+			});
+			const intercepting = await this.#endpoint
+				.send(targetId, "Input.setInterceptDrags", { enabled: true })
+				.then(() => true)
+				.catch(() => false);
+			try {
+				await this.#mouse("mouseMoved", path[0]!, { modifiers });
+				await this.#mouse("mousePressed", path[0]!, { button: "left", buttons: 1, clickCount: 1, modifiers });
+				let at = path[0]!;
+				for (const next of path.slice(1)) {
+					const steps = Math.max(2, Math.ceil(Math.hypot(next.x - at.x, next.y - at.y) / DRAG_STEP_PX));
+					for (let step = 1; step <= steps; step++) {
+						const point = {
+							x: at.x + ((next.x - at.x) * step) / steps,
+							y: at.y + ((next.y - at.y) * step) / steps,
+						};
 						if (dragData !== undefined) {
 							await this.#endpoint.send(targetId, "Input.dispatchDragEvent", {
-								type: "dragEnter",
+								type: "dragOver",
 								...point,
 								data: dragData,
 								modifiers,
 							});
+						} else {
+							await this.#mouse("mouseMoved", point, { button: "left", buttons: 1, modifiers });
+							if (intercepting) await Bun.sleep(0);
+							if (dragData !== undefined) {
+								await this.#endpoint.send(targetId, "Input.dispatchDragEvent", {
+									type: "dragEnter",
+									...point,
+									data: dragData,
+									modifiers,
+								});
+							}
 						}
 					}
+					at = next;
 				}
-				at = next;
+				if (dragData === undefined && intercepting) await Bun.sleep(30);
+				if (dragData !== undefined) {
+					await this.#endpoint.send(targetId, "Input.dispatchDragEvent", {
+						type: "drop",
+						...at,
+						data: dragData,
+						modifiers,
+					});
+				}
+				await this.#mouse("mouseReleased", at, { button: "left", buttons: 0, clickCount: 1, modifiers });
+				return dragData === undefined ? "pointer" : "html";
+			} finally {
+				off();
+				if (intercepting)
+					await this.#endpoint.send(targetId, "Input.setInterceptDrags", { enabled: false }).catch(() => {});
 			}
-			if (dragData === undefined && intercepting) await Bun.sleep(30);
-			if (dragData !== undefined) {
-				await this.#endpoint.send(targetId, "Input.dispatchDragEvent", {
-					type: "drop",
-					...at,
-					data: dragData,
-					modifiers,
-				});
-			}
-			await this.#mouse("mouseReleased", at, { button: "left", buttons: 0, clickCount: 1, modifiers });
-			return dragData === undefined ? "pointer" : "html";
-		} finally {
-			off();
-			if (intercepting)
-				await this.#endpoint.send(targetId, "Input.setInterceptDrags", { enabled: false }).catch(() => {});
-		}
+		});
 	}
 
 	/**
@@ -976,6 +1030,7 @@ function activationGrant(): string | undefined {
 export class DevToolsBridge {
 	readonly #endpoints = new Map<number, Endpoint>();
 	readonly #frames = new Map<string, Frame>();
+	readonly #presses: PressQueue = { tail: Promise.resolve() };
 	#routes = new Map<string, DevToolsWindow>();
 	#runningScan?: { at: number; found: FoundEndpoint[] };
 	/** {@link activationGrant}, read when the first window is routed; the compositor setting rarely changes. */
@@ -1063,7 +1118,7 @@ export class DevToolsBridge {
 		const window = this.#routes.get(id);
 		if (!window) return undefined;
 		this.#pressTakesFocus ??= { reason: activationGrant() };
-		return new DevToolsRoute(id, window, this.#frames, this.#pressTakesFocus.reason);
+		return new DevToolsRoute(id, window, this.#frames, this.#pressTakesFocus.reason, this.#presses);
 	}
 
 	close(): void {

@@ -13,6 +13,7 @@ use std::{
 	path::PathBuf,
 };
 
+pub(crate) use focus_guard::Watch as FocusGuardWatch;
 use image::RgbaImage;
 
 use crate::desktop::{
@@ -148,25 +149,27 @@ impl PortalGeometry {
 }
 
 pub struct WaylandBackend {
-	display:           DisplaySelector,
-	pipewire:          pipewire::Loaded,
-	ax:                Option<focus_guard::GuardedAx>,
-	ax_error:          Option<DesktopError>,
-	input:             Option<libei::Libei>,
+	display:              DisplaySelector,
+	pipewire:             pipewire::Loaded,
+	ax:                   Option<focus_guard::GuardedAx>,
+	ax_error:             Option<DesktopError>,
+	input:                Option<libei::Libei>,
 	/// Why native input can never work here, probed once without a prompt;
 	/// `None` when it may.
-	input_unavailable: OnceCell<Option<String>>,
-	displays:          Vec<DesktopDisplay>,
+	input_unavailable:    OnceCell<Option<String>>,
+	displays:             Vec<DesktopDisplay>,
 	/// The PID that listens on the Wayland socket: gnome-shell on GNOME, whose
 	/// own AT-SPI frames never count as the focused application window. On
 	/// Plasma it is `kwin_wayland_wrapper`, which owns no frames.
-	compositor_pid:    Option<u32>,
+	compositor_pid:       Option<u32>,
 	/// Bus names of the applications that did not answer the last window
 	/// listing, whose windows it therefore left out.
-	unanswered:        Vec<String>,
+	unanswered:           Vec<String>,
 	/// Hyprland's IPC when the compositor is Hyprland: real window
 	/// positions, focus, and pixel clicks and scrolls through AT-SPI.
-	hyprland:          Option<hyprland::Hyprland>,
+	hyprland:             Option<hyprland::Hyprland>,
+	/// Created only without AT-SPI; otherwise GuardedAx owns the sole guard.
+	fallback_focus_guard: Option<focus_guard::FocusGuard>,
 }
 
 /// Reads the compositor's PID from the peer credentials of its Wayland socket.
@@ -231,6 +234,7 @@ impl WaylandBackend {
 			compositor_pid,
 			unanswered: Vec::new(),
 			hyprland,
+			fallback_focus_guard: None,
 		}
 	}
 
@@ -782,11 +786,27 @@ impl Backend for WaylandBackend {
 		self.ax.as_mut().map(|ax| ax as &mut dyn AxBackend)
 	}
 
-	fn take_windows_opened(&mut self) -> Vec<DesktopWindowOpened> {
+	fn begin_focus_guard(&mut self, pid: u32) -> CoreResult<crate::desktop::ArmedFocusGuard> {
+		if let Some(ax) = &mut self.ax {
+			return ax.begin_focus_guard(pid);
+		}
+		let Some(hyprland) = &self.hyprland else {
+			return Ok(crate::desktop::ArmedFocusGuard::default());
+		};
 		self
-			.ax
-			.as_mut()
-			.map_or_default(focus_guard::GuardedAx::take_windows_opened)
+			.fallback_focus_guard
+			.get_or_insert_with(|| focus_guard::FocusGuard::new(hyprland.clone()))
+			.begin(pid)
+	}
+
+	fn take_windows_opened(&mut self) -> Vec<DesktopWindowOpened> {
+		match &mut self.ax {
+			Some(ax) => ax.take_windows_opened(),
+			None => self
+				.fallback_focus_guard
+				.as_mut()
+				.map_or_default(focus_guard::FocusGuard::take),
+		}
 	}
 }
 

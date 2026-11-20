@@ -20,6 +20,7 @@ const REQUIRED_METHODS = [
 	"holdDisplayUntilReleased",
 	"releaseDisplayAwake",
 	"takeWindowsOpened",
+	"beginFocusGuard",
 ];
 
 /** Getters the computer worker reads; without `escapeStops` it would read every run as stopped by the user's Escape. */

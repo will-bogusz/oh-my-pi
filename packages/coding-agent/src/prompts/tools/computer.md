@@ -224,7 +224,7 @@ await win.click(120, 48, button="right")
 - Wayland: per-window native input and `.raise()` are unavailable; use AX, or desktop input after focusing the target yourself.
   - Chromium and Electron apps opened with `computer.apps.open` get a DevTools route: their windows (listed as `devtools:…` when the desktop does not list them) take screenshots, clicks, `type` (any Unicode), `press`, `scroll`, `drag` and `move` (hover) in the background through the page, covered or not.
     Their screenshot is the page viewport, without the browser's tabs and toolbar. An app that was already running has no route; the `apps.open` output says so.
-    In a Chromium browser (not Electron) on a desktop that hands focus to windows asking for it (Omarchy's Hyprland), clicks and drags are refused: every press makes the browser ask for focus. A plain click on a text field focuses it instead; hover, scroll, `type` and `press` still work.
+    Chromium browsers (not Electron) ask the desktop for focus on every press. Where the desktop grants activation, clicks and drags are refused; on Hyprland only, an armed native in-compositor hook lifts that refusal for the browser's pid and the call reports window-focus outcomes. A socket watcher or unavailable guard does not lift it. A plain click on a text field focuses it instead; hover, scroll, `type` and `press` still work.
 - macOS `screenLocked` (in `capabilities()`, a screenshot result, or a run's leading `Note:`):
   - A display capture shows the lock screen and a window capture that window's last frame.
   - Keystrokes, takeover and AX fail until someone unlocks, while background clicks still reach the app.
