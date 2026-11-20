@@ -116961,6 +116961,11 @@
     "sha": "ad63a1ce2ff50cc64811b86fb60ee90f2ae7fa44",
     "at": "2026-11-20T16:57:58Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "ad63a1ce2ff50cc64811b86fb60ee90f2ae7fa44",
+    "at": "2026-11-20T17:00:22Z",
+    "host": "goliath"
    }
   }
  },
