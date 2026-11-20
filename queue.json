@@ -106379,7 +106379,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "725f8c6f34ce648bec57af31a4e91baea1081a3c",
+   "base": "fbb8085ff432419132c6e3132f36ad857893b1a4",
    "body": "bodies/atspi-alert-windows.md",
    "state": "open",
    "pr": 19884,
@@ -106387,7 +106387,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/atspi-alert-windows",
    "host": "MacBook-Pro",
    "added": "2026-11-20T18:24:54Z",
-   "updated": "2026-11-20T18:38:15Z",
+   "updated": "2026-11-20T18:52:34Z",
    "note": "",
    "tests_over_override": {
     "reason": "LinuxUpstream, 2026-11-20: one test reaching three branches (Alert listing through windows(), shared-title refusal in window_id, an in-window alert's owner); 45 of its lines are a fake GTK 3 app with children, application, parent and pid that no existing fixture provides",
@@ -106523,7 +106523,8 @@
       ]
      }
     }
-   ]
+   ],
+   "advanced": "2026-11-20T18:52:34Z"
   },
   {
    "id": "hyprland-window-list",
