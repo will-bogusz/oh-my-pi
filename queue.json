@@ -105273,6 +105273,24 @@
     "19519": "Main, 2026-11-20: adjacent test-only fields in the fake backend; combined = both"
    },
    "advanced": "2026-11-20T04:33:58Z"
+  },
+  {
+   "id": "win-popup-foreground",
+   "branch": "will/win-popup-foreground",
+   "title": "fix(natives): press items of the open WPF context menu of the window in front",
+   "area": "computer",
+   "priority": null,
+   "needs": [],
+   "base": "34962a6f8e62cca003c24d6fa9a85578d7b23707",
+   "body": "bodies/win-popup-foreground.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-popup-foreground",
+   "host": "MacBook-Pro",
+   "added": "2026-11-20T04:47:55Z",
+   "updated": "2026-11-20T04:47:55Z",
+   "note": ""
   }
  ],
  "watch": {
