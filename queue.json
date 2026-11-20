@@ -105270,7 +105270,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-occluded-capture",
    "host": "MacBook-Pro",
    "added": "2026-11-20T04:27:57Z",
-   "updated": "2026-11-20T07:39:20Z",
+   "updated": "2026-11-20T07:39:46Z",
    "note": "",
    "rebases_after": [
     19519
@@ -105449,7 +105449,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-11-20T07:39:20Z"
+   "opened": "2026-11-20T07:39:20Z",
+   "readied": "2026-11-20T07:39:46Z"
   },
   {
    "id": "win-popup-foreground",
