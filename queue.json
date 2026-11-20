@@ -107060,7 +107060,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-20T21:12:04Z",
+  "checked": "2026-11-20T22:13:24Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -118423,12 +118423,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-20T21:42:34.882698Z",
+  "at": "2026-11-20T22:13:24.940024Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 2,
-   "left": 6
+   "used": 0,
+   "left": 8
   },
   "rows": [
    {
@@ -119264,7 +119264,7 @@
     "state": "queued",
     "area": "snapcompact",
     "priority": "P2",
-    "title": "fix(catalog): draw Gemini 4 Carbon's snapcompact frames at 1568px on Devin and Factory Droid",
+    "title": "fix(catalog): draw Gemini 4 Carbon, Neon and Hydrogen snapcompact frames at 1568px on Devin, and Carbon's on Factory Droid",
     "action": "wait",
     "reasons": [
      "needs #19880 (open)"

@@ -1,9 +1,9 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20 22:08Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20 22:14Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-11-20 21:42Z on goliath; groups below are from it, states from the manifest)
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-20 22:13Z on goliath; groups below are from it, states from the manifest)
 **Counts:** openable now 1, conflict-held 17, stacked 20, held 13, parked 1, open PRs 28; merged 404, closed 44
 
 ## Openable now (1)
@@ -55,7 +55,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20
 | win-popup-foreground | fix(natives): press items of the open WPF context menu of the window in front | computer |  | 17h | win-button-click ([#19889](https://github.com/can1357/oh-my-pi/pull/19889)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-popup-foreground) |
 | win-takeover-settle | fix(natives): stop Windows takeovers of a busy app bringing it forward after the call failed | computer |  | 8h | win-takeover-intervene | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-takeover-settle) |
 | win-button-click-fence | fix(natives): mark dispatch before a fenced BM_CLICK | computer |  | 5h | win-button-click ([#19889](https://github.com/can1357/oh-my-pi/pull/19889)), desktop-dispatch-fence ([#19871](https://github.com/can1357/oh-my-pi/pull/19871)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-button-click-fence) |
-| win-wpf-press | fix(natives): press WPF controls behind other windows through their default action | computer |  | 2h | win-button-click ([#19889](https://github.com/can1357/oh-my-pi/pull/19889)), desktop-dispatch-fence ([#19871](https://github.com/can1357/oh-my-pi/pull/19871)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-wpf-press) |
+| win-wpf-press | fix(natives): press WPF controls behind other windows through their default action | computer |  | 3h | win-button-click ([#19889](https://github.com/can1357/oh-my-pi/pull/19889)), desktop-dispatch-fence ([#19871](https://github.com/can1357/oh-my-pi/pull/19871)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-wpf-press) |
 | win-takeover-selection | fix(natives): keep the user's caret through a Windows takeover's hand-back | computer |  | 2h | win-takeover-settle | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-takeover-selection) |
 | devin-gemini-image-price-rest | fix(catalog): budget Devin's other measured Gemini models at the 1,089 tokens it bills per image | catalog | P2 | 0h | devin-neon-image-price ([#19883](https://github.com/can1357/oh-my-pi/pull/19883)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-gemini-image-price-rest) |
 
@@ -114,4 +114,4 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20
 | [#19883](https://github.com/can1357/oh-my-pi/pull/19883) | devin-neon-image-price | fix(catalog): budget Gemini 4 Neon's images on Devin at the 1,089 tokens it bills | catalog | P0 | 3h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-neon-image-price) |
 | [#19884](https://github.com/can1357/oh-my-pi/pull/19884) | atspi-alert-windows | fix(natives): list GTK message dialogs as windows on Wayland | computer | P1 | 3h | keep; tests-over: LinuxUpstream, 2026-11-20: one test reaching three branches (Alert listing through windows(), shared-title refusal in window_id, an in-window alert's owner); 45 of its lines are a fake GTK 3 app with children, application, parent and pid that no existing fixture provides | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-alert-windows) |
 | [#19928](https://github.com/can1357/oh-my-pi/pull/19928) | devin-org-identity | fix(ai,catalog): store Devin login identity scoped by organization | broker | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-org-identity) |
-| [#19929](https://github.com/can1357/oh-my-pi/pull/19929) | devin-quota-ranking | fix(ai): rank Devin logins by quota before their on-demand balance | broker | P0 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-quota-ranking) |
+| [#19929](https://github.com/can1357/oh-my-pi/pull/19929) | devin-quota-ranking | fix(ai): rank Devin logins by quota before their on-demand balance | broker | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-quota-ranking) |
