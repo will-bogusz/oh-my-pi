@@ -105729,13 +105729,13 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-20T13:33:09Z",
+  "checked": "2026-11-20T14:03:27Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "win-wpf-scroll": {
-    "since": "2026-11-20T13:33:09Z",
-    "title": "fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing"
+   "win-takeover-intervene": {
+    "since": "2026-11-20T14:03:27Z",
+    "title": "fix(natives): stop Windows takeovers when the user types or clicks"
    },
    "factory-droid-1100-pin": {
     "since": "2026-11-17T00:39:57Z",
@@ -107557,6 +107557,19 @@
     "id": "win-uia-set-patterns",
     "title": "fix(natives): set WPF sliders and combo boxes through RangeValue and SelectionItem",
     "why": "plan: held (held: Main, 2026-11-20: in its fix round (WinWpfRoutes5, review needs-changes at 86d258734d9); takes the recorded ax.rs form with win-wpf-scroll when it follows)"
+   },
+   {
+    "at": "2026-11-20T14:03:27Z",
+    "kind": "openable",
+    "id": "win-takeover-intervene",
+    "title": "fix(natives): stop Windows takeovers when the user types or clicks"
+   },
+   {
+    "at": "2026-11-20T14:03:27Z",
+    "kind": "unopenable",
+    "id": "win-wpf-scroll",
+    "title": "fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing",
+    "why": "plan: wait (conflicts with win-takeover-intervene in crates/natives/src/desktop/win32/mod.rs)"
    }
   ]
  },
@@ -116433,7 +116446,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-20T13:33:09.960226Z",
+  "at": "2026-11-20T14:03:28.462324Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -116981,7 +116994,7 @@
     "reasons": [
      "conflicts with #19542 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19633 in packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-daemon.test.ts"
+     "conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-daemon.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
     ],
     "note": "",
     "over": [],
@@ -117006,7 +117019,8 @@
      "needs r2/relay-own-only (queued)",
      "conflicts with #19542 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19633 in packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-daemon.test.ts"
+     "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-daemon.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
+     "conflicts with main in packages/browser-relay/extension/background.ts, packages/browser-relay/extension/chrome.d.ts, packages/browser-relay/extension/manifest.json, packages/coding-agent/src/tools/browser/relay/extension-assets/manifest.json.txt, packages/coding-agent/src/tools/browser/relay/protocol.ts"
     ],
     "note": "",
     "over": [],
@@ -117033,9 +117047,9 @@
      "needs r2/relay-popup-owned (queued), r2/page-waiting (queued)",
      "conflicts with #19542 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19633 in packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "its need r2/relay-popup-owned conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-daemon.test.ts",
-     "its need r2/page-waiting conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/dialogs.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
-     "conflicts with main in packages/coding-agent/src/tools/browser.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts"
+     "its need r2/relay-popup-owned conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/extension/background.ts, packages/browser-relay/extension/chrome.d.ts, packages/browser-relay/extension/manifest.json, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/extension-assets/manifest.json.txt, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-daemon.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
+     "its need r2/page-waiting conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/dialogs.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
+     "conflicts with main in packages/coding-agent/src/tools/browser.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts"
     ],
     "note": "",
     "over": [],
@@ -117062,7 +117076,7 @@
     "reasons": [
      "conflicts with #19542 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19633 in packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with main in packages/browser-relay/extension/background.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/tab-worker.ts"
+     "conflicts with main in packages/browser-relay/extension/background.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts"
     ],
     "note": "",
     "over": [],
@@ -117545,7 +117559,7 @@
      "needs r2/relay-own-only (queued)",
      "conflicts with #19542 in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19633 in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-daemon.test.ts",
+     "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-daemon.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/dialogs.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/interactions.ts"
     ],
     "note": "",
@@ -117713,17 +117727,39 @@
     "area": "computer",
     "priority": null,
     "title": "fix(natives): stop Windows takeovers when the user types or clicks",
-    "action": "held",
-    "reasons": [
-     "held: WinTakeover2, 2026-11-20: Main asked to scope the Raw Input listener to the takeover call; re-measure and review the delta first",
-     "conflicts with main in crates/natives/src/desktop/win32/mod.rs"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-20T12:25:26Z"
+   },
+   {
+    "id": "win-takeover-settle",
+    "label": "win-takeover-settle",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": null,
+    "title": "fix(natives): stop Windows takeovers of a busy app bringing it forward after the call failed",
+    "action": "wait",
+    "reasons": [
+     "needs win-takeover-intervene (queued)",
+     "conflicts with win-takeover-intervene in crates/natives/src/desktop/win32/input.rs, crates/natives/src/desktop/win32/mod.rs",
+     "conflicts with main in crates/natives/src/desktop/win32/input.rs, crates/natives/src/desktop/win32/mod.rs"
+    ],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [
+     "win-takeover-intervene"
+    ],
+    "needs": [
+     "win-takeover-intervene"
+    ],
+    "created": "2026-11-20T13:55:57Z"
    },
    {
     "id": "win-uia-set-patterns",
@@ -117752,12 +117788,16 @@
     "area": "computer",
     "priority": null,
     "title": "fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with win-takeover-intervene in crates/natives/src/desktop/win32/mod.rs"
+    ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "win-takeover-intervene"
+    ],
     "needs": [],
     "created": "2026-11-20T04:27:43Z"
    },

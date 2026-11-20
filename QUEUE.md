@@ -1,19 +1,19 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20 14:02Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20 14:04Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-20 13:33Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 2, conflict-held 18, stacked 15, held 11, parked 1, open PRs 19, queued since the last plan 2; merged 404, closed 44
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-20 14:03Z on goliath; groups below are from it, states from the manifest)
+**Counts:** openable now 2, conflict-held 19, stacked 16, held 11, parked 1, open PRs 19; merged 404, closed 44
 
 ## Openable now (2)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
 | factory-droid-1100-pin | feat(catalog): identify Factory Droid requests as droid 1.10.0 | factory-droid |  | 6d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-pin) |
-| win-wpf-scroll | fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing | computer |  | 9h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-wpf-scroll) |
+| win-takeover-intervene | fix(natives): stop Windows takeovers when the user types or clicks | computer |  | 1h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-takeover-intervene) |
 
-## Conflict-held (18)
+## Conflict-held (19)
 
 | id | title | area | priority | age | blocked by | branch |
 |---|---|---|---|---|---|---|
@@ -34,9 +34,10 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20
 | stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 7d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 | macos-web-type-background | fix(natives): type into a background macOS web page field without a takeover | computer | P2 | 5d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19504](https://github.com/can1357/oh-my-pi/pull/19504), [#19702](https://github.com/can1357/oh-my-pi/pull/19702), [#19531](https://github.com/can1357/oh-my-pi/pull/19531), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-web-type-background) |
 | deadline-ranking | feat(ai): rank an account priority by quota deadline | ai/auth | P2 | 2d | [#19623](https://github.com/can1357/oh-my-pi/pull/19623), [#19700](https://github.com/can1357/oh-my-pi/pull/19700), [#19701](https://github.com/can1357/oh-my-pi/pull/19701) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/deadline-ranking) |
+| win-wpf-scroll | fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing | computer |  | 9h | win-takeover-intervene | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-wpf-scroll) |
 | win-popup-foreground | fix(natives): press items of the open WPF context menu of the window in front | computer |  | 9h | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-popup-foreground) |
 
-## Stacked (15)
+## Stacked (16)
 
 | id | title | area | priority | age | needs | branch |
 |---|---|---|---|---|---|---|
@@ -55,6 +56,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20
 | snapcompact-shape-reader-identity | fix(catalog): give snapcompact readers their lead model's frame shape | snapcompact | P2 | 2d | snapcompact-shape-kdl | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-shape-reader-identity) |
 | snapcompact-deepseek-text | fix(catalog,snapcompact,coding-agent): give DeepSeek V4.1 Flash its snapcompact archive as text | snapcompact | P2 | 2d | snapcompact-shape-kdl, snapcompact-rerender-on-switch ([#19620](https://github.com/can1357/oh-my-pi/pull/19620)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-deepseek-text) |
 | snapcompact-carbon-1568 | fix(catalog): draw Gemini 4 Carbon's snapcompact frames at 1568px on Devin and Factory Droid | snapcompact | P2 | 2d | snapcompact-shape-kdl | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-carbon-1568) |
+| win-takeover-settle | fix(natives): stop Windows takeovers of a busy app bringing it forward after the call failed | computer |  | 0h | win-takeover-intervene | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-takeover-settle) |
 
 ## Held (11)
 
@@ -101,10 +103,3 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20
 | [#19615](https://github.com/can1357/oh-my-pi/pull/19615) | wayland-still-capture | fix(natives): keep the Wayland ScreenCast stream open between screenshots on Hyprland and wlroots | natives | P2 | 2d | keep; accepted pair with #19616: Main, 2026-11-18: no conflict since #19615 376a1b8be12 moved the kept-stream consts to wayland/capture/share.rs (git merge-tree clean); the merged tree built and its wayland tests passed 57/57 on goliath (ShareScope) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/wayland-still-capture) |
 | [#19620](https://github.com/can1357/oh-my-pi/pull/19620) | snapcompact-rerender-on-switch | fix(snapcompact,coding-agent): re-render a snapcompact archive in the frame shape of the model reading it | snapcompact | P2 | 2d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-rerender-on-switch) |
 | [#19849](https://github.com/can1357/oh-my-pi/pull/19849) | win-occluded-capture | fix(natives): count every opaque window as a cover over a Chromium capture | computer | P1 | 6h | keep; accepted pair with #19519: Main, 2026-11-20: adjacent test-only fields in the fake backend; combined = both | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-occluded-capture) |
-
-## Queued since the last plan (2)
-
-| id | title | area | priority | age | branch |
-|---|---|---|---|---|---|
-| win-takeover-intervene | fix(natives): stop Windows takeovers when the user types or clicks | computer |  | 1h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-takeover-intervene) |
-| win-takeover-settle | fix(natives): stop Windows takeovers of a busy app bringing it forward after the call failed | computer |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-takeover-settle) |
