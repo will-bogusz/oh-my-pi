@@ -106686,6 +106686,24 @@
    "added": "2026-11-20T19:28:59Z",
    "updated": "2026-11-20T20:35:18Z",
    "note": ""
+  },
+  {
+   "id": "devin-org-identity",
+   "branch": "will/devin-org-identity",
+   "title": "fix(ai,catalog): store Devin login identity scoped by organization",
+   "area": "broker",
+   "priority": null,
+   "needs": [],
+   "base": "fbb8085ff432419132c6e3132f36ad857893b1a4",
+   "body": "bodies/devin-org-identity.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-org-identity",
+   "host": "MacBook-Pro",
+   "added": "2026-11-20T20:47:34Z",
+   "updated": "2026-11-20T20:47:34Z",
+   "note": ""
   }
  ],
  "watch": {
