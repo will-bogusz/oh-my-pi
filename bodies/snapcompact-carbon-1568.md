@@ -39,7 +39,7 @@ Maintenance: a change in how Gemini bills or resamples images calls for re-runni
 
 - `bun test packages/snapcompact/test/snapcompact.test.ts -t "Gemini 4 Carbon"`: renders one Carbon frame per host and decodes its PNG. Devin frames (logical id and the `-high` effort uid) and Factory frames are 1568px wide in the 8x22 cell, Google's 2048px. With the rule removed, or the effort uid dropped from it, it fails (`Expected: 1568, Received: 2048`).
 - `resolveShape()` on this branch: Carbon on Devin and Factory 1568px; Carbon on Google, Gemini 3.7 Flash on Devin and Factory, and Gemini 4 Argon on Factory 2048px.
-- `bun test packages/snapcompact/test/snapcompact.test.ts`: 122 pass.
+- `bun test packages/snapcompact/test/snapcompact.test.ts`: 124 pass. A model's configured `snapcompactShape` still wins over this rule.
 
 ---
 

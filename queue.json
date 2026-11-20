@@ -104607,7 +104607,7 @@
    "needs": [
     "snapcompact-shape-kdl"
    ],
-   "base": "495a582070a024db23680d35a7562f935b9829cc",
+   "base": "a0078fecb1842eceed362b538e6a9d0b698ca2c2",
    "body": "bodies/snapcompact-carbon-1568.md",
    "state": "queued",
    "pr": null,
@@ -104615,8 +104615,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-carbon-1568",
    "host": "MacBook-Pro",
    "added": "2026-11-18T04:51:10Z",
-   "updated": "2026-11-18T17:49:38Z",
-   "note": "LaneReaderCarriers, 2026-11-18: one-push fix after review: Devin's Carbon effort uids (-low/-medium/-high) added to the 1568 rule after Brit's b76734aac30 showed Devin serves them; test row fails without the uid. Factory carries only gemini-4-carbon."
+   "updated": "2026-11-20T17:50:15Z",
+   "note": "LaneSnapcompactStack, 2026-11-20: rebased onto the restacked kdl (a0078fecb18, on origin/main alone, #19591 folded in); rules.json regenerated, CHANGELOG under [Unreleased]; own diff unchanged, so no new review. snapcompact 124 pass, catalog 1,421; Carbon test fails with either commit's rule reverted (Received: 2048)."
   },
   {
    "id": "export-viewer-regen",
