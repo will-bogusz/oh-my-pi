@@ -476,23 +476,6 @@ pub(super) fn polled() -> bool {
 	ACTIVE.with_borrow(|active| matches!(active, Some((presses, _)) if presses.polled()))
 }
 
-/// Runs `run` in a listening takeover whose user has already pressed
-/// something, as [`check`] and [`outcome`] then report; the thread's
-/// takeover state is restored afterwards, even on unwinding.
-#[cfg(test)]
-pub(super) fn with_press_for_test<R>(run: impl FnOnce() -> R) -> R {
-	struct Restore(Option<Baseline>);
-	impl Drop for Restore {
-		fn drop(&mut self) {
-			ACTIVE.set(self.0.take());
-		}
-	}
-	let presses = Arc::new(Presses::new(None, Watched::listening(|_| true)));
-	presses.record(Duration::ZERO);
-	let _restore = Restore(ACTIVE.replace(Some((presses, 0))));
-	run()
-}
-
 /// Admission's failure when the user's input cannot be watched, for `reason`.
 fn unwatched(reason: &str) -> DesktopError {
 	DesktopError::input_failed(format!(
@@ -997,8 +980,24 @@ fn listen(seen: Option<Duration>) -> CoreResult<(Arc<Presses>, Listener)> {
 }
 
 #[cfg(test)]
-mod tests {
+pub(super) mod tests {
 	use super::*;
+
+	/// Runs `run` in a listening takeover whose user has already pressed
+	/// something, as [`check`] and [`outcome`] then report; the thread's
+	/// takeover state is restored afterwards, even on unwinding.
+	pub(in crate::desktop::win32) fn with_press_for_test<R>(run: impl FnOnce() -> R) -> R {
+		struct Restore(Option<Baseline>);
+		impl Drop for Restore {
+			fn drop(&mut self) {
+				ACTIVE.set(self.0.take());
+			}
+		}
+		let presses = Arc::new(Presses::new(None, Watched::listening(|_| true)));
+		presses.record(Duration::ZERO);
+		let _restore = Restore(ACTIVE.replace(Some((presses, 0))));
+		run()
+	}
 
 	fn presses(last: Option<Duration>) -> Presses {
 		Presses::new(last, Watched::listening(|_| true))

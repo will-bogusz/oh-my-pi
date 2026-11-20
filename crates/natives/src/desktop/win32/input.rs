@@ -2062,7 +2062,7 @@ mod foreground {
 			})
 			.unwrap_err();
 			assert_eq!((typed, packets), ((1, true), 2));
-			let error = activity::with_press_for_test(|| {
+			let error = activity::tests::with_press_for_test(|| {
 				let error = activity::outcome(Err(short)).unwrap_err();
 				stopped_typing(error, typed, 3, "window 7")
 			});
