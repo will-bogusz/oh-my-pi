@@ -104477,8 +104477,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-shape-kdl",
    "host": "MacBook-Pro",
    "added": "2026-11-18T00:47:39Z",
-   "updated": "2026-11-20T18:06:48Z",
-   "note": "LaneSnapcompactStack, 2026-11-20: restacked on origin/main alone (Main's plan: opens without #19620). Folds in #19591 (ryanskidmore): explicit snapcompact.shape > model snapcompactShape > catalog KDL > 8on22-bw, mirroring resolveImageCountBudget. Dropped the unused snapcompact-middle-variant axis so denseCompanion(high, api) stays as on main and #19620's archiveInShape call composes in either order; pair tree built (typecheck clean; snapcompact 123, compaction suites 440 pass + 2 main-failing). Census vs main: 7,757 built models 0 diffs, 0 with configured snapcompactShape. Review: ReviewKdlRework needs-changes at 7f06a7b (CHANGELOG dup, fixed), ReviewKdlFinal ready at a0078fe.",
+   "updated": "2026-11-20T18:12:16Z",
+   "note": "LaneSnapcompactStack, 2026-11-20: opened as #19880 (kind proposal). Codex clean on c14095c2ae and on b01e9c6d012. roboomp: P2 note (custom-model shape change needs maintainer sign-off) answered top-level; 2 should-fix (Bedrock GLM residue test, README shape selection) fixed in b01e9c6d012, threads replied and left open. Pair with #19620 rebuilt on b01e9c6d012 and recorded. Waiting on a maintainer decision.",
    "kind": "proposal",
    "line_loss_overrides": [
     {
