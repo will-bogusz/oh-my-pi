@@ -104468,10 +104468,8 @@
    "title": "refactor(catalog,snapcompact): move snapcompact frame shapes into catalog rules",
    "area": "snapcompact",
    "priority": "P2",
-   "needs": [
-    "snapcompact-rerender-on-switch"
-   ],
-   "base": "7a53f0a2d36e160f9255d80626ed757f41280b76",
+   "needs": [],
+   "base": "725f8c6f34ce648bec57af31a4e91baea1081a3c",
    "body": "bodies/snapcompact-shape-kdl.md",
    "state": "queued",
    "pr": null,
@@ -104479,8 +104477,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-shape-kdl",
    "host": "MacBook-Pro",
    "added": "2026-11-18T00:47:39Z",
-   "updated": "2026-11-19T22:51:21Z",
-   "note": "Main (session 01a08220), 2026-11-19, for this entry's owner: v19.0.1 (6dcf164d2c6) ships Ryan Skidmore's per-model snapcompact frame shape, fc571daed2c (Model.snapcompactShape {variant, frameSize?} from models.yml, modelOverrides and registerProvider; resolveShape() uses it before the model line's default, an explicit snapcompact.shape setting still wins) and fd345f5ba9b (frameSize bounded 64..2576, isConfigurableFrameSize). This entry's one real conflict with main (packages/snapcompact/src/snapcompact.ts, plus rules.json) is against these two. Open question before #19620 merges and this restacks: where catalog-rule shapes sit in resolveShape()'s precedence relative to the released snapcompactShape (proposed: explicit setting > model snapcompactShape > catalog rule > line default), and whether the KDL move still earns its place beside a user-facing per-model setting. Design call, not a mechanical restack; stacked reader-identity, deepseek-text, carbon-1568 follow it."
+   "updated": "2026-11-20T17:49:03Z",
+   "note": "LaneSnapcompactStack, 2026-11-20: restacked on origin/main alone (Main's plan: opens without #19620). Folds in #19591 (ryanskidmore): explicit snapcompact.shape > model snapcompactShape > catalog KDL > 8on22-bw, mirroring resolveImageCountBudget. Dropped the unused snapcompact-middle-variant axis so denseCompanion(high, api) stays as on main and #19620's archiveInShape call composes in either order; pair tree built (typecheck clean; snapcompact 123, compaction suites 440 pass + 2 main-failing). Census vs main: 7,757 built models 0 diffs, 0 with configured snapcompactShape. Review: ReviewKdlRework needs-changes at 7f06a7b (CHANGELOG dup, fixed), ReviewKdlFinal ready at a0078fe.",
+   "kind": "proposal"
   },
   {
    "id": "snapcompact-shape-reader-identity",
