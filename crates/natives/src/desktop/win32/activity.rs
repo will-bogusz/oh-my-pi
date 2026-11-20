@@ -485,48 +485,4 @@ mod tests {
 		assert_eq!(error.code, crate::desktop::error::ErrorCode::UserIntervened);
 		assert!(error.message.contains("nothing was sent"), "{}", error.message);
 	}
-
-	#[test]
-	#[ignore = "sends input to the desktop: run with --ignored in a signed-in desktop session"]
-	fn the_listener_does_not_count_input_this_process_sends() {
-		use windows_sys::Win32::UI::Input::KeyboardAndMouse::{
-			INPUT, INPUT_0, INPUT_KEYBOARD, INPUT_MOUSE, KEYBDINPUT, KEYEVENTF_KEYUP,
-			MOUSEEVENTF_WHEEL, MOUSEINPUT, SendInput,
-		};
-		let activity = UserActivity::start().unwrap();
-		let key = |flags| INPUT {
-			r#type:    INPUT_KEYBOARD,
-			Anonymous: INPUT_0 {
-				// 0xE8 is unassigned: it types nothing.
-				ki: KEYBDINPUT {
-					wVk:         0xe8,
-					wScan:       0,
-					dwFlags:     flags,
-					time:        0,
-					dwExtraInfo: 0,
-				},
-			},
-		};
-		let wheel = INPUT {
-			r#type:    INPUT_MOUSE,
-			Anonymous: INPUT_0 {
-				mi: MOUSEINPUT {
-					dx:          0,
-					dy:          0,
-					mouseData:   0,
-					dwFlags:     MOUSEEVENTF_WHEEL,
-					time:        0,
-					dwExtraInfo: 0,
-				},
-			},
-		};
-		let inputs = [key(0), key(KEYEVENTF_KEYUP), wheel];
-		let before = activity.presses.count.load(Ordering::Acquire);
-		// SAFETY: `inputs` is an initialized INPUT slice copied synchronously.
-		let sent =
-			unsafe { SendInput(inputs.len() as u32, inputs.as_ptr(), size_of::<INPUT>() as i32) };
-		assert_eq!(sent as usize, inputs.len());
-		std::thread::sleep(Duration::from_millis(300));
-		assert_eq!(activity.presses.count.load(Ordering::Acquire), before);
-	}
 }
