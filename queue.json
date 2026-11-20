@@ -105695,7 +105695,7 @@
    "area": "computer",
    "priority": null,
    "needs": [],
-   "base": "b636e19d10b664950d600505d194337bbeef42f0",
+   "base": "17e663b73667941db39271d90528a05c9c1e5f4b",
    "body": "bodies/win-takeover-intervene.md",
    "state": "queued",
    "pr": null,
@@ -105703,8 +105703,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-takeover-intervene",
    "host": "MacBook-Pro",
    "added": "2026-11-20T12:25:26Z",
-   "updated": "2026-11-20T13:54:22Z",
-   "note": ""
+   "updated": "2026-11-20T13:57:49Z",
+   "note": "",
+   "advanced": "2026-11-20T13:57:49Z"
   },
   {
    "id": "win-takeover-settle",
