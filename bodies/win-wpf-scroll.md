@@ -19,19 +19,19 @@ Reading order: `refusal`, `wpf_scroll_unsupported` and `pointer` in `win32/input
 Decisions:
 - A posted wheel to a WPF window is never reported `ok`.
 - In front, over a UI Automation scroll container, the scroll goes through `ScrollPattern`, one step per wheel-setting increment, each axis on its own. A step counts only when that axis's scroll percent moved the requested way with its view size unchanged; a view-size change is `AxUnconfirmed`, no movement `InputFailed`.
-- One deadline from entry is checked before every UI Automation call; past it, `AxUnconfirmed` if a step was sent, else a failure with nothing sent.
+- Scroll's own cutoff, the operation deadline less the reply's margin, is checked around every UI Automation call; past it, `AxUnconfirmed` if a step was sent, else a failure with nothing sent. The caller's timeout comes later, so a call ending in between still gets this error.
 - Every other WPF case (behind other windows, no scroll container, an unmapped point, a provider failure before any step) is `Unsupported` with nothing sent, naming what works: the front, or `takeover: true`. It is not `BackgroundUnavailable`, so default mode never takes over on its own.
-- A hosted WinForms list under the point keeps `main`'s posted wheel; other hosted children do not (unhandled, it bubbles back to WPF), and a WPF window hosting Chromium keeps `main`'s refusal.
+- A hosted WinForms list under the point keeps `main`'s posted wheel; other hosted children do not, and a WPF window hosting Chromium keeps `main`'s refusal.
 
-Limits: WPF exposes scroll percent and view size, not offsets: a resize that keeps the view size and moves the percent the requested way counts as a scroll. A blocked provider can hold one call past the deadline (client timeouts did not cut a blocked WPF call short on Windows 10 or 11); the caller then gets `main`'s `Timeout`. XAML hosts: not measured, unchanged.
+Limits: WPF exposes scroll percent and view size, not offsets: a resize that keeps the view size and moves the percent the requested way counts as a scroll. A blocked provider can hold one call past both (client timeouts did not cut it short on Windows 10 or 11); the caller then gets `main`'s `Timeout`. XAML hosts: not measured.
 
 ## Testing
 
-`wpf_scrolls_go_through_ui_automation_in_front_and_report_what_moved` (ignored; needs a signed-in desktop) drives `Request::Scroll` on a WPF list beside a hosted WinForms list: behind another window, `Unsupported`, nothing sent, window left behind; the WinForms list takes the posted wheel; a synthetic Chromium descendant keeps the refusal; in front, one notch moves by the wheel setting (also horizontal, diagonal), at the end `InputFailed`, a list growing during the step `AxUnconfirmed`, no container `Unsupported`, explicit takeover sends the real wheel. It passes at the head on both versions and fails on both with the view-size check removed. The non-ignored tests (deadline and read-back, host filter, `delivery.rs` matrix) pass on both.
+`wpf_scrolls_go_through_ui_automation_in_front_and_report_what_moved` (ignored: needs a desktop) drives `Request::Scroll` on a WPF list beside a hosted WinForms list: behind another window, `Unsupported`, nothing sent; the WinForms list takes the posted wheel; a synthetic Chromium descendant keeps the refusal; in front, one notch moves by the wheel setting, at the end `InputFailed`, a list growing during the step `AxUnconfirmed`, no container `Unsupported`, explicit takeover sends the real wheel. It passes on Windows 10 and 11 and fails on both with the view-size check removed; non-ignored tests pass too. Units and cells ran on `4a25afbb728`, before the import-only rebase.
 
 <details><summary>Builds and runs behind the numbers</summary>
 
-- Release v19.0.1 (`f40f335845f`) against an addon built from the head (`4a25afbb728`), through the harness's `scroll` (`dy: 3`), 1 round per build, v19.0.1 cells then branch cells: `PM-scroll-list` n=5 per condition, and `PM-scroll-canvas` (the fixture's Canvas border, which has no scroll container) n=10 in front. Windows 11 and Windows 10 12:51-13:00Z. Every reply in the table is counted; the harness also flagged one v19.0.1 Windows 11 covered trial (its observer window closed) and one branch Windows 10 typing trial (the fixture app was closed after the `Unsupported` reply). No trial lost a user key.
+- Release v19.0.1 (`f40f335845f`) against an addon built from `4a25afbb728`, through the harness's `scroll` (`dy: 3`), 1 round per build, v19.0.1 cells then branch cells: `PM-scroll-list` n=5 per condition, and `PM-scroll-canvas` (the fixture's Canvas border, which has no scroll container) n=10 in front. Windows 11 and Windows 10 12:51-13:00Z. Every reply in the table is counted; the harness also flagged one v19.0.1 Windows 11 covered trial (its observer window closed) and one branch Windows 10 typing trial (the fixture app was closed after the `Unsupported` reply). No trial lost a user key.
 - Explicit `takeover: true` is not a harness cell: Windows refused the harness's activation on both v19.0.1 and an earlier build of this branch (5 of 5 each), so the unit test's explicit-takeover step carries that case.
 
 </details>
@@ -59,3 +59,4 @@ Wheel routes are posted or sent to the list's window from outside it, or a move 
 </details>
 
 `scripts/rust-check` on Windows (cargo-xwin), Linux and macOS: pass, recorded for the head.
+
