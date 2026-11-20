@@ -105233,7 +105233,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-20T00:49:17Z",
+  "checked": "2026-11-20T01:49:35Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -114979,7 +114979,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-20T00:49:17.903470Z",
+  "at": "2026-11-20T01:49:36.364795Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -114987,6 +114987,23 @@
    "left": 8
   },
   "rows": [
+   {
+    "id": "macos-drag-confirm",
+    "label": "#19195",
+    "number": 19195,
+    "state": "open",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): stop macOS background drags reporting moves that did not happen",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-13T20:28:59Z"
+   },
    {
     "id": "iphone-mirror-pointer",
     "label": "#17756",
@@ -115005,23 +115022,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-02T03:27:31Z"
-   },
-   {
-    "id": "macos-drag-confirm",
-    "label": "#19195",
-    "number": 19195,
-    "state": "open",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives): stop macOS background drags reporting moves that did not happen",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-13T20:28:59Z"
    },
    {
     "id": "macos-handback-typed",
@@ -116216,7 +116216,8 @@
     "action": "wait",
     "reasons": [
      "needs #19814 (open)",
-     "conflicts with #19814 in crates/natives/src/desktop/win32/value_write.rs, docs/tools/computer.md"
+     "conflicts with #19814 in crates/natives/src/desktop/win32/value_write.rs, docs/tools/computer.md",
+     "conflicts with main in crates/natives/src/desktop/win32/value_write.rs, docs/tools/computer.md"
     ],
     "note": "accepted pair with #19195: Main (assignment to QueueThirtySeven), 2026-11-19: docs/tools/computer.md only, both add one paragraph after the line-118 paragraph of the desktop section; combined = #19195's macOS background-drag paragraph, then this entry's Windows BM_CLICK paragraph (union, no wording change)",
     "over": [],
