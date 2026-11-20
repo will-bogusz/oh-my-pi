@@ -941,6 +941,127 @@ public static class Fixture {
 			let _ = self.host.wait();
 		}
 	}
+	// Measurement only (WinWpfRoutes7, thread 4644734942): never part of the PR.
+	const VAR_LIST: &str = r#"
+Add-Type -ReferencedAssemblies PresentationFramework,PresentationCore,WindowsBase,System.Xaml -TypeDefinition @'
+using System; using System.Windows; using System.Windows.Controls; using System.Windows.Interop; using System.Windows.Media;
+public static class VarFixture {
+	static ListBox list; static ScrollViewer viewer;
+	static ScrollViewer Find(DependencyObject o) {
+		if (o is ScrollViewer) return (ScrollViewer)o;
+		for (int i = 0; i < VisualTreeHelper.GetChildrenCount(o); i++) { var r = Find(VisualTreeHelper.GetChild(o, i)); if (r != null) return r; }
+		return null;
+	}
+	static IntPtr Hook(IntPtr hwnd, int message, IntPtr w, IntPtr l, ref bool handled) {
+		if (message == 0x8007) {
+			list.UpdateLayout(); if (viewer == null) viewer = Find(list);
+			Console.WriteLine("{0} {1} {2}", viewer.VerticalOffset, viewer.ViewportHeight, viewer.CanContentScroll); Console.Out.Flush();
+		}
+		return IntPtr.Zero;
+	}
+	public static void Run() {
+		list = new ListBox();
+		var heights = new[] { 18, 60, 24, 110, 40, 18, 18, 86 };
+		for (int i = 0; i < 400; i++) list.Items.Add(new TextBlock { Text = "Row " + i, Height = heights[i % heights.Length] });
+		var window = new Window { Title = "omp test: wpf varlist", Left = 40, Top = 40, Width = 420, Height = 300, Content = list };
+		window.SourceInitialized += (s, e) => HwndSource.FromHwnd(new WindowInteropHelper(window).Handle).AddHook(Hook);
+		window.ContentRendered += (s, e) => { window.Activate(); Console.WriteLine("ready"); Console.Out.Flush(); };
+		window.ShowDialog();
+	}
+}
+'@
+[VarFixture]::Run()
+"#;
+	#[test]
+	#[ignore = "measurement only"]
+	fn measure_wpf_variable_height_list_scrolls() {
+		use windows_sys::Win32::UI::WindowsAndMessaging::{SPI_SETWHEELSCROLLLINES, SPIF_SENDCHANGE};
+		let _serial = control::OWNERSHIP_TEST.lock();
+		let mut host = Command::new("powershell")
+			.args(["-NoProfile", "-Command", VAR_LIST])
+			.stdout(Stdio::piped())
+			.spawn()
+			.unwrap();
+		let mut out = BufReader::new(host.stdout.take().unwrap()).lines();
+		assert_eq!(out.next().unwrap().unwrap(), "ready");
+		// SAFETY: the title is NUL-terminated and outlives the call.
+		let window = unsafe { FindWindowW(std::ptr::null(), wide("omp test: wpf varlist").as_ptr()) };
+		assert!(!window.is_null());
+		assert!(window::wait_for_foreground(window, Duration::from_secs(2)).unwrap());
+		let mut state = || {
+			// SAFETY: a plain message to a window this fixture owns.
+			unsafe { PostMessageW(window, 0x8007, 0, 0) };
+			out.next().unwrap().unwrap()
+		};
+		let mut worker = Worker::new(DisplaySelector::Active, Arc::default(), Arc::default());
+		let token = CancellationSource::default().token();
+		let target = Target::Window(window.expose_provenance().to_string());
+		let request = Request::Capture {
+			target: target.clone(),
+			caps:   CaptureCaps::default(),
+			reply:  flume::unbounded().0,
+		};
+		let Response::Capture(frame) = worker.execute(&request, &token).unwrap() else {
+			panic!("expected capture")
+		};
+		let (x, y) =
+			(f64::from(frame.coordinate_width) / 2.0, f64::from(frame.coordinate_height) / 2.0);
+		let mut scroll = |dy: f64, takeover| {
+			let request = Request::Scroll {
+				target: target.clone(),
+				x,
+				y,
+				dx: 0.0,
+				dy,
+				takeover: Takeover::new(takeover, None),
+				reply: flume::unbounded().0,
+			};
+			match worker.execute(&request, &token) {
+				Ok(_) => "ok".to_owned(),
+				Err(error) => format!("{:?}: {}", error.code, error.message),
+			}
+		};
+		println!("MEASURE start {}", state());
+		for (direction, dy) in [("down", 100.0), ("up", -100.0)] {
+			for i in 0..5 {
+				let before = state();
+				let result = scroll(dy, None);
+				println!("MEASURE {direction} {i} [{before}] -> [{}] {result}", state());
+			}
+		}
+		let mut lines = 3_u32;
+		// SAFETY: these actions read or write one u32 setting.
+		unsafe {
+			SystemParametersInfoW(SPI_GETWHEELSCROLLLINES, 0, (&raw mut lines).cast(), 0);
+			SystemParametersInfoW(SPI_SETWHEELSCROLLLINES, 0, std::ptr::null_mut(), SPIF_SENDCHANGE);
+		}
+		std::thread::sleep(Duration::from_millis(500));
+		let before = state();
+		let result = scroll(100.0, None);
+		println!("MEASURE wheel-off background [{before}] -> [{}] {result}", state());
+		for i in 0..3 {
+			let before = state();
+			let result = scroll(100.0, Some(true));
+			std::thread::sleep(Duration::from_millis(500));
+			println!("MEASURE wheel-off takeover {i} [{before}] -> [{}] {result}", state());
+		}
+		// SAFETY: restores the setting read above.
+		unsafe {
+			SystemParametersInfoW(
+				SPI_SETWHEELSCROLLLINES,
+				lines,
+				std::ptr::null_mut(),
+				SPIF_SENDCHANGE,
+			);
+		}
+		std::thread::sleep(Duration::from_millis(500));
+		let before = state();
+		let result = scroll(100.0, Some(true));
+		std::thread::sleep(Duration::from_millis(500));
+		println!("MEASURE wheel-on takeover control [{before}] -> [{}] {result}", state());
+		let _ = host.kill();
+		let _ = host.wait();
+	}
 	#[test]
 	#[ignore = "moves the foreground between windows it opens; run with --ignored from a focused \
 	            terminal in a signed-in desktop session"]
