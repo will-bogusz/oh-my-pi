@@ -105892,7 +105892,7 @@
    "area": "computer",
    "priority": null,
    "needs": [],
-   "base": "640d6e49cff452a4cb101a0643219736df1a2b23",
+   "base": "725f8c6f34ce648bec57af31a4e91baea1081a3c",
    "body": "bodies/desktop-dispatch-fence.md",
    "state": "queued",
    "pr": null,
@@ -105900,7 +105900,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/desktop-dispatch-fence",
    "host": "MacBook-Pro",
    "added": "2026-11-20T15:50:23Z",
-   "updated": "2026-11-20T16:49:00Z",
+   "updated": "2026-11-20T16:49:10Z",
    "note": "",
    "tests_over_override": {
     "reason": "WinWpfRoutes6, 2026-11-20: the final-head review asked for the action off side through the caller and deadline-free teardown; the four session tests each reach a distinct branch (marked then expired, abandoned, on time, unfenced)",
@@ -106013,7 +106013,8 @@
      "host": "goliath",
      "tree": "7e9a9b0ac08912a0e7d1dce33419bedbf6fa4529"
     }
-   ]
+   ],
+   "advanced": "2026-11-20T16:49:10Z"
   }
  ],
  "watch": {
