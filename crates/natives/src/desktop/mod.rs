@@ -1979,6 +1979,12 @@ impl Worker {
 		handle: &ax::AxHandle,
 		error: DesktopError,
 	) -> DesktopError {
+		// The walk to the element's window is untimed UI Automation, which
+		// could start after the operation's deadline.
+		#[cfg(target_os = "windows")]
+		if control::reply_deadline().is_some() {
+			return DesktopError::new(error.code, format!("{} ({reference})", error.message));
+		}
 		let windows = self
 			.backend()
 			.and_then(|backend| backend.windows())

@@ -239,7 +239,7 @@ mod tests {
 		io::{BufRead, BufReader, Write},
 		process::{Child, ChildStdout, Command, Stdio},
 		sync::Arc,
-		time::Duration,
+		time::{Duration, Instant},
 	};
 
 	use windows_sys::Win32::{
@@ -261,6 +261,7 @@ mod tests {
 		Request, Response, Takeover, Worker,
 		control::{self, CancellationSource},
 		error::ErrorCode,
+		types::{AxNode, AxQuery},
 	};
 
 	fn wide(text: &str) -> Vec<u16> {
@@ -1053,5 +1054,590 @@ public static class Fixture {
 		assert_eq!(wheel[OFFSET], grown[OFFSET] - f64::from(per_notch));
 		assert_eq!(wheel[CALLS], grown[CALLS]);
 		assert_eq!(foreground(), list.other);
+	}
+
+	/// Posted to the item fixture: scroll to `w` (0 top, 1 middle, 2 bottom,
+	/// 3 `l` rows above the bottom, 4 row offset `l`, 5 tree child `l + 40`).
+	const ROWS_AT: u32 = WM_APP + 11;
+	/// Posted to the item fixture: count foreground changes from here on.
+	const ARM: u32 = WM_APP + 12;
+	/// Posted to the `busy` list: the next read of its view size first scrolls
+	/// it 5 rows, as an app moving its list while it is read would.
+	const MOVE_ON_READ: u32 = WM_APP + 13;
+	/// Posted to the `busy` list: the next `ScrollIntoView` asked of a row
+	/// holds the app's UI thread for 2 s first.
+	const STALL_ITEM: u32 = WM_APP + 14;
+
+	// One full-window control of `__KIND__` behind a second window of the same
+	// app. MARK reports layout at dispatcher idle, after WPF's deferred
+	// ScrollIntoView, and a global foreground WinEvent hook also catches an
+	// activation undone between two reports.
+	const WPF_ITEMS: &str = r#"
+Add-Type -ReferencedAssemblies PresentationFramework,PresentationCore,WindowsBase,System.Xaml,UIAutomationProvider,UIAutomationTypes -TypeDefinition @'
+using System;
+using System.Globalization;
+using System.Runtime.InteropServices;
+using System.Windows;
+using System.Windows.Automation.Peers;
+using System.Windows.Automation.Provider;
+using System.Windows.Controls;
+using System.Windows.Interop;
+using System.Windows.Media;
+using System.Windows.Threading;
+public class BusyList : ListBox {
+	protected override AutomationPeer OnCreateAutomationPeer() { return new BusyListPeer(this); }
+}
+public class BusyListPeer : ListBoxAutomationPeer {
+	public BusyListPeer(ListBox owner) : base(owner) {}
+	public override object GetPattern(PatternInterface pattern) {
+		var inner = base.GetPattern(pattern);
+		var scroll = inner as IScrollProvider;
+		return pattern == PatternInterface.Scroll && scroll != null ? new BusyScroll(scroll) : inner;
+	}
+	protected override ItemAutomationPeer CreateItemAutomationPeer(object item) { return new BusyItemPeer(item, this); }
+}
+public class BusyItemPeer : ListBoxItemAutomationPeer {
+	public BusyItemPeer(object item, SelectorAutomationPeer owner) : base(item, owner) {}
+	public override object GetPattern(PatternInterface pattern) {
+		var inner = base.GetPattern(pattern);
+		var item = inner as IScrollItemProvider;
+		return pattern == PatternInterface.ScrollItem && item != null ? new BusyScrollItem(item) : inner;
+	}
+}
+public class BusyScroll : IScrollProvider {
+	readonly IScrollProvider inner;
+	public BusyScroll(IScrollProvider inner) { this.inner = inner; }
+	public void Scroll(System.Windows.Automation.ScrollAmount across, System.Windows.Automation.ScrollAmount down) { inner.Scroll(across, down); }
+	public void SetScrollPercent(double across, double down) { inner.SetScrollPercent(across, down); }
+	public double HorizontalScrollPercent { get { return inner.HorizontalScrollPercent; } }
+	public double VerticalScrollPercent { get { return inner.VerticalScrollPercent; } }
+	public double HorizontalViewSize { get { return inner.HorizontalViewSize; } }
+	public double VerticalViewSize { get { Fixture.MoveOnRead(); return inner.VerticalViewSize; } }
+	public bool HorizontallyScrollable { get { return inner.HorizontallyScrollable; } }
+	public bool VerticallyScrollable { get { return inner.VerticallyScrollable; } }
+}
+public class BusyScrollItem : IScrollItemProvider {
+	readonly IScrollItemProvider inner;
+	public BusyScrollItem(IScrollItemProvider inner) { this.inner = inner; }
+	public void ScrollIntoView() { Fixture.Stall(); inner.ScrollIntoView(); }
+}
+public static class Fixture {
+	public class Row { public string Value { get; set; } public int Group { get; set; } }
+	delegate void ForegroundEvent(IntPtr hook, uint evt, IntPtr hwnd, int obj, int child, uint thread, uint time);
+	[DllImport("user32.dll")] static extern IntPtr SetWinEventHook(uint min, uint max, IntPtr module, ForegroundEvent callback, uint process, uint thread, uint flags);
+	[DllImport("user32.dll")] static extern bool UnhookWinEvent(IntPtr hook);
+	[DllImport("user32.dll")] static extern IntPtr GetForegroundWindow();
+	static ForegroundEvent foregroundEvent;
+	static IntPtr otherHandle;
+	static bool armed;
+	static int foregroundChanges, wheels;
+	static ItemsControl items;
+	static ScrollViewer viewer;
+	static bool visibilityShape = true;
+	static bool moveOnRead, stall;
+	public static void MoveOnRead() {
+		if (!moveOnRead) return;
+		moveOnRead = false;
+		viewer.ScrollToVerticalOffset(viewer.VerticalOffset + 5);
+		viewer.UpdateLayout();
+	}
+	public static void Stall() { if (stall) { stall = false; System.Threading.Thread.Sleep(2000); } }
+	static void Say(string line) { Console.Out.WriteLine(line); Console.Out.Flush(); }
+	static ScrollViewer FindViewer(DependencyObject root, int depth) {
+		if (root is ScrollViewer) return (ScrollViewer)root;
+		if (depth == 0) return null;
+		for (int i = 0; i < VisualTreeHelper.GetChildrenCount(root); i++) {
+			var found = FindViewer(VisualTreeHelper.GetChild(root, i), depth - 1);
+			if (found != null) return found;
+		}
+		return null;
+	}
+	static void State() {
+		int first = -1, last = -1, realized = 0;
+		bool container = false, firstScrollItem = false, lastScrollItem = false;
+		if (items != null) {
+			for (int i = 0; i < items.Items.Count; i++) {
+				if (items.ItemContainerGenerator.ContainerFromIndex(i) == null) continue;
+				if (first < 0) first = i;
+				last = i;
+				realized++;
+			}
+			var peer = UIElementAutomationPeer.CreatePeerForElement(items);
+			var pattern = peer == null ? null : peer.GetPattern(PatternInterface.ItemContainer) as IItemContainerProvider;
+			container = pattern != null;
+			if (pattern != null) {
+				IRawElementProviderSimple current = null;
+				for (int i = 0; i < items.Items.Count; i++) {
+					current = pattern.FindItemByProperty(current, 0, null);
+					if (current == null) break;
+					if (i == 0) firstScrollItem = current.GetPatternProvider(10017) != null;
+					if (i == items.Items.Count - 1) lastScrollItem = current.GetPatternProvider(10017) != null;
+				}
+			}
+		}
+		bool hiddenHeader = false;
+		var tree = items == null ? null : items.ItemContainerGenerator.ContainerFromIndex(0) as TreeViewItem;
+		if (tree != null && tree.IsExpanded) {
+			var header = tree.Template.FindName("PART_Header", tree) as FrameworkElement;
+			hiddenHeader = header != null && header.TranslatePoint(new Point(0, header.ActualHeight), viewer).Y <= 0 &&
+				tree.TranslatePoint(new Point(0, tree.ActualHeight), viewer).Y > viewer.ActualHeight;
+		}
+		Say(String.Format(CultureInfo.InvariantCulture, "state {0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13}",
+			viewer.VerticalOffset, viewer.HorizontalOffset, viewer.ScrollableHeight, viewer.ScrollableWidth,
+			first, last, realized, container ? 1 : 0, foregroundChanges, wheels,
+			firstScrollItem ? 1 : 0, lastScrollItem ? 1 : 0, visibilityShape ? 1 : 0, hiddenHeader ? 1 : 0));
+		Say("mark");
+	}
+	static IntPtr Hook(IntPtr hwnd, int message, IntPtr w, IntPtr l, ref bool handled) {
+		if (message == 0x020A || message == 0x020E) wheels++;
+		else if (message == 0x8007)
+			viewer.Dispatcher.BeginInvoke(DispatcherPriority.ContextIdle, new Action(State));
+		else if (message == 0x800B) {
+			int position = w.ToInt32();
+			if (position == 5) {
+				var parent = (TreeViewItem)items.ItemContainerGenerator.ContainerFromIndex(0);
+				var child = (TreeViewItem)parent.ItemContainerGenerator.ContainerFromIndex(l.ToInt32() + 40);
+				child.BringIntoView();
+				return IntPtr.Zero;
+			}
+			viewer.ScrollToVerticalOffset(position == 0 ? 0 : position == 1 ? viewer.ScrollableHeight / 2 :
+				position == 3 ? Math.Max(0, viewer.ScrollableHeight - l.ToInt32()) :
+				position == 4 ? l.ToInt32() : viewer.ScrollableHeight);
+		}
+		else if (message == 0x800C) {
+			armed = true;
+			if (GetForegroundWindow() != otherHandle) foregroundChanges++;
+		}
+		else if (message == 0x800D) moveOnRead = true;
+		else if (message == 0x800E) stall = true;
+		return IntPtr.Zero;
+	}
+	public static void Run() {
+		// Not const: Add-Type fails on the unreachable-code warning a constant
+		// kind gives every other branch.
+		string kind = "__KIND__";
+		bool virtualized = __VIRTUALIZED__;
+		FrameworkElement content;
+		if (kind == "free") {
+			viewer = new ScrollViewer {
+				Content = new Border { Width = 2000, Height = 8000, Background = Brushes.White },
+				VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+				HorizontalScrollBarVisibility = ScrollBarVisibility.Auto
+			};
+			content = viewer;
+		} else {
+			if (kind == "tree" || kind == "expanded") items = new TreeView();
+			else if (kind == "grid") {
+				var grid = new DataGrid { AutoGenerateColumns = false, CanUserAddRows = false, RowHeight = 24, EnableRowVirtualization = virtualized };
+				grid.Columns.Add(new DataGridTextColumn { Header = "Value", Binding = new System.Windows.Data.Binding("Value"), Width = 240 });
+				items = grid;
+			} else items = kind == "busy" ? new BusyList() : new ListBox();
+			VirtualizingStackPanel.SetIsVirtualizing(items, virtualized);
+			VirtualizingStackPanel.SetVirtualizationMode(items, VirtualizationMode.Standard);
+			VirtualizingPanel.SetCacheLength(items, new VirtualizationCacheLength(3));
+			VirtualizingPanel.SetCacheLengthUnit(items, VirtualizationCacheLengthUnit.Page);
+			ScrollViewer.SetCanContentScroll(items, true);
+			if (kind != "grid")
+				items.ItemsPanel = new ItemsPanelTemplate(new FrameworkElementFactory(typeof(VirtualizingStackPanel)));
+			for (int i = 0; i < 240; i++) {
+				if (kind == "grid") items.Items.Add(new Row { Value = "Row " + i });
+				else if (kind == "horizontal") items.Items.Add(new TextBlock { Text = "Row " + i, Width = 2000, Height = 24 });
+				else if (kind == "expanded" && i == 0) {
+					var parent = new TreeViewItem { Header = "Expanded parent", IsExpanded = true };
+					for (int child = 0; child < 120; child++) parent.Items.Add("Child " + child);
+					items.Items.Add(parent);
+				}
+				else items.Items.Add("Row " + i);
+			}
+			if (kind == "grouped") {
+				var rows = new System.Collections.Generic.List<Row>();
+				for (int i = 0; i < 240; i++) rows.Add(new Row { Value = "Row " + i, Group = i / 40 });
+				var view = System.Windows.Data.CollectionViewSource.GetDefaultView(rows);
+				view.GroupDescriptions.Add(new System.Windows.Data.PropertyGroupDescription("Group"));
+				items.Items.Clear();
+				items.ItemsSource = view;
+				items.ItemTemplate = new DataTemplate {
+					VisualTree = new FrameworkElementFactory(typeof(TextBlock))
+				};
+				items.ItemTemplate.VisualTree.SetBinding(TextBlock.TextProperty, new System.Windows.Data.Binding("Value"));
+				items.GroupStyle.Add(new GroupStyle());
+			}
+			if (kind == "horizontal") ScrollViewer.SetHorizontalScrollBarVisibility(items, ScrollBarVisibility.Auto);
+			content = items;
+		}
+		var window = new Window { Title = "omp test: wpf list", Left = 40, Top = 40, Width = 420, Height = 240, Content = content };
+		var other = new Window { Title = "omp test: wpf other", Left = 40, Top = 40, Width = 500, Height = 300 };
+		IntPtr hook = IntPtr.Zero;
+		window.SourceInitialized += (sender, e) => HwndSource.FromHwnd(new WindowInteropHelper(window).Handle).AddHook(Hook);
+		window.ContentRendered += (sender, e) => {
+			viewer = FindViewer(content, 64);
+			if (viewer == null) throw new InvalidOperationException("fixture has no ScrollViewer");
+			if (kind == "expanded") {
+				var first = (FrameworkElement)items.ItemContainerGenerator.ContainerFromIndex(0);
+				var header = ((TreeViewItem)first).Template.FindName("PART_Header", first) as FrameworkElement;
+				visibilityShape = first.ActualHeight > viewer.ActualHeight && header != null &&
+					header.TranslatePoint(new Point(0, 0), viewer).Y >= 0 &&
+					header.TranslatePoint(new Point(0, 0), viewer).Y < viewer.ActualHeight;
+			}
+			if (kind == "grouped") visibilityShape = items.Items.Groups != null && items.Items.Groups.Count == 6;
+			other.Show();
+			otherHandle = new WindowInteropHelper(other).Handle;
+			foregroundEvent = (h, evt, hwnd, obj, child, thread, time) => {
+				if (armed && hwnd != otherHandle) foregroundChanges++;
+			};
+			hook = SetWinEventHook(3, 3, IntPtr.Zero, foregroundEvent, 0, 0, 0);
+			if (hook == IntPtr.Zero) throw new InvalidOperationException("foreground event hook failed");
+			Say("ready Row 1");
+		};
+		try { window.ShowDialog(); }
+		finally { if (hook != IntPtr.Zero) UnhookWinEvent(hook); }
+	}
+}
+'@
+[Fixture]::Run()
+"#;
+
+	/// A [`WPF_ITEMS`] window behind its second window.
+	struct WpfItems {
+		host:   Child,
+		output: std::io::Lines<BufReader<ChildStdout>>,
+		window: HWND,
+		other:  HWND,
+	}
+
+	#[derive(Debug)]
+	struct ItemsState {
+		vertical:          f64,
+		horizontal:        f64,
+		bottom:            f64,
+		right:             f64,
+		first:             i32,
+		last:              i32,
+		realized:          usize,
+		item_container:    bool,
+		first_scroll_item: bool,
+		last_scroll_item:  bool,
+		visibility_shape:  bool,
+		hidden_header:     bool,
+	}
+
+	impl WpfItems {
+		fn open(kind: &str, virtualized: bool) -> Self {
+			let script = WPF_ITEMS
+				.replace("__KIND__", kind)
+				.replace("__VIRTUALIZED__", if virtualized { "true" } else { "false" });
+			let mut host = Command::new("powershell")
+				.args(["-NoProfile", "-Command", &script])
+				.stdout(Stdio::piped())
+				.spawn()
+				.unwrap();
+			let output = BufReader::new(host.stdout.take().unwrap()).lines();
+			let mut items =
+				Self { host, output, window: std::ptr::null_mut(), other: std::ptr::null_mut() };
+			assert_eq!(items.output.next().unwrap().unwrap(), "ready Row 1");
+			// SAFETY: both titles are NUL-terminated and outlive these calls.
+			unsafe {
+				items.window = FindWindowW(std::ptr::null(), wide("omp test: wpf list").as_ptr());
+				items.other = FindWindowW(std::ptr::null(), wide("omp test: wpf other").as_ptr());
+			}
+			assert!(!items.window.is_null() && !items.other.is_null());
+			assert!(window::wait_for_foreground(items.other, Duration::from_secs(2)).unwrap());
+			items.post(ARM, 0, 0);
+			items
+		}
+
+		fn post(&self, message: u32, w: usize, l: isize) {
+			// SAFETY: a plain message to a window this fixture owns.
+			assert_ne!(unsafe { PostMessageW(self.window, message, w, l) }, 0);
+		}
+
+		/// The list's actual offsets, asserting that nothing so far moved the
+		/// foreground or sent the list a wheel.
+		fn state(&mut self) -> ItemsState {
+			self.post(MARK, 0, 0);
+			let mut state = None;
+			loop {
+				let line = self.output.next().unwrap().unwrap();
+				if line == "mark" {
+					break;
+				}
+				state = line.strip_prefix("state ").map(str::to_owned).or(state);
+			}
+			let state = state.expect("the fixture reports its ScrollViewer offsets");
+			let fields: Vec<&str> = state.split_whitespace().collect();
+			assert_eq!(fields.len(), 14, "{state}");
+			assert_eq!(fields[8], "0", "the foreground left the covering window: {state}");
+			assert_eq!(fields[9], "0", "the WPF target received a wheel message: {state}");
+			// SAFETY: GetForegroundWindow has no preconditions.
+			assert_eq!(unsafe { GetForegroundWindow() }, self.other);
+			ItemsState {
+				vertical:          fields[0].parse().unwrap(),
+				horizontal:        fields[1].parse().unwrap(),
+				bottom:            fields[2].parse().unwrap(),
+				right:             fields[3].parse().unwrap(),
+				first:             fields[4].parse().unwrap(),
+				last:              fields[5].parse().unwrap(),
+				realized:          fields[6].parse().unwrap(),
+				item_container:    fields[7] == "1",
+				first_scroll_item: fields[10] == "1",
+				last_scroll_item:  fields[11] == "1",
+				visibility_shape:  fields[12] == "1",
+				hidden_header:     fields[13] == "1",
+			}
+		}
+
+		fn at(&mut self, position: usize, rows: isize) -> ItemsState {
+			self.post(ROWS_AT, position, rows);
+			self.state()
+		}
+	}
+
+	impl Drop for WpfItems {
+		fn drop(&mut self) {
+			let _ = self.host.kill();
+			let _ = self.host.wait();
+		}
+	}
+
+	/// A worker answering requests within a run of `run` from now.
+	struct ItemsSession {
+		worker: Worker,
+		source: CancellationSource,
+		target: Target,
+		point:  (f64, f64),
+	}
+
+	impl ItemsSession {
+		fn open(items: &WpfItems) -> Self {
+			let target = Target::Window(items.window.expose_provenance().to_string());
+			let mut session = Self {
+				worker: Worker::new(DisplaySelector::Active, Arc::default(), Arc::default()),
+				source: CancellationSource::default(),
+				target,
+				point: (0.0, 0.0),
+			};
+			let request = Request::Capture {
+				target: session.target.clone(),
+				caps:   CaptureCaps::default(),
+				reply:  flume::unbounded().0,
+			};
+			let Response::Capture(frame) = session.run(&request, Duration::from_secs(15)).unwrap()
+			else {
+				panic!("expected capture");
+			};
+			session.point =
+				(f64::from(frame.coordinate_width) / 2.0, f64::from(frame.coordinate_height) / 2.0);
+			session
+		}
+
+		fn run(&mut self, request: &Request, run: Duration) -> CoreResult<Response> {
+			let token = self
+				.source
+				.token()
+				.replying_by(Instant::now() + control::DEADLINE_MARGIN + run);
+			self.worker.execute(request, &token)
+		}
+
+		fn scroll(&mut self, dx: f64, dy: f64, run: Duration) -> CoreResult<Response> {
+			let request = Request::Scroll {
+				target: self.target.clone(),
+				x: self.point.0,
+				y: self.point.1,
+				dx,
+				dy,
+				takeover: Takeover::new(None, None),
+				reply: flume::unbounded().0,
+			};
+			self.run(&request, run)
+		}
+
+		fn moved(&mut self, items: &mut WpfItems, before: &ItemsState, dy: f64) -> ItemsState {
+			self.scroll(0.0, dy, Duration::from_secs(15)).unwrap();
+			let after = items.state();
+			assert!(
+				if dy > 0.0 {
+					after.vertical > before.vertical
+				} else {
+					after.vertical < before.vertical
+				},
+				"{before:?} -> {after:?}"
+			);
+			assert_eq!(after.horizontal, before.horizontal);
+			after
+		}
+
+		fn refused(&mut self, items: &mut WpfItems, dx: f64, dy: f64, code: ErrorCode) {
+			let before = items.state();
+			let error = self
+				.scroll(dx, dy, Duration::from_secs(15))
+				.err()
+				.expect("refused");
+			assert_eq!(error.code, code, "{error}");
+			let after = items.state();
+			assert_eq!((after.vertical, after.horizontal), (before.vertical, before.horizontal));
+		}
+
+		/// `scrollintoview` on the realized row with the highest number.
+		fn scroll_into_view(&mut self, run: Duration) -> (String, CoreResult<Response>) {
+			let query = AxQuery { title: Some("Row ".to_string()), ..AxQuery::default() };
+			let request =
+				Request::AxQuery { target: self.target.clone(), query, reply: flume::unbounded().0 };
+			let Response::Nodes(rows) = self.run(&request, Duration::from_secs(15)).unwrap() else {
+				panic!("AxQuery returns nodes");
+			};
+			let number = |node: &AxNode| {
+				node
+					.title
+					.as_deref()?
+					.strip_prefix("Row ")?
+					.parse::<u32>()
+					.ok()
+			};
+			// The item comes before its text, which carries the same name.
+			let last = rows.iter().filter_map(number).max();
+			let row = rows
+				.iter()
+				.find(|node| last.is_some() && number(node) == last)
+				.expect("the list exposes its rows");
+			let request = Request::AxPerform {
+				reference: row.ref_.clone(),
+				action:    "scrollintoview".to_string(),
+				menu:      None,
+				reply:     flume::unbounded().0,
+			};
+			(row.ref_.clone(), self.run(&request, run))
+		}
+	}
+
+	#[test]
+	#[ignore = "opens WPF windows and covers the target; run with --ignored from a focused terminal \
+	            in a signed-in desktop session"]
+	fn wpf_scrolls_behind_other_windows_bring_rows_into_view_without_activating() {
+		let _serial = control::OWNERSHIP_TEST.lock();
+		let mut per_notch = 0_u32;
+		// SAFETY: this setting writes one u32 to the pointer given.
+		unsafe {
+			SystemParametersInfoW(SPI_GETWHEELSCROLLLINES, 0, (&raw mut per_notch).cast(), 0);
+		}
+		assert!((1..=20).contains(&per_notch), "the test needs 1 to 20 wheel lines per notch");
+		for (kind, virtualized) in [
+			("list", false),
+			("list", true),
+			("grid", false),
+			("grid", true),
+			("tree", false),
+			("tree", true),
+			("expanded", false),
+			("grouped", false),
+			("free", false),
+			("horizontal", false),
+			("busy", true),
+		] {
+			eprintln!("WPF case: {kind}, virtualized={virtualized}");
+			let mut items = WpfItems::open(kind, virtualized);
+			let mut session = ItemsSession::open(&items);
+			let top = items.state();
+			assert_eq!(top.vertical, 0.0);
+			assert!(top.bottom > 0.0, "{kind} must scroll vertically");
+			match kind {
+				"busy" => {
+					// The app moves the list while its rows are read: nothing is
+					// sent, and the app's own move is not credited.
+					items.post(MOVE_ON_READ, 0, 0);
+					let error = session
+						.scroll(0.0, 100.0, Duration::from_secs(15))
+						.err()
+						.expect("a list that moved while read is refused");
+					assert_eq!(error.code, ErrorCode::InputFailed, "{error}");
+					assert!(error.message.contains("while its rows were read"), "{error}");
+					let moved = items.state();
+					assert_eq!(moved.vertical, 5.0, "only the app's own move: {moved:?}");
+					// A ScrollIntoView answered after the run's end may have
+					// scrolled: unconfirmed, not failed.
+					items.post(STALL_ITEM, 0, 0);
+					let error = session
+						.scroll(0.0, 100.0, Duration::from_secs(1))
+						.err()
+						.expect("a ScrollIntoView answered after the cutoff is not confirmed");
+					assert_eq!(error.code, ErrorCode::AxUnconfirmed, "{error}");
+					let late = items.state();
+					assert!(late.vertical > moved.vertical, "{late:?}");
+					// `scrollintoview` on a row behind the other window shows it,
+					// and one answered after the run's end is unconfirmed, naming
+					// the ref without looking up its window.
+					session.scroll_into_view(Duration::from_secs(15)).1.unwrap();
+					let shown = items.state();
+					assert!(shown.vertical > late.vertical, "{shown:?}");
+					items.post(STALL_ITEM, 0, 0);
+					let (row, result) = session.scroll_into_view(Duration::from_secs(1));
+					let error = result
+						.err()
+						.expect("a late scrollintoview is not confirmed");
+					assert_eq!(error.code, ErrorCode::AxUnconfirmed, "{error}");
+					assert!(error.message.ends_with(&format!("({row})")), "{error}");
+					assert!(items.state().vertical > shown.vertical);
+				},
+				"free" | "horizontal" => {
+					assert!(top.right > 0.0, "{kind} must scroll horizontally");
+					for (dx, dy) in
+						[(0.0, 100.0), (0.0, -100.0), (100.0, 0.0), (-100.0, 0.0), (100.0, 100.0)]
+					{
+						session.refused(&mut items, dx, dy, ErrorCode::Unsupported);
+					}
+				},
+				"expanded" | "grouped" => {
+					assert!(top.visibility_shape, "the {kind} fixture must have its shape");
+					session.refused(&mut items, 0.0, -100.0, ErrorCode::InputFailed);
+					session.moved(&mut items, &top, 100.0);
+					// The parent row spans the view with its header above it, so
+					// the first row shown is a child.
+					let middle = if kind == "expanded" {
+						let middle = items.at(5, per_notch as isize);
+						assert!(middle.hidden_header, "{middle:?}");
+						middle
+					} else {
+						items.at(1, 0)
+					};
+					session.moved(&mut items, &middle, -100.0);
+				},
+				_ => {
+					assert_eq!(
+						top.realized == 240,
+						!virtualized,
+						"the fixture must use the requested realization: {top:?}"
+					);
+					session.refused(&mut items, 0.0, -100.0, ErrorCode::InputFailed);
+					session.moved(&mut items, &top, 100.0);
+					let middle = items.at(1, 0);
+					session.moved(&mut items, &middle, -100.0);
+					let bottom = items.at(2, 0);
+					assert_eq!(bottom.vertical, bottom.bottom);
+					session.refused(&mut items, 0.0, 100.0, ErrorCode::InputFailed);
+					session.moved(&mut items, &bottom, -100.0);
+					// Far past the realized rows: ItemContainer finds the row
+					// without realizing it, except in a virtualized tree, whose
+					// order past them depends on expansions WPF reads only from
+					// realized rows.
+					let crosses = !(kind == "tree" && virtualized);
+					let start = items.at(0, 0);
+					if start.item_container && start.last_scroll_item && crosses {
+						let end = session.moved(&mut items, &start, 27_300.0);
+						assert_eq!(end.vertical, end.bottom);
+						assert!(!virtualized || end.first > start.last, "{start:?} -> {end:?}");
+					} else {
+						session.refused(&mut items, 0.0, 27_300.0, ErrorCode::Unsupported);
+					}
+					let end = items.at(2, 0);
+					if end.item_container && end.first_scroll_item && crosses {
+						let home = session.moved(&mut items, &end, -27_300.0);
+						assert_eq!(home.vertical, 0.0);
+						assert!(!virtualized || home.last < end.first, "{end:?} -> {home:?}");
+					} else {
+						session.refused(&mut items, 0.0, -27_300.0, ErrorCode::Unsupported);
+					}
+				},
+			}
+			items.state();
+		}
 	}
 }

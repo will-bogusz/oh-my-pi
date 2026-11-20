@@ -431,7 +431,8 @@ mod background {
 	/// click when UI Automation can invoke the control under the point, except
 	/// Chromium, whose Invoke reports success without acting. While a WPF
 	/// window holds the foreground, its scrolls go to the UI Automation scroll
-	/// container under the point; behind other windows they are refused
+	/// container under the point; behind other windows a vertical scroll
+	/// brings a list, tree or grid row into view, and the rest are refused
 	/// ([`wpf_scroll_unsupported`]).
 	pub(super) fn pointer(ax: &mut Win32Ax, id: &str, event: PointerEvent) -> CoreResult<()> {
 		control::check()?;

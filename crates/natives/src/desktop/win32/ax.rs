@@ -1,28 +1,37 @@
 use std::{
+	collections::VecDeque,
 	ptr::with_exposed_provenance_mut,
 	time::{Duration, Instant},
 };
 
 use uiautomation::{
-	UIAutomation, UIElement,
+	UIAutomation, UIElement, UITreeWalker,
 	patterns::{
-		UIExpandCollapsePattern, UIInvokePattern, UILegacyIAccessiblePattern, UIScrollItemPattern,
-		UIScrollPattern, UISelectionItemPattern, UITogglePattern, UIValuePattern,
+		UIExpandCollapsePattern, UIInvokePattern, UIItemContainerPattern, UILegacyIAccessiblePattern,
+		UIScrollItemPattern, UIScrollPattern, UISelectionItemPattern, UITogglePattern,
+		UIValuePattern,
 	},
 	types::{ControlType, ExpandCollapseState, Handle, Point, ScrollAmount, UIProperty},
 	variants::Value,
 };
 use windows::{
 	Win32::{
-		System::Com::{CLSCTX_ALL, COINIT_MULTITHREADED, CoCreateInstance, CoInitializeEx},
-		UI::Accessibility::{CUIAutomation8, IUIAutomation, IUIAutomation2},
+		System::{
+			Com::{CLSCTX_ALL, COINIT_MULTITHREADED, CoCreateInstance, CoInitializeEx},
+			Variant::{VARIANT, VT_DISPATCH, VT_I4, VariantClear},
+		},
+		UI::Accessibility::{
+			AccessibleObjectFromWindow, CUIAutomation8, IAccessible, IUIAutomation, IUIAutomation2,
+			IUIAutomationElement, IUIAutomationItemContainerPattern, IUIAutomationTreeWalker,
+			UIA_E_ELEMENTNOTAVAILABLE, UIA_PROPERTY_ID,
+		},
 	},
 	core::Interface,
 };
 use windows_sys::Win32::{
 	Foundation::{HWND, POINT},
 	UI::WindowsAndMessaging::{
-		GetDesktopWindow, IsWindow, SPI_GETWHEELSCROLLCHARS, SPI_GETWHEELSCROLLLINES,
+		GetDesktopWindow, IsWindow, OBJID_CLIENT, SPI_GETWHEELSCROLLCHARS, SPI_GETWHEELSCROLLLINES,
 		SystemParametersInfoW, WindowFromPoint,
 	},
 };
@@ -184,7 +193,9 @@ impl Win32Ax {
 	}
 
 	/// WPF drops posted wheels, and `ScrollPattern` can activate its window.
-	/// Only a foreground container under the point may receive these steps.
+	/// Only a foreground container under the point may receive these steps;
+	/// behind other windows a vertical scroll brings a row into view instead
+	/// ([`Self::scroll_rows`]).
 	pub(super) fn scroll_at_point(
 		&mut self,
 		root: HWND,
@@ -192,37 +203,19 @@ impl Win32Ax {
 		horizontal: i32,
 		vertical: i32,
 	) -> CoreResult<bool> {
-		let mut run =
-			ScrollRun { cutoff: control::reply_deadline(), now: Instant::now, sent: false };
+		let mut run = ScrollRun {
+			cutoff: control::reply_deadline(),
+			now:    Instant::now,
+			sent:   false,
+			advice: WPF_SCROLL_ADVICE,
+		};
 		if !window::owns_foreground(root) || !shows_at(root, point) {
-			return Ok(false);
+			if horizontal != 0 || vertical == 0 {
+				return Ok(false);
+			}
+			return self.scroll_rows(&mut run, root, point, vertical);
 		}
-		if !self.automation_initialized {
-			let initialized = &mut self.automation_initialized;
-			run.call(|| {
-				// SAFETY: initialize the worker apartment in the same mode as
-				// UIAutomation::new.
-				let result = unsafe { CoInitializeEx(None, COINIT_MULTITHREADED).ok() };
-				// Recorded at once, so a cutoff right after cannot lose it.
-				*initialized |= result.is_ok();
-				result
-			})?;
-		}
-		// A scroll-local client leaves other actions' timeout settings alone.
-		// SAFETY: this thread's COM apartment is initialized.
-		let client = run.call(|| unsafe {
-			CoCreateInstance::<_, IUIAutomation2>(&CUIAutomation8, None, CLSCTX_ALL)
-		})?;
-		if let Some(cutoff) = run.cutoff {
-			let timeout = u32::try_from(cutoff.saturating_duration_since((run.now)()).as_millis())
-				.unwrap_or(u32::MAX)
-				.max(1);
-			// SAFETY: these puts take scalar milliseconds on our local client.
-			run.call(|| unsafe { client.SetConnectionTimeout(timeout) })?;
-			// SAFETY: same local client and scalar timeout.
-			run.call(|| unsafe { client.SetTransactionTimeout(timeout) })?;
-		}
-		let automation = UIAutomation::from(run.call(|| client.cast::<IUIAutomation>())?);
+		let automation = self.timed_automation(&run)?;
 		let walker = run.call(|| automation.get_raw_view_walker())?;
 		let Ok(hit) = run.call(|| {
 			Ok::<_, DesktopError>(automation.element_from_point(Point::new(point.x, point.y)))
@@ -238,46 +231,7 @@ impl Win32Ax {
 			if steps == 0 {
 				continue;
 			}
-			let mut element = run.call(|| Ok::<_, DesktopError>(hit.clone()))?;
-			let mut found = None;
-			for _ in 0..16 {
-				if let Ok(pattern) =
-					run.call(|| Ok::<_, DesktopError>(element.get_pattern::<UIScrollPattern>()))?
-					&& run.call(|| {
-						if across {
-							pattern.is_horizontally_scrollable()
-						} else {
-							pattern.is_vertically_scrollable()
-						}
-					})? {
-					found = bind_scroll_candidate(pattern, root.expose_provenance(), || {
-						let raw: isize = run.call(|| element.get_native_window_handle())?.into();
-						if raw != 0 {
-							return Ok(Some(
-								window::root(with_exposed_provenance_mut(raw as usize)).expose_provenance(),
-							));
-						}
-						let Ok(parent) =
-							run.call(|| Ok::<_, DesktopError>(walker.get_parent(&element)))?
-						else {
-							return Ok(Some(0));
-						};
-						element = parent;
-						Ok(None)
-					})?;
-					break;
-				}
-				let raw: isize = run.call(|| element.get_native_window_handle())?.into();
-				if raw != 0 && with_exposed_provenance_mut::<std::ffi::c_void>(raw as usize) == root {
-					break;
-				}
-				let Ok(parent) = run.call(|| Ok::<_, DesktopError>(walker.get_parent(&element)))?
-				else {
-					break;
-				};
-				element = parent;
-			}
-			let Some(pattern) = found else {
+			let Some((_, pattern)) = scroll_container(&run, &walker, &hit, root, across)? else {
 				continue;
 			};
 			eligible = true;
@@ -300,10 +254,7 @@ impl Win32Ax {
 							}
 						})?;
 						if !window::owns_foreground(root) || !shows_at(root, point) {
-							return Err(run.failure(
-								ErrorCode::Unsupported,
-								"bring WPF in front or use takeover: true",
-							));
+							return Err(run.failure(ErrorCode::Unsupported, WPF_SCROLL_ADVICE));
 						}
 						Ok(Sample { position, view })
 					},
@@ -322,6 +273,494 @@ impl Win32Ax {
 		}
 		run.finish(eligible)
 	}
+
+	/// A call-local client whose provider calls time out at `run`'s cutoff,
+	/// leaving other actions' timeout settings alone.
+	fn timed_automation<N: Fn() -> Instant>(
+		&mut self,
+		run: &ScrollRun<N>,
+	) -> CoreResult<UIAutomation> {
+		if !self.automation_initialized {
+			let initialized = &mut self.automation_initialized;
+			run.call(|| {
+				// SAFETY: initialize the worker apartment in the same mode as
+				// UIAutomation::new.
+				let result = unsafe { CoInitializeEx(None, COINIT_MULTITHREADED).ok() };
+				// Recorded at once, so a cutoff right after cannot lose it.
+				*initialized |= result.is_ok();
+				result
+			})?;
+		}
+		// SAFETY: this thread's COM apartment is initialized.
+		let client = run.call(|| unsafe {
+			CoCreateInstance::<_, IUIAutomation2>(&CUIAutomation8, None, CLSCTX_ALL)
+		})?;
+		if let Some(cutoff) = run.cutoff {
+			let timeout = u32::try_from(cutoff.saturating_duration_since((run.now)()).as_millis())
+				.unwrap_or(u32::MAX)
+				.max(1);
+			// SAFETY: these puts take scalar milliseconds on our local client.
+			run.call(|| unsafe { client.SetConnectionTimeout(timeout) })?;
+			// SAFETY: same local client and scalar timeout.
+			run.call(|| unsafe { client.SetTransactionTimeout(timeout) })?;
+		}
+		Ok(UIAutomation::from(run.call(|| client.cast::<IUIAutomation>())?))
+	}
+
+	/// Brings the row `vertical` wheel notches past the visible edge of the
+	/// list, tree or grid under the point into view through
+	/// `ScrollItemPattern`, which leaves a WPF window behind others, and
+	/// confirms the position moved as [`ScrollRun::step`] does. The window's
+	/// own accessible object hit-tests the point: UI Automation asks the
+	/// screen, where the window in front answers.
+	fn scroll_rows<N: Fn() -> Instant>(
+		&mut self,
+		run: &mut ScrollRun<N>,
+		root: HWND,
+		point: POINT,
+		vertical: i32,
+	) -> CoreResult<bool> {
+		/// A realization boundary is not a measured endpoint.
+		const UNREALIZED: &str = "the row that far past the visible edge cannot be found or shown \
+		                          without realizing it, which can bring the window to the front; \
+		                          bring WPF in front or use takeover: true";
+		let per_notch = wheel_setting(SPI_GETWHEELSCROLLLINES);
+		if per_notch == 0 {
+			return Ok(false);
+		}
+		let automation = self.timed_automation(run)?;
+		let Some(hit) = hit_in_window(run, &automation, root, point)? else {
+			return Ok(false);
+		};
+		let walker = run.call(|| automation.get_raw_view_walker())?;
+		let Some((container, pattern)) = scroll_container(run, &walker, &hit, root, false)? else {
+			return Ok(false);
+		};
+		// ScrollIntoView can move both axes, and only the activating
+		// ScrollPattern could move one back.
+		if run.call(|| pattern.is_horizontally_scrollable())? {
+			return Err(run.failure(
+				ErrorCode::Unsupported,
+				"the container under the point also scrolls horizontally, which bringing a row into \
+				 view can move; bring WPF in front or use takeover: true",
+			));
+		}
+		let sample = |run: &ScrollRun<N>| -> CoreResult<Sample> {
+			Ok(Sample {
+				position: run.call(|| pattern.get_vertical_scroll_percent())?,
+				view:     run.call(|| pattern.get_vertical_view_size())?,
+			})
+		};
+		let start = sample(&*run)?;
+		let down = vertical > 0;
+		if (down && start.position >= 100.0) || (!down && start.position <= 0.0) {
+			return run.finish(true);
+		}
+		let rows_walker = run.call(|| automation.get_control_view_walker())?;
+		let mut rows = Vec::new();
+		collect_rows(run, &rows_walker, &container, &mut rows)?;
+		let mut shown = Vec::new();
+		for (index, row) in rows.iter().enumerate() {
+			if row_visible(run, &rows_walker, row)? {
+				shown.push(index);
+			}
+		}
+		let (Some(&first), Some(&last)) = (shown.first(), shown.last()) else {
+			return Err(run.failure(
+				ErrorCode::Unsupported,
+				"the container under the point shows no list, tree or grid rows; bring WPF in front \
+				 or use takeover: true",
+			));
+		};
+		// A page per notch is the rows in view, as the wheel pages.
+		let per_notch = if per_notch == u32::MAX {
+			shown.len()
+		} else {
+			per_notch as usize
+		};
+		let distance = (vertical.unsigned_abs() as usize).saturating_mul(per_notch);
+		let edge = if down { last } else { first };
+		let exact = if down {
+			edge
+				.checked_add(distance)
+				.filter(|index| *index < rows.len())
+		} else {
+			edge.checked_sub(distance)
+		};
+		let target = match exact {
+			Some(index) => Some(rows[index].clone()),
+			None => match run
+				.call(|| Ok::<_, DesktopError>(container.get_pattern::<UIItemContainerPattern>()))?
+			{
+				Ok(logical) => {
+					let tree = run.call(|| container.get_control_type())? == ControlType::Tree;
+					logical_target(run, &automation, &logical, &rows[edge], distance, down, tree)?
+				},
+				Err(_) => None,
+			},
+		};
+		let Some(target) = target else {
+			return Err(run.failure(ErrorCode::Unsupported, UNREALIZED));
+		};
+		let Ok(item) =
+			run.call(|| Ok::<_, DesktopError>(target.get_pattern::<UIScrollItemPattern>()))?
+		else {
+			return Err(run.failure(ErrorCode::Unsupported, UNREALIZED));
+		};
+		let moved = run.step(
+			down,
+			|run| {
+				let now = sample(run)?;
+				// Never send for a container that moved or changed size while
+				// its rows were read, or for a row already in view.
+				if !run.sent
+					&& ((now.position - start.position).abs() > f64::EPSILON
+						|| (now.view - start.view).abs() > f64::EPSILON
+						|| row_visible(run, &rows_walker, &target)?)
+				{
+					return Err(run.failure(
+						ErrorCode::InputFailed,
+						"the container under the point moved or changed size while its rows were read",
+					));
+				}
+				Ok(now)
+			},
+			|| item.scroll_into_view(),
+			control::wait,
+		)?;
+		if moved { Ok(true) } else { run.finish(true) }
+	}
+
+	/// `ScrollIntoView` on a WPF element, which leaves its window behind
+	/// others, where its other pattern calls (`Scroll` and `SetScrollPercent`
+	/// included) can bring it forward. Confirmed by the element showing;
+	/// `false`, with nothing sent, for an element of another framework, even
+	/// one hosted in a WPF window.
+	fn scroll_into_view(&mut self, element: &UIElement) -> CoreResult<bool> {
+		let mut run = ScrollRun {
+			cutoff: control::reply_deadline(),
+			now:    Instant::now,
+			sent:   false,
+			advice: "use coordinate input instead",
+		};
+		let automation = self.timed_automation(&run)?;
+		let walker = run.call(|| automation.get_raw_view_walker())?;
+		// Timeouts apply to calls through the timed client's own elements.
+		let element = run.call(|| walker.normalize(element))?;
+		if run.call(|| element.get_framework_id())? != "WPF" {
+			return Ok(false);
+		}
+		let pattern = run
+			.call(|| Ok::<_, DesktopError>(element.get_pattern::<UIScrollItemPattern>()))?
+			.map_err(ax_error)?;
+		if run.send(
+			|| pattern.scroll_into_view(),
+			|run| Ok(!run.call(|| element.is_offscreen())?),
+			control::wait,
+		)? {
+			return Ok(true);
+		}
+		Err(DesktopError::ax_failed(
+			"ScrollIntoView returned, but the element is still off screen; nothing scrolled it into \
+			 view (an item of a closed list, such as a collapsed combo box's, does not scroll); open \
+			 its container first",
+		))
+	}
+}
+
+const WPF_SCROLL_ADVICE: &str = "bring WPF in front or use takeover: true";
+
+/// How long a sent step's effect is polled for.
+const READBACK: Duration = Duration::from_millis(500);
+
+/// The innermost element from `hit` up that scrolls on the requested axis,
+/// with its pattern, when `root` hosts it.
+fn scroll_container<N: Fn() -> Instant>(
+	run: &ScrollRun<N>,
+	walker: &UITreeWalker,
+	hit: &UIElement,
+	root: HWND,
+	across: bool,
+) -> CoreResult<Option<(UIElement, UIScrollPattern)>> {
+	let mut element = run.call(|| Ok::<_, DesktopError>(hit.clone()))?;
+	for _ in 0..16 {
+		if let Ok(pattern) =
+			run.call(|| Ok::<_, DesktopError>(element.get_pattern::<UIScrollPattern>()))?
+			&& run.call(|| {
+				if across {
+					pattern.is_horizontally_scrollable()
+				} else {
+					pattern.is_vertically_scrollable()
+				}
+			})? {
+			return bind_scroll_candidate(
+				(element.clone(), pattern),
+				root.expose_provenance(),
+				|| {
+					let raw: isize = run.call(|| element.get_native_window_handle())?.into();
+					if raw != 0 {
+						return Ok(Some(
+							window::root(with_exposed_provenance_mut(raw as usize)).expose_provenance(),
+						));
+					}
+					let Ok(parent) = run.call(|| Ok::<_, DesktopError>(walker.get_parent(&element)))?
+					else {
+						return Ok(Some(0));
+					};
+					element = parent;
+					Ok(None)
+				},
+			);
+		}
+		let raw: isize = run.call(|| element.get_native_window_handle())?.into();
+		if raw != 0 && with_exposed_provenance_mut::<std::ffi::c_void>(raw as usize) == root {
+			break;
+		}
+		let Ok(parent) = run.call(|| Ok::<_, DesktopError>(walker.get_parent(&element)))? else {
+			break;
+		};
+		element = parent;
+	}
+	Ok(None)
+}
+
+/// The element `root`'s own accessible object reports under the screen
+/// `point`, whichever window is in front there; `None` outside it. WPF's
+/// hit test honours z-order and clipping inside the window, so a panel over
+/// a list is not scrolled through. These MSAA calls are not UI Automation
+/// calls, so the client's timeouts do not bound them; the cutoff is checked
+/// around each.
+fn hit_in_window<N: Fn() -> Instant>(
+	run: &ScrollRun<N>,
+	automation: &UIAutomation,
+	root: HWND,
+	point: POINT,
+) -> CoreResult<Option<UIElement>> {
+	let window = run.call(|| {
+		let mut raw = std::ptr::null_mut();
+		// SAFETY: a window handle, IAccessible's IID and an output pointer that
+		// receives one reference on success, which `from_raw` then owns.
+		unsafe {
+			AccessibleObjectFromWindow(
+				windows::Win32::Foundation::HWND(root),
+				OBJID_CLIENT.cast_unsigned(),
+				&IAccessible::IID,
+				&mut raw,
+			)?;
+			Ok::<_, windows::core::Error>(IAccessible::from_raw(raw))
+		}
+	})?;
+	let found = run.call(|| {
+		// SAFETY: a live accessible object and screen coordinates.
+		let mut hit = unsafe { window.accHitTest(point.x, point.y) }?;
+		// SAFETY: the union member read is the one `vt` names; VariantClear then
+		// releases the reference the hit holds. A child id names a simple child
+		// of `window`; nothing (VT_EMPTY) means outside it.
+		unsafe {
+			let value = &hit.Anonymous.Anonymous;
+			let found = match value.vt {
+				VT_DISPATCH => (*value.Anonymous.pdispVal).as_ref().map(|dispatch| {
+					dispatch
+						.cast::<IAccessible>()
+						.map(|accessible| (accessible, 0))
+				}),
+				VT_I4 => Some(Ok((window.clone(), value.Anonymous.lVal))),
+				_ => None,
+			};
+			let _ = VariantClear(&raw mut hit);
+			found.transpose()
+		}
+	})?;
+	let Some((accessible, child)) = found else {
+		return Ok(None);
+	};
+	let client: &IUIAutomation = automation.as_ref();
+	// SAFETY: a live accessible object and the child id its hit test gave.
+	let element = run.call(|| unsafe { client.ElementFromIAccessible(&accessible, child) })?;
+	Ok(Some(element.into()))
+}
+
+/// A walker step that keeps the end (`S_OK` with no element) apart from
+/// every provider error, `E_POINTER` included.
+fn tree_element<N: Fn() -> Instant>(
+	run: &ScrollRun<N>,
+	walker: &UITreeWalker,
+	element: &UIElement,
+	first_child: bool,
+) -> CoreResult<Option<UIElement>> {
+	let raw: &IUIAutomationTreeWalker = walker.as_ref();
+	let step = if first_child {
+		raw.vtable().GetFirstChildElement
+	} else {
+		raw.vtable().GetNextSiblingElement
+	};
+	let next = run.call(|| {
+		let mut result = std::ptr::null_mut();
+		// SAFETY: the live interfaces and output pointer outlive the call; a
+		// non-null successful result transfers one reference to `from_raw`.
+		unsafe {
+			step(raw.as_raw(), element.as_ref().as_raw(), &mut result).ok()?;
+			Ok::<_, windows::core::Error>(
+				(!result.is_null()).then(|| IUIAutomationElement::from_raw(result)),
+			)
+		}
+	})?;
+	Ok(next.map(Into::into))
+}
+
+/// `IsOffscreen` uses the provider's clipped viewport, so partial and tall
+/// rows count. An expanded tree item's rectangle also encloses its
+/// descendants, so its header is tested instead.
+fn row_visible<N: Fn() -> Instant>(
+	run: &ScrollRun<N>,
+	walker: &UITreeWalker,
+	row: &UIElement,
+) -> CoreResult<bool> {
+	if run.call(|| row.get_control_type())? == ControlType::TreeItem {
+		let mut child = tree_element(run, walker, row, true)?;
+		while let Some(header) = child {
+			if run.call(|| header.get_control_type())? == ControlType::Text {
+				return Ok(!run.call(|| header.is_offscreen())?);
+			}
+			child = tree_element(run, walker, &header, false)?;
+		}
+		return Ok(false);
+	}
+	Ok(!run.call(|| row.is_offscreen())?)
+}
+
+/// The list, tree and grid rows under `container`, through group wrappers
+/// and expanded tree rows but not into another scroll owner.
+fn collect_rows<N: Fn() -> Instant>(
+	run: &ScrollRun<N>,
+	walker: &UITreeWalker,
+	container: &UIElement,
+	rows: &mut Vec<UIElement>,
+) -> CoreResult<()> {
+	let mut child = tree_element(run, walker, container, true)?;
+	while let Some(item) = child {
+		let kind = run.call(|| item.get_control_type())?;
+		let owns_scroll: bool = run.call(|| {
+			item
+				.get_property_value(UIProperty::IsScrollPatternAvailable)
+				.and_then(TryInto::try_into)
+		})?;
+		if !owns_scroll {
+			if matches!(kind, ControlType::ListItem | ControlType::TreeItem | ControlType::DataItem) {
+				rows.push(item.clone());
+			}
+			let expanded = kind == ControlType::TreeItem
+				&& match run
+					.call(|| Ok::<_, DesktopError>(item.get_pattern::<UIExpandCollapsePattern>()))?
+				{
+					Ok(expand) => run
+						.call(|| Ok::<_, DesktopError>(expand.get_state()))?
+						.is_ok_and(|state| state == ExpandCollapseState::Expanded),
+					Err(_) => false,
+				};
+			if kind == ControlType::Group || expanded {
+				collect_rows(run, walker, &item, rows)?;
+			}
+		}
+		child = tree_element(run, walker, &item, false)?;
+	}
+	Ok(())
+}
+
+/// The row `distance` rows past `edge` in `pattern`'s logical order, which
+/// `ItemContainer` reads beyond the realized rows, or the last one before
+/// the end; `None` when that order is unknown without realizing a row.
+fn logical_target<N: Fn() -> Instant>(
+	run: &ScrollRun<N>,
+	automation: &UIAutomation,
+	pattern: &UIItemContainerPattern,
+	edge: &UIElement,
+	distance: usize,
+	down: bool,
+	tree: bool,
+) -> CoreResult<Option<UIElement>> {
+	// Downwards a flat list continues after the edge; otherwise the scan
+	// starts at the first row and finds the edge on the way.
+	let mut found = down && !tree;
+	let mut stack = smallvec::SmallVec::<[(UIItemContainerPattern, Option<UIElement>); 4]>::new();
+	stack.push((pattern.clone(), found.then(|| edge.clone())));
+	let mut target = None;
+	let mut preceding = VecDeque::new();
+	let mut passed = 0;
+	while let Some((owner, current)) = stack.last_mut() {
+		let raw: &IUIAutomationItemContainerPattern = owner.as_ref();
+		let after = current
+			.as_ref()
+			.map_or(std::ptr::null_mut(), |row| row.as_ref().as_raw());
+		let next = run.call(|| {
+			let mut result = std::ptr::null_mut();
+			// SAFETY: live interfaces, an empty VARIANT and an output pointer are
+			// valid for property 0 (the next item); a successful null is the end,
+			// and a non-null result transfers one reference to `from_raw`.
+			unsafe {
+				(raw.vtable().FindItemByProperty)(
+					raw.as_raw(),
+					after,
+					UIA_PROPERTY_ID(0),
+					VARIANT::default(),
+					&mut result,
+				)
+				.ok()?;
+				Ok::<_, windows::core::Error>(
+					(!result.is_null()).then(|| IUIAutomationElement::from_raw(result)),
+				)
+			}
+		})?;
+		let Some(next) = next else {
+			stack.pop();
+			continue;
+		};
+		let next = UIElement::from(next);
+		*current = Some(next.clone());
+		if found {
+			passed += 1;
+			if passed == distance {
+				return Ok(Some(next));
+			}
+			target = Some(next.clone());
+		} else if run.call(|| automation.compare_elements(&next, edge))? {
+			if !down {
+				return Ok(preceding.pop_front());
+			}
+			found = true;
+		} else if !down {
+			if preceding.len() == distance {
+				preceding.pop_front();
+			}
+			preceding.push_back(next.clone());
+		}
+		if tree {
+			let Ok(expand) =
+				run.call(|| Ok::<_, DesktopError>(next.get_pattern::<UIExpandCollapsePattern>()))?
+			else {
+				return Ok(None);
+			};
+			// A row WPF has not realized has no expansion state to read, so the
+			// order past it is unknown.
+			let state = run.call(|| match expand.get_state() {
+				Err(error) if error.code().cast_unsigned() == UIA_E_ELEMENTNOTAVAILABLE => Ok(None),
+				state => state.map(Some),
+			})?;
+			match state {
+				None => return Ok(None),
+				Some(ExpandCollapseState::Expanded) => {
+					let Ok(children) =
+						run.call(|| Ok::<_, DesktopError>(next.get_pattern::<UIItemContainerPattern>()))?
+					else {
+						return Ok(None);
+					};
+					stack.push((children, None));
+				},
+				Some(_) => {},
+			}
+		}
+	}
+	Ok(target)
 }
 
 fn bind_scroll_candidate<T>(
@@ -349,6 +788,8 @@ struct ScrollRun<N> {
 	cutoff: Option<Instant>,
 	now:    N,
 	sent:   bool,
+	/// What the caller can do instead when UI Automation is unavailable.
+	advice: &'static str,
 }
 
 impl<N: Fn() -> Instant> ScrollRun<N> {
@@ -382,9 +823,7 @@ impl<N: Fn() -> Instant> ScrollRun<N> {
 		result.map_err(|error| {
 			self.failure(
 				ErrorCode::Unsupported,
-				format!(
-					"UI Automation unavailable ({error}); bring WPF in front or use takeover: true"
-				),
+				format!("UI Automation unavailable ({error}); {}", self.advice),
 			)
 		})
 	}
@@ -394,7 +833,7 @@ impl<N: Fn() -> Instant> ScrollRun<N> {
 		forward: bool,
 		mut sample: impl FnMut(&Self) -> CoreResult<Sample>,
 		send: impl FnOnce() -> uiautomation::Result<()>,
-		mut wait: impl FnMut(Duration) -> CoreResult<()>,
+		wait: impl FnMut(Duration) -> CoreResult<()>,
 	) -> CoreResult<bool> {
 		self.check()?;
 		let before = sample(self)?;
@@ -407,26 +846,48 @@ impl<N: Fn() -> Instant> ScrollRun<N> {
 		if (forward && before.position >= 100.0) || (!forward && before.position <= 0.0) {
 			return Ok(false);
 		}
+		let landed = self.send(
+			send,
+			|run| {
+				let after = sample(run)?;
+				run.check()?;
+				if (after.view - before.view).abs() > f64::EPSILON {
+					return Err(run.failure(ErrorCode::AxFailed, "the list's size changed"));
+				}
+				let movement = after.position - before.position;
+				Ok(after.position >= 0.0
+					&& ((forward && movement > 0.0) || (!forward && movement < 0.0)))
+			},
+			wait,
+		)?;
+		if !landed {
+			return Err(DesktopError::input_failed(
+				"a sent scroll step did not move; inspect before retrying",
+			));
+		}
+		Ok(true)
+	}
+
+	/// Sends once, then polls `landed` until it holds, for up to [`READBACK`]
+	/// and never past the cutoff; `false` when it never did.
+	fn send(
+		&mut self,
+		send: impl FnOnce() -> uiautomation::Result<()>,
+		mut landed: impl FnMut(&Self) -> CoreResult<bool>,
+		mut wait: impl FnMut(Duration) -> CoreResult<()>,
+	) -> CoreResult<bool> {
 		self.sent = true;
 		let result = send();
 		self.check()?;
 		result.map_err(|error| self.failure(ErrorCode::AxFailed, error))?;
-		let until = (self.now)() + Duration::from_millis(500);
+		let until = (self.now)() + READBACK;
 		loop {
-			let after = sample(self)?;
-			self.check()?;
-			if (after.view - before.view).abs() > f64::EPSILON {
-				return Err(self.failure(ErrorCode::AxFailed, "the list's size changed"));
-			}
-			let movement = after.position - before.position;
-			if after.position >= 0.0 && ((forward && movement > 0.0) || (!forward && movement < 0.0)) {
+			if landed(self)? {
 				return Ok(true);
 			}
 			let now = (self.now)();
 			if now >= until {
-				return Err(DesktopError::input_failed(
-					"a sent scroll step did not move; inspect before retrying",
-				));
+				return Ok(false);
 			}
 			let end = self.cutoff.map_or(until, |cutoff| cutoff.min(until));
 			wait(
@@ -721,6 +1182,9 @@ impl AxBackend for Win32Ax {
 	fn perform(&mut self, handle: &AxHandle, action: &str) -> CoreResult<()> {
 		let element = Self::element(handle)?;
 		let action = action.trim().to_ascii_lowercase();
+		if action == "scrollintoview" && self.scroll_into_view(element)? {
+			return Ok(());
+		}
 		self.contained(element, || match action.as_str() {
 			"press" => {
 				if let Some(pattern) = positionless_press(element) {
@@ -921,7 +1385,7 @@ mod tests {
 
 	#[test]
 	fn wpf_provider_failure_before_send_is_unsupported() {
-		let run = ScrollRun { cutoff: None, now: Instant::now, sent: false };
+		let run = ScrollRun { cutoff: None, now: Instant::now, sent: false, advice: "" };
 		let error = run
 			.call(|| Err::<(), _>("provider disappeared"))
 			.unwrap_err();
@@ -946,7 +1410,8 @@ mod tests {
 			let cutoff = start + Duration::from_secs(1);
 			let clock = Cell::new(if case == "expired" { cutoff } else { start });
 			let (read_count, send_count) = (Cell::new(0), Cell::new(0));
-			let mut run = ScrollRun { cutoff: Some(cutoff), now: || clock.get(), sent: false };
+			let mut run =
+				ScrollRun { cutoff: Some(cutoff), now: || clock.get(), sent: false, advice: "" };
 			let result = run.step(
 				true,
 				|run| {
