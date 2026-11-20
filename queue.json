@@ -117826,7 +117826,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-20T19:47:24.127414Z",
+  "at": "2026-11-20T20:05:11.376385Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -119127,9 +119127,11 @@
     "state": "queued",
     "area": "computer",
     "priority": null,
-    "title": "fix(natives): read window positions and focus from Hyprland",
-    "action": "open",
-    "reasons": [],
+    "title": "fix(natives): list Hyprland window positions for native Wayland apps",
+    "action": "held",
+    "reasons": [
+     "held: LinuxUpstream2, 2026-11-20: delta review ReviewHyprList (gpt-6.2-sol) on 50e036edcd6 needs-changes, 3 must-fixes in new code (positional j/clients rows accepted; Hyprland::detect connects at backend startup and caches a failed probe; accept-queue test hits the FD limit); parked for Main/Will"
+    ],
     "note": "accepted pair with #19615: Main, 2026-11-20: wayland/mod.rs capture: hyprland's before-listing then #19615's shares.capture; combined, a kept stream's newest frame can predate the listing by about one frame",
     "over": [],
     "paired": [
