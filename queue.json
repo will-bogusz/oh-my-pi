@@ -107042,18 +107042,6 @@
     "host": "Wills-MacBook-Pro"
    }
   },
-  "a057629889be1ca09c9ae4ee991d71e534b1aa13": {
-   "linux": {
-    "sha": "3e401feee281c3da4e817cde816a494e3debb3b8",
-    "at": "2026-10-21T03:16:01Z",
-    "host": "goliath"
-   },
-   "windows": {
-    "sha": "3e401feee281c3da4e817cde816a494e3debb3b8",
-    "at": "2026-10-21T03:16:20Z",
-    "host": "goliath"
-   }
-  },
   "7119cf42a0828f3ec310ecec8b09132613b7b9bb": {
    "linux": {
     "sha": "31534fb9cb8854e27719835f72adaabeda1e62c7",
@@ -114983,6 +114971,13 @@
     "sha": "ddaed5d12f340628e59b38907c5082e440232c95",
     "at": "2026-11-20T02:36:55Z",
     "host": "goliath"
+   }
+  },
+  "d26f0de4aad634272aa0e3124cf38c1a62cbda6a": {
+   "macos": {
+    "sha": "9c9c7f3d02d10bfa8a69c034cf7ea1d3e51866aa",
+    "at": "2026-11-20T03:22:22Z",
+    "host": "MacBook-Pro"
    }
   }
  },
