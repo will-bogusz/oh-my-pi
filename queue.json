@@ -116364,8 +116364,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-20T13:02:31.092608Z",
-  "host": "goliath",
+  "at": "2026-11-20T13:10:48.293869Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -116450,10 +116450,8 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): type characters outside the X11 keymap through temporary keycodes",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in crates/natives/src/desktop/mod.rs"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "accepted pair with #19531: Main, 2026-11-17: adjacent unions in x11/mod.rs (mod lines), input.rs use list, X11Input::new fields and foreground_keys_after (watch_releases() then Keymap::xtest); in send_xtest #19519's text_mapping.pressed(keycode) moves into xtest's restructured send_xtest at the same point (after the request is sent, before check(), key presses only), no new logic. Combined form: merge 7b0d2ff0b68, ~/tmp/oh-my-pi/queuethirty/xpair-combined.md; accepted pair with #19849: Main, 2026-11-20: adjacent test-only fields in the fake backend; combined = both",
     "over": [],
     "paired": [
@@ -117562,10 +117560,8 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "wait",
-    "reasons": [
-     "conflicts with main in (branch missing on the fork)"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -117686,9 +117682,8 @@
     "title": "fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing",
     "action": "wait",
     "reasons": [
-     "conflicts with win-button-click in crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md",
-     "conflicts with win-uia-set-patterns in crates/natives/src/desktop/win32/ax.rs",
-     "conflicts with main in crates/natives/src/desktop/control.rs, crates/natives/src/desktop/win32/ax.rs"
+     "conflicts with win-button-click in docs/tools/computer.md",
+     "conflicts with win-uia-set-patterns in crates/natives/src/desktop/win32/ax.rs"
     ],
     "note": "",
     "over": [],
