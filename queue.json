@@ -105802,7 +105802,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-uia-set-patterns",
    "host": "MacBook-Pro",
    "added": "2026-11-20T06:29:20Z",
-   "updated": "2026-11-20T16:01:33Z",
+   "updated": "2026-11-20T16:07:26Z",
    "note": "",
    "advanced": "2026-11-20T16:01:33Z",
    "hold": "Main, 2026-11-20: in its fix round (WinWpfRoutes5, review needs-changes at 86d258734d9); takes the recorded ax.rs form with win-wpf-scroll when it follows",
@@ -105831,7 +105831,13 @@
       ]
      }
     }
-   ]
+   ],
+   "rebases_after": [
+    19870
+   ],
+   "pair_reasons": {
+    "19870": "Main, 2026-11-20: win32/ax.rs: two appended blocks (methods then free items each) and uiautomation import unions; combined = both"
+   }
   },
   {
    "id": "win-takeover-intervene",
