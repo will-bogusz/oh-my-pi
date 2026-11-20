@@ -106783,13 +106783,13 @@
    "needs": [],
    "base": "fbb8085ff432419132c6e3132f36ad857893b1a4",
    "body": "bodies/devin-org-identity.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19928,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-org-identity",
    "host": "MacBook-Pro",
    "added": "2026-11-20T20:47:34Z",
-   "updated": "2026-11-20T21:07:53Z",
+   "updated": "2026-11-20T21:08:52Z",
    "note": "",
    "built": [
     {
@@ -106882,7 +106882,8 @@
      "host": "goliath",
      "tree": "667e496ce999348e2d2c1a714eccc53c55bfe2cb"
     }
-   ]
+   ],
+   "opened": "2026-11-20T21:08:52Z"
   },
   {
    "id": "devin-quota-ranking",
