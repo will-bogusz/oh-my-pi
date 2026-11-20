@@ -889,8 +889,8 @@ mod foreground {
 			WindowsAndMessaging::{
 				GA_ROOTOWNER, GetAncestor, GetCursorPos, GetForegroundWindow, GetSystemMetrics,
 				GetWindowThreadProcessId, IsHungAppWindow, IsWindow, SM_CXVIRTUALSCREEN,
-				SM_CYVIRTUALSCREEN, SM_XVIRTUALSCREEN, SM_YVIRTUALSCREEN, SetCursorPos,
-				WindowFromPoint,
+				SM_CYVIRTUALSCREEN, SM_XVIRTUALSCREEN, SM_YVIRTUALSCREEN, SMTO_ABORTIFHUNG,
+				SendMessageTimeoutW, SetCursorPos, WM_NULL, WindowFromPoint,
 			},
 		},
 	};
@@ -957,9 +957,11 @@ mod foreground {
 			}
 			let mut guard = Self { previous, target, settle, armed: true, _user: user };
 			if previous != target {
+				let mut requested = false;
 				let activation = (|| {
 					activity::check()?;
 					let _ = window::activate(target)?;
+					requested = true;
 					// Waits in slices so the user's press ends the wait.
 					let end = Instant::now() + ACTIVATION_TIMEOUT;
 					while !window::wait_for_foreground(target, Duration::from_millis(10))? {
@@ -974,6 +976,12 @@ mod foreground {
 					hold(Duration::from_millis(20), control::wait)
 				})();
 				if let Err(error) = activation {
+					if requested && activity::check().is_err() {
+						// The user's press cut short the wait for an activation
+						// Windows accepted: let the target's thread take it first, so
+						// the hand-back below sees where it went.
+						Self::settle_activation(target);
+					}
 					let restored = guard.restore();
 					// A press while Windows decided or during the hand-back is the
 					// reason the user sees.
@@ -982,6 +990,28 @@ mod foreground {
 				}
 			}
 			Ok(guard)
+		}
+
+		/// Lets the target's thread process an activation request made for it,
+		/// waiting at most [`ACTIVATION_TIMEOUT`] and not at all for a hung
+		/// thread.
+		fn settle_activation(target: HWND) {
+			control::cleanup(|| {
+				let mut ignored = 0;
+				// SAFETY: WM_NULL carries no pointers; SMTO_ABORTIFHUNG returns at
+				// once for a thread Windows already considers hung.
+				unsafe {
+					SendMessageTimeoutW(
+						target,
+						WM_NULL,
+						0,
+						0,
+						SMTO_ABORTIFHUNG,
+						ACTIVATION_TIMEOUT.as_millis() as u32,
+						&raw mut ignored,
+					)
+				};
+			});
 		}
 
 		fn run(mut self, operation: impl FnOnce(HWND) -> CoreResult<()>) -> CoreResult<()> {
