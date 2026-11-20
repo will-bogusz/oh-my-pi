@@ -105292,6 +105292,21 @@
        "\t\tSystemParametersInfoW, WindowFromPoint,"
       ]
      }
+    },
+    {
+     "at": "2026-11-20T15:53:06Z",
+     "reason": "Main, 2026-11-20: scroll's prompt lines and their coding-agent CHANGELOG entry dropped (prompt rule; error texts carry the way forward)",
+     "old": "b583cf010dc56d375169a34427874bd43ea24d8a",
+     "new": "e260d86b5bced96ef2cf3efd9dfbcc4476c4e298",
+     "dropped": {
+      "packages/coding-agent/src/prompts/tools/computer.md": [
+       "  - Windows WPF scrolls use UI Automation only while the window is in front, choosing a container for each requested axis. If that route cannot be used,",
+       "    `Unsupported` means nothing was sent and never triggers automatic takeover: bring it forward or explicitly use `takeover: true`.",
+       "    Hosted non-WPF child windows keep their normal posted-wheel route.",
+       "- Partial-delivery or restoration error, such as a partial WPF `InputFailed`? Inspect the target before retrying; input may already have landed. NEVER blindly repeat it.",
+       "- On macOS and for Windows WPF scrolling, `AxUnconfirmed` means an accessibility action may already have taken effect."
+      ]
+     }
     }
    ]
   },
