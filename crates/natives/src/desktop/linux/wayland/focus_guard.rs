@@ -49,10 +49,12 @@ use crate::desktop::{
 	},
 };
 
-/// How long an action's call waits after the action returns for a window it
-/// opens, so the call itself reports it. On Omarchy 4.5, GTK and Electron
-/// dialogs appeared 20-55 ms after an AT-SPI press returned and Qt's 115-175
-/// ms; `LibreOffice`'s, 0.3 s and later, are reported by the next call.
+/// How long a watch keeps going after its action returned before an action on
+/// another process may end it (unless a window it watches appeared first).
+/// An action's own call does not wait: on Omarchy 4.5 a waiting call cost 210
+/// ms whenever nothing opened, while dialogs appeared a median 16-60 ms after
+/// an AT-SPI press returned (GTK, Electron, the file-chooser portal) and Qt's
+/// 112 ms; `LibreOffice`'s, 0.24 s and later, came after any such wait.
 const SETTLE: Duration = Duration::from_millis(200);
 /// How long after the action returns the watch keeps handing focus back:
 /// `LibreOffice` built its Paragraph dialog 0.3-1.7 s after the press.
@@ -583,8 +585,8 @@ pub(super) struct FocusGuard {
 	refusal:  Option<String>,
 	/// Watches whose reports have not all been handed to the caller.
 	watches:  Vec<Arc<Mutex<Shared>>>,
-	/// The latest watch's thread, while it runs; ended by the next watch.
-	running:  Option<(Arc<AtomicBool>, thread::JoinHandle<()>)>,
+	/// The latest watch, while its thread runs; ended by the next watch.
+	running:  Option<Running>,
 	next_id:  u64,
 }
 
@@ -662,24 +664,24 @@ impl FocusGuard {
 		out
 	}
 
-	/// Runs `action` on process `pid` under a watch, then waits up to
-	/// [`SETTLE`] for a window it opens. The watch keeps going for [`WATCH`]
-	/// after the action returns. An action on the app the user has focused,
-	/// or one when Hyprland cannot be read, runs unwatched: the first is the
-	/// user's own app, and the second must not stop their work.
+	/// Runs `action` on process `pid` under a watch and returns as soon as it
+	/// does: the watch keeps going for [`WATCH`] after the action returns, and
+	/// a window that opens after the call is reported by the next one. An
+	/// action on the app the user has focused, or one when Hyprland cannot be
+	/// read, runs unwatched: the first is the user's own app, and the second
+	/// must not stop their work.
 	pub(super) fn run<T>(&mut self, pid: u32, action: impl FnOnce() -> T) -> T {
 		let Some(watch) = self.arm(pid) else {
 			return action();
 		};
 		let result = action();
-		watch.finish();
+		watch.end();
 		result
 	}
 
 	fn arm(&mut self, pid: u32) -> Option<Watch> {
-		if let Some((stop, thread)) = self.running.take() {
-			stop.store(true, Ordering::Release);
-			let _ = thread.join();
+		if let Some(previous) = self.running.take() {
+			previous.stop_for(pid);
 		}
 		let user: Client = self.hyprland.json("j/activewindow").ok()?;
 		if user.pid <= 0 || user.pid == i64::from(pid) {
@@ -714,7 +716,7 @@ impl FocusGuard {
 			stop: Arc::clone(&stop),
 			shared: Arc::clone(&shared),
 		};
-		let thread = thread::Builder::new()
+		thread::Builder::new()
 			.name("hyprland-focus-guard".into())
 			.spawn(move || {
 				let (hook, hyprland) = (watcher.hook.clone(), watcher.hyprland.clone());
@@ -724,9 +726,52 @@ impl FocusGuard {
 				}
 			})
 			.ok()?;
-		self.running = Some((stop, thread));
 		self.watches.push(Arc::clone(&shared));
-		Some(Watch { ends, started, shared })
+		self.running = Some(Running { pid, stop, ends: Arc::clone(&ends), started, shared });
+		Some(Watch { ends, started })
+	}
+}
+
+/// The latest watch, while its thread runs.
+struct Running {
+	pid:     u32,
+	stop:    Arc<AtomicBool>,
+	ends:    Arc<AtomicU64>,
+	started: Instant,
+	shared:  Arc<Mutex<Shared>>,
+}
+
+impl Running {
+	/// Ends this watch for the next action, on process `pid`. That action's
+	/// own watch keeps any new window of the same process from the keyboard,
+	/// so this one stops at once; another process's watch first runs until
+	/// [`SETTLE`] after its action returned, or until a window it watches
+	/// appeared, as the action's own call used to wait. The thread is not
+	/// joined: it removes its hook and exits on its own.
+	fn stop_for(self, pid: u32) {
+		if self.pid != pid {
+			self.settle();
+		}
+		self.stop.store(true, Ordering::Release);
+	}
+
+	fn settle(&self) {
+		let ends = self.ends.load(Ordering::Acquire);
+		if ends == u64::MAX {
+			return;
+		}
+		let until = self.started + Duration::from_nanos(ends).saturating_sub(WATCH) + SETTLE;
+		let seen = || !self.shared.lock().report.is_empty();
+		if seen() {
+			return;
+		}
+		while Instant::now() < until && !seen() {
+			thread::sleep(Duration::from_millis(5));
+		}
+		// A hand-back lands within a compositor turn or one IPC round trip.
+		if seen() {
+			thread::sleep(Duration::from_millis(20));
+		}
 	}
 }
 
@@ -736,26 +781,15 @@ struct Watch {
 	/// the action runs.
 	ends:    Arc<AtomicU64>,
 	started: Instant,
-	shared:  Arc<Mutex<Shared>>,
 }
 
 impl Watch {
-	/// Marks the action done, then waits up to [`SETTLE`] for a window it
-	/// opens, and once one has, a moment for its focus outcome.
-	fn finish(self) {
+	/// Marks the action done; the watch keeps going for [`WATCH`].
+	fn end(self) {
 		let ends = self.started.elapsed() + WATCH;
 		self
 			.ends
 			.store(u64::try_from(ends.as_nanos()).unwrap_or(u64::MAX), Ordering::Release);
-		let until = Instant::now() + SETTLE;
-		let seen = || !self.shared.lock().report.is_empty();
-		while Instant::now() < until && !seen() {
-			thread::sleep(Duration::from_millis(5));
-		}
-		// A hand-back lands within a compositor turn or one IPC round trip.
-		if seen() {
-			thread::sleep(Duration::from_millis(20));
-		}
 	}
 }
 
@@ -1236,6 +1270,58 @@ mod tests {
 		);
 		assert_eq!(parse("activewindowv2>>"), Some(Event::Active(None)));
 		assert_eq!(parse("activewindow>>foot,x"), None);
+	}
+
+	/// A watch on process 20 whose action returned `ago`, with `report`.
+	fn running(
+		ago: Duration,
+		report: Vec<(String, DesktopWindowOpened)>,
+	) -> (Running, Arc<AtomicBool>) {
+		let started = Instant::now()
+			.checked_sub(ago + Duration::from_millis(10))
+			.unwrap();
+		let ends = u64::try_from((Duration::from_millis(10) + WATCH).as_nanos()).unwrap();
+		let stop = Arc::new(AtomicBool::new(false));
+		let shared = Arc::new(Mutex::new(Shared { report, ..Shared::default() }));
+		let running = Running {
+			pid: 20,
+			stop: Arc::clone(&stop),
+			ends: Arc::new(AtomicU64::new(ends)),
+			started,
+			shared,
+		};
+		(running, stop)
+	}
+
+	fn stop_for_takes(
+		ago: Duration,
+		report: Vec<(String, DesktopWindowOpened)>,
+		pid: u32,
+	) -> Duration {
+		let (running, stop) = running(ago, report);
+		let t = Instant::now();
+		running.stop_for(pid);
+		assert!(stop.load(Ordering::Acquire));
+		t.elapsed()
+	}
+
+	#[test]
+	fn the_next_action_on_the_same_app_ends_the_previous_watch_at_once() {
+		assert!(stop_for_takes(Duration::ZERO, Vec::new(), 20) < Duration::from_millis(50));
+	}
+
+	#[test]
+	fn the_next_action_on_another_app_lets_the_previous_watch_settle_first() {
+		// Returned just now, nothing seen yet: the old call's settle, at the
+		// start of the next one.
+		let waited = stop_for_takes(Duration::ZERO, Vec::new(), 30);
+		assert!(waited >= SETTLE.saturating_sub(Duration::from_millis(15)), "{waited:?}");
+		// Its settle is over already.
+		assert!(stop_for_takes(SETTLE, Vec::new(), 30) < Duration::from_millis(50));
+		// A window it watches appeared already.
+		let mut run = Run::new();
+		assert_eq!(run.at(30, "openwindow>>d,1,tdlg.py,Allow?"), Verdict::Nothing);
+		assert!(stop_for_takes(Duration::ZERO, run.tracker.report(), 30) < Duration::from_millis(50));
 	}
 
 	#[test]
