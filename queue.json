@@ -106073,8 +106073,20 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/picker-stale-discovery",
    "host": "MacBook-Pro",
    "added": "2026-11-20T17:27:00Z",
-   "updated": "2026-11-20T17:27:00Z",
-   "note": ""
+   "updated": "2026-11-20T17:46:01Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#19701",
+     "code": "3002eb888bf893fbd9fad1b3d794c10652156c19",
+     "with_code": "ee683a22eebb363ada645b7a7da414c8c3e71a56",
+     "tip": "a7654622f5cc642b74aa24fba218ddea2ef85bbb",
+     "with_tip": "3704154aa9143ed620ccb6f77be94b68551a3a70",
+     "at": "2026-11-20T17:46:01Z",
+     "host": "MacBook-Pro",
+     "tree": "bc9514e7ad077bdd6e7ff232a3195a2fdea92acb"
+    }
+   ]
   }
  ],
  "watch": {
