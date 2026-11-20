@@ -16,7 +16,7 @@ On Windows 11 with the user typing, their keys reaching the target go from 283 i
 
 ## Why
 
-- **Admission, as on macOS and X11:** the call waits until the user has pressed nothing for 5 s and holds no button or modifier, up to the run's deadline, else fails with `UserIntervened` having sent nothing.
+- **Admission, as on macOS and X11:** the call waits until the user has pressed nothing for 5 s and holds no button or modifier, up to the deadline, else fails with `UserIntervened` having sent nothing.
 - **During the takeover:** each input batch, hold, settle and drain checks the count; a press stops the call with `UserIntervened`, releases what it held and hands the user's window back. The stopping key has landed: one key per intervention.
 - **Limit:** a call Windows will refuse now waits for the pause first (Windows 10: median 0.5 s to 6.8 s). Nothing we measured predicts a refusal; activating first would send the user's keys to the target while waiting.
 
@@ -34,6 +34,6 @@ On Windows 11 with the user typing, their keys reaching the target go from 283 i
 
 Windows 11 guest, v19.0.1 against this branch's addon, three interleaved rounds; WPF target, user typing real QEMU input in a window beside it. The `takeover: true` rows are logged explicit takeovers: admission is not skipped.
 
-Windows 10 refused every takeover with the user typing on both builds, so it only shows nothing else changed (idle: 6 of 8 ran on each).
+Windows 10 refused every takeover with the user typing on both builds, so it only shows nothing else changed (idle: 6 of 8 ran each).
 
 Unit level (injected clock): the admission and press-classification tests in `win32/activity.rs` pass on Windows 11; they test new code. Live: no windowed takeover test runs to its end on these guests, `main`'s included (Windows refuses the test's activation), so this PR's change to them (`admitted_backend` waits out the click that started the test) is unverified; the cells are the evidence. The prompt's `UserIntervened` line gains the word Windows; no eval was run.
