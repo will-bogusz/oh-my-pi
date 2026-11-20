@@ -552,6 +552,16 @@ mod tests {
 		}
 	}
 
+	/// A backend whose user-activity listener runs, once the user has left
+	/// the keyboard and mouse alone for 5 s, as a session's worker waits
+	/// before a takeover: the key or click that started this test is the
+	/// user's.
+	fn admitted_backend() -> Win32Backend {
+		let mut backend = Win32Backend::new(DisplaySelector::Active).unwrap();
+		backend.admit_takeover().unwrap();
+		backend
+	}
+
 	#[test]
 	#[ignore = "moves focus in a signed-in Windows desktop session"]
 	fn takeover_keys_use_the_focused_child_threads_layout_after_focus() {
@@ -572,6 +582,7 @@ mod tests {
 			assert_eq!(frame as usize & 0xffff, 0x0409, "frame layout");
 			assert_eq!(child as usize & 0xffff, 0x0407, "child layout");
 		}
+		let _backend = admitted_backend();
 		// SAFETY: the window belongs to the test host.
 		unsafe { SetForegroundWindow(windows.user) };
 		assert!(window::wait_for_foreground(windows.user, Duration::from_secs(2)).unwrap());
@@ -612,7 +623,7 @@ mod tests {
 	            terminal in a signed-in desktop session"]
 	fn element_takeover_hands_the_foreground_back_to_the_users_window() {
 		let windows = Windows::open();
-		let mut backend = Win32Backend::new(DisplaySelector::Active).unwrap();
+		let mut backend = admitted_backend();
 		let target = backend
 			.windows()
 			.unwrap()
@@ -679,7 +690,7 @@ mod tests {
 	/// user's window in front; returns the call's result and its unconfirmed
 	/// report.
 	fn type_into_busy_target(windows: &Windows, hang: Duration) -> (CoreResult<()>, Option<String>) {
-		let mut backend = Win32Backend::new(DisplaySelector::Active).unwrap();
+		let mut backend = admitted_backend();
 		let empty = wide("");
 		// SAFETY: WM_SETTEXT copies the NUL-terminated string before it
 		// returns; the handles are windows this test's host created.
@@ -722,7 +733,7 @@ mod tests {
 
 	fn type_with_return_moving_foreground(text: &str) -> Option<String> {
 		let windows = Windows::open();
-		let mut backend = Win32Backend::new(DisplaySelector::Active).unwrap();
+		let mut backend = admitted_backend();
 		let empty = wide("");
 		// SAFETY: these handles belong to the test host; WM_SETTEXT copies
 		// the string synchronously and RETURN_TO carries a window handle.
