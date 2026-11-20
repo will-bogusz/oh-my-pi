@@ -105659,7 +105659,7 @@
    "area": "computer",
    "priority": null,
    "needs": [],
-   "base": "f40f335845f0b136453d12fec8d6057011082766",
+   "base": "640d6e49cff452a4cb101a0643219736df1a2b23",
    "body": "bodies/win-uia-set-patterns.md",
    "state": "queued",
    "pr": null,
@@ -105667,8 +105667,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-uia-set-patterns",
    "host": "MacBook-Pro",
    "added": "2026-11-20T06:29:20Z",
-   "updated": "2026-11-20T09:38:43Z",
-   "note": ""
+   "updated": "2026-11-20T12:56:11Z",
+   "note": "",
+   "advanced": "2026-11-20T12:56:11Z"
   },
   {
    "id": "win-takeover-intervene",
