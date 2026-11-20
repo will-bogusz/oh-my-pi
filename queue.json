@@ -106078,10 +106078,14 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-20T17:06:38Z",
+  "checked": "2026-11-20T17:36:51Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
+   "picker-stale-discovery": {
+    "since": "2026-11-20T17:36:51Z",
+    "title": "fix(coding-agent): refresh discovery from the model picker once the catalog is two hours old"
+   },
    "factory-droid-1100-pin": {
     "since": "2026-11-17T00:39:57Z",
     "title": "feat(catalog): identify Factory Droid requests as droid 1.10.0"
@@ -106158,94 +106162,16 @@
      }
     ]
    },
-   "19516": {
-    "title": "fix(natives): read a macOS popup after the option its typed letters choose",
-    "merge_commit": "4dbe7c2cf0309753befa9bb73a3f65758bc645b2",
-    "merged_at": "2026-11-18T17:12:46Z",
-    "findings": []
-   },
-   "19532": {
-    "title": "fix(natives): put the user's key window back in front of a macOS target after background input and takeover",
-    "merge_commit": "958607927742b92faffe8fc6fc7f6a107255bee1",
-    "merged_at": "2026-11-18T17:12:46Z",
-    "findings": []
-   },
-   "19586": {
-    "title": "docs(auth-gateway): describe reclaim moving warm pins back",
-    "merge_commit": "0e9db07d6cf4c2f21c53df6ba92aff5ea3034143",
-    "merged_at": "2026-11-18T17:12:46Z",
-    "findings": []
-   },
    "19590": {
     "title": "fix(ai): warn when a broker refresh failure outlasts the access token",
     "merge_commit": "35a313ec2bf11512eb4816d718fbd373689bc2ca",
     "merged_at": "2026-11-20T00:19:38Z",
     "findings": []
    },
-   "19596": {
-    "title": "fix(natives): capture the visible part of a Linux window partly off its monitor",
-    "merge_commit": "7de774b6f7f5db17335d672eb7d7b052614b8df0",
-    "merged_at": "2026-11-18T17:12:46Z",
-    "findings": []
-   },
-   "19598": {
-    "title": "fix(ai): retry the initial auth-broker snapshot through a broker restart",
-    "merge_commit": "254ae243060e8258ef8b99d938c23321946cce2b",
-    "merged_at": "2026-11-18T17:12:46Z",
-    "findings": []
-   },
-   "19599": {
-    "title": "fix(coding-agent): let auth-broker serve save an in-flight refresh before exit",
-    "merge_commit": "713aba6df013437df844495f5ea83b17608f46b6",
-    "merged_at": "2026-11-18T17:12:46Z",
-    "findings": []
-   },
-   "19600": {
-    "title": "fix(ai): heal Claude tier blocks a shared weekly wall caused from single-window usage reports",
-    "merge_commit": "a6d09e9aa1991d4dd1c02c86cb3a99101fa9ee02",
-    "merged_at": "2026-11-18T17:12:46Z",
-    "findings": []
-   },
-   "19601": {
-    "title": "fix(catalog): switch Devin's Gemini promo prices to list when each promo ends",
-    "merge_commit": "aba92696315b6945ceda3d2d7c22078ec63066fd",
-    "merged_at": "2026-11-18T17:12:46Z",
-    "findings": []
-   },
-   "19602": {
-    "title": "fix(ai): read auth-broker responses that carry fields a newer broker adds",
-    "merge_commit": "850e17501228cfd7dd4405a1fe9b70053bbaa6c3",
-    "merged_at": "2026-11-18T17:12:46Z",
-    "findings": []
-   },
-   "19605": {
-    "title": "fix(utils): apply OMP_LOG_LEVEL to the console transport",
-    "merge_commit": "34dadb878d845311904928875a7f6dd8f77099a9",
-    "merged_at": "2026-11-18T17:12:46Z",
-    "findings": []
-   },
-   "19606": {
-    "title": "fix(coding-agent): judge omp usage policy state by account-wide windows",
-    "merge_commit": "d0d57d7d5be51481f70f637d44ed83fc9319866c",
-    "merged_at": "2026-11-18T17:12:46Z",
-    "findings": []
-   },
    "19611": {
     "title": "fix(coding-agent): keep the image omission note on evicted Responses computer results",
     "merge_commit": "9c1d2879708db7357554ceb63de326e524a4c94b",
     "merged_at": "2026-11-20T00:19:38Z",
-    "findings": []
-   },
-   "19619": {
-    "title": "fix(catalog): carry Devin's measured image limits",
-    "merge_commit": "7d72a0224f7e35ee63e2cc699e0777b0a80d297b",
-    "merged_at": "2026-11-18T17:12:46Z",
-    "findings": []
-   },
-   "19629": {
-    "title": "fix(natives): refuse every Wayland input call at once when no input route exists",
-    "merge_commit": "bcbc1b9ef2cf1bcbe2fb9a31308aa2a8ab9ec05e",
-    "merged_at": "2026-11-18T17:12:46Z",
     "findings": []
    },
    "19696": {
@@ -107926,6 +107852,12 @@
     "id": "desktop-dispatch-fence",
     "title": "fix(natives): report Windows UIA actions unconfirmed when their reply times out after dispatch",
     "why": "opened as #19871"
+   },
+   {
+    "at": "2026-11-20T17:36:51Z",
+    "kind": "openable",
+    "id": "picker-stale-discovery",
+    "title": "fix(coding-agent): refresh discovery from the model picker once the catalog is two hours old"
    }
   ]
  },
@@ -117106,8 +117038,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-20T17:27:12.900758Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-20T17:36:52.170814Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 1,
@@ -117964,12 +117896,15 @@
     "action": "wait",
     "reasons": [
      "needs #19620 (open)",
+     "conflicts with #19620 in packages/snapcompact/src/snapcompact.ts",
      "conflicts with main in packages/snapcompact/src/snapcompact.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#19620"
+    ],
     "needs": [
      "snapcompact-rerender-on-switch"
     ],
@@ -118380,8 +118315,10 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with main in (branch missing on the fork)"
+    ],
     "note": "",
     "over": [],
     "paired": [],
