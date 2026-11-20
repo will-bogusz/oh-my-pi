@@ -105278,7 +105278,21 @@
    "pair_reasons": {
     "19814": "Main, 2026-11-20: import-list union in win32/ax.rs; combined = both"
    },
-   "advanced": "2026-11-20T13:08:57Z"
+   "advanced": "2026-11-20T13:08:57Z",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-20T13:09:34Z",
+     "reason": "QueueFortyOne, 2026-11-20: rebase onto main; ax.rs WindowsAndMessaging import list rewrapped as the union with main's GA_PARENT/GetAncestor; no item dropped",
+     "old": "4a25afbb72802152ba9adf58fd4aa4e56240b795",
+     "new": "b583cf010dc56d375169a34427874bd43ea24d8a",
+     "dropped": {
+      "crates/natives/src/desktop/win32/ax.rs": [
+       "\t\tGetDesktopWindow, IsWindow, SPI_GETWHEELSCROLLCHARS, SPI_GETWHEELSCROLLLINES,",
+       "\t\tSystemParametersInfoW, WindowFromPoint,"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "win-occluded-capture",
