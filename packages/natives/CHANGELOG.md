@@ -11,6 +11,7 @@
 - Fixed Windows window captures and accessibility trees of a fully covered window passing as current: for Chromium-based browsers and Electron apps, which can stop drawing while covered, they now report `covered` ([#19849](https://github.com/can1357/oh-my-pi/pull/19849) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed Windows `computer` `setValue` on a classic text box (Win32 and WinForms, including Windows 10 Notepad) bringing its window in front of yours, so the keys you typed next went into that box ([#19814](https://github.com/can1357/oh-my-pi/pull/19814) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed Windows `computer` `press()` on a classic button or check box (Win32 and WinForms) bringing its app in front of yours, and `click()` on one reporting success without clicking it
+- Fixed Windows `computer` `press()` and `click()` on a WPF button or check box behind other windows being refused, or for a default-mode click taking over: they now run the control's default action and leave the window where it is; a check box changes state without running its `Click` handler
 
 ## [19.0.1] - 2026-11-19
 

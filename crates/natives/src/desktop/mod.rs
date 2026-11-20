@@ -2011,6 +2011,13 @@ impl Worker {
 		handle: &ax::AxHandle,
 		error: DesktopError,
 	) -> DesktopError {
+		#[cfg(target_os = "windows")]
+		if let Some(target) = error.target_window {
+			return DesktopError::new(
+				error.code,
+				format!("{} (target {reference}; window {target})", error.message),
+			);
+		}
 		let windows = self
 			.backend()
 			.and_then(|backend| backend.windows())
