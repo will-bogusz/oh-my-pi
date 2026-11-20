@@ -25,6 +25,7 @@ const nativeBindings = loadNative();
 // classes
 export const AudioCapture = nativeBindings.AudioCapture ?? missingNativeClass("AudioCapture");
 export const AudioPlayback = nativeBindings.AudioPlayback ?? missingNativeClass("AudioPlayback");
+export const DesktopFocusGuard = nativeBindings.DesktopFocusGuard ?? missingNativeClass("DesktopFocusGuard");
 export const DesktopSession = adaptDesktopSession(nativeBindings.DesktopSession);
 export const DiffStream = nativeBindings.DiffStream ?? missingNativeClass("DiffStream");
 export const DirectoryWatcher = nativeBindings.DirectoryWatcher ?? missingNativeClass("DirectoryWatcher");

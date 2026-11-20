@@ -854,16 +854,17 @@ mod tests {
 
 	fn backend_without_services() -> WaylandBackend {
 		WaylandBackend {
-			display:           DisplaySelector::All,
-			pipewire:          Err("libpipewire-0.3.so.0 could not be loaded (not installed)"),
-			ax:                None,
-			ax_error:          None,
-			input:             None,
-			input_unavailable: OnceCell::from(None),
-			displays:          Vec::new(),
-			compositor_pid:    None,
-			unanswered:        Vec::new(),
-			hyprland:          None,
+			display:              DisplaySelector::All,
+			pipewire:             Err("libpipewire-0.3.so.0 could not be loaded (not installed)"),
+			ax:                   None,
+			ax_error:             None,
+			input:                None,
+			input_unavailable:    OnceCell::from(None),
+			displays:             Vec::new(),
+			compositor_pid:       None,
+			unanswered:           Vec::new(),
+			hyprland:             None,
+			fallback_focus_guard: None,
 		}
 	}
 	/// Holds `LIBEI_ENV_LOCK` with `LIBEI_SOCKET` set to a test's value (removed

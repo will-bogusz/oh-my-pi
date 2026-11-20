@@ -28,6 +28,19 @@ export declare class AudioPlayback {
   stop(): void
 }
 
+/**
+ * An external action's compositor guard, sharing its desktop session's
+ * reports.
+ */
+export declare class DesktopFocusGuard {
+  get kind(): string
+  /**
+   * Ends the action, settles its watch and drains the session's pending
+   * outcomes.
+   */
+  finish(): Promise<Array<DesktopWindowOpened>>
+}
+
 /** Persistent, serialized native desktop capture/input/accessibility session. */
 export declare class DesktopSession {
   constructor(options?: DesktopSessionOptions | undefined | null)
@@ -121,10 +134,15 @@ export declare class DesktopSession {
   axFocused(): Promise<AxNode | undefined | null>
   axNode(reference: string): Promise<AxNode>
   /**
+   * Arms the session's compositor guard around input delivered outside the
+   * worker.
+   */
+  beginFocusGuard(pid: number): Promise<DesktopFocusGuard>
+  /**
    * Windows that apps opened or asked to activate around this session's
    * background actions since the last call, and what each did to the
    * user's keyboard focus. A window still watched is listed again when its
-   * outcome changes. Hyprland only; empty elsewhere.
+   * outcome changes. Hyprland and sway only; empty elsewhere.
    */
   takeWindowsOpened(): Promise<Array<DesktopWindowOpened>>
   axAttributes(reference: string): Promise<Array<[string, string]>>
