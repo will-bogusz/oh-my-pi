@@ -1,10 +1,10 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20 19:26Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20 19:29Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-11-20 19:14Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 4, conflict-held 16, stacked 18, held 11, parked 1, open PRs 25; merged 404, closed 44
+**Counts:** openable now 4, conflict-held 16, stacked 18, held 11, parked 1, open PRs 25, queued since the last plan 1; merged 404, closed 44
 
 ## Openable now (4)
 
@@ -110,3 +110,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20
 | [#19878](https://github.com/can1357/oh-my-pi/pull/19878) | picker-stale-discovery | fix(coding-agent,tui): refresh discovery from the model picker once the catalog is two hours old | other | P1 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/picker-stale-discovery) |
 | [#19883](https://github.com/can1357/oh-my-pi/pull/19883) | devin-neon-image-price | fix(catalog): budget Gemini 4 Neon's images on Devin at the 1,089 tokens it bills | catalog | P0 | 1h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-neon-image-price) |
 | [#19884](https://github.com/can1357/oh-my-pi/pull/19884) | atspi-alert-windows | fix(natives): list GTK message dialogs as windows on Wayland | computer | P1 | 0h | keep; tests-over: LinuxUpstream, 2026-11-20: one test reaching three branches (Alert listing through windows(), shared-title refusal in window_id, an in-window alert's owner); 45 of its lines are a fake GTK 3 app with children, application, parent and pid that no existing fixture provides | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-alert-windows) |
+
+## Queued since the last plan (1)
+
+| id | title | area | priority | age | branch |
+|---|---|---|---|---|---|
+| win-takeover-selection | fix(natives): keep the user's caret through a Windows takeover's hand-back | computer |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-takeover-selection) |
