@@ -117199,7 +117199,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-20T17:47:47.338599Z",
+  "at": "2026-11-20T17:50:34.848624Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -117893,8 +117893,7 @@
     "title": "fix(catalog): draw Gemini 4 Carbon's snapcompact frames at 1568px on Devin and Factory Droid",
     "action": "wait",
     "reasons": [
-     "needs snapcompact-shape-kdl (queued)",
-     "its need snapcompact-shape-kdl conflicts with main in packages/snapcompact/src/snapcompact.ts"
+     "needs snapcompact-shape-kdl (queued)"
     ],
     "note": "",
     "over": [],
@@ -117915,8 +117914,7 @@
     "title": "fix(catalog,snapcompact,coding-agent): give DeepSeek V4.1 Flash its snapcompact archive as text",
     "action": "wait",
     "reasons": [
-     "needs snapcompact-shape-kdl (queued), #19620 (open)",
-     "its need snapcompact-shape-kdl conflicts with main in packages/snapcompact/src/snapcompact.ts"
+     "needs snapcompact-shape-kdl (queued), #19620 (open)"
     ],
     "note": "",
     "over": [],
@@ -117938,8 +117936,7 @@
     "title": "fix(catalog): give snapcompact readers their lead model's frame shape",
     "action": "wait",
     "reasons": [
-     "needs snapcompact-shape-kdl (queued)",
-     "its need snapcompact-shape-kdl conflicts with main in packages/snapcompact/src/snapcompact.ts"
+     "needs snapcompact-shape-kdl (queued)"
     ],
     "note": "",
     "over": [],
@@ -118054,21 +118051,13 @@
     "area": "snapcompact",
     "priority": "P2",
     "title": "refactor(catalog,snapcompact): move snapcompact frame shapes into catalog rules",
-    "action": "wait",
-    "reasons": [
-     "needs #19620 (open)",
-     "conflicts with #19620 in packages/snapcompact/src/snapcompact.ts",
-     "conflicts with main in packages/snapcompact/src/snapcompact.ts"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#19620"
-    ],
-    "needs": [
-     "snapcompact-rerender-on-switch"
-    ],
+    "blocked_by": [],
+    "needs": [],
     "created": "2026-11-18T00:47:39Z"
    },
    {
@@ -118797,13 +118786,15 @@
     "action": "wait",
     "reasons": [
      "conflicts with #19620 in packages/coding-agent/src/session/session-maintenance.ts",
+     "conflicts with snapcompact-shape-kdl in packages/catalog/src/compat/rules/README.md, packages/catalog/src/compat/rules/classes/anthropic.kdl, packages/catalog/src/compat/rules/classes/glm.kdl, packages/catalog/src/compat/rules/classes/kimi.kdl, packages/catalog/src/compat/rules/classes/openai.kdl",
      "conflicts with main in packages/catalog/src/compat/rules/README.md, packages/catalog/src/compat/rules/classes/anthropic.kdl, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/session/session-stats.ts, packages/coding-agent/test/context-fits-model.test.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#19620"
+     "#19620",
+     "snapcompact-shape-kdl"
     ],
     "needs": [],
     "created": "2026-11-03T01:24:37Z"
