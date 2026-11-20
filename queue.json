@@ -106215,10 +106215,16 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-takeover-intervene",
    "host": "MacBook-Pro",
    "added": "2026-11-20T12:25:26Z",
-   "updated": "2026-11-20T20:33:25Z",
+   "updated": "2026-11-20T21:22:05Z",
    "note": "TakeoverDeltaReview fa83a834233 finding declined by Main, 2026-11-20: post-drain attribution stated as a limit",
    "advanced": "2026-11-20T14:02:56Z",
-   "hold": "Main, 2026-11-20: takeover-run hold lifted (final n20 0/20, WinTakeover3); waits for a macOS build host (shared desktop code: control/error/mod/types.rs, macos/skylight.rs), then final-head review, trees, precheck, pre-open line"
+   "hold": "Main, 2026-11-20: takeover-run hold lifted (final n20 0/20, WinTakeover3); waits for a macOS build host (shared desktop code: control/error/mod/types.rs, macos/skylight.rs), then final-head review, trees, precheck, pre-open line",
+   "rebases_after": [
+    19870
+   ],
+   "pair_reasons": {
+    "19870": "Main, 2026-11-20: win32/mod.rs tests-module import list only; combined = union of both WindowsAndMessaging imports"
+   }
   },
   {
    "id": "win-takeover-settle",
