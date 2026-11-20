@@ -885,6 +885,7 @@ mod foreground {
 		Foundation::{HWND, POINT},
 		System::Threading::{AttachThreadInput, GetCurrentThreadId},
 		UI::{
+			Controls::{EM_GETSEL, EM_SETSEL},
 			Input::KeyboardAndMouse::{
 				GetKeyState, GetLastInputInfo, INPUT, INPUT_0, INPUT_KEYBOARD, INPUT_MOUSE, KEYBDINPUT,
 				KEYEVENTF_EXTENDEDKEY, KEYEVENTF_KEYUP, KEYEVENTF_UNICODE, LASTINPUTINFO,
@@ -894,10 +895,11 @@ mod foreground {
 				MOUSEINPUT, MapVirtualKeyExW, SendInput, VK_RETURN,
 			},
 			WindowsAndMessaging::{
-				GA_ROOTOWNER, GetAncestor, GetCursorPos, GetForegroundWindow, GetSystemMetrics,
-				GetWindowThreadProcessId, IsHungAppWindow, IsWindow, SM_CXVIRTUALSCREEN,
-				SM_CYVIRTUALSCREEN, SM_XVIRTUALSCREEN, SM_YVIRTUALSCREEN, SMTO_ABORTIFHUNG,
-				SendMessageTimeoutW, SetCursorPos, WM_NULL, WindowFromPoint,
+				DLGC_HASSETSEL, GA_ROOTOWNER, GUITHREADINFO, GetAncestor, GetCursorPos,
+				GetForegroundWindow, GetGUIThreadInfo, GetSystemMetrics, GetWindowThreadProcessId,
+				IsHungAppWindow, IsWindow, SM_CXVIRTUALSCREEN, SM_CYVIRTUALSCREEN, SM_XVIRTUALSCREEN,
+				SM_YVIRTUALSCREEN, SMTO_ABORTIFHUNG, SendMessageTimeoutW, SetCursorPos, WM_GETDLGCODE,
+				WM_GETTEXTLENGTH, WM_NULL, WindowFromPoint,
 			},
 		},
 	};
@@ -938,6 +940,10 @@ mod foreground {
 	/// Longest wait for the target to read typed text before the foreground
 	/// is handed back.
 	const DRAIN_TIMEOUT: Duration = Duration::from_secs(5);
+	/// Longest wait for the user's app to answer the selection messages sent
+	/// before the target is activated, and again for those sent after the
+	/// foreground is handed back.
+	const FIELD_BUDGET: Duration = Duration::from_millis(200);
 
 	fn last_input_tick() -> Option<u32> {
 		let mut info =
@@ -949,17 +955,23 @@ mod foreground {
 	/// Activates the target for foreground input and hands the foreground back
 	/// to the user's window once the target has consumed it.
 	struct ForegroundGuard {
-		previous: HWND,
-		target:   HWND,
-		settle:   Duration,
-		armed:    bool,
+		previous:  HWND,
+		target:    HWND,
+		settle:    Duration,
+		armed:     bool,
+		selection: Option<UserSelection>,
+		cursor:    Option<CursorGuard>,
 		/// Watches the user's presses until the guard is gone
 		/// ([`activity::check`]).
-		_user:    activity::Takeover,
+		_user:     activity::Takeover,
 	}
 
 	impl ForegroundGuard {
-		fn activate(id: &str, settle: Duration) -> CoreResult<Self> {
+		fn activate(
+			id: &str,
+			settle: Duration,
+			save_cursor: impl FnOnce() -> CoreResult<Option<CursorGuard>>,
+		) -> CoreResult<Self> {
 			control::check()?;
 			// Fails when the user pressed something since the takeover was
 			// admitted: nothing has come forward yet.
@@ -974,8 +986,30 @@ mod foreground {
 				));
 			}
 			let last_input = last_input_tick();
-			let mut guard = Self { previous, target, settle, armed: true, _user: user };
+			let mut guard = Self {
+				previous, target, settle, armed: false, selection: None, cursor: None, _user: user,
+			};
 			if previous != target {
+				guard.selection = UserSelection::save(previous);
+				// Saving waited on the user's app: the window handed back is the
+				// one in front as the target is activated, as without a save.
+				// SAFETY: GetForegroundWindow has no preconditions.
+				let current = unsafe { GetForegroundWindow() };
+				if current.is_null() {
+					return Err(DesktopError::input_failed(
+						"cannot save the current foreground window; no input was sent",
+					));
+				}
+				if current != previous {
+					guard.selection = None;
+					guard.previous = current;
+				}
+			}
+			// The optional selection probe can wait on the user's app. Snapshot
+			// the cursor only once it has finished, just before activation.
+			guard.cursor = save_cursor()?;
+			guard.armed = true;
+			if guard.previous != target {
 				let mut requested = false;
 				let mut attempted = false;
 				let mut prior_fence = None;
@@ -1009,6 +1043,10 @@ mod foreground {
 					},
 				);
 				if let Err((_, error)) = brought {
+					// No pointer input was sent; leave user movement alone.
+					if let Some(cursor) = &mut guard.cursor {
+						cursor.0 = None;
+					}
 					if !attempted {
 						// Nothing was asked of Windows: whatever is in front now is
 						// the user's choice.
@@ -1235,10 +1273,9 @@ mod foreground {
 			// to their window, and fails the call even when every packet was out,
 			// as does a press during the hand-back.
 			settle(self.settle);
-			let restored = self.restore();
-			self.report(restored.is_ok());
-			// A press since the takeover started is the outcome; what else failed
-			// meanwhile, a release Windows refused among it, stays in its message.
+			let (restored, foreground_restored) = self.restore();
+			self.report(foreground_restored);
+			// Preserve release failures alongside the intervention outcome.
 			let result = activity::outcome(result);
 			super::completed(result, restored)
 		}
@@ -1264,14 +1301,20 @@ mod foreground {
 			});
 		}
 
-		fn restore(&mut self) -> CoreResult<()> {
+		fn restore(&mut self) -> (CoreResult<()>, bool) {
 			self.armed = false;
-			control::cleanup(|| {
+			if let Err(error) = activity::check() {
+				if let Some(cursor) = &mut self.cursor {
+					cursor.0 = None;
+				}
+				return (Err(error), false);
+			}
+			let foreground = control::cleanup(|| {
 				// SAFETY: these functions validate scalar handles. Owned modal
 				// windows qualify for restoration, never for input targeting.
 				let current = unsafe { GetForegroundWindow() };
 				if current == self.previous {
-					return Ok(());
+					return Ok(false);
 				}
 				// SAFETY: GetAncestor validates the observed handle, including
 				// null.
@@ -1288,12 +1331,22 @@ mod foreground {
 					));
 				}
 				let _ = window::activate(self.previous)?;
-				window::wait_for_foreground(self.previous, ACTIVATION_TIMEOUT)?.ok_or_else(|| {
-					DesktopError::input_failed(
+				if !window::wait_for_foreground(self.previous, ACTIVATION_TIMEOUT)? {
+					return Err(DesktopError::input_failed(
 						"Windows refused to restore the previous foreground window",
-					)
-				})
-			})
+					));
+				}
+				Ok(true)
+			});
+			// Return the cursor before the optional cross-thread selection probe.
+			let cursor = self.cursor.as_mut().map_or(Ok(()), CursorGuard::restore);
+			if matches!(foreground, Ok(true))
+				&& let Some(selection) = &self.selection
+			{
+				selection.restore();
+			}
+			let foreground_restored = foreground.is_ok();
+			(super::completed(foreground.map(|_| ()), cursor), foreground_restored)
 		}
 	}
 
@@ -1305,6 +1358,132 @@ mod foreground {
 				let _ = self.restore();
 			}
 		}
+	}
+
+	/// The caret in the text field that had the user's focus, put back once the
+	/// foreground is handed back if the activation selected the field's whole
+	/// text. A `WinForms` text box does that on its first focus since its app
+	/// last set its text, when no mouse button is down and nothing is selected,
+	/// and the user's next key would then replace what they typed. Any other
+	/// change the app makes on activation stands. Only a field that takes
+	/// `EM_SETSEL`, as its `WM_GETDLGCODE` says (the dialog manager's own test),
+	/// on another thread than this one, is watched; WPF, browser and other
+	/// windowless fields have no such message. Positions past 65,535 are left
+	/// alone, since `EM_GETSEL`'s packed answer cannot hold them.
+	struct UserSelection {
+		window: HWND,
+		thread: u32,
+		field:  HWND,
+		caret:  usize,
+		token:  Option<control::OperationToken>,
+	}
+
+	impl UserSelection {
+		fn save(window: HWND) -> Option<Self> {
+			// SAFETY: a null process-id pointer is permitted; Win32 validates
+			// the handle.
+			let thread = unsafe { GetWindowThreadProcessId(window, std::ptr::null_mut()) };
+			// SAFETY: GetCurrentThreadId has no preconditions.
+			if thread == unsafe { GetCurrentThreadId() } {
+				// A send to this thread's own window ignores its timeout.
+				return None;
+			}
+			let field = focus_of(thread)?;
+			let mut user = Self { window, thread, field, caret: 0, token: control::current_token() };
+			let until = user.budget()?;
+			if user.send(field, WM_GETDLGCODE, 0, until)? as u32 & DLGC_HASSETSEL == 0 {
+				return None;
+			}
+			let (start, end) = user.selection(until)?;
+			user.caret = start;
+			let focused = focus_of(thread);
+			(start == end && focused == Some(field)).then_some(user)
+		}
+
+		/// With the user's window in front again. A message to that window is
+		/// answered once its thread has handled the activation, focus handlers
+		/// included, so the field is read after whatever they selected. Best
+		/// effort: a key the user presses before the write still replaces the
+		/// selection.
+		fn restore(&self) {
+			let Some(until) = self.budget() else {
+				return;
+			};
+			// The saved range was a caret, so a whole non-empty text selected
+			// now is the activation's doing.
+			let selected_all = self.send(self.window, WM_NULL, 0, until).is_some()
+				&& self
+					.send(self.field, WM_GETTEXTLENGTH, 0, until)
+					.is_some_and(|length| {
+						self
+							.selection(until)
+							.is_some_and(|(start, end)| start == 0 && end > 0 && end == length)
+					});
+			// SAFETY: GetForegroundWindow has no preconditions.
+			let user_in_front = unsafe { GetForegroundWindow() } == self.window;
+			let focused = focus_of(self.thread);
+			if selected_all && user_in_front && focused == Some(self.field) {
+				let _ = self.send(self.field, EM_SETSEL, self.caret, until);
+			}
+		}
+
+		/// When these messages must have been answered: shortly, and before the
+		/// call's deadline; `None` once the call is cancelled or out of time.
+		fn budget(&self) -> Option<Instant> {
+			let until = Instant::now() + FIELD_BUDGET;
+			let Some(token) = &self.token else {
+				return Some(until);
+			};
+			token.check().ok()?;
+			let until = token
+				.deadline()
+				.and_then(|deadline| deadline.checked_sub(control::DEADLINE_MARGIN))
+				.map_or(until, |deadline| deadline.min(until));
+			(until > Instant::now()).then_some(until)
+		}
+
+		/// Start and end of the field's selection.
+		fn selection(&self, until: Instant) -> Option<(usize, usize)> {
+			let packed = self.send(self.field, EM_GETSEL, 0, until)?;
+			(packed as isize != -1).then_some((packed & 0xffff, packed >> 16 & 0xffff))
+		}
+
+		/// Sends `message` with `wparam` and `lparam` both `wparam` (a caret for
+		/// `EM_SETSEL`, zero otherwise), waiting no later than `until`.
+		fn send(&self, window: HWND, message: u32, wparam: usize, until: Instant) -> Option<usize> {
+			let timeout = until.saturating_duration_since(Instant::now()).as_millis();
+			if timeout == 0
+				|| self
+					.token
+					.as_ref()
+					.is_some_and(|token| token.check().is_err())
+			{
+				return None;
+			}
+			let mut result = 0;
+			// SAFETY: the parameters are scalars (no pointers for these
+			// messages), and `result` is writable for the call.
+			let answered = unsafe {
+				SendMessageTimeoutW(
+					window,
+					message,
+					wparam,
+					wparam as isize,
+					SMTO_ABORTIFHUNG,
+					u32::try_from(timeout).unwrap_or(u32::MAX),
+					&mut result,
+				)
+			};
+			(answered != 0).then_some(result)
+		}
+	}
+
+	fn focus_of(thread: u32) -> Option<HWND> {
+		let mut info =
+			GUITHREADINFO { cbSize: size_of::<GUITHREADINFO>() as u32, ..Default::default() };
+		// SAFETY: `info` is writable and its size field is initialized.
+		let read = thread != 0 && unsafe { GetGUIThreadInfo(thread, &mut info) } != 0;
+		(read && !info.hwndFocus.is_null()).then_some(info.hwndFocus)
 	}
 
 	/// Returns the user's pointer to where it was once foreground pointer input,
@@ -1623,27 +1802,8 @@ mod foreground {
 	}
 
 	pub(super) fn pointer(id: &str, event: PointerEvent) -> CoreResult<()> {
-		// Declared first so it drops last: the cursor returns after the
-		// foreground has been handed back.
-		let mut cursor = CursorGuard::save()?;
-		let foreground = match ForegroundGuard::activate(id, POINTER_SETTLE) {
-			Ok(foreground) => foreground,
-			Err(error) => {
-				// Activation sent no pointer input; do not overwrite movement
-				// the user made while Windows decided the focus request.
-				cursor.0 = None;
-				return Err(error);
-			},
-		};
-		let result = foreground.run(|target| pointer_active(target, event));
-		// The user's pointer is theirs again once they pressed something.
-		if result
-			.as_ref()
-			.is_err_and(|error| error.code == ErrorCode::UserIntervened)
-		{
-			cursor.0 = None;
-		}
-		super::completed(result, cursor.restore())
+		ForegroundGuard::activate(id, POINTER_SETTLE, || CursorGuard::save().map(Some))?
+			.run(|target| pointer_active(target, event))
 	}
 
 	fn pointer_active(target: HWND, event: PointerEvent) -> CoreResult<()> {
@@ -1837,7 +1997,7 @@ mod foreground {
 		focus: impl FnOnce() -> CoreResult<()>,
 		held: impl FnOnce() -> CoreResult<()>,
 	) -> CoreResult<()> {
-		ForegroundGuard::activate(id, KEY_SETTLE)?.run(|target| {
+		ForegroundGuard::activate(id, KEY_SETTLE, || Ok(None))?.run(|target| {
 			focus()?;
 			with_keys(Some(target), keys, held)
 		})
@@ -2108,7 +2268,7 @@ mod foreground {
 		let name = format!("window {id}");
 		let mut typed = None;
 		let mut unread = None;
-		let result = ForegroundGuard::activate(id, KEY_SETTLE)?.run(|target| {
+		let result = ForegroundGuard::activate(id, KEY_SETTLE, || Ok(None))?.run(|target| {
 			focus()?;
 			let total = match send_graphemes(text, super::keyboard_layout(Some(target)), |events| {
 				send_to(target, events)
@@ -2172,6 +2332,8 @@ mod foreground {
 				target,
 				settle: Duration::ZERO,
 				armed: true,
+				selection: None,
+				cursor: None,
 				_user: activity::Takeover::default(),
 			};
 			let result = guard.run(|_| {

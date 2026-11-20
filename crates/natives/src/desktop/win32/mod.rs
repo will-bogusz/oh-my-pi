@@ -255,6 +255,7 @@ mod tests {
 		os::windows::io::{AsRawHandle, FromRawHandle, OwnedHandle},
 		process::{Child, ChildStdout, Command, Stdio},
 		sync::Arc,
+		sync::atomic::{AtomicBool, AtomicIsize, Ordering},
 		time::Duration,
 	};
 
@@ -285,6 +286,10 @@ mod tests {
 	const TARGET: &str = "omp test: takeover target";
 	/// Set for the copy of this test binary that hosts the windows.
 	const HOST: &str = "OMP_TAKEOVER_TEST_WINDOWS";
+	/// What the user window of a window host does with its selection when it
+	/// gets the focus with no mouse button down: `all` selects the whole text,
+	/// `end` moves the caret to the end; unset leaves it alone.
+	const ON_FOCUS: &str = "OMP_TAKEOVER_TEST_ON_FOCUS";
 
 	/// Posted to the target window: once its thread reads the next key-down,
 	/// it stops reading messages for `wParam` milliseconds, as a busy app's
@@ -356,10 +361,14 @@ mod tests {
 
 	impl Windows {
 		fn open() -> Self {
-			Self::open_with_layout(false)
+			Self::open_with(false, "")
 		}
 
 		fn open_with_layout(editor: bool) -> Self {
+			Self::open_with(editor, "")
+		}
+
+		fn open_with(editor: bool, on_focus: &str) -> Self {
 			let mut host = Command::new(std::env::current_exe().unwrap())
 				.args([
 					"--ignored",
@@ -370,6 +379,7 @@ mod tests {
 				.env(HOST, "1")
 				.env("OMP_TAKEOVER_TEST_LAYOUT", if editor { "1" } else { "" })
 				.stdin(Stdio::piped())
+				.env(ON_FOCUS, on_focus)
 				.stdout(Stdio::piped())
 				.spawn()
 				.unwrap();
@@ -615,6 +625,16 @@ mod tests {
 		let (sender, receiver) = std::sync::mpsc::channel();
 		std::thread::spawn(move || {
 			let user = create(USER);
+			use windows_sys::Win32::UI::WindowsAndMessaging::{GWLP_WNDPROC, SetWindowLongPtrW};
+			let on_focus = std::env::var(ON_FOCUS).unwrap_or_default();
+			SELECT_ON_FOCUS.store(!on_focus.is_empty(), Ordering::Release);
+			CARET_TO_END.store(on_focus == "end", Ordering::Release);
+			// SAFETY: this thread owns the window, and the procedure lives
+			// until exit.
+			let edit = unsafe {
+				SetWindowLongPtrW(user, GWLP_WNDPROC, user_window_proc as *const () as isize)
+			};
+			USER_PROC.store(edit, Ordering::Release);
 			// SAFETY: this thread owns the edit window; the callback remains
 			// live until the host exits.
 			unsafe {
@@ -641,6 +661,50 @@ mod tests {
 		println!("windows {user} {}", target as usize);
 		std::io::stdout().flush().unwrap();
 		pump();
+	}
+
+	/// The EDIT procedure [`user_window_proc`] replaced.
+	static USER_PROC: AtomicIsize = AtomicIsize::new(0);
+	/// Whether [`user_window_proc`] changes the selection on focus.
+	static SELECT_ON_FOCUS: AtomicBool = AtomicBool::new(false);
+	/// Whether [`user_window_proc`] moves the caret to the end instead.
+	static CARET_TO_END: AtomicBool = AtomicBool::new(false);
+
+	/// Gives the runner permission to activate the target while the host owns
+	/// the foreground, and optionally models a text box's focus selection.
+	unsafe extern "system" fn user_window_proc(
+		hwnd: HWND,
+		message: u32,
+		wparam: usize,
+		lparam: isize,
+	) -> isize {
+		use windows_sys::Win32::UI::{
+			Controls::EM_SETSEL,
+			Input::KeyboardAndMouse::{GetAsyncKeyState, VK_LBUTTON},
+			WindowsAndMessaging::{CallWindowProcW, WM_GETTEXTLENGTH, WM_SETFOCUS, WNDPROC},
+		};
+		// SAFETY: USER_PROC holds the procedure SetWindowLongPtrW returned for
+		// this window, stored before the window could receive a message here.
+		let edit =
+			unsafe { std::mem::transmute::<isize, WNDPROC>(USER_PROC.load(Ordering::Acquire)) };
+		// SAFETY: all arguments came from the window procedure.
+		let result = unsafe { CallWindowProcW(edit, hwnd, message, wparam, lparam) };
+		// SAFETY: GetAsyncKeyState takes a scalar virtual key; the messages go
+		// to this window on its own thread.
+		unsafe {
+			if message == WM_SETFOCUS
+				&& SELECT_ON_FOCUS.load(Ordering::Acquire)
+				&& GetAsyncKeyState(VK_LBUTTON.into()) >= 0
+			{
+				if CARET_TO_END.load(Ordering::Acquire) {
+					let end = SendMessageW(hwnd, WM_GETTEXTLENGTH, 0, 0);
+					SendMessageW(hwnd, EM_SETSEL, end as usize, end);
+				} else {
+					SendMessageW(hwnd, EM_SETSEL, 0, -1);
+				}
+			}
+		}
+		result
 	}
 
 	unsafe extern "system" fn layout_receiver(
@@ -799,6 +863,53 @@ mod tests {
 			control::take_focus_return().map(|r| (r.handed_back, r.previous_pid, r.front_pid)),
 			Some((false, pid, pid))
 		);
+	}
+
+	#[test]
+	#[ignore = "moves the foreground between windows it opens; run with --ignored from a focused \
+	            terminal in a signed-in desktop session"]
+	fn takeover_hands_back_the_users_caret_where_it_was() {
+		use windows_sys::Win32::UI::{Controls::EM_SETSEL, WindowsAndMessaging::WM_CHAR};
+		// What the user's window does on a keyboard-style focus, and where
+		// their next key lands after a takeover: a select-all is undone, any
+		// other move of the caret is the app's own and stands.
+		for (on_focus, expected) in
+			[("all", "omp Ztest: user window"), ("end", "omp test: user windowZ")]
+		{
+			let windows = Windows::open_with(false, on_focus);
+			let (_watch, mut backend) = admitted_backend();
+			let target = backend
+				.windows()
+				.unwrap()
+				.into_iter()
+				.find(|window| window.id == (windows.target as usize).to_string())
+				.expect("the target window is listed");
+			let element = backend.ax.window_root(&target).unwrap();
+			// SAFETY: a window handle this test created.
+			unsafe { SetForegroundWindow(windows.user) };
+			assert!(
+				window::wait_for_foreground(windows.user, Duration::from_secs(2)).unwrap(),
+				"this process cannot take the foreground; run it from a focused terminal"
+			);
+			windows.grant_foreground();
+			// The user's caret sits after "omp " as they type on.
+			// SAFETY: scalar arguments to a window this test created.
+			unsafe { SendMessageW(windows.user, EM_SETSEL, 4, 4) };
+			let input = ElementInput::Text("x".to_string());
+			backend
+				.element_input(
+					&element,
+					&input,
+					DeliveryMode::ForegroundReturnFocus,
+					&CancellationSource::default().token(),
+				)
+				.unwrap();
+			// SAFETY: no preconditions.
+			assert_eq!(unsafe { GetForegroundWindow() }, windows.user, "{on_focus}");
+			// SAFETY: scalar arguments to a window this test created.
+			unsafe { SendMessageW(windows.user, WM_CHAR, usize::from(b'Z'), 1) };
+			assert_eq!(Windows::text(windows.user), expected, "{on_focus}");
+		}
 	}
 
 	/// 240 characters, each block numbered so a dropped one shows.
