@@ -254,8 +254,10 @@ mod tests {
 		io::{BufRead, BufReader, Write},
 		os::windows::io::{AsRawHandle, FromRawHandle, OwnedHandle},
 		process::{Child, ChildStdout, Command, Stdio},
-		sync::Arc,
-		sync::atomic::{AtomicBool, AtomicIsize, Ordering},
+		sync::{
+			Arc,
+			atomic::{AtomicBool, AtomicIsize, Ordering},
+		},
 		time::Duration,
 	};
 

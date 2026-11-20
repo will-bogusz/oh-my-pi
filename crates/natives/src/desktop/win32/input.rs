@@ -987,7 +987,13 @@ mod foreground {
 			}
 			let last_input = last_input_tick();
 			let mut guard = Self {
-				previous, target, settle, armed: false, selection: None, cursor: None, _user: user,
+				previous,
+				target,
+				settle,
+				armed: false,
+				selection: None,
+				cursor: None,
+				_user: user,
 			};
 			if previous != target {
 				guard.selection = UserSelection::save(previous);
