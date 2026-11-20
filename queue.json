@@ -106504,7 +106504,26 @@
     }
    ],
    "opened": "2026-11-20T18:33:41Z",
-   "readied": "2026-11-20T18:34:06Z"
+   "readied": "2026-11-20T18:34:06Z",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-20T18:52:27Z",
+     "reason": "QueueFortyTwo, 2026-11-20: bot-round fix 27a496426a5 replaces the namesake counter in window_id (roboomp 4646281886/4646281894, Codex 4646309714); the dropped lines are the fail-open name read and the >1 count",
+     "old": "379b31edf12ffff75ecda20c6e54421788521c90",
+     "new": "bc1b9818703d544cb12276643ddd9a4a842e6fef",
+     "dropped": {
+      "crates/natives/src/desktop/linux/ax.rs": [
+       "\t\t\t\tlet mut namesakes = 0;",
+       "\t\t\t\t\tlet proxy = frame",
+       "\t\t\t\t\t\t.map_err(|err| DesktopError::ax_failed(format!(\"AT-SPI window: {err}\")))?;",
+       "\t\t\t\t\tif proxy.name().await.is_ok_and(|name| name == title) {",
+       "\t\t\t\t\t\tnamesakes += 1;",
+       "\t\t\t\tif namesakes > 1 {",
+       "\t\t\t\t\t\t\"{namesakes} AT-SPI windows of the application are titled '{title}'; refusing \\"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "hyprland-window-list",
