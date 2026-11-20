@@ -118370,6 +118370,11 @@
     "sha": "c6df69d27973a89218aeb5e3e9989902c513dd9f",
     "at": "2026-11-20T21:39:20Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "c6df69d27973a89218aeb5e3e9989902c513dd9f",
+    "at": "2026-11-20T21:44:16Z",
+    "host": "goliath"
    }
   },
   "eebdbe7e5f25975f5d3de527599f5400faf24961": {
