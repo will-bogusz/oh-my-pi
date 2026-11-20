@@ -11,7 +11,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
 | factory-droid-1100-pin | feat(catalog): identify Factory Droid requests as droid 1.10.0 | factory-droid |  | 6d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-pin) |
-| win-wpf-scroll | fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing | computer |  | 3h | open; accepted pair with #19814: Main, 2026-11-20: import-list union in win32/ax.rs; combined = both | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-wpf-scroll) |
+| win-wpf-scroll | fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing | computer |  | 4h | open; accepted pair with #19814: Main, 2026-11-20: import-list union in win32/ax.rs; combined = both | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-wpf-scroll) |
 
 ## Conflict-held (19)
 
