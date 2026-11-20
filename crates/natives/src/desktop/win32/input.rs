@@ -960,17 +960,25 @@ mod foreground {
 				let activation = (|| {
 					activity::check()?;
 					let _ = window::activate(target)?;
-					if !window::wait_for_foreground(target, ACTIVATION_TIMEOUT)? {
-						return Err(DesktopError::input_failed(format!(
-							"Windows refused to activate the exact target window {id}; no input was sent"
-						)));
+					// Waits in slices so the user's press ends the wait.
+					let end = Instant::now() + ACTIVATION_TIMEOUT;
+					while !window::wait_for_foreground(target, Duration::from_millis(10))? {
+						activity::check()?;
+						if Instant::now() >= end {
+							return Err(DesktopError::input_failed(format!(
+								"Windows refused to activate the exact target window {id}; no input was \
+								 sent"
+							)));
+						}
 					}
-					control::wait(Duration::from_millis(20))
+					hold(Duration::from_millis(20), control::wait)
 				})();
 				if let Err(error) = activation {
-					// A press while Windows decided is the reason the user sees.
+					let restored = guard.restore();
+					// A press while Windows decided or during the hand-back is the
+					// reason the user sees.
 					let error = activity::check().err().unwrap_or(error);
-					return super::completed(Err(error), guard.restore()).map(|()| guard);
+					return super::completed(Err(error), restored).map(|()| guard);
 				}
 			}
 			Ok(guard)
