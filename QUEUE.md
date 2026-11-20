@@ -4,7 +4,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20
 
 **Opening:** not paused
 **Ready budget:** 2 of 8 ready events used in the hour before the last plan, 6 left (plan of 2026-11-20 18:18Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 3, conflict-held 16, stacked 17, held 11, parked 1, open PRs 24; merged 404, closed 44
+**Counts:** openable now 3, conflict-held 16, stacked 17, held 11, parked 1, open PRs 24, queued since the last plan 1; merged 404, closed 44
 
 ## Openable now (3)
 
@@ -107,3 +107,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20
 | [#19871](https://github.com/can1357/oh-my-pi/pull/19871) | desktop-dispatch-fence | fix(natives): report Windows UIA actions unconfirmed when their reply times out after dispatch | computer | P1 | 1h | keep; accepted pair with #19870: Main, 2026-11-20: win32/ax.rs import union; docs/tools/computer.md AxUnconfirmed: #19870's rewritten sentence, then this entry's Windows dispatch line; combined = both; tests-over: WinWpfRoutes6, 2026-11-20: the final-head review asked for the action off side through the caller and deadline-free teardown; the four session tests each reach a distinct branch (marked then expired, abandoned, on time, unfenced) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/desktop-dispatch-fence) |
 | [#19878](https://github.com/can1357/oh-my-pi/pull/19878) | picker-stale-discovery | fix(coding-agent,tui): refresh discovery from the model picker once the catalog is two hours old | other | P1 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/picker-stale-discovery) |
 | [#19883](https://github.com/can1357/oh-my-pi/pull/19883) | devin-neon-image-price | fix(catalog): budget Gemini 4 Neon's images on Devin at the 1,089 tokens it bills | catalog | P2 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-neon-image-price) |
+
+## Queued since the last plan (1)
+
+| id | title | area | priority | age | branch |
+|---|---|---|---|---|---|
+| atspi-alert-windows | fix(natives): list GTK message dialogs as windows on Wayland | computer |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-alert-windows) |
