@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20 08:28Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20 08:34Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-20 08:27Z on goliath; groups below are from it, states from the manifest)
@@ -35,7 +35,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20
 | macos-web-type-background | fix(natives): type into a background macOS web page field without a takeover | computer | P2 | 5d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19504](https://github.com/can1357/oh-my-pi/pull/19504), [#19702](https://github.com/can1357/oh-my-pi/pull/19702), [#19849](https://github.com/can1357/oh-my-pi/pull/19849), [#19531](https://github.com/can1357/oh-my-pi/pull/19531), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-web-type-background) |
 | deadline-ranking | feat(ai): rank an account priority by quota deadline | ai/auth | P2 | 2d | [#19623](https://github.com/can1357/oh-my-pi/pull/19623), [#19700](https://github.com/can1357/oh-my-pi/pull/19700), [#19701](https://github.com/can1357/oh-my-pi/pull/19701) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/deadline-ranking) |
 | win-wpf-scroll | fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing | computer |  | 4h | win-popup-foreground | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-wpf-scroll) |
-| win-uia-set-patterns | fix(natives): set WPF sliders and combo boxes through RangeValue and SelectionItem | computer |  | 1h | [#19814](https://github.com/can1357/oh-my-pi/pull/19814), win-popup-foreground | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-uia-set-patterns) |
+| win-uia-set-patterns | fix(natives): set WPF sliders and combo boxes through RangeValue and SelectionItem | computer |  | 2h | [#19814](https://github.com/can1357/oh-my-pi/pull/19814), win-popup-foreground | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-uia-set-patterns) |
 
 ## Stacked (16)
 
