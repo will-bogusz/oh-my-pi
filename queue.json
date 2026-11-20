@@ -107081,7 +107081,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-20T22:13:24Z",
+  "checked": "2026-11-20T23:13:42Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -107206,12 +107206,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-13T22:52:46Z",
-    "kind": "openable",
-    "id": "macos-handback-key",
-    "title": "fix(natives): give the user's key window back after macOS takeover and focus-guard hand-backs"
-   },
    {
     "at": "2026-11-13T23:54:48Z",
     "kind": "unopenable",
