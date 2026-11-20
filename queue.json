@@ -118282,6 +118282,11 @@
     "sha": "3121d8ce90e3c5c264f9339c9a60ff2ec01b8637",
     "at": "2026-11-20T21:06:56Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "3121d8ce90e3c5c264f9339c9a60ff2ec01b8637",
+    "at": "2026-11-20T21:09:13Z",
+    "host": "goliath"
    }
   }
  },
