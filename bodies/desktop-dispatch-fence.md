@@ -6,7 +6,7 @@ The caller used to return `Timeout` when its wait for the native worker ended, w
 
 Covered: Windows `press()` without a chord and `perform()` without a menu path (`Win32Ax::perform` and its pattern fallbacks). Only those requests allocate a fence. Coordinate clicks, `press(chord)`, `setValue`, focus, menu commands and other platforms keep `main`'s `Timeout`. A fenced caller stops waiting 125 ms before the run's deadline; the run's own abort is separate and does not close the fence. Both docs pages say this; the model guide is unchanged.
 
-Reading order: `DispatchFence` and `dispatching` in `desktop/control.rs`, `SessionCore::call_with_wait` in `desktop/mod.rs`, the `dispatching()` calls in `win32/ax.rs`.
+Reading order: `DispatchFence` and `dispatching` in `desktop/control.rs`, `SessionCore::call_with_wait` in `desktop/mod.rs`, then the calls in `win32/ax.rs`.
 
 ## Why
 
