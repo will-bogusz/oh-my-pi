@@ -105692,10 +105692,18 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-20T12:32:15Z",
+  "checked": "2026-11-20T13:02:30Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
+   "win-button-click": {
+    "since": "2026-11-20T13:02:30Z",
+    "title": "fix(natives): click Windows buttons without activating their window"
+   },
+   "win-uia-set-patterns": {
+    "since": "2026-11-20T13:02:30Z",
+    "title": "fix(natives): set WPF sliders and combo boxes through RangeValue and SelectionItem"
+   },
    "factory-droid-1100-pin": {
     "since": "2026-11-17T00:39:57Z",
     "title": "feat(catalog): identify Factory Droid requests as droid 1.10.0"
@@ -105906,12 +105914,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-13T12:49:10Z",
-    "kind": "openable",
-    "id": "key-menu",
-    "title": "fix(natives): close the menu a macOS background key press opens"
-   },
    {
     "at": "2026-11-13T13:20:12Z",
     "kind": "merged",
@@ -107543,6 +107545,18 @@
     "files": [
      "crates/natives/src/desktop/mod.rs"
     ]
+   },
+   {
+    "at": "2026-11-20T13:02:30Z",
+    "kind": "openable",
+    "id": "win-button-click",
+    "title": "fix(natives): click Windows buttons without activating their window"
+   },
+   {
+    "at": "2026-11-20T13:02:30Z",
+    "kind": "openable",
+    "id": "win-uia-set-patterns",
+    "title": "fix(natives): set WPF sliders and combo boxes through RangeValue and SelectionItem"
    }
   ]
  },
@@ -116323,8 +116337,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-20T12:36:16.990925Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-20T13:02:31.092608Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -117521,8 +117535,10 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with main in (branch missing on the fork)"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -117560,19 +117576,15 @@
     "area": "computer",
     "priority": null,
     "title": "fix(natives): click Windows buttons without activating their window",
-    "action": "wait",
-    "reasons": [
-     "conflicts with #19849 in crates/natives/src/desktop/win32/window.rs",
-     "conflicts with main in crates/natives/src/desktop/win32/window.rs"
-    ],
-    "note": "accepted pair with #19195: Main (assignment to QueueThirtySeven), 2026-11-19: docs/tools/computer.md only, both add one paragraph after the line-118 paragraph of the desktop section; combined = #19195's macOS background-drag paragraph, then this entry's Windows BM_CLICK paragraph (union, no wording change)",
+    "action": "open",
+    "reasons": [],
+    "note": "accepted pair with #19195: Main (assignment to QueueThirtySeven), 2026-11-19: docs/tools/computer.md only, both add one paragraph after the line-118 paragraph of the desktop section; combined = #19195's macOS background-drag paragraph, then this entry's Windows BM_CLICK paragraph (union, no wording change); accepted pair with #19849: Main, 2026-11-20: import-list union in win32/window.rs with #19849's three style removals applied, one tests module; combined = both",
     "over": [],
     "paired": [
-     "#19195"
-    ],
-    "blocked_by": [
+     "#19195",
      "#19849"
     ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-19T11:17:04Z"
    },
@@ -117586,6 +117598,7 @@
     "title": "fix(natives): press items of the open WPF context menu of the window in front",
     "action": "wait",
     "reasons": [
+     "conflicts with win-button-click in crates/natives/src/desktop/win32/ax.rs, crates/natives/src/desktop/win32/window.rs",
      "conflicts with main in crates/natives/src/desktop/win32/ax.rs, crates/natives/src/desktop/win32/window.rs"
     ],
     "note": "accepted pair with #19849: Main, 2026-11-20: win32/window.rs; combined = WindowsAndMessaging import-list union, and one #[cfg(test)] mod tests holding both sides' uses and items (both append a tests module); recheck at #19849's next head",
@@ -117593,7 +117606,9 @@
     "paired": [
      "#19849"
     ],
-    "blocked_by": [],
+    "blocked_by": [
+     "win-button-click"
+    ],
     "needs": [],
     "created": "2026-11-20T04:47:55Z"
    },
@@ -117625,10 +117640,8 @@
     "area": "computer",
     "priority": null,
     "title": "fix(natives): set WPF sliders and combo boxes through RangeValue and SelectionItem",
-    "action": "wait",
-    "reasons": [
-     "conflicts with main in crates/natives/src/desktop/win32/ax.rs"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -117646,12 +117659,17 @@
     "title": "fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing",
     "action": "wait",
     "reasons": [
+     "conflicts with win-button-click in crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md",
+     "conflicts with win-uia-set-patterns in crates/natives/src/desktop/win32/ax.rs",
      "conflicts with main in crates/natives/src/desktop/control.rs, crates/natives/src/desktop/win32/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "win-button-click",
+     "win-uia-set-patterns"
+    ],
     "needs": [],
     "created": "2026-11-20T04:27:43Z"
    },
