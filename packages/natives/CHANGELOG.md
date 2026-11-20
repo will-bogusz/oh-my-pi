@@ -29,7 +29,8 @@
 - Fixed Windows AX `press()` (no chord) and `perform()` calls without a menu path reporting `Timeout` instead of `AxUnconfirmed` when dispatch may have begun but the provider did not reply before the native reply wait ended, and prevented those calls from dispatching after that wait ended without dispatch ([#19871](https://github.com/can1357/oh-my-pi/pull/19871) by [@will-bogusz](https://github.com/will-bogusz))
 - Fixed Windows `computer` `press()` on a classic button or check box (Win32 and WinForms) bringing its app in front of yours, and `click()` on one reporting success without clicking it
 - Fixed Windows `computer` `press()` and `click()` on a WPF button or check box behind other windows being refused, or for a default-mode click taking over: they now run the control's default action and leave the window where it is; a check box changes state without running its `Click` handler
-- Fixed Windows `setValue` to set a WPF slider to a number in its range (at most 15 significant digits) or a combo box/list to the exact name of an exposed item, then read it back. The app must already be in front; these writes are refused behind other windows
+- Fixed Windows `setValue` to set a WPF slider to a number in its range (at most 15 significant digits) or a combo box/list to the exact name of an exposed item, then read it back. Outside the eligible WPF background route below, the app must already be in front
+- Fixed Windows `computer` `setValue` on eligible WPF text boxes, whole-percent slider steps and exposed combo/list items behind other windows without raising the window; late replies after attempted dispatch report `AxUnconfirmed`, while requests abandoned before dispatch report `Timeout` with nothing sent
 
 ## [19.0.1] - 2026-11-19
 
