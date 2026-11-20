@@ -105248,6 +105248,24 @@
    "added": "2026-11-20T04:27:43Z",
    "updated": "2026-11-20T04:27:43Z",
    "note": ""
+  },
+  {
+   "id": "win-occluded-capture",
+   "branch": "will/win-occluded-capture",
+   "title": "fix(natives,coding-agent): say when a Windows capture or tree of a covered Chromium window may be stale",
+   "area": "computer",
+   "priority": null,
+   "needs": [],
+   "base": "f40f335845f0b136453d12fec8d6057011082766",
+   "body": "bodies/win-occluded-capture.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-occluded-capture",
+   "host": "MacBook-Pro",
+   "added": "2026-11-20T04:27:57Z",
+   "updated": "2026-11-20T04:27:57Z",
+   "note": ""
   }
  ],
  "watch": {
