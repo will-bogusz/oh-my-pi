@@ -105348,6 +105348,63 @@
        "\t\tnative_button,"
       ]
      }
+    },
+    {
+     "at": "2026-11-20T21:01:10Z",
+     "reason": "QueueFortyFour, 2026-11-20: bot round (roboomp 4647148431): same-thread guard in native_button and button fixtures moved to their own message-loop thread rewrite these lines on purpose (WinButtonBot head f6af5880c1)",
+     "old": "032857eba7668d917dd7cda34041a89db9b9bc91",
+     "new": "18eec705594e1457d53926318ba5179698a038ad",
+     "dropped": {
+      "crates/natives/src/desktop/win32/ax.rs": [
+       "\t\t\twindow::tests::{button, button_parent, click_messages, clicks, record},",
+       "\t\t// No message pump runs: the click must have reached the app, as the",
+       "\t\t// button's own click message, when the action returns.",
+       "\t\tassert_eq!((clicks(), click_messages()), (1, 1));",
+       "\t\tassert_eq!((clicks(), click_messages()), (2, 2));",
+       "\t\t// SAFETY: this thread owns the window.",
+       "\t\tunsafe { DestroyWindow(parent) };"
+      ],
+      "crates/natives/src/desktop/win32/input.rs": [
+       "\t\t\t\t\tBS_OWNERDRAW, BS_PUSHBUTTON, DestroyWindow, DispatchMessageW, MSG, PM_REMOVE,",
+       "\t\t\t\t\tPeekMessageW, SW_SHOWNOACTIVATE, ShowWindow, WS_VISIBLE,",
+       "\t\t\tbutton, button_parent, click_messages, clicks, pressed_at, record, winforms_button_class,",
+       "\t\t\t// SAFETY: this thread owns `button`; `point` is writable.",
+       "\t\t\t// SAFETY: this thread owns the window.",
+       "\t\t\t// No message pump runs: a WinForms button's click must have reached",
+       "\t\t\t// the app, as its own click message, when the click returns.",
+       "\t\t\tlet forms = button(parent, winforms_button_class(), WS_VISIBLE | BS_PUSHBUTTON as u32);",
+       "\t\t\tassert_eq!((clicks(), click_messages()), (1, 1));",
+       "\t\t\t// SAFETY: this thread owns the button.",
+       "\t\t\tunsafe { DestroyWindow(forms) };",
+       "\t\t\tlet drawn = button(parent, \"BUTTON\", WS_VISIBLE | BS_OWNERDRAW as u32);",
+       "\t\t\tlet mut message = MSG::default();",
+       "\t\t\t// SAFETY: `message` is writable; this thread owns the posted-to",
+       "\t\t\t// windows.",
+       "\t\t\twhile unsafe { PeekMessageW(&raw mut message, std::ptr::null_mut(), 0, 0, PM_REMOVE) } != 0",
+       "\t\t\t\t// SAFETY: `message` was just filled by PeekMessageW.",
+       "\t\t\t\tunsafe { DispatchMessageW(&raw const message) };",
+       "\t\t\tassert_eq!(pressed_at(), Some((70, 15)));",
+       "\t\t\tassert_eq!(click_messages(), 0);",
+       "\t\t\tunsafe { DestroyWindow(parent) };"
+      ],
+      "crates/natives/src/desktop/win32/window.rs": [
+       "/// enabled; `None` for other windows, group boxes and split buttons.",
+       "\tif !with_class_name(hwnd, |class| is_native_class(class, \"Button\")) {",
+       "\t\tlet child = |style: i32| button(parent, \"BUTTON\", style as u32);",
+       "\t\t// SAFETY: this thread owns the windows and subclasses only them.",
+       "\t\t\t// No message pump runs: the click must have reached the app when",
+       "\t\t\t// click_button reports success.",
+       "\t\t\tassert_eq!(clicks(), 1);",
+       "\t\t\tsubclass(refuses, Some(refusing_button));",
+       "\t\t\tassert_eq!(click_messages(), 0);",
+       "\t\t\tlet other = top_level();",
+       "\t\t\tMOVE_ON_CHECK.with(|target| target.set(other));",
+       "\t\t\tDestroyWindow(other);",
+       "\t\t\tsubclass(destroyed, Some(refusing_button));",
+       "\t\t\tassert_eq!(click_messages(), 1);",
+       "\t\t\tDestroyWindow(parent);"
+      ]
+     }
     }
    ],
    "tests_over_override": {
