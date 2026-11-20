@@ -1226,6 +1226,7 @@ impl AtSpiAx {
 	) -> CoreResult<Vec<ObjectRefOwned>> {
 		/// Children read one by one before the list is bisected instead.
 		const SCANNED: i32 = 64;
+		type ChildExtents = (ObjectRefOwned, (i32, i32, i32, i32));
 		let accessible =
 			answered("the application", reply_timeout, parent.as_accessible_proxy(connection))
 				.await?
@@ -1234,22 +1235,21 @@ impl AtSpiAx {
 			.await?
 			.unwrap_or_default()
 			.max(0);
-		let child_at =
-			async |index: i32| -> CoreResult<Option<(ObjectRefOwned, (i32, i32, i32, i32))>> {
-				let Ok(child) =
-					answered("the application", reply_timeout, accessible.get_child_at_index(index))
-						.await?
-				else {
-					return Ok(None);
-				};
-				let Ok(component) = Self::component(connection, &child).await else {
-					return Ok(None);
-				};
-				Ok(answered("the application", reply_timeout, component.get_extents(CoordType::Window))
+		let child_at = async |index: i32| -> CoreResult<Option<ChildExtents>> {
+			let Ok(child) =
+				answered("the application", reply_timeout, accessible.get_child_at_index(index))
 					.await?
-					.ok()
-					.map(|extents| (child, extents)))
+			else {
+				return Ok(None);
 			};
+			let Ok(component) = Self::component(connection, &child).await else {
+				return Ok(None);
+			};
+			Ok(answered("the application", reply_timeout, component.get_extents(CoordType::Window))
+				.await?
+				.ok()
+				.map(|extents| (child, extents)))
+		};
 		let indices: Vec<i32> = if count <= SCANNED {
 			(0..count).collect()
 		} else {
@@ -1259,7 +1259,7 @@ impl AtSpiAx {
 				let middle = low + (high - low) / 2;
 				match child_at(middle).await? {
 					Some((_, (_, top, _, height))) if top.saturating_add(height) <= y => {
-						low = middle + 1
+						low = middle + 1;
 					},
 					Some(_) => high = middle,
 					None => break,
