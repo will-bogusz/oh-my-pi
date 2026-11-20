@@ -97,20 +97,26 @@ thread_local! {
 	static ACTIVE: RefCell<Option<Baseline>> = const { RefCell::new(None) };
 }
 
+/// Reports teardown failure before the last watch permits another admission.
+trait Unregister {
+	fn unregister(&mut self) -> CoreResult<()>;
+}
+
 /// A transition excludes new registrations without holding the state lock
 /// while the listener starts or joins. Waiters release it through the condvar.
 enum Registration<R> {
 	Idle,
 	Changing,
 	Live(usize, Arc<Presses>, R),
+	Failed(DesktopError),
 }
 
-struct Watches<R> {
+struct Watches<R: Unregister> {
 	state: Mutex<Registration<R>>,
 	changed: Condvar,
 }
 
-impl<R> Watches<R> {
+impl<R: Unregister> Watches<R> {
 	const fn new() -> Self {
 		Self { state: Mutex::new(Registration::Idle), changed: Condvar::new() }
 	}
@@ -127,6 +133,7 @@ impl<R> Watches<R> {
 					return Ok(Watch { watches: self, presses: Arc::clone(presses) });
 				},
 				Registration::Changing => self.changed.wait(&mut state),
+				Registration::Failed(error) => return Err(error.clone()),
 				Registration::Idle => break,
 			}
 		}
@@ -152,17 +159,17 @@ impl<R> Watches<R> {
 	fn presses(&self) -> Option<Arc<Presses>> {
 		match &*self.state.lock() {
 			Registration::Live(_, presses, _) => Some(Arc::clone(presses)),
-			Registration::Idle | Registration::Changing => None,
+			Registration::Idle | Registration::Changing | Registration::Failed(_) => None,
 		}
 	}
 }
 
-struct Watch<'a, R> {
+struct Watch<'a, R: Unregister> {
 	watches: &'a Watches<R>,
 	presses: Arc<Presses>,
 }
 
-impl<R> Drop for Watch<'_, R> {
+impl<R: Unregister> Drop for Watch<'_, R> {
 	fn drop(&mut self) {
 		let mut state = self.watches.state.lock();
 		let Registration::Live(count, _, _) = &mut *state else {
@@ -174,9 +181,17 @@ impl<R> Drop for Watch<'_, R> {
 		}
 		let registration = std::mem::replace(&mut *state, Registration::Changing);
 		drop(state);
-		// Listener drop signals an independent event and joins its thread.
-		drop(registration);
-		*self.watches.state.lock() = Registration::Idle;
+		// Join acknowledges removal, destruction and any listener panic.
+		// A failed teardown poisons admission rather than pretending the
+		// process-wide registration is clean; restart the process to recover.
+		let result = match registration {
+			Registration::Live(_, _, mut listener) => listener.unregister(),
+			_ => unreachable!("the last watch removed a live registration"),
+		};
+		*self.watches.state.lock() = match result {
+			Ok(()) => Registration::Idle,
+			Err(error) => Registration::Failed(error),
+		};
 		self.watches.changed.notify_all();
 	}
 }
@@ -386,6 +401,7 @@ struct OwnSend {
 
 static OWN_SEND: Mutex<Option<OwnSend>> = Mutex::new(None);
 const SEND_HISTORY: Duration = Duration::from_secs(60);
+const MAX_SEND_WINDOW_MS: u32 = 50;
 
 pub(super) fn sending() -> u32 {
 	// SAFETY: GetTickCount has no preconditions.
@@ -401,9 +417,10 @@ fn user_tick(last: u32, own: Option<OwnSend>, at: Duration) -> bool {
 	let Some(own) = own else {
 		return true;
 	};
-	// A user press during SendInput itself is attributed to OMP. Only that
-	// batch's bounded tick window is suppressed, never earlier/later input.
+	// A user press during a short SendInput batch is attributed to OMP.
+	// A longer interval may include descheduling, so none of it is conclusive.
 	at.saturating_sub(own.at) >= SEND_HISTORY
+		|| own.after.wrapping_sub(own.before) > MAX_SEND_WINDOW_MS
 		|| last.wrapping_sub(own.before) > own.after.wrapping_sub(own.before)
 }
 
@@ -476,18 +493,31 @@ impl Drop for StopEvent {
 }
 
 struct Listener {
-	thread: Option<thread::JoinHandle<()>>,
+	thread: Option<thread::JoinHandle<CoreResult<()>>>,
 	stop: Arc<StopEvent>,
+}
+
+impl Unregister for Listener {
+	fn unregister(&mut self) -> CoreResult<()> {
+		let Some(thread) = self.thread.take() else {
+			return Ok(());
+		};
+		// SAFETY: both owners retain this valid manual-reset event. Unlike a
+		// posted message, signaling cannot fail because the queue is full.
+		if unsafe { SetEvent(self.stop.0 as HANDLE) } == 0 {
+			return Err(DesktopError::input_failed(
+				"Windows input listener teardown failed: SetEvent failed; no further takeover can start",
+			));
+		}
+		thread.join().map_err(|_| DesktopError::input_failed(
+			"Windows input listener teardown failed: listener thread panicked; no further takeover can start",
+		))?
+	}
 }
 
 impl Drop for Listener {
 	fn drop(&mut self) {
-		// SAFETY: both owners retain this valid manual-reset event. Unlike a
-		// posted message, signaling cannot fail because the queue is full.
-		unsafe { SetEvent(self.stop.0 as HANDLE) };
-		if let Some(thread) = self.thread.take() {
-			let _ = thread.join();
-		}
+		let _ = self.unregister();
 	}
 }
 
@@ -546,7 +576,7 @@ fn listen() -> CoreResult<(Arc<Presses>, Listener)> {
 				// SAFETY: no live window uses this class, even when creation failed.
 				unsafe { UnregisterClassW(class.as_ptr(), std::ptr::null_mut()) };
 				let _ = ready.send(None);
-				return;
+				return Ok(());
 			}
 			// Registration precedes the history sample, so input during thread
 			// startup is covered by history or by the queue, never neither.
@@ -588,12 +618,19 @@ fn listen() -> CoreResult<(Arc<Presses>, Listener)> {
 			};
 			// SAFETY: this thread owns the window and its class.
 			let destroyed = unsafe { DestroyWindow(window) };
-			// A failed removal can leave an enumerated registration, but
-			// destroying its target still ends delivery to this process.
-			assert!(removed != 0 || destroyed != 0, "cannot stop Raw Input delivery");
+			// Destroying the target ends delivery even if removal fails, but
+			// its stale registration is not clean: the joined result poisons
+			// the watch state and refuses all later takeovers.
 			// SAFETY: no live window uses the class after destruction.
 			unsafe { UnregisterClassW(class.as_ptr(), std::ptr::null_mut()) };
 			LISTENING.set(None);
+			if removed == 0 || destroyed == 0 {
+				return Err(DesktopError::input_failed(format!(
+					"Windows input listener teardown failed: RIDEV_REMOVE={}, DestroyWindow={}; no further takeover can start",
+					removed != 0, destroyed != 0,
+				)));
+			}
+			Ok(())
 		})
 		.map_err(|error| {
 			DesktopError::input_failed(format!("cannot start watching the user's input: {error}"))
@@ -707,6 +744,12 @@ mod tests {
 		}
 	}
 
+	impl Unregister for Registration<'_> {
+		fn unregister(&mut self) -> CoreResult<()> {
+			Ok(())
+		}
+	}
+
 	#[test]
 	fn call_watches_balance_on_success_refusal_cancel_early_error_and_panic() {
 		let registered = std::cell::Cell::new(0);
@@ -769,7 +812,7 @@ mod tests {
 			let _call = watches.watch(register).unwrap();
 			panic!("call panicked before input");
 		}));
-		assert!(panic.is_err());
+		assert_eq!(panic.unwrap_err().downcast_ref::<&str>(), Some(&"call panicked before input"));
 		assert_eq!((registered.get(), removed.get()), (6, 6));
 	}
 
@@ -803,6 +846,10 @@ mod tests {
 		assert!(!user_tick(1, wrapped, at));
 		assert!(user_tick(u32::MAX - 1, wrapped, at));
 		assert!(user_tick(2, wrapped, at));
+		let delayed = Some(OwnSend { before: 100, after: 151, at });
+		assert!(user_tick(125, delayed, at), "a descheduled sender cannot identify its input");
+		let bounded = Some(OwnSend { before: 100, after: 150, at });
+		assert!(!user_tick(125, bounded, at));
 	}
 
 	#[test]
@@ -823,6 +870,24 @@ mod tests {
 		assert_eq!(error.code, crate::desktop::error::ErrorCode::UserIntervened);
 		assert!(ACTIVE.with_borrow(Option::is_none));
 		assert_eq!(removed.get(), 2);
+	}
+
+	#[test]
+	fn failed_removal_refuses_the_next_watch_without_registering_again() {
+		struct FailedRemoval;
+		impl Unregister for FailedRemoval {
+			fn unregister(&mut self) -> CoreResult<()> {
+				Err(DesktopError::input_failed("RIDEV_REMOVE failed"))
+			}
+		}
+		let watches = Watches::new();
+		let watch = watches.watch(|| Ok((Arc::new(presses(None)), FailedRemoval))).unwrap();
+		drop(watch);
+		let error = watches.watch(|| panic!("a failed teardown must not register again"))
+			.err()
+			.expect("failed teardown must poison the next start");
+		assert_eq!(error.code, crate::desktop::error::ErrorCode::InputFailed);
+		assert!(error.message.contains("RIDEV_REMOVE"), "{}", error.message);
 	}
 
 	#[test]
@@ -874,7 +939,7 @@ mod tests {
 			let _call = UserActivity::start().unwrap();
 			panic!("unwind a real call-scope watch");
 		});
-		assert!(panic.is_err());
+		assert_eq!(panic.unwrap_err().downcast_ref::<&str>(), Some(&"unwind a real call-scope watch"));
 		assert!(registered().is_empty());
 	}
 }
