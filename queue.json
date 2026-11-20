@@ -106505,6 +106505,24 @@
    ],
    "opened": "2026-11-20T18:33:41Z",
    "readied": "2026-11-20T18:34:06Z"
+  },
+  {
+   "id": "hyprland-window-list",
+   "branch": "will/hyprland-window-list",
+   "title": "fix(natives): read window positions and focus from Hyprland",
+   "area": "computer",
+   "priority": null,
+   "needs": [],
+   "base": "725f8c6f34ce648bec57af31a4e91baea1081a3c",
+   "body": "bodies/hyprland-window-list.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/hyprland-window-list",
+   "host": "MacBook-Pro",
+   "added": "2026-11-20T18:38:26Z",
+   "updated": "2026-11-20T18:38:26Z",
+   "note": ""
   }
  ],
  "watch": {
