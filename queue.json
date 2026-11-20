@@ -106017,13 +106017,13 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-20T15:04:17Z",
+  "checked": "2026-11-20T16:36:18Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "win-wpf-scroll": {
-    "since": "2026-11-20T14:33:32Z",
-    "title": "fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing"
+   "desktop-dispatch-fence": {
+    "since": "2026-11-20T16:36:18Z",
+    "title": "fix(natives): report Windows UIA actions unconfirmed when their reply times out after dispatch"
    },
    "factory-droid-1100-pin": {
     "since": "2026-11-17T00:39:57Z",
@@ -106073,7 +106073,8 @@
    19700,
    19701,
    19702,
-   19849
+   19849,
+   19870
   ],
   "post_merge": {
    "18632": {
@@ -106227,12 +106228,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-13T15:53:06Z",
-    "kind": "openable",
-    "id": "covered-fill",
-    "title": "fix(coding-agent): refuse browser keys aimed at a field a modal dialog covers"
-   },
    {
     "at": "2026-11-13T16:54:22Z",
     "kind": "openable",
@@ -107859,6 +107854,19 @@
     "id": "win-takeover-intervene",
     "title": "fix(natives): stop Windows takeovers when the user types or clicks",
     "why": "plan: held (held: Main, 2026-11-20: final-head review needs-changes at 6073806a3fc (fix round WinTakeover3); win-wpf-scroll opens first (ready first))"
+   },
+   {
+    "at": "2026-11-20T16:36:18Z",
+    "kind": "openable",
+    "id": "desktop-dispatch-fence",
+    "title": "fix(natives): report Windows UIA actions unconfirmed when their reply times out after dispatch"
+   },
+   {
+    "at": "2026-11-20T16:36:18Z",
+    "kind": "unopenable",
+    "id": "win-wpf-scroll",
+    "title": "fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing",
+    "why": "opened as #19870"
    }
   ]
  },
@@ -116911,12 +116919,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-20T16:04:35.491360Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-20T16:36:19.554470Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 1,
+   "left": 7
   },
   "rows": [
    {
@@ -117137,6 +117145,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-18T02:06:12Z"
+   },
+   {
+    "id": "win-wpf-scroll",
+    "label": "#19870",
+    "number": 19870,
+    "state": "open",
+    "area": "computer",
+    "priority": "P2",
+    "title": "fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-20T16:06:33Z"
    },
    {
     "id": "browser-wait-predicate",
@@ -117827,6 +117852,7 @@
      "conflicts with #19531 in docs/computer-use.md, docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md",
      "conflicts with #19620 in packages/coding-agent/src/session/session-maintenance.ts",
+     "conflicts with #19870 in docs/tools/computer.md",
      "its need computer-ui-quiet conflicts with main in crates/natives/src/desktop/macos/settle.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/tools/computer.md, packages/agent/src/agent.ts, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -117840,7 +117866,8 @@
      "#19849",
      "#19531",
      "#19618",
-     "#19620"
+     "#19620",
+     "#19870"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -117862,6 +117889,7 @@
      "conflicts with #19849 in docs/tools/computer.md",
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md",
+     "conflicts with #19870 in docs/tools/computer.md",
      "its need computer-ui-quiet conflicts with main in crates/natives/src/desktop/macos/settle.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/macos/ax/rich_text.rs, crates/natives/src/desktop/mod.rs, docs/tools/computer.md"
     ],
@@ -117872,7 +117900,8 @@
      "#19195",
      "#19849",
      "#19531",
-     "#19618"
+     "#19618",
+     "#19870"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -117919,6 +117948,7 @@
      "conflicts with #19849 in docs/tools/computer.md",
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md, packages/natives/native/index.d.ts",
+     "conflicts with #19870 in docs/tools/computer.md",
      "conflicts with main in crates/natives/src/desktop/backend.rs, crates/natives/src/desktop/cursor.rs, crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/macos/capture.rs, crates/natives/src/desktop/macos/cursor.rs, crates/natives/src/desktop/macos/cursor/helper.m, crates/natives/src/desktop/macos/mod.rs, crates/natives/src/desktop/mod.rs, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
@@ -117928,7 +117958,8 @@
      "#19195",
      "#19849",
      "#19531",
-     "#19618"
+     "#19618",
+     "#19870"
     ],
     "needs": [],
     "created": "2026-11-11T00:21:12Z"
@@ -118054,6 +118085,7 @@
      "conflicts with #19849 in docs/tools/computer.md",
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md",
+     "conflicts with #19870 in docs/tools/computer.md",
      "conflicts with main in crates/natives/src/desktop/win32/edit.rs, crates/natives/src/desktop/win32/input.rs, crates/natives/src/desktop/win32/mod.rs"
     ],
     "note": "",
@@ -118063,7 +118095,8 @@
      "#19195",
      "#19849",
      "#19531",
-     "#19618"
+     "#19618",
+     "#19870"
     ],
     "needs": [],
     "created": "2026-11-12T04:40:13Z"
@@ -118076,13 +118109,13 @@
     "area": "computer",
     "priority": null,
     "title": "fix(natives): report Windows UIA actions unconfirmed when their reply times out after dispatch",
-    "action": "held",
-    "reasons": [
-     "held: Main, 2026-11-20: opens as a recorded pair with win-wpf-scroll once scroll is open (scroll first)"
-    ],
-    "note": "tests-over: WinWpfRoutes6, 2026-11-20: the final-head review asked for the action off side through the caller and deadline-free teardown; the four session tests each reach a distinct branch (marked then expired, abandoned, on time, unfenced)",
+    "action": "open",
+    "reasons": [],
+    "note": "accepted pair with #19870: Main, 2026-11-20: win32/ax.rs import union; docs/tools/computer.md AxUnconfirmed: #19870's rewritten sentence, then this entry's Windows dispatch line; combined = both; tests-over: WinWpfRoutes6, 2026-11-20: the final-head review asked for the action off side through the caller and deadline-free teardown; the four session tests each reach a distinct branch (marked then expired, abandoned, on time, unfenced)",
     "over": [],
-    "paired": [],
+    "paired": [
+     "#19870"
+    ],
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-20T15:50:23Z"
@@ -118127,8 +118160,10 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with main in (branch missing on the fork)"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -118168,15 +118203,19 @@
     "title": "fix(natives): click Windows buttons without activating their window",
     "action": "held",
     "reasons": [
-     "held: Main, 2026-11-20: in its fix round (WinButtonRound, review needs-changes at e06e31d6bf7); ready work opens in the order it becomes ready"
+     "held: Main, 2026-11-20: in its fix round (WinButtonRound, review needs-changes at e06e31d6bf7); ready work opens in the order it becomes ready",
+     "conflicts with desktop-dispatch-fence in crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md"
     ],
-    "note": "accepted pair with #19195: Main (assignment to QueueThirtySeven), 2026-11-19: docs/tools/computer.md only, both add one paragraph after the line-118 paragraph of the desktop section; combined = #19195's macOS background-drag paragraph, then this entry's Windows BM_CLICK paragraph (union, no wording change); accepted pair with #19849: Main, 2026-11-20: import-list union in win32/window.rs with #19849's three style removals applied, one tests module; combined = both",
+    "note": "accepted pair with #19195: Main (assignment to QueueThirtySeven), 2026-11-19: docs/tools/computer.md only, both add one paragraph after the line-118 paragraph of the desktop section; combined = #19195's macOS background-drag paragraph, then this entry's Windows BM_CLICK paragraph (union, no wording change); accepted pair with #19870: Main, 2026-11-20: docs/tools/computer.md AxUnconfirmed: #19870's sentence plus this entry's WinForms check-box case; combined = both; recheck at #19870's next head. Wording rule (Main): one sentence per platform fact; 'It may already have taken effect: observe ... before repeating it' stays last, unduplicated; whoever merges third reads the paragraph whole; accepted pair with #19849: Main, 2026-11-20: import-list union in win32/window.rs with #19849's three style removals applied, one tests module; combined = both; tests-over: WbcReview (gpt-6.2-sol) should-fix 5, 2026-11-20: dispatch tests at the AX and pointer entries; each reaches a route no other does (click_button guards incl. reparent/destroy rows; perform's native route + disabled-form refusal; pointer hand-off + owner-drawn exclusion); each fails with its guard reverted on the VM",
     "over": [],
     "paired": [
      "#19195",
+     "#19870",
      "#19849"
     ],
-    "blocked_by": [],
+    "blocked_by": [
+     "desktop-dispatch-fence"
+    ],
     "needs": [],
     "created": "2026-11-19T11:17:04Z"
    },
@@ -118190,6 +118229,8 @@
     "title": "fix(natives): press items of the open WPF context menu of the window in front",
     "action": "wait",
     "reasons": [
+     "conflicts with #19870 in crates/natives/src/desktop/win32/ax.rs",
+     "conflicts with desktop-dispatch-fence in crates/natives/src/desktop/win32/ax.rs",
      "conflicts with main in crates/natives/src/desktop/win32/ax.rs, crates/natives/src/desktop/win32/window.rs"
     ],
     "note": "accepted pair with #19849: Main, 2026-11-20: win32/window.rs; combined = WindowsAndMessaging import-list union, and one #[cfg(test)] mod tests holding both sides' uses and items (both append a tests module); recheck at #19849's next head",
@@ -118197,7 +118238,10 @@
     "paired": [
      "#19849"
     ],
-    "blocked_by": [],
+    "blocked_by": [
+     "#19870",
+     "desktop-dispatch-fence"
+    ],
     "needs": [],
     "created": "2026-11-20T04:47:55Z"
    },
@@ -118211,12 +118255,15 @@
     "title": "fix(natives): stop Windows takeovers when the user types or clicks",
     "action": "held",
     "reasons": [
-     "held: Main, 2026-11-20: final-head review needs-changes at 6073806a3fc (fix round WinTakeover3); win-wpf-scroll opens first (ready first)"
+     "held: Main, 2026-11-20: final-head review needs-changes at 6073806a3fc (fix round WinTakeover3); win-wpf-scroll opens first (ready first)",
+     "conflicts with #19870 in crates/natives/src/desktop/win32/mod.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#19870"
+    ],
     "needs": [],
     "created": "2026-11-20T12:25:26Z"
    },
@@ -118231,12 +118278,15 @@
     "action": "wait",
     "reasons": [
      "needs win-takeover-intervene (queued)",
+     "conflicts with #19870 in crates/natives/src/desktop/win32/mod.rs",
      "conflicts with main in crates/natives/src/desktop/win32/input.rs, crates/natives/src/desktop/win32/mod.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#19870"
+    ],
     "needs": [
      "win-takeover-intervene"
     ],
@@ -118252,31 +118302,19 @@
     "title": "fix(natives): set WPF sliders and combo boxes through RangeValue and SelectionItem",
     "action": "held",
     "reasons": [
-     "held: Main, 2026-11-20: in its fix round (WinWpfRoutes5, review needs-changes at 86d258734d9); takes the recorded ax.rs form with win-wpf-scroll when it follows"
+     "held: Main, 2026-11-20: in its fix round (WinWpfRoutes5, review needs-changes at 86d258734d9); takes the recorded ax.rs form with win-wpf-scroll when it follows",
+     "conflicts with desktop-dispatch-fence in crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md"
     ],
-    "note": "",
+    "note": "accepted pair with #19870: Main, 2026-11-20: win32/ax.rs: two appended blocks (methods then free items each) and uiautomation import unions; combined = both",
     "over": [],
-    "paired": [],
-    "blocked_by": [],
+    "paired": [
+     "#19870"
+    ],
+    "blocked_by": [
+     "desktop-dispatch-fence"
+    ],
     "needs": [],
     "created": "2026-11-20T06:29:20Z"
-   },
-   {
-    "id": "win-wpf-scroll",
-    "label": "win-wpf-scroll",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": null,
-    "title": "fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-20T04:27:43Z"
    },
    {
     "id": "wire-delta-count",
