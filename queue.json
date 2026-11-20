@@ -106779,7 +106779,7 @@
    "branch": "will/devin-org-identity",
    "title": "fix(ai,catalog): store Devin login identity scoped by organization",
    "area": "broker",
-   "priority": null,
+   "priority": "P0",
    "needs": [],
    "base": "fbb8085ff432419132c6e3132f36ad857893b1a4",
    "body": "bodies/devin-org-identity.md",
@@ -106789,7 +106789,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-org-identity",
    "host": "MacBook-Pro",
    "added": "2026-11-20T20:47:34Z",
-   "updated": "2026-11-20T21:09:15Z",
+   "updated": "2026-11-20T21:12:00Z",
    "note": "",
    "built": [
     {
@@ -106891,7 +106891,7 @@
    "branch": "will/devin-quota-ranking",
    "title": "fix(ai): rank Devin logins by quota before their on-demand balance",
    "area": "broker",
-   "priority": null,
+   "priority": "P0",
    "needs": [],
    "base": "fbb8085ff432419132c6e3132f36ad857893b1a4",
    "body": "bodies/devin-quota-ranking.md",
@@ -106901,7 +106901,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-quota-ranking",
    "host": "MacBook-Pro",
    "added": "2026-11-20T20:55:11Z",
-   "updated": "2026-11-20T21:10:43Z",
+   "updated": "2026-11-20T21:12:00Z",
    "note": "",
    "built": [
     {

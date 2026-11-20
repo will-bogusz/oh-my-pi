@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20 21:10Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20 21:12Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-20 20:57Z on MacBook-Pro; groups below are from it, states from the manifest)
@@ -111,8 +111,8 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20
 | [#19878](https://github.com/can1357/oh-my-pi/pull/19878) | picker-stale-discovery | fix(coding-agent,tui): refresh discovery from the model picker once the catalog is two hours old | other | P1 | 3h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/picker-stale-discovery) |
 | [#19883](https://github.com/can1357/oh-my-pi/pull/19883) | devin-neon-image-price | fix(catalog): budget Gemini 4 Neon's images on Devin at the 1,089 tokens it bills | catalog | P0 | 2h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-neon-image-price) |
 | [#19884](https://github.com/can1357/oh-my-pi/pull/19884) | atspi-alert-windows | fix(natives): list GTK message dialogs as windows on Wayland | computer | P1 | 2h | keep; tests-over: LinuxUpstream, 2026-11-20: one test reaching three branches (Alert listing through windows(), shared-title refusal in window_id, an in-window alert's owner); 45 of its lines are a fake GTK 3 app with children, application, parent and pid that no existing fixture provides | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/atspi-alert-windows) |
-| [#19928](https://github.com/can1357/oh-my-pi/pull/19928) | devin-org-identity | fix(ai,catalog): store Devin login identity scoped by organization | broker |  | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-org-identity) |
-| [#19929](https://github.com/can1357/oh-my-pi/pull/19929) | devin-quota-ranking | fix(ai): rank Devin logins by quota before their on-demand balance | broker |  | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-quota-ranking) |
+| [#19928](https://github.com/can1357/oh-my-pi/pull/19928) | devin-org-identity | fix(ai,catalog): store Devin login identity scoped by organization | broker | P0 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-org-identity) |
+| [#19929](https://github.com/can1357/oh-my-pi/pull/19929) | devin-quota-ranking | fix(ai): rank Devin logins by quota before their on-demand balance | broker | P0 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-quota-ranking) |
 
 ## Queued since the last plan (1)
 
