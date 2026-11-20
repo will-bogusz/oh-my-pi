@@ -105176,7 +105176,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-19T23:47:16Z",
+  "checked": "2026-11-20T00:18:10Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -105352,20 +105352,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-13T00:06:18Z",
-    "kind": "unopenable",
-    "id": "browser-click-frame-removed",
-    "title": "fix(coding-agent): fail a click whose frame the page removed while the button was down",
-    "why": "opened as #19094"
-   },
-   {
-    "at": "2026-11-13T00:06:18Z",
-    "kind": "unopenable",
-    "id": "computer-run-failure-output",
-    "title": "fix(computer): retain output and screenshots when a run fails",
-    "why": "opened as #19100"
-   },
    {
     "at": "2026-11-13T03:39:19Z",
     "kind": "openable",
