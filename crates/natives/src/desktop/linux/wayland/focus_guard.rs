@@ -31,7 +31,7 @@ use std::{
 use parking_lot::Mutex;
 use serde::Deserialize;
 
-use super::hyprland::Hyprland;
+use super::{hyprland::Hyprland, sway::SwayGuard};
 use crate::desktop::{
 	ax::{AxHandle, AxProps, WalkBounds},
 	backend::AxBackend,
@@ -56,7 +56,7 @@ const FRESH: Duration = Duration::from_millis(500);
 const HOOK_LIFETIME_MS: u32 = 15_000;
 /// How often the watcher checks whether it should stop; the next action's
 /// watch waits up to this long for the previous one to end.
-const POLL: Duration = Duration::from_millis(20);
+pub(super) const POLL: Duration = Duration::from_millis(20);
 /// Window classes of the desktop portal backends (`xdg-desktop-portal-gtk`,
 /// `-kde`, `-gnome`, ...). They show dialogs on an app's behalf: Electron's
 /// file chooser on Omarchy 4.5 is an `xdg-desktop-portal-gtk` window, so a new
@@ -65,7 +65,7 @@ const PORTAL_CLASS: &str = "xdg-desktop-portal";
 
 /// One line of Hyprland's event socket that the guard reads.
 #[derive(Debug, Clone, PartialEq, Eq)]
-enum Event {
+pub(super) enum Event {
 	Open {
 		address: String,
 		class:   String,
@@ -114,14 +114,14 @@ fn parse(line: &str) -> Option<Event> {
 }
 
 #[derive(Debug, Clone, Deserialize)]
-struct Client {
-	address: String,
+pub(super) struct Client {
+	pub(super) address: String,
 	#[serde(default)]
-	pid:     i64,
+	pub(super) pid:     i64,
 	#[serde(default)]
-	class:   String,
+	pub(super) class:   String,
 	#[serde(default)]
-	title:   String,
+	pub(super) title:   String,
 }
 
 /// A window of the target the watch has seen appear or ask for activation.
@@ -145,14 +145,14 @@ struct Seen {
 
 /// What the watch decides about a focus move.
 #[derive(Debug, PartialEq, Eq)]
-enum Verdict {
+pub(super) enum Verdict {
 	Nothing,
 	/// Give focus back to the user's window.
 	HandBack,
 }
 
 /// The guard's reading of the events, apart from any IO, so it can be tested.
-struct Tracker {
+pub(super) struct Tracker {
 	user:    Client,
 	target:  u32,
 	known:   HashSet<String>,
@@ -163,7 +163,12 @@ struct Tracker {
 }
 
 impl Tracker {
-	const fn new(user: Client, target: u32, known: HashSet<String>, started: Instant) -> Self {
+	pub(super) const fn new(
+		user: Client,
+		target: u32,
+		known: HashSet<String>,
+		started: Instant,
+	) -> Self {
 		Self { user, target, known, started, seen: Vec::new(), picked: false }
 	}
 
@@ -201,7 +206,7 @@ impl Tracker {
 
 	/// Reads one event at `now`; `client` resolves a window's process, class
 	/// and title.
-	fn event(
+	pub(super) fn event(
 		&mut self,
 		event: &Event,
 		now: Instant,
@@ -277,7 +282,7 @@ impl Tracker {
 	}
 
 	/// Each window seen so far, by address, with what it did to focus.
-	fn report(&self) -> Vec<(String, DesktopWindowOpened)> {
+	pub(super) fn report(&self) -> Vec<(String, DesktopWindowOpened)> {
 		let user_window = format!("{}: {}", self.user.class, self.user.title);
 		self
 			.seen
@@ -363,12 +368,12 @@ fn unhook(id: &str) -> String {
 /// What one action's watch has seen, shared between its thread and the
 /// guard.
 #[derive(Default)]
-struct Shared {
+pub(super) struct Shared {
 	/// Every window seen so far, by address.
-	report: Vec<(String, DesktopWindowOpened)>,
+	pub(super) report: Vec<(String, DesktopWindowOpened)>,
 	/// Window outcomes already handed to the caller.
-	given:  HashSet<(String, DesktopWindowFocus)>,
-	done:   bool,
+	pub(super) given:  HashSet<(String, DesktopWindowFocus)>,
+	pub(super) done:   bool,
 }
 
 /// Watches Hyprland around background actions; see the module docs.
@@ -470,18 +475,18 @@ impl FocusGuard {
 }
 
 /// One action's watch, until its action returns.
-struct Watch {
+pub(super) struct Watch {
 	/// Nanoseconds after `started` at which the watch ends; `u64::MAX` while
 	/// the action runs.
-	ends:    Arc<AtomicU64>,
-	started: Instant,
-	shared:  Arc<Mutex<Shared>>,
+	pub(super) ends:    Arc<AtomicU64>,
+	pub(super) started: Instant,
+	pub(super) shared:  Arc<Mutex<Shared>>,
 }
 
 impl Watch {
 	/// Marks the action done, then waits up to [`SETTLE`] for a window it
 	/// opens, and once one has, a moment for its focus outcome.
-	fn finish(self) {
+	pub(super) fn finish(self) {
 		let ends = self.started.elapsed() + WATCH;
 		self
 			.ends
@@ -580,21 +585,52 @@ impl Watcher {
 	}
 }
 
+/// The guard for the running compositor.
+pub(super) enum Guard {
+	Hyprland(FocusGuard),
+	Sway(SwayGuard),
+}
+
+impl Guard {
+	fn run<T>(&mut self, pid: u32, action: impl FnOnce() -> T) -> T {
+		match self {
+			Self::Hyprland(guard) => guard.run(pid, action),
+			Self::Sway(guard) => guard.run(pid, action),
+		}
+	}
+
+	fn take(&mut self) -> Vec<DesktopWindowOpened> {
+		match self {
+			Self::Hyprland(guard) => guard.take(),
+			Self::Sway(guard) => guard.take(),
+		}
+	}
+
+	/// Which guard keeps the user's keyboard, for capabilities.
+	#[allow(dead_code, reason = "capabilities name the active guard once that lands")]
+	pub(super) const fn kind(&self) -> &'static str {
+		match self {
+			Self::Hyprland(FocusGuard { lua: Some(false), .. }) => "Hyprland socket watcher",
+			Self::Hyprland(_) => "Hyprland hook",
+			Self::Sway(_) => "sway watcher",
+		}
+	}
+}
+
 /// The AT-SPI backend with each action that can open a window run under the
-/// [`FocusGuard`] when the compositor is Hyprland; reads pass straight
-/// through.
+/// compositor's [`Guard`] (Hyprland or sway); reads pass straight through.
 pub(super) struct GuardedAx {
 	ax:    AtSpiAx,
-	guard: Option<FocusGuard>,
+	guard: Option<Guard>,
 }
 
 impl GuardedAx {
-	pub(super) fn new(ax: AtSpiAx, hyprland: Option<Hyprland>) -> Self {
-		Self { ax, guard: hyprland.map(FocusGuard::new) }
+	pub(super) const fn new(ax: AtSpiAx, guard: Option<Guard>) -> Self {
+		Self { ax, guard }
 	}
 
 	/// Runs `action` under the guard for process `pid`; unguarded when the
-	/// process is unknown or the compositor is not Hyprland.
+	/// process is unknown or the compositor has no guard.
 	pub(super) fn guarded<T>(
 		&mut self,
 		pid: Option<u32>,
@@ -622,7 +658,7 @@ impl GuardedAx {
 
 	/// See [`FocusGuard::take`].
 	pub(super) fn take_windows_opened(&mut self) -> Vec<DesktopWindowOpened> {
-		self.guard.as_mut().map_or_default(FocusGuard::take)
+		self.guard.as_mut().map_or_default(Guard::take)
 	}
 }
 

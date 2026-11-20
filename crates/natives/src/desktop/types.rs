@@ -361,7 +361,7 @@ pub struct DesktopTypeResult {
 /// A window a background action's app opened or asked to activate.
 ///
 /// Reported with what became of the user's keyboard, while the action ran or
-/// shortly after it. Hyprland only; other backends report none.
+/// shortly after it. Hyprland and sway only; other backends report none.
 #[napi(object)]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DesktopWindowOpened {

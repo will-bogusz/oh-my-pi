@@ -2073,7 +2073,7 @@ export declare enum DesktopWindowFocus {
  * A window a background action's app opened or asked to activate.
  *
  * Reported with what became of the user's keyboard, while the action ran or
- * shortly after it. Hyprland only; other backends report none.
+ * shortly after it. Hyprland and sway only; other backends report none.
  */
 export interface DesktopWindowOpened {
   /** The app's window class. */

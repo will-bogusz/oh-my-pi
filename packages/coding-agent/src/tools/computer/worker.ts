@@ -141,7 +141,7 @@ export interface NativeDesktopSession {
 	axAttributes(ref: string): Promise<Array<[string, string]>>;
 	axChildren(ref: string): Promise<AxNode[]>;
 	axParent(ref: string): Promise<AxNode | null | undefined>;
-	/** Windows apps opened or asked to activate around background actions since the last call (Hyprland; empty elsewhere). */
+	/** Windows apps opened or asked to activate around background actions since the last call (Hyprland, sway; empty elsewhere). */
 	takeWindowsOpened(): Promise<DesktopWindowOpened[]>;
 	axPerform(ref: string, action: string, menu?: string[] | null): Promise<void>;
 	axSetValue(ref: string, value: string): Promise<void>;
@@ -653,7 +653,7 @@ async function appNames(session: NativeDesktopSession, signal: AbortSignal): Pro
 
 /**
  * Says what a window an app opened around a background action did to the
- * user's keyboard, from native's reading of the compositor (Hyprland).
+ * user's keyboard, from native's reading of the compositor (Hyprland, sway).
  */
 export function windowOpenedNote(opened: DesktopWindowOpened): string {
 	const { app, title, afterMs, heldMs, userWindow } = opened;
@@ -2196,7 +2196,7 @@ export class ComputerWorkerCore {
 	/**
 	 * Notes each window an app opened or asked to activate around a background
 	 * action, and what it did to the user's keyboard, as the compositor
-	 * reported it (Hyprland; other backends report none).
+	 * reported it (Hyprland, sway; other backends report none).
 	 */
 	async #noteWindowsOpened(output = this.#runContexts.getStore()?.output): Promise<void> {
 		const session = this.#session;
