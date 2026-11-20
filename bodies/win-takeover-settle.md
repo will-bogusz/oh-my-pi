@@ -14,10 +14,10 @@ Review `ForegroundGuard::activate` and `take_back_owed_activation` in `win32/inp
 
 ## Testing
 
-Windows 11, head 866f44a24a7: `a_takeover_whose_target_comes_forward_too_late_leaves_the_users_window_in_front` passed twice, interleaved with the same test on parent f6a4155c9d6, which failed twice. The parent control adds only the regression fixture; its production code is unchanged.
+At prior head 866f44a24a7 on Windows 11: `a_takeover_whose_target_comes_forward_too_late_leaves_the_users_window_in_front` passed twice, interleaved with the same test on parent f6a4155c9d6, which failed twice. The parent control adds only the regression fixture; its production code is unchanged.
 
-`rust-check` passed on Linux, macOS and the Windows MSVC target. These Windows unit runs predate the harness's build-hash attestation: hash not recorded.
+At that head, `rust-check` passed on Linux, macOS and the Windows MSVC target. The Windows unit runs predate build-hash attestation: hash not recorded. Live checks were not repeated after the C review-fix restack.
 
-Interleaved WPF click/type calls with `takeover: true` (40 per build: 20 idle, 20 typing) returned success 34/40 on parent f6a4155c9d6 and 32/40 here; the other calls returned activation errors. Both kept all the user's typed text. The fixture confirmed all 34 parent successes and 31 of this head's 32 successes; one reported-success type call's target effect is unverified because the fixture's liveness oracle failed.
+Interleaved WPF click/type calls with `takeover: true` (40 per build: 20 idle, 20 typing) returned success 34/40 on parent f6a4155c9d6 and 32/40 at 866f44a24a7; the other calls returned activation errors. Both kept all the user's typed text. The fixture confirmed all 34 parent successes and 31 of the fix's 32 successes; one reported-success type call's target effect is unverified because the fixture's liveness oracle failed.
 
 Those calls used TypeScript ref f6a4155c9d6 with each head's own native addon. Round two attested both installed native DLL hashes; round one predates that check (hash not recorded). This is not an unconditional success-rate or zero-key-event claim.
