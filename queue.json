@@ -104566,7 +104566,7 @@
    "needs": [
     "snapcompact-shape-kdl"
    ],
-   "base": "495a582070a024db23680d35a7562f935b9829cc",
+   "base": "a0078fecb1842eceed362b538e6a9d0b698ca2c2",
    "body": "bodies/snapcompact-shape-reader-identity.md",
    "state": "queued",
    "pr": null,
@@ -104574,8 +104574,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-shape-reader-identity",
    "host": "MacBook-Pro",
    "added": "2026-11-18T00:48:33Z",
-   "updated": "2026-11-18T00:48:33Z",
-   "note": ""
+   "updated": "2026-11-20T17:50:11Z",
+   "note": "LaneSnapcompactStack, 2026-11-20: rebased onto the restacked kdl (a0078fecb18, on origin/main alone, #19591 folded in); rules.json regenerated, CHANGELOG under [Unreleased]; own diff unchanged, so no new review. Census vs main: 337 of 7,757 built models change (was 297/7,498: 120 GPT-led Fusion rows now, was 80); snapcompact 123 pass, catalog 1,421; gateway test fails with the residue restored."
   },
   {
    "id": "snapcompact-deepseek-text",
