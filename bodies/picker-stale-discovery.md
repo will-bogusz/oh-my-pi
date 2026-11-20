@@ -15,13 +15,13 @@ The picker still paints at once from the in-memory catalog and re-syncs when the
 `ModelRegistry.refreshIfStale()` has one caller, the alt+p picker. It waited out an in-flight refresh and reloaded `models.yml` if the file changed, but never asked providers again, so the only ways to see a new model were opening `/model` or restarting. Discovery-backed providers (Devin, Cursor, Copilot, OpenRouter, custom `discovery:` entries) add models without an omp release, so this hits anyone who leaves sessions open.
 
 Decisions:
-- **Threshold is the built-in discovery cache TTL (`BUILT_IN_DISCOVERY_CACHE_TTL_MS`, 2 h).** Below it, a refresh would only replay the same cache rows, so an earlier trigger costs a catalog rebuild for nothing; this keeps the latency fix of the picker's "rebuild only when stale" contract for every open within the window.
-- **`online-if-uncached`, not `online`.** A provider whose cache row another process refreshed (a newer session, `omp models refresh`) replays that row without a fetch; only expired ones hit the network. Errors stay swallowed and logged by `refreshInBackground`, as at startup, so a provider outage never turns into a picker error.
+- **Threshold is the built-in discovery cache TTL (`BUILT_IN_DISCOVERY_CACHE_TTL_MS`, 2 h).** Below it, a refresh would only replay the same cache rows, so an earlier trigger costs a catalog rebuild for nothing; the picker's "rebuild only when stale" contract holds inside the window.
+- **`online-if-uncached`, not `online`.** A provider whose cache row another process refreshed (a newer session, `omp models refresh`) replays that row without a fetch; only expired ones hit the network. Errors stay logged by `refreshInBackground` as at startup, never a picker error.
 - **Only after an online refresh already ran in this registry.** An SDK embedder or test that never went online stays offline.
 
 Non-goals: `/switch <name>` and `--model` resolution still read the in-memory catalog; the hub's own refresh is untouched.
 
-Review first: `refresh()` stamping `#lastOnlineRefreshAt`, and the new branch in `refreshIfStale()` (`packages/coding-agent/src/config/model-registry.ts`).
+Review first: `refresh()` stamping `#lastOnlineRefreshAt`, and the new branch in `refreshIfStale()` (`model-registry.ts`).
 
 ## Testing
 
