@@ -105309,13 +105309,13 @@
    ],
    "base": "725f8c6f34ce648bec57af31a4e91baea1081a3c",
    "body": "bodies/win-button-click.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19889,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-edit-setvalue",
    "host": "MacBook-Pro",
    "added": "2026-11-19T11:17:04Z",
-   "updated": "2026-11-20T20:04:33Z",
+   "updated": "2026-11-20T20:07:20Z",
    "note": "WbcReview must-fix (b) WinForms radio route: accepted BM_CLICK for WinForms radios \u2014 Main, 2026-11-20: main clicks a hidden retained-ref radio too, with a foreground take; exception measured and removed",
    "rebases_after": [
     19195,
@@ -105438,7 +105438,8 @@
      "at": "2026-11-20T20:04:30Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-20T20:07:20Z"
   },
   {
    "id": "win-wpf-scroll",
