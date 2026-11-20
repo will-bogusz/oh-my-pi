@@ -1,133 +1,28 @@
 ## What
 
-On Windows, when my window covered Chrome, Edge or an Electron app, `computer` screenshots and `ax()` reads of it came back as ok but showed the page from before it was covered, so I'm making both say so and say how to get a current view.
+This is the rest of this PR after `5a3f19facee` was merged as c72da2125ba: I'm making every opaque window count as a cover over a Chromium window, so a paused page can't come back unmarked.
 
-A covered Chromium window's screenshot or tree was a plain `ok` with old content in 114 of 120 trials on Windows 10 and 113 of 120 on Windows 11 with v19.0.1, and none with this PR; every one of the 120 reads on each system carried the mark.
+On `main`, `occluder()` skips popup (`WS_POPUP`), tool (`WS_EX_TOOLWINDOW`) and click-through (`WS_EX_TRANSPARENT`) covers, mirroring Chromium's own occlusion check, because Chromium usually keeps drawing under them. That mirror can leave a paused page unmarked:
 
-| Chrome, Edge or Electron window | `main` | this PR |
+| A fully covered Chrome/Electron window, cover kind | `main` (c72da2125ba) | this PR |
 |---|---|---|
-| fully covered: screenshot / zoom | `ok`, a frame from before the cover | the same frame, `covered: true` and a note |
-| fully covered: `ax()` | `ok`, the tree from before the cover | the same tree, ending with a `… covered:` line |
-| any column of it showing | current | current, no mark |
-| WinForms or WPF under the same cover | current | current, no mark |
+| plain opaque window | marked | marked |
+| a cover that restyles itself into a popup while covering (e.g. DOSBox Staging's Alt+Enter) | unmarked, page can stay paused | marked |
+| a cover toggled into a tool window (e.g. mpv's taskbar toggle) | unmarked before Chromium recalculates | marked |
+| a counted cover that hides or lowers, leaving an already-skipped popup or tool window over the page | unmarked, page can stay paused | marked |
+| a popup, tool or click-through window that was there all along | unmarked, page current | marked (needless caution) |
 
-<details><summary>The note (the tree's closing line says the same for the tree)</summary>
-
-> window covered: this window appeared fully covered around the read, and Chromium can stop drawing a window it finds covered, so this capture and the window's ax() tree may be stale; while it stays covered, do not wait and read it again by any route (screenshot, ax(), find), since those may be stale too. To see its current state, read the page with the browser tool if it is connected to this app; otherwise raise() the window (it comes in front of the user's windows and takes their keyboard; Windows refuses it while they are using another window) and read it again, checking for the state you expect rather than trusting the first read after it; otherwise go on without it, telling the user what you could not confirm
-
-</details>
-
-> **Windows context.** A window capture is DWM's last frame. Once nothing of a Chromium window is visible, Chromium can mark its pages hidden and stop painting and updating its tree; nothing fails. The mark comes from window geometry, so it says the read *may* be stale.
+The cost is the last row: under those three kinds Chromium usually keeps drawing (measured on Windows 10 over Chrome and Electron: current 10/10 under a click-through cover, 8/8 under a tool window, 8/8 under a popup), so the "may be stale" mark there is a needless caution. It stays because the same covers can sit over a paused page, and geometry alone can't tell which.
 
 ## Why
 
-A model told a stale picture is current acts on it; covered browsers are normal.
+The mark exists to stop a stale read passing as current. From window styles we can't know when Chromium last recalculated occlusion, so any mirror of its exemptions can drop a mark exactly when the page is paused; a needless mark only costs a fresh look.
 
-- Mark, not refuse: other apps' covered windows are current.
-- Only Chromium windows: no generic signal exists (Windows.Graphics.Capture delivers frames whether the app drew or not).
-- No fresh-frame route: `PrintWindow` and Windows.Graphics.Capture return the old frame (0/30 each); what works fakes a system-wide event, changes how the user's app runs, or is the browser tool.
-- The note says not to re-read while covered, and to check the expected state after a `raise()` rather than trust the first unmarked read.
-
-Limits: click-through, tool and popup styles alone don't stop an opaque window covering; Chromium usually keeps drawing under them, so that mark is needless caution, kept since one replacing a counted cover can leave the page paused until Chromium recalculates. A dragged window counts while Chromium ignores it; the geometry is approximate: no mark isn't proof of freshness.
+Limits: shaped (complex-region) windows, layered windows whose opacity can't be read, and unreadable geometry still don't count as covers, so those reads stay unmarked; a window being dragged over the target counts as a cover while Chromium ignores it.
 
 ## Testing
 
-Rig: Windows 10 22H2 and 11 VMs, Chrome/Edge/Electron/WinForms/WPF fixtures, a simulated user typing into a full-screen window, OMP's `eval` path; each trial changes the page, then reads it; v19.0.1 and this PR interleaved, n=10 per cell.
-
-<details><summary>Windows 10 cells</summary>
-
-| fixture | cell | condition | v19.0.1 | fix |
-|---|---|---|---|---|
-| chromium-page | PM-shot | covered | 10 false-success | 10 flagged |
-| chromium-page | PM-shot | unfocused | 10 correct | 10 correct |
-| chromium-page | PM-shot | user-typing | 10 false-success | 10 flagged |
-| chromium-page | PM-tree | covered | 1 correct, 1 crashed-app, 1 disturbed-user, 7 false-success | 1 crashed-app, 8 flagged, 1 wrong-target |
-| chromium-page | PM-tree | unfocused | 8 correct, 1 disturbed-user, 1 false-success | 8 correct, 2 disturbed-user |
-| chromium-page | PM-tree | user-typing | 10 false-success | 10 flagged |
-| edge-page | PM-shot | covered | 10 false-success | 10 flagged |
-| edge-page | PM-shot | unfocused | 10 correct | 10 correct |
-| edge-page | PM-shot | user-typing | 10 false-success | 10 flagged |
-| edge-page | PM-tree | covered | 10 false-success | 1 crashed-app, 9 flagged |
-| edge-page | PM-tree | unfocused | 8 correct, 2 false-success | 8 correct, 2 false-success |
-| edge-page | PM-tree | user-typing | 10 false-success | 1 correct+marked, 1 crashed-app, 1 disturbed-user, 7 flagged |
-| electron | PM-shot | covered | 10 false-success | 10 flagged |
-| electron | PM-shot | unfocused | 10 correct | 10 correct |
-| electron | PM-shot | user-typing | 1 crashed-app, 9 false-success | 1 crashed-app, 9 flagged |
-| electron | PM-tree | covered | 10 false-success | 10 flagged |
-| electron | PM-tree | unfocused | 9 correct, 1 harness-error | 10 correct |
-| electron | PM-tree | user-typing | 2 crashed-app, 8 false-success | 1 crashed-app, 8 flagged, 1 wrong-target |
-| winforms | PM-shot | covered | 9 correct, 1 false-success | 10 correct |
-| winforms | PM-shot | unfocused | 10 correct | 10 correct |
-| winforms | PM-shot | user-typing | 10 correct | 10 correct |
-| winforms | PM-tree | covered | 10 correct | 10 correct |
-| winforms | PM-tree | unfocused | 10 correct | 9 correct, 1 disturbed-user |
-| winforms | PM-tree | user-typing | 10 correct | 9 correct, 1 crashed-app |
-| wpf | PM-shot | covered | 9 correct, 1 crashed-app | 10 correct |
-| wpf | PM-shot | unfocused | 10 correct | 10 correct |
-| wpf | PM-shot | user-typing | 9 correct, 1 crashed-app | 10 correct |
-| wpf | PM-tree | covered | 8 correct, 1 crashed-app, 1 void | 10 correct |
-| wpf | PM-tree | unfocused | 9 correct, 1 crashed-app | 10 correct |
-| wpf | PM-tree | user-typing | 10 correct | 10 correct |
-</details>
-
-<details><summary>Windows 11 cells (head ddaed5d)</summary>
-
-| fixture | cell | condition | v19.0.1 | fix |
-|---|---|---|---|---|
-| chromium-page | PM-shot | covered | 8 false-success, 1 harness-error, 1 void | 10 flagged |
-| chromium-page | PM-shot | unfocused | 10 correct | 10 correct |
-| chromium-page | PM-shot | user-typing | 10 false-success | 10 flagged |
-| chromium-page | PM-tree | covered | 10 false-success | 10 flagged |
-| chromium-page | PM-tree | unfocused | 8 correct, 1 disturbed-user, 1 wrong-target | 8 correct, 2 disturbed-user |
-| chromium-page | PM-tree | user-typing | 9 false-success, 1 harness-error | 8 flagged, 2 harness-error |
-| edge-page | PM-shot | covered | 1 crashed-app, 8 false-success, 1 wrong-target | 10 flagged |
-| edge-page | PM-shot | unfocused | 10 correct | 10 correct |
-| edge-page | PM-shot | user-typing | 9 false-success, 1 harness-error | 10 flagged |
-| edge-page | PM-tree | covered | 10 false-success | 10 flagged |
-| edge-page | PM-tree | unfocused | 5 correct, 1 crashed-app, 4 false-success | 8 correct, 2 false-success |
-| edge-page | PM-tree | user-typing | 10 false-success | 2 crashed-app, 8 flagged |
-| electron | PM-shot | covered | 9 false-success, 1 harness-error | 10 flagged |
-| electron | PM-shot | unfocused | 10 correct | 10 correct |
-| electron | PM-shot | user-typing | 10 false-success | 10 flagged |
-| electron | PM-tree | covered | 10 false-success | 10 flagged |
-| electron | PM-tree | unfocused | 10 correct | 10 correct |
-| electron | PM-tree | user-typing | 10 false-success | 1 disturbed-user, 9 flagged |
-| winforms | PM-shot | covered | 10 correct | 9 correct, 1 false-success |
-| winforms | PM-shot | unfocused | 10 correct | 10 correct |
-| winforms | PM-shot | user-typing | 10 correct | 10 correct |
-| winforms | PM-tree | covered | 9 correct, 1 void | 10 correct |
-| winforms | PM-tree | unfocused | 10 correct | 10 correct |
-| winforms | PM-tree | user-typing | 10 correct | 10 correct |
-| wpf | PM-shot | covered | 10 correct | 9 correct, 1 disturbed-user |
-| wpf | PM-shot | unfocused | 10 correct | 10 correct |
-| wpf | PM-shot | user-typing | 10 correct | 9 correct, 1 false-success |
-| wpf | PM-tree | covered | 9 correct, 1 crashed-app | 9 correct, 1 crashed-app |
-| wpf | PM-tree | unfocused | 10 correct | 9 correct, 1 crashed-app |
-| wpf | PM-tree | user-typing | 10 correct | 10 correct |
-</details>
-
-Windows 10 `PM-shot` fix rows ran ddaed5d's TypeScript with 5c95347's addon in both rounds (Rust differs only in the tree note); its `PM-tree` fix rows ran ddaed5d's own addon. Other misses occur on both builds, in code this PR leaves alone.
-
-One column outside the cover (n=5): Chrome current 5/5 and 4/4 (one void), Electron 5/5 and 5/5; fully covered 0/20.
-
-<details><summary>Covers Chromium's next pass skips (Windows 10, opaque user window fully over the target, n=4-5 per fixture; measured with a build that skipped them)</summary>
-
-| cover | Chrome and Electron: page visible and read current |
-|---|---|
-| `WS_EX_TRANSPARENT` | 10/10 |
-| `WS_EX_TOOLWINDOW` | 8/8 (visible 18/18) |
-| `WS_POPUP` | 8/8 |
-| plain (control) | stale 15/16 |
-
-A cover that turns into a popup while covering leaves the page hidden until Chromium recalculates (it ignores a popup's own events): visible 0/10 before, 8/8 after the target window moved. This PR marks all four.
-
-</details>
-
-`raise()` while the user worked elsewhere: refused 75/75 (foreground lock).
-
-Sample set (`omp -p`, covered Chrome after a background Save, a task needing a current look; Haiku 5.5 and GPT-6.1 Sol, n=3 per cell): `main` re-read the window 18/18; this PR re-read 0/24, told the user what it could not confirm 18/18 with them typing, and with them away raised Chrome 5/6. A draft saying only "do not read it again" left Haiku re-reading by `find` or wait-then-read 2/12.
-
-Unit tests: 223 passed on Windows 10 (this head), 222 on 11 (ddaed5d); click-through, tool and popup covers mark; worker tests fail with `worker.ts` reverted.
+`a_chromium_window_is_marked_only_when_nothing_of_it_shows` now asserts that an opaque click-through, tool and popup cover each mark (reading back each style bit to prove it took) and fails on `5a3f19facee`. Windows 10 unit run: 223/223 at this head; `scripts/rust-check` on Windows, Linux and macOS: pass, recorded.
 
 ---
 
