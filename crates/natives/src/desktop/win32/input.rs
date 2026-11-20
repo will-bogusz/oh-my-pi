@@ -1422,7 +1422,7 @@ mod foreground {
 			let field = focus_of(thread)?;
 			let mut user = Self { window, thread, field, caret: 0 };
 			let until = Self::budget()?;
-			if user.send(field, WM_GETDLGCODE, 0, until)? as u32 & DLGC_HASSETSEL == 0 {
+			if Self::send(field, WM_GETDLGCODE, 0, until)? as u32 & DLGC_HASSETSEL == 0 {
 				return None;
 			}
 			let (start, end) = user.selection(until)?;
@@ -1443,14 +1443,11 @@ mod foreground {
 		/// selection.
 		fn restore(&self, until: Instant) {
 			// The caret was unchanged immediately before OMP's hand-back.
-			let selected_all = self.send(self.window, WM_NULL, 0, until).is_some()
-				&& self
-					.send(self.field, WM_GETTEXTLENGTH, 0, until)
-					.is_some_and(|length| {
-						self
-							.selection(until)
-							.is_some_and(|(start, end)| start == 0 && end > 0 && end == length)
-					});
+			let selected_all = Self::send(self.window, WM_NULL, 0, until).is_some()
+				&& Self::send(self.field, WM_GETTEXTLENGTH, 0, until).is_some_and(|length| {
+					self.selection(until)
+						.is_some_and(|(start, end)| start == 0 && end > 0 && end == length)
+				});
 			// SAFETY: GetForegroundWindow has no preconditions.
 			let user_in_front = unsafe { GetForegroundWindow() } == self.window;
 			let focused = focus_of(self.thread);
@@ -1459,7 +1456,7 @@ mod foreground {
 				&& focused == Some(self.field)
 				&& activity::check().is_ok()
 			{
-				let _ = self.send(self.field, EM_SETSEL, self.caret, until);
+				let _ = Self::send(self.field, EM_SETSEL, self.caret, until);
 			}
 		}
 
@@ -1474,13 +1471,13 @@ mod foreground {
 
 		/// Start and end of the field's selection.
 		fn selection(&self, until: Instant) -> Option<(usize, usize)> {
-			let packed = self.send(self.field, EM_GETSEL, 0, until)?;
+			let packed = Self::send(self.field, EM_GETSEL, 0, until)?;
 			(packed as isize != -1).then_some((packed & 0xffff, packed >> 16 & 0xffff))
 		}
 
 		/// Sends `message` with `wparam` and `lparam` both `wparam` (a caret for
 		/// `EM_SETSEL`, zero otherwise), waiting no later than `until`.
-		fn send(&self, window: HWND, message: u32, wparam: usize, until: Instant) -> Option<usize> {
+		fn send(window: HWND, message: u32, wparam: usize, until: Instant) -> Option<usize> {
 			let timeout = until.saturating_duration_since(Instant::now()).as_millis();
 			if timeout == 0 || control::check().is_err() || activity::check().is_err() {
 				return None;

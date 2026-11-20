@@ -925,7 +925,10 @@ mod tests {
 				// SAFETY: this message follows queued fixture activation.
 				unsafe { PostMessageW(windows.target, DRAINED, 0, 0) };
 				windows.await_line("drained");
-				assert_eq!(result.unwrap_err().code, crate::desktop::error::ErrorCode::InputFailed);
+				assert_eq!(
+					result.err().map(|error| error.code),
+					Some(crate::desktop::error::ErrorCode::InputFailed)
+				);
 				assert_eq!(Windows::text(windows.target), TARGET);
 			} else {
 				result.unwrap();
