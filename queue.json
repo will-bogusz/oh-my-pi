@@ -101698,13 +101698,13 @@
    "needs": [],
    "base": "2cdc756f93122a4da1e75100099eebcc0a22b451",
    "body": "bodies/image-eviction-notice.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19611,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/image-eviction-notice",
    "host": "MacBook-Pro",
    "added": "2026-11-17T20:57:09Z",
-   "updated": "2026-11-18T18:01:51Z",
+   "updated": "2026-11-20T00:49:13Z",
    "note": "Main for Will, 2026-11-17: P2 estimate, images silently dropped from model context on every provider",
    "built": [
     {
@@ -101821,7 +101821,8 @@
       ]
      }
     }
-   ]
+   ],
+   "merged_by": "pr"
   },
   {
    "id": "usage-state-per-model",
@@ -102644,13 +102645,13 @@
    "needs": [],
    "base": "e1ae2cc998efd1ca151b46ebefc0e0dab6c23c63",
    "body": "bodies/broker-refresh-failure-loud.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19590,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/broker-refresh-failure-loud",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:06:15Z",
-   "updated": "2026-11-18T01:13:30Z",
+   "updated": "2026-11-20T00:49:13Z",
    "note": "",
    "built": [
     {
@@ -102674,7 +102675,8 @@
    ],
    "opened": "2026-11-17T21:39:01Z",
    "readied": "2026-11-17T21:39:27Z",
-   "advanced": "2026-11-18T01:13:30Z"
+   "advanced": "2026-11-18T01:13:30Z",
+   "merged_by": "pr"
   },
   {
    "id": "broker-client-startup-retry",
@@ -104911,13 +104913,13 @@
    "needs": [],
    "base": "f40f335845f0b136453d12fec8d6057011082766",
    "body": "bodies/fill-key-events.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19748,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/fill-key-events",
    "host": "MacBook-Pro",
    "added": "2026-11-19T01:34:57Z",
-   "updated": "2026-11-19T22:51:42Z",
+   "updated": "2026-11-20T00:49:13Z",
    "note": "",
    "built": [
     {
@@ -105023,7 +105025,8 @@
    ],
    "opened": "2026-11-19T04:00:03Z",
    "readied": "2026-11-19T04:00:24Z",
-   "advanced": "2026-11-19T22:51:42Z"
+   "advanced": "2026-11-19T22:51:42Z",
+   "merged_by": "pr"
   },
   {
    "id": "win-edit-setvalue",
