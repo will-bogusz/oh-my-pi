@@ -1,9 +1,9 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20 11:29Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20 11:31Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-20 10:29Z on goliath; groups below are from it, states from the manifest)
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-20 11:30Z on goliath; groups below are from it, states from the manifest)
 **Counts:** openable now 3, conflict-held 18, stacked 16, held 9, parked 1, open PRs 20; merged 403, closed 44
 
 ## Openable now (3)
@@ -35,7 +35,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20
 | stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 7d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 | macos-web-type-background | fix(natives): type into a background macOS web page field without a takeover | computer | P2 | 5d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19504](https://github.com/can1357/oh-my-pi/pull/19504), [#19702](https://github.com/can1357/oh-my-pi/pull/19702), [#19849](https://github.com/can1357/oh-my-pi/pull/19849), [#19531](https://github.com/can1357/oh-my-pi/pull/19531), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-web-type-background) |
 | deadline-ranking | feat(ai): rank an account priority by quota deadline | ai/auth | P2 | 2d | [#19623](https://github.com/can1357/oh-my-pi/pull/19623), [#19700](https://github.com/can1357/oh-my-pi/pull/19700), [#19701](https://github.com/can1357/oh-my-pi/pull/19701) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/deadline-ranking) |
-| win-uia-set-patterns | fix(natives): set WPF sliders and combo boxes through RangeValue and SelectionItem | computer |  | 4h | [#19814](https://github.com/can1357/oh-my-pi/pull/19814), win-popup-foreground | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-uia-set-patterns) |
+| win-uia-set-patterns | fix(natives): set WPF sliders and combo boxes through RangeValue and SelectionItem | computer |  | 5h | [#19814](https://github.com/can1357/oh-my-pi/pull/19814), win-popup-foreground | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-uia-set-patterns) |
 
 ## Stacked (16)
 
