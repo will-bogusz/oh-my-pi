@@ -105270,7 +105270,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-occluded-capture",
    "host": "MacBook-Pro",
    "added": "2026-11-20T04:27:57Z",
-   "updated": "2026-11-20T09:07:04Z",
+   "updated": "2026-11-20T09:07:44Z",
    "note": "",
    "rebases_after": [
     19519
@@ -105278,7 +105278,7 @@
    "pair_reasons": {
     "19519": "Main, 2026-11-20: adjacent test-only fields in the fake backend; combined = both"
    },
-   "advanced": "2026-11-20T09:07:04Z",
+   "advanced": "2026-11-20T09:07:44Z",
    "built": [
     {
      "with": "#19195",
