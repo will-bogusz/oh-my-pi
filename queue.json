@@ -105265,13 +105265,13 @@
    "needs": [],
    "base": "2be72551c1987fa2c21753a15950f2367d8bfea9",
    "body": "bodies/win-wpf-scroll.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 19870,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-wpf-scroll",
    "host": "MacBook-Pro",
    "added": "2026-11-20T04:27:43Z",
-   "updated": "2026-11-20T16:04:24Z",
+   "updated": "2026-11-20T16:06:35Z",
    "note": "QueueFortyOne.ScrollDeltaReview must-fix (split COM init/activation cutoffs in scroll) declined by Main, 2026-11-20: main's shared automation() path, used unchanged; nit fold of control.rs time_left/reply_deadline skipped by Main (don't touch #19814's merged fn)",
    "rebases_after": [
     19814
@@ -105410,7 +105410,8 @@
      "host": "goliath",
      "tree": "8e70e929c68dbc8222ce650918210fce489820f9"
     }
-   ]
+   ],
+   "opened": "2026-11-20T16:06:35Z"
   },
   {
    "id": "win-occluded-capture",
