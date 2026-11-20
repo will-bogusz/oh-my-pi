@@ -1642,7 +1642,7 @@ impl Worker {
 				Ok(Response::Capabilities(caps))
 			},
 			Request::ListDisplays { .. } => Ok(Response::Displays(self.backend()?.displays()?)),
-			Request::ListWindows { .. } => Ok(Response::Windows(self.backend()?.windows()?)),
+			Request::ListWindows { .. } => Ok(Response::Windows(self.backend()?.listed_windows()?)),
 			Request::Capture { target, caps, .. } => {
 				Ok(Response::Capture(self.capture_full(target, caps, token)?))
 			},
@@ -3189,6 +3189,9 @@ mod capture_tests {
 		queries_at_input:       Arc<Mutex<Vec<u32>>>,
 		/// Elements report no bounds.
 		no_bounds:              bool,
+		/// Where only the caller's listing places the window, as Hyprland's
+		/// placement of a native Wayland window does.
+		listed_at:              Option<(i32, i32)>,
 		cancel_on_capabilities: Arc<Mutex<Option<CancellationSource>>>,
 		snapshot_error:         Arc<Mutex<bool>>,
 		cancel_on_snapshot:     Arc<Mutex<Option<CancellationSource>>>,
@@ -3321,6 +3324,7 @@ mod capture_tests {
 				window_queries: Arc::new(Mutex::new(0)),
 				queries_at_input: Arc::new(Mutex::new(Vec::new())),
 				no_bounds: false,
+				listed_at: None,
 				cancel_on_capabilities: Arc::new(Mutex::new(None)),
 				snapshot_error: Arc::new(Mutex::new(false)),
 				cancel_on_snapshot: Arc::new(Mutex::new(None)),
@@ -3571,6 +3575,16 @@ mod capture_tests {
 				.chain(self.window_present.then_some(&self.window))
 				.cloned()
 				.collect())
+		}
+
+		fn listed_windows(&mut self) -> CoreResult<Vec<DesktopWindow>> {
+			let mut windows = self.windows()?;
+			if let Some((x, y)) = self.listed_at {
+				for window in &mut windows {
+					(window.x, window.y) = (x, y);
+				}
+			}
+			Ok(windows)
 		}
 
 		fn minimized_root(
@@ -4441,6 +4455,29 @@ mod capture_tests {
 	) -> CoreResult<Response> {
 		let (reply, _rx) = flume::bounded(1);
 		worker.execute(&make(reply), &source.token())
+	}
+
+	#[test]
+	fn only_the_caller_gets_the_listing_and_internal_lookups_read_the_backend() {
+		let backend = FakeWaylandBackend { listed_at: Some((647, 38)), ..FakeWaylandBackend::new() };
+		let mut worker = unlocked_worker(backend);
+		let Ok(Response::Windows(listed)) =
+			call(&mut worker, |reply| Request::ListWindows { reply }, &CancellationSource::default())
+		else {
+			panic!("the listing failed");
+		};
+		assert_eq!(
+			listed
+				.iter()
+				.map(|window| (window.x, window.y))
+				.collect::<Vec<_>>(),
+			[(647, 38)]
+		);
+		// Capture metadata, frames and AX roots look windows up here.
+		let window = worker
+			.window(&Target::Window(WAYLAND_ID.to_string()))
+			.unwrap();
+		assert_eq!((window.x, window.y), (0, 0));
 	}
 
 	fn press_request(reference: &str) -> impl FnOnce(Reply) -> Request {

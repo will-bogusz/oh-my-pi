@@ -273,6 +273,17 @@ impl WaylandBackend {
 		self.unanswered = listed.unanswered;
 		Ok(listed.windows)
 	}
+
+	/// AT-SPI's windows with focus resolved, as `windows()` lists them.
+	fn resolved_windows(&mut self) -> CoreResult<Vec<AtSpiWindow>> {
+		let mut windows = self.atspi_windows()?;
+		if let Some(ax) = self.ax.as_ref() {
+			resolve_focus(&mut windows, self.compositor_pid, !self.unanswered.is_empty(), |window| {
+				ax.holds_focus(window)
+			});
+		}
+		Ok(windows)
+	}
 }
 
 /// The listed windows: a window whose toolkit gives no screen position takes
@@ -373,14 +384,18 @@ impl Backend for WaylandBackend {
 	}
 
 	fn windows(&mut self) -> CoreResult<Vec<DesktopWindow>> {
-		let mut windows = self.atspi_windows()?;
-		if let Some(ax) = self.ax.as_ref() {
-			resolve_focus(&mut windows, self.compositor_pid, !self.unanswered.is_empty(), |window| {
-				ax.holds_focus(window)
-			});
-		}
-		// Hyprland is asked only for a window its toolkit cannot place; when it
-		// does not answer, the list is AT-SPI's as on any Wayland desktop.
+		Ok(self
+			.resolved_windows()?
+			.into_iter()
+			.map(|entry| entry.window)
+			.collect())
+	}
+
+	/// Hyprland is asked only here, for the caller's list, and only for a
+	/// window its toolkit cannot place; when it does not answer, the list is
+	/// AT-SPI's as on any Wayland desktop.
+	fn listed_windows(&mut self) -> CoreResult<Vec<DesktopWindow>> {
+		let windows = self.resolved_windows()?;
 		let clients = windows
 			.iter()
 			.any(|entry| !entry.position_known)

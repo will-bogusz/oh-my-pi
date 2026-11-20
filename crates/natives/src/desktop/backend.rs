@@ -258,6 +258,12 @@ pub trait Backend: Send {
 	fn capabilities(&mut self) -> DesktopCapabilities;
 	fn displays(&mut self) -> CoreResult<Vec<DesktopDisplay>>;
 	fn windows(&mut self) -> CoreResult<Vec<DesktopWindow>>;
+	/// The list `computer.windows()` returns: [`Self::windows`] plus what a
+	/// backend reports only to the caller. Captures, frames, AX roots and
+	/// input keep reading [`Self::windows`].
+	fn listed_windows(&mut self) -> CoreResult<Vec<DesktopWindow>> {
+		self.windows()
+	}
 	/// A minimized window's exact accessibility root, for inspection only.
 	/// This never adds a window to the roster used for input or menu dispatch.
 	fn minimized_root(
