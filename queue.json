@@ -104587,7 +104587,7 @@
     "snapcompact-shape-kdl",
     "snapcompact-rerender-on-switch"
    ],
-   "base": "e3ab64546170e0b7f742d1f422254430e97270e0",
+   "base": "03ac8048980c40f83fff45e8ed986e2691cf8ad1",
    "body": "bodies/snapcompact-deepseek-text.md",
    "state": "queued",
    "pr": null,
@@ -104595,8 +104595,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-deepseek-text",
    "host": "MacBook-Pro",
    "added": "2026-11-18T04:50:59Z",
-   "updated": "2026-11-18T17:49:55Z",
-   "note": "LaneReaderCarriers, 2026-11-18: no code change; Devin's deepseek-v4-1-flash classifies deepseek/flash/4.1.0 and already gets the text archive; body names it."
+   "updated": "2026-11-20T17:50:19Z",
+   "note": "LaneSnapcompactStack, 2026-11-20: rebased onto the restacked kdl (a0078fecb18, on origin/main alone, #19591 folded in); rules.json regenerated, CHANGELOG under [Unreleased]; own diff unchanged, so no new review. Base is a local merge of kdl a0078fecb18 and #19620 205ab81cc2b (03ac8048980); rebase on advance. Reader tests 15 pass; compaction suites 443 pass + 2 main-failing; rule reverted -> the text-archive test fails; the sizing test did not fail under a two-line frameCost revert (body's 64.5k figure is for the full sizing revert, not rechecked)."
   },
   {
    "id": "snapcompact-carbon-1568",
