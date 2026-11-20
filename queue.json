@@ -105498,13 +105498,13 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-20T07:57:45Z",
+  "checked": "2026-11-20T08:27:52Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "win-wpf-scroll": {
-    "since": "2026-11-20T04:53:31Z",
-    "title": "fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing"
+   "win-popup-foreground": {
+    "since": "2026-11-20T08:27:52Z",
+    "title": "fix(natives): press items of the open WPF context menu of the window in front"
    },
    "factory-droid-1100-pin": {
     "since": "2026-11-17T00:39:57Z",
@@ -107297,6 +107297,19 @@
     "id": "win-occluded-capture",
     "title": "fix(natives,coding-agent): say when a Windows capture or tree of a covered Chromium window may be stale",
     "why": "opened as #19849"
+   },
+   {
+    "at": "2026-11-20T08:27:52Z",
+    "kind": "openable",
+    "id": "win-popup-foreground",
+    "title": "fix(natives): press items of the open WPF context menu of the window in front"
+   },
+   {
+    "at": "2026-11-20T08:27:52Z",
+    "kind": "unopenable",
+    "id": "win-wpf-scroll",
+    "title": "fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing",
+    "why": "plan: wait (conflicts with win-popup-foreground in crates/natives/src/desktop/win32/ax.rs)"
    }
   ]
  },
@@ -115618,7 +115631,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-20T07:57:45.832907Z",
+  "at": "2026-11-20T08:27:53.385676Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -116918,18 +116931,15 @@
     "area": "computer",
     "priority": null,
     "title": "fix(natives): press items of the open WPF context menu of the window in front",
-    "action": "wait",
-    "reasons": [
-     "conflicts with #19814 in crates/natives/src/desktop/win32/ax.rs",
-     "conflicts with #19849 in crates/natives/src/desktop/win32/window.rs"
-    ],
-    "note": "",
+    "action": "open",
+    "reasons": [],
+    "note": "accepted pair with #19814: Main, 2026-11-20: win32/ax.rs set_value match; combined = #19814's ValueRoute::Edit arm unchanged, then this entry's two-closure Pattern arm (lookup, then send); built with #19849 at 3af806637f5, Windows clippy+rustfmt pass; accepted pair with #19849: Main, 2026-11-20: win32/window.rs; combined = WindowsAndMessaging import-list union, and one #[cfg(test)] mod tests holding both sides' uses and items (both append a tests module); recheck at #19849's next head",
     "over": [],
-    "paired": [],
-    "blocked_by": [
+    "paired": [
      "#19814",
      "#19849"
     ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-20T04:47:55Z"
    },
@@ -116943,13 +116953,15 @@
     "title": "fix(natives): set WPF sliders and combo boxes through RangeValue and SelectionItem",
     "action": "wait",
     "reasons": [
-     "conflicts with #19814 in crates/natives/src/desktop/win32/ax.rs"
+     "conflicts with #19814 in crates/natives/src/desktop/win32/ax.rs",
+     "conflicts with win-popup-foreground in crates/natives/src/desktop/win32/ax.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#19814"
+     "#19814",
+     "win-popup-foreground"
     ],
     "needs": [],
     "created": "2026-11-20T06:29:20Z"
@@ -116962,14 +116974,18 @@
     "area": "computer",
     "priority": null,
     "title": "fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with win-popup-foreground in crates/natives/src/desktop/win32/ax.rs"
+    ],
     "note": "accepted pair with #19814: Main, 2026-11-20: import-list union in win32/ax.rs; combined = both",
     "over": [],
     "paired": [
      "#19814"
     ],
-    "blocked_by": [],
+    "blocked_by": [
+     "win-popup-foreground"
+    ],
     "needs": [],
     "created": "2026-11-20T04:27:43Z"
    },
