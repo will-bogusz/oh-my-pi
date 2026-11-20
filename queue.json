@@ -106689,14 +106689,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-20T19:39:33Z",
+  "checked": "2026-11-20T20:10:43Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "win-button-click": {
-    "since": "2026-11-20T18:07:37Z",
-    "title": "fix(natives): click Windows buttons without activating their window"
-   },
    "factory-droid-1100-pin": {
     "since": "2026-11-17T00:39:57Z",
     "title": "feat(catalog): identify Factory Droid requests as droid 1.10.0"
@@ -106751,7 +106747,8 @@
    19878,
    19880,
    19883,
-   19884
+   19884,
+   19889
   ],
   "post_merge": {
    "18632": {
@@ -106815,13 +106812,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-13T19:57:40Z",
-    "kind": "unopenable",
-    "id": "factory-droid-capture-resilience",
-    "title": "test(ai): keep captured Factory Droid parity cases when one case fails",
-    "why": "opened as #19194"
-   },
    {
     "at": "2026-11-13T20:58:55Z",
     "kind": "unopenable",
@@ -108452,6 +108442,13 @@
     "id": "hyprland-window-list",
     "title": "fix(natives): read window positions and focus from Hyprland",
     "why": "plan: wait (conflicts with #19871 in crates/natives/src/desktop/mod.rs)"
+   },
+   {
+    "at": "2026-11-20T20:10:43Z",
+    "kind": "unopenable",
+    "id": "win-button-click",
+    "title": "fix(natives): click Windows buttons without activating their window",
+    "why": "opened as #19889"
    }
   ]
  },
@@ -117847,12 +117844,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-20T20:05:11.376385Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-20T20:10:44.492779Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 1,
+   "left": 7
   },
   "rows": [
    {
@@ -117865,9 +117862,11 @@
     "title": "fix(natives): stop macOS background drags reporting moves that did not happen",
     "action": "keep",
     "reasons": [],
-    "note": "",
+    "note": "accepted pair with #19889: Main (assignment to QueueThirtySeven), 2026-11-19: docs/tools/computer.md only, both add one paragraph after the line-118 paragraph of the desktop section; combined = #19195's macOS background-drag paragraph, then this entry's Windows BM_CLICK paragraph (union, no wording change)",
     "over": [],
-    "paired": [],
+    "paired": [
+     "#19889"
+    ],
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-13T20:28:59Z"
@@ -118010,10 +118009,11 @@
     "title": "fix(natives): count every opaque window as a cover over a Chromium capture",
     "action": "keep",
     "reasons": [],
-    "note": "accepted pair with #19519: Main, 2026-11-20: adjacent test-only fields in the fake backend; combined = both",
+    "note": "accepted pair with #19519: Main, 2026-11-20: adjacent test-only fields in the fake backend; combined = both; accepted pair with #19889: Main, 2026-11-20: import-list union in win32/window.rs with #19849's three style removals applied, one tests module; combined = both",
     "over": [],
     "paired": [
-     "#19519"
+     "#19519",
+     "#19889"
     ],
     "blocked_by": [],
     "needs": [],
@@ -118029,9 +118029,10 @@
     "title": "fix(natives): report Windows UIA actions unconfirmed when their reply times out after dispatch",
     "action": "keep",
     "reasons": [],
-    "note": "accepted pair with #19870: Main, 2026-11-20: win32/ax.rs import union; docs/tools/computer.md AxUnconfirmed: #19870's rewritten sentence, then this entry's Windows dispatch line; combined = both; tests-over: WinWpfRoutes6, 2026-11-20: the final-head review asked for the action off side through the caller and deadline-free teardown; the four session tests each reach a distinct branch (marked then expired, abandoned, on time, unfenced)",
+    "note": "accepted pair with #19889: Main, 2026-11-20: win32/ax.rs perform arms = #19871's, invoke arm reusing this entry's probe (invoke.unwrap_or_else(get_pattern UIInvokePattern), then control::dispatching(), then invoke); docs/tools/computer.md AxUnconfirmed: this entry's (or the #19870-combined) sentence, then #19871's Windows dispatch line, Main's one-fact-per-sentence rule; BM_CLICK dispatch mark left to win-button-click-fence; accepted pair with #19870: Main, 2026-11-20: win32/ax.rs import union; docs/tools/computer.md AxUnconfirmed: #19870's rewritten sentence, then this entry's Windows dispatch line; combined = both; tests-over: WinWpfRoutes6, 2026-11-20: the final-head review asked for the action off side through the caller and deadline-free teardown; the four session tests each reach a distinct branch (marked then expired, abandoned, on time, unfenced)",
     "over": [],
     "paired": [
+     "#19889",
      "#19870"
     ],
     "blocked_by": [],
@@ -118071,6 +118072,28 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-20T18:33:40Z"
+   },
+   {
+    "id": "win-button-click",
+    "label": "#19889",
+    "number": 19889,
+    "state": "open",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): click Windows buttons without activating their window",
+    "action": "keep",
+    "reasons": [],
+    "note": "accepted pair with #19195: Main (assignment to QueueThirtySeven), 2026-11-19: docs/tools/computer.md only, both add one paragraph after the line-118 paragraph of the desktop section; combined = #19195's macOS background-drag paragraph, then this entry's Windows BM_CLICK paragraph (union, no wording change); accepted pair with #19870: Main, 2026-11-20: docs/tools/computer.md AxUnconfirmed: #19870's sentence plus this entry's WinForms check-box case; combined = both; recheck at #19870's next head. Wording rule (Main): one sentence per platform fact; 'It may already have taken effect: observe ... before repeating it' stays last, unduplicated; whoever merges third reads the paragraph whole; accepted pair with #19849: Main, 2026-11-20: import-list union in win32/window.rs with #19849's three style removals applied, one tests module; combined = both; accepted pair with #19871: Main, 2026-11-20: win32/ax.rs perform arms = #19871's, invoke arm reusing this entry's probe (invoke.unwrap_or_else(get_pattern UIInvokePattern), then control::dispatching(), then invoke); docs/tools/computer.md AxUnconfirmed: this entry's (or the #19870-combined) sentence, then #19871's Windows dispatch line, Main's one-fact-per-sentence rule; BM_CLICK dispatch mark left to win-button-click-fence; tests-over: WbcReview (gpt-6.2-sol) should-fix 5, 2026-11-20: dispatch tests at the AX and pointer entries; each reaches a route no other does (click_button guards incl. reparent/destroy rows; perform's native route + disabled-form refusal; pointer hand-off + owner-drawn exclusion); each fails with its guard reverted on the VM",
+    "over": [],
+    "paired": [
+     "#19195",
+     "#19870",
+     "#19849",
+     "#19871"
+    ],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-20T20:07:19Z"
    },
    {
     "id": "x11-xtest-release",
@@ -118154,9 +118177,10 @@
     "title": "fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing",
     "action": "keep",
     "reasons": [],
-    "note": "accepted pair with #19871: Main, 2026-11-20: win32/ax.rs import union; docs/tools/computer.md AxUnconfirmed: #19870's rewritten sentence, then this entry's Windows dispatch line; combined = both",
+    "note": "accepted pair with #19889: Main, 2026-11-20: docs/tools/computer.md AxUnconfirmed: #19870's sentence plus this entry's WinForms check-box case; combined = both; recheck at #19870's next head. Wording rule (Main): one sentence per platform fact; 'It may already have taken effect: observe ... before repeating it' stays last, unduplicated; whoever merges third reads the paragraph whole; accepted pair with #19871: Main, 2026-11-20: win32/ax.rs import union; docs/tools/computer.md AxUnconfirmed: #19870's rewritten sentence, then this entry's Windows dispatch line; combined = both",
     "over": [],
     "paired": [
+     "#19889",
      "#19871"
     ],
     "blocked_by": [],
@@ -118850,6 +118874,7 @@
      "conflicts with #19702 in docs/computer-use.md",
      "conflicts with #19849 in docs/tools/computer.md",
      "conflicts with #19871 in docs/computer-use.md, docs/tools/computer.md",
+     "conflicts with #19889 in docs/tools/computer.md",
      "conflicts with #19531 in docs/computer-use.md, docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md",
      "conflicts with #19620 in packages/coding-agent/src/session/session-maintenance.ts",
@@ -118866,6 +118891,7 @@
      "#19702",
      "#19849",
      "#19871",
+     "#19889",
      "#19531",
      "#19618",
      "#19620",
@@ -118890,6 +118916,7 @@
      "conflicts with #19195 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19849 in docs/tools/computer.md",
      "conflicts with #19871 in docs/tools/computer.md",
+     "conflicts with #19889 in docs/tools/computer.md",
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md",
      "conflicts with #19870 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
@@ -118903,6 +118930,7 @@
      "#19195",
      "#19849",
      "#19871",
+     "#19889",
      "#19531",
      "#19618",
      "#19870"
@@ -118951,6 +118979,7 @@
      "conflicts with #19195 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts, packages/natives/native/index.d.ts",
      "conflicts with #19849 in docs/tools/computer.md",
      "conflicts with #19871 in docs/tools/computer.md",
+     "conflicts with #19889 in docs/tools/computer.md",
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md, packages/natives/native/index.d.ts",
      "conflicts with #19870 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
@@ -118963,6 +118992,7 @@
      "#19195",
      "#19849",
      "#19871",
+     "#19889",
      "#19531",
      "#19618",
      "#19870"
@@ -119090,6 +119120,7 @@
      "conflicts with #19195 in docs/tools/computer.md",
      "conflicts with #19849 in docs/tools/computer.md",
      "conflicts with #19871 in docs/tools/computer.md",
+     "conflicts with #19889 in docs/tools/computer.md",
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md",
      "conflicts with #19870 in docs/tools/computer.md",
@@ -119102,6 +119133,7 @@
      "#19195",
      "#19849",
      "#19871",
+     "#19889",
      "#19531",
      "#19618",
      "#19870"
@@ -119170,8 +119202,10 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with main in (branch missing on the fork)"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -119202,28 +119236,6 @@
     "created": "2026-10-31T21:07:28Z"
    },
    {
-    "id": "win-button-click",
-    "label": "win-button-click",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": null,
-    "title": "fix(natives): click Windows buttons without activating their window",
-    "action": "open",
-    "reasons": [],
-    "note": "accepted pair with #19195: Main (assignment to QueueThirtySeven), 2026-11-19: docs/tools/computer.md only, both add one paragraph after the line-118 paragraph of the desktop section; combined = #19195's macOS background-drag paragraph, then this entry's Windows BM_CLICK paragraph (union, no wording change); accepted pair with #19870: Main, 2026-11-20: docs/tools/computer.md AxUnconfirmed: #19870's sentence plus this entry's WinForms check-box case; combined = both; recheck at #19870's next head. Wording rule (Main): one sentence per platform fact; 'It may already have taken effect: observe ... before repeating it' stays last, unduplicated; whoever merges third reads the paragraph whole; accepted pair with #19849: Main, 2026-11-20: import-list union in win32/window.rs with #19849's three style removals applied, one tests module; combined = both; accepted pair with #19871: Main, 2026-11-20: win32/ax.rs perform arms = #19871's, invoke arm reusing this entry's probe (invoke.unwrap_or_else(get_pattern UIInvokePattern), then control::dispatching(), then invoke); docs/tools/computer.md AxUnconfirmed: this entry's (or the #19870-combined) sentence, then #19871's Windows dispatch line, Main's one-fact-per-sentence rule; BM_CLICK dispatch mark left to win-button-click-fence; tests-over: WbcReview (gpt-6.2-sol) should-fix 5, 2026-11-20: dispatch tests at the AX and pointer entries; each reaches a route no other does (click_button guards incl. reparent/destroy rows; perform's native route + disabled-form refusal; pointer hand-off + owner-drawn exclusion); each fails with its guard reverted on the VM",
-    "over": [],
-    "paired": [
-     "#19195",
-     "#19870",
-     "#19849",
-     "#19871"
-    ],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-19T11:17:04Z"
-   },
-   {
     "id": "win-button-click-fence",
     "label": "win-button-click-fence",
     "number": null,
@@ -119233,7 +119245,7 @@
     "title": "fix(natives): mark dispatch before a fenced BM_CLICK",
     "action": "wait",
     "reasons": [
-     "needs win-button-click (queued), #19871 (open)",
+     "needs #19889 (open), #19871 (open)",
      "conflicts with #19849 in crates/natives/src/desktop/win32/window.rs",
      "its need #19871 conflicts with main in crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md"
     ],
@@ -119259,11 +119271,8 @@
     "title": "fix(natives): press items of the open WPF context menu of the window in front",
     "action": "wait",
     "reasons": [
-     "needs win-button-click (queued)",
-     "conflicts with #19871 in crates/natives/src/desktop/win32/ax.rs",
-     "conflicts with #19870 in crates/natives/src/desktop/win32/ax.rs",
-     "conflicts with win-button-click in crates/natives/src/desktop/win32/ax.rs, crates/natives/src/desktop/win32/window.rs",
-     "conflicts with main in crates/natives/src/desktop/win32/ax.rs, crates/natives/src/desktop/win32/window.rs"
+     "needs #19889 (open)",
+     "conflicts with #19871 in crates/natives/src/desktop/win32/ax.rs"
     ],
     "note": "accepted pair with #19849: Main, 2026-11-20: win32/window.rs; combined = WindowsAndMessaging import-list union, and one #[cfg(test)] mod tests holding both sides' uses and items (both append a tests module); recheck at #19849's next head",
     "over": [],
@@ -119271,9 +119280,7 @@
      "#19849"
     ],
     "blocked_by": [
-     "#19871",
-     "#19870",
-     "win-button-click"
+     "#19871"
     ],
     "needs": [
      "win-button-click"
@@ -119361,7 +119368,7 @@
     "action": "held",
     "reasons": [
      "held: Main, 2026-11-20: in its fix round (WinWpfRoutes5, review needs-changes at 86d258734d9); takes the recorded ax.rs form with win-wpf-scroll when it follows",
-     "conflicts with win-button-click in crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md"
+     "conflicts with #19889 in crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md"
     ],
     "note": "accepted pair with #19870: Main, 2026-11-20: win32/ax.rs: two appended blocks (methods then free items each) and uiautomation import unions; combined = both; accepted pair with #19871: Main, 2026-11-20: ax.rs import union; perform arms = #19871's (pattern fetch, dispatch mark, action); this entry's setValue routes stay outside the fence's stated scope until win-wpf-set-background extends it (unfenced setValue keeps main's generic Timeout: AxSetValue is not dispatch_fenced, so it never reaches abandoned_before_dispatch). docs/tools/computer.md AxUnconfirmed paragraph: form brought to Main at #19870's final head",
     "over": [],
@@ -119370,7 +119377,7 @@
      "#19871"
     ],
     "blocked_by": [
-     "win-button-click"
+     "#19889"
     ],
     "needs": [],
     "created": "2026-11-20T06:29:20Z"
@@ -119385,7 +119392,7 @@
     "title": "fix(natives): press WPF controls behind other windows through their default action",
     "action": "wait",
     "reasons": [
-     "needs win-button-click (queued), #19871 (open)",
+     "needs #19889 (open), #19871 (open)",
      "conflicts with #19195 in docs/tools/computer.md",
      "conflicts with #19870 in crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md",
      "its need #19871 conflicts with main in crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md"
