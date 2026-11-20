@@ -8,13 +8,18 @@
 //! Hyprland's event socket; when a window of the acted-on process, or of a
 //! desktop portal backend showing a dialog for it, takes focus because it
 //! appeared, or asked for activation, during the watch, focus goes back to
-//! the user's window. Where the compositor runs a Lua config, the
-//! hand-back is also armed inside it (`hl.on("window.active")`), so it runs in
-//! the same compositor turn as the steal and no key reaches the dialog; the
-//! socket watcher then only confirms and reports. Nothing persists: the hook
-//! removes itself when the watch ends, when the user moves focus anywhere
-//! else, on `hyprctl reload`, or after [`HOOK_LIFETIME_MS`] if this process
-//! dies. Nothing is written to the user's configuration.
+//! the user's window. Where the compositor runs a Lua config, a temporary
+//! hook inside it keeps such a window from taking the keyboard at all: it
+//! opens with the `no_focus` window property set for the compositor turn
+//! that maps it (`window.open_early` to `window.open`), and an activation
+//! request is declined by `focus_on_activate = 0` for the turn that reads it
+//! (`window.urgent`). A window that takes focus anyway gets it handed back
+//! from `window.active`, in the same compositor turn. The socket watcher then
+//! only confirms and reports. Nothing persists: each property override ends
+//! in the turn that set it (a 1 ms timer backs that up), the hook removes
+//! itself when the watch ends, when the user moves focus anywhere else, on
+//! `hyprctl reload`, or after [`HOOK_LIFETIME_MS`] if this process dies.
+//! Nothing is written to the user's configuration.
 
 use std::{
 	collections::{HashMap, HashSet},
@@ -38,7 +43,10 @@ use crate::desktop::{
 	error::CoreResult,
 	linux::ax::AtSpiAx,
 	text_range::TextSelectRequest,
-	types::{AxTextSelection, DesktopWindow, DesktopWindowFocus, DesktopWindowOpened},
+	types::{
+		AxTextSelection, DesktopFocusGuard, DesktopFocusGuardKind, DesktopWindow, DesktopWindowFocus,
+		DesktopWindowOpened,
+	},
 };
 
 /// How long an action's call waits after the action returns for a window it
@@ -141,6 +149,8 @@ struct Seen {
 	took_focus: bool,
 	held:       Option<Duration>,
 	left:       bool,
+	/// Which guard kept the keyboard from it or gave it back.
+	guard:      Option<DesktopFocusGuardKind>,
 }
 
 /// What the watch decides about a focus move.
@@ -196,6 +206,7 @@ impl Tracker {
 			took_focus: false,
 			held:       None,
 			left:       false,
+			guard:      None,
 		});
 	}
 
@@ -264,6 +275,34 @@ impl Tracker {
 		Verdict::Nothing
 	}
 
+	/// The compositor hook kept window `address` from taking the keyboard: it
+	/// opened without focus or its activation request was declined.
+	fn hook_kept(
+		&mut self,
+		address: &str,
+		now: Instant,
+		client: &mut impl FnMut(&str) -> Option<Client>,
+	) {
+		if self.seen(address).is_none()
+			&& let Some(found) = client(address)
+			&& self.for_target(&found)
+		{
+			self.note(address, &found, now);
+		}
+		if let Some(seen) = self.seen(address) {
+			seen
+				.guard
+				.get_or_insert(DesktopFocusGuardKind::CompositorHook);
+		}
+	}
+
+	/// Focus went back from window `address`, put there by `by`.
+	fn handed_back_by(&mut self, address: &str, by: DesktopFocusGuardKind) {
+		if let Some(seen) = self.seen(address) {
+			seen.guard = Some(by);
+		}
+	}
+
 	/// The user (or something other than the action) moved focus: what holds
 	/// it now is their choice.
 	fn pick(&mut self, now: Instant) {
@@ -306,6 +345,7 @@ impl Tracker {
 						_ => None,
 					},
 					user_window: user_window.clone(),
+					guard: seen.guard,
 				})
 			})
 			.collect()
@@ -316,16 +356,56 @@ fn millis(duration: Duration) -> u32 {
 	u32::try_from(duration.as_millis()).unwrap_or(u32::MAX)
 }
 
-/// The compositor-side hand-back for process `pid` and the user's window
+/// What the hook needs from Hyprland's Lua API. Evaluated alone it tells
+/// whether the hook can run; it also opens the hook, so a Hyprland whose Lua
+/// lacks any of it refuses the hook and the socket watcher works alone.
+const HOOK_NEEDS: &str = r#"if not (hl.on and hl.timer and hl.dispatch and hl.get_windows and hl.dsp and hl.dsp.focus and hl.dsp.event and hl.dsp.window and hl.dsp.window.set_prop) then error("omp focus guard: this Hyprland's Lua lacks hl.on, hl.timer or hl.dsp.window.set_prop") end"#;
+
+/// What the hook posts on the event socket (`custom>>`) when it keeps a
+/// window from taking the keyboard: `omp-focus-guard,ID,PROPERTY,ADDRESS`.
+const HOOK_EVENT: &str = "omp-focus-guard";
+
+/// The compositor-side guard for process `pid` and the user's window
 /// `user`, registered as `omp_focus_guard[id]` (a function that removes it).
+///
+/// A new window of the target opens with `no_focus` set from
+/// `window.open_early` (rules applied, before Hyprland decides its initial
+/// focus) to `window.open` (after it); an activation request has
+/// `focus_on_activate = 0` from `window.urgent` until the turn ends, which
+/// `CWindow::activate` reads right after emitting it. Each override is also
+/// released by a 1 ms timer and when the hook stops, so none outlives the
+/// turn. A window that takes focus anyway while fresh is handed back from
+/// `window.active`.
 fn hook(id: &str, pid: u32, user: &str) -> String {
 	format!(
-		r#"local id, pid, user, fresh_ms, portal = "{id}", {pid}, "{user}", {fresh}, "{PORTAL_CLASS}"
+		r#"{HOOK_NEEDS}
+local id, pid, user, fresh_ms, portal = "{id}", {pid}, "{user}", {fresh}, "{PORTAL_CLASS}"
 omp_focus_guard = omp_focus_guard or {{}}
-local known, fresh, subs = {{}}, {{}}, {{}}
+local known, fresh, held, subs = {{}}, {{}}, {{}}, {{}}
 for _, w in ipairs(hl.get_windows()) do known[w.address] = true end
+local function prop(address, name, value)
+  hl.dispatch(hl.dsp.window.set_prop({{ prop = name, value = value, window = "address:" .. address }}))
+end
+local function release(address, name)
+  local props = held[address]
+  if props and props[name] then
+    props[name] = nil
+    if next(props) == nil then held[address] = nil end
+    prop(address, name, "unset")
+  end
+end
+local function hold(address, name, value)
+  held[address] = held[address] or {{}}
+  held[address][name] = true
+  prop(address, name, value)
+  hl.timer(function() release(address, name) end, {{ timeout = 1, type = "oneshot" }})
+  hl.dispatch(hl.dsp.event("{HOOK_EVENT}," .. id .. "," .. name .. "," .. address))
+end
 local function stop()
   for _, s in ipairs(subs) do s:remove() end
+  for address, props in pairs(held) do
+    for name in pairs(props) do release(address, name) end
+  end
   omp_focus_guard[id] = nil
 end
 local function freshen(address)
@@ -336,8 +416,21 @@ end
 local function ours(w)
   return w.pid == pid or (w.class or ""):find(portal, 1, true) == 1
 end
-subs[1] = hl.on("window.urgent", function(w) if w and ours(w) then freshen(w.address) end end)
-subs[2] = hl.on("window.active", function(w)
+subs[1] = hl.on("window.open_early", function(w)
+  if w and ours(w) and not known[w.address] then
+    known[w.address] = true
+    freshen(w.address)
+    hold(w.address, "no_focus", "1")
+  end
+end)
+subs[2] = hl.on("window.open", function(w) if w then release(w.address, "no_focus") end end)
+subs[3] = hl.on("window.urgent", function(w)
+  if w and ours(w) then
+    freshen(w.address)
+    hold(w.address, "focus_on_activate", "0")
+  end
+end)
+subs[4] = hl.on("window.active", function(w)
   if not w or w.address == user then return end
   if ours(w) and not known[w.address] and not fresh[w.address] then
     known[w.address] = true
@@ -360,6 +453,18 @@ fn unhook(id: &str) -> String {
 	format!(r#"if omp_focus_guard and omp_focus_guard["{id}"] then omp_focus_guard["{id}"]() end"#)
 }
 
+/// The window the hook `id` kept from taking the keyboard, from an event
+/// socket line it posted.
+fn kept_by_hook(line: &str, id: &str) -> Option<String> {
+	let data = line
+		.strip_prefix("custom>>")?
+		.strip_prefix(HOOK_EVENT)?
+		.strip_prefix(',')?;
+	let mut parts = data.splitn(3, ',');
+	let (hook, prop, window) = (parts.next()?, parts.next()?, parts.next()?);
+	(hook == id && matches!(prop, "no_focus" | "focus_on_activate")).then(|| address(window))
+}
+
 /// What one action's watch has seen, shared between its thread and the
 /// guard.
 #[derive(Default)]
@@ -374,8 +479,11 @@ struct Shared {
 /// Watches Hyprland around background actions; see the module docs.
 pub(super) struct FocusGuard {
 	hyprland: Hyprland,
-	/// Whether the compositor takes Lua (`hyprctl eval`); `None` until tried.
+	/// Whether the compositor takes the Lua hook (`hyprctl eval`); `None`
+	/// until tried.
 	lua:      Option<bool>,
+	/// What Hyprland answered when it refused the hook.
+	refusal:  Option<String>,
 	/// Watches whose reports have not all been handed to the caller.
 	watches:  Vec<Arc<Mutex<Shared>>>,
 	/// The latest watch's thread, while it runs; ended by the next watch.
@@ -385,7 +493,55 @@ pub(super) struct FocusGuard {
 
 impl FocusGuard {
 	pub(super) const fn new(hyprland: Hyprland) -> Self {
-		Self { hyprland, lua: None, watches: Vec::new(), running: None, next_id: 0 }
+		Self { hyprland, lua: None, refusal: None, watches: Vec::new(), running: None, next_id: 0 }
+	}
+
+	/// Records Hyprland's answer to Lua sent with `hyprctl eval`.
+	fn lua_reply(&mut self, reply: CoreResult<Vec<u8>>) {
+		let refusal = match reply {
+			Ok(reply) if reply == b"ok" => None,
+			Ok(reply) => Some(
+				String::from_utf8_lossy(&reply)
+					.trim()
+					.chars()
+					.take(200)
+					.collect(),
+			),
+			Err(err) => Some(err.to_string()),
+		};
+		self.lua = Some(refusal.is_none());
+		self.refusal = refusal;
+	}
+
+	/// Which guard background actions run under, asking Hyprland whether it
+	/// takes the hook if no action has yet.
+	pub(super) fn describe(&mut self) -> DesktopFocusGuard {
+		if self.lua.is_none() {
+			let reply = self.hyprland.request(&format!("eval {HOOK_NEEDS}"));
+			self.lua_reply(reply);
+		}
+		if self.lua == Some(true) {
+			return DesktopFocusGuard {
+				kind:   DesktopFocusGuardKind::CompositorHook,
+				reason: "Hyprland runs a Lua config, so each background action installs a temporary \
+				         hook in it (hyprctl eval): the acted-on app's new windows open without the \
+				         keyboard, its activation requests are declined, and a window that takes \
+				         focus anyway gives it back in the same compositor turn. The hook removes \
+				         itself within 15 s and writes nothing to the config; OMP's event-socket \
+				         watcher reports what each window did."
+					.to_owned(),
+			};
+		}
+		DesktopFocusGuard {
+			kind:   DesktopFocusGuardKind::SocketWatcher,
+			reason: format!(
+				"Hyprland refused the Lua hook (hyprctl eval: {}), as it does with a hyprlang config: \
+				 OMP's event-socket watcher hands focus back after a window a background action opens \
+				 has taken it, a few milliseconds later, so keys the user types in that time go to \
+				 that window.",
+				self.refusal.as_deref().unwrap_or("no reply")
+			),
+		}
 	}
 
 	/// What windows actions opened did to focus, each outcome once: a window
@@ -434,19 +590,22 @@ impl FocusGuard {
 		events.set_read_timeout(Some(POLL)).ok()?;
 		self.next_id += 1;
 		let id = format!("{}-{}", std::process::id(), self.next_id);
-		if self.lua != Some(false) {
+		let hook_id = if self.lua == Some(false) {
+			None
+		} else {
 			let reply = self
 				.hyprland
 				.request(&format!("eval {}", hook(&id, pid, &user.address)));
-			self.lua = Some(reply.is_ok_and(|reply| reply == b"ok"));
-		}
+			self.lua_reply(reply);
+			(self.lua == Some(true)).then_some(id)
+		};
 		let started = Instant::now();
 		let ends = Arc::new(AtomicU64::new(u64::MAX));
 		let stop = Arc::new(AtomicBool::new(false));
 		let shared = Arc::new(Mutex::new(Shared::default()));
 		let watcher = Watcher {
 			hyprland: self.hyprland.clone(),
-			lua: self.lua == Some(true),
+			hook: hook_id,
 			tracker: Tracker::new(user, pid, known, started),
 			started,
 			ends: Arc::clone(&ends),
@@ -456,9 +615,9 @@ impl FocusGuard {
 		let thread = thread::Builder::new()
 			.name("hyprland-focus-guard".into())
 			.spawn(move || {
-				let (lua, hyprland) = (watcher.lua, watcher.hyprland.clone());
+				let (hook, hyprland) = (watcher.hook.clone(), watcher.hyprland.clone());
 				watcher.watch(events);
-				if lua {
+				if let Some(id) = hook {
 					let _ = hyprland.request(&format!("eval {}", unhook(&id)));
 				}
 			})
@@ -500,7 +659,8 @@ impl Watch {
 
 struct Watcher {
 	hyprland: Hyprland,
-	lua:      bool,
+	/// The compositor hook's id, when Hyprland took it.
+	hook:     Option<String>,
 	tracker:  Tracker,
 	started:  Instant,
 	ends:     Arc<AtomicU64>,
@@ -539,9 +699,8 @@ impl Watcher {
 			if !buffered {
 				read_at = Instant::now();
 			}
-			let event = parse(String::from_utf8_lossy(&line).trim_end());
-			line.clear();
-			let Some(event) = event else { continue };
+			let text = String::from_utf8_lossy(&line);
+			let text = text.trim_end();
 			let hyprland = &self.hyprland;
 			let mut client = |address: &str| {
 				if !clients.contains_key(address) {
@@ -550,10 +709,20 @@ impl Watcher {
 				}
 				clients.get(address).cloned()
 			};
-			let verdict = self.tracker.event(&event, read_at, &mut client);
-			if verdict == Verdict::HandBack {
-				self.hand_back();
+			if let Some(id) = &self.hook
+				&& let Some(address) = kept_by_hook(text, id)
+			{
+				self.tracker.hook_kept(&address, read_at, &mut client);
+			} else if let Some(event) = parse(text) {
+				let verdict = self.tracker.event(&event, read_at, &mut client);
+				if verdict == Verdict::HandBack
+					&& let Event::Active(Some(address)) = &event
+				{
+					let by = self.hand_back();
+					self.tracker.handed_back_by(address, by);
+				}
 			}
+			line.clear();
 			self.shared.lock().report = self.tracker.report();
 		}
 		let mut shared = self.shared.lock();
@@ -562,21 +731,22 @@ impl Watcher {
 	}
 
 	/// Puts focus back on the user's window unless the compositor hook
-	/// already did.
-	fn hand_back(&self) {
+	/// already did; says which did.
+	fn hand_back(&self) -> DesktopFocusGuardKind {
 		let user = &self.tracker.user.address;
-		if self.lua
+		if self.hook.is_some()
 			&& let Ok(active) = self.hyprland.json::<Client>("j/activewindow")
 			&& active.address == *user
 		{
-			return;
+			return DesktopFocusGuardKind::CompositorHook;
 		}
-		let command = if self.lua {
+		let command = if self.hook.is_some() {
 			format!(r#"dispatch hl.dsp.focus({{ window = "address:{user}" }})"#)
 		} else {
 			format!("dispatch focuswindow address:{user}")
 		};
 		let _ = self.hyprland.request(&command);
+		DesktopFocusGuardKind::SocketWatcher
 	}
 }
 
@@ -623,6 +793,27 @@ impl GuardedAx {
 	/// See [`FocusGuard::take`].
 	pub(super) fn take_windows_opened(&mut self) -> Vec<DesktopWindowOpened> {
 		self.guard.as_mut().map_or_default(FocusGuard::take)
+	}
+
+	/// Which guard background actions run under, and why.
+	pub(super) fn focus_guard(&mut self) -> DesktopFocusGuard {
+		match &mut self.guard {
+			Some(guard) => guard.describe(),
+			None => DesktopFocusGuard {
+				kind:   DesktopFocusGuardKind::Unguarded,
+				reason: "The compositor is not Hyprland: a window a background action opens takes the \
+				         keyboard if the compositor gives it focus, and OMP does not give it back."
+					.to_owned(),
+			},
+		}
+	}
+
+	/// [`Self::focus_guard`] when AT-SPI is unavailable.
+	pub(super) fn without_ax() -> DesktopFocusGuard {
+		DesktopFocusGuard {
+			kind:   DesktopFocusGuardKind::Unguarded,
+			reason: "AT-SPI is unavailable, so no background action runs to guard.".to_owned(),
+		}
 	}
 }
 
@@ -890,5 +1081,82 @@ mod tests {
 		);
 		assert_eq!(parse("activewindowv2>>"), Some(Event::Active(None)));
 		assert_eq!(parse("activewindow>>foot,x"), None);
+	}
+
+	#[test]
+	fn a_window_the_hook_kept_is_reported_kept_by_it_and_a_hand_back_names_its_guard() {
+		let mut run = Run::new();
+		let mut lookup =
+			|address: &str| (address == "0xd").then(|| client("0xd", 20, "tdlg.py", "Allow?"));
+		// Hyprland posts openwindow before window.open_early runs the hook,
+		// which posts what it held.
+		assert_eq!(run.at(30, "openwindow>>d,1,tdlg.py,Allow?"), Verdict::Nothing);
+		let kept =
+			kept_by_hook("custom>>omp-focus-guard,7-1,no_focus,d", "7-1").expect("the hook's line");
+		run.tracker
+			.hook_kept(&kept, run.t0 + Duration::from_millis(30), &mut lookup);
+		let report = run.tracker.report();
+		assert_eq!(report.len(), 1);
+		assert_eq!(
+			(report[0].1.focus, report[0].1.guard),
+			(DesktopWindowFocus::Kept, Some(DesktopFocusGuardKind::CompositorHook))
+		);
+
+		// A window that took focus anyway names who gave it back.
+		let mut run = Run::new();
+		assert_eq!(run.at(40, "openwindow>>e,1,tdlg.py,Sure?"), Verdict::Nothing);
+		assert_eq!(run.at(40, "activewindowv2>>e"), Verdict::HandBack);
+		run.tracker
+			.handed_back_by("0xe", DesktopFocusGuardKind::SocketWatcher);
+		assert_eq!(run.at(52, "activewindowv2>>a"), Verdict::Nothing);
+		let report = run.tracker.report();
+		assert_eq!(
+			(report[0].1.focus, report[0].1.guard),
+			(DesktopWindowFocus::HandedBack, Some(DesktopFocusGuardKind::SocketWatcher))
+		);
+	}
+
+	#[test]
+	fn only_this_watchs_hook_lines_count() {
+		assert_eq!(
+			kept_by_hook("custom>>omp-focus-guard,7-1,focus_on_activate,55f6", "7-1"),
+			Some("0x55f6".to_owned())
+		);
+		assert_eq!(kept_by_hook("custom>>omp-focus-guard,7-2,no_focus,55f6", "7-1"), None);
+		assert_eq!(kept_by_hook("custom>>omp-focus-guard,7-1,opacity,55f6", "7-1"), None);
+		assert_eq!(kept_by_hook("custom>>something else", "7-1"), None);
+		assert_eq!(kept_by_hook("openwindow>>55f6,1,a,b", "7-1"), None);
+	}
+
+	#[test]
+	fn the_hook_holds_focus_properties_only_for_the_turn_and_checks_the_api_first() {
+		let lua = hook("7-1", 20, "0xa");
+		assert!(lua.starts_with(HOOK_NEEDS));
+		assert!(lua.contains(
+			r#"local id, pid, user, fresh_ms, portal = "7-1", 20, "0xa", 500, "xdg-desktop-portal""#
+		));
+		// Set before Hyprland decides a new window's focus, released after it.
+		assert!(lua.contains(
+			"hl.on(\"window.open_early\", function(w)\n  if w and ours(w) and not known[w.address] \
+			 then\n    known[w.address] = true\n    freshen(w.address)\n    hold(w.address, \
+			 \"no_focus\", \"1\")"
+		));
+		assert!(lua.contains(
+			r#"hl.on("window.open", function(w) if w then release(w.address, "no_focus") end end)"#
+		));
+		assert!(lua.contains(r#"hold(w.address, "focus_on_activate", "0")"#));
+		// Every hold ends within the turn, or 1 ms later, and when the hook
+		// stops.
+		assert!(lua.contains(
+			r#"hl.timer(function() release(address, name) end, { timeout = 1, type = "oneshot" })"#
+		));
+		assert!(lua.contains("for name in pairs(props) do release(address, name) end"));
+		assert!(lua.contains(r#"prop(address, name, "unset")"#));
+		assert!(
+			lua.contains(r#"hl.dsp.event("omp-focus-guard," .. id .. "," .. name .. "," .. address)"#)
+		);
+		assert!(lua.ends_with(r#"{ timeout = 15000, type = "oneshot" })"#));
+		// No unescaped format braces were left behind.
+		assert!(!lua.contains("{{") && !lua.contains("}}"));
 	}
 }

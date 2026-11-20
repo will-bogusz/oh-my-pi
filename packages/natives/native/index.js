@@ -181,6 +181,11 @@ export const AstMatchStrictness = {
 	Signature: "signature",
 	Template: "template",
 };
+export const DesktopFocusGuardKind = {
+	CompositorHook: "compositorHook",
+	SocketWatcher: "socketWatcher",
+	Unguarded: "none",
+};
 export const DesktopKeyboardReturn = {
 	HandedBack: "handedBack",
 	LeftAsChosen: "leftAsChosen",

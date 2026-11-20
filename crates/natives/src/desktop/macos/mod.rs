@@ -112,6 +112,7 @@ impl Backend for MacosBackend {
 			display_count,
 			screen_locked: screen.locked,
 			display_asleep: screen.display_asleep,
+			focus_guard: None,
 		}
 	}
 

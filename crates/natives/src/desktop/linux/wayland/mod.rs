@@ -464,6 +464,12 @@ impl Backend for WaylandBackend {
 			display_count: self.displays.len() as u32,
 			screen_locked: false,
 			display_asleep: false,
+			focus_guard: Some(
+				self.ax.as_mut().map_or_else(
+					focus_guard::GuardedAx::without_ax,
+					focus_guard::GuardedAx::focus_guard,
+				),
+			),
 		}
 	}
 
