@@ -13,6 +13,7 @@ use uiautomation::{
 	types::{ControlType, ExpandCollapseState, Handle, Point, TreeScope, UIProperty},
 	variants::{Value, Variant},
 };
+use windows::Win32::UI::Accessibility::UIA_E_TIMEOUT;
 use windows_sys::Win32::{
 	Foundation::{HWND, POINT},
 	UI::{
@@ -223,6 +224,7 @@ impl Win32Ax {
 			control::check()?;
 			return self.select_item(root, element, &selection, text);
 		}
+		control::check()?;
 		Err(DesktopError::ax_failed(
 			"this element offers none of UI Automation's Value, RangeValue and Selection patterns, \
 			 so it takes no text, number or item; nothing was written; set it via press/click instead",
@@ -240,46 +242,9 @@ impl Win32Ax {
 	}
 
 	fn set_number(root: HWND, range: &UIRangeValuePattern, text: &str) -> CoreResult<()> {
-		let current = range.get_value().map_err(ax_error)?;
-		control::check()?;
-		let refusal = |reason: &str| {
-			DesktopError::ax_failed(format!("{reason}; it reads {current} now; nothing was written"))
-		};
-		// The number written must spell the text back, so no digit is lost to
-		// the parse.
-		let value = plain_decimal(text)
-			.filter(|_| {
-				let (_, integer, fraction) = decimal_value(text);
-				let digits = if integer.is_empty() {
-					fraction.trim_start_matches('0').len()
-				} else {
-					integer.len() + fraction.len()
-				};
-				digits <= 15
-			})
-			.and_then(|_| text.parse::<f64>().ok())
-			.filter(|value| decimal_value(text) == decimal_value(&value.to_string()))
-			.ok_or_else(|| {
-				refusal(
-					"this control takes a number and the text given is not one it can hold: write \
-					 plain digits such as \"75\" or \"0.5\", at most 32 characters and 15 significant \
-					 digits",
-				)
-			})?;
-		let readonly = range.is_readonly().map_err(ax_error)?;
-		control::check()?;
-		if readonly {
-			return Err(refusal("this control is read-only"));
-		}
-		let (minimum, maximum) =
-			(range.get_minimum().map_err(ax_error)?, range.get_maximum().map_err(ax_error)?);
-		control::check()?;
-		if !(minimum..=maximum).contains(&value) {
-			return Err(refusal(&format!(
-				"{text} is outside the control's range {minimum} to {maximum}"
-			)));
-		}
+		let (value, ..) = Self::number(range, text)?;
 		fresh_write(root)?;
+		control::dispatching()?;
 		range.set_value(value).map_err(|error| {
 			DesktopError::input_failed(format!(
 				"RangeValue.SetValue({text}) was attempted and may have taken effect ({error})"
@@ -301,6 +266,36 @@ impl Win32Ax {
 		}
 	}
 
+	/// The number `text` asks `range` to hold, with the range's minimum and
+	/// maximum, or a refusal naming the control's current value.
+	fn number(range: &UIRangeValuePattern, text: &str) -> CoreResult<(f64, f64, f64)> {
+		let current = range.get_value().map_err(ax_error)?;
+		control::check()?;
+		let refusal = |reason: &str| {
+			DesktopError::ax_failed(format!("{reason}; it reads {current} now; nothing was written"))
+		};
+		let value = range_number(text).ok_or_else(|| {
+			refusal(
+				"this control takes a number and the text given is not one it can hold: write plain \
+				 digits such as \"75\" or \"0.5\", at most 32 characters and 15 significant digits",
+			)
+		})?;
+		let readonly = range.is_readonly().map_err(ax_error)?;
+		control::check()?;
+		if readonly {
+			return Err(refusal("this control is read-only"));
+		}
+		let (minimum, maximum) =
+			(range.get_minimum().map_err(ax_error)?, range.get_maximum().map_err(ax_error)?);
+		control::check()?;
+		if !(minimum..=maximum).contains(&value) {
+			return Err(refusal(&format!(
+				"{text} is outside the control's range {minimum} to {maximum}"
+			)));
+		}
+		Ok((value, minimum, maximum))
+	}
+
 	/// Selects the item of the selection container `element` named exactly
 	/// `text` among the items currently exposed. A cold combo is opened to
 	/// expose its items and closed again while its window remains in front.
@@ -317,6 +312,7 @@ impl Win32Ax {
 			let item = pick(items, text)?;
 			self.preserve_selection(selection, Some(&item.element))?;
 			fresh_write(root)?;
+			control::dispatching()?;
 			item.pattern.select().map_err(|error| {
 				DesktopError::input_failed(format!(
 					"SelectionItem.Select({text:?}) was attempted and may have taken effect ({error})"
@@ -350,6 +346,7 @@ impl Win32Ax {
 		// Before Expand, cancellation or loss of foreground still sent nothing.
 		self.preserve_selection(selection, None)?;
 		fresh_write(root)?;
+		control::dispatching()?;
 		let expanded = expander.expand();
 		let selected = expanded
 			.map_err(|error| format!("Expand was attempted and failed ({error})"))
@@ -582,6 +579,187 @@ impl Win32Ax {
 			)))
 		}
 	}
+
+	/// Where containment refuses a WPF window, writes a WPF text box, slider
+	/// or list (a combo box included) through `LegacyIAccessible`, which
+	/// leaves the window behind where UI Automation's writes bring it forward.
+	/// Anything else keeps `refusal`. Every provider read comes before the
+	/// send; after it, only [`legacy_readback`].
+	fn set_behind(
+		&mut self,
+		element: &UIElement,
+		root: HWND,
+		text: &str,
+		refusal: DesktopError,
+	) -> CoreResult<()> {
+		if !legacy_window(root) || element.get_framework_id().ok().as_deref() != Some("WPF") {
+			return Err(refusal);
+		}
+		if element.get_control_type().ok() == Some(ControlType::Edit) {
+			return Self::set_text_behind(element, root, text, refusal);
+		}
+		if let Ok(range) = element.get_pattern::<UIRangeValuePattern>() {
+			return Self::set_number_behind(element, root, &range, text, refusal);
+		}
+		if let Ok(selection) = element.get_pattern::<UISelectionPattern>() {
+			return self.select_behind(element, root, &selection, text, refusal);
+		}
+		Err(refusal)
+	}
+
+	/// A WPF text box's text, through its `LegacyIAccessible` value. Password
+	/// and read-only boxes are refused with nothing sent.
+	fn set_text_behind(
+		element: &UIElement,
+		root: HWND,
+		text: &str,
+		refusal: DesktopError,
+	) -> CoreResult<()> {
+		if element.is_password().map_err(ax_error)? {
+			return Err(DesktopError::ax_failed(
+				"this password box cannot be written behind other windows; nothing was written",
+			));
+		}
+		let (Ok(value), Ok(legacy)) = (
+			element.get_pattern::<UIValuePattern>(),
+			element.get_pattern::<UILegacyIAccessiblePattern>(),
+		) else {
+			return Err(refusal);
+		};
+		if value.is_readonly().map_err(ax_error)? {
+			return Err(DesktopError::ax_failed("this text box is read-only; nothing was written"));
+		}
+		legacy_enabled(element, "nothing was written")?;
+		legacy_dispatch(root, refusal, "nothing was written")?;
+		legacy.set_value(text).map_err(legacy_write_error)?;
+		legacy_readback(|| value.get_value().map_err(unread_after_send), |read| Ok(read == text))?
+			.map(drop)
+			.map_err(|last| {
+				DesktopError::ax_unconfirmed(format!(
+					"sent {} characters to the text box, but {}; inspect it before writing again",
+					text.chars().count(),
+					match last {
+						// The text written is not repeated back.
+						Some(read) => format!(
+							"it was not seen to hold them in time and last read {:?}",
+							truncate(if text.is_empty() {
+								read
+							} else {
+								read.replace(text, "[written text]")
+							})
+						),
+						None => "no read of it finished in time".to_string(),
+					}
+				))
+			})
+	}
+
+	/// A WPF slider's number, through its `LegacyIAccessible` value, which is
+	/// the whole percent of the range the number sits at: a number between
+	/// two percents is refused before sending, naming the nearest that are
+	/// not.
+	fn set_number_behind(
+		element: &UIElement,
+		root: HWND,
+		range: &UIRangeValuePattern,
+		text: &str,
+		refusal: DesktopError,
+	) -> CoreResult<()> {
+		let Ok(legacy) = element.get_pattern::<UILegacyIAccessiblePattern>() else {
+			return Err(refusal);
+		};
+		let (value, minimum, maximum) = Self::number(range, text)?;
+		let Some(percent) = whole_percent(value, minimum, maximum) else {
+			let choices = match percent_neighbours(value, minimum, maximum) {
+				(Some(below), Some(above)) => format!("set {below} or {above} instead"),
+				(Some(other), None) | (None, Some(other)) => format!("set {other} instead"),
+				(None, None) => "no number at a whole percent was found near it".to_string(),
+			};
+			return Err(DesktopError::background_unavailable(format!(
+				"behind other windows this slider takes only numbers at a whole percent of its range \
+				 {minimum} to {maximum}, and {text} is not one: {choices}; with its window in front \
+				 that restriction does not apply; nothing was written"
+			)));
+		};
+		legacy_enabled(element, "nothing was written")?;
+		legacy_dispatch(root, refusal, "nothing was written")?;
+		legacy
+			.set_value(&percent.to_string())
+			.map_err(legacy_write_error)?;
+		legacy_readback(
+			|| range.get_value().map_err(unread_after_send),
+			|read| Ok(wpf_number_reached(value, *read, minimum, maximum)),
+		)?
+		.map(drop)
+		.map_err(|last| {
+			DesktopError::ax_unconfirmed(format!(
+				"sent {text} ({percent}% of the slider's range), but {}; the app may have rounded it \
+				 to a step or not taken it: inspect it before writing again",
+				last.map_or_else(
+					|| "no read of it finished in time".to_string(),
+					|read| format!("it was not seen to hold it in time and last read {read}")
+				)
+			))
+		})
+	}
+
+	/// Selects the exposed item of a WPF list or combo box named exactly
+	/// `text`, through the item's `LegacyIAccessible` selection. A combo box
+	/// whose list was never opened exposes no items, and opening it would
+	/// bring the window forward, so it is refused.
+	fn select_behind(
+		&mut self,
+		element: &UIElement,
+		root: HWND,
+		selection: &UISelectionPattern,
+		text: &str,
+		refusal: DesktopError,
+	) -> CoreResult<()> {
+		let items = self.selection_items(element)?;
+		if items.is_empty() {
+			return Err(DesktopError::background_unavailable(
+				"this list exposes no items to select behind other windows (a combo box whose list \
+				 was never opened has none); nothing was selected; with its window in front, setValue \
+				 opens it, or choose the item via press/click",
+			));
+		}
+		let item = pick(items, text)?;
+		let framework = item.element.get_framework_id();
+		let (Ok("WPF"), Ok(legacy)) =
+			(framework.as_deref(), item.element.get_pattern::<UILegacyIAccessiblePattern>())
+		else {
+			return Err(refusal);
+		};
+		self.preserve_selection(selection, Some(&item.element))?;
+		let automation = self.automation()?;
+		legacy_enabled(element, "nothing was selected")?;
+		legacy_dispatch(root, refusal, "nothing was selected")?;
+		legacy
+			.select(SELFLAG_TAKESELECTION)
+			.map_err(legacy_write_error)?;
+		legacy_readback(
+			|| selection.get_selection().map_err(unread_after_send),
+			|selected| match selected.as_slice() {
+				[only] => automation
+					.compare_elements(only, &item.element)
+					.map_err(unread_after_send),
+				_ => Ok(false),
+			},
+		)?
+		.map(drop)
+		.map_err(|last| {
+			DesktopError::ax_unconfirmed(format!(
+				"selected {text:?}, but {}; inspect the selection before writing again",
+				last.map_or_else(
+					|| "no read of the selection finished in time".to_string(),
+					|selected| format!(
+						"the list was not seen to select it alone in time ({} selected at the last read)",
+						selected.len()
+					)
+				)
+			))
+		})
+	}
 }
 
 /// Fresh writes honour cancellation after provider reads and require the
@@ -594,6 +772,96 @@ fn fresh_write(root: HWND) -> CoreResult<()> {
 		));
 	}
 	Ok(())
+}
+
+/// The number `text` spells, when a range control can hold it exactly: plain
+/// decimal digits, at most 15 significant, that parse back to the same
+/// spelling, so no digit is lost to the parse.
+fn range_number(text: &str) -> Option<f64> {
+	plain_decimal(text)
+		.filter(|_| {
+			let (_, integer, fraction) = decimal_value(text);
+			let digits = if integer.is_empty() {
+				fraction.trim_start_matches('0').len()
+			} else {
+				integer.len() + fraction.len()
+			};
+			digits <= 15
+		})
+		.and_then(|_| text.parse::<f64>().ok())
+		.filter(|value| decimal_value(text) == decimal_value(&value.to_string()))
+}
+
+/// Whether a slider written as a whole percent of its range reads `target`:
+/// only the bridge's arithmetic noise may differ from it.
+#[allow(
+	clippy::suboptimal_flops,
+	reason = "match the bridge's separately rounded multiply and add"
+)]
+fn wpf_number_reached(target: f64, read: f64, minimum: f64, maximum: f64) -> bool {
+	if read == target {
+		return true;
+	}
+	let percent = ((target - minimum) / (maximum - minimum) * 100.0).round();
+	if !(0.0..=100.0).contains(&percent) {
+		return false;
+	}
+	let bridge = minimum + percent / 100.0 * (maximum - minimum);
+	read == bridge && range_number(&read.to_string()).is_none()
+}
+
+/// The whole percent of the range `minimum..=maximum` at which `value` sits.
+/// UI Automation's bridge to `LegacyIAccessible` exposes a range control's
+/// value as a whole percent of its range, not as the number, so that is what
+/// a background write sends; a value between two percents cannot be sent.
+fn whole_percent(value: f64, minimum: f64, maximum: f64) -> Option<f64> {
+	let minimum = minimum.to_string().parse::<bigdecimal::BigDecimal>().ok()?;
+	let maximum = maximum.to_string().parse::<bigdecimal::BigDecimal>().ok()?;
+	let value = value.to_string().parse::<bigdecimal::BigDecimal>().ok()?;
+	let span = &maximum - &minimum;
+	// Admission uses decimal endpoints, never a rounded binary64 projection.
+	let offset = (value - &minimum) * bigdecimal::BigDecimal::from(100);
+	if minimum == maximum {
+		return (offset == 0).then_some(0.0);
+	}
+	let percent = (&offset / &span)
+		.with_scale(0)
+		.to_string()
+		.parse::<u32>()
+		.ok()?;
+	(percent <= 100 && offset == &span * bigdecimal::BigDecimal::from(percent))
+		.then_some(f64::from(percent))
+}
+
+/// The nearest numbers below and above `value` at a whole percent of the
+/// range that [`range_number`] and the range accept.
+fn percent_neighbours(value: f64, minimum: f64, maximum: f64) -> (Option<f64>, Option<f64>) {
+	let Ok(low) = minimum.to_string().parse::<bigdecimal::BigDecimal>() else {
+		return (None, None);
+	};
+	let Ok(high) = maximum.to_string().parse::<bigdecimal::BigDecimal>() else {
+		return (None, None);
+	};
+	let span = high - &low;
+	let mut below = None;
+	let mut above = None;
+	for percent in 0..=100 {
+		let nominal =
+			&low + &span * bigdecimal::BigDecimal::from(percent) / bigdecimal::BigDecimal::from(100);
+		let Some(candidate) = range_number(&nominal.normalized().to_plain_string()) else {
+			continue;
+		};
+		if !(minimum..=maximum).contains(&candidate) {
+			continue;
+		}
+		if candidate < value {
+			below = Some(candidate);
+		} else if candidate > value {
+			above = Some(candidate);
+			break;
+		}
+	}
+	(below, above)
 }
 
 /// A selectable item of a selection container.
@@ -728,7 +996,7 @@ fn press_button(element: &UIElement, button: HWND, top: HWND) -> CoreResult<()> 
 	}
 }
 
-/// How long a WPF check box pressed through `LegacyIAccessible` is given to
+/// How long a WPF control acted on through `LegacyIAccessible` is given to
 /// show its new state: WPF runs the action from its dispatcher after the call
 /// returns.
 const LEGACY_READBACK: Duration = Duration::from_millis(500);
@@ -742,6 +1010,94 @@ const LEGACY_READBACK: Duration = Duration::from_millis(500);
 fn legacy_window(root: HWND) -> bool {
 	is_wpf_class(&window::class_name(root)) && !window::has_chromium_descendant(root)
 }
+
+/// A disabled control takes no `LegacyIAccessible` action.
+fn legacy_enabled(element: &UIElement, unsent: &str) -> CoreResult<()> {
+	if element.is_enabled().map_err(ax_error)? {
+		Ok(())
+	} else {
+		Err(DesktopError::input_failed(format!("the WPF control is disabled; {unsent}")))
+	}
+}
+
+/// Marks the dispatch fence right before a `LegacyIAccessible` action, after
+/// the provider reads, which run app code: a Chromium child attached
+/// meanwhile takes the window out of this route (`refusal` stands), and a
+/// modal dialog disables the host window, not the control.
+fn legacy_dispatch(root: HWND, refusal: DesktopError, unsent: &str) -> CoreResult<()> {
+	if !legacy_window(root) {
+		return Err(refusal);
+	}
+	// SAFETY: IsWindowEnabled only queries the handle.
+	if unsafe { IsWindowEnabled(root) } == 0 {
+		return Err(DesktopError::input_failed(format!(
+			"window {} is disabled (behind a dialog, for instance); {unsent}",
+			root.expose_provenance()
+		)));
+	}
+	control::check()?;
+	control::dispatching()
+}
+
+/// Reads the target after a sent `LegacyIAccessible` action until `seen`
+/// holds, for at most [`LEGACY_READBACK`] within the call's deadline: `Ok`
+/// with the read that showed it, else `Err` with the last read, if any. No
+/// read starts after that window, and a read already in flight is not
+/// interrupted; one answered after the window, read or `seen` check (which
+/// may itself query the provider), confirms nothing.
+fn legacy_readback<T>(
+	mut read: impl FnMut() -> CoreResult<T>,
+	mut seen: impl FnMut(&T) -> CoreResult<bool>,
+) -> CoreResult<Result<T, Option<T>>> {
+	let until = Instant::now()
+		+ control::time_left().map_or(LEGACY_READBACK, |left| left.min(LEGACY_READBACK));
+	let mut last = None;
+	loop {
+		if Instant::now() >= until {
+			return Ok(Err(last));
+		}
+		let value = read()?;
+		if Instant::now() >= until {
+			return Ok(Err(Some(value)));
+		}
+		if seen(&value)? && Instant::now() < until {
+			return Ok(Ok(value));
+		}
+		last = Some(value);
+		control::wait(
+			until
+				.saturating_duration_since(Instant::now())
+				.min(Duration::from_millis(20)),
+		)?;
+	}
+}
+
+/// A read failing after a sent write. Not `AxUnconfirmed`: naming the target
+/// would query the same, possibly unresponsive, provider again.
+fn unread_after_send(error: uiautomation::Error) -> DesktopError {
+	DesktopError::input_failed(format!(
+		"the write was sent and may have taken effect, but the control could not be read afterwards \
+		 ({error}); inspect it before writing again"
+	))
+}
+
+/// A `LegacyIAccessible` write that failed may still have reached the app.
+fn legacy_write_error(error: uiautomation::Error) -> DesktopError {
+	if error.code() == UIA_E_TIMEOUT as i32 {
+		return DesktopError::ax_unconfirmed(format!(
+			"the write was attempted and may still take effect, but was not confirmed: \
+			 LegacyIAccessible timed out ({error}); inspect it before writing again"
+		));
+	}
+	DesktopError::input_failed(format!(
+		"the write through LegacyIAccessible failed and may already have taken effect ({error}); \
+		 inspect it before writing again"
+	))
+}
+
+/// MSAA's `SELFLAG_TAKESELECTION`: select the item alone, leaving keyboard
+/// focus where it is.
+const SELFLAG_TAKESELECTION: i32 = 0x2;
 
 /// A WPF button's `Invoke` or check box's `Toggle` through
 /// `LegacyIAccessible`'s default action, for a [`legacy_window`] that
@@ -785,64 +1141,35 @@ impl LegacyPress {
 	/// the call's deadline; a change not seen by then reports the sent action
 	/// as unconfirmed. A read already in flight is not interrupted.
 	fn run(self, element: &UIElement, root: HWND, refusal: DesktopError) -> CoreResult<()> {
-		if !element.is_enabled().map_err(ax_error)? {
-			return Err(DesktopError::input_failed(
-				"the WPF control is disabled; nothing was pressed",
-			));
-		}
+		legacy_enabled(element, "nothing was pressed")?;
 		let before = self
 			.toggle
 			.as_ref()
 			.map(UITogglePattern::get_toggle_state)
 			.transpose()
 			.map_err(ax_error)?;
-		// After the provider reads, which run app code: a Chromium child
-		// attached meanwhile takes the window out of this route, and a modal
-		// dialog disables the host window, not the control.
-		if !legacy_window(root) {
-			return Err(refusal);
-		}
-		// SAFETY: IsWindowEnabled only queries the handle.
-		if unsafe { IsWindowEnabled(root) } == 0 {
-			return Err(DesktopError::input_failed(format!(
-				"window {} is disabled (behind a dialog, for instance); nothing was pressed",
-				root.expose_provenance()
-			)));
-		}
-		control::check()?;
-		control::dispatching()?;
+		legacy_dispatch(root, refusal, "nothing was pressed")?;
 		self.action.do_default_action().map_err(ax_error)?;
 		let (Some(toggle), Some(before)) = (self.toggle, before) else {
 			return Ok(());
 		};
-		let until = Instant::now()
-			+ control::time_left().map_or(LEGACY_READBACK, |left| left.min(LEGACY_READBACK));
-		loop {
-			if Instant::now() >= until {
-				return Err(DesktopError::ax_unconfirmed(
-					"the check box's default action was sent but no change of its state was seen in \
-					 time; the app may manage it itself, have refused it or not have applied it yet; \
-					 inspect the target before pressing again",
-				));
-			}
-			// Not `AxUnconfirmed`: naming the target would query the same,
-			// possibly unresponsive, provider again.
-			let after = toggle.get_toggle_state().map_err(|error| {
+		let read = || {
+			toggle.get_toggle_state().map_err(|error| {
 				DesktopError::input_failed(format!(
 					"the check box's default action was sent and may have changed it, but its state \
 					 could not be read afterwards ({error}); inspect the target before pressing again"
 				))
-			})?;
-			// A read answered after the window closed confirms nothing.
-			if after != before && Instant::now() < until {
-				return Ok(());
-			}
-			control::wait(
-				until
-					.saturating_duration_since(Instant::now())
-					.min(Duration::from_millis(20)),
-			)?;
-		}
+			})
+		};
+		legacy_readback(read, |after| Ok(*after != before))?
+			.map(drop)
+			.map_err(|_| {
+				DesktopError::ax_unconfirmed(
+					"the check box's default action was sent but no change of its state was seen in \
+					 time; the app may manage it itself, have refused it or not have applied it yet; \
+					 inspect the target before pressing again",
+				)
+			})
 	}
 }
 
@@ -1204,10 +1531,23 @@ impl AxBackend for Win32Ax {
 		let native = native_window(element);
 		let mut value = None;
 		if native.is_none() {
-			self.contained(element, || {
-				value = present(element.get_pattern::<UIValuePattern>(), "Value")?;
-				Ok(())
-			})?;
+			// Where containment refuses a WPF window, a WPF text box, slider or
+			// list takes its LegacyIAccessible write instead.
+			let mut behind = false;
+			Self::contained_or(
+				self.host_root(element),
+				|root, refusal| {
+					behind = true;
+					self.set_behind(element, root, text, refusal)
+				},
+				|| {
+					value = present(element.get_pattern::<UIValuePattern>(), "Value")?;
+					Ok(())
+				},
+			)?;
+			if behind {
+				return Ok(());
+			}
 			if value.is_none() {
 				return self.set_number_or_item(element, text);
 			}
@@ -1255,6 +1595,7 @@ impl AxBackend for Win32Ax {
 							.get_pattern::<UIValuePattern>()
 							.map_err(pattern_error("Value"))?,
 					};
+					control::dispatching()?;
 					pattern.set_value(text).map_err(ax_error)
 				})?;
 			},
@@ -1641,25 +1982,55 @@ public static class Fixture {
 	/// controls (`level`, `opened`, `selected`, `closed`) and `mark` for each
 	/// mark posted to it.
 	const WPF_VALUES: &str = r#"
-Add-Type -ReferencedAssemblies PresentationFramework,PresentationCore,WindowsBase,System.Xaml,System.Windows.Forms,WindowsFormsIntegration,System.Drawing -TypeDefinition @'
+Add-Type -ReferencedAssemblies PresentationFramework,PresentationCore,WindowsBase,System.Xaml,UIAutomationProvider,UIAutomationTypes,System.Windows.Forms,WindowsFormsIntegration,System.Drawing -TypeDefinition @'
 using System;
 using System.Windows;
 using System.Windows.Automation;
+using System.Windows.Automation.Peers;
+using System.Windows.Automation.Provider;
 using System.Windows.Controls;
 using System.Windows.Interop;
+public class RejectingSlider : Slider {
+	protected override AutomationPeer OnCreateAutomationPeer() { return new RejectingSliderPeer(this); }
+}
+public class RejectingSliderPeer : SliderAutomationPeer {
+	public RejectingSliderPeer(Slider owner) : base(owner) {}
+	public override object GetPattern(PatternInterface pattern) {
+		var inner = base.GetPattern(pattern);
+		return pattern == PatternInterface.RangeValue ? new RejectingRange((IRangeValueProvider)inner) : inner;
+	}
+}
+public class RejectingRange : IRangeValueProvider {
+	readonly IRangeValueProvider inner;
+	public RejectingRange(IRangeValueProvider inner) { this.inner = inner; }
+	public void SetValue(double value) { throw new InvalidOperationException("setter rejected"); }
+	public double Value { get { return inner.Value; } }
+	public bool IsReadOnly { get { return inner.IsReadOnly; } }
+	public double Minimum { get { return inner.Minimum; } }
+	public double Maximum { get { return inner.Maximum; } }
+	public double SmallChange { get { return inner.SmallChange; } }
+	public double LargeChange { get { return inner.LargeChange; } }
+}
 public static class Fixture {
 	static Window window, other;
-	static ListBox multiple;
 	static bool steal;
+	static TextBox text;
+	static ListBox list;
 	static void Say(string line) { Console.Out.WriteLine(line); Console.Out.Flush(); }
 	static IntPtr Hook(IntPtr hwnd, int message, IntPtr w, IntPtr l, ref bool handled) {
 		if (message == 0x8007) Say("mark");
 		else if (message == 0x8008) steal = true;
 		else if (message == 0x8009) {
 			string selected = "";
-			foreach (var item in multiple.SelectedItems) selected += item + ",";
+			foreach (var item in list.SelectedItems) selected += item + ",";
 			Say("multiple " + selected);
 		}
+		else if (message == 0x800A) window.Dispatcher.BeginInvoke(new Action(() => {
+			// A window without content never raises ContentRendered.
+			var dialog = new Window { Owner = window, Title = "omp test: wpf modal", Width = 200, Height = 100, Content = "modal" };
+			dialog.ContentRendered += (sender, e) => Say("modal");
+			dialog.ShowDialog();
+		}));
 		return IntPtr.Zero;
 	}
 	static ComboBox Combo(string name, params string[] items) {
@@ -1676,11 +2047,14 @@ public static class Fixture {
 	}
 	static IntPtr Handle(Window window) { return new WindowInteropHelper(window).Handle; }
 	public static void Run() {
-		var level = new Slider { Minimum = 0, Maximum = 100 };
+		var level = new Slider { Minimum = -2, Maximum = 8 };
 		AutomationProperties.SetName(level, "Level");
 		level.ValueChanged += (sender, e) => Say("level " + e.NewValue);
 		var panel = new StackPanel();
 		panel.Children.Add(level);
+		var rejected = new RejectingSlider();
+		AutomationProperties.SetName(rejected, "Rejected level");
+		panel.Children.Add(rejected);
 		panel.Children.Add(Combo("Choice", "One", "Two", "Three"));
 		panel.Children.Add(Combo("Cold", "Red", "Blue"));
 		panel.Children.Add(Combo("Missing", "Red", "Blue"));
@@ -1693,12 +2067,25 @@ public static class Fixture {
 		};
 		commit.DropDownClosed += (sender, e) => { commit.SelectedItem = "Two"; };
 		panel.Children.Add(commit);
-		multiple = new ListBox { SelectionMode = SelectionMode.Multiple };
-		AutomationProperties.SetName(multiple, "Multiple");
-		foreach (var item in new[] { "Red", "Green", "Blue" }) multiple.Items.Add(item);
-		multiple.SelectedItems.Add("Red");
-		multiple.SelectedItems.Add("Green");
-		panel.Children.Add(multiple);
+		panel.Children.Add(Combo("Unexposed", "Red", "Blue"));
+		list = new ListBox { SelectionMode = SelectionMode.Multiple };
+		list.Items.Add("First"); list.Items.Add("Second");
+		list.SelectedItems.Add("First"); list.SelectedItems.Add("Second");
+		AutomationProperties.SetName(list, "Multiple");
+		list.SelectionChanged += (sender, e) => Say("list " + list.SelectedItems.Count + " " + list.SelectedItem);
+		panel.Children.Add(list);
+		text = new TextBox();
+		AutomationProperties.SetName(text, "Text");
+		text.TextChanged += (sender, e) => Say("text " + text.Text);
+		panel.Children.Add(text);
+		var password = new PasswordBox();
+		AutomationProperties.SetName(password, "Secret");
+		password.PasswordChanged += (sender, e) => Say("password changed");
+		panel.Children.Add(password);
+		var readOnly = new TextBox { Text = "original", IsReadOnly = true };
+		AutomationProperties.SetName(readOnly, "Read only");
+		readOnly.TextChanged += (sender, e) => Say("read-only changed");
+		panel.Children.Add(readOnly);
 		var button = new Button { Content = "OffSide" };
 		AutomationProperties.SetName(button, "OffSide");
 		button.Click += (sender, e) => Say("clicked");
@@ -1709,11 +2096,12 @@ public static class Fixture {
 		offSide.Controls.Add(new System.Windows.Forms.Integration.ElementHost {
 			Child = button, Dock = System.Windows.Forms.DockStyle.Fill
 		});
-		window = new Window { Title = "omp test: wpf values", Left = 40, Top = 40, Width = 300, Height = 400, Content = panel };
+		window = new Window { Title = "omp test: wpf values", Left = 40, Top = 40, Width = 300, Height = 500, Content = panel };
 		other = new Window { Title = "omp test: wpf other", ShowActivated = false, Left = 360, Top = 40, Width = 240, Height = 140 };
 		window.SourceInitialized += (sender, e) => HwndSource.FromHwnd(Handle(window)).AddHook(Hook);
 		window.ContentRendered += (sender, e) => {
 			offSide.Show(); other.Show(); window.Activate();
+			window.Activated += (s, a) => Say("activated");
 			Say("ready " + Handle(window) + " " + Handle(other) + " " + offSide.Handle);
 		};
 		window.ShowDialog();
@@ -1770,12 +2158,15 @@ public static class Fixture {
 	/// Posted to the WPF window: the next list to open activates its other
 	/// window, as a user switching windows would.
 	const STEAL: u32 = 0x8008;
+	/// Posted to the WPF window: it opens a modal dialog it owns, which
+	/// disables it, and prints `modal` once the dialog shows.
+	const VALUES_MODAL: u32 = 0x800a;
 
 	#[test]
 	#[ignore = "moves the foreground between windows it opens; run with --ignored from a focused \
 	            terminal in a signed-in desktop session"]
 	fn set_value_writes_a_wpf_slider_as_a_number_and_a_combo_box_as_its_item() {
-		use std::{process::Stdio, sync::Arc, time::Duration};
+		use std::{process::Stdio, sync::Arc};
 
 		use windows_sys::Win32::UI::WindowsAndMessaging::{GetForegroundWindow, SetForegroundWindow};
 
@@ -1832,6 +2223,15 @@ public static class Fixture {
 			window::wait_for_foreground(window, Duration::from_secs(2)).unwrap(),
 			"the WPF window did not come to the front: run from a focused terminal"
 		);
+		app.printed();
+		set("Text", "foreground text").unwrap();
+		assert_eq!(app.printed(), ["text foreground text"]);
+
+		// A failed ordinary setter is not success even if its value already
+		// matches.
+		let error = set("Rejected level", "0").unwrap_err();
+		assert_eq!(error.code, ErrorCode::InputFailed, "{error}");
+		assert_eq!(app.printed(), Vec::<String>::new());
 
 		set("Level", "0.5").unwrap();
 		assert_eq!(app.printed(), ["level 0.5"]);
@@ -1839,28 +2239,21 @@ public static class Fixture {
 		let error = set("Level", "0.5000000000000001").unwrap_err();
 		assert_eq!(error.code, ErrorCode::AxFailed, "{error}");
 		assert_eq!(app.printed(), Vec::<String>::new());
-
-		let error = set("Multiple", "Blue").unwrap_err();
+		let error = set("Multiple", "Second").unwrap_err();
 		assert_eq!(error.code, ErrorCode::AxFailed, "{error}");
 		app.post(0x8009);
-		assert_eq!(app.printed(), ["multiple Red,Green,"]);
+		assert_eq!(app.printed(), ["multiple First,Second,"]);
 
 		// A combo box never opened has no items until its list opens: it is
 		// opened, the item selected, and the list closed again.
 		set("Choice", "Two").unwrap();
 		assert_eq!(app.printed(), ["opened", "selected Two", "closed"]);
 		let error = set("Choice", "Four").unwrap_err();
-		assert!(
-			error
-				.message
-				.contains("the exposed items are One, Two, Three"),
-			"{error}"
-		);
+		assert_eq!(error.code, ErrorCode::AxFailed, "{error}");
 		assert_eq!(app.printed(), Vec::<String>::new());
 
 		let error = set("Missing", "Green").unwrap_err();
 		assert_eq!(error.code, ErrorCode::InputFailed, "{error}");
-		assert!(error.message.contains("the list now reads closed"), "{error}");
 		// UIA's Collapsed state can precede WPF's deferred DropDownClosed.
 		// Wait for the event, not a posted mark, before checking what was sent.
 		let mut printed = Vec::new();
@@ -1877,16 +2270,8 @@ public static class Fixture {
 
 		let error = set("Reset", "Two").unwrap_err();
 		assert_eq!(error.code, ErrorCode::AxFailed, "{error}");
-		assert!(
-			error
-				.message
-				.contains("after the list closed, the selection reads"),
-			"{error}"
-		);
-		assert!(error.message.contains("selection reads [One]"), "{error}");
 		assert_eq!(app.printed(), ["opened", "selected Two", "closed", "selected One"]);
-
-		// The selected item is restored while open but committed on close.
+		// A transient open-state mismatch can commit the target on close.
 		set("Commit", "Two").unwrap();
 		assert_eq!(app.printed(), [
 			"opened",
@@ -1902,23 +2287,123 @@ public static class Fixture {
 		assert_eq!(app.printed(), Vec::<String>::new());
 		let error = set("Cold", "Blue").unwrap_err();
 		assert_eq!(error.code, ErrorCode::InputFailed, "{error}");
-		assert!(error.message.contains("lost the foreground"), "{error}");
 		let printed = app.printed();
 		assert!(printed.iter().any(|line| line == "opened"), "{printed:?}");
 		assert!(!printed.iter().any(|line| line.starts_with("selected")), "{printed:?}");
 		assert_eq!(foreground(), other);
 
-		// Behind another window nothing is sent.
-		// A covered windowless button in an unguarded WinForms host still
-		// refuses for its missing writable patterns, not its foreground.
+		// Synchronize activation before testing writes behind another window.
+		// The fixture records any activation during a call, including one that
+		// would be undone before the call returns.
+		// SAFETY: a window of this test's fixture.
+		unsafe { SetForegroundWindow(other) };
+		assert!(window::wait_for_foreground(other, Duration::from_secs(2)).unwrap());
+		app.printed();
+		// A windowless button in an unguarded WinForms host refuses for its
+		// missing writable patterns, not its foreground.
 		let error = set("OffSide", "anything").unwrap_err();
 		assert_eq!(error.code, ErrorCode::AxFailed, "{error}");
-		for (name, value) in [("Level", "70"), ("Choice", "Three")] {
-			let error = set(name, value).unwrap_err();
-			assert_eq!(error.code, ErrorCode::BackgroundUnavailable, "{error}");
+		assert_eq!(app.printed(), Vec::<String>::new());
+		set("Text", "background text").unwrap();
+		assert_eq!(app.printed(), ["text background text"]);
+		assert_eq!(foreground(), other);
+		for name in ["Secret", "Read only"] {
+			let error = set(name, "replacement").unwrap_err();
+			assert_eq!(error.code, ErrorCode::AxFailed, "{error}");
+			assert!(!error.message.contains("replacement"), "{error}");
+			assert_eq!(app.printed(), Vec::<String>::new());
+			assert_eq!(foreground(), other);
 		}
+		// Behind, the slider's legacy value is a whole percent of its range
+		// (-2 to 8): 3 is sent as 50, and 2.75 (47.5%) is refused unsent,
+		// naming the nearest whole percents; the lower one is then written.
+		let error = set("Level", "2.75").unwrap_err();
+		assert_eq!(error.code, ErrorCode::BackgroundUnavailable, "{error}");
+		assert!(error.message.contains("set 2.7 or 2.8 instead"), "{error}");
+		assert_eq!(app.printed(), Vec::<String>::new());
+		set("Level", "2.7").unwrap();
+		assert_eq!(app.printed(), ["level 2.7"]);
+		set("Level", "3").unwrap();
+		assert_eq!(app.printed(), ["level 3"]);
+		set("Level", "-1").unwrap();
+		assert_eq!(app.printed(), ["level -1"]);
+		set("Level", "0").unwrap();
+		assert_eq!(app.printed(), ["level 0"]);
+		assert_eq!(foreground(), other);
+		set("Choice", "Three").unwrap();
+		assert_eq!(app.printed(), ["selected Three"]);
+		assert_eq!(foreground(), other);
+		let error = set("Unexposed", "Blue").unwrap_err();
+		assert_eq!(error.code, ErrorCode::BackgroundUnavailable, "{error}");
 		assert_eq!(app.printed(), Vec::<String>::new());
 		assert_eq!(foreground(), other);
+		// The background legacy Select must preserve other selected items too.
+		let error = set("Multiple", "Second").unwrap_err();
+		assert_eq!(error.code, ErrorCode::AxFailed, "{error}");
+		app.post(0x8009);
+		assert_eq!(app.printed(), ["multiple First,Second,"]);
+		assert_eq!(foreground(), other);
+
+		// Behind its own modal dialog the window is disabled while its controls
+		// still report themselves enabled: nothing is written.
+		app.post(VALUES_MODAL);
+		assert_eq!(app.line(), "modal");
+		for (name, value) in [("Text", "modal text"), ("Level", "1"), ("Choice", "One")] {
+			let error = set(name, value).unwrap_err();
+			assert_eq!(error.code, ErrorCode::InputFailed, "{name}: {error}");
+			assert!(error.message.contains("behind a dialog"), "{name}: {error}");
+		}
+		assert_eq!(app.printed(), Vec::<String>::new());
+	}
+
+	#[test]
+	fn background_slider_values_are_whole_percents_of_the_range() {
+		assert_eq!(whole_percent(3.0, -2.0, 8.0), Some(50.0));
+		assert_eq!(whole_percent(0.0, -2.0, 8.0), Some(20.0));
+		assert!(!wpf_number_reached(0.0, 1.1102230246251565e-16, -2.0, 8.0));
+		assert!(!wpf_number_reached(0.0, 0.000000000000001, -2.0, 8.0));
+		assert_eq!(whole_percent(0.0, -2.0, 0.0000000000000001), None);
+		assert_eq!(whole_percent(0.0000000000000001, -2.0, 0.0000000000000001), Some(100.0));
+		assert!(!wpf_number_reached(0.0000000000000001, 0.0, -2.0, 0.0000000000000001,));
+		assert_eq!(percent_neighbours(0.835, 0.5, 1.5), (Some(0.83), Some(0.84)));
+		assert_eq!(whole_percent(0.0000000000001, 0.0, 1000.0), None);
+		assert_eq!(whole_percent(0.000000000000001, -2.0, 8.0), None);
+		assert!(!wpf_number_reached(10.0, 10.0000000000001, 0.0, 1000.0));
+		assert_eq!(whole_percent(2.7, -2.0, 8.0), Some(47.0));
+		assert_eq!(whole_percent(2.75, -2.0, 8.0), None);
+		assert_eq!(whole_percent(0.3, 0.0, 0.6000000238418579), None);
+		assert_eq!(whole_percent(0.83, 0.5, 1.5), Some(33.0));
+		assert!(wpf_number_reached(0.83, 0.8300000000000001, 0.5, 1.5));
+		assert_eq!(whole_percent(-2.0, -2.0, 8.0).map(|p| p.to_string()), Some("0".to_string()));
+		assert_eq!(whole_percent(30.0, 0.0, 1000.0), Some(3.0));
+		assert_eq!(whole_percent(35.0, 0.0, 1000.0), None);
+		assert_eq!(whole_percent(5.0, 5.0, 5.0), Some(0.0));
+		assert_eq!(percent_neighbours(2.75, -2.0, 8.0), (Some(2.7), Some(2.8)));
+		assert_eq!(percent_neighbours(35.0, 0.0, 1000.0), (Some(30.0), Some(40.0)));
+		assert_eq!(whole_percent(50.0000000005, 0.0, 100.0), None);
+		assert_eq!(percent_neighbours(50.0000000005, 0.0, 100.0), (Some(50.0), Some(51.0)));
+		assert_eq!(whole_percent(1000000.0005, 1000000.0, 1000000.001), Some(50.0));
+		assert_eq!(whole_percent(0.00000000015, 0.0, 0.00000001), None);
+		assert_eq!(
+			percent_neighbours(0.00000000015, 0.0, 0.00000001),
+			(Some(0.0000000001), Some(0.0000000002)),
+		);
+		for (value, minimum, maximum, has_above) in [
+			(2.75, -2.0, 8.0, true),
+			(0.835, 0.5, 1.5, true),
+			(0.499, -1.0, 0.49999999999999994, false),
+		] {
+			let (below, above) = percent_neighbours(value, minimum, maximum);
+			assert!(below.is_some_and(|below| below < value));
+			assert_eq!(above.is_some(), has_above);
+			assert!(above.is_none_or(|above| above > value));
+			for suggested in [below, above].into_iter().flatten() {
+				assert!((minimum..=maximum).contains(&suggested));
+				assert_eq!(range_number(&suggested.to_string()), Some(suggested));
+				assert!(whole_percent(suggested, minimum, maximum).is_some());
+				assert_ne!(suggested, value);
+			}
+		}
 	}
 
 	#[test]
