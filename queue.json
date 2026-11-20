@@ -106276,13 +106276,17 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-20T17:36:51Z",
+  "checked": "2026-11-20T18:07:37Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "picker-stale-discovery": {
-    "since": "2026-11-20T17:36:51Z",
-    "title": "fix(coding-agent): refresh discovery from the model picker once the catalog is two hours old"
+   "devin-neon-image-price": {
+    "since": "2026-11-20T18:07:37Z",
+    "title": "fix(catalog): budget Gemini 4 Neon's images on Devin at the 1,089 tokens it bills"
+   },
+   "win-button-click": {
+    "since": "2026-11-20T18:07:37Z",
+    "title": "fix(natives): click Windows buttons without activating their window"
    },
    "factory-droid-1100-pin": {
     "since": "2026-11-17T00:39:57Z",
@@ -106334,7 +106338,9 @@
    19702,
    19849,
    19870,
-   19871
+   19871,
+   19878,
+   19880
   ],
   "post_merge": {
    "18632": {
@@ -106410,34 +106416,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-13T17:55:52Z",
-    "kind": "merged",
-    "number": 19181,
-    "title": "fix(catalog): keep Gemini 4 Hydrogen in one thinking rule so a regenerated catalog starts",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-13T17:55:52Z",
-    "kind": "openable",
-    "id": "factory-droid-config-update-upstreams",
-    "title": "fix(catalog): keep GPT-6 effort changes off configuration_update on Factory Droid Bedrock and Snowflake"
-   },
-   {
-    "at": "2026-11-13T17:55:52Z",
-    "kind": "unopenable",
-    "id": "relay-restored-frame",
-    "title": "fix(browser-relay): keep a relay tab when another extension's frame keeps omp out",
-    "why": "opened as #19178"
-   },
-   {
-    "at": "2026-11-13T17:55:52Z",
-    "kind": "unopenable",
-    "id": "key-menu",
-    "title": "fix(natives): close the menu a macOS background key press opens",
-    "why": "opened as #19179"
-   },
    {
     "at": "2026-11-13T18:26:45Z",
     "kind": "unopenable",
@@ -108056,6 +108034,25 @@
     "kind": "openable",
     "id": "picker-stale-discovery",
     "title": "fix(coding-agent): refresh discovery from the model picker once the catalog is two hours old"
+   },
+   {
+    "at": "2026-11-20T18:07:37Z",
+    "kind": "openable",
+    "id": "devin-neon-image-price",
+    "title": "fix(catalog): budget Gemini 4 Neon's images on Devin at the 1,089 tokens it bills"
+   },
+   {
+    "at": "2026-11-20T18:07:37Z",
+    "kind": "openable",
+    "id": "win-button-click",
+    "title": "fix(natives): click Windows buttons without activating their window"
+   },
+   {
+    "at": "2026-11-20T18:07:37Z",
+    "kind": "unopenable",
+    "id": "picker-stale-discovery",
+    "title": "fix(coding-agent): refresh discovery from the model picker once the catalog is two hours old",
+    "why": "opened as #19878"
    }
   ]
  },
@@ -117246,8 +117243,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-20T18:07:15.454161Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-20T18:07:38.164603Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 2,
@@ -118529,8 +118526,10 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with main in (branch missing on the fork)"
+    ],
     "note": "",
     "over": [],
     "paired": [],
