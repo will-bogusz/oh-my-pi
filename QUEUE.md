@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20 13:21Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20 13:26Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-20 13:10Z on MacBook-Pro; groups below are from it, states from the manifest)
@@ -71,7 +71,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-20
 | macos-keys-read-cost | perf(natives): prove a macOS key window draws its own content without reading all its children | computer | P2 | 1d | Main, 2026-11-18: needs an independent review and a VM row before it can open; no work on it now | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-keys-read-cost) |
 | win-button-click | fix(natives): click Windows buttons without activating their window | computer |  | 1d | Main, 2026-11-20: in its fix round (WinButtonRound, review needs-changes at e06e31d6bf7); ready work opens in the order it becomes ready | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-button-click) |
 | win-uia-set-patterns | fix(natives): set WPF sliders and combo boxes through RangeValue and SelectionItem | computer |  | 6h | Main, 2026-11-20: in its fix round (WinWpfRoutes5, review needs-changes at 86d258734d9); takes the recorded ax.rs form with win-wpf-scroll when it follows | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-uia-set-patterns) |
-| win-takeover-intervene | fix(natives): stop Windows takeovers when the user types or clicks | computer |  | 0h | WinTakeover2, 2026-11-20: Main asked to scope the Raw Input listener to the takeover call; re-measure and review the delta first | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-takeover-intervene) |
+| win-takeover-intervene | fix(natives): stop Windows takeovers when the user types or clicks | computer |  | 1h | WinTakeover2, 2026-11-20: Main asked to scope the Raw Input listener to the takeover call; re-measure and review the delta first | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-takeover-intervene) |
 
 ## Parked (1)
 
