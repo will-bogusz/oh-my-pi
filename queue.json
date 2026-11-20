@@ -105644,6 +105644,24 @@
    "added": "2026-11-20T06:29:20Z",
    "updated": "2026-11-20T09:38:43Z",
    "note": ""
+  },
+  {
+   "id": "win-takeover-intervene",
+   "branch": "will/win-takeover-intervene",
+   "title": "fix(natives): stop Windows takeovers when the user types or clicks",
+   "area": "computer",
+   "priority": null,
+   "needs": [],
+   "base": "b636e19d10b664950d600505d194337bbeef42f0",
+   "body": "bodies/win-takeover-intervene.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-takeover-intervene",
+   "host": "MacBook-Pro",
+   "added": "2026-11-20T12:25:26Z",
+   "updated": "2026-11-20T12:25:26Z",
+   "note": ""
   }
  ],
  "watch": {
