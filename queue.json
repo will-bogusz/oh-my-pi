@@ -120652,5 +120652,11 @@
     "wake": ""
    }
   ]
+ },
+ "opening": {
+  "id": "devin-gemini-image-price-rest",
+  "token": "15a1e6274f6640588a3a8176d940c7a1",
+  "host": "MacBook-Pro",
+  "at": "2026-11-21T11:29:20Z"
  }
 }
