@@ -107421,7 +107421,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-21T20:39:01Z",
+  "checked": "2026-11-21T21:09:35Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -107558,12 +107558,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-14T20:45:18Z",
-    "kind": "openable",
-    "id": "macos-takeover-typing-pause",
-    "title": "fix(natives): keep macOS takeover from taking a typing user's keys"
-   },
    {
     "at": "2026-11-14T21:47:09Z",
     "kind": "unopenable",
@@ -118887,12 +118881,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-21T20:07:55.927182Z",
+  "at": "2026-11-21T21:09:36.651431Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 2,
-   "left": 6
+   "used": 0,
+   "left": 8
   },
   "rows": [
    {
