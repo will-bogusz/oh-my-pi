@@ -1,7 +1,8 @@
 //! Where Hyprland shows each window, read over its IPC socket (`hyprctl -j`).
 //! A native Wayland client cannot learn where the compositor put it, so over
-//! AT-SPI its window reads `0,0` and its elements read positions inside the
-//! window. Requests only read; nothing is kept from one to the next, and any
+//! AT-SPI its window reads `0,0`. Nothing ties an AT-SPI window to a Hyprland
+//! window but its process, so only an app with one window on each side is
+//! placed. Requests only read; nothing is kept from one to the next, and any
 //! failure leaves the caller with what AT-SPI said.
 
 use std::{
@@ -11,22 +12,21 @@ use std::{
 		unix::{ffi::OsStrExt, net::UnixStream},
 	},
 	path::{Path, PathBuf},
-	sync::{Arc, Mutex},
 	time::{Duration, Instant},
 };
 
 use serde::{Deserialize, de::DeserializeOwned};
 
-use super::{compositor_pid, peer_pid};
+use super::{peer_pid, wayland_socket};
 use crate::desktop::{
 	error::{CoreResult, DesktopError},
-	linux::ax::{AtSpiAx, AtSpiWindow, NativeGeometry, NativeWindows},
+	linux::ax::AtSpiWindow,
 	types::DesktopWindow,
 };
 
-/// How long one read of Hyprland's state may take, connection to last byte;
+/// How long reading Hyprland may add to one call, connection to last byte;
 /// Hyprland answers in about a millisecond.
-const IPC_TIMEOUT: Duration = Duration::from_secs(1);
+pub(super) const IPC_TIMEOUT: Duration = Duration::from_secs(1);
 /// The largest reply read; a `j/clients` of a hundred windows is about 100 KiB.
 const MAX_REPLY: usize = 16 * 1024 * 1024;
 
@@ -53,28 +53,52 @@ impl Workspace {
 
 /// The keys read from each `j/clients` entry; a reply missing one is refused.
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub(super) struct Client {
-	address:   String,
 	mapped:    bool,
+	/// Drawn: not hidden (a swallowed terminal, an inactive group tab) and
+	/// not transparent. Read for captures only.
+	#[serde(default)]
+	visible:   bool,
 	at:        [i32; 2],
 	size:      [u32; 2],
 	workspace: Workspace,
 	pid:       i64,
-	title:     String,
+	/// The window for the compositor's life; its `address` can be reused by
+	/// the next window. Read for captures only.
+	#[serde(default)]
+	stable_id: String,
 }
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct Monitor {
+	x:                 i32,
+	y:                 i32,
+	/// In pixels; `scale` gives the logical size.
+	width:             u32,
+	height:            u32,
+	scale:             f64,
 	active_workspace:  Workspace,
 	special_workspace: Workspace,
 }
 
+impl Monitor {
+	/// Whether this monitor is the logical rectangle `rect` and shows
+	/// workspace `key`.
+	fn shows(&self, rect: (i32, i32, u32, u32), key: &str) -> bool {
+		let logical = |pixels: u32| (f64::from(pixels) / self.scale).round() as u32;
+		(self.x, self.y, logical(self.width), logical(self.height)) == rect
+			&& [&self.active_workspace, &self.special_workspace]
+				.iter()
+				.any(|workspace| workspace.key().as_deref() == Some(key))
+	}
+}
+
 /// Hyprland's state as one read saw it.
 pub(super) struct Snapshot {
-	clients: Vec<Client>,
-	/// The workspaces some monitor shows, special ones included.
-	shown:   Vec<String>,
+	clients:  Vec<Client>,
+	monitors: Vec<Monitor>,
 }
 
 /// The request socket of the Hyprland serving this session's Wayland socket.
@@ -83,8 +107,8 @@ pub(super) struct Session {
 	compositor: u32,
 }
 
-/// Connects without waiting: a socket whose compositor stopped accepting,
-/// with its queue full, refuses at once instead of blocking the call.
+/// Connects without waiting: a socket whose server stopped accepting, with
+/// its queue full, refuses at once instead of blocking the call.
 fn connect(path: &Path) -> io::Result<UnixStream> {
 	let bytes = path.as_os_str().as_bytes();
 	// SAFETY: `sockaddr_un` is plain old data; all zeroes is a valid value.
@@ -124,31 +148,22 @@ fn objects<T: DeserializeOwned>(reply: &[u8]) -> serde_json::Result<Vec<T>> {
 		.collect()
 }
 
-/// `ax` placing native Wayland windows by Hyprland's list ([`Windows`]) when
-/// this session's compositor is Hyprland: its Wayland socket is served by a
-/// process named `Hyprland` and the session names an instance.
-pub(super) fn placing(ax: AtSpiAx) -> AtSpiAx {
-	let hyprland = std::env::var_os("HYPRLAND_INSTANCE_SIGNATURE").is_some()
-		&& compositor_pid()
-			.and_then(|pid| std::fs::read_to_string(format!("/proc/{pid}/comm")).ok())
-			.is_some_and(|comm| comm.trim_end() == "Hyprland");
-	if hyprland {
-		ax.with_native_windows(Box::new(Windows::default()))
-	} else {
-		ax
-	}
+/// Whether this session names a Hyprland instance; nothing is connected.
+pub(super) fn running() -> bool {
+	std::env::var_os("HYPRLAND_INSTANCE_SIGNATURE").is_some()
 }
 
 impl Session {
 	/// Hyprland's socket for this session, found again at every read; `None`
-	/// outside Hyprland.
+	/// outside Hyprland or when the Wayland socket does not accept at once.
 	pub(super) fn current() -> Option<Self> {
 		let signature = std::env::var_os("HYPRLAND_INSTANCE_SIGNATURE")?;
 		let socket = PathBuf::from(std::env::var_os("XDG_RUNTIME_DIR")?)
 			.join("hypr")
 			.join(signature)
 			.join(".socket.sock");
-		Some(Self { socket, compositor: compositor_pid()? })
+		let compositor = peer_pid(&connect(&wayland_socket()?).ok()?)?;
+		Some(Self { socket, compositor })
 	}
 
 	/// One request, answered by the compositor itself before `deadline`.
@@ -163,6 +178,7 @@ impl Session {
 				Ok(left)
 			}
 		};
+		left()?;
 		let mut stream = connect(&self.socket).map_err(failed)?;
 		if peer_pid(&stream) != Some(self.compositor) {
 			return Err(failed(io::ErrorKind::PermissionDenied.into()));
@@ -184,198 +200,100 @@ impl Session {
 		objects(&reply).map_err(|err| failed(err.into()))
 	}
 
-	/// Every client, mapped or not.
-	pub(super) fn clients(&self) -> CoreResult<Vec<Client>> {
-		self.request("j/clients", Instant::now() + IPC_TIMEOUT)
+	/// Every client, mapped or not, read before `deadline`.
+	pub(super) fn clients(&self, deadline: Instant) -> CoreResult<Vec<Client>> {
+		self.request("j/clients", deadline)
 	}
 
-	/// Clients and the shown workspaces, read under one deadline.
-	pub(super) fn snapshot(&self) -> CoreResult<Snapshot> {
-		self.read(Instant::now() + IPC_TIMEOUT)
-	}
-
-	fn read(&self, deadline: Instant) -> CoreResult<Snapshot> {
-		let clients = self.request("j/clients", deadline)?;
-		Ok(Snapshot::new(clients, &self.request("j/monitors", deadline)?))
-	}
-}
-
-impl Snapshot {
-	fn new(clients: Vec<Client>, monitors: &[Monitor]) -> Self {
-		let shown = monitors
-			.iter()
-			.flat_map(|monitor| [&monitor.active_workspace, &monitor.special_workspace])
-			.filter_map(Workspace::key)
-			.collect();
-		Self { clients, shown }
+	/// Clients and monitors, read within `budget`, which this spends: the
+	/// reads on both sides of one capture share one budget.
+	pub(super) fn snapshot(&self, budget: &mut Duration) -> CoreResult<Snapshot> {
+		let start = Instant::now();
+		let deadline = start + *budget;
+		let read = self.request("j/clients", deadline).and_then(|clients| {
+			Ok(Snapshot { clients, monitors: self.request("j/monitors", deadline)? })
+		});
+		*budget = budget.saturating_sub(start.elapsed());
+		read
 	}
 }
 
-/// The client showing AT-SPI window `window`: the one client of its process
-/// with its title, while no other AT-SPI window (`windows`) of that process
-/// has that title either, and the client is mapped at the size AT-SPI reports.
-/// `None` otherwise: nothing else ties the two lists together.
+/// The client showing AT-SPI window `window`, when its app has exactly one
+/// window on each side: one in `windows` (AT-SPI's) and one Hyprland client,
+/// mapped. Titles and sizes are not compared: an app can give two windows the
+/// same title, or swap them, so no other app is placed.
 pub(super) fn client_for<'a>(
 	clients: &'a [Client],
 	windows: &[AtSpiWindow],
 	window: &DesktopWindow,
 ) -> Option<&'a Client> {
 	let pid = window.pid?;
-	let namesakes = windows
+	if windows
 		.iter()
-		.filter(|other| other.window.pid == Some(pid) && other.window.title == window.title)
-		.count();
-	let mut same = clients
-		.iter()
-		.filter(|client| client.pid == i64::from(pid) && client.title == window.title);
-	let client = same.next()?;
-	(namesakes == 1
-		&& same.next().is_none()
-		&& client.mapped
-		&& client.size == [window.width, window.height])
-	.then_some(client)
+		.filter(|other| other.window.pid == Some(pid))
+		.count()
+		!= 1
+	{
+		return None;
+	}
+	let mut own = clients.iter().filter(|client| client.pid == i64::from(pid));
+	let client = own.next()?;
+	(own.next().is_none() && client.mapped).then_some(client)
 }
 
-/// AT-SPI's windows as listed: each whose toolkit gives no position takes the
-/// position of its one client (`client_for`, which has its size); every other
+/// AT-SPI's windows as listed: each whose toolkit gives no position takes
+/// the place and size of its app's one client (`client_for`); every other
 /// field, and every other window, stays AT-SPI's.
 pub(super) fn listed(windows: Vec<AtSpiWindow>, clients: &[Client]) -> Vec<DesktopWindow> {
 	let places: Vec<_> = windows
 		.iter()
 		.map(|entry| {
 			let client = client_for(clients, &windows, &entry.window)?;
-			(!entry.position_known).then_some(client.at)
+			(!entry.position_known).then_some((client.at, client.size))
 		})
 		.collect();
 	windows
 		.into_iter()
 		.zip(places)
 		.map(|(AtSpiWindow { mut window, .. }, place)| {
-			if let Some([x, y]) = place {
-				(window.x, window.y) = (x, y);
+			if let Some(([x, y], [width, height])) = place {
+				(window.x, window.y, window.width, window.height) = (x, y, width, height);
 			}
 			window
 		})
 		.collect()
 }
 
-/// Where a capture of AT-SPI window `window` is cut: the position of the same
-/// client, on the same shown workspace, in the same place in `before` and
-/// `after`, the reads taken on either side of the frame. `None` when either
-/// read cannot say.
+/// Where a capture of `window` from the portal monitor `portal` (its logical
+/// rectangle) is cut, `at` and `size`: the app's one client, drawn, on a
+/// workspace that monitor shows, the same window (`stableId`) in the same
+/// place in both reads, each taken with what AT-SPI listed then. `None` when
+/// a read cannot say.
 pub(super) fn agreed(
-	before: &Snapshot,
-	after: &Snapshot,
-	windows: &[AtSpiWindow],
+	before: (&Snapshot, &[AtSpiWindow]),
+	after: (&Snapshot, &[AtSpiWindow]),
 	window: &DesktopWindow,
-) -> Option<[i32; 2]> {
-	let shown = before.shown(windows, window)?;
-	(after.shown(windows, window)? == shown).then_some(shown.2)
+	portal: (i32, i32, u32, u32),
+) -> Option<([i32; 2], [u32; 2])> {
+	let shown = before.0.shown(before.1, window, portal)?;
+	(after.0.shown(after.1, window, portal)? == shown).then_some((shown.2, shown.3))
 }
 
 impl Snapshot {
-	/// The client showing `window` (`client_for`), its workspace and place,
-	/// while some monitor shows that workspace and no other window of its
-	/// process has its size: a title can pass from one window to another
-	/// while the frame is taken, and a size then still tells them apart.
 	fn shown(
 		&self,
 		windows: &[AtSpiWindow],
 		window: &DesktopWindow,
+		portal: (i32, i32, u32, u32),
 	) -> Option<(&str, String, [i32; 2], [u32; 2])> {
-		let client = client_for(&self.clients, windows, window)?;
-		let workspace = client
-			.workspace
-			.key()
-			.filter(|key| self.shown.contains(key))?;
-		let alike =
-			|other: &&Client| other.mapped && other.pid == client.pid && other.size == client.size;
-		(self.clients.iter().filter(alike).count() == 1).then_some((
-			client.address.as_str(),
-			workspace,
-			client.at,
-			client.size,
-		))
-	}
-}
-
-/// Places AT-SPI elements of native Wayland windows by where Hyprland shows
-/// their window. One `j/clients` read serves an operation: it is dropped at
-/// the next ([`NativeWindows::refresh`]); a read that fails places nothing.
-#[derive(Default)]
-pub(super) struct Windows {
-	read: Mutex<Option<Arc<Vec<Client>>>>,
-}
-
-impl Windows {
-	fn clients(&self) -> Arc<Vec<Client>> {
-		let mut read = self
-			.read
-			.lock()
-			.unwrap_or_else(|poisoned| poisoned.into_inner());
-		read
-			.get_or_insert_with(|| {
-				Arc::new(
-					Session::current()
-						.and_then(|hyprland| hyprland.clients().ok())
-						.unwrap_or_default(),
-				)
-			})
-			.clone()
-	}
-}
-
-impl NativeWindows for Windows {
-	/// Every client, mapped or not, so a title two of them share matches
-	/// neither.
-	fn windows(&self) -> CoreResult<Vec<DesktopWindow>> {
-		let clients = self.clients();
-		Ok(clients
+		let client = client_for(&self.clients, windows, window)
+			.filter(|client| client.visible && !client.stable_id.is_empty())?;
+		let workspace = client.workspace.key()?;
+		self
+			.monitors
 			.iter()
-			.filter_map(|client| {
-				Some(DesktopWindow {
-					id:      client.address.clone(),
-					title:   client.title.clone(),
-					app:     String::new(),
-					pid:     Some(u32::try_from(client.pid).ok()?),
-					x:       client.at[0],
-					y:       client.at[1],
-					width:   client.size[0],
-					height:  client.size[1],
-					focused: false,
-				})
-			})
-			.collect())
-	}
-
-	/// While client `id` (its address) is mapped and still the only one of
-	/// its process with its title: a frame matched earlier is matched again
-	/// once that stops holding.
-	fn geometry(&self, id: &str) -> Option<NativeGeometry> {
-		let clients = self.clients();
-		let client = clients.iter().find(|client| client.address == id)?;
-		let namesakes = clients
-			.iter()
-			.filter(|other| other.pid == client.pid && other.title == client.title)
-			.count();
-		(client.mapped && namesakes == 1).then(|| NativeGeometry {
-			x:      client.at[0],
-			y:      client.at[1],
-			width:  client.size[0],
-			height: client.size[1],
-			shadow: [0; 4],
-		})
-	}
-
-	fn screen_is_window_relative(&self) -> bool {
-		true
-	}
-
-	fn refresh(&self) {
-		*self
-			.read
-			.lock()
-			.unwrap_or_else(|poisoned| poisoned.into_inner()) = None;
+			.any(|monitor| monitor.shows(portal, &workspace))
+			.then_some((client.stable_id.as_str(), workspace, client.at, client.size))
 	}
 }
 
@@ -390,23 +308,25 @@ mod tests {
 	/// workspace, and a window being closed.
 	const CLIENTS: &str = r#"[
 		{"address":"0x5501","mapped":true,"hidden":false,"visible":true,"at":[12,38],"size":[621,750],
-		 "workspace":{"id":1,"name":"1"},"class":"tdlg.py","title":"TDLG","pid":5104,"focusHistoryID":0},
+		 "workspace":{"id":1,"name":"1"},"class":"tdlg.py","title":"TDLG","pid":5104,"stableId":"11"},
 		{"address":"0x5502","mapped":true,"hidden":false,"visible":true,"at":[647,38],"size":[621,750],
-		 "workspace":{"id":1,"name":"1"},"class":"foot","title":"foot","pid":4920,"focusHistoryID":1},
+		 "workspace":{"id":1,"name":"1"},"class":"foot","title":"foot","pid":4920,"stableId":"12"},
 		{"address":"0x5503","mapped":true,"hidden":false,"visible":true,"at":[12,38],"size":[1256,750],
-		 "workspace":{"id":2,"name":"2"},"class":"org.gnome.Nautilus","title":"Home","pid":6001,"focusHistoryID":2},
+		 "workspace":{"id":2,"name":"2"},"class":"org.gnome.Nautilus","title":"Home","pid":6001,"stableId":"13"},
 		{"address":"0x5504","mapped":true,"hidden":false,"visible":true,"at":[112,88],"size":[1056,650],
-		 "workspace":{"id":-98,"name":"special:magic"},"class":"calc","title":"Calc","pid":6003,"focusHistoryID":3},
+		 "workspace":{"id":-98,"name":"special:magic"},"class":"calc","title":"Calc","pid":6003,"stableId":"14"},
 		{"address":"0x5507","mapped":false,"hidden":true,"visible":false,"at":[0,0],"size":[0,0],
-		 "workspace":{"id":-1,"name":""},"class":"","title":"","pid":-1,"focusHistoryID":-1}
+		 "workspace":{"id":-1,"name":""},"class":"","title":"","pid":-1,"stableId":"15"}
 	]"#;
 
-	/// `j/monitors` from 0.56.2, trimmed: workspace 1 shown, no special one.
-	const MONITORS: &str = r#"[{"id":0,"name":"Virtual-1","x":0,"y":0,
-		"activeWorkspace":{"id":1,"name":"1"},"specialWorkspace":{"id":0,"name":""}}]"#;
+	/// `j/monitors` from 0.56.2, trimmed: a 1280x800 monitor showing workspace
+	/// 1, no special one.
+	const MONITORS: &str = r#"[{"id":0,"name":"Virtual-1","x":0,"y":0,"width":1280,"height":800,
+		"scale":1.0,"activeWorkspace":{"id":1,"name":"1"},"specialWorkspace":{"id":0,"name":""}}]"#;
 
-	/// A request socket owned by this process that answers one connection per
-	/// `(command, reply)`, as Hyprland's does, then closes it.
+	/// The portal stream of that monitor, as a logical rectangle.
+	const PORTAL: (i32, i32, u32, u32) = (0, 0, 1280, 800);
+
 	fn serve(socket: PathBuf, replies: Vec<(&'static str, &'static str)>) -> Session {
 		let listener = UnixListener::bind(&socket).unwrap();
 		std::thread::spawn(move || {
@@ -433,58 +353,54 @@ mod tests {
 	fn atspi(pid: u32, title: &str, position_known: bool) -> AtSpiWindow {
 		AtSpiWindow {
 			window: DesktopWindow {
-				id:      format!("atspi:{title}"),
+				id:      format!("atspi:{pid}:{title}"),
 				title:   title.into(),
 				app:     "app".into(),
 				pid:     Some(pid),
 				x:       0,
 				y:       0,
-				width:   621,
-				height:  750,
-				focused: title == "TDLG",
+				width:   600,
+				height:  400,
+				focused: false,
 			},
 			position_known,
 		}
 	}
 
-	fn client(address: &str, pid: i64, title: &str, mapped: bool, workspace: i64) -> Client {
-		Client {
-			address: address.into(),
-			mapped,
-			at: [10, 20],
-			size: [621, 750],
-			workspace: Workspace { id: Some(workspace), address: None },
-			pid,
-			title: title.into(),
-		}
+	fn snapshot(clients: &str) -> Snapshot {
+		Snapshot { clients: parse(clients), monitors: parse(MONITORS) }
 	}
 
 	#[test]
-	fn clients_and_shown_workspaces_are_read_one_request_each() {
+	fn clients_and_monitors_are_read_one_request_each_within_one_budget() {
 		let dir = tempfile::tempdir().unwrap();
 		let hyprland = serve(dir.path().join(".socket.sock"), vec![
 			("j/clients", CLIENTS),
 			("j/monitors", MONITORS),
 		]);
-		let snapshot = hyprland.read(unhurried()).unwrap();
-		let read: Vec<_> = snapshot
-			.clients
-			.iter()
-			.map(|client| (client.address.as_str(), client.pid, client.title.as_str(), client.at))
-			.collect();
-		assert_eq!(read, [
-			("0x5501", 5104, "TDLG", [12, 38]),
-			("0x5502", 4920, "foot", [647, 38]),
-			("0x5503", 6001, "Home", [12, 38]),
-			("0x5504", 6003, "Calc", [112, 88]),
-			("0x5507", -1, "", [0, 0]),
-		]);
-		assert_eq!(snapshot.shown, ["1"]);
+		let mut budget = Duration::from_secs(60);
+		let read = hyprland.snapshot(&mut budget).unwrap();
+		assert!(budget < Duration::from_secs(60));
+		assert_eq!(read.clients.len(), 5);
+		assert_eq!(read.monitors.len(), 1);
+
+		// A compositor that accepts and never answers: the first read spends
+		// the budget, and the read after the frame gets only what is left.
+		let socket = dir.path().join("silent.sock");
+		let _listener = UnixListener::bind(&socket).unwrap();
+		let silent = Session { socket, compositor: std::process::id() };
+		let mut budget = Duration::from_millis(200);
+		assert!(silent.snapshot(&mut budget).is_err());
+		assert!(budget < Duration::from_millis(10), "{budget:?}");
+		let start = Instant::now();
+		assert!(silent.snapshot(&mut budget).is_err());
+		assert!(start.elapsed() < Duration::from_millis(10), "{:?}", start.elapsed());
 	}
 
 	#[test]
 	fn a_reply_that_is_not_a_whole_object_list_is_refused() {
-		const ROW: &str = r#"{"address":"0x1","mapped":true,"at":[12,38],"size":[621,750],"workspace":{"id":1},"pid":5104,"title":"TDLG"}"#;
+		const ROW: &str =
+			r#"{"mapped":true,"at":[12,38],"size":[621,750],"workspace":{"id":1},"pid":5104}"#;
 		for reply in [
 			String::new(),
 			"unknown request".to_owned(),
@@ -492,11 +408,11 @@ mod tests {
 			// Cut off mid-list.
 			format!("[{ROW},"),
 			// A key missing.
-			format!("[{}]", ROW.replace(r#","title":"TDLG""#, "")),
+			format!("[{}]", ROW.replace(r#","pid":5104"#, "")),
 			// A negative size.
 			format!("[{}]", ROW.replace("[621,750]", "[-1,750]")),
 			// A row in positional form after a whole one.
-			format!(r#"[{ROW},["0x2",true,[12,38],[621,750],{{"id":1}},5104,"TDLG"]]"#),
+			format!(r#"[{ROW},[true,[12,38],[621,750],{{"id":1}},5104]]"#),
 		] {
 			assert!(objects::<Client>(reply.as_bytes()).is_err(), "{reply}");
 		}
@@ -557,174 +473,132 @@ mod tests {
 	}
 
 	#[test]
-	fn a_window_takes_the_one_client_of_its_process_and_title() {
-		let clients = [
-			client("0x1", 10, "Editor", true, 1),
-			client("0x2", 20, "Main", true, 1),
-			client("0x3", 20, "Dialog", true, 1),
-			client("0x4", 30, "Same", true, 1),
-			client("0x5", 30, "Same", true, 1),
-			// A closing window still shares its title.
-			client("0x6", 40, "Viewer", true, 1),
-			client("0x7", 40, "Viewer", false, -1),
-			client("0x8", 50, "Hidden", false, -1),
-			client("0x9", 60, "Find", true, 1),
-		];
-		let windows = [
-			atspi(10, "Editor", false),
-			atspi(20, "Dialog", false),
-			atspi(30, "Same", false),
-			atspi(40, "Viewer", false),
-			atspi(50, "Hidden", false),
-			// Two AT-SPI windows of one process titled alike, one client.
-			atspi(60, "Find", false),
-			atspi(60, "Find", false),
-		];
-		let address = |pid, title: &str| {
-			let window = DesktopWindow { pid, ..atspi(0, title, false).window };
-			client_for(&clients, &windows, &window).map(|client| client.address.clone())
+	fn only_an_app_with_one_window_on_each_side_is_placed() {
+		let clients: Vec<Client> = parse(CLIENTS);
+		let tdlg = atspi(5104, "TDLG", false);
+		let place = |windows: &[AtSpiWindow], window: &AtSpiWindow| {
+			client_for(&clients, windows, &window.window).map(|client| client.at)
 		};
-		assert_eq!(address(Some(10), "Editor").as_deref(), Some("0x1"));
-		assert_eq!(address(Some(20), "Dialog").as_deref(), Some("0x3"));
-		// The title changed since AT-SPI read it: not this window's client.
-		assert_eq!(address(Some(10), "Editor — modified"), None);
-		assert_eq!(address(Some(30), "Same"), None);
-		assert_eq!(address(Some(40), "Viewer"), None);
-		assert_eq!(address(Some(50), "Hidden"), None);
-		assert_eq!(address(Some(60), "Find"), None);
-		assert_eq!(address(None, "Editor"), None);
+		assert_eq!(place(&[atspi(5104, "TDLG", false)], &tdlg), Some([12, 38]));
+		// Titles are not compared: the one window is the one client.
+		let renamed = atspi(5104, "Untitled", false);
+		assert_eq!(place(&[atspi(5104, "Untitled", false)], &renamed), Some([12, 38]));
+		// A second accessible window of the app: neither is placed.
+		let dialog = atspi(5104, "Dialog", false);
+		let both = [atspi(5104, "TDLG", false), atspi(5104, "Dialog", false)];
+		assert_eq!(place(&both, &tdlg), None);
+		assert_eq!(place(&both, &dialog), None);
+		// A second Hyprland window of the app: neither is placed.
+		let mut two: Vec<Client> = parse(CLIENTS);
+		two.extend(parse::<Client>(
+			&CLIENTS
+				.replace("[647,38]", "[700,38]")
+				.replace("4920", "5104"),
+		));
+		assert!(client_for(&two, &[atspi(5104, "TDLG", false)], &tdlg.window).is_none());
+		// No client, or an unmapped one.
+		let closing = atspi(4242, "Gone", false);
+		assert_eq!(place(&[atspi(4242, "Gone", false)], &closing), None);
+		let unmapped: Vec<Client> = parse(&CLIENTS.replace(r#""mapped":true"#, r#""mapped":false"#));
+		assert!(client_for(&unmapped, &[atspi(5104, "TDLG", false)], &tdlg.window).is_none());
 	}
 
 	#[test]
 	fn only_windows_without_a_position_are_listed_where_hyprland_shows_them() {
-		let clients: Vec<Client> = parse(CLIENTS);
 		let windows = || {
 			vec![
 				atspi(5104, "TDLG", false),
 				// A toolkit that knows its position keeps it.
 				atspi(4920, "foot", true),
-				// On a workspace no monitor shows: listed where it is there.
-				AtSpiWindow {
-					window:         DesktopWindow { width: 1256, ..atspi(6001, "Home", false).window },
-					position_known: false,
-				},
-				// The title changed since Hyprland read it.
-				atspi(6003, "Calculator", false),
-				// The size AT-SPI reports is not the client's.
-				atspi(6003, "Calc", false),
+				// An app with two windows stays as AT-SPI lists it.
+				atspi(6001, "Home", false),
+				atspi(6001, "Preferences", false),
 			]
 		};
-		let placed: Vec<_> = listed(windows(), &clients)
-			.into_iter()
-			.map(|window| (window.x, window.y, window.width, window.height, window.focused))
-			.collect();
-		assert_eq!(placed, [
-			(12, 38, 621, 750, true),
-			(0, 0, 621, 750, false),
-			(12, 38, 1256, 750, false),
-			(0, 0, 621, 750, false),
-			(0, 0, 621, 750, false),
+		let rects = |listed: Vec<DesktopWindow>| {
+			listed
+				.into_iter()
+				.map(|window| (window.x, window.y, window.width, window.height))
+				.collect::<Vec<_>>()
+		};
+		assert_eq!(rects(listed(windows(), &parse(CLIENTS))), [
+			(12, 38, 621, 750),
+			(0, 0, 600, 400),
+			(0, 0, 600, 400),
+			(0, 0, 600, 400),
 		]);
-		// Without clients, AT-SPI's list field for field.
-		let unplaced: Vec<_> = windows().into_iter().map(|entry| entry.window).collect();
-		assert_eq!(format!("{:?}", listed(windows(), &[])), format!("{unplaced:?}"));
+		assert_eq!(rects(listed(windows(), &[])), [(0, 0, 600, 400); 4]);
 	}
 
 	#[test]
 	fn workspaces_are_told_apart_by_id_or_address_never_by_name() {
-		// 0.57: named workspaces have no `id`; two can share a displayed name.
-		let clients: Vec<Client> = parse(
-			r#"[
-			{"address":"0x1","mapped":true,"at":[0,0],"size":[621,750],"pid":1,"title":"Mail",
-			 "workspace":{"address":"name:mail","type":"named","name":"Mail"}},
-			{"address":"0x2","mapped":true,"at":[0,0],"size":[621,750],"pid":2,"title":"Inbox",
-			 "workspace":{"address":"name:inbox","type":"named","name":"Mail"}},
-			{"address":"0x3","mapped":true,"at":[0,0],"size":[621,750],"pid":3,"title":"Term",
-			 "workspace":{"address":"1","id":1,"type":"numbered","name":"1"}}
-		]"#,
-		);
-		let monitors: Vec<Monitor> = parse(
-			r#"[{"activeWorkspace":{"address":"name:inbox","type":"named","name":"Mail"},
-			 "specialWorkspace":{"address":"","type":"special","name":""}}]"#,
-		);
-		let snapshot = Snapshot::new(clients, &monitors);
-		let windows = [atspi(1, "Mail", false), atspi(2, "Inbox", false), atspi(3, "Term", false)];
-		let shown: Vec<_> = windows
-			.iter()
-			.map(|entry| snapshot.shown(&windows, &entry.window).is_some())
-			.collect();
-		assert_eq!(shown, [false, true, false]);
-		assert_eq!(Workspace { id: Some(0), address: None }.key(), None);
-		assert_eq!(Workspace { id: Some(-1), address: None }.key(), None);
-		assert_eq!(Workspace::default().key(), None);
+		let key = |json: &str| serde_json::from_str::<Workspace>(json).unwrap().key();
+		assert_eq!(key(r#"{"id":1,"name":"1"}"#), Some("1".into()));
+		assert_eq!(key(r#"{"id":-98,"name":"special:magic"}"#), Some("-98".into()));
+		// 0.57: a named workspace has an address and no id.
+		assert_eq!(key(r#"{"address":"0xa1","name":"mail"}"#), Some("0xa1".into()));
+		assert_eq!(key(r#"{"address":"0xa2","name":"mail"}"#), Some("0xa2".into()));
+		// No workspace: a closing window, a monitor without a special one.
+		assert_eq!(key(r#"{"id":-1,"name":""}"#), None);
+		assert_eq!(key(r#"{"id":0,"name":""}"#), None);
+		assert_eq!(key(r#"{"address":"","name":""}"#), None);
 	}
 
 	#[test]
-	fn a_capture_is_cut_only_where_both_reads_agree() {
-		let monitors: Vec<Monitor> = parse(MONITORS);
-		let special: Vec<Monitor> = parse(
-			r#"[{"activeWorkspace":{"id":1,"name":"1"},
-			 "specialWorkspace":{"id":-98,"name":"special:magic"}}]"#,
-		);
-		let windows = [atspi(10, "Editor", false)];
-		let window = &windows[0].window;
-		let read = |client: Client, monitors: &[Monitor]| Snapshot::new(vec![client], monitors);
-		let editor = || client("0x1", 10, "Editor", true, 1);
-		let cut = |before: Snapshot, after: Snapshot| {
-			agreed(&before, &after, &windows, window).map(|[x, y]| (x, y))
+	fn a_capture_is_cut_only_where_both_reads_show_the_same_drawn_window() {
+		let tdlg = atspi(5104, "TDLG", false);
+		let alone = [atspi(5104, "TDLG", false)];
+		let cut = |before: &str, after: &str| {
+			agreed((&snapshot(before), &alone), (&snapshot(after), &alone), &tdlg.window, PORTAL)
 		};
-		assert_eq!(cut(read(editor(), &monitors), read(editor(), &monitors)), Some((10, 20)));
-		// Moved to another workspace in the same place.
-		let away = client("0x1", 10, "Editor", true, 2);
-		assert_eq!(cut(read(editor(), &monitors), read(away, &monitors)), None);
-		// Closed and replaced by a window of the same process, title and place.
+		assert_eq!(cut(CLIENTS, CLIENTS), Some(([12, 38], [621, 750])));
+		// Moved or resized between the reads.
+		assert_eq!(cut(CLIENTS, &CLIENTS.replacen("[12,38]", "[13,38]", 1)), None);
+		assert_eq!(cut(CLIENTS, &CLIENTS.replacen("[621,750]", "[621,751]", 1)), None);
+		// Mapped but not drawn (swallowed, an inactive group tab), in either
+		// read.
+		let hidden = CLIENTS.replacen(r#""visible":true"#, r#""visible":false"#, 1);
+		assert_eq!(cut(&hidden, CLIENTS), None);
+		assert_eq!(cut(CLIENTS, &hidden), None);
+		// Closed and replaced in the same place: a new stable id.
 		assert_eq!(
-			cut(read(editor(), &monitors), read(client("0x2", 10, "Editor", true, 1), &monitors)),
+			cut(CLIENTS, &CLIENTS.replacen(r#""stableId":"11""#, r#""stableId":"21""#, 1)),
 			None
 		);
-		// Moved within the workspace.
-		let shifted = Client { at: [11, 20], ..editor() };
-		assert_eq!(cut(read(editor(), &monitors), read(shifted, &monitors)), None);
-		// On a workspace no monitor shows, in both reads.
-		let hidden = || client("0x1", 10, "Editor", true, 2);
-		assert_eq!(cut(read(hidden(), &monitors), read(hidden(), &monitors)), None);
-		// On the special workspace a monitor shows.
-		let magic = || client("0x1", 10, "Editor", true, -98);
-		assert_eq!(cut(read(magic(), &special), read(magic(), &special)), Some((10, 20)));
-		// The special workspace was closed between the reads.
-		assert_eq!(cut(read(magic(), &special), read(magic(), &monitors)), None);
-		// Another window of the process at the same size: only the titles
-		// tell them apart, and those can swap while the frame is taken.
-		let pair = |size| {
-			let other = Client { address: "0x2".into(), title: "Other".into(), size, ..editor() };
-			Snapshot::new(vec![editor(), other], &monitors)
-		};
-		assert_eq!(cut(pair([621, 750]), pair([621, 750])), None);
-		assert_eq!(cut(pair([300, 750]), pair([300, 750])), Some((10, 20)));
+		// No stable id to compare.
+		let anonymous = CLIENTS.replacen(r#","stableId":"11""#, "", 1);
+		assert_eq!(cut(&anonymous, &anonymous), None);
+		// On a workspace no monitor shows.
+		let away = CLIENTS.replacen(
+			r#""id":1,"name":"1"},"class":"tdlg.py""#,
+			r#""id":2,"name":"2"},"class":"tdlg.py""#,
+			1,
+		);
+		assert_eq!(cut(&away, &away), None);
+		// A second accessible window of the app appeared by the second read.
+		let dialog = [atspi(5104, "TDLG", false), atspi(5104, "Dialog", false)];
+		assert_eq!(
+			agreed((&snapshot(CLIENTS), &alone), (&snapshot(CLIENTS), &dialog), &tdlg.window, PORTAL),
+			None
+		);
 	}
 
 	#[test]
-	fn elements_are_placed_from_one_client_list_per_operation() {
-		let placing = Windows { read: Mutex::new(Some(Arc::new(parse(CLIENTS)))) };
-		let ids: Vec<_> = placing
-			.windows()
-			.unwrap()
-			.into_iter()
-			.map(|window| window.id)
-			.collect();
-		// The closing window's pid is no process.
-		assert_eq!(ids, ["0x5501", "0x5502", "0x5503", "0x5504"]);
-		let geometry = |id: &str| placing.geometry(id).map(|g| (g.x, g.y, g.width, g.height));
-		assert_eq!(geometry("0x5501"), Some((12, 38, 621, 750)));
-		assert_eq!(geometry("0x5507"), None);
-		assert_eq!(geometry("0x9999"), None);
-		// A second window of the process takes the title: the first is no
-		// longer told apart.
-		let mut clients: Vec<Client> = parse(CLIENTS);
-		clients.push(client("0x5508", 5104, "TDLG", true, 1));
-		*placing.read.lock().unwrap() = Some(Arc::new(clients));
-		assert_eq!(geometry("0x5501"), None);
-		placing.refresh();
-		assert!(placing.read.lock().unwrap().is_none());
+	fn a_capture_is_cut_only_from_the_monitor_hyprland_shows_the_window_on() {
+		let tdlg = atspi(5104, "TDLG", false);
+		let alone = [atspi(5104, "TDLG", false)];
+		let cut = |monitors: &str, portal| {
+			let read = Snapshot { clients: parse(CLIENTS), monitors: parse(monitors) };
+			agreed((&read, &alone), (&read, &alone), &tdlg.window, portal)
+		};
+		assert!(cut(MONITORS, PORTAL).is_some());
+		// The portal streams another compositor's monitor (nested Hyprland).
+		assert_eq!(cut(MONITORS, (0, 0, 1920, 1080)), None);
+		assert_eq!(cut(MONITORS, (1280, 0, 1280, 800)), None);
+		// A 2560x1600 monitor at scale 2 is the 1280x800 logical stream.
+		let scaled = MONITORS
+			.replace(r#""width":1280,"height":800"#, r#""width":2560,"height":1600"#)
+			.replace(r#""scale":1.0"#, r#""scale":2.0"#);
+		assert!(cut(&scaled, PORTAL).is_some());
 	}
 }

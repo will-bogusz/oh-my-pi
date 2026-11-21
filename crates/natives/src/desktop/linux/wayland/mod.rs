@@ -9,6 +9,7 @@ use std::{
 	cell::OnceCell,
 	os::{fd::AsRawFd, unix::net::UnixStream},
 	path::PathBuf,
+	time::Instant,
 };
 
 use image::RgbaImage;
@@ -158,17 +159,24 @@ pub struct WaylandBackend {
 	/// Bus names of the applications that did not answer the last window
 	/// listing, whose windows it therefore left out.
 	unanswered:        Vec<String>,
+	/// Set by a window capture cut where Hyprland showed the window: the end
+	/// of that call's Hyprland budget, for the listing that checks the frame.
+	hyprland_deadline: Option<Instant>,
+}
+
+/// The path of this session's Wayland socket.
+fn wayland_socket() -> Option<PathBuf> {
+	let display = PathBuf::from(std::env::var_os("WAYLAND_DISPLAY")?);
+	Some(if display.is_absolute() {
+		display
+	} else {
+		PathBuf::from(std::env::var_os("XDG_RUNTIME_DIR")?).join(display)
+	})
 }
 
 /// Reads the compositor's PID from the peer credentials of its Wayland socket.
 fn compositor_pid() -> Option<u32> {
-	let display = PathBuf::from(std::env::var_os("WAYLAND_DISPLAY")?);
-	let path = if display.is_absolute() {
-		display
-	} else {
-		PathBuf::from(std::env::var_os("XDG_RUNTIME_DIR")?).join(display)
-	};
-	peer_pid(&UnixStream::connect(path).ok()?)
+	peer_pid(&UnixStream::connect(wayland_socket()?).ok()?)
 }
 
 /// The PID of the process at the other end of a connected Unix socket.
@@ -195,7 +203,7 @@ impl WaylandBackend {
 		// builds wrote during read-only calls; nothing reads it anymore (#7884).
 		portal::remove_orphaned_remote_desktop_token();
 		let (ax, ax_error) = match AtSpiAx::new() {
-			Ok(ax) => (Some(hyprland::placing(ax.with_alert_windows())), None),
+			Ok(ax) => (Some(ax.with_alert_windows()), None),
 			Err(err) => (None, Some(err)),
 		};
 		Self {
@@ -208,6 +216,7 @@ impl WaylandBackend {
 			displays: Vec::new(),
 			compositor_pid: compositor_pid(),
 			unanswered: Vec::new(),
+			hyprland_deadline: None,
 		}
 	}
 
@@ -351,10 +360,14 @@ impl Backend for WaylandBackend {
 		}
 		// Hyprland is asked only when a toolkit could not place its window;
 		// without an answer the list is AT-SPI's.
+		let deadline = self
+			.hyprland_deadline
+			.take()
+			.unwrap_or_else(|| Instant::now() + hyprland::IPC_TIMEOUT);
 		let clients = windows
 			.iter()
 			.any(|entry| !entry.position_known)
-			.then(|| hyprland::Session::current()?.clients().ok())
+			.then(|| hyprland::Session::current()?.clients(deadline).ok())
 			.flatten();
 		Ok(match clients {
 			Some(clients) => hyprland::listed(windows, &clients),
@@ -404,11 +417,25 @@ impl Backend for WaylandBackend {
 		_caps: &CaptureCaps,
 		selector: Option<&DisplaySelector>,
 	) -> CoreResult<(RgbaImage, FrameGeometry)> {
-		// Hyprland's view of a window target, read on both sides of the frame.
-		let before = matches!(target, Target::Window(_))
-			.then(hyprland::Session::current)
-			.flatten()
-			.map(|hyprland| hyprland.snapshot());
+		// On Hyprland, a window its toolkit cannot place is read before the
+		// frame too: AT-SPI's list, then, only for such a window, Hyprland's.
+		self.hyprland_deadline = None;
+		let before = match target {
+			Target::Window(id) if hyprland::running() => {
+				let windows = self.atspi_windows()?;
+				windows
+					.iter()
+					.any(|entry| &entry.window.id == id && !entry.position_known)
+					.then(hyprland::Session::current)
+					.flatten()
+					.map(|session| {
+						let mut budget = hyprland::IPC_TIMEOUT;
+						let snapshot = session.snapshot(&mut budget);
+						(session, budget, snapshot, windows)
+					})
+			},
+			_ => None,
+		};
 		let (image, geometry) = capture::capture(self.pipewire)?;
 		self.displays = vec![geometry.display()];
 		let explicit = target.display_selector();
@@ -430,21 +457,29 @@ impl Backend for WaylandBackend {
 							DesktopError::window_not_found(format!("Wayland window {id} not found"))
 						})
 					})?;
-				// A window its toolkit cannot place is cut where Hyprland showed
-				// it, only while both reads agree; otherwise it is refused as on
-				// any Wayland desktop.
-				let shown = (!windows[index].position_known)
-					.then(|| {
-						let before = before?.ok()?;
-						let after = hyprland::Session::current()?.snapshot().ok()?;
-						hyprland::agreed(&before, &after, &windows, &windows[index].window)
-					})
-					.flatten();
-				let mut entry = windows.swap_remove(index);
-				if let Some([x, y]) = shown {
-					(entry.window.x, entry.window.y) = (x, y);
-					entry.position_known = true;
+				// Cut where Hyprland showed the window only while both reads
+				// agree; otherwise it is refused as on any Wayland desktop.
+				if let Some((session, mut budget, Ok(snapshot), before)) = before
+					&& !windows[index].position_known
+					&& let Ok(after) = session.snapshot(&mut budget)
+				{
+					let display = geometry.display();
+					let monitor = (display.x, display.y, display.width, display.height);
+					if let Some(([x, y], [width, height])) = hyprland::agreed(
+						(&snapshot, &before),
+						(&after, &windows),
+						&windows[index].window,
+						monitor,
+					) {
+						// The listing that checks the frame spends what is left.
+						self.hyprland_deadline = Some(Instant::now() + budget);
+						let entry = &mut windows[index];
+						(entry.window.x, entry.window.y) = (x, y);
+						(entry.window.width, entry.window.height) = (width, height);
+						entry.position_known = true;
+					}
 				}
+				let entry = windows.swap_remove(index);
 				let ((x, y, width, height), frame) = geometry.window_crop(&entry)?;
 				let cropped = image::imageops::crop_imm(&image, x, y, width, height).to_image();
 				Ok((cropped, frame))
@@ -604,6 +639,7 @@ mod tests {
 			displays:          Vec::new(),
 			compositor_pid:    None,
 			unanswered:        Vec::new(),
+			hyprland_deadline: None,
 		}
 	}
 	/// Holds `LIBEI_ENV_LOCK` with `LIBEI_SOCKET` set to a test's value (removed
