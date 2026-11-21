@@ -103156,7 +103156,7 @@
    "area": "ai/auth",
    "priority": "P2",
    "needs": [],
-   "base": "baf60290fde5e9eea4edb30bff07695877682ba9",
+   "base": "4ab71d06b72997715a3f37e56562f6ed45a599e5",
    "body": "bodies/deadline-ranking.md",
    "state": "queued",
    "pr": null,
@@ -103164,9 +103164,10 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/deadline-ranking",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:17:58Z",
-   "updated": "2026-11-17T22:35:46Z",
+   "updated": "2026-11-21T18:44:38Z",
    "note": "Will, 2026-11-17: go-ahead to open",
-   "kind": "proposal"
+   "kind": "proposal",
+   "advanced": "2026-11-21T18:44:38Z"
   },
   {
    "id": "account-switch-reason",
