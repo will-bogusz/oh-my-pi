@@ -1,18 +1,21 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-21 19:27Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-21 19:30Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-21 19:06Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 1, conflict-held 17, stacked 19, held 13, parked 1, open PRs 26, queued since the last plan 2; merged 408, closed 44
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-21 19:29Z on MacBook-Pro; groups below are from it, states from the manifest)
+**Counts:** openable now 4, conflict-held 16, stacked 19, held 13, parked 1, open PRs 26; merged 408, closed 44
 
-## Openable now (1)
+## Openable now (4)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
+| stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 8d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 | factory-droid-1100-pin | feat(catalog): identify Factory Droid requests as droid 1.10.0 | factory-droid |  | 8d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-pin) |
+| cursor-long-context-output | fix(catalog): price Cursor's GPT-5.6 long-context output at 1.5x | catalog |  | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/cursor-long-context-output) |
+| devin-fast-long-context | fix(catalog): price Devin's GPT-5.6 long-context tiers as published, Fast lanes included | catalog |  | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-fast-long-context) |
 
-## Conflict-held (17)
+## Conflict-held (16)
 
 | id | title | area | priority | age | blocked by | branch |
 |---|---|---|---|---|---|---|
@@ -30,7 +33,6 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-21
 | win-minimised-windows | fix(natives,coding-agent): show a minimized Windows app's window from apps.open instead of launching it again | computer | P2 | 10d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#20019](https://github.com/can1357/oh-my-pi/pull/20019), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-minimised-windows) |
 | macos-ax-cancel-before-send | fix(natives): send no macOS AX action once its run is cancelled | natives | P2 | 10d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-ax-cancel-before-send) |
 | win-ax-states | fix(natives): expose Windows control state and stale-reference matches | computer | P2 | 10d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-ax-states) |
-| stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 8d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 | macos-web-type-background | fix(natives): type into a background macOS web page field without a takeover | computer | P2 | 6d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19504](https://github.com/can1357/oh-my-pi/pull/19504), [#19702](https://github.com/can1357/oh-my-pi/pull/19702), [#19871](https://github.com/can1357/oh-my-pi/pull/19871), [#19531](https://github.com/can1357/oh-my-pi/pull/19531), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-web-type-background) |
 | deadline-ranking | feat(ai): rank an account priority by quota deadline | ai/auth | P2 | 3d | [#19623](https://github.com/can1357/oh-my-pi/pull/19623), [#19700](https://github.com/can1357/oh-my-pi/pull/19700), [#19701](https://github.com/can1357/oh-my-pi/pull/19701) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/deadline-ranking) |
 
@@ -74,7 +76,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-21
 | win-uia-set-patterns | fix(natives): set WPF sliders and combo boxes through RangeValue and SelectionItem | computer |  | 1d | Main, 2026-11-20: in its fix round (WinWpfRoutes5, review needs-changes at 86d258734d9); takes the recorded ax.rs form with win-wpf-scroll when it follows | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-uia-set-patterns) |
 | win-takeover-settle | fix(natives): stop Windows takeovers of a busy app bringing it forward after the call failed | computer |  | 1d | Main, 2026-11-21: waits on a restack lane onto cut C (f2d071a1915): needs new production code, since the cut removed what it used: it must carry the WM_NULL settle_activation fence and the interruptible bring_forward arrival loop itself, and a "person input since the takeover started" veto (on cut C alone only the polled last-input date, pointer moves veto too; activity::check() only with the listener + stop-on-press follow-up). Spec: WinTakeoverCut PLAN.md (d) and "What a/b need" | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-takeover-settle) |
 | hyprland-window-list | fix(natives): list Hyprland window positions for native Wayland apps | computer |  | 1d | LinuxUpstream2, 2026-11-20: delta review ReviewHyprList (gpt-6.2-sol) on 50e036edcd6 needs-changes, 3 must-fixes in new code (positional j/clients rows accepted; Hyprland::detect connects at backend startup and caches a failed probe; accept-queue test hits the FD limit); parked for Main/Will | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/hyprland-window-list) |
-| win-takeover-selection | fix(natives): keep the user's caret through a Windows takeover's hand-back | computer |  | 23h | Main, 2026-11-21: waits on a restack lane onto cut C via win-takeover-settle: needs the "person input since the takeover started" veto in its caret loops and a restack on the new restore code (cut C removed activity::check). Spec: WinTakeoverCut PLAN.md (d) and "What a/b need" | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-takeover-selection) |
+| win-takeover-selection | fix(natives): keep the user's caret through a Windows takeover's hand-back | computer |  | 1d | Main, 2026-11-21: waits on a restack lane onto cut C via win-takeover-settle: needs the "person input since the takeover started" veto in its caret loops and a restack on the new restore code (cut C removed activity::check). Spec: WinTakeoverCut PLAN.md (d) and "What a/b need" | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-takeover-selection) |
 
 ## Parked (1)
 
@@ -111,11 +113,4 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-21
 | [#20019](https://github.com/can1357/oh-my-pi/pull/20019) | win-takeover-intervene | fix(natives): wait for the user to pause before a Windows takeover | computer | P1 | 14h | keep; accepted pair with #19870: Main, 2026-11-20: win32/mod.rs tests-module import list only; combined = union of both WindowsAndMessaging imports | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-takeover-intervene) |
 | [#19871](https://github.com/can1357/oh-my-pi/pull/19871) | desktop-dispatch-fence | fix(natives): report Windows UIA actions unconfirmed when their reply times out after dispatch | computer | P1 | 1d | keep; accepted pair with #19889: Main, 2026-11-20: win32/ax.rs perform arms = #19871's, invoke arm reusing this entry's probe (invoke.unwrap_or_else(get_pattern UIInvokePattern), then control::dispatching(), then invoke); docs/tools/computer.md AxUnconfirmed: this entry's (or the #19870-combined) sentence, then #19871's Windows dispatch line, Main's one-fact-per-sentence rule; BM_CLICK dispatch mark left to win-button-click-fence; accepted pair with #19870: Main, 2026-11-20: win32/ax.rs import union; docs/tools/computer.md AxUnconfirmed: #19870's rewritten sentence, then this entry's Windows dispatch line; combined = both; tests-over: WinWpfRoutes6, 2026-11-20: the final-head review asked for the action off side through the caller and deadline-free teardown; the four session tests each reach a distinct branch (marked then expired, abandoned, on time, unfenced) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/desktop-dispatch-fence) |
 | [#19878](https://github.com/can1357/oh-my-pi/pull/19878) | picker-stale-discovery | fix(coding-agent,tui): refresh discovery from the model picker once the catalog is two hours old | other | P1 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/picker-stale-discovery) |
-| [#20038](https://github.com/can1357/oh-my-pi/pull/20038) | devin-gemini-image-price-rest | fix(catalog): budget Devin's other measured Gemini models at the 1,089 tokens it bills per image | catalog | P0 | 7h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-gemini-image-price-rest) |
-
-## Queued since the last plan (2)
-
-| id | title | area | priority | age | branch |
-|---|---|---|---|---|---|
-| cursor-long-context-output | fix(catalog): price Cursor's GPT-5.6 long-context output at 1.5x | catalog |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/cursor-long-context-output) |
-| devin-fast-long-context | fix(catalog): price Devin's GPT-5.6 long-context tiers as published, Fast lanes included | catalog |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-fast-long-context) |
+| [#20038](https://github.com/can1357/oh-my-pi/pull/20038) | devin-gemini-image-price-rest | fix(catalog): budget Devin's other measured Gemini models at the 1,089 tokens it bills per image | catalog | P0 | 8h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-gemini-image-price-rest) |

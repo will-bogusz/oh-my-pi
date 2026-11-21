@@ -118840,8 +118840,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-21T19:06:07.980221Z",
-  "host": "goliath",
+  "at": "2026-11-21T19:29:58.663828Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -120186,6 +120186,40 @@
     "created": "2026-11-12T04:40:13Z"
    },
    {
+    "id": "cursor-long-context-output",
+    "label": "cursor-long-context-output",
+    "number": null,
+    "state": "queued",
+    "area": "catalog",
+    "priority": null,
+    "title": "fix(catalog): price Cursor's GPT-5.6 long-context output at 1.5x",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-21T19:25:32Z"
+   },
+   {
+    "id": "devin-fast-long-context",
+    "label": "devin-fast-long-context",
+    "number": null,
+    "state": "queued",
+    "area": "catalog",
+    "priority": null,
+    "title": "fix(catalog): price Devin's GPT-5.6 long-context tiers as published, Fast lanes included",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-21T19:27:43Z"
+   },
+   {
     "id": "encoded-prefix-count",
     "label": "encoded-prefix-count",
     "number": null,
@@ -120246,10 +120280,8 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "wait",
-    "reasons": [
-     "conflicts with main in (branch missing on the fork)"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
