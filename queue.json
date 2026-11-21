@@ -118909,7 +118909,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-21T22:48:03.766957Z",
+  "at": "2026-11-21T22:56:30.711839Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -119571,6 +119571,23 @@
     "created": "2026-11-20T22:18:48Z"
    },
    {
+    "id": "linux-ax-value-selected",
+    "label": "linux-ax-value-selected",
+    "number": null,
+    "state": "queued",
+    "area": "computer",
+    "priority": "P2",
+    "title": "fix(natives): read Linux slider and scroll bar values and selected state",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-21T22:56:01Z"
+   },
+   {
     "id": "macos-ax-cancel-before-send",
     "label": "macos-ax-cancel-before-send",
     "number": null,
@@ -119822,12 +119839,15 @@
     "title": "fix(natives): expose Windows control state and stale-reference matches",
     "action": "wait",
     "reasons": [
+     "conflicts with linux-ax-value-selected in docs/tools/computer.md",
      "conflicts with main in crates/natives/src/desktop/ax.rs, crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/mod.rs, crates/natives/src/desktop/win32/ax.rs, crates/natives/src/desktop/win32/ax_states.rs, crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/win32/mod.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "linux-ax-value-selected"
+    ],
     "needs": [],
     "created": "2026-11-11T10:16:04Z"
    },
@@ -119843,6 +119863,7 @@
     "reasons": [
      "conflicts with #19195 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #20019 in packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with linux-ax-value-selected in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with main in crates/natives/src/desktop/win32/capture.rs, crates/natives/src/desktop/win32/reopen.rs, crates/pi-natives/src/desktop/win32/mod.rs, packages/coding-agent/src/prompts/tools/computer.md"
     ],
     "note": "",
@@ -119850,7 +119871,8 @@
     "paired": [],
     "blocked_by": [
      "#19195",
-     "#20019"
+     "#20019",
+     "linux-ax-value-selected"
     ],
     "needs": [],
     "created": "2026-11-11T09:06:32Z"
@@ -119978,6 +120000,7 @@
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md",
      "conflicts with #19870 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with linux-ax-value-selected in docs/tools/computer.md",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/sdk-computer-prelude-toggle.test.ts, packages/coding-agent/test/tools/computer.test.ts, packages/coding-agent/test/tools/eval-description.test.ts"
     ],
     "note": "",
@@ -119991,7 +120014,8 @@
      "#20019",
      "#19531",
      "#19618",
-     "#19870"
+     "#19870",
+     "linux-ax-value-selected"
     ],
     "needs": [],
     "created": "2026-11-10T19:53:35Z"
@@ -120019,6 +120043,7 @@
      "conflicts with #19618 in docs/tools/computer.md",
      "conflicts with #19620 in packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with #19870 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with linux-ax-value-selected in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md",
      "its need computer-ui-quiet conflicts with main in crates/natives/src/desktop/macos/settle.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/tools/computer.md, packages/agent/src/agent.ts, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -120036,7 +120061,8 @@
      "#19531",
      "#19618",
      "#19620",
-     "#19870"
+     "#19870",
+     "linux-ax-value-selected"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -120062,6 +120088,7 @@
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md",
      "conflicts with #19870 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with linux-ax-value-selected in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md",
      "its need computer-ui-quiet conflicts with main in crates/natives/src/desktop/macos/settle.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/macos/ax/rich_text.rs, crates/natives/src/desktop/mod.rs, docs/tools/computer.md"
     ],
@@ -120076,7 +120103,8 @@
      "#20019",
      "#19531",
      "#19618",
-     "#19870"
+     "#19870",
+     "linux-ax-value-selected"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -120127,6 +120155,7 @@
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md, packages/natives/native/index.d.ts",
      "conflicts with #19870 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with linux-ax-value-selected in docs/tools/computer.md",
      "conflicts with main in crates/natives/src/desktop/backend.rs, crates/natives/src/desktop/cursor.rs, crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/macos/capture.rs, crates/natives/src/desktop/macos/cursor.rs, crates/natives/src/desktop/macos/cursor/helper.m, crates/natives/src/desktop/macos/mod.rs, crates/natives/src/desktop/mod.rs, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
@@ -120140,7 +120169,8 @@
      "#20019",
      "#19531",
      "#19618",
-     "#19870"
+     "#19870",
+     "linux-ax-value-selected"
     ],
     "needs": [],
     "created": "2026-11-11T00:21:12Z"
@@ -120270,6 +120300,7 @@
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md",
      "conflicts with #19870 in docs/tools/computer.md",
+     "conflicts with linux-ax-value-selected in docs/tools/computer.md",
      "conflicts with main in crates/natives/src/desktop/win32/edit.rs, crates/natives/src/desktop/win32/input.rs, crates/natives/src/desktop/win32/mod.rs"
     ],
     "note": "",
@@ -120283,7 +120314,8 @@
      "#20019",
      "#19531",
      "#19618",
-     "#19870"
+     "#19870",
+     "linux-ax-value-selected"
     ],
     "needs": [],
     "created": "2026-11-12T04:40:13Z"
@@ -120499,7 +120531,8 @@
     "action": "held",
     "reasons": [
      "held: Main, 2026-11-20: in its fix round (WinWpfRoutes5, review needs-changes at 86d258734d9); takes the recorded ax.rs form with win-wpf-scroll when it follows",
-     "conflicts with #19889 in crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md"
+     "conflicts with #19889 in crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md",
+     "conflicts with linux-ax-value-selected in crates/natives/src/desktop/macos/ax.rs"
     ],
     "note": "accepted pair with #19870: Main, 2026-11-20: win32/ax.rs: two appended blocks (methods then free items each) and uiautomation import unions; combined = both; accepted pair with #19871: Main, 2026-11-20: ax.rs import union; perform arms = #19871's (pattern fetch, dispatch mark, action); this entry's setValue routes stay outside the fence's stated scope until win-wpf-set-background extends it (unfenced setValue keeps main's generic Timeout: AxSetValue is not dispatch_fenced, so it never reaches abandoned_before_dispatch). docs/tools/computer.md AxUnconfirmed paragraph: form brought to Main at #19870's final head",
     "over": [],
@@ -120508,7 +120541,8 @@
      "#19871"
     ],
     "blocked_by": [
-     "#19889"
+     "#19889",
+     "linux-ax-value-selected"
     ],
     "needs": [],
     "created": "2026-11-20T06:29:20Z"
