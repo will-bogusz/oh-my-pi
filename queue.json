@@ -103549,7 +103549,7 @@
    "area": "natives",
    "priority": "P1",
    "needs": [],
-   "base": "f40f335845f0b136453d12fec8d6057011082766",
+   "base": "c61a4881a55389ca576662d62dbee0399463a0c1",
    "body": "bodies/wayland-share-picker-deadline.md",
    "state": "open",
    "pr": 19616,
@@ -103557,7 +103557,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-share-picker-deadline",
    "host": "MacBook-Pro",
    "added": "2026-11-17T22:04:45Z",
-   "updated": "2026-11-19T22:53:13Z",
+   "updated": "2026-11-21T08:35:19Z",
    "note": "",
    "built": [
     {
@@ -103657,7 +103657,7 @@
    "pair_reasons": {
     "19615": "Main, 2026-11-18: no conflict since #19615 376a1b8be12 moved the kept-stream consts to wayland/capture/share.rs (git merge-tree clean); the merged tree built and its wayland tests passed 57/57 on goliath (ShareScope)"
    },
-   "advanced": "2026-11-19T22:53:13Z",
+   "advanced": "2026-11-21T08:35:19Z",
    "opened": "2026-11-18T01:54:35Z",
    "readied": "2026-11-18T01:55:01Z",
    "line_loss_overrides": [
