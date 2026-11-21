@@ -107330,14 +107330,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-21T11:27:20Z",
+  "checked": "2026-11-21T11:57:49Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "devin-gemini-image-price-rest": {
-    "since": "2026-11-21T11:27:20Z",
-    "title": "fix(catalog): budget Devin's other measured Gemini models at the 1,089 tokens it bills per image"
-   },
    "factory-droid-1100-pin": {
     "since": "2026-11-17T00:39:57Z",
     "title": "feat(catalog): identify Factory Droid requests as droid 1.10.0"
@@ -107400,7 +107396,8 @@
    19878,
    19880,
    19889,
-   20019
+   20019,
+   20038
   ],
   "post_merge": {
    "18632": {
@@ -109104,6 +109101,13 @@
     "kind": "openable",
     "id": "devin-gemini-image-price-rest",
     "title": "fix(catalog): budget Devin's other measured Gemini models at the 1,089 tokens it bills per image"
+   },
+   {
+    "at": "2026-11-21T11:57:49Z",
+    "kind": "unopenable",
+    "id": "devin-gemini-image-price-rest",
+    "title": "fix(catalog): budget Devin's other measured Gemini models at the 1,089 tokens it bills per image",
+    "why": "opened as #20038"
    }
   ]
  },
@@ -118857,14 +118861,31 @@
   }
  },
  "plan": {
-  "at": "2026-11-21T11:30:33.937130Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-21T11:57:49.880054Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 1,
    "left": 7
   },
   "rows": [
+   {
+    "id": "devin-gemini-image-price-rest",
+    "label": "#20038",
+    "number": 20038,
+    "state": "open",
+    "area": "catalog",
+    "priority": "P0",
+    "title": "fix(catalog): budget Devin's other measured Gemini models at the 1,089 tokens it bills per image",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-21T11:30:06Z"
+   },
    {
     "id": "iphone-mirror-pointer",
     "label": "#17756",
@@ -119185,23 +119206,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-20T16:06:33Z"
-   },
-   {
-    "id": "devin-gemini-image-price-rest",
-    "label": "#20038",
-    "number": 20038,
-    "state": "open",
-    "area": "catalog",
-    "priority": "P2",
-    "title": "fix(catalog): budget Devin's other measured Gemini models at the 1,089 tokens it bills per image",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-21T11:30:06Z"
    },
    {
     "id": "snapcompact-shape-kdl",
@@ -120265,8 +120269,10 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with main in (branch missing on the fork)"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -120333,16 +120339,15 @@
     "action": "wait",
     "reasons": [
      "needs #19889 (open)",
-     "conflicts with #19871 in crates/natives/src/desktop/win32/ax.rs",
      "conflicts with #19870 in crates/natives/src/desktop/win32/ax.rs"
     ],
-    "note": "accepted pair with #19849: Main, 2026-11-20: win32/window.rs; combined = WindowsAndMessaging import-list union, and one #[cfg(test)] mod tests holding both sides' uses and items (both append a tests module); recheck at #19849's next head",
+    "note": "accepted pair with #19849: Main, 2026-11-20: win32/window.rs; combined = WindowsAndMessaging import-list union, and one #[cfg(test)] mod tests holding both sides' uses and items (both append a tests module); recheck at #19849's next head; accepted pair with #19871: Main, 2026-11-21: win32/ax.rs perform; combined = popup's lookup/send split, #19871's per-arm marks become one control::dispatching()? at the start of perform's send closure (after contained_root's second ensure_pattern_safe, so a refusal there is still nothing sent). Every send arm goes straight to its live UIA call (PositionlessPress::run invoke/expand/collapse/toggle/select, scroll_into_view, do_default_action; all pattern fetches and get_default_action are in lookup), so one mark is right. setValue unmarked (not dispatch_fenced); imports union. At open: Windows build of the combined tree running #19871's production-seam and unfenced-negative tests plus popup's recheck test",
     "over": [],
     "paired": [
-     "#19849"
+     "#19849",
+     "#19871"
     ],
     "blocked_by": [
-     "#19871",
      "#19870"
     ],
     "needs": [
