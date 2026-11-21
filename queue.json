@@ -107330,7 +107330,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-21T18:05:06Z",
+  "checked": "2026-11-21T18:35:36Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -107433,18 +107433,6 @@
     "title": "fix(coding-agent): keep the image omission note on evicted Responses computer results",
     "merge_commit": "9c1d2879708db7357554ceb63de326e524a4c94b",
     "merged_at": "2026-11-20T00:19:38Z",
-    "findings": []
-   },
-   "19703": {
-    "title": "fix(tui): stopped the loop profiler when the last TUI watchdog stops",
-    "merge_commit": "7073cbe465430def46854349feb6bdc630a276e4",
-    "merged_at": "2026-11-19T18:35:27Z",
-    "findings": []
-   },
-   "19715": {
-    "title": "test(natives): restore passing macOS native typing tests",
-    "merge_commit": "d483aab03b2b9f4ab7701a9801adf4435da3c0f5",
-    "merged_at": "2026-11-19T18:35:27Z",
     "findings": []
    },
    "19748": {
