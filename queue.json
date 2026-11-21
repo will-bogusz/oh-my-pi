@@ -107315,10 +107315,14 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-21T10:26:20Z",
+  "checked": "2026-11-21T11:27:20Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
+   "devin-gemini-image-price-rest": {
+    "since": "2026-11-21T11:27:20Z",
+    "title": "fix(catalog): budget Devin's other measured Gemini models at the 1,089 tokens it bills per image"
+   },
    "factory-droid-1100-pin": {
     "since": "2026-11-17T00:39:57Z",
     "title": "feat(catalog): identify Factory Droid requests as droid 1.10.0"
@@ -107333,8 +107337,29 @@
     ]
    }
   },
-  "merged_through": "2026-11-20T12:29:05Z",
-  "unreleased": {},
+  "merged_through": "2026-11-21T11:14:50Z",
+  "unreleased": {
+   "19929": {
+    "title": "fix(ai): rank Devin logins by quota before their on-demand balance",
+    "merge_commit": "704a751306625b62e418f064d8d1f10b4c105c1d",
+    "merged_at": "2026-11-21T11:14:50Z"
+   },
+   "19928": {
+    "title": "fix(ai,catalog): store Devin login identity scoped by organization",
+    "merge_commit": "0f67fbd0900f4859f14be78bb47c89fbeced0573",
+    "merged_at": "2026-11-21T11:14:50Z"
+   },
+   "19884": {
+    "title": "fix(natives): list GTK message dialogs as windows on Wayland",
+    "merge_commit": "b0c1f0e20e1fcf9d49968f9f1f1050fcc458d821",
+    "merged_at": "2026-11-21T11:14:50Z"
+   },
+   "19883": {
+    "title": "fix(catalog): budget Gemini 4 Neon's images on Devin at the 1,089 tokens it bills",
+    "merge_commit": "e6ca414a79c6a2fdce95aeb74f61cc487ec92d66",
+    "merged_at": "2026-11-21T11:14:50Z"
+   }
+  },
   "ready": [
    17756,
    19195,
@@ -107359,11 +107384,7 @@
    19871,
    19878,
    19880,
-   19883,
-   19884,
    19889,
-   19928,
-   19929,
    20019
   ],
   "post_merge": {
@@ -107424,6 +107445,30 @@
     "title": "fix(natives): write Windows edit values without activating their window",
     "merge_commit": "1d69c008d42dbe6520db807598c2be20470159d8",
     "merged_at": "2026-11-20T12:29:05Z",
+    "findings": []
+   },
+   "19883": {
+    "title": "fix(catalog): budget Gemini 4 Neon's images on Devin at the 1,089 tokens it bills",
+    "merge_commit": "e6ca414a79c6a2fdce95aeb74f61cc487ec92d66",
+    "merged_at": "2026-11-21T11:14:50Z",
+    "findings": []
+   },
+   "19884": {
+    "title": "fix(natives): list GTK message dialogs as windows on Wayland",
+    "merge_commit": "b0c1f0e20e1fcf9d49968f9f1f1050fcc458d821",
+    "merged_at": "2026-11-21T11:14:50Z",
+    "findings": []
+   },
+   "19928": {
+    "title": "fix(ai,catalog): store Devin login identity scoped by organization",
+    "merge_commit": "0f67fbd0900f4859f14be78bb47c89fbeced0573",
+    "merged_at": "2026-11-21T11:14:50Z",
+    "findings": []
+   },
+   "19929": {
+    "title": "fix(ai): rank Devin logins by quota before their on-demand balance",
+    "merge_commit": "704a751306625b62e418f064d8d1f10b4c105c1d",
+    "merged_at": "2026-11-21T11:14:50Z",
     "findings": []
    }
   },
@@ -109006,6 +109051,44 @@
     "files": [
      "packages/coding-agent/src/modes/controllers/event-controller.ts"
     ]
+   },
+   {
+    "at": "2026-11-21T11:27:20Z",
+    "kind": "merged",
+    "number": 19929,
+    "title": "fix(ai): rank Devin logins by quota before their on-demand balance",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-21T11:27:20Z",
+    "kind": "merged",
+    "number": 19928,
+    "title": "fix(ai,catalog): store Devin login identity scoped by organization",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-21T11:27:20Z",
+    "kind": "merged",
+    "number": 19884,
+    "title": "fix(natives): list GTK message dialogs as windows on Wayland",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-21T11:27:20Z",
+    "kind": "merged",
+    "number": 19883,
+    "title": "fix(catalog): budget Gemini 4 Neon's images on Devin at the 1,089 tokens it bills",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-21T11:27:20Z",
+    "kind": "openable",
+    "id": "devin-gemini-image-price-rest",
+    "title": "fix(catalog): budget Devin's other measured Gemini models at the 1,089 tokens it bills per image"
    }
   ]
  },
@@ -118759,8 +118842,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-21T11:18:18.176555Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-21T11:27:21.491821Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -120167,8 +120250,10 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with main in (branch missing on the fork)"
+    ],
     "note": "",
     "over": [],
     "paired": [],
