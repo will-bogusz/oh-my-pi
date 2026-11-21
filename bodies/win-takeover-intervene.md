@@ -47,13 +47,17 @@ Admission-disabled before-state, same head, debug builds: 20 default click calls
 | User typing, `takeover: true` | 40 target key events; 42 missing user characters; 6 extra button activations | 0 target key events; 0 missing characters; 0 extra activations |
 | User idle | 17/19 foreground takeovers; click/type medians 253/446.5 ms | 17/20 foreground takeovers; click/type medians 263.5/443 ms |
 
-One earlier 10-trial default click run logged five target key events in three trials between input-call start and first recorded target foreground. Three other events preceded the call; two followed activation. Sixty later trials across three builds (unchanged debug, polling-fallback debug, unchanged release/original WPF) on verified transport logged no target key events and lost no user text; 53 had an observed target-foreground transition, seven did not. The earlier harness silently accepted failed input commands (now fixed); the cause is unestablished, not an unconditional-zero claim.
-
 One idle click in the original interleaved table had a post-action state request time out, so that reported-success call's target effect is unverified. Build-hash attestation was not available for that table: hash not recorded on either side.
 
 The six historical windowed cases use a fixture foreground grant: allowed delivery/drain, not physical intervention or unassisted activation.
 
-`rust-check` passed on Linux, Windows MSVC and macOS at this head. Live checks below are at f6a4155c9d6 and were not repeated after review corrections. No prompt eval was run. No test covers the order of the two reads in `Sample::read`: that needs a clock seam the code lacks.
+`rust-check` passed on Linux, Windows MSVC and macOS at this head. Live checks below are at f6a4155c9d6 and were not repeated after review corrections. The prompt's `UserIntervened` sentence now names Windows; no instruction changed, no model sample run. No test covers the order of the two reads in `Sample::read`: that needs a clock seam the code lacks.
+
+<details><summary>The earlier key-event anomaly</summary>
+
+One earlier 10-trial default click run logged five target key events in three trials between input-call start and first recorded target foreground. Three other events preceded the call; two followed activation. Sixty later trials across three builds (unchanged debug, polling-fallback debug, unchanged release/original WPF) on verified transport logged no target key events and lost no user text; 53 had an observed target-foreground transition, seven did not. The earlier harness silently accepted failed input commands (now fixed); the cause is unestablished, not an unconditional-zero claim.
+
+</details>
 
 <details><summary>Unit detail</summary>
 

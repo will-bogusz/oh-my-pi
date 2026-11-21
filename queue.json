@@ -106226,8 +106226,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-takeover-intervene",
    "host": "MacBook-Pro",
    "added": "2026-11-20T12:25:26Z",
-   "updated": "2026-11-21T00:05:46Z",
-   "note": "TakeoverDeltaReview fa83a834233 finding declined by Main, 2026-11-20: post-drain attribution stated as a limit",
+   "updated": "2026-11-21T00:07:45Z",
+   "note": "TakeoverDeltaReview fa83a834233 finding declined by Main, 2026-11-20: post-drain attribution stated as a limit. Prompt NOTE (behavior) decided by Main, 2026-11-20: the prompt hunk only adds Windows to the existing UserIntervened sentence, a factual scope correction (without it the prompt is false about Windows once this merges); no instruction changed, no model sample owed.",
    "advanced": "2026-11-20T14:02:56Z",
    "hold": "Main, 2026-11-20: takeover-run hold lifted (final n20 0/20, WinTakeover3); waits for a macOS build host (shared desktop code: control/error/mod/types.rs, macos/skylight.rs), then final-head review, trees, precheck, pre-open line",
    "rebases_after": [
