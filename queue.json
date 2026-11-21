@@ -106955,8 +106955,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/hyprland-window-list",
    "host": "MacBook-Pro",
    "added": "2026-11-20T18:38:26Z",
-   "updated": "2026-11-20T19:56:49Z",
-   "note": "",
+   "updated": "2026-11-21T13:18:42Z",
+   "note": "Main, 2026-11-21: parked with the capture follow-up (hyprland-window-capture-2, fork b0274adc6c5, reviewed needs-changes twice). Before reopening read the binding problem in ~/tmp/trycua-omp/HyprlandCapture/HANDOFF.md ('Start here'): no interface ties an AT-SPI window to a Hyprland client (layer-shell counter-example), and xdph 1.4.1 reports every stream at (0,0) with the output only in mapping_id.",
    "rebases_after": [
     19615
    ],
