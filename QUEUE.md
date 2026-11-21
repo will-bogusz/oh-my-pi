@@ -1,10 +1,10 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-21 22:48Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-21 22:56Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-21 22:48Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 2, conflict-held 16, stacked 19, held 13, parked 1, open PRs 28; merged 408, closed 44
+**Counts:** openable now 2, conflict-held 16, stacked 19, held 13, parked 1, open PRs 28, queued since the last plan 1; merged 408, closed 44
 
 ## Openable now (2)
 
@@ -114,3 +114,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-21
 | [#20038](https://github.com/can1357/oh-my-pi/pull/20038) | devin-gemini-image-price-rest | fix(catalog): budget Devin's other measured Gemini models at the 1,089 tokens it bills per image | catalog | P0 | 11h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-gemini-image-price-rest) |
 | [#20093](https://github.com/can1357/oh-my-pi/pull/20093) | cursor-long-context-output | fix(catalog): price Cursor's GPT-5.6 long-context output at 1.5x | catalog | P0 | 3h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/cursor-long-context-output) |
 | [#20094](https://github.com/can1357/oh-my-pi/pull/20094) | devin-fast-long-context | fix(catalog): price Devin's GPT-5.6 long-context tiers as published, Fast lanes included | catalog | P1 | 3h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-fast-long-context) |
+
+## Queued since the last plan (1)
+
+| id | title | area | priority | age | branch |
+|---|---|---|---|---|---|
+| linux-ax-value-selected | fix(natives): read Linux slider and scroll bar values and selected state | computer | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/linux-ax-value-selected) |

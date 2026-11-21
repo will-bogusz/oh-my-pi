@@ -107418,6 +107418,24 @@
    "opened": "2026-11-21T19:48:00Z",
    "readied": "2026-11-21T19:48:22Z",
    "advanced": "2026-11-21T19:51:57Z"
+  },
+  {
+   "id": "linux-ax-value-selected",
+   "branch": "will/linux-ax-value-selected",
+   "title": "fix(natives): read Linux slider and scroll bar values and selected state",
+   "area": "computer",
+   "priority": "P2",
+   "needs": [],
+   "base": "e1a9f4b41d24fe223bb71e864bef552f0fae6948",
+   "body": "bodies/linux-ax-value-selected.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/linux-ax-value-selected",
+   "host": "MacBook-Pro",
+   "added": "2026-11-21T22:56:01Z",
+   "updated": "2026-11-21T22:56:01Z",
+   "note": ""
   }
  ],
  "watch": {
