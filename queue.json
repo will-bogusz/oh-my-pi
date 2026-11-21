@@ -107434,7 +107434,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/linux-ax-value-selected",
    "host": "MacBook-Pro",
    "added": "2026-11-21T22:56:01Z",
-   "updated": "2026-11-21T23:15:42Z",
+   "updated": "2026-11-21T23:16:30Z",
    "note": "QueueFortyEight, 2026-11-21: from lane LinuxClicks (8a31c81a1c0 on 07c97a3e991), rebased onto e1a9f4b41d2 as 3d46eca4724; Rust diff 9161ce4807 unchanged, rust-check linux/windows/macos records stand. Main's rulings: (a) prompt hunk kept, only moves (selected) from 'on macOS:' to 'on macOS and Linux' (corrects a sentence the change makes false, adds no instruction; body says no model sample run, which answers precheck's behavior NOTE). precheck FIXes a touched package without an entry and has no prompt-only exemption, so the coding-agent Fixed line was added (folded into the one commit). (b) review LinuxClicks.ReviewLinuxAxValue (openai-codex/gpt-6.2-sol) at 8a31c81a1c0 needs-changes, answered: retained risk (an app that lists Value and never answers uses up read_node's per-element deadline and fails the whole ax()/find(), as main already does for Text) accepted by Main as a stated Limit, no code; body length/checklist fixed by the lane; changelog gate answered by (a). The reviewer read an earlier body draft (3,677 prose chars). (c) the guest numbers come from first build 114ffbeedf3 (also asked elements with unreadable interfaces); a final-head confirmation on wl-gnome was blocked by goliath's guest admission (MemAvailable 12.3 GiB, 4 GiB guest would leave 8.3 < 9 GiB; another session's two Android emulators hold ~12.6 GiB); body says which build was measured: scroll bars proven to list Value through their setValue's own GetInterfaces (LinuxClicks), sliders not re-measured. (d) Limits in body: many selected rows (~550 tokens/200 rows), find({value:'1'}) matches a numeric control, LibreOffice document scroll bar ok-without-moving (as main), the retained risk. Queued-entry conflicts (they wait behind it): uia win-uia-set-patterns in macos/ax.rs (import list only: combined = union of bounded_number with uia's decimal_value, plain_decimal, real_reached; ax.rs auto-merges, combined compile untested), docs/prompt with win-ax-states, win-minimised-windows, computer-rich-text, computer-input-diff-repo, win-type-insert, desktop-cursor, computer-guide-first-use. None with popup, fence, D, D2. Follow-up entry B (no branch): GTK 3 list rows selected through the parent's AT-SPI Selection (SelectChild) by their by-construction index only, needs this entry's SELECTED read-back to confirm; GTK 4 excluded because SelectChild(i) counts all rows while AT-SPI's child list skips rows the app hid and includes a visible placeholder (GTK 4.24.1 source, LinuxClicks' report).",
    "built": [
     {
@@ -107476,6 +107476,16 @@
      "at": "2026-11-21T23:15:41Z",
      "host": "MacBook-Pro",
      "tree": "96950dfa7bc5f010b5962d363e10ccc6a5b16ef7"
+    },
+    {
+     "with": "#19870",
+     "code": "6415b2db6fad53f8246a64a2bccaae758b661424",
+     "with_code": "9a5fecb65a9d3d9a9fc9d3c15d540d6b8f3fdf78",
+     "tip": "3d46eca4724a5833612ff13d906ed2ccc0dfde05",
+     "with_tip": "a195fe0e6f728b294a04a62891129af3d64bdb37",
+     "at": "2026-11-21T23:16:29Z",
+     "host": "MacBook-Pro",
+     "tree": "02bb05a5bc625a3edea7e74912dc60d21838f510"
     }
    ]
   }
