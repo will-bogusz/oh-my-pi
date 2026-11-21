@@ -106631,7 +106631,7 @@
    "area": "other",
    "priority": "P1",
    "needs": [],
-   "base": "fbb8085ff432419132c6e3132f36ad857893b1a4",
+   "base": "b3142bf7e7e459560919abec0658b5f3851bcbcc",
    "body": "bodies/picker-stale-discovery.md",
    "state": "open",
    "pr": 19878,
@@ -106639,7 +106639,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/picker-stale-discovery",
    "host": "MacBook-Pro",
    "added": "2026-11-20T17:27:00Z",
-   "updated": "2026-11-20T18:13:08Z",
+   "updated": "2026-11-21T18:40:09Z",
    "note": "",
    "built": [
     {
@@ -106742,7 +106742,7 @@
      }
     }
    ],
-   "advanced": "2026-11-20T18:12:55Z"
+   "advanced": "2026-11-21T18:40:09Z"
   },
   {
    "id": "devin-neon-image-price",
