@@ -106226,10 +106226,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-takeover-intervene",
    "host": "MacBook-Pro",
    "added": "2026-11-20T12:25:26Z",
-   "updated": "2026-11-21T05:20:00Z",
+   "updated": "2026-11-21T05:21:50Z",
    "note": "Cut to option P by WinTakeoverCut (Main, 2026-11-21 ~00:15Z): admission only; old head kept on backup/win-takeover-intervene-c6df69d2797; earlier C build records void. Prompt hunk decided by Main, 2026-11-21: only names Windows in the existing UserIntervened sentence (Windows causes stay in the error text, docs and body Limits); no instruction changed, no model sample owed. Pair with #19870 (win32/mod.rs tests import union) is stale at f2d071a1915: git merge-tree with 5cf7d246537 is clean. Follow-up entry \"listener + stop-on-press\" not built: spec in WinTakeoverCut PLAN.md (Follow-up entry spec).",
    "advanced": "2026-11-20T14:02:56Z",
-   "hold": "Main, 2026-11-21: cut head (option P) pre-open in progress: merged trees, body review, pre-open line; opens only on Main's go",
    "rebases_after": [
     19870
    ],
