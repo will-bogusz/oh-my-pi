@@ -1,3 +1,5 @@
+#[cfg(any(target_os = "windows", test))]
+mod activity;
 #[cfg(target_os = "windows")]
 mod ax;
 #[cfg(target_os = "windows")]
@@ -52,6 +54,8 @@ pub(crate) struct Win32Backend {
 	display:      DisplaySelector,
 	global_input: Enigo,
 	ax:           Win32Ax,
+	/// The user's last input when the takeover was admitted.
+	admitted:     Option<Option<std::time::Duration>>,
 }
 
 #[cfg(target_os = "windows")]
@@ -62,7 +66,7 @@ impl Win32Backend {
 		// coordinate regime.
 		let global_input = input::create_global_input()?;
 		let _ = capture::displays()?;
-		Ok(Self { display, global_input, ax: Win32Ax::new() })
+		Ok(Self { display, global_input, ax: Win32Ax::new(), admitted: None })
 	}
 }
 
@@ -107,6 +111,16 @@ impl Backend for Win32Backend {
 
 	fn window_covered(&mut self, id: &str) -> bool {
 		capture::window_covered(id)
+	}
+
+	fn admit_takeover(&mut self) -> CoreResult<()> {
+		self.admitted = None;
+		self.admitted = Some(activity::admit()?);
+		Ok(())
+	}
+
+	fn takeover_admitted(&mut self) -> CoreResult<bool> {
+		self.admitted.map_or(Ok(false), activity::admitted)
 	}
 
 	fn displays(&mut self) -> CoreResult<Vec<DesktopDisplay>> {
