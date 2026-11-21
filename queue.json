@@ -118804,8 +118804,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-21T02:31:25.977790Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-21T02:47:41.367701Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -120238,8 +120238,10 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with main in (branch missing on the fork)"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -120330,10 +120332,10 @@
     "state": "queued",
     "area": "computer",
     "priority": null,
-    "title": "fix(natives): stop Windows takeovers when the user types or clicks",
+    "title": "fix(natives): wait for the user to pause before a Windows takeover",
     "action": "held",
     "reasons": [
-     "held: Main, 2026-11-20: takeover-run hold lifted (final n20 0/20, WinTakeover3); waits for a macOS build host (shared desktop code: control/error/mod/types.rs, macos/skylight.rs), then final-head review, trees, precheck, pre-open line"
+     "held: Main, 2026-11-21: cut head (option P) pre-open in progress: merged trees, body review, pre-open line; opens only on Main's go"
     ],
     "note": "accepted pair with #19870: Main, 2026-11-20: win32/mod.rs tests-module import list only; combined = union of both WindowsAndMessaging imports",
     "over": [],
@@ -120352,8 +120354,9 @@
     "area": "computer",
     "priority": null,
     "title": "fix(natives): keep the user's caret through a Windows takeover's hand-back",
-    "action": "wait",
+    "action": "held",
     "reasons": [
+     "held: Main, 2026-11-21: waits on a restack lane onto cut C via win-takeover-settle: needs the \"person input since the takeover started\" veto in its caret loops and a restack on the new restore code (cut C removed activity::check). Spec: WinTakeoverCut PLAN.md (d) and \"What a/b need\"",
      "needs win-takeover-settle (queued)",
      "conflicts with #19870 in crates/natives/src/desktop/win32/mod.rs"
     ],
@@ -120376,8 +120379,9 @@
     "area": "computer",
     "priority": null,
     "title": "fix(natives): stop Windows takeovers of a busy app bringing it forward after the call failed",
-    "action": "wait",
+    "action": "held",
     "reasons": [
+     "held: Main, 2026-11-21: waits on a restack lane onto cut C (f2d071a1915): needs new production code, since the cut removed what it used: it must carry the WM_NULL settle_activation fence and the interruptible bring_forward arrival loop itself, and a \"person input since the takeover started\" veto (on cut C alone only the polled last-input date, pointer moves veto too; activity::check() only with the listener + stop-on-press follow-up). Spec: WinTakeoverCut PLAN.md (d) and \"What a/b need\"",
      "needs win-takeover-intervene (queued)",
      "conflicts with #19870 in crates/natives/src/desktop/win32/mod.rs",
      "conflicts with main in crates/natives/src/desktop/win32/input.rs, crates/natives/src/desktop/win32/mod.rs"
