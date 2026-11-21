@@ -107298,7 +107298,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-21T00:14:34Z",
+  "checked": "2026-11-21T01:16:15Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -107423,28 +107423,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-14T00:55:43Z",
-    "kind": "openable",
-    "id": "macos-popup-value",
-    "title": "fix(natives): choose a Chromium select's option on macOS and close the menu it opens"
-   },
-   {
-    "at": "2026-11-14T00:55:43Z",
-    "kind": "unopenable",
-    "id": "covered-fill",
-    "title": "fix(coding-agent): refuse browser keys aimed at a field a modal dialog covers",
-    "why": "plan: wait (conflicts with #19045 in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts; conflicts with main in packages/coding-agent/src/tools/browser/tab-worker.ts)"
-   },
-   {
-    "at": "2026-11-14T00:55:43Z",
-    "kind": "conflict",
-    "label": "#18925",
-    "title": "feat(coding-agent): name the native windows a browser call raised on macOS",
-    "files": [
-     "packages/coding-agent/src/tools/browser/tab-worker.ts"
-    ]
-   },
    {
     "at": "2026-11-14T05:00:07Z",
     "kind": "openable",
