@@ -107310,7 +107310,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-21T09:24:42Z",
+  "checked": "2026-11-21T10:26:20Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -118754,7 +118754,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-21T09:24:42.799931Z",
+  "at": "2026-11-21T10:26:20.991417Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -118762,25 +118762,6 @@
    "left": 8
   },
   "rows": [
-   {
-    "id": "macos-drag-confirm",
-    "label": "#19195",
-    "number": 19195,
-    "state": "open",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives): stop macOS background drags reporting moves that did not happen",
-    "action": "keep",
-    "reasons": [],
-    "note": "accepted pair with #19889: Main (assignment to QueueThirtySeven), 2026-11-19: docs/tools/computer.md only, both add one paragraph after the line-118 paragraph of the desktop section; combined = #19195's macOS background-drag paragraph, then this entry's Windows BM_CLICK paragraph (union, no wording change)",
-    "over": [],
-    "paired": [
-     "#19889"
-    ],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-13T20:28:59Z"
-   },
    {
     "id": "devin-neon-image-price",
     "label": "#19883",
@@ -118850,6 +118831,25 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-02T03:27:31Z"
+   },
+   {
+    "id": "macos-drag-confirm",
+    "label": "#19195",
+    "number": 19195,
+    "state": "open",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): stop macOS background drags reporting moves that did not happen",
+    "action": "keep",
+    "reasons": [],
+    "note": "accepted pair with #19889: Main (assignment to QueueThirtySeven), 2026-11-19: docs/tools/computer.md only, both add one paragraph after the line-118 paragraph of the desktop section; combined = #19195's macOS background-drag paragraph, then this entry's Windows BM_CLICK paragraph (union, no wording change)",
+    "over": [],
+    "paired": [
+     "#19889"
+    ],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-13T20:28:59Z"
    },
    {
     "id": "macos-handback-typed",
