@@ -106768,11 +106768,17 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-wpf-press",
    "host": "MacBook-Pro",
    "added": "2026-11-20T19:14:08Z",
-   "updated": "2026-11-20T23:41:08Z",
+   "updated": "2026-11-21T00:01:31Z",
    "note": "",
    "tests_over_override": {
     "reason": "ReviewWpfPressCut10, 2026-11-20: one signed-in WPF fixture test whose rows each reach a distinct branch (reviewer's request)",
     "at": "2026-11-20T23:41:08Z"
+   },
+   "rebases_after": [
+    19195
+   ],
+   "pair_reasons": {
+    "19195": "Main, 2026-11-21: docs/tools/computer.md only; combined = #19195's macOS drag paragraph, wbc's BM_CLICK paragraph, then this entry's WPF press paragraph, no wording change"
    }
   },
   {
