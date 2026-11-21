@@ -107338,13 +107338,13 @@
    "needs": [],
    "base": "e1a9f4b41d24fe223bb71e864bef552f0fae6948",
    "body": "bodies/cursor-long-context-output.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 20093,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/cursor-long-context-output",
    "host": "MacBook-Pro",
    "added": "2026-11-21T19:25:32Z",
-   "updated": "2026-11-21T19:45:33Z",
+   "updated": "2026-11-21T19:46:39Z",
    "note": "",
    "built": [
     {
@@ -107374,7 +107374,8 @@
      "at": "2026-11-21T19:45:33Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-21T19:46:39Z"
   },
   {
    "id": "devin-fast-long-context",
