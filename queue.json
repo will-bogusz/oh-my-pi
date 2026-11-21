@@ -102477,7 +102477,7 @@
    "area": "auth-broker",
    "priority": "P2",
    "needs": [],
-   "base": "e1ae2cc998efd1ca151b46ebefc0e0dab6c23c63",
+   "base": "b3142bf7e7e459560919abec0658b5f3851bcbcc",
    "body": "bodies/broker-version-skew.md",
    "state": "open",
    "pr": 19592,
@@ -102485,7 +102485,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/broker-version-skew",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:04:06Z",
-   "updated": "2026-11-18T01:13:41Z",
+   "updated": "2026-11-21T18:40:47Z",
    "note": "Will, 2026-11-17: go-ahead to open",
    "kind": "proposal",
    "built": [
@@ -102674,7 +102674,7 @@
      }
     }
    ],
-   "advanced": "2026-11-18T01:13:41Z"
+   "advanced": "2026-11-21T18:40:47Z"
   },
   {
    "id": "broker-refresh-failure-loud",
