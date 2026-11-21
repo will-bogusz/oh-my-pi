@@ -106454,9 +106454,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-takeover-settle",
    "host": "MacBook-Pro",
    "added": "2026-11-20T13:55:57Z",
-   "updated": "2026-11-21T02:42:00Z",
+   "updated": "2026-11-21T02:42:16Z",
    "note": "",
-   "hold": "Main, 2026-11-21: waits on a restack lane onto cut C (f2d071a1915): needs new production code, since the cut removed what it used: it must carry the WM_NULL settle_activation fence and the interruptible bring_forward arrival loop itself, and a \"person input since the takeover started\" veto (on cut C alone only the polled last-input date, pointer moves veto too; activity::check() only with the listener + stop-on-press follow-up). Spec: ~/tmp/trycua-omp/WinTakeoverCut/PLAN.md (d) and \"What a/b need\""
+   "hold": "Main, 2026-11-21: waits on a restack lane onto cut C (f2d071a1915): needs new production code, since the cut removed what it used: it must carry the WM_NULL settle_activation fence and the interruptible bring_forward arrival loop itself, and a \"person input since the takeover started\" veto (on cut C alone only the polled last-input date, pointer moves veto too; activity::check() only with the listener + stop-on-press follow-up). Spec: WinTakeoverCut PLAN.md (d) and \"What a/b need\""
   },
   {
    "id": "desktop-dispatch-fence",
