@@ -12,11 +12,11 @@ On Linux, an element with an AT-SPI `Value` and no text (slider, scroll bar, pro
 | selected row in `ax()` (GTK 3, GTK 4, Qt 6, Chromium, Electron) | never marked | `(selected)` on it, not on the next row, 50/50 · 49/50 (1 reply lost by the harness) |
 | LibreOffice's document scroll bar | `undefined`; an absolute write reports ok, page stays | readable; a write + 224 reads back ok, page still stays, 0/10 (Omarchy) |
 
-`AtSpiAx::read_element` asks for the number only when an element lists `Value` and has no text (a spin button keeps its text; an element whose interfaces cannot be read shows none, as on `main`), and reads `selected` from the state set. Like `text_value` it skips zbus's property cache (Qt); `bounded_number` moves to `desktop/ax.rs` to format it. The prompt's state list now names Linux for `(selected)`; no instruction changed, no model sample run.
+`AtSpiAx::read_element` asks for the number only when an element lists `Value` and has no text (a spin button keeps its text; an element whose interfaces cannot be read shows none, as on `main`), and reads `selected` from the state set. Like `text_value` it skips zbus's property cache (Qt). The prompt's state list now names Linux for `(selected)`; no instruction changed, no model sample run.
 
 ## Why
 
-On Wayland, `main` refuses `win.click(x, y)` and `el.click()` on a background window, while `el.press()` and `el.setValue()` act through AT-SPI with no window geometry: they land 21 of our 27 background-control cells on Omarchy and 21 of 25 on GNOME, the user typing undisturbed (below). Pixel clicks stay out: nothing ties an AT-SPI window to a Hyprland one, so a click could hit another window.
+On Wayland, `main` refuses `win.click(x, y)` and `el.click()` on a background window, while `el.press()` and `el.setValue()` act through AT-SPI: they land 21 of our 27 background-control cells on Omarchy and 21 of 25 on GNOME, the user typing undisturbed (below). Pixel clicks stay out: nothing ties an AT-SPI window to a Hyprland one, so a click could hit another window.
 
 Two gaps left are reads: no slider or scroll-bar value, so a list scrolled only to absolute positions, and no visible selection. Selecting a GTK row by `press()` stays out.
 
@@ -65,8 +65,8 @@ Prototype = a fork build that mapped pixels through Hyprland's window list and A
 ## Testing
 
 - `cargo test -p omp-natives --lib desktop`: 360 passed. The extended `an_element_is_read_in_two_rounds_and_only_on_its_interfaces` fails with the number read removed, with `SELECTED` ignored, and with the number asked speculatively.
-- Fresh Omarchy 4.5 (Hyprland 0.56.2) and GNOME 50.6 guests, `main` and the change's first build (it also probed elements with unreadable interfaces; none was measured) alternating per trial while a simulated user types elsewhere; effects read from each app's own state; the user's line and focus untouched in 260/260 · 240/240.
-- `ax()` of six other windows on both desktops grew 0 to 38 characters (a GTK 4 scrolled area, Chromium's resize handles and tab).
+- Fresh Omarchy 4.5 (Hyprland 0.56.2) and GNOME 50.6 guests, `main` and the change's first build alternating per trial while a simulated user types elsewhere; effects read from each app's own state; the user's line and focus untouched in 260/260 · 240/240. That build also asked elements whose interfaces cannot be read for a number: the scroll bars measured list `Value`, as their `setValue` requires; the sliders were not re-measured on this head.
+- `ax()` of six test windows on both desktops grew 0 to 38 characters (a GTK 4 scrolled area, Chromium's resize handles and tab).
 - `rust-check` Linux, Windows and macOS pass. Not run: an X11 session (same `read_element` path), progress bars (same interface as sliders).
 
 ---
