@@ -1030,7 +1030,8 @@ impl FrameCache {
 	/// Whether `frame` holds screen point (`x`, `y`): `Some` with where it sits
 	/// when its toolkit cannot place it, `Some(None)` when it reports screen
 	/// positions itself. Such a frame `native` cannot place either (minimized,
-	/// another workspace) holds no point.
+	/// another workspace) holds no point; where every toolkit is window-relative
+	/// (Wayland), it is hit-tested as reported, as without `native`.
 	async fn claim(
 		&mut self,
 		connection: &zbus::Connection,
@@ -1043,9 +1044,11 @@ impl FrameCache {
 			&& self.unplaced(connection, native, frame).await
 		{
 			let placement = self.placement(connection, native, frame).await;
-			return Ok(placement
-				.filter(|placement| placement.contains(x, y))
-				.map(Some));
+			if placement.is_some() || !native.screen_is_window_relative() {
+				return Ok(placement
+					.filter(|placement| placement.contains(x, y))
+					.map(Some));
+			}
 		}
 		let contains = AtSpiAx::component(connection, frame)
 			.await
@@ -3861,7 +3864,7 @@ mod tests {
 	#[test]
 	fn native_wayland_elements_are_placed_by_their_own_window_alone() {
 		let rt = Builder::new_current_thread().enable_all().build().unwrap();
-		let bounds = rt.block_on(async {
+		let (bounds, claims) = rt.block_on(async {
 			// A GTK 3 window on Wayland, whose screen and window extents agree;
 			// an `XWayland` frame, which reports where it is; and two frames of
 			// the app titled alike, which one native window cannot tell apart.
@@ -3919,8 +3922,20 @@ mod tests {
 					bounds.push(read_bounds(&mut cache, &client, Some(native), path).await);
 				}
 			}
+			// Hit tests: the placed window where Hyprland shows it; a window it
+			// cannot place, as reported, as without it.
+			let mut cache = FrameCache::default();
+			let mut claims = Vec::new();
+			for (path, x, y) in [("/frame", 310, 210), ("/frame", 5, 5), ("/viewer", 5, 5)] {
+				claims.push(
+					cache
+						.claim(&client, Some(&wayland), &object(path), x, y)
+						.await
+						.unwrap(),
+				);
+			}
 			drop(server);
-			bounds
+			(bounds, claims)
 		});
 		assert_eq!(bounds, [
 			// Read as screen positions (X11's rule): as the toolkit put them.
@@ -3934,6 +3949,11 @@ mod tests {
 			Some((315.0, 203.0, 67.0, 46.0)),
 			Some((640.0, 120.0, 890.0, 550.0)),
 			Some((5.0, 5.0, 10.0, 10.0)),
+		]);
+		assert_eq!(claims, [
+			Some(Some(Placement { x: 300, y: 200, width: 890, height: 550 })),
+			None,
+			Some(None),
 		]);
 	}
 
