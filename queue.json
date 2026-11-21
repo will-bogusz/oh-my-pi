@@ -102159,7 +102159,7 @@
    "area": "coding-agent",
    "priority": "P2",
    "needs": [],
-   "base": "e1ae2cc998efd1ca151b46ebefc0e0dab6c23c63",
+   "base": "b3142bf7e7e459560919abec0658b5f3851bcbcc",
    "body": "bodies/reset-spend-log.md",
    "state": "open",
    "pr": 19626,
@@ -102167,7 +102167,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/reset-spend-log",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:02:20Z",
-   "updated": "2026-11-18T03:04:30Z",
+   "updated": "2026-11-21T18:40:56Z",
    "note": "Review ResetSpendLog.ReviewResetSpendLog at 608d234 needs-changes: #2 (CLI fence throw unlogged) fixed in code, no test (marker-write failure is input nobody sends); #1 (two concurrent unfenced in-process redeems coalesce into one POST yet log two resets) declined: only reachable for /usage reset racing an auto spend on the same account within the redeem's 15 s; auto vs auto is serialized by the reset fence",
    "built": [
     {
@@ -102309,7 +102309,7 @@
      "host": "MacBook-Pro"
     }
    ],
-   "advanced": "2026-11-18T03:04:30Z",
+   "advanced": "2026-11-21T18:40:56Z",
    "opened": "2026-11-18T02:55:18Z",
    "readied": "2026-11-18T02:55:45Z"
   },
