@@ -65,9 +65,17 @@ Prototype = a fork build that mapped pixels through Hyprland's window list and A
 ## Testing
 
 - `cargo test -p omp-natives --lib desktop`: 360 passed. The extended `an_element_is_read_in_two_rounds_and_only_on_its_interfaces` fails with the number read removed, with `SELECTED` ignored, and with the number asked speculatively.
-- Fresh Omarchy 4.5 (Hyprland 0.56.2) and GNOME 50.6 guests, `main` and the change's first build alternating per trial while a simulated user types elsewhere; effects read from each app's own state; the user's line and focus untouched in 260/260 · 240/240. That build also asked elements whose interfaces cannot be read for a number: the scroll bars measured list `Value`, as their `setValue` requires; the sliders were not re-measured on this head.
+- Guests (the change's first build, which also asked elements whose interfaces cannot be read for a number): fresh Omarchy 4.5 (Hyprland 0.56.2) and GNOME 50.6, alternating with `main` per trial while a simulated user types elsewhere; effects read from each app's own state; the user's line and focus untouched in 260/260 · 240/240.
+- Headless X11 session on the final head (Xvfb, GTK 3.24.41, Qt 6.4.2), alternating with `main`; every slider and scroll-bar read answered `GetInterfaces` listing `Value`:
+
+  | headless X11 session on the final head, n=5 | `main` | this PR (GTK 3 · Qt 6) |
+  |---|---|---|
+  | slider `value()` equals the app's value | 0/5 · 0/5 | 5/5 · 5/5 |
+  | vertical scroll bar `value()` equals the list's offset | 0/5 · – | 5/5 · – (no scroll bar in Qt's tree) |
+  | selected row `(selected)`, next row not | 0/5 · 0/5 | 5/5 · 5/5 |
+
 - `ax()` of six test windows on both desktops grew 0 to 38 characters (a GTK 4 scrolled area, Chromium's resize handles and tab).
-- `rust-check` Linux, Windows and macOS pass. Not run: an X11 session (same `read_element` path), progress bars (same interface as sliders).
+- `rust-check` Linux, Windows and macOS pass. Not run: progress bars (same interface as sliders).
 
 ---
 
