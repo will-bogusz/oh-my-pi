@@ -107367,10 +107367,18 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-21T19:06:07Z",
+  "checked": "2026-11-21T19:37:01Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
+   "cursor-long-context-output": {
+    "since": "2026-11-21T19:37:01Z",
+    "title": "fix(catalog): price Cursor's GPT-5.6 long-context output at 1.5x"
+   },
+   "devin-fast-long-context": {
+    "since": "2026-11-21T19:37:01Z",
+    "title": "fix(catalog): price Devin's GPT-5.6 long-context tiers as published, Fast lanes included"
+   },
    "factory-droid-1100-pin": {
     "since": "2026-11-17T00:39:57Z",
     "title": "feat(catalog): identify Factory Droid requests as droid 1.10.0"
@@ -109051,6 +109059,18 @@
     "id": "devin-gemini-image-price-rest",
     "title": "fix(catalog): budget Devin's other measured Gemini models at the 1,089 tokens it bills per image",
     "why": "opened as #20038"
+   },
+   {
+    "at": "2026-11-21T19:37:01Z",
+    "kind": "openable",
+    "id": "cursor-long-context-output",
+    "title": "fix(catalog): price Cursor's GPT-5.6 long-context output at 1.5x"
+   },
+   {
+    "at": "2026-11-21T19:37:01Z",
+    "kind": "openable",
+    "id": "devin-fast-long-context",
+    "title": "fix(catalog): price Devin's GPT-5.6 long-context tiers as published, Fast lanes included"
    }
   ]
  },
@@ -118840,8 +118860,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-21T19:29:58.663828Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-21T19:37:02.638262Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -120280,8 +120300,10 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with main in (branch missing on the fork)"
+    ],
     "note": "",
     "over": [],
     "paired": [],
