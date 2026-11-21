@@ -58699,8 +58699,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/iphone-mirror-pointer",
    "host": "MacBook-Pro",
    "added": "2026-10-30T21:35:47Z",
-   "updated": "2026-11-19T22:54:48Z",
-   "note": "next push: input.rs primed() doc comment (~3496-3499) says a cancel keeps the mark; a cancel noticed after a successful primer clears it first (SolFinal17756 P3; body fixed 2026-11-17)",
+   "updated": "2026-11-21T08:28:12Z",
+   "note": "next push: input.rs primed() doc comment (~3496-3499) says a cancel keeps the mark; a cancel noticed after a successful primer clears it first (SolFinal17756 P3; body fixed 2026-11-17)\nOpen check (Main, 2026-11-21): combined form with #19702 sends #17756's primer without the activating press (KeyPurpose::Keyboard); unmeasured; needs a macOS VM host.",
    "built": [
     {
      "with": "iphone-mirror-not-showing",
