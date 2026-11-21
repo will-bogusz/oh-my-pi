@@ -107344,8 +107344,37 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/cursor-long-context-output",
    "host": "MacBook-Pro",
    "added": "2026-11-21T19:25:32Z",
-   "updated": "2026-11-21T19:27:23Z",
-   "note": ""
+   "updated": "2026-11-21T19:45:33Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#20038",
+     "code": "4979c3a57714e775505351af4e27bc7a29b8b9e0",
+     "with_code": "9029ab0ef0cb2c17a5999bbdbb3b06522a8b5878",
+     "tip": "8bf820faa43436ca4c81bf89ecc9534dc2cf2b30",
+     "with_tip": "893694384f914ebaad95d2949d59752ccd6a5dbe",
+     "at": "2026-11-21T19:45:29Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19880",
+     "code": "4979c3a57714e775505351af4e27bc7a29b8b9e0",
+     "with_code": "342975e578cdc803fb101dc93c2c5345485bbff0",
+     "tip": "8bf820faa43436ca4c81bf89ecc9534dc2cf2b30",
+     "with_tip": "dabcb7b440c32fbe211f6a4bcf5b554942b7e7db",
+     "at": "2026-11-21T19:45:33Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "devin-fast-long-context",
+     "code": "4979c3a57714e775505351af4e27bc7a29b8b9e0",
+     "with_code": "124861eb827d1e8789f4ed9e9896f7e69a41a0d7",
+     "tip": "8bf820faa43436ca4c81bf89ecc9534dc2cf2b30",
+     "with_tip": "4a92328724704ef769709f9d003823ed40dd8e9a",
+     "at": "2026-11-21T19:45:33Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "devin-fast-long-context",
