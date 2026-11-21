@@ -107330,7 +107330,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-21T13:00:02Z",
+  "checked": "2026-11-21T13:31:01Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -107485,13 +107485,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-14T13:07:56Z",
-    "kind": "unopenable",
-    "id": "macos-stale-press",
-    "title": "fix(natives): refuse macOS element actions on a control a person could not click",
-    "why": "opened as #19258"
-   },
    {
     "at": "2026-11-14T17:42:23Z",
     "kind": "released",
