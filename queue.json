@@ -102485,7 +102485,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/broker-version-skew",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:04:06Z",
-   "updated": "2026-11-21T18:40:47Z",
+   "updated": "2026-11-21T18:43:13Z",
    "note": "Will, 2026-11-17: go-ahead to open",
    "kind": "proposal",
    "built": [
@@ -102674,7 +102674,7 @@
      }
     }
    ],
-   "advanced": "2026-11-21T18:40:47Z"
+   "advanced": "2026-11-21T18:43:13Z"
   },
   {
    "id": "broker-refresh-failure-loud",
