@@ -103001,7 +103001,7 @@
    "area": "broker",
    "priority": "P2",
    "needs": [],
-   "base": "b3142bf7e7e459560919abec0658b5f3851bcbcc",
+   "base": "4ab71d06b72997715a3f37e56562f6ed45a599e5",
    "body": "bodies/reserve-per-model-family.md",
    "state": "open",
    "pr": 19700,
@@ -103009,10 +103009,10 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/reserve-per-model-family",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:13:06Z",
-   "updated": "2026-11-21T18:41:04Z",
+   "updated": "2026-11-21T18:43:39Z",
    "note": "Will, 2026-11-17: go-ahead to open",
    "kind": "proposal",
-   "advanced": "2026-11-21T18:41:04Z",
+   "advanced": "2026-11-21T18:43:39Z",
    "line_loss_overrides": [
     {
      "at": "2026-11-18T17:55:21Z",
