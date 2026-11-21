@@ -107310,7 +107310,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-21T05:21:34Z",
+  "checked": "2026-11-21T05:51:56Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -107371,7 +107371,8 @@
    19884,
    19889,
    19928,
-   19929
+   19929,
+   20019
   ],
   "post_merge": {
    "18632": {
@@ -107435,13 +107436,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-14T05:30:57Z",
-    "kind": "unopenable",
-    "id": "macos-popup-value",
-    "title": "fix(natives): choose a Chromium select's option on macOS and close the menu it opens",
-    "why": "opened as #19224"
-   },
    {
     "at": "2026-11-14T06:31:53Z",
     "kind": "merged",
@@ -118802,12 +118796,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-21T04:51:01.750897Z",
+  "at": "2026-11-21T05:51:57.543312Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 1,
+   "left": 7
   },
   "rows": [
    {
@@ -119088,6 +119082,25 @@
     "created": "2026-11-20T20:07:19Z"
    },
    {
+    "id": "win-takeover-intervene",
+    "label": "#20019",
+    "number": 20019,
+    "state": "open",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): wait for the user to pause before a Windows takeover",
+    "action": "keep",
+    "reasons": [],
+    "note": "accepted pair with #19870: Main, 2026-11-20: win32/mod.rs tests-module import list only; combined = union of both WindowsAndMessaging imports",
+    "over": [],
+    "paired": [
+     "#19870"
+    ],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-21T05:22:39Z"
+   },
+   {
     "id": "x11-xtest-release",
     "label": "#19531",
     "number": 19531,
@@ -119169,10 +119182,11 @@
     "title": "fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing",
     "action": "keep",
     "reasons": [],
-    "note": "accepted pair with #19889: Main, 2026-11-20: docs AxUnconfirmed paragraph (both) and win32/ax.rs host_root_from (wbc's loop takes #19870's MAX_ANCESTORS bound; behaviour of each side unchanged); accepted pair with #19871: Main, 2026-11-20: win32/ax.rs import union; docs/tools/computer.md AxUnconfirmed: #19870's rewritten sentence, then this entry's Windows dispatch line; combined = both",
+    "note": "accepted pair with #19889: Main, 2026-11-20: docs AxUnconfirmed paragraph (both) and win32/ax.rs host_root_from (wbc's loop takes #19870's MAX_ANCESTORS bound; behaviour of each side unchanged); accepted pair with #20019: Main, 2026-11-20: win32/mod.rs tests-module import list only; combined = union of both WindowsAndMessaging imports; accepted pair with #19871: Main, 2026-11-20: win32/ax.rs import union; docs/tools/computer.md AxUnconfirmed: #19870's rewritten sentence, then this entry's Windows dispatch line; combined = both",
     "over": [],
     "paired": [
      "#19889",
+     "#20019",
      "#19871"
     ],
     "blocked_by": [],
@@ -119421,6 +119435,7 @@
      "conflicts with #19504 in docs/computer-use.md",
      "conflicts with #19702 in docs/computer-use.md",
      "conflicts with #19871 in docs/computer-use.md",
+     "conflicts with #20019 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #19531 in docs/computer-use.md",
      "conflicts with main in crates/natives/src/desktop/macos/settle.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts"
     ],
@@ -119432,6 +119447,7 @@
      "#19504",
      "#19702",
      "#19871",
+     "#20019",
      "#19531"
     ],
     "needs": [],
@@ -119563,7 +119579,7 @@
     "reasons": [
      "conflicts with #19542 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19633 in packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-daemon.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
+     "conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-daemon.test.ts"
     ],
     "note": "",
     "over": [],
@@ -119588,7 +119604,7 @@
      "needs r2/relay-own-only (queued)",
      "conflicts with #19542 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19633 in packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-daemon.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
+     "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-daemon.test.ts",
      "conflicts with main in packages/browser-relay/extension/background.ts, packages/browser-relay/extension/chrome.d.ts, packages/browser-relay/extension/manifest.json, packages/coding-agent/src/tools/browser/relay/extension-assets/manifest.json.txt, packages/coding-agent/src/tools/browser/relay/protocol.ts"
     ],
     "note": "",
@@ -119616,8 +119632,8 @@
      "needs r2/relay-popup-owned (queued), r2/page-waiting (queued)",
      "conflicts with #19542 in packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19633 in packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "its need r2/relay-popup-owned conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/extension/background.ts, packages/browser-relay/extension/chrome.d.ts, packages/browser-relay/extension/manifest.json, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/extension-assets/manifest.json.txt, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-daemon.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
-     "its need r2/page-waiting conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/dialogs.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
+     "its need r2/relay-popup-owned conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/extension/background.ts, packages/browser-relay/extension/chrome.d.ts, packages/browser-relay/extension/manifest.json, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/extension-assets/manifest.json.txt, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-daemon.test.ts",
+     "its need r2/page-waiting conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/dialogs.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts"
     ],
     "note": "",
@@ -119751,13 +119767,15 @@
     "action": "wait",
     "reasons": [
      "conflicts with #19195 in packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with #20019 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with main in crates/natives/src/desktop/win32/capture.rs, crates/natives/src/desktop/win32/reopen.rs, crates/pi-natives/src/desktop/win32/mod.rs, packages/coding-agent/src/prompts/tools/computer.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#19195"
+     "#19195",
+     "#20019"
     ],
     "needs": [],
     "created": "2026-11-11T09:06:32Z"
@@ -119909,6 +119927,7 @@
      "conflicts with #19849 in docs/tools/computer.md",
      "conflicts with #19871 in docs/computer-use.md, docs/tools/computer.md",
      "conflicts with #19889 in docs/tools/computer.md",
+     "conflicts with #20019 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #19531 in docs/computer-use.md, docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md",
      "conflicts with #19620 in packages/coding-agent/src/session/session-maintenance.ts",
@@ -119926,6 +119945,7 @@
      "#19849",
      "#19871",
      "#19889",
+     "#20019",
      "#19531",
      "#19618",
      "#19620",
@@ -119951,6 +119971,7 @@
      "conflicts with #19849 in docs/tools/computer.md",
      "conflicts with #19871 in docs/tools/computer.md",
      "conflicts with #19889 in docs/tools/computer.md",
+     "conflicts with #20019 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md",
      "conflicts with #19870 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
@@ -119965,6 +119986,7 @@
      "#19849",
      "#19871",
      "#19889",
+     "#20019",
      "#19531",
      "#19618",
      "#19870"
@@ -120014,6 +120036,7 @@
      "conflicts with #19849 in docs/tools/computer.md",
      "conflicts with #19871 in docs/tools/computer.md",
      "conflicts with #19889 in docs/tools/computer.md",
+     "conflicts with #20019 in docs/tools/computer.md",
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md, packages/natives/native/index.d.ts",
      "conflicts with #19870 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
@@ -120027,6 +120050,7 @@
      "#19849",
      "#19871",
      "#19889",
+     "#20019",
      "#19531",
      "#19618",
      "#19870"
@@ -120125,7 +120149,7 @@
      "needs r2/relay-own-only (queued)",
      "conflicts with #19542 in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19633 in packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-daemon.test.ts, packages/coding-agent/test/tools/browser-relay-self-update.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
+     "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-daemon.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/dialogs.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/interactions.ts"
     ],
     "note": "",
@@ -120155,6 +120179,7 @@
      "conflicts with #19849 in docs/tools/computer.md",
      "conflicts with #19871 in docs/tools/computer.md",
      "conflicts with #19889 in docs/tools/computer.md",
+     "conflicts with #20019 in docs/tools/computer.md",
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md",
      "conflicts with #19870 in docs/tools/computer.md",
@@ -120168,6 +120193,7 @@
      "#19849",
      "#19871",
      "#19889",
+     "#20019",
      "#19531",
      "#19618",
      "#19870"
@@ -120324,27 +120350,6 @@
     "created": "2026-11-20T04:47:55Z"
    },
    {
-    "id": "win-takeover-intervene",
-    "label": "win-takeover-intervene",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": null,
-    "title": "fix(natives): wait for the user to pause before a Windows takeover",
-    "action": "held",
-    "reasons": [
-     "held: Main, 2026-11-21: cut head (option P) pre-open in progress: merged trees, body review, pre-open line; opens only on Main's go"
-    ],
-    "note": "accepted pair with #19870: Main, 2026-11-20: win32/mod.rs tests-module import list only; combined = union of both WindowsAndMessaging imports",
-    "over": [],
-    "paired": [
-     "#19870"
-    ],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-20T12:25:26Z"
-   },
-   {
     "id": "win-takeover-selection",
     "label": "win-takeover-selection",
     "number": null,
@@ -120356,12 +120361,14 @@
     "reasons": [
      "held: Main, 2026-11-21: waits on a restack lane onto cut C via win-takeover-settle: needs the \"person input since the takeover started\" veto in its caret loops and a restack on the new restore code (cut C removed activity::check). Spec: WinTakeoverCut PLAN.md (d) and \"What a/b need\"",
      "needs win-takeover-settle (queued)",
+     "conflicts with #20019 in crates/natives/src/desktop/win32/input.rs, crates/natives/src/desktop/win32/mod.rs",
      "conflicts with #19870 in crates/natives/src/desktop/win32/mod.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#20019",
      "#19870"
     ],
     "needs": [
@@ -120380,7 +120387,8 @@
     "action": "held",
     "reasons": [
      "held: Main, 2026-11-21: waits on a restack lane onto cut C (f2d071a1915): needs new production code, since the cut removed what it used: it must carry the WM_NULL settle_activation fence and the interruptible bring_forward arrival loop itself, and a \"person input since the takeover started\" veto (on cut C alone only the polled last-input date, pointer moves veto too; activity::check() only with the listener + stop-on-press follow-up). Spec: WinTakeoverCut PLAN.md (d) and \"What a/b need\"",
-     "needs win-takeover-intervene (queued)",
+     "needs #20019 (open)",
+     "conflicts with #20019 in crates/natives/src/desktop/win32/input.rs, crates/natives/src/desktop/win32/mod.rs, docs/tools/computer.md",
      "conflicts with #19870 in crates/natives/src/desktop/win32/mod.rs",
      "conflicts with main in crates/natives/src/desktop/win32/input.rs, crates/natives/src/desktop/win32/mod.rs"
     ],
@@ -120388,6 +120396,7 @@
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#20019",
      "#19870"
     ],
     "needs": [
