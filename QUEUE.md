@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-21 09:18Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-21 09:19Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-21 08:54Z on goliath; groups below are from it, states from the manifest)
@@ -57,7 +57,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-21
 | win-wpf-press | fix(natives): press WPF controls behind other windows through their default action | computer |  | 14h | win-button-click ([#19889](https://github.com/can1357/oh-my-pi/pull/19889)), desktop-dispatch-fence ([#19871](https://github.com/can1357/oh-my-pi/pull/19871)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-wpf-press) |
 | win-wpf-set-background | fix(natives): set WPF text boxes, sliders and combo boxes behind other windows | computer |  | 12h | win-wpf-press, win-uia-set-patterns, desktop-dispatch-fence ([#19871](https://github.com/can1357/oh-my-pi/pull/19871)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-wpf-set-background) |
 | devin-gemini-image-price-rest | fix(catalog): budget Devin's other measured Gemini models at the 1,089 tokens it bills per image | catalog | P2 | 11h | devin-neon-image-price ([#19883](https://github.com/can1357/oh-my-pi/pull/19883)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-gemini-image-price-rest) |
-| devin-gemini-image-count-80 | fix(catalog): let Gemini on Devin's own host carry 80 images | catalog | P2 | 10h | snapcompact-carbon-1568 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-gemini-image-count-80) |
+| devin-gemini-image-count-80 | fix(catalog): let Gemini on Devin's own host carry 80 images | catalog | P2 | 11h | snapcompact-carbon-1568 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-gemini-image-count-80) |
 
 ## Held (13)
 
