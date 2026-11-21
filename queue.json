@@ -104517,7 +104517,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-shape-kdl",
    "host": "MacBook-Pro",
    "added": "2026-11-18T00:47:39Z",
-   "updated": "2026-11-21T11:27:58Z",
+   "updated": "2026-11-21T11:28:48Z",
    "note": "LaneSnapcompactStack, 2026-11-20: opened as #19880 (kind proposal). Codex clean on c14095c2ae and on b01e9c6d012. roboomp: P2 note (custom-model shape change needs maintainer sign-off) answered top-level; 2 should-fix (Bedrock GLM residue test, README shape selection) fixed in b01e9c6d012, threads replied and left open. Pair with #19620 rebuilt on b01e9c6d012 and recorded. Waiting on a maintainer decision.",
    "kind": "proposal",
    "line_loss_overrides": [
@@ -104588,11 +104588,11 @@
    "built": [
     {
      "with": "#19620",
-     "code": "245964753c73e11932c639d96176f4391cf9bca2",
+     "code": "342975e578cdc803fb101dc93c2c5345485bbff0",
      "with_code": "3f31de9f48fc13ac289d41080fa450515af2a5ea",
-     "tip": "b01e9c6d012ff37428dc28f259a4a0803bb7432b",
-     "with_tip": "205ab81cc2b0fd97d3a58b657bae1445b84034a5",
-     "at": "2026-11-20T18:06:44Z",
+     "tip": "dabcb7b440c32fbe211f6a4bcf5b554942b7e7db",
+     "with_tip": "0d53af1f2d2b7ccabf7fa14c9060dedd565f8f0e",
+     "at": "2026-11-21T11:28:44Z",
      "host": "MacBook-Pro"
     }
    ],
