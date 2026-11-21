@@ -104345,7 +104345,7 @@
    "area": "snapcompact",
    "priority": "P2",
    "needs": [],
-   "base": "3c65f4895fdbfb06120eb38e6168876d597428c3",
+   "base": "b3142bf7e7e459560919abec0658b5f3851bcbcc",
    "body": "bodies/snapcompact-rerender-on-switch.md",
    "state": "open",
    "pr": 19620,
@@ -104353,9 +104353,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-rerender-on-switch",
    "host": "MacBook-Pro",
    "added": "2026-11-18T00:36:24Z",
-   "updated": "2026-11-21T11:32:03Z",
+   "updated": "2026-11-21T18:38:26Z",
    "note": "LaneSnapcompactStack, 2026-11-21: CONFLICTING after 19.1.0 (CHANGELOGs; main's de21c0ac454 also touched session-maintenance.ts, textual only); advanced onto 3c65f4895fd, head 0d53af1f2d2, MERGEABLE. Reader tests 12/12, snapcompact 122, typecheck clean; compaction suites fail only the 6 that fail on main. Pair with #19880 rebuilt and recorded.",
-   "advanced": "2026-11-21T11:27:46Z",
+   "advanced": "2026-11-21T18:38:26Z",
    "built": [
     {
      "with": "#19516",
