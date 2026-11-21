@@ -107308,7 +107308,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-21T04:20:02Z",
+  "checked": "2026-11-21T05:21:34Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -107433,18 +107433,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-14T05:00:07Z",
-    "kind": "openable",
-    "id": "macos-stale-press",
-    "title": "fix(natives): refuse macOS element actions on a control a person could not click"
-   },
-   {
-    "at": "2026-11-14T05:00:07Z",
-    "kind": "openable",
-    "id": "macos-move-receipt",
-    "title": "fix(coding-agent): say what a macOS background move did"
-   },
    {
     "at": "2026-11-14T05:30:57Z",
     "kind": "unopenable",
