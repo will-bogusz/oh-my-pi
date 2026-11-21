@@ -107289,8 +107289,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-gemini-image-price-rest",
    "host": "MacBook-Pro",
    "added": "2026-11-20T21:22:43Z",
-   "updated": "2026-11-21T11:30:28Z",
-   "note": "LaneSnapcompactStack, 2026-11-21: need #19883 merged (Brit batch; his dc9a2443adf restated its CHANGELOG at the catalog layer). Rebased onto main 3c65f4895fd, rules.json regenerated; CHANGELOG now 'budgeted at the 1,089 tokens Devin bills per image, measured across sizes, instead of the unverified 1,120-token Gemini estimate'; body What rewritten: catalog change first, then why frames change (verified price replaces snapcompact's 5,024 floor), no 'twice as much history'. Material body change after review: final-head review applies. Catalog 1,416 pass; Devin row fails with devin.kdl reverted; frames 26->48 rechecked on new main (3.6 Flash 26, Neon 48 both).",
+   "updated": "2026-11-21T11:37:24Z",
+   "note": "LaneSnapcompactStack, 2026-11-21: opened as #20038 after #19883 merged; CHANGELOG at the catalog layer per Brit's dc9a2443adf; body What gives the mechanism (verified price replaces snapcompact's 5,024 floor: 26 -> 48 frames). roboomp lgtm P0; Codex clean on 893694384f9. Final-head review ReviewGeminiPriceRestFinal: body-only (stale bun-check claim, 'four more' scope, exact fallback wording) fixed via pr-body, stamped ready at 893694384f9. Pairs with #19880 and factory-droid-1100-pin recorded. bun check passes on head.",
    "kind": "fix",
    "advanced": "2026-11-21T11:24:35Z",
    "built": [
