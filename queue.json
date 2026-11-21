@@ -118739,7 +118739,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-21T00:14:35.400952Z",
+  "at": "2026-11-21T00:45:31.268497Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -120316,7 +120316,8 @@
     "action": "wait",
     "reasons": [
      "needs win-takeover-intervene (queued)",
-     "conflicts with #19870 in crates/natives/src/desktop/win32/mod.rs"
+     "conflicts with #19870 in crates/natives/src/desktop/win32/mod.rs",
+     "conflicts with main in crates/natives/src/desktop/win32/input.rs, crates/natives/src/desktop/win32/mod.rs"
     ],
     "note": "",
     "over": [],
