@@ -107391,8 +107391,28 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-fast-long-context",
    "host": "MacBook-Pro",
    "added": "2026-11-21T19:27:43Z",
-   "updated": "2026-11-21T19:27:43Z",
-   "note": ""
+   "updated": "2026-11-21T19:45:43Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#20038",
+     "code": "124861eb827d1e8789f4ed9e9896f7e69a41a0d7",
+     "with_code": "9029ab0ef0cb2c17a5999bbdbb3b06522a8b5878",
+     "tip": "4a92328724704ef769709f9d003823ed40dd8e9a",
+     "with_tip": "893694384f914ebaad95d2949d59752ccd6a5dbe",
+     "at": "2026-11-21T19:45:38Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19880",
+     "code": "124861eb827d1e8789f4ed9e9896f7e69a41a0d7",
+     "with_code": "342975e578cdc803fb101dc93c2c5345485bbff0",
+     "tip": "4a92328724704ef769709f9d003823ed40dd8e9a",
+     "with_tip": "dabcb7b440c32fbe211f6a4bcf5b554942b7e7db",
+     "at": "2026-11-21T19:45:42Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   }
  ],
  "watch": {
