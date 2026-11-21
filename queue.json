@@ -107328,6 +107328,24 @@
    "updated": "2026-11-20T22:20:19Z",
    "note": "LaneSnapcompactStack, 2026-11-20: Gemini class official-image-count-budget 80 on Devin (Claude 20, others 60, custom baseUrl 40). Synthetic compaction (scratch ~/checkouts/sc-budget80, harness test/zz-budget.test.ts): Carbon 1568px keeps 1.52M at 80 vs 1.14M at 60 (1.54M history; all kept at 2048/60) and 1.52M vs 1.13M (3.98M; 1.94M at 2048/60). Neon/Hydrogen need verified price first (else 26 frames). Tests: real compaction 80 frames + budget table row, both fail reverted; catalog 1,421, snapcompact 124. Review ReviewDevinGeminiCount80: needs-changes at 590fab87b22 (body/test, fixed); needs-changes at ba63e70e203 on one point, DECLINED BY DESIGN (Main, 2026-11-20): a GetUserJwt customApiServerUrl reroute (pi-ai devin.ts:241-244) gets 80 Gemini images on an unmeasured server. Reason: caps applying before the sign-in reroute is how every on-host Devin budget already behaves on main (#19619's 60 instead of the custom-URL 40), a pre-existing ordering gap in pi-ai's Devin path; fixing means resolving the chat host before the caps, its own change, untestable without an enterprise-routed account, tied to issue #16172. Body's Limits line states it. Ships as is; opens after snapcompact-carbon-1568.",
    "kind": "fix"
+  },
+  {
+   "id": "cursor-long-context-output",
+   "branch": "will/cursor-long-context-output",
+   "title": "fix(catalog): price Cursor's GPT-5.6 long-context output at 1.5x",
+   "area": "catalog",
+   "priority": null,
+   "needs": [],
+   "base": "e1a9f4b41d24fe223bb71e864bef552f0fae6948",
+   "body": "bodies/cursor-long-context-output.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/cursor-long-context-output",
+   "host": "MacBook-Pro",
+   "added": "2026-11-21T19:25:32Z",
+   "updated": "2026-11-21T19:25:32Z",
+   "note": ""
   }
  ],
  "watch": {
