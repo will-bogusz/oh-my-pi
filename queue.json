@@ -107310,7 +107310,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-21T07:23:10Z",
+  "checked": "2026-11-21T07:53:28Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -107319,30 +107319,17 @@
     "title": "feat(catalog): identify Factory Droid requests as droid 1.10.0"
    }
   },
-  "conflicts": {},
-  "merged_through": "2026-11-20T12:29:05Z",
-  "unreleased": {
-   "19748": {
-    "title": "fix(coding-agent): fire key events after a browser fill for pages that search on keyup",
-    "merge_commit": "b832944e598a22cbe022394a7e02b181f58f26c9",
-    "merged_at": "2026-11-20T00:19:37Z"
-   },
-   "19611": {
-    "title": "fix(coding-agent): keep the image omission note on evicted Responses computer results",
-    "merge_commit": "9c1d2879708db7357554ceb63de326e524a4c94b",
-    "merged_at": "2026-11-20T00:19:38Z"
-   },
-   "19590": {
-    "title": "fix(ai): warn when a broker refresh failure outlasts the access token",
-    "merge_commit": "35a313ec2bf11512eb4816d718fbd373689bc2ca",
-    "merged_at": "2026-11-20T00:19:38Z"
-   },
-   "19814": {
-    "title": "fix(natives): write Windows edit values without activating their window",
-    "merge_commit": "1d69c008d42dbe6520db807598c2be20470159d8",
-    "merged_at": "2026-11-20T12:29:05Z"
+  "conflicts": {
+   "#19623": {
+    "since": "2026-11-21T07:53:28Z",
+    "title": "feat(ai,coding-agent): record why a session's OAuth account switched",
+    "files": [
+     "packages/coding-agent/src/modes/controllers/event-controller.ts"
+    ]
    }
   },
+  "merged_through": "2026-11-20T12:29:05Z",
+  "unreleased": {},
   "ready": [
    17756,
    19195,
@@ -108986,6 +108973,43 @@
     "id": "win-button-click",
     "title": "fix(natives): click Windows buttons without activating their window",
     "why": "opened as #19889"
+   },
+   {
+    "at": "2026-11-21T07:53:28Z",
+    "kind": "released",
+    "number": 19748,
+    "title": "fix(coding-agent): fire key events after a browser fill for pages that search on keyup",
+    "tag": "v19.1.0"
+   },
+   {
+    "at": "2026-11-21T07:53:28Z",
+    "kind": "released",
+    "number": 19611,
+    "title": "fix(coding-agent): keep the image omission note on evicted Responses computer results",
+    "tag": "v19.1.0"
+   },
+   {
+    "at": "2026-11-21T07:53:28Z",
+    "kind": "released",
+    "number": 19590,
+    "title": "fix(ai): warn when a broker refresh failure outlasts the access token",
+    "tag": "v19.1.0"
+   },
+   {
+    "at": "2026-11-21T07:53:28Z",
+    "kind": "released",
+    "number": 19814,
+    "title": "fix(natives): write Windows edit values without activating their window",
+    "tag": "v19.1.0"
+   },
+   {
+    "at": "2026-11-21T07:53:28Z",
+    "kind": "conflict",
+    "label": "#19623",
+    "title": "feat(ai,coding-agent): record why a session's OAuth account switched",
+    "files": [
+     "packages/coding-agent/src/modes/controllers/event-controller.ts"
+    ]
    }
   ]
  },
@@ -118770,7 +118794,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-21T06:52:25.855574Z",
+  "at": "2026-11-21T07:53:29.396667Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -119226,8 +119250,10 @@
     "area": "auth",
     "priority": "P2",
     "title": "feat(ai,coding-agent): record why a session's OAuth account switched",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in packages/coding-agent/src/modes/controllers/event-controller.ts"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -119871,7 +119897,7 @@
      "held: Main, 2026-11-11: stays held until #18786 merges with the typed-message guide channel (design check replace); then one property on the computer prelude, drop the wrap variant, re-run its blind legs",
      "conflicts with #19195 in packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19870 in packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with main in packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/sdk-computer-prelude-toggle.test.ts, packages/coding-agent/test/tools/computer.test.ts, packages/coding-agent/test/tools/eval-description.test.ts"
+     "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/sdk-computer-prelude-toggle.test.ts, packages/coding-agent/test/tools/computer.test.ts, packages/coding-agent/test/tools/eval-description.test.ts"
     ],
     "note": "",
     "over": [],
@@ -120189,7 +120215,7 @@
      "conflicts with #19623 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #19626 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #19701 in packages/coding-agent/src/session/agent-session.ts",
-     "its need token-count-policy conflicts with main in packages/catalog/src/compat/rules/README.md, packages/catalog/src/compat/rules/classes/anthropic.kdl, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/session/session-stats.ts, packages/coding-agent/test/context-fits-model.test.ts",
+     "its need token-count-policy conflicts with main in packages/catalog/scripts/compat-compiler/compile-axes.ts, packages/catalog/src/compat/rules/README.md, packages/catalog/src/compat/rules/classes/anthropic.kdl, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/session/session-stats.ts, packages/coding-agent/test/context-fits-model.test.ts",
      "its need wire-delta-count conflicts with main in packages/agent/src/tokenizer.ts, packages/agent/test/tokenizer.test.ts, packages/ai/src/providers/factory-droid.ts, packages/ai/src/providers/transform-messages.ts, packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with main in packages/agent/src/agent.ts, packages/ai/src/providers/factory-droid/gemini.ts, packages/ai/src/providers/google-gemini-cli.ts, packages/ai/src/providers/openai-responses.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/context-view.ts, packages/coding-agent/test/modes/context-view.test.ts, packages/tui/src/status-line/context-usage.ts, packages/tui/test/context-usage.test.ts"
     ],
@@ -120578,7 +120604,7 @@
     "action": "wait",
     "reasons": [
      "needs token-count-policy (queued)",
-     "its need token-count-policy conflicts with main in packages/catalog/src/compat/rules/README.md, packages/catalog/src/compat/rules/classes/anthropic.kdl, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/session/session-stats.ts, packages/coding-agent/test/context-fits-model.test.ts",
+     "its need token-count-policy conflicts with main in packages/catalog/scripts/compat-compiler/compile-axes.ts, packages/catalog/src/compat/rules/README.md, packages/catalog/src/compat/rules/classes/anthropic.kdl, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/session/session-stats.ts, packages/coding-agent/test/context-fits-model.test.ts",
      "conflicts with main in crates/natives/data/LICENSE.gemma4, crates/natives/data/gemma4.bin.zst, crates/natives/fixtures/gemma4.json, crates/natives/src/utok/gemma.rs, crates/natives/src/utok/tests/gemma.rs, crates/natives/tools/gen-gemma-fixtures.py, crates/natives/tools/pack-gemma.ts, docs/models.md, packages/natives/THIRD-PARTY-NOTICES.txt"
     ],
     "note": "",
@@ -120602,7 +120628,7 @@
     "reasons": [
      "conflicts with #19620 in packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with #19880 in packages/catalog/src/compat/rules/README.md, packages/catalog/src/compat/rules/classes/anthropic.kdl, packages/catalog/src/compat/rules/classes/glm.kdl, packages/catalog/src/compat/rules/classes/kimi.kdl, packages/catalog/src/compat/rules/classes/openai.kdl",
-     "conflicts with main in packages/catalog/src/compat/rules/README.md, packages/catalog/src/compat/rules/classes/anthropic.kdl, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/session/session-stats.ts, packages/coding-agent/test/context-fits-model.test.ts"
+     "conflicts with main in packages/catalog/scripts/compat-compiler/compile-axes.ts, packages/catalog/src/compat/rules/README.md, packages/catalog/src/compat/rules/classes/anthropic.kdl, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/session/session-stats.ts, packages/coding-agent/test/context-fits-model.test.ts"
     ],
     "note": "",
     "over": [],
