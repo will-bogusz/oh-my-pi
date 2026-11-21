@@ -107310,7 +107310,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-21T08:54:41Z",
+  "checked": "2026-11-21T09:24:42Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -107423,15 +107423,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-14T09:04:14Z",
-    "kind": "conflict",
-    "label": "#18786",
-    "title": "feat(agent,coding-agent): send a short browser guide with the first browser call",
-    "files": [
-     "packages/coding-agent/src/session/agent-session.ts"
-    ]
-   },
    {
     "at": "2026-11-14T13:07:56Z",
     "kind": "unopenable",
@@ -118763,7 +118754,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-21T08:54:42.570183Z",
+  "at": "2026-11-21T09:24:42.799931Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -120453,7 +120444,7 @@
      "conflicts with #19195 in docs/tools/computer.md",
      "conflicts with #19889 in crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md",
      "its need win-uia-set-patterns conflicts with main in crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md",
-     "its need #19871 conflicts with main in crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md"
+     "its need #19871 conflicts with main in crates/natives/src/desktop/mod.rs, crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md"
     ],
     "note": "accepted pair with #19870: Main, 2026-11-21: win32/ax.rs std + windows_sys UI import unions (as D's form); D2's appended impl methods and #19870's scroll_at_point methods insert at one point: combined = both blocks (methods of each inside the impl, then free items of each), no shared item names; docs: D2's 'and setValue() calls' goes inside the recorded #19871 x #19870 dispatch line. Combined tree (sim main+wbc+#19871+D+uia+D2 x #19870, 6ae79fb584) passed Windows clippy/rustfmt on goliath. The docs AxUnconfirmed paragraph written by #19870, wbc, #19871 and D/D2 is read once as a whole by whoever merges last (Main's ruling).",
     "over": [],
