@@ -107279,7 +107279,7 @@
    "needs": [
     "devin-neon-image-price"
    ],
-   "base": "3c05b860c5c5d99fe4c50dac8968b0102a7d5e8d",
+   "base": "3c65f4895fdbfb06120eb38e6168876d597428c3",
    "body": "bodies/devin-gemini-image-price-rest.md",
    "state": "queued",
    "pr": null,
@@ -107287,10 +107287,10 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-gemini-image-price-rest",
    "host": "MacBook-Pro",
    "added": "2026-11-20T21:22:43Z",
-   "updated": "2026-11-21T11:22:47Z",
+   "updated": "2026-11-21T11:24:35Z",
    "note": "LaneSnapcompactStack, 2026-11-21: need #19883 merged (Brit batch; his dc9a2443adf restated its CHANGELOG at the catalog layer). Rebased onto main 3c65f4895fd, rules.json regenerated; CHANGELOG now 'budgeted at the 1,089 tokens Devin bills per image, measured across sizes, instead of the unverified 1,120-token Gemini estimate'; body What rewritten: catalog change first, then why frames change (verified price replaces snapcompact's 5,024 floor), no 'twice as much history'. Material body change after review: final-head review applies. Catalog 1,416 pass; Devin row fails with devin.kdl reverted; frames 26->48 rechecked on new main (3.6 Flash 26, Neon 48 both).",
    "kind": "fix",
-   "advanced": "2026-11-21T11:21:23Z"
+   "advanced": "2026-11-21T11:24:35Z"
   },
   {
    "id": "devin-gemini-image-count-80",
