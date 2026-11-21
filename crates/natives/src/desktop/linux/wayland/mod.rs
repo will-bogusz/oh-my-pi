@@ -1,4 +1,5 @@
 mod capture;
+mod hyprland;
 mod libei;
 mod pipewire;
 mod portal;
@@ -167,7 +168,11 @@ fn compositor_pid() -> Option<u32> {
 	} else {
 		PathBuf::from(std::env::var_os("XDG_RUNTIME_DIR")?).join(display)
 	};
-	let socket = UnixStream::connect(path).ok()?;
+	peer_pid(&UnixStream::connect(path).ok()?)
+}
+
+/// The PID of the process at the other end of a connected Unix socket.
+fn peer_pid(socket: &UnixStream) -> Option<u32> {
 	let mut credentials = libc::ucred { pid: 0, uid: 0, gid: 0 };
 	let mut length = size_of::<libc::ucred>() as libc::socklen_t;
 	// SAFETY: `credentials` and `length` are live, correctly sized out-params
@@ -190,7 +195,7 @@ impl WaylandBackend {
 		// builds wrote during read-only calls; nothing reads it anymore (#7884).
 		portal::remove_orphaned_remote_desktop_token();
 		let (ax, ax_error) = match AtSpiAx::new() {
-			Ok(ax) => (Some(ax.with_alert_windows()), None),
+			Ok(ax) => (Some(hyprland::placing(ax.with_alert_windows())), None),
 			Err(err) => (None, Some(err)),
 		};
 		Self {
@@ -344,7 +349,17 @@ impl Backend for WaylandBackend {
 				ax.holds_focus(window)
 			});
 		}
-		Ok(windows.into_iter().map(|entry| entry.window).collect())
+		// Hyprland is asked only when a toolkit could not place its window;
+		// without an answer the list is AT-SPI's.
+		let clients = windows
+			.iter()
+			.any(|entry| !entry.position_known)
+			.then(|| hyprland::Session::current()?.clients().ok())
+			.flatten();
+		Ok(match clients {
+			Some(clients) => hyprland::listed(windows, &clients),
+			None => windows.into_iter().map(|entry| entry.window).collect(),
+		})
 	}
 
 	fn missing_window(&self, target: &Target) -> Option<DesktopError> {
@@ -389,6 +404,11 @@ impl Backend for WaylandBackend {
 		_caps: &CaptureCaps,
 		selector: Option<&DisplaySelector>,
 	) -> CoreResult<(RgbaImage, FrameGeometry)> {
+		// Hyprland's view of a window target, read on both sides of the frame.
+		let before = matches!(target, Target::Window(_))
+			.then(hyprland::Session::current)
+			.flatten()
+			.map(|hyprland| hyprland.snapshot());
 		let (image, geometry) = capture::capture(self.pipewire)?;
 		self.displays = vec![geometry.display()];
 		let explicit = target.display_selector();
@@ -401,15 +421,30 @@ impl Backend for WaylandBackend {
 				Ok((image, FrameGeometry::for_displays(&selected)))
 			},
 			Target::Window(id) => {
-				let entry = self
-					.atspi_windows()?
-					.into_iter()
-					.find(|entry| &entry.window.id == id)
+				let mut windows = self.atspi_windows()?;
+				let index = windows
+					.iter()
+					.position(|entry| &entry.window.id == id)
 					.ok_or_else(|| {
 						self.missing_window(target).unwrap_or_else(|| {
 							DesktopError::window_not_found(format!("Wayland window {id} not found"))
 						})
 					})?;
+				// A window its toolkit cannot place is cut where Hyprland showed
+				// it, only while both reads agree; otherwise it is refused as on
+				// any Wayland desktop.
+				let shown = (!windows[index].position_known)
+					.then(|| {
+						let before = before?.ok()?;
+						let after = hyprland::Session::current()?.snapshot().ok()?;
+						hyprland::agreed(&before, &after, &windows, &windows[index].window)
+					})
+					.flatten();
+				let mut entry = windows.swap_remove(index);
+				if let Some([x, y]) = shown {
+					(entry.window.x, entry.window.y) = (x, y);
+					entry.position_known = true;
+				}
 				let ((x, y, width, height), frame) = geometry.window_crop(&entry)?;
 				let cropped = image::imageops::crop_imm(&image, x, y, width, height).to_image();
 				Ok((cropped, frame))
