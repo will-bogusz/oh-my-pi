@@ -4,7 +4,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-21
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-21 19:06Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 1, conflict-held 17, stacked 19, held 13, parked 1, open PRs 26, queued since the last plan 1; merged 408, closed 44
+**Counts:** openable now 1, conflict-held 17, stacked 19, held 13, parked 1, open PRs 26, queued since the last plan 2; merged 408, closed 44
 
 ## Openable now (1)
 
@@ -113,8 +113,9 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-21
 | [#19878](https://github.com/can1357/oh-my-pi/pull/19878) | picker-stale-discovery | fix(coding-agent,tui): refresh discovery from the model picker once the catalog is two hours old | other | P1 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/picker-stale-discovery) |
 | [#20038](https://github.com/can1357/oh-my-pi/pull/20038) | devin-gemini-image-price-rest | fix(catalog): budget Devin's other measured Gemini models at the 1,089 tokens it bills per image | catalog | P0 | 7h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-gemini-image-price-rest) |
 
-## Queued since the last plan (1)
+## Queued since the last plan (2)
 
 | id | title | area | priority | age | branch |
 |---|---|---|---|---|---|
 | cursor-long-context-output | fix(catalog): price Cursor's GPT-5.6 long-context output at 1.5x | catalog |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/cursor-long-context-output) |
+| devin-fast-long-context | fix(catalog): price Devin's GPT-5.6 long-context tiers as published, Fast lanes included | catalog |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-fast-long-context) |
