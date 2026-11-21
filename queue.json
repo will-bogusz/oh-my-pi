@@ -107434,8 +107434,50 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/linux-ax-value-selected",
    "host": "MacBook-Pro",
    "added": "2026-11-21T22:56:01Z",
-   "updated": "2026-11-21T23:02:25Z",
-   "note": "QueueFortyEight, 2026-11-21: from lane LinuxClicks (8a31c81a1c0 on 07c97a3e991), rebased onto e1a9f4b41d2 as 3d46eca4724; Rust diff 9161ce4807 unchanged, rust-check linux/windows/macos records stand. Main's rulings: (a) prompt hunk kept, only moves (selected) from 'on macOS:' to 'on macOS and Linux' (corrects a sentence the change makes false, adds no instruction; body says no model sample run, which answers precheck's behavior NOTE). precheck FIXes a touched package without an entry and has no prompt-only exemption, so the coding-agent Fixed line was added (folded into the one commit). (b) review LinuxClicks.ReviewLinuxAxValue (openai-codex/gpt-6.2-sol) at 8a31c81a1c0 needs-changes, answered: retained risk (an app that lists Value and never answers uses up read_node's per-element deadline and fails the whole ax()/find(), as main already does for Text) accepted by Main as a stated Limit, no code; body length/checklist fixed by the lane; changelog gate answered by (a). The reviewer read an earlier body draft (3,677 prose chars). (c) the guest numbers come from first build 114ffbeedf3 (also asked elements with unreadable interfaces); a final-head confirmation on wl-gnome was blocked by goliath's guest admission (MemAvailable 12.3 GiB, 4 GiB guest would leave 8.3 < 9 GiB; another session's two Android emulators hold ~12.6 GiB); body says which build was measured: scroll bars proven to list Value through their setValue's own GetInterfaces (LinuxClicks), sliders not re-measured. (d) Limits in body: many selected rows (~550 tokens/200 rows), find({value:'1'}) matches a numeric control, LibreOffice document scroll bar ok-without-moving (as main), the retained risk. Queued-entry conflicts (they wait behind it): uia win-uia-set-patterns in macos/ax.rs (import list only: combined = union of bounded_number with uia's decimal_value, plain_decimal, real_reached; ax.rs auto-merges, combined compile untested), docs/prompt with win-ax-states, win-minimised-windows, computer-rich-text, computer-input-diff-repo, win-type-insert, desktop-cursor, computer-guide-first-use. None with popup, fence, D, D2. Follow-up entry B (no branch): GTK 3 list rows selected through the parent's AT-SPI Selection (SelectChild) by their by-construction index only, needs this entry's SELECTED read-back to confirm; GTK 4 excluded because SelectChild(i) counts all rows while AT-SPI's child list skips rows the app hid and includes a visible placeholder (GTK 4.24.1 source, LinuxClicks' report)."
+   "updated": "2026-11-21T23:15:42Z",
+   "note": "QueueFortyEight, 2026-11-21: from lane LinuxClicks (8a31c81a1c0 on 07c97a3e991), rebased onto e1a9f4b41d2 as 3d46eca4724; Rust diff 9161ce4807 unchanged, rust-check linux/windows/macos records stand. Main's rulings: (a) prompt hunk kept, only moves (selected) from 'on macOS:' to 'on macOS and Linux' (corrects a sentence the change makes false, adds no instruction; body says no model sample run, which answers precheck's behavior NOTE). precheck FIXes a touched package without an entry and has no prompt-only exemption, so the coding-agent Fixed line was added (folded into the one commit). (b) review LinuxClicks.ReviewLinuxAxValue (openai-codex/gpt-6.2-sol) at 8a31c81a1c0 needs-changes, answered: retained risk (an app that lists Value and never answers uses up read_node's per-element deadline and fails the whole ax()/find(), as main already does for Text) accepted by Main as a stated Limit, no code; body length/checklist fixed by the lane; changelog gate answered by (a). The reviewer read an earlier body draft (3,677 prose chars). (c) the guest numbers come from first build 114ffbeedf3 (also asked elements with unreadable interfaces); a final-head confirmation on wl-gnome was blocked by goliath's guest admission (MemAvailable 12.3 GiB, 4 GiB guest would leave 8.3 < 9 GiB; another session's two Android emulators hold ~12.6 GiB); body says which build was measured: scroll bars proven to list Value through their setValue's own GetInterfaces (LinuxClicks), sliders not re-measured. (d) Limits in body: many selected rows (~550 tokens/200 rows), find({value:'1'}) matches a numeric control, LibreOffice document scroll bar ok-without-moving (as main), the retained risk. Queued-entry conflicts (they wait behind it): uia win-uia-set-patterns in macos/ax.rs (import list only: combined = union of bounded_number with uia's decimal_value, plain_decimal, real_reached; ax.rs auto-merges, combined compile untested), docs/prompt with win-ax-states, win-minimised-windows, computer-rich-text, computer-input-diff-repo, win-type-insert, desktop-cursor, computer-guide-first-use. None with popup, fence, D, D2. Follow-up entry B (no branch): GTK 3 list rows selected through the parent's AT-SPI Selection (SelectChild) by their by-construction index only, needs this entry's SELECTED read-back to confirm; GTK 4 excluded because SelectChild(i) counts all rows while AT-SPI's child list skips rows the app hid and includes a visible placeholder (GTK 4.24.1 source, LinuxClicks' report).",
+   "built": [
+    {
+     "with": "#19702",
+     "code": "6415b2db6fad53f8246a64a2bccaae758b661424",
+     "with_code": "e608cd824a8447d2fca6ebe64e6b79079f530099",
+     "tip": "3d46eca4724a5833612ff13d906ed2ccc0dfde05",
+     "with_tip": "93c26989760a470a608e8c011354fb2ec8d4c95a",
+     "at": "2026-11-21T23:15:41Z",
+     "host": "MacBook-Pro",
+     "tree": "96950dfa7bc5f010b5962d363e10ccc6a5b16ef7"
+    },
+    {
+     "with": "#19889",
+     "code": "6415b2db6fad53f8246a64a2bccaae758b661424",
+     "with_code": "e202d05e26193cf4896362b5900d199b852bc878",
+     "tip": "3d46eca4724a5833612ff13d906ed2ccc0dfde05",
+     "with_tip": "c266cc4704a8b4f84a043dad5162b78278492550",
+     "at": "2026-11-21T23:15:41Z",
+     "host": "MacBook-Pro",
+     "tree": "96950dfa7bc5f010b5962d363e10ccc6a5b16ef7"
+    },
+    {
+     "with": "#19531",
+     "code": "6415b2db6fad53f8246a64a2bccaae758b661424",
+     "with_code": "d6ffe761e6cb2055157979cb3d54b5c3ba1571d5",
+     "tip": "3d46eca4724a5833612ff13d906ed2ccc0dfde05",
+     "with_tip": "c4f108df6baba14e68f682083e4bf3447f32fe90",
+     "at": "2026-11-21T23:15:41Z",
+     "host": "MacBook-Pro",
+     "tree": "96950dfa7bc5f010b5962d363e10ccc6a5b16ef7"
+    },
+    {
+     "with": "#19701",
+     "code": "6415b2db6fad53f8246a64a2bccaae758b661424",
+     "with_code": "ee683a22eebb363ada645b7a7da414c8c3e71a56",
+     "tip": "3d46eca4724a5833612ff13d906ed2ccc0dfde05",
+     "with_tip": "1b2a3d9de31ba77e5aaa7d8df5412cd34ec1cb77",
+     "at": "2026-11-21T23:15:41Z",
+     "host": "MacBook-Pro",
+     "tree": "96950dfa7bc5f010b5962d363e10ccc6a5b16ef7"
+    }
+   ]
   }
  ],
  "watch": {
