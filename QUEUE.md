@@ -1,10 +1,10 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-21 02:41Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-21 02:42Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-21 02:31Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 2, conflict-held 16, stacked 22, held 12, parked 1, open PRs 28; merged 404, closed 44
+**Counts:** openable now 2, conflict-held 16, stacked 21, held 13, parked 1, open PRs 28; merged 404, closed 44
 
 ## Openable now (2)
 
@@ -34,7 +34,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-21
 | macos-web-type-background | fix(natives): type into a background macOS web page field without a takeover | computer | P2 | 6d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19504](https://github.com/can1357/oh-my-pi/pull/19504), [#19702](https://github.com/can1357/oh-my-pi/pull/19702), [#19871](https://github.com/can1357/oh-my-pi/pull/19871), [#19531](https://github.com/can1357/oh-my-pi/pull/19531), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-web-type-background) |
 | deadline-ranking | feat(ai): rank an account priority by quota deadline | ai/auth | P2 | 3d | [#19623](https://github.com/can1357/oh-my-pi/pull/19623), [#19700](https://github.com/can1357/oh-my-pi/pull/19700), [#19701](https://github.com/can1357/oh-my-pi/pull/19701) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/deadline-ranking) |
 
-## Stacked (22)
+## Stacked (21)
 
 | id | title | area | priority | age | needs | branch |
 |---|---|---|---|---|---|---|
@@ -53,7 +53,6 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-21
 | snapcompact-deepseek-text | fix(catalog,snapcompact,coding-agent): give DeepSeek V4.1 Flash its snapcompact archive as text | snapcompact | P2 | 2d | snapcompact-shape-kdl ([#19880](https://github.com/can1357/oh-my-pi/pull/19880)), snapcompact-rerender-on-switch ([#19620](https://github.com/can1357/oh-my-pi/pull/19620)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-deepseek-text) |
 | snapcompact-carbon-1568 | fix(catalog): draw Gemini 4 Carbon, Neon and Hydrogen snapcompact frames at 1568px on Devin, and Carbon's on Factory Droid | snapcompact | P2 | 2d | snapcompact-shape-kdl ([#19880](https://github.com/can1357/oh-my-pi/pull/19880)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-carbon-1568) |
 | win-popup-foreground | fix(natives): press items of the open WPF context menu of the window in front | computer |  | 21h | win-button-click ([#19889](https://github.com/can1357/oh-my-pi/pull/19889)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-popup-foreground) |
-| win-takeover-settle | fix(natives): stop Windows takeovers of a busy app bringing it forward after the call failed | computer |  | 12h | win-takeover-intervene | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-takeover-settle) |
 | win-button-click-fence | fix(natives): mark dispatch before a fenced BM_CLICK | computer |  | 9h | win-button-click ([#19889](https://github.com/can1357/oh-my-pi/pull/19889)), desktop-dispatch-fence ([#19871](https://github.com/can1357/oh-my-pi/pull/19871)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-button-click-fence) |
 | win-wpf-press | fix(natives): press WPF controls behind other windows through their default action | computer |  | 7h | win-button-click ([#19889](https://github.com/can1357/oh-my-pi/pull/19889)), desktop-dispatch-fence ([#19871](https://github.com/can1357/oh-my-pi/pull/19871)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-wpf-press) |
 | win-takeover-selection | fix(natives): keep the user's caret through a Windows takeover's hand-back | computer |  | 7h | win-takeover-settle | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-takeover-selection) |
@@ -61,7 +60,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-21
 | devin-gemini-image-price-rest | fix(catalog): budget Devin's other measured Gemini models at the 1,089 tokens it bills per image | catalog | P2 | 5h | devin-neon-image-price ([#19883](https://github.com/can1357/oh-my-pi/pull/19883)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-gemini-image-price-rest) |
 | devin-gemini-image-count-80 | fix(catalog): let Gemini on Devin's own host carry 80 images | catalog | P2 | 4h | snapcompact-carbon-1568 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-gemini-image-count-80) |
 
-## Held (12)
+## Held (13)
 
 | id | title | area | priority | age | hold | branch |
 |---|---|---|---|---|---|---|
@@ -76,6 +75,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-21
 | macos-keys-read-cost | perf(natives): prove a macOS key window draws its own content without reading all its children | computer | P2 | 2d | Main, 2026-11-18: needs an independent review and a VM row before it can open; no work on it now | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-keys-read-cost) |
 | win-uia-set-patterns | fix(natives): set WPF sliders and combo boxes through RangeValue and SelectionItem | computer |  | 20h | Main, 2026-11-20: in its fix round (WinWpfRoutes5, review needs-changes at 86d258734d9); takes the recorded ax.rs form with win-wpf-scroll when it follows | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-uia-set-patterns) |
 | win-takeover-intervene | fix(natives): wait for the user to pause before a Windows takeover | computer |  | 14h | Main, 2026-11-21: cut head (option P) pre-open in progress: merged trees, body review, pre-open line; opens only on Main's go | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-takeover-intervene) |
+| win-takeover-settle | fix(natives): stop Windows takeovers of a busy app bringing it forward after the call failed | computer |  | 12h | Main, 2026-11-21: waits on a restack lane onto cut C (f2d071a1915): needs new production code, since the cut removed what it used: it must carry the WM_NULL settle_activation fence and the interruptible bring_forward arrival loop itself, and a "person input since the takeover started" veto (on cut C alone only the polled last-input date, pointer moves veto too; activity::check() only with the listener + stop-on-press follow-up). Spec: ~/tmp/trycua-omp/WinTakeoverCut/PLAN.md (d) and "What a/b need" | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-takeover-settle) |
 | hyprland-window-list | fix(natives): list Hyprland window positions for native Wayland apps | computer |  | 8h | LinuxUpstream2, 2026-11-20: delta review ReviewHyprList (gpt-6.2-sol) on 50e036edcd6 needs-changes, 3 must-fixes in new code (positional j/clients rows accepted; Hyprland::detect connects at backend startup and caches a failed probe; accept-queue test hits the FD limit); parked for Main/Will | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/hyprland-window-list) |
 
 ## Parked (1)
