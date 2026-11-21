@@ -107344,7 +107344,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/cursor-long-context-output",
    "host": "MacBook-Pro",
    "added": "2026-11-21T19:25:32Z",
-   "updated": "2026-11-21T19:46:39Z",
+   "updated": "2026-11-21T19:47:01Z",
    "note": "",
    "built": [
     {
@@ -107375,7 +107375,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-11-21T19:46:39Z"
+   "opened": "2026-11-21T19:46:39Z",
+   "readied": "2026-11-21T19:47:00Z"
   },
   {
    "id": "devin-fast-long-context",
