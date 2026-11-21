@@ -104345,7 +104345,7 @@
    "area": "snapcompact",
    "priority": "P2",
    "needs": [],
-   "base": "725f8c6f34ce648bec57af31a4e91baea1081a3c",
+   "base": "3c65f4895fdbfb06120eb38e6168876d597428c3",
    "body": "bodies/snapcompact-rerender-on-switch.md",
    "state": "open",
    "pr": 19620,
@@ -104353,9 +104353,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-rerender-on-switch",
    "host": "MacBook-Pro",
    "added": "2026-11-18T00:36:24Z",
-   "updated": "2026-11-20T17:50:29Z",
+   "updated": "2026-11-21T11:25:45Z",
    "note": "LaneSnapcompactStack, 2026-11-20: GitHub CONFLICTING was CHANGELOG-only (merge=union hides it locally; both CHANGELOGs conflict without union after 19.0.0/19.0.1). Advanced onto 725f8c6f34; composes with #19591: views and context scans now keyed by the reader's snapcompactShape (205ab81cc2b, review Review19620Rebase needs-changes at df77b71 for the scan key, fixed). Pair with snapcompact-shape-kdl built.",
-   "advanced": "2026-11-20T17:32:36Z",
+   "advanced": "2026-11-21T11:25:45Z",
    "built": [
     {
      "with": "#19516",
