@@ -36,7 +36,7 @@ On Windows 11, across 40 trials per build with the person typing as the call sta
 
 Windows 11 guest, v19.0.1 (release natives) against an addon of this branch at 1abbc33c67d (build hash checked on install; this head differs from it only in one error message's wording and the prompt line), two interleaved rounds per build; WPF target, the person's keys and pointer moves sent as real QEMU input to their own window. Windows refused to activate the target in 11 of 90 v19.0.1 trials and 12 of 90 here (`InputFailed`, nothing sent; a click pair counts its second call); the table counts every trial. The baseline is v19.0.1, not this branch's merge base.
 
-`rust-check` passed on Linux, Windows MSVC and macOS at this head. The prompt's `UserIntervened` sentence now names Windows; no instruction changed, no model sample run.
+`rust-check` passed on Linux, Windows MSVC and macOS at this head. `bun check` fails on `main` at formatting (20 TS files, `crates/edit/tests/sloppy_parse.rs`) and fails the same way here; `check:types` for coding-agent and natives passes. The prompt's `UserIntervened` sentence now names Windows; no instruction changed, no model sample run.
 
 Units (`cargo test -p omp-natives --lib desktop::win32::activity`, run on macOS) with injected clock and tick values; each row added for a review finding fails with that fix reverted. The functions they test have no Windows-only path (each Win32 read is a `cfg(windows)` wrapper passed in as a closure), and the Windows `rust-check` (clippy on all targets) checks these tests against MSVC.
 
