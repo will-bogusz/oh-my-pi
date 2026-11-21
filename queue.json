@@ -107310,7 +107310,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-21T05:51:56Z",
+  "checked": "2026-11-21T06:52:25Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -107436,22 +107436,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-14T06:31:53Z",
-    "kind": "merged",
-    "number": 19188,
-    "title": "fix(catalog): keep GPT-6 effort changes off configuration_update on Factory Droid Bedrock and Snowflake",
-    "merged_by": "can1357",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-14T06:31:53Z",
-    "kind": "merged",
-    "number": 19180,
-    "title": "fix(catalog): identify Devin requests as CLI 3000.12.57",
-    "merged_by": "can1357",
-    "maintainer_commits": 0
-   },
    {
     "at": "2026-11-14T07:02:08Z",
     "kind": "conflict",
@@ -118796,12 +118780,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-21T05:51:57.543312Z",
+  "at": "2026-11-21T06:52:25.855574Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 1,
-   "left": 7
+   "used": 0,
+   "left": 8
   },
   "rows": [
    {
