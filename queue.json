@@ -106483,7 +106483,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/desktop-dispatch-fence",
    "host": "MacBook-Pro",
    "added": "2026-11-20T15:50:23Z",
-   "updated": "2026-11-21T08:32:23Z",
+   "updated": "2026-11-21T09:08:21Z",
    "note": "",
    "tests_over_override": {
     "reason": "WinWpfRoutes6, 2026-11-20: the final-head review asked for the action off side through the caller and deadline-free teardown; the four session tests each reach a distinct branch (marked then expired, abandoned, on time, unfenced)",
@@ -106597,7 +106597,7 @@
      "tree": "7e9a9b0ac08912a0e7d1dce33419bedbf6fa4529"
     }
    ],
-   "advanced": "2026-11-21T08:32:23Z",
+   "advanced": "2026-11-21T09:08:21Z",
    "opened": "2026-11-20T16:50:26Z",
    "readied": "2026-11-20T16:50:49Z"
   },
