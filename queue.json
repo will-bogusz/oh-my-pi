@@ -106080,15 +106080,17 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-popup-foreground",
    "host": "MacBook-Pro",
    "added": "2026-11-20T04:47:55Z",
-   "updated": "2026-11-20T21:09:43Z",
+   "updated": "2026-11-21T11:34:13Z",
    "note": "",
    "rebases_after": [
     19814,
-    19849
+    19849,
+    19871
    ],
    "pair_reasons": {
     "19814": "Main, 2026-11-20: win32/ax.rs set_value match; combined = #19814's ValueRoute::Edit arm unchanged, then this entry's two-closure Pattern arm (lookup, then send); built with #19849 at 3af806637f5, Windows clippy+rustfmt pass",
-    "19849": "Main, 2026-11-20: win32/window.rs; combined = WindowsAndMessaging import-list union, and one #[cfg(test)] mod tests holding both sides' uses and items (both append a tests module); recheck at #19849's next head"
+    "19849": "Main, 2026-11-20: win32/window.rs; combined = WindowsAndMessaging import-list union, and one #[cfg(test)] mod tests holding both sides' uses and items (both append a tests module); recheck at #19849's next head",
+    "19871": "Main, 2026-11-21: win32/ax.rs perform; combined = popup's lookup/send split, #19871's per-arm marks become one control::dispatching()? at the start of perform's send closure (after contained_root's second ensure_pattern_safe, so a refusal there is still nothing sent). Every send arm goes straight to its live UIA call (PositionlessPress::run invoke/expand/collapse/toggle/select, scroll_into_view, do_default_action; all pattern fetches and get_default_action are in lookup), so one mark is right. setValue unmarked (not dispatch_fenced); imports union. At open: Windows build of the combined tree running #19871's production-seam and unfenced-negative tests plus popup's recheck test"
    },
    "built": [
     {
