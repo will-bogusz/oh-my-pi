@@ -1,10 +1,10 @@
 ## What
 
-I measured what Devin bills per image for the rest of its Gemini models, and Gemini 4 Hydrogen and Argon and Gemini 3.5 and 3.8 Flash all bill the same flat ~1,089 tokens as Carbon and Neon, so this marks them verified and their snapcompact archives stop dropping history that fits.
+I measured what Devin bills per image for the rest of its Gemini models: Gemini 4 Hydrogen and Argon and Gemini 3.5 and 3.8 Flash all bill the same flat ~1,089 tokens as Carbon and Neon, so the catalog now budgets them at 1,089, verified, instead of the unverified 1,120-token Gemini estimate.
 
-A compaction of 1.54M characters at a 300K-token trigger on `devin/gemini-4-hydrogen` keeps 26 frames and drops 721K characters on `main`; with this PR it keeps 48 frames and drops nothing.
+Verifying the price is what changes compaction. Snapcompact plans each frame at a reader's catalog price only when that price is `verified`; otherwise it uses its own 5,024-token floor. So a compaction of 1.54M characters at a 300K-token trigger on `devin/gemini-4-hydrogen` plans 5,024 tokens per frame, keeps 26 frames and drops 721K characters on `main`; with this PR it plans 1,089, keeps 48 frames and drops nothing.
 
-> **Snapcompact context.** Compaction draws old history into PNG frames and caps how many it keeps by what they will cost in tokens. A reader whose image price is `verified` in the catalog is charged that price per frame; any other reader is charged a 5,024-token planning estimate.
+> **Snapcompact context.** Compaction draws old history into PNG frames and caps how many it keeps by what they will cost in tokens.
 
 The change is in `devin.kdl`: the Flash rule's revision range widens to `>=3.5 <3.6` and `>=3.7 <3.9`, and Hydrogen and Argon, with their raw effort uids, join Carbon and Neon's verified id list.
 
@@ -32,9 +32,9 @@ Decisions:
 ## Testing
 
 - **Live billing**, the table above, through omp's Devin transport.
-- **Frames kept.** A real `session.compact()` over 280 turns (1.54M characters), 1M-token window, 300K trigger: before this change Hydrogen, Argon, 3.5 Flash and 3.8 Flash each plan 5,024 tokens per frame, keep 26 frames and drop 720,896 characters; with it each plans 1,089, keeps 48 and drops nothing. Raw effort uids (`-xhigh`, `-low`) match their logical ids. 3.6 Flash stays at 26 frames; Carbon is 48 on both.
+- **Frames kept.** A real `session.compact()` over 280 turns (1.54M characters), 1M-token window, 300K trigger: Hydrogen, Argon, 3.5 Flash and 3.8 Flash each go from 26 frames (720,896 characters dropped) to 48 (none dropped). Raw effort uids (`-xhigh`, `-low`) match their logical ids. 3.6 Flash stays at 26 frames; Carbon is 48 on both.
 - `bun test packages/catalog/test/image-tokenization.test.ts`: 24 pass. With `devin.kdl` reverted and `gen:compat` rerun, every added id resolves to the unverified `tokens: 1120` rule and the Devin row fails.
-- `bun test packages/catalog`: 1,421 pass. `check:types` for `packages/catalog` passes; `bun check` fails on `main` itself (`oxfmt --check` on 20 browser-relay and collab-web files), so its box stays unticked.
+- `bun test packages/catalog`: 1,416 pass. `check:types` for `packages/catalog` passes; `bun check` fails on `main` itself (`oxfmt --check` on 20 browser-relay and collab-web files), so its box stays unticked.
 
 ---
 

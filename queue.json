@@ -107287,8 +107287,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-gemini-image-price-rest",
    "host": "MacBook-Pro",
    "added": "2026-11-20T21:22:43Z",
-   "updated": "2026-11-21T11:21:23Z",
-   "note": "LaneSnapcompactStack, 2026-11-20: Devin per-image billing for Gemini 4 Hydrogen/Argon and 3.5/3.8 Flash (REPORT.md block A, ~/tmp/adhoc/2026-11-20-devin-gemini-snapcompact/levers/routes). Diff applied as proposed, rules.json regenerated; catalog 1,421 pass; Devin row fails with devin.kdl reverted (every added id falls to unverified 1,120). Frames kept 26 -> 48 for each model, 3.6 Flash control stays 26. Review ReviewGeminiPriceRest: needs-changes at dc0cdfea163, body-only (Argon requests were nonce-varied, not byte-identical; 0 of 50 frame calls), both fixed in the stored body; no code finding. Dup-scan: no duplicate (only our #19883). Opens after #19883 merges.",
+   "updated": "2026-11-21T11:22:47Z",
+   "note": "LaneSnapcompactStack, 2026-11-21: need #19883 merged (Brit batch; his dc9a2443adf restated its CHANGELOG at the catalog layer). Rebased onto main 3c65f4895fd, rules.json regenerated; CHANGELOG now 'budgeted at the 1,089 tokens Devin bills per image, measured across sizes, instead of the unverified 1,120-token Gemini estimate'; body What rewritten: catalog change first, then why frames change (verified price replaces snapcompact's 5,024 floor), no 'twice as much history'. Material body change after review: final-head review applies. Catalog 1,416 pass; Devin row fails with devin.kdl reverted; frames 26->48 rechecked on new main (3.6 Flash 26, Neon 48 both).",
    "kind": "fix",
    "advanced": "2026-11-21T11:21:23Z"
   },
