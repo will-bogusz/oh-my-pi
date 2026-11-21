@@ -107001,9 +107001,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-takeover-selection",
    "host": "MacBook-Pro",
    "added": "2026-11-20T19:28:59Z",
-   "updated": "2026-11-21T02:42:04Z",
+   "updated": "2026-11-21T02:42:19Z",
    "note": "",
-   "hold": "Main, 2026-11-21: waits on a restack lane onto cut C via win-takeover-settle: needs the \"person input since the takeover started\" veto in its caret loops and a restack on the new restore code (cut C removed activity::check). Spec: ~/tmp/trycua-omp/WinTakeoverCut/PLAN.md (d) and \"What a/b need\""
+   "hold": "Main, 2026-11-21: waits on a restack lane onto cut C via win-takeover-settle: needs the \"person input since the takeover started\" veto in its caret loops and a restack on the new restore code (cut C removed activity::check). Spec: WinTakeoverCut PLAN.md (d) and \"What a/b need\""
   },
   {
    "id": "devin-org-identity",
