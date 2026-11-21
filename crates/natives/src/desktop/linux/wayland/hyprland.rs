@@ -132,7 +132,11 @@ pub(super) fn placing(ax: AtSpiAx) -> AtSpiAx {
 		&& compositor_pid()
 			.and_then(|pid| std::fs::read_to_string(format!("/proc/{pid}/comm")).ok())
 			.is_some_and(|comm| comm.trim_end() == "Hyprland");
-	if hyprland { ax.with_native_windows(Box::new(Windows::default())) } else { ax }
+	if hyprland {
+		ax.with_native_windows(Box::new(Windows::default()))
+	} else {
+		ax
+	}
 }
 
 impl Session {
@@ -153,7 +157,11 @@ impl Session {
 			|err: io::Error| DesktopError::ax_failed(format!("Hyprland IPC {command}: {err}"));
 		let left = || {
 			let left = deadline.saturating_duration_since(Instant::now());
-			if left.is_zero() { Err(failed(io::ErrorKind::TimedOut.into())) } else { Ok(left) }
+			if left.is_zero() {
+				Err(failed(io::ErrorKind::TimedOut.into()))
+			} else {
+				Ok(left)
+			}
 		};
 		let mut stream = connect(&self.socket).map_err(failed)?;
 		if peer_pid(&stream) != Some(self.compositor) {
@@ -225,7 +233,7 @@ pub(super) fn client_for<'a>(
 		&& same.next().is_none()
 		&& client.mapped
 		&& client.size == [window.width, window.height])
-		.then_some(client)
+	.then_some(client)
 }
 
 /// AT-SPI's windows as listed: each whose toolkit gives no position takes the
@@ -276,26 +284,43 @@ impl Snapshot {
 		window: &DesktopWindow,
 	) -> Option<(&str, String, [i32; 2], [u32; 2])> {
 		let client = client_for(&self.clients, windows, window)?;
-		let workspace = client.workspace.key().filter(|key| self.shown.contains(key))?;
-		let alike = |other: &&Client| other.mapped && other.pid == client.pid && other.size == client.size;
-		(self.clients.iter().filter(alike).count() == 1)
-			.then(|| (client.address.as_str(), workspace, client.at, client.size))
+		let workspace = client
+			.workspace
+			.key()
+			.filter(|key| self.shown.contains(key))?;
+		let alike =
+			|other: &&Client| other.mapped && other.pid == client.pid && other.size == client.size;
+		(self.clients.iter().filter(alike).count() == 1).then_some((
+			client.address.as_str(),
+			workspace,
+			client.at,
+			client.size,
+		))
 	}
 }
 
 /// Places AT-SPI elements of native Wayland windows by where Hyprland shows
 /// their window. One `j/clients` read serves an operation: it is dropped at
-/// the next ([`NativeWindows::refresh`]).
+/// the next ([`NativeWindows::refresh`]); a read that fails places nothing.
 #[derive(Default)]
 pub(super) struct Windows {
-	read: Mutex<Option<Option<Arc<Vec<Client>>>>>,
+	read: Mutex<Option<Arc<Vec<Client>>>>,
 }
 
 impl Windows {
-	fn clients(&self) -> Option<Arc<Vec<Client>>> {
-		let mut read = self.read.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
+	fn clients(&self) -> Arc<Vec<Client>> {
+		let mut read = self
+			.read
+			.lock()
+			.unwrap_or_else(|poisoned| poisoned.into_inner());
 		read
-			.get_or_insert_with(|| Some(Arc::new(Session::current()?.clients().ok()?)))
+			.get_or_insert_with(|| {
+				Arc::new(
+					Session::current()
+						.and_then(|hyprland| hyprland.clients().ok())
+						.unwrap_or_default(),
+				)
+			})
 			.clone()
 	}
 }
@@ -304,9 +329,7 @@ impl NativeWindows for Windows {
 	/// Every client, mapped or not, so a title two of them share matches
 	/// neither.
 	fn windows(&self) -> CoreResult<Vec<DesktopWindow>> {
-		let clients = self
-			.clients()
-			.ok_or_else(|| DesktopError::ax_failed("Hyprland IPC j/clients: no answer"))?;
+		let clients = self.clients();
 		Ok(clients
 			.iter()
 			.filter_map(|client| {
@@ -329,7 +352,7 @@ impl NativeWindows for Windows {
 	/// its process with its title: a frame matched earlier is matched again
 	/// once that stops holding.
 	fn geometry(&self, id: &str) -> Option<NativeGeometry> {
-		let clients = self.clients()?;
+		let clients = self.clients();
 		let client = clients.iter().find(|client| client.address == id)?;
 		let namesakes = clients
 			.iter()
@@ -349,7 +372,10 @@ impl NativeWindows for Windows {
 	}
 
 	fn refresh(&self) {
-		*self.read.lock().unwrap_or_else(|poisoned| poisoned.into_inner()) = None;
+		*self
+			.read
+			.lock()
+			.unwrap_or_else(|poisoned| poisoned.into_inner()) = None;
 	}
 }
 
@@ -407,14 +433,14 @@ mod tests {
 	fn atspi(pid: u32, title: &str, position_known: bool) -> AtSpiWindow {
 		AtSpiWindow {
 			window: DesktopWindow {
-				id: format!("atspi:{title}"),
-				title: title.into(),
-				app: "app".into(),
-				pid: Some(pid),
-				x: 0,
-				y: 0,
-				width: 621,
-				height: 750,
+				id:      format!("atspi:{title}"),
+				title:   title.into(),
+				app:     "app".into(),
+				pid:     Some(pid),
+				x:       0,
+				y:       0,
+				width:   621,
+				height:  750,
 				focused: title == "TDLG",
 			},
 			position_known,
@@ -474,7 +500,12 @@ mod tests {
 		] {
 			assert!(objects::<Client>(reply.as_bytes()).is_err(), "{reply}");
 		}
-		assert_eq!(objects::<Client>(format!("[{ROW}]").as_bytes()).unwrap().len(), 1);
+		assert_eq!(
+			objects::<Client>(format!("[{ROW}]").as_bytes())
+				.unwrap()
+				.len(),
+			1
+		);
 	}
 
 	#[test]
@@ -516,7 +547,11 @@ mod tests {
 		let socket = dir.path().join(".socket.sock");
 		let listener = UnixListener::bind(&socket).unwrap();
 		let hyprland = Session { socket, compositor: std::process::id() + 1 };
-		assert!(hyprland.request::<Client>("j/clients", unhurried()).is_err());
+		assert!(
+			hyprland
+				.request::<Client>("j/clients", unhurried())
+				.is_err()
+		);
 		let (mut stream, _) = listener.accept().unwrap();
 		assert_eq!(stream.read(&mut [0; 64]).unwrap(), 0);
 	}
@@ -570,7 +605,7 @@ mod tests {
 				atspi(4920, "foot", true),
 				// On a workspace no monitor shows: listed where it is there.
 				AtSpiWindow {
-					window: DesktopWindow { width: 1256, ..atspi(6001, "Home", false).window },
+					window:         DesktopWindow { width: 1256, ..atspi(6001, "Home", false).window },
 					position_known: false,
 				},
 				// The title changed since Hyprland read it.
@@ -670,7 +705,7 @@ mod tests {
 
 	#[test]
 	fn elements_are_placed_from_one_client_list_per_operation() {
-		let placing = Windows { read: Mutex::new(Some(Some(Arc::new(parse(CLIENTS))))) };
+		let placing = Windows { read: Mutex::new(Some(Arc::new(parse(CLIENTS)))) };
 		let ids: Vec<_> = placing
 			.windows()
 			.unwrap()
@@ -679,8 +714,7 @@ mod tests {
 			.collect();
 		// The closing window's pid is no process.
 		assert_eq!(ids, ["0x5501", "0x5502", "0x5503", "0x5504"]);
-		let geometry =
-			|id: &str| placing.geometry(id).map(|g| (g.x, g.y, g.width, g.height));
+		let geometry = |id: &str| placing.geometry(id).map(|g| (g.x, g.y, g.width, g.height));
 		assert_eq!(geometry("0x5501"), Some((12, 38, 621, 750)));
 		assert_eq!(geometry("0x5507"), None);
 		assert_eq!(geometry("0x9999"), None);
@@ -688,7 +722,7 @@ mod tests {
 		// longer told apart.
 		let mut clients: Vec<Client> = parse(CLIENTS);
 		clients.push(client("0x5508", 5104, "TDLG", true, 1));
-		*placing.read.lock().unwrap() = Some(Some(Arc::new(clients)));
+		*placing.read.lock().unwrap() = Some(Arc::new(clients));
 		assert_eq!(geometry("0x5501"), None);
 		placing.refresh();
 		assert!(placing.read.lock().unwrap().is_none());

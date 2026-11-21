@@ -1205,11 +1205,11 @@ async fn native_window(
 	let title = proxy.name().await.ok()?;
 	if native.screen_is_window_relative() {
 		let app = proxy.parent().await.ok()?;
+		let app = app.as_accessible_proxy(connection).await.ok()?;
 		let mut namesakes = 0;
-		for window in app.as_accessible_proxy(connection).await.ok()?.get_children().await.ok()? {
-			if window.as_accessible_proxy(connection).await.ok()?.name().await.ok()? == title {
-				namesakes += 1;
-			}
+		for window in app.get_children().await.ok()? {
+			let window = window.as_accessible_proxy(connection).await.ok()?;
+			namesakes += usize::from(window.name().await.ok()? == title);
 		}
 		if namesakes != 1 {
 			return None;
@@ -3908,9 +3908,8 @@ mod tests {
 			.await;
 			// The `XWayland` window's native origin differs from what it
 			// reports, so translating it would show.
-			let windows = [("42", "Desktop", 300, 200), ("43", "Editor", 700, 300), (
-				"44", "Viewer", 100, 100,
-			)];
+			let windows =
+				[("42", "Desktop", 300, 200), ("43", "Editor", 700, 300), ("44", "Viewer", 100, 100)];
 			let x11 = Native::new(&windows);
 			let wayland = WindowRelative(Native::new(&windows));
 			let mut bounds = Vec::new();
