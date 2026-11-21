@@ -118812,7 +118812,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-21T18:37:58.233234Z",
+  "at": "2026-11-21T18:44:59.306721Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -119217,10 +119217,8 @@
     "area": "auth",
     "priority": "P2",
     "title": "feat(ai,coding-agent): record why a session's OAuth account switched",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in packages/coding-agent/src/modes/controllers/event-controller.ts"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
