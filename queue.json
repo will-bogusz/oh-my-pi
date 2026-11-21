@@ -107245,8 +107245,14 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-wpf-set-background",
    "host": "MacBook-Pro",
    "added": "2026-11-20T21:08:35Z",
-   "updated": "2026-11-20T23:59:00Z",
-   "note": ""
+   "updated": "2026-11-21T00:12:58Z",
+   "note": "",
+   "rebases_after": [
+    19870
+   ],
+   "pair_reasons": {
+    "19870": "Main, 2026-11-21: win32/ax.rs std + windows_sys UI import unions (as D's form); D2's appended impl methods and #19870's scroll_at_point methods insert at one point: combined = both blocks (methods of each inside the impl, then free items of each), no shared item names; docs: D2's 'and setValue() calls' goes inside the recorded #19871 x #19870 dispatch line. Combined tree (sim main+wbc+#19871+D+uia+D2 x #19870, 6ae79fb584) passed Windows clippy/rustfmt on goliath. The docs AxUnconfirmed paragraph written by #19870, wbc, #19871 and D/D2 is read once as a whole by whoever merges last (Main's ruling)."
+   }
   },
   {
    "id": "devin-gemini-image-price-rest",
