@@ -118754,65 +118754,14 @@
   }
  },
  "plan": {
-  "at": "2026-11-21T10:26:20.991417Z",
-  "host": "goliath",
+  "at": "2026-11-21T11:18:18.176555Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 0,
    "left": 8
   },
   "rows": [
-   {
-    "id": "devin-neon-image-price",
-    "label": "#19883",
-    "number": 19883,
-    "state": "open",
-    "area": "catalog",
-    "priority": "P0",
-    "title": "fix(catalog): budget Gemini 4 Neon's images on Devin at the 1,089 tokens it bills",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-20T18:20:35Z"
-   },
-   {
-    "id": "devin-org-identity",
-    "label": "#19928",
-    "number": 19928,
-    "state": "open",
-    "area": "broker",
-    "priority": "P0",
-    "title": "fix(ai,catalog): store Devin login identity scoped by organization",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-20T21:08:51Z"
-   },
-   {
-    "id": "devin-quota-ranking",
-    "label": "#19929",
-    "number": 19929,
-    "state": "open",
-    "area": "broker",
-    "priority": "P0",
-    "title": "fix(ai): rank Devin logins by quota before their on-demand balance",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-20T21:10:19Z"
-   },
    {
     "id": "iphone-mirror-pointer",
     "label": "#17756",
@@ -118999,23 +118948,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-20T17:53:33Z"
-   },
-   {
-    "id": "atspi-alert-windows",
-    "label": "#19884",
-    "number": 19884,
-    "state": "open",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives): list GTK message dialogs as windows on Wayland",
-    "action": "keep",
-    "reasons": [],
-    "note": "tests-over: LinuxUpstream, 2026-11-20: one test reaching three branches (Alert listing through windows(), shared-title refusal in window_id, an in-window alert's owner); 45 of its lines are a fake GTK 3 app with children, application, parent and pid that no existing fixture provides",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-20T18:33:40Z"
    },
    {
     "id": "win-button-click",
@@ -119442,17 +119374,13 @@
     "area": "catalog",
     "priority": "P2",
     "title": "fix(catalog): budget Devin's other measured Gemini models at the 1,089 tokens it bills per image",
-    "action": "wait",
-    "reasons": [
-     "needs #19883 (open)"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [],
-    "needs": [
-     "devin-neon-image-price"
-    ],
+    "needs": [],
     "created": "2026-11-20T21:22:43Z"
    },
    {
@@ -120234,10 +120162,8 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "wait",
-    "reasons": [
-     "conflicts with main in (branch missing on the fork)"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
