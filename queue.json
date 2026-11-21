@@ -105348,7 +105348,7 @@
    "needs": [
     "win-edit-setvalue"
    ],
-   "base": "fbb8085ff432419132c6e3132f36ad857893b1a4",
+   "base": "c61a4881a55389ca576662d62dbee0399463a0c1",
    "body": "bodies/win-button-click.md",
    "state": "open",
    "pr": 19889,
@@ -105356,7 +105356,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-edit-setvalue",
    "host": "MacBook-Pro",
    "added": "2026-11-19T11:17:04Z",
-   "updated": "2026-11-21T00:06:31Z",
+   "updated": "2026-11-21T08:31:13Z",
    "note": "WbcReview must-fix (b) WinForms radio route: accepted BM_CLICK for WinForms radios \u2014 Main, 2026-11-20: main clicks a hidden retained-ref radio too, with a foreground take; exception measured and removed",
    "rebases_after": [
     19195,
@@ -105370,7 +105370,7 @@
     "19870": "Main, 2026-11-20: docs AxUnconfirmed paragraph (both) and win32/ax.rs host_root_from (wbc's loop takes #19870's MAX_ANCESTORS bound; behaviour of each side unchanged)",
     "19871": "Main, 2026-11-20: win32/ax.rs perform arms = #19871's, invoke arm reusing this entry's probe (invoke.unwrap_or_else(get_pattern UIInvokePattern), then control::dispatching(), then invoke); docs/tools/computer.md AxUnconfirmed: this entry's (or the #19870-combined) sentence, then #19871's Windows dispatch line, Main's one-fact-per-sentence rule; BM_CLICK dispatch mark left to win-button-click-fence"
    },
-   "advanced": "2026-11-20T21:01:17Z",
+   "advanced": "2026-11-21T08:31:13Z",
    "line_loss_overrides": [
     {
      "at": "2026-11-20T12:47:37Z",
