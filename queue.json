@@ -120649,5 +120649,11 @@
     "wake": ""
    }
   ]
+ },
+ "opening": {
+  "id": "win-takeover-intervene",
+  "token": "ada7afb7869244989648e184a1362ac2",
+  "host": "MacBook-Pro",
+  "at": "2026-11-21T05:21:54Z"
  }
 }
