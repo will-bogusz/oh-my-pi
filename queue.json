@@ -107334,7 +107334,7 @@
    "branch": "will/cursor-long-context-output",
    "title": "fix(catalog): price Cursor's GPT-5.6 long-context output at 1.5x",
    "area": "catalog",
-   "priority": null,
+   "priority": "P0",
    "needs": [],
    "base": "e1a9f4b41d24fe223bb71e864bef552f0fae6948",
    "body": "bodies/cursor-long-context-output.md",
@@ -107344,7 +107344,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/cursor-long-context-output",
    "host": "MacBook-Pro",
    "added": "2026-11-21T19:25:32Z",
-   "updated": "2026-11-21T19:47:01Z",
+   "updated": "2026-11-21T20:07:52Z",
    "note": "",
    "built": [
     {
@@ -107383,7 +107383,7 @@
    "branch": "will/devin-fast-long-context",
    "title": "fix(catalog): price Devin's GPT-5.6 long-context tiers as published, Fast lanes included",
    "area": "catalog",
-   "priority": null,
+   "priority": "P1",
    "needs": [],
    "base": "e1a9f4b41d24fe223bb71e864bef552f0fae6948",
    "body": "bodies/devin-fast-long-context.md",
@@ -107393,7 +107393,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-fast-long-context",
    "host": "MacBook-Pro",
    "added": "2026-11-21T19:27:43Z",
-   "updated": "2026-11-21T19:51:57Z",
+   "updated": "2026-11-21T20:07:52Z",
    "note": "",
    "built": [
     {
