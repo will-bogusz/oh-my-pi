@@ -58951,6 +58951,24 @@
        "\t\tassert_eq!(result.unwrap_err().code, ErrorCode::Cancelled);"
       ]
      }
+    },
+    {
+     "at": "2026-11-22T13:26:15Z",
+     "reason": "Main, 2026-11-22: rebase onto #19702 (make_key_in_background takes a purpose; keyboard_in_watch passes it), primer keeps KeyPurpose::Pointer and 120 ms PRIMER_KEY_GAP, primed() doc corrected",
+     "old": "923c19c1c4826318e88da8f1cd3818be6f93900e",
+     "new": "5778203c49696eba5a1cb9cc5dc1c3332d6d7d02",
+     "dropped": {
+      "crates/natives/src/desktop/macos/input.rs": [
+       "\t\tkeyboard_in_watch(source, pid, wid, window, entry_front, route, visit, deliver)",
+       "/// reports the user's visits through `visit`.",
+       "\tlet prepared = make_key_in_background(source, pid, wid, window, entry_front, in_overlay, visit)?;",
+       "/// user stopped (`UserIntervened`) or a cancel keeps the mark and stops the",
+       "/// call before any pointer event.",
+       "/// Shift alone types nothing.",
+       "\tkeyboard_in_watch(source, pid, wid, window, entry_front, route, visit, |to, guard| {",
+       "\t\t\tREPORT_KEY_GAP,"
+      ]
+     }
     }
    ]
   },
