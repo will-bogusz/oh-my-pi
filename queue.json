@@ -107652,6 +107652,24 @@
    ],
    "opened": "2026-11-21T23:25:22Z",
    "readied": "2026-11-21T23:25:43Z"
+  },
+  {
+   "id": "snapcompact-frame-geometry",
+   "branch": "will/snapcompact-frame-geometry",
+   "title": "fix(snapcompact): state every grid an archive's frames use in its summary",
+   "area": "other",
+   "priority": "P2",
+   "needs": [],
+   "base": "e1a9f4b41d24fe223bb71e864bef552f0fae6948",
+   "body": "bodies/snapcompact-frame-geometry.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-frame-geometry",
+   "host": "MacBook-Pro",
+   "added": "2026-11-22T10:55:43Z",
+   "updated": "2026-11-22T10:55:43Z",
+   "note": ""
   }
  ],
  "watch": {
