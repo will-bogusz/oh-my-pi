@@ -106141,7 +106141,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-popup-foreground",
    "host": "MacBook-Pro",
    "added": "2026-11-20T04:47:55Z",
-   "updated": "2026-11-22T14:32:00Z",
+   "updated": "2026-11-22T14:35:11Z",
    "note": "",
    "rebases_after": [
     19814,
@@ -106258,7 +106258,11 @@
       ]
      }
     }
-   ]
+   ],
+   "tests_over_override": {
+    "reason": "Main, 2026-11-22: one signed-in WPF fixture test whose cases each reach a distinct branch (pressed in front, owned dialog refused, lookup-switch refused, behind refused); no smaller fixture reaches the popup-owner rule",
+    "at": "2026-11-22T14:35:11Z"
+   }
   },
   {
    "id": "win-uia-set-patterns",
