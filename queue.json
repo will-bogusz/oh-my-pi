@@ -89192,13 +89192,13 @@
    "needs": [],
    "base": "c61a4881a55389ca576662d62dbee0399463a0c1",
    "body": "bodies/x11-keysym-remap.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19519,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-keysym-remap",
    "host": "MacBook-Pro",
    "added": "2026-11-11T13:55:21Z",
-   "updated": "2026-11-21T08:37:39Z",
+   "updated": "2026-11-22T12:57:46Z",
    "note": "LinuxGrabs, 2026-11-17: head 719b46266b0 (local branch, on main 1bdbf6d242d): grab only for keymap reads/writes; rebind owns old+new keysym until the write lands; close returns restore failures; over-capacity text refused before any key (MPX warm-up deferred after bind). Linux/macOS/Windows rust-check recorded. Sol reviews: round 1 findings fixed; round 2 (b)(c) closed, MPX warm-up finding fixed.",
    "line_loss_overrides": [
     {
@@ -90593,7 +90593,8 @@
     }
    ],
    "opened": "2026-11-17T04:19:40Z",
-   "readied": "2026-11-17T04:20:08Z"
+   "readied": "2026-11-17T04:20:08Z",
+   "merged_by": "pr"
   },
   {
    "id": "macos-ax-linked-label",
@@ -99505,13 +99506,13 @@
    ],
    "base": "c61a4881a55389ca576662d62dbee0399463a0c1",
    "body": "bodies/macos-keys-no-press.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19702,
    "closed_prs": [],
    "worktree": null,
    "host": "MacBook-Pro",
    "added": "2026-11-14T10:49:09Z",
-   "updated": "2026-11-21T08:33:34Z",
+   "updated": "2026-11-22T12:57:46Z",
    "note": "Will, 2026-11-16: go, at P2. DragConfirm r7 2026-11-14: head d44070508c4 on macos-window-order 4f8d2cd973d. Rule: keys skip the activating press only when AXFocusedWindow==target and the window draws its own content (key_without_press), read after the activation inside with_background_watch. VM block lease ce51b160 (r7/a/out-final.jsonl, kit r7/kit/sum8.py): 540 tries, all cells pass. Review DragConfirm.ReviewKeysNoPress ready@0c5567391a; after it: docs scope, remote panels keep the press (+test). rust-check macos+linux at d44070508c. Benchmark: keys/type on Electron/Chrome raised 2 of ~83 actions, 0 trials flip (OmpTrajClass2 s2). | Main, 2026-11-18: once macos-main-key-tests merges, the body's Testing line '722 pass; the 2 failures, desktop::macos::input Unicode-typing tests, fail the same on main' is stale; fix it on the next push (no push for that alone). | Main, 2026-11-19: #19715 merged 18:35Z, so on #19702's next push drop the body's '2 failures ... Unicode-typing tests, fail the same on main' clause (Testing, macOS cargo line); no push for that alone.\nOpen check (Main, 2026-11-21): combined form with #17756 sends #17756's primer without the activating press (KeyPurpose::Keyboard); unmeasured; needs a macOS VM host.",
    "advanced": "2026-11-21T08:33:34Z",
    "rebases_after": [
@@ -99659,7 +99660,8 @@
       ]
      }
     }
-   ]
+   ],
+   "merged_by": "pr"
   },
   {
    "id": "macos-handback-typed",
@@ -99672,13 +99674,13 @@
    ],
    "base": "c61a4881a55389ca576662d62dbee0399463a0c1",
    "body": "bodies/macos-handback-typed.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19504,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/macos-handback-typed",
    "host": "MacBook-Pro",
    "added": "2026-11-14T11:57:04Z",
-   "updated": "2026-11-21T08:38:49Z",
+   "updated": "2026-11-22T12:57:46Z",
    "note": "QueueTwentySeven 2026-11-16: rebased locally onto main as 372f93ca576 (clean). HandBackTyped 2026-11-14. P2 (Main): only keystrokes posted by another process trigger it; real keyboard unaffected 10/10 in 9 cells; keys still arrive. Head 642130fe1f6, one commit on macos-handback-key 78c730db8e9; review TypedReview approve (should-fix 1 + nits addressed before measuring). rust-check: macOS and Linux recorded at 642130fe1f6 (diff 030d8e53d3); diff is macos/ only, so Windows is not required by the path rule. Merges cleanly with will/macos-window-order 37142503cd9 (git merge-tree, no conflict). Cmd-` hole on #19208's guard (2/40 both builds) is out of scope: repro in ~/tmp/oh-my-pi/HandBackTyped/HANDOFF.md.",
    "advanced": "2026-11-21T08:38:49Z",
    "built": [
@@ -100016,7 +100018,8 @@
       ]
      }
     }
-   ]
+   ],
+   "merged_by": "pr"
   },
   {
    "id": "macos-drag-no-change-note",
@@ -103552,13 +103555,13 @@
    "needs": [],
    "base": "c61a4881a55389ca576662d62dbee0399463a0c1",
    "body": "bodies/wayland-share-picker-deadline.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19616,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-share-picker-deadline",
    "host": "MacBook-Pro",
    "added": "2026-11-17T22:04:45Z",
-   "updated": "2026-11-21T08:35:19Z",
+   "updated": "2026-11-22T12:57:46Z",
    "note": "",
    "built": [
     {
@@ -103799,7 +103802,8 @@
       ]
      }
     }
-   ]
+   ],
+   "merged_by": "pr"
   },
   {
    "id": "wayland-still-capture",
@@ -105351,13 +105355,13 @@
    ],
    "base": "c61a4881a55389ca576662d62dbee0399463a0c1",
    "body": "bodies/win-button-click.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19889,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-edit-setvalue",
    "host": "MacBook-Pro",
    "added": "2026-11-19T11:17:04Z",
-   "updated": "2026-11-21T08:31:13Z",
+   "updated": "2026-11-22T12:57:46Z",
    "note": "WbcReview must-fix (b) WinForms radio route: accepted BM_CLICK for WinForms radios \u2014 Main, 2026-11-20: main clicks a hidden retained-ref radio too, with a foreground take; exception measured and removed",
    "rebases_after": [
     19195,
@@ -105539,7 +105543,8 @@
     }
    ],
    "opened": "2026-11-20T20:07:20Z",
-   "readied": "2026-11-20T20:07:46Z"
+   "readied": "2026-11-20T20:07:46Z",
+   "merged_by": "pr"
   },
   {
    "id": "win-wpf-scroll",
@@ -106480,13 +106485,13 @@
    "needs": [],
    "base": "c61a4881a55389ca576662d62dbee0399463a0c1",
    "body": "bodies/desktop-dispatch-fence.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19871,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/desktop-dispatch-fence",
    "host": "MacBook-Pro",
    "added": "2026-11-20T15:50:23Z",
-   "updated": "2026-11-21T09:08:21Z",
+   "updated": "2026-11-22T12:57:46Z",
    "note": "",
    "tests_over_override": {
     "reason": "WinWpfRoutes6, 2026-11-20: the final-head review asked for the action off side through the caller and deadline-free teardown; the four session tests each reach a distinct branch (marked then expired, abandoned, on time, unfenced)",
@@ -106602,7 +106607,8 @@
    ],
    "advanced": "2026-11-21T09:08:21Z",
    "opened": "2026-11-20T16:50:26Z",
-   "readied": "2026-11-20T16:50:49Z"
+   "readied": "2026-11-20T16:50:49Z",
+   "merged_by": "pr"
   },
   {
    "id": "win-button-click-fence",
@@ -106634,13 +106640,13 @@
    "needs": [],
    "base": "b3142bf7e7e459560919abec0658b5f3851bcbcc",
    "body": "bodies/picker-stale-discovery.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19878,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/picker-stale-discovery",
    "host": "MacBook-Pro",
    "added": "2026-11-20T17:27:00Z",
-   "updated": "2026-11-21T18:40:09Z",
+   "updated": "2026-11-22T12:57:46Z",
    "note": "",
    "built": [
     {
@@ -106743,7 +106749,8 @@
      }
     }
    ],
-   "advanced": "2026-11-21T18:40:09Z"
+   "advanced": "2026-11-21T18:40:09Z",
+   "merged_by": "pr"
   },
   {
    "id": "devin-neon-image-price",
@@ -107284,13 +107291,13 @@
    ],
    "base": "3c65f4895fdbfb06120eb38e6168876d597428c3",
    "body": "bodies/devin-gemini-image-price-rest.md",
-   "state": "open",
+   "state": "merged",
    "pr": 20038,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-gemini-image-price-rest",
    "host": "MacBook-Pro",
    "added": "2026-11-20T21:22:43Z",
-   "updated": "2026-11-21T11:57:45Z",
+   "updated": "2026-11-22T12:57:46Z",
    "note": "LaneSnapcompactStack, 2026-11-21: opened as #20038 after #19883 merged; CHANGELOG at the catalog layer per Brit's dc9a2443adf; body What gives the mechanism (verified price replaces snapcompact's 5,024 floor: 26 -> 48 frames). roboomp lgtm P0; Codex clean on 893694384f9. Final-head review ReviewGeminiPriceRestFinal: body-only (stale bun-check claim, 'four more' scope, exact fallback wording) fixed via pr-body, stamped ready at 893694384f9. Pairs with #19880 and factory-droid-1100-pin recorded. bun check passes on head.",
    "kind": "fix",
    "advanced": "2026-11-21T11:24:35Z",
@@ -107306,7 +107313,8 @@
     }
    ],
    "opened": "2026-11-21T11:30:07Z",
-   "readied": "2026-11-21T11:30:28Z"
+   "readied": "2026-11-21T11:30:28Z",
+   "merged_by": "pr"
   },
   {
    "id": "devin-gemini-image-count-80",
@@ -107338,13 +107346,13 @@
    "needs": [],
    "base": "e1a9f4b41d24fe223bb71e864bef552f0fae6948",
    "body": "bodies/cursor-long-context-output.md",
-   "state": "open",
+   "state": "merged",
    "pr": 20093,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/cursor-long-context-output",
    "host": "MacBook-Pro",
    "added": "2026-11-21T19:25:32Z",
-   "updated": "2026-11-21T20:07:52Z",
+   "updated": "2026-11-22T12:57:46Z",
    "note": "",
    "built": [
     {
@@ -107376,7 +107384,8 @@
     }
    ],
    "opened": "2026-11-21T19:46:39Z",
-   "readied": "2026-11-21T19:47:00Z"
+   "readied": "2026-11-21T19:47:00Z",
+   "merged_by": "pr"
   },
   {
    "id": "devin-fast-long-context",
@@ -107387,13 +107396,13 @@
    "needs": [],
    "base": "e1a9f4b41d24fe223bb71e864bef552f0fae6948",
    "body": "bodies/devin-fast-long-context.md",
-   "state": "open",
+   "state": "merged",
    "pr": 20094,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-fast-long-context",
    "host": "MacBook-Pro",
    "added": "2026-11-21T19:27:43Z",
-   "updated": "2026-11-21T20:07:52Z",
+   "updated": "2026-11-22T12:57:46Z",
    "note": "",
    "built": [
     {
@@ -107417,7 +107426,8 @@
    ],
    "opened": "2026-11-21T19:48:00Z",
    "readied": "2026-11-21T19:48:22Z",
-   "advanced": "2026-11-21T19:51:57Z"
+   "advanced": "2026-11-21T19:51:57Z",
+   "merged_by": "pr"
   },
   {
    "id": "linux-ax-value-selected",
@@ -107428,13 +107438,13 @@
    "needs": [],
    "base": "e1a9f4b41d24fe223bb71e864bef552f0fae6948",
    "body": "bodies/linux-ax-value-selected.md",
-   "state": "open",
+   "state": "merged",
    "pr": 20110,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/linux-ax-value-selected",
    "host": "MacBook-Pro",
    "added": "2026-11-21T22:56:01Z",
-   "updated": "2026-11-21T23:28:37Z",
+   "updated": "2026-11-22T12:57:46Z",
    "note": "QueueFortyEight, 2026-11-21: from lane LinuxClicks (8a31c81a1c0 on 07c97a3e991), rebased onto e1a9f4b41d2 as 3d46eca4724; Rust diff 9161ce4807 unchanged, rust-check linux/windows/macos records stand. Main's rulings: (a) prompt hunk kept, only moves (selected) from 'on macOS:' to 'on macOS and Linux' (corrects a sentence the change makes false, adds no instruction; body says no model sample run, which answers precheck's behavior NOTE). precheck FIXes a touched package without an entry and has no prompt-only exemption, so the coding-agent Fixed line was added (folded into the one commit). (b) review LinuxClicks.ReviewLinuxAxValue (openai-codex/gpt-6.2-sol) at 8a31c81a1c0 needs-changes, answered: retained risk (an app that lists Value and never answers uses up read_node's per-element deadline and fails the whole ax()/find(), as main already does for Text) accepted by Main as a stated Limit, no code; body length/checklist fixed by the lane; changelog gate answered by (a). The reviewer read an earlier body draft (3,677 prose chars). (c) the guest numbers come from first build 114ffbeedf3 (also asked elements with unreadable interfaces); a final-head confirmation on wl-gnome was blocked by goliath's guest admission (MemAvailable 12.3 GiB, 4 GiB guest would leave 8.3 < 9 GiB; another session's two Android emulators hold ~12.6 GiB); body says which build was measured: scroll bars proven to list Value through their setValue's own GetInterfaces (LinuxClicks), sliders not re-measured. Then (Main, 23:20Z) a headless X11 check on the final head (goliath, dbus-run-session + Xvfb + openbox + at-spi, GTK 3.24.41 and Qt 6.4.2 fixtures; addon fix-8a31c81a1c0 = the final Rust diff vs main-07c97a3; n=5 alternating): slider 5/5 GTK3 and 5/5 Qt (main 0), GTK3 scroll bar 5/5 (main 0), selected row marked and next not 5/5 and 5/5 (main 0); every slider/scroll-bar CurrentValue read preceded by GetInterfaces replies listing Value (50/50 per object) and a fresh GetInterfaces lists Value; Qt list scroll bar not in the tree (not claimed). Body Testing carries it as a table. Rig ~/tmp/oh-my-pi/queuefortyeight/hl (goliath). (d) Limits in body: many selected rows (~550 tokens/200 rows), find({value:'1'}) matches a numeric control, LibreOffice document scroll bar ok-without-moving (as main), the retained risk. Queued-entry conflicts (they wait behind it): uia win-uia-set-patterns in macos/ax.rs (import list only: combined = union of bounded_number with uia's decimal_value, plain_decimal, real_reached; ax.rs auto-merges, combined compile untested), docs/prompt with win-ax-states, win-minimised-windows, computer-rich-text, computer-input-diff-repo, win-type-insert, desktop-cursor, computer-guide-first-use. None with popup, fence, D, D2. Follow-up entry B (no branch): GTK 3 list rows selected through the parent's AT-SPI Selection (SelectChild) by their by-construction index only, needs this entry's SELECTED read-back to confirm; GTK 4 excluded because SelectChild(i) counts all rows while AT-SPI's child list skips rows the app hid and includes a visible placeholder (GTK 4.24.1 source, LinuxClicks' report).",
    "built": [
     {
@@ -107651,7 +107661,8 @@
     }
    ],
    "opened": "2026-11-21T23:25:22Z",
-   "readied": "2026-11-21T23:25:43Z"
+   "readied": "2026-11-21T23:25:43Z",
+   "merged_by": "pr"
   },
   {
    "id": "snapcompact-frame-geometry",
