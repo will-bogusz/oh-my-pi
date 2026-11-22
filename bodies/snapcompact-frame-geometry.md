@@ -10,7 +10,7 @@ I made a snapcompact archive's summary state every grid its frames use. When a l
 | Gemini (`8on22-bw`, 2048px) | 256×93, 256×128 | "256 characters wide, up to 93 rows tall" | both grids |
 | Claude Opus 4.7+ (`11on16-bw`, 1932px) | 175×120, 241×120 | "175 or 241 characters wide, up to 120 rows tall" (right: only the width changes) | both grids |
 
-`compact()` collects the distinct grid of each planned frame's shape, and `snapcompact-summary.md` lists them. The old summary already listed every distinct width, so it was right whenever only widths differ (Claude). It gave one row count, the edge layout's, which is wrong for every `8on22-bw` reader, since its dense companion `8on16-bw` keeps the width and adds rows.
+`compact()` collects the distinct grids of the rendered frames, and `snapcompact-summary.md` lists them. The old summary already listed every distinct width, so it was right whenever only widths differ (Claude). It gave one row count, the edge layout's, which is wrong for every `8on22-bw` reader, since its dense companion `8on16-bw` keeps the width and adds rows.
 
 ## Why
 

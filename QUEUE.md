@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-22 10:55Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-22 10:56Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-22 10:23Z on goliath; groups below are from it, states from the manifest)
@@ -120,4 +120,4 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-22
 
 | id | title | area | priority | age | branch |
 |---|---|---|---|---|---|
-| snapcompact-frame-geometry | fix(snapcompact): state every grid an archive's frames use in its summary | other | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-frame-geometry) |
+| snapcompact-frame-geometry | fix(snapcompact): state every grid an archive's frames use in its summary | snapcompact | P2 | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-frame-geometry) |
