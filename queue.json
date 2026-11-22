@@ -106135,13 +106135,13 @@
    ],
    "base": "b505770284deff6b2888a4eb26a7cc95497cc111",
    "body": "bodies/win-popup-foreground.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 20177,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-popup-foreground",
    "host": "MacBook-Pro",
    "added": "2026-11-20T04:47:55Z",
-   "updated": "2026-11-22T15:31:24Z",
+   "updated": "2026-11-22T15:32:08Z",
    "note": "",
    "rebases_after": [
     19814,
@@ -106262,7 +106262,8 @@
    "tests_over_override": {
     "reason": "Main, 2026-11-22: one signed-in WPF fixture test whose cases each reach a distinct branch (pressed in front, owned dialog refused, lookup-switch refused, behind refused); no smaller fixture reaches the popup-owner rule",
     "at": "2026-11-22T14:35:11Z"
-   }
+   },
+   "opened": "2026-11-22T15:32:08Z"
   },
   {
    "id": "win-uia-set-patterns",

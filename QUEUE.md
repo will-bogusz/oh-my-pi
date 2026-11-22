@@ -1,18 +1,17 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-22 15:31Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-22 15:32Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-22 15:29Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 3, conflict-held 18, stacked 16, held 12, parked 1, open PRs 19; merged 419, closed 45
+**Counts:** openable now 2, conflict-held 18, stacked 16, held 12, parked 1, open PRs 20; merged 419, closed 45
 
-## Openable now (3)
+## Openable now (2)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
 | stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 9d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 | factory-droid-1100-pin | feat(catalog): identify Factory Droid requests as droid 1.10.0 | factory-droid |  | 8d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-pin) |
-| win-popup-foreground | fix(natives): press items of the open WPF context menu of the window in front | computer |  | 2d | open; accepted pair with #19849: Main, 2026-11-22: rechecked at #19849's head f6d3565f189: win32/window.rs production WindowsAndMessaging list = popup's minus WS_EX_TOOLWINDOW and WS_EX_TRANSPARENT (unused once #19849 drops the cover check's tool-window test; popup keeps GW_OWNER, GetWindow, WS_EX_NOACTIVATE, WS_POPUP for is_menu_popup); tests-module list = union (+GWL_STYLE, WS_EX_TOOLWINDOW, WS_EX_TRANSPARENT, WS_POPUP from #19849, PostMessageW, WM_APP from popup), rustfmt reflow; both tests modules merge as one; tests-over: Main, 2026-11-22: one signed-in WPF fixture test whose cases each reach a distinct branch (pressed in front, owned dialog refused, lookup-switch refused, behind refused); no smaller fixture reaches the popup-owner rule | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-popup-foreground) |
 
 ## Conflict-held (18)
 
@@ -81,7 +80,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-22
 |---|---|---|---|---|---|---|---|---|
 | [#16611](https://github.com/can1357/oh-my-pi/pull/16611) | read-audio-transcripts | feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio | catalog | P2 | 4d | Will, 2026-11-17: parked as draft, not maintained for now; revisit later | not checked or kept fresh | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-audio-transcripts) |
 
-## Open PRs (19)
+## Open PRs (20)
 
 | PR | id | title | area | rank | open | plan | branch |
 |---|---|---|---|---|---|---|---|
@@ -102,5 +101,6 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-22
 | [#19880](https://github.com/can1357/oh-my-pi/pull/19880) | snapcompact-shape-kdl | refactor(catalog,snapcompact): move snapcompact frame shapes into catalog rules | snapcompact | P2 | 1d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-shape-kdl) |
 | [#19870](https://github.com/can1357/oh-my-pi/pull/19870) | win-wpf-scroll | fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing | computer | P2 | 1d | keep; accepted pair with #20019: Main, 2026-11-20: win32/mod.rs tests-module import list only; combined = union of both WindowsAndMessaging imports | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-wpf-scroll) |
 | [#19849](https://github.com/can1357/oh-my-pi/pull/19849) | win-occluded-capture | fix(natives): count every opaque window as a cover over a Chromium capture | computer | P1 | 2d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-occluded-capture) |
+| [#20177](https://github.com/can1357/oh-my-pi/pull/20177) | win-popup-foreground | fix(natives): press items of the open WPF context menu of the window in front | computer |  | 2d | open; accepted pair with #19849: Main, 2026-11-22: rechecked at #19849's head f6d3565f189: win32/window.rs production WindowsAndMessaging list = popup's minus WS_EX_TOOLWINDOW and WS_EX_TRANSPARENT (unused once #19849 drops the cover check's tool-window test; popup keeps GW_OWNER, GetWindow, WS_EX_NOACTIVATE, WS_POPUP for is_menu_popup); tests-module list = union (+GWL_STYLE, WS_EX_TOOLWINDOW, WS_EX_TRANSPARENT, WS_POPUP from #19849, PostMessageW, WM_APP from popup), rustfmt reflow; both tests modules merge as one; tests-over: Main, 2026-11-22: one signed-in WPF fixture test whose cases each reach a distinct branch (pressed in front, owned dialog refused, lookup-switch refused, behind refused); no smaller fixture reaches the popup-owner rule | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-popup-foreground) |
 | [#20019](https://github.com/can1357/oh-my-pi/pull/20019) | win-takeover-intervene | fix(natives): wait for the user to pause before a Windows takeover | computer | P1 | 1d | keep; accepted pair with #19870: Main, 2026-11-20: win32/mod.rs tests-module import list only; combined = union of both WindowsAndMessaging imports | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-takeover-intervene) |
 | [#20163](https://github.com/can1357/oh-my-pi/pull/20163) | snapcompact-frame-geometry | fix(snapcompact): state every grid an archive's frames use in its summary | snapcompact | P1 | 4h | close | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-frame-geometry) |
