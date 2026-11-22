@@ -102706,6 +102706,17 @@
        "\t\t\texpect(versionRow()).toEqual({ version: VERSION });"
       ]
      }
+    },
+    {
+     "at": "2026-11-22T18:44:40Z",
+     "reason": "Main, 2026-11-22: the pi-utils import line in client.ts gained main's isRecord in the conflict resolution; no code dropped",
+     "old": "ba53009b25777e8c9e8ccace54cff32ab93a15dd",
+     "new": "9cd28583c0cf33507a02462d14c52f380ac88613",
+     "dropped": {
+      "packages/ai/src/auth-broker/client.ts": [
+       "import { logger, readSseEvents, VERSION } from \"@oh-my-pi/pi-utils\";"
+      ]
+     }
     }
    ],
    "advanced": "2026-11-21T18:43:13Z"
