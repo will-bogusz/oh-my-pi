@@ -107708,7 +107708,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-22T12:26:45Z",
+  "checked": "2026-11-22T12:57:50Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -107717,8 +107717,53 @@
     "title": "feat(catalog): identify Factory Droid requests as droid 1.10.0"
    }
   },
-  "conflicts": {},
-  "merged_through": "2026-11-21T11:14:50Z",
+  "conflicts": {
+   "#17756": {
+    "since": "2026-11-22T12:57:50Z",
+    "title": "fix(natives): keep background iPhone Mirroring taps reaching the phone after a takeover tap",
+    "files": [
+     "crates/natives/src/desktop/macos/input.rs"
+    ]
+   },
+   "#19531": {
+    "since": "2026-11-22T12:57:50Z",
+    "title": "fix(natives): release X11 XTest keys and buttons a killed omp held",
+    "files": [
+     "crates/natives/src/desktop/linux/x11/input.rs",
+     "crates/natives/src/desktop/linux/x11/mod.rs"
+    ]
+   },
+   "#19195": {
+    "since": "2026-11-22T12:57:50Z",
+    "title": "fix(natives): stop macOS background drags reporting moves that did not happen",
+    "files": [
+     "docs/tools/computer.md"
+    ]
+   },
+   "#19592": {
+    "since": "2026-11-22T12:57:50Z",
+    "title": "feat(ai,coding-agent): exchanged omp versions between auth-broker clients and the broker",
+    "files": [
+     "packages/ai/src/auth-broker/client.ts"
+    ]
+   },
+   "#19870": {
+    "since": "2026-11-22T12:57:50Z",
+    "title": "fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing",
+    "files": [
+     "crates/natives/src/desktop/win32/ax.rs",
+     "docs/tools/computer.md"
+    ]
+   },
+   "#19849": {
+    "since": "2026-11-22T12:57:50Z",
+    "title": "fix(natives): count every opaque window as a cover over a Chromium capture",
+    "files": [
+     "crates/natives/src/desktop/win32/window.rs"
+    ]
+   }
+  },
+  "merged_through": "2026-11-22T12:54:56Z",
   "unreleased": {
    "19929": {
     "title": "fix(ai): rank Devin logins by quota before their on-demand balance",
@@ -107739,19 +107784,71 @@
     "title": "fix(catalog): budget Gemini 4 Neon's images on Devin at the 1,089 tokens it bills",
     "merge_commit": "e6ca414a79c6a2fdce95aeb74f61cc487ec92d66",
     "merged_at": "2026-11-21T11:14:50Z"
+   },
+   "20110": {
+    "title": "fix(natives): read Linux slider and scroll bar values and selected state",
+    "merge_commit": "d37b9beeff2304f0b3dd304737a95adcf6878289",
+    "merged_at": "2026-11-22T12:54:56Z"
+   },
+   "20094": {
+    "title": "fix(catalog): price Devin's GPT-5.6 long-context tiers as published, Fast lanes included",
+    "merge_commit": "bd57da626b41e6a512ab7f868eb8658400ee66a2",
+    "merged_at": "2026-11-22T12:54:56Z"
+   },
+   "20093": {
+    "title": "fix(catalog): price Cursor's GPT-5.6 long-context output at 1.5x",
+    "merge_commit": "8cd282f9a39467d5b1e9a985e9b6944df19dab20",
+    "merged_at": "2026-11-22T12:54:56Z"
+   },
+   "20038": {
+    "title": "fix(catalog): budget Devin's other measured Gemini models at the 1,089 tokens it bills per image",
+    "merge_commit": "029488d2d244af2ff8183b785593a262e74f9b63",
+    "merged_at": "2026-11-22T12:54:56Z"
+   },
+   "19889": {
+    "title": "fix(natives): click Windows buttons without activating their window",
+    "merge_commit": "22fdc80bc5fc60fc3b222f1212b1815124543110",
+    "merged_at": "2026-11-22T12:54:56Z"
+   },
+   "19878": {
+    "title": "fix(coding-agent,tui): refresh discovery from the model picker once the catalog is two hours old",
+    "merge_commit": "4221ebec8edfb1b803b055aaf9f9c8cdcd1530f5",
+    "merged_at": "2026-11-22T12:54:56Z"
+   },
+   "19871": {
+    "title": "fix(natives): report Windows UIA actions unconfirmed when their reply times out after dispatch",
+    "merge_commit": "e720b3568ac4b26da3821c41997883d9953281eb",
+    "merged_at": "2026-11-22T12:54:56Z"
+   },
+   "19702": {
+    "title": "fix(natives): send macOS background keys to the key window without a press",
+    "merge_commit": "d0d52763cacc711d6e67a2f1f5b5eae0959a6396",
+    "merged_at": "2026-11-22T12:54:56Z"
+   },
+   "19616": {
+    "title": "fix(natives): wait for the Wayland screen-share picker until the call's deadline",
+    "merge_commit": "78e7b3adb1434cec8a255b65ba2f26d9dcb8c388",
+    "merged_at": "2026-11-22T12:54:56Z"
+   },
+   "19519": {
+    "title": "fix(natives): type characters outside the X11 keymap through temporary keycodes",
+    "merge_commit": "14dd6b6f715eb914bda8149286757205b817f2c7",
+    "merged_at": "2026-11-22T12:54:56Z"
+   },
+   "19504": {
+    "title": "fix(natives): give the macOS key window back after a takeover while another program types",
+    "merge_commit": "f1cf93301bdd7d2f1a76e8533939c3bffdea7e10",
+    "merged_at": "2026-11-22T12:54:56Z"
    }
   },
   "ready": [
    17756,
    19195,
-   19504,
    19513,
-   19519,
    19531,
    19542,
    19592,
    19615,
-   19616,
    19618,
    19620,
    19623,
@@ -107759,18 +107856,10 @@
    19633,
    19700,
    19701,
-   19702,
    19849,
    19870,
-   19871,
-   19878,
    19880,
-   19889,
    20019,
-   20038,
-   20093,
-   20094,
-   20110,
    20163
   ],
   "post_merge": {
@@ -107797,10 +107886,40 @@
      }
     ]
    },
-   "19814": {
-    "title": "fix(natives): write Windows edit values without activating their window",
-    "merge_commit": "1d69c008d42dbe6520db807598c2be20470159d8",
-    "merged_at": "2026-11-20T12:29:05Z",
+   "19504": {
+    "title": "fix(natives): give the macOS key window back after a takeover while another program types",
+    "merge_commit": "f1cf93301bdd7d2f1a76e8533939c3bffdea7e10",
+    "merged_at": "2026-11-22T12:54:56Z",
+    "findings": []
+   },
+   "19519": {
+    "title": "fix(natives): type characters outside the X11 keymap through temporary keycodes",
+    "merge_commit": "14dd6b6f715eb914bda8149286757205b817f2c7",
+    "merged_at": "2026-11-22T12:54:56Z",
+    "findings": []
+   },
+   "19616": {
+    "title": "fix(natives): wait for the Wayland screen-share picker until the call's deadline",
+    "merge_commit": "78e7b3adb1434cec8a255b65ba2f26d9dcb8c388",
+    "merged_at": "2026-11-22T12:54:56Z",
+    "findings": []
+   },
+   "19702": {
+    "title": "fix(natives): send macOS background keys to the key window without a press",
+    "merge_commit": "d0d52763cacc711d6e67a2f1f5b5eae0959a6396",
+    "merged_at": "2026-11-22T12:54:56Z",
+    "findings": []
+   },
+   "19871": {
+    "title": "fix(natives): report Windows UIA actions unconfirmed when their reply times out after dispatch",
+    "merge_commit": "e720b3568ac4b26da3821c41997883d9953281eb",
+    "merged_at": "2026-11-22T12:54:56Z",
+    "findings": []
+   },
+   "19878": {
+    "title": "fix(coding-agent,tui): refresh discovery from the model picker once the catalog is two hours old",
+    "merge_commit": "4221ebec8edfb1b803b055aaf9f9c8cdcd1530f5",
+    "merged_at": "2026-11-22T12:54:56Z",
     "findings": []
    },
    "19883": {
@@ -107815,6 +107934,12 @@
     "merged_at": "2026-11-21T11:14:50Z",
     "findings": []
    },
+   "19889": {
+    "title": "fix(natives): click Windows buttons without activating their window",
+    "merge_commit": "22fdc80bc5fc60fc3b222f1212b1815124543110",
+    "merged_at": "2026-11-22T12:54:56Z",
+    "findings": []
+   },
    "19928": {
     "title": "fix(ai,catalog): store Devin login identity scoped by organization",
     "merge_commit": "0f67fbd0900f4859f14be78bb47c89fbeced0573",
@@ -107825,6 +107950,30 @@
     "title": "fix(ai): rank Devin logins by quota before their on-demand balance",
     "merge_commit": "704a751306625b62e418f064d8d1f10b4c105c1d",
     "merged_at": "2026-11-21T11:14:50Z",
+    "findings": []
+   },
+   "20038": {
+    "title": "fix(catalog): budget Devin's other measured Gemini models at the 1,089 tokens it bills per image",
+    "merge_commit": "029488d2d244af2ff8183b785593a262e74f9b63",
+    "merged_at": "2026-11-22T12:54:56Z",
+    "findings": []
+   },
+   "20093": {
+    "title": "fix(catalog): price Cursor's GPT-5.6 long-context output at 1.5x",
+    "merge_commit": "8cd282f9a39467d5b1e9a985e9b6944df19dab20",
+    "merged_at": "2026-11-22T12:54:56Z",
+    "findings": []
+   },
+   "20094": {
+    "title": "fix(catalog): price Devin's GPT-5.6 long-context tiers as published, Fast lanes included",
+    "merge_commit": "bd57da626b41e6a512ab7f868eb8658400ee66a2",
+    "merged_at": "2026-11-22T12:54:56Z",
+    "findings": []
+   },
+   "20110": {
+    "title": "fix(natives): read Linux slider and scroll bar values and selected state",
+    "merge_commit": "d37b9beeff2304f0b3dd304737a95adcf6878289",
+    "merged_at": "2026-11-22T12:54:56Z",
     "findings": []
    }
   },
@@ -109386,6 +109535,150 @@
     "id": "linux-ax-value-selected",
     "title": "fix(natives): read Linux slider and scroll bar values and selected state",
     "why": "opened as #20110"
+   },
+   {
+    "at": "2026-11-22T12:57:50Z",
+    "kind": "merged",
+    "number": 20110,
+    "title": "fix(natives): read Linux slider and scroll bar values and selected state",
+    "merged_by": "can1357",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-22T12:57:50Z",
+    "kind": "merged",
+    "number": 20094,
+    "title": "fix(catalog): price Devin's GPT-5.6 long-context tiers as published, Fast lanes included",
+    "merged_by": "can1357",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-22T12:57:50Z",
+    "kind": "merged",
+    "number": 20093,
+    "title": "fix(catalog): price Cursor's GPT-5.6 long-context output at 1.5x",
+    "merged_by": "can1357",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-22T12:57:50Z",
+    "kind": "merged",
+    "number": 20038,
+    "title": "fix(catalog): budget Devin's other measured Gemini models at the 1,089 tokens it bills per image",
+    "merged_by": "can1357",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-22T12:57:50Z",
+    "kind": "merged",
+    "number": 19889,
+    "title": "fix(natives): click Windows buttons without activating their window",
+    "merged_by": "can1357",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-22T12:57:50Z",
+    "kind": "merged",
+    "number": 19878,
+    "title": "fix(coding-agent,tui): refresh discovery from the model picker once the catalog is two hours old",
+    "merged_by": "can1357",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-22T12:57:50Z",
+    "kind": "merged",
+    "number": 19871,
+    "title": "fix(natives): report Windows UIA actions unconfirmed when their reply times out after dispatch",
+    "merged_by": "can1357",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-22T12:57:50Z",
+    "kind": "merged",
+    "number": 19702,
+    "title": "fix(natives): send macOS background keys to the key window without a press",
+    "merged_by": "can1357",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-22T12:57:50Z",
+    "kind": "merged",
+    "number": 19616,
+    "title": "fix(natives): wait for the Wayland screen-share picker until the call's deadline",
+    "merged_by": "can1357",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-22T12:57:50Z",
+    "kind": "merged",
+    "number": 19519,
+    "title": "fix(natives): type characters outside the X11 keymap through temporary keycodes",
+    "merged_by": "can1357",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-22T12:57:50Z",
+    "kind": "merged",
+    "number": 19504,
+    "title": "fix(natives): give the macOS key window back after a takeover while another program types",
+    "merged_by": "can1357",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-22T12:57:50Z",
+    "kind": "conflict",
+    "label": "#17756",
+    "title": "fix(natives): keep background iPhone Mirroring taps reaching the phone after a takeover tap",
+    "files": [
+     "crates/natives/src/desktop/macos/input.rs"
+    ]
+   },
+   {
+    "at": "2026-11-22T12:57:50Z",
+    "kind": "conflict",
+    "label": "#19531",
+    "title": "fix(natives): release X11 XTest keys and buttons a killed omp held",
+    "files": [
+     "crates/natives/src/desktop/linux/x11/input.rs",
+     "crates/natives/src/desktop/linux/x11/mod.rs"
+    ]
+   },
+   {
+    "at": "2026-11-22T12:57:50Z",
+    "kind": "conflict",
+    "label": "#19195",
+    "title": "fix(natives): stop macOS background drags reporting moves that did not happen",
+    "files": [
+     "docs/tools/computer.md"
+    ]
+   },
+   {
+    "at": "2026-11-22T12:57:50Z",
+    "kind": "conflict",
+    "label": "#19592",
+    "title": "feat(ai,coding-agent): exchanged omp versions between auth-broker clients and the broker",
+    "files": [
+     "packages/ai/src/auth-broker/client.ts"
+    ]
+   },
+   {
+    "at": "2026-11-22T12:57:50Z",
+    "kind": "conflict",
+    "label": "#19870",
+    "title": "fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing",
+    "files": [
+     "crates/natives/src/desktop/win32/ax.rs",
+     "docs/tools/computer.md"
+    ]
+   },
+   {
+    "at": "2026-11-22T12:57:50Z",
+    "kind": "conflict",
+    "label": "#19849",
+    "title": "fix(natives): count every opaque window as a cover over a Chromium capture",
+    "files": [
+     "crates/natives/src/desktop/win32/window.rs"
+    ]
    }
   ]
  },
@@ -119175,7 +119468,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-22T12:26:46.244956Z",
+  "at": "2026-11-22T12:57:50.727334Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -119184,57 +119477,6 @@
   },
   "rows": [
    {
-    "id": "devin-gemini-image-price-rest",
-    "label": "#20038",
-    "number": 20038,
-    "state": "open",
-    "area": "catalog",
-    "priority": "P0",
-    "title": "fix(catalog): budget Devin's other measured Gemini models at the 1,089 tokens it bills per image",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-21T11:30:06Z"
-   },
-   {
-    "id": "cursor-long-context-output",
-    "label": "#20093",
-    "number": 20093,
-    "state": "open",
-    "area": "catalog",
-    "priority": "P0",
-    "title": "fix(catalog): price Cursor's GPT-5.6 long-context output at 1.5x",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-21T19:46:38Z"
-   },
-   {
-    "id": "linux-ax-value-selected",
-    "label": "#20110",
-    "number": 20110,
-    "state": "open",
-    "area": "computer",
-    "priority": "P0",
-    "title": "fix(natives): read Linux slider and scroll bar values and selected state",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-21T23:25:20Z"
-   },
-   {
     "id": "iphone-mirror-pointer",
     "label": "#17756",
     "number": 17756,
@@ -119242,13 +119484,13 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): keep background iPhone Mirroring taps reaching the phone after a takeover tap",
-    "action": "keep",
-    "reasons": [],
-    "note": "accepted pair with #19702: Main, 2026-11-18: one argument added to the make_key_in_background call that #17756 moves into keyboard_in_watch; combined = #17756's function with that argument, now KeyPurpose::Keyboard (was ActivatingPress::UnlessKey before the KeysNoPressTest refactor)",
-    "over": [],
-    "paired": [
-     "#19702"
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in crates/natives/src/desktop/macos/input.rs"
     ],
+    "note": "",
+    "over": [],
+    "paired": [],
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-02T03:27:31Z"
@@ -119261,33 +119503,16 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): stop macOS background drags reporting moves that did not happen",
-    "action": "keep",
-    "reasons": [],
-    "note": "accepted pair with #19889: Main (assignment to QueueThirtySeven), 2026-11-19: docs/tools/computer.md only, both add one paragraph after the line-118 paragraph of the desktop section; combined = #19195's macOS background-drag paragraph, then this entry's Windows BM_CLICK paragraph (union, no wording change)",
-    "over": [],
-    "paired": [
-     "#19889"
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in docs/tools/computer.md"
     ],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-13T20:28:59Z"
-   },
-   {
-    "id": "macos-handback-typed",
-    "label": "#19504",
-    "number": 19504,
-    "state": "open",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives): give the macOS key window back after a takeover while another program types",
-    "action": "keep",
-    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [],
     "needs": [],
-    "created": "2026-11-17T01:43:47Z"
+    "created": "2026-11-13T20:28:59Z"
    },
    {
     "id": "upload-stall-error-all-providers",
@@ -119307,64 +119532,6 @@
     "created": "2026-11-17T02:58:47Z"
    },
    {
-    "id": "x11-keysym-remap",
-    "label": "#19519",
-    "number": 19519,
-    "state": "open",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives): type characters outside the X11 keymap through temporary keycodes",
-    "action": "keep",
-    "reasons": [],
-    "note": "accepted pair with #19531: Main, 2026-11-17: adjacent unions in x11/mod.rs (mod lines), input.rs use list, X11Input::new fields and foreground_keys_after (watch_releases() then Keymap::xtest); in send_xtest #19519's text_mapping.pressed(keycode) moves into xtest's restructured send_xtest at the same point (after the request is sent, before check(), key presses only), no new logic. Combined form: merge 7b0d2ff0b68, ~/tmp/oh-my-pi/queuethirty/xpair-combined.md; accepted pair with #19849: Main, 2026-11-20: adjacent test-only fields in the fake backend; combined = both",
-    "over": [],
-    "paired": [
-     "#19531",
-     "#19849"
-    ],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-17T04:19:37Z"
-   },
-   {
-    "id": "wayland-share-picker-deadline",
-    "label": "#19616",
-    "number": 19616,
-    "state": "open",
-    "area": "natives",
-    "priority": "P1",
-    "title": "fix(natives): wait for the Wayland screen-share picker until the call's deadline",
-    "action": "keep",
-    "reasons": [],
-    "note": "accepted pair with #19615: Main, 2026-11-18: no conflict since #19615 376a1b8be12 moved the kept-stream consts to wayland/capture/share.rs (git merge-tree clean); the merged tree built and its wayland tests passed 57/57 on goliath (ShareScope)",
-    "over": [],
-    "paired": [
-     "#19615"
-    ],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-18T01:54:34Z"
-   },
-   {
-    "id": "macos-keys-no-press",
-    "label": "#19702",
-    "number": 19702,
-    "state": "open",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives): send macOS background keys to the key window without a press",
-    "action": "keep",
-    "reasons": [],
-    "note": "accepted pair with #17756: Main, 2026-11-18: one argument added to the make_key_in_background call that #17756 moves into keyboard_in_watch; combined = #17756's function with that argument, now KeyPurpose::Keyboard (was ActivatingPress::UnlessKey before the KeysNoPressTest refactor)",
-    "over": [],
-    "paired": [
-     "#17756"
-    ],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-18T18:46:50Z"
-   },
-   {
     "id": "win-occluded-capture",
     "label": "#19849",
     "number": 19849,
@@ -119372,76 +119539,16 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): count every opaque window as a cover over a Chromium capture",
-    "action": "keep",
-    "reasons": [],
-    "note": "accepted pair with #19519: Main, 2026-11-20: adjacent test-only fields in the fake backend; combined = both; accepted pair with #19889: Main, 2026-11-20: import-list union in win32/window.rs with #19849's three style removals applied, one tests module; combined = both",
-    "over": [],
-    "paired": [
-     "#19519",
-     "#19889"
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in crates/natives/src/desktop/win32/window.rs"
     ],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-20T07:39:18Z"
-   },
-   {
-    "id": "desktop-dispatch-fence",
-    "label": "#19871",
-    "number": 19871,
-    "state": "open",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives): report Windows UIA actions unconfirmed when their reply times out after dispatch",
-    "action": "keep",
-    "reasons": [],
-    "note": "accepted pair with #19889: Main, 2026-11-20: win32/ax.rs perform arms = #19871's, invoke arm reusing this entry's probe (invoke.unwrap_or_else(get_pattern UIInvokePattern), then control::dispatching(), then invoke); docs/tools/computer.md AxUnconfirmed: this entry's (or the #19870-combined) sentence, then #19871's Windows dispatch line, Main's one-fact-per-sentence rule; BM_CLICK dispatch mark left to win-button-click-fence; accepted pair with #19870: Main, 2026-11-20: win32/ax.rs import union; docs/tools/computer.md AxUnconfirmed: #19870's rewritten sentence, then this entry's Windows dispatch line; combined = both; tests-over: WinWpfRoutes6, 2026-11-20: the final-head review asked for the action off side through the caller and deadline-free teardown; the four session tests each reach a distinct branch (marked then expired, abandoned, on time, unfenced)",
-    "over": [],
-    "paired": [
-     "#19889",
-     "#19870"
-    ],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-20T16:50:25Z"
-   },
-   {
-    "id": "picker-stale-discovery",
-    "label": "#19878",
-    "number": 19878,
-    "state": "open",
-    "area": "other",
-    "priority": "P1",
-    "title": "fix(coding-agent,tui): refresh discovery from the model picker once the catalog is two hours old",
-    "action": "keep",
-    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [],
     "needs": [],
-    "created": "2026-11-20T17:53:33Z"
-   },
-   {
-    "id": "win-button-click",
-    "label": "#19889",
-    "number": 19889,
-    "state": "open",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives): click Windows buttons without activating their window",
-    "action": "keep",
-    "reasons": [],
-    "note": "accepted pair with #19195: Main (assignment to QueueThirtySeven), 2026-11-19: docs/tools/computer.md only, both add one paragraph after the line-118 paragraph of the desktop section; combined = #19195's macOS background-drag paragraph, then this entry's Windows BM_CLICK paragraph (union, no wording change); accepted pair with #19870: Main, 2026-11-20: docs AxUnconfirmed paragraph (both) and win32/ax.rs host_root_from (wbc's loop takes #19870's MAX_ANCESTORS bound; behaviour of each side unchanged); accepted pair with #19849: Main, 2026-11-20: import-list union in win32/window.rs with #19849's three style removals applied, one tests module; combined = both; accepted pair with #19871: Main, 2026-11-20: win32/ax.rs perform arms = #19871's, invoke arm reusing this entry's probe (invoke.unwrap_or_else(get_pattern UIInvokePattern), then control::dispatching(), then invoke); docs/tools/computer.md AxUnconfirmed: this entry's (or the #19870-combined) sentence, then #19871's Windows dispatch line, Main's one-fact-per-sentence rule; BM_CLICK dispatch mark left to win-button-click-fence; tests-over: WbcReview (gpt-6.2-sol) should-fix 5, 2026-11-20: dispatch tests at the AX and pointer entries; each reaches a route no other does (click_button guards incl. reparent/destroy rows; perform's native route + disabled-form refusal; pointer hand-off + owner-drawn exclusion); each fails with its guard reverted on the VM",
-    "over": [],
-    "paired": [
-     "#19195",
-     "#19870",
-     "#19849",
-     "#19871"
-    ],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-20T20:07:19Z"
+    "created": "2026-11-20T07:39:18Z"
    },
    {
     "id": "win-takeover-intervene",
@@ -119463,23 +119570,6 @@
     "created": "2026-11-21T05:22:39Z"
    },
    {
-    "id": "devin-fast-long-context",
-    "label": "#20094",
-    "number": 20094,
-    "state": "open",
-    "area": "catalog",
-    "priority": "P1",
-    "title": "fix(catalog): price Devin's GPT-5.6 long-context tiers as published, Fast lanes included",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-21T19:47:59Z"
-   },
-   {
     "id": "snapcompact-frame-geometry",
     "label": "#20163",
     "number": 20163,
@@ -119487,8 +119577,10 @@
     "area": "snapcompact",
     "priority": "P1",
     "title": "fix(snapcompact): state every grid an archive's frames use in its summary",
-    "action": "keep",
-    "reasons": [],
+    "action": "close",
+    "reasons": [
+     "its commits are already on main"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -119504,13 +119596,13 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): release X11 XTest keys and buttons a killed omp held",
-    "action": "keep",
-    "reasons": [],
-    "note": "accepted pair with #19519: Main, 2026-11-17: adjacent unions in x11/mod.rs (mod lines), input.rs use list, X11Input::new fields and foreground_keys_after (watch_releases() then Keymap::xtest); in send_xtest #19519's text_mapping.pressed(keycode) moves into xtest's restructured send_xtest at the same point (after the request is sent, before check(), key presses only), no new logic. Combined form: merge 7b0d2ff0b68, ~/tmp/oh-my-pi/queuethirty/xpair-combined.md",
-    "over": [],
-    "paired": [
-     "#19519"
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in crates/natives/src/desktop/linux/x11/input.rs, crates/natives/src/desktop/linux/x11/mod.rs"
     ],
+    "note": "",
+    "over": [],
+    "paired": [],
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-17T06:32:59Z"
@@ -119525,11 +119617,9 @@
     "title": "fix(natives): keep the Wayland ScreenCast stream open between screenshots on Hyprland and wlroots",
     "action": "keep",
     "reasons": [],
-    "note": "accepted pair with #19616: Main, 2026-11-18: no conflict since #19615 376a1b8be12 moved the kept-stream consts to wayland/capture/share.rs (git merge-tree clean); the merged tree built and its wayland tests passed 57/57 on goliath (ShareScope)",
+    "note": "",
     "over": [],
-    "paired": [
-     "#19616"
-    ],
+    "paired": [],
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-18T01:48:58Z"
@@ -119576,14 +119666,14 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing",
-    "action": "keep",
-    "reasons": [],
-    "note": "accepted pair with #19889: Main, 2026-11-20: docs AxUnconfirmed paragraph (both) and win32/ax.rs host_root_from (wbc's loop takes #19870's MAX_ANCESTORS bound; behaviour of each side unchanged); accepted pair with #20019: Main, 2026-11-20: win32/mod.rs tests-module import list only; combined = union of both WindowsAndMessaging imports; accepted pair with #19871: Main, 2026-11-20: win32/ax.rs import union; docs/tools/computer.md AxUnconfirmed: #19870's rewritten sentence, then this entry's Windows dispatch line; combined = both",
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md"
+    ],
+    "note": "accepted pair with #20019: Main, 2026-11-20: win32/mod.rs tests-module import list only; combined = union of both WindowsAndMessaging imports",
     "over": [],
     "paired": [
-     "#19889",
-     "#20019",
-     "#19871"
+     "#20019"
     ],
     "blocked_by": [],
     "needs": [],
@@ -119631,8 +119721,10 @@
     "area": "auth-broker",
     "priority": "P2",
     "title": "feat(ai,coding-agent): exchanged omp versions between auth-broker clients and the broker",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in packages/ai/src/auth-broker/client.ts"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -119827,26 +119919,20 @@
     "title": "fix(computer): wait for the app to finish reacting before the next read or input",
     "action": "wait",
     "reasons": [
-     "conflicts with #20110 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #19195 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
-     "conflicts with #19504 in docs/computer-use.md",
-     "conflicts with #19702 in docs/computer-use.md",
-     "conflicts with #19871 in docs/computer-use.md",
      "conflicts with #20019 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #19531 in docs/computer-use.md",
+     "conflicts with #19870 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with main in crates/natives/src/desktop/macos/settle.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#20110",
      "#19195",
-     "#19504",
-     "#19702",
-     "#19871",
      "#20019",
-     "#19531"
+     "#19531",
+     "#19870"
     ],
     "needs": [],
     "created": "2026-10-19T07:26:45Z"
@@ -119903,6 +119989,7 @@
     "reasons": [
      "held: Main, 2026-11-18: rework against #19195's new drag logic after it merges (not a mechanical restack; drag_control.rs moved)",
      "needs #19195 (open)",
+     "its need #19195 conflicts with main in docs/tools/computer.md",
      "conflicts with main in crates/natives/src/desktop/macos/ax/drag_control.rs, crates/natives/src/desktop/macos/input.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md"
     ],
     "note": "",
@@ -119925,9 +120012,6 @@
     "action": "wait",
     "reasons": [
      "conflicts with #19195 in docs/computer-use.md",
-     "conflicts with #19504 in docs/computer-use.md",
-     "conflicts with #19702 in docs/computer-use.md",
-     "conflicts with #19871 in docs/computer-use.md",
      "conflicts with #19531 in docs/computer-use.md",
      "conflicts with main in crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/macos/input.rs, docs/computer-use.md"
     ],
@@ -119936,9 +120020,6 @@
     "paired": [],
     "blocked_by": [
      "#19195",
-     "#19504",
-     "#19702",
-     "#19871",
      "#19531"
     ],
     "needs": [],
@@ -120124,15 +120205,12 @@
     "title": "fix(natives): expose Windows control state and stale-reference matches",
     "action": "wait",
     "reasons": [
-     "conflicts with #20110 in docs/tools/computer.md",
-     "conflicts with main in crates/natives/src/desktop/ax.rs, crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/mod.rs, crates/natives/src/desktop/win32/ax.rs, crates/natives/src/desktop/win32/ax_states.rs, crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/win32/mod.rs"
+     "conflicts with main in crates/natives/src/desktop/ax.rs, crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/mod.rs, crates/natives/src/desktop/win32/ax.rs, crates/natives/src/desktop/win32/ax_states.rs, crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/win32/mod.rs, docs/tools/computer.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#20110"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T10:16:04Z"
    },
@@ -120146,18 +120224,18 @@
     "title": "fix(natives,coding-agent): show a minimized Windows app's window from apps.open instead of launching it again",
     "action": "wait",
     "reasons": [
-     "conflicts with #20110 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #19195 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #20019 in packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with #19870 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with main in crates/natives/src/desktop/win32/capture.rs, crates/natives/src/desktop/win32/reopen.rs, crates/pi-natives/src/desktop/win32/mod.rs, packages/coding-agent/src/prompts/tools/computer.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#20110",
      "#19195",
-     "#20019"
+     "#20019",
+     "#19870"
     ],
     "needs": [],
     "created": "2026-11-11T09:06:32Z"
@@ -120194,11 +120272,7 @@
     "action": "held",
     "reasons": [
      "held: Main, 2026-11-18: needs an independent review and a VM row before it can open; no work on it now",
-     "needs #19702 (open)",
      "conflicts with #19195 in docs/computer-use.md",
-     "conflicts with #19504 in docs/computer-use.md",
-     "conflicts with #19702 in docs/computer-use.md",
-     "conflicts with #19871 in docs/computer-use.md",
      "conflicts with #19531 in docs/computer-use.md",
      "conflicts with main in crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/macos/input.rs, docs/computer-use.md"
     ],
@@ -120207,14 +120281,9 @@
     "paired": [],
     "blocked_by": [
      "#19195",
-     "#19504",
-     "#19702",
-     "#19871",
      "#19531"
     ],
-    "needs": [
-     "macos-keys-no-press"
-    ],
+    "needs": [],
     "created": "2026-11-18T18:02:46Z"
    },
    {
@@ -120277,11 +120346,8 @@
     "action": "held",
     "reasons": [
      "held: Main, 2026-11-11: stays held until #18786 merges with the typed-message guide channel (design check replace); then one property on the computer prelude, drop the wrap variant, re-run its blind legs",
-     "conflicts with #20110 in docs/tools/computer.md",
      "conflicts with #19195 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19849 in docs/tools/computer.md",
-     "conflicts with #19871 in docs/tools/computer.md",
-     "conflicts with #19889 in docs/tools/computer.md",
      "conflicts with #20019 in docs/tools/computer.md",
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md",
@@ -120292,11 +120358,8 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#20110",
      "#19195",
      "#19849",
-     "#19871",
-     "#19889",
      "#20019",
      "#19531",
      "#19618",
@@ -120317,18 +120380,13 @@
     "reasons": [
      "held: Main for InputDiffFix, 2026-11-12: held; the fix round failed two Opus acceptance lines fixed beforehand (Finder steps 1.47x, Automator tokens 1.26x vs main); code branch stays local and unpushed; see note",
      "needs computer-ui-quiet (queued)",
-     "conflicts with #20110 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #19195 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with #19504 in docs/computer-use.md",
-     "conflicts with #19702 in docs/computer-use.md",
      "conflicts with #19849 in docs/tools/computer.md",
-     "conflicts with #19871 in docs/computer-use.md, docs/tools/computer.md",
-     "conflicts with #19889 in docs/tools/computer.md",
      "conflicts with #20019 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #19531 in docs/computer-use.md, docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md",
      "conflicts with #19620 in packages/coding-agent/src/session/session-maintenance.ts",
-     "conflicts with #19870 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with #19870 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "its need computer-ui-quiet conflicts with main in crates/natives/src/desktop/macos/settle.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/tools/computer.md, packages/agent/src/agent.ts, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -120336,13 +120394,8 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#20110",
      "#19195",
-     "#19504",
-     "#19702",
      "#19849",
-     "#19871",
-     "#19889",
      "#20019",
      "#19531",
      "#19618",
@@ -120365,15 +120418,12 @@
     "action": "wait",
     "reasons": [
      "needs computer-ui-quiet (queued)",
-     "conflicts with #20110 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #19195 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19849 in docs/tools/computer.md",
-     "conflicts with #19871 in docs/tools/computer.md",
-     "conflicts with #19889 in docs/tools/computer.md",
      "conflicts with #20019 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md",
-     "conflicts with #19870 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with #19870 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "its need computer-ui-quiet conflicts with main in crates/natives/src/desktop/macos/settle.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/macos/ax/rich_text.rs, crates/natives/src/desktop/mod.rs, docs/tools/computer.md"
     ],
@@ -120381,11 +120431,8 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#20110",
      "#19195",
      "#19849",
-     "#19871",
-     "#19889",
      "#20019",
      "#19531",
      "#19618",
@@ -120432,11 +120479,8 @@
     "action": "held",
     "reasons": [
      "held: Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check | Main 2026-11-12: before it opens, the waiting-key-chord case with the cursor actually drawn (20 trials at a 20 s deadline; CursorDemo's cursor-on arm never drew one, and an early run on the combined tree returned 'Cancelled, input may be partial' 11/11, unexplained), on the polished branch will/desktop-cursor-polish.",
-     "conflicts with #20110 in docs/tools/computer.md",
      "conflicts with #19195 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts, packages/natives/native/index.d.ts",
      "conflicts with #19849 in docs/tools/computer.md",
-     "conflicts with #19871 in docs/tools/computer.md",
-     "conflicts with #19889 in docs/tools/computer.md",
      "conflicts with #20019 in docs/tools/computer.md",
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md, packages/natives/native/index.d.ts",
@@ -120447,11 +120491,8 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#20110",
      "#19195",
      "#19849",
-     "#19871",
-     "#19889",
      "#20019",
      "#19531",
      "#19618",
@@ -120577,11 +120618,8 @@
     "action": "held",
     "reasons": [
      "held: Main, 2026-11-12: proposal; opens only after entry A merges and Will has seen the body",
-     "conflicts with #20110 in docs/tools/computer.md",
      "conflicts with #19195 in docs/tools/computer.md",
      "conflicts with #19849 in docs/tools/computer.md",
-     "conflicts with #19871 in docs/tools/computer.md",
-     "conflicts with #19889 in docs/tools/computer.md",
      "conflicts with #20019 in docs/tools/computer.md",
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md",
@@ -120592,11 +120630,8 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#20110",
      "#19195",
      "#19849",
-     "#19871",
-     "#19889",
      "#20019",
      "#19531",
      "#19618",
@@ -120620,8 +120655,8 @@
      "conflicts with #19626 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #19701 in packages/coding-agent/src/session/agent-session.ts",
      "its need token-count-policy conflicts with main in packages/catalog/scripts/compat-compiler/compile-axes.ts, packages/catalog/src/compat/rules/README.md, packages/catalog/src/compat/rules/classes/anthropic.kdl, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/session/session-stats.ts, packages/coding-agent/test/context-fits-model.test.ts",
-     "its need wire-delta-count conflicts with main in packages/agent/src/tokenizer.ts, packages/agent/test/tokenizer.test.ts, packages/ai/src/providers/factory-droid.ts, packages/ai/src/providers/transform-messages.ts, packages/coding-agent/src/session/session-maintenance.ts",
-     "conflicts with main in packages/agent/src/agent.ts, packages/ai/src/providers/factory-droid/gemini.ts, packages/ai/src/providers/google-gemini-cli.ts, packages/ai/src/providers/openai-responses.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/context-view.ts, packages/coding-agent/test/modes/context-view.test.ts, packages/tui/src/status-line/context-usage.ts, packages/tui/test/context-usage.test.ts"
+     "its need wire-delta-count conflicts with main in packages/agent/src/agent.ts, packages/agent/src/tokenizer.ts, packages/agent/test/tokenizer.test.ts, packages/ai/src/providers/factory-droid.ts, packages/ai/src/providers/transform-messages.ts, packages/coding-agent/src/session/session-maintenance.ts",
+     "conflicts with main in packages/ai/src/providers/factory-droid/gemini.ts, packages/ai/src/providers/google-gemini-cli.ts, packages/ai/src/providers/openai-responses.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/context-view.ts, packages/coding-agent/test/modes/context-view.test.ts, packages/tui/src/status-line/context-usage.ts, packages/tui/test/context-usage.test.ts"
     ],
     "note": "",
     "over": [],
@@ -120709,9 +120744,7 @@
     "title": "fix(natives): mark dispatch before a fenced BM_CLICK",
     "action": "wait",
     "reasons": [
-     "needs #19889 (open), #19871 (open)",
-     "conflicts with #19849 in crates/natives/src/desktop/win32/window.rs",
-     "its need #19871 conflicts with main in crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md"
+     "conflicts with #19849 in crates/natives/src/desktop/win32/window.rs"
     ],
     "note": "",
     "over": [],
@@ -120719,10 +120752,7 @@
     "blocked_by": [
      "#19849"
     ],
-    "needs": [
-     "win-button-click",
-     "desktop-dispatch-fence"
-    ],
+    "needs": [],
     "created": "2026-11-20T17:01:38Z"
    },
    {
@@ -120735,21 +120765,18 @@
     "title": "fix(natives): press items of the open WPF context menu of the window in front",
     "action": "wait",
     "reasons": [
-     "needs #19889 (open)",
-     "conflicts with #19870 in crates/natives/src/desktop/win32/ax.rs"
+     "conflicts with #19870 in crates/natives/src/desktop/win32/ax.rs",
+     "conflicts with main in crates/natives/src/desktop/win32/ax.rs"
     ],
-    "note": "accepted pair with #19849: Main, 2026-11-20: win32/window.rs; combined = WindowsAndMessaging import-list union, and one #[cfg(test)] mod tests holding both sides' uses and items (both append a tests module); recheck at #19849's next head; accepted pair with #19871: Main, 2026-11-21: win32/ax.rs perform; combined = popup's lookup/send split, #19871's per-arm marks become one control::dispatching()? at the start of perform's send closure (after contained_root's second ensure_pattern_safe, so a refusal there is still nothing sent). Every send arm goes straight to its live UIA call (PositionlessPress::run invoke/expand/collapse/toggle/select, scroll_into_view, do_default_action; all pattern fetches and get_default_action are in lookup), so one mark is right. setValue unmarked (not dispatch_fenced); imports union. At open: Windows build of the combined tree running #19871's production-seam and unfenced-negative tests plus popup's recheck test",
+    "note": "accepted pair with #19849: Main, 2026-11-20: win32/window.rs; combined = WindowsAndMessaging import-list union, and one #[cfg(test)] mod tests holding both sides' uses and items (both append a tests module); recheck at #19849's next head",
     "over": [],
     "paired": [
-     "#19849",
-     "#19871"
+     "#19849"
     ],
     "blocked_by": [
      "#19870"
     ],
-    "needs": [
-     "win-button-click"
-    ],
+    "needs": [],
     "created": "2026-11-20T04:47:55Z"
    },
    {
@@ -120818,19 +120845,14 @@
     "action": "held",
     "reasons": [
      "held: Main, 2026-11-20: in its fix round (WinWpfRoutes5, review needs-changes at 86d258734d9); takes the recorded ax.rs form with win-wpf-scroll when it follows",
-     "conflicts with #20110 in crates/natives/src/desktop/macos/ax.rs",
-     "conflicts with #19889 in crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md"
+     "conflicts with main in crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md"
     ],
-    "note": "accepted pair with #19870: Main, 2026-11-20: win32/ax.rs: two appended blocks (methods then free items each) and uiautomation import unions; combined = both; accepted pair with #19871: Main, 2026-11-20: ax.rs import union; perform arms = #19871's (pattern fetch, dispatch mark, action); this entry's setValue routes stay outside the fence's stated scope until win-wpf-set-background extends it (unfenced setValue keeps main's generic Timeout: AxSetValue is not dispatch_fenced, so it never reaches abandoned_before_dispatch). docs/tools/computer.md AxUnconfirmed paragraph: form brought to Main at #19870's final head",
+    "note": "accepted pair with #19870: Main, 2026-11-20: win32/ax.rs: two appended blocks (methods then free items each) and uiautomation import unions; combined = both",
     "over": [],
     "paired": [
-     "#19870",
-     "#19871"
+     "#19870"
     ],
-    "blocked_by": [
-     "#20110",
-     "#19889"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-20T06:29:20Z"
    },
@@ -120844,9 +120866,7 @@
     "title": "fix(natives): press WPF controls behind other windows through their default action",
     "action": "wait",
     "reasons": [
-     "needs #19889 (open), #19871 (open)",
-     "conflicts with #19889 in crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md",
-     "its need #19871 conflicts with main in crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md"
+     "conflicts with main in docs/tools/computer.md"
     ],
     "note": "accepted pair with #19195: Main, 2026-11-21: docs/tools/computer.md only; combined = #19195's macOS drag paragraph, wbc's BM_CLICK paragraph, then this entry's WPF press paragraph, no wording change; accepted pair with #19870: Main, 2026-11-21: win32/ax.rs std and windows_sys UI import lists = union (cmp::Ordering, time::{Duration, Instant}; IsWindowEnabled + SPI_GETWHEELSCROLLCHARS/LINES, SystemParametersInfoW); docs AxUnconfirmed: in the recorded wbc x #19870 sentence, 'a WinForms check box' becomes 'a WinForms or WPF check box'; tests-over: ReviewWpfPressCut10, 2026-11-20: one signed-in WPF fixture test whose rows each reach a distinct branch (reviewer's request)",
     "over": [],
@@ -120854,13 +120874,8 @@
      "#19195",
      "#19870"
     ],
-    "blocked_by": [
-     "#19889"
-    ],
-    "needs": [
-     "win-button-click",
-     "desktop-dispatch-fence"
-    ],
+    "blocked_by": [],
+    "needs": [],
     "created": "2026-11-20T19:14:08Z"
    },
    {
@@ -120873,11 +120888,10 @@
     "title": "fix(natives): set WPF text boxes, sliders and combo boxes behind other windows",
     "action": "wait",
     "reasons": [
-     "needs win-wpf-press (queued), win-uia-set-patterns (queued), #19871 (open)",
+     "needs win-wpf-press (queued), win-uia-set-patterns (queued)",
      "conflicts with #19195 in docs/tools/computer.md",
-     "conflicts with #19889 in crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md",
-     "its need win-uia-set-patterns conflicts with main in crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md",
-     "its need #19871 conflicts with main in crates/natives/src/desktop/mod.rs, crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md"
+     "its need win-wpf-press conflicts with main in crates/natives/src/desktop/mod.rs, crates/natives/src/desktop/win32/ax.rs, crates/natives/src/desktop/win32/input.rs, crates/natives/src/desktop/win32/window.rs, docs/tools/computer.md",
+     "its need win-uia-set-patterns conflicts with main in crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md"
     ],
     "note": "accepted pair with #19870: Main, 2026-11-21: win32/ax.rs std + windows_sys UI import unions (as D's form); D2's appended impl methods and #19870's scroll_at_point methods insert at one point: combined = both blocks (methods of each inside the impl, then free items of each), no shared item names; docs: D2's 'and setValue() calls' goes inside the recorded #19871 x #19870 dispatch line. Combined tree (sim main+wbc+#19871+D+uia+D2 x #19870, 6ae79fb584) passed Windows clippy/rustfmt on goliath. The docs AxUnconfirmed paragraph written by #19870, wbc, #19871 and D/D2 is read once as a whole by whoever merges last (Main's ruling).",
     "over": [],
@@ -120885,13 +120899,11 @@
      "#19870"
     ],
     "blocked_by": [
-     "#19195",
-     "#19889"
+     "#19195"
     ],
     "needs": [
      "win-wpf-press",
-     "win-uia-set-patterns",
-     "desktop-dispatch-fence"
+     "win-uia-set-patterns"
     ],
     "created": "2026-11-20T21:08:35Z"
    },
@@ -120906,7 +120918,7 @@
     "action": "wait",
     "reasons": [
      "conflicts with #19620 in packages/coding-agent/src/session/session-maintenance.ts",
-     "conflicts with main in packages/agent/src/tokenizer.ts, packages/agent/test/tokenizer.test.ts, packages/ai/src/providers/factory-droid.ts, packages/ai/src/providers/transform-messages.ts, packages/coding-agent/src/session/session-maintenance.ts"
+     "conflicts with main in packages/agent/src/agent.ts, packages/agent/src/tokenizer.ts, packages/agent/test/tokenizer.test.ts, packages/ai/src/providers/factory-droid.ts, packages/ai/src/providers/transform-messages.ts, packages/coding-agent/src/session/session-maintenance.ts"
     ],
     "note": "",
     "over": [],
