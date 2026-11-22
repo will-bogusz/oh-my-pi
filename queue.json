@@ -107066,7 +107066,7 @@
     "win-button-click",
     "desktop-dispatch-fence"
    ],
-   "base": "3119be97ee8a4e20f31d6d45db50de11104d3e60",
+   "base": "b505770284deff6b2888a4eb26a7cc95497cc111",
    "body": "bodies/win-wpf-press.md",
    "state": "queued",
    "pr": null,
@@ -107074,7 +107074,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-wpf-press",
    "host": "MacBook-Pro",
    "added": "2026-11-20T19:14:08Z",
-   "updated": "2026-11-21T00:01:35Z",
+   "updated": "2026-11-22T13:44:50Z",
    "note": "",
    "tests_over_override": {
     "reason": "ReviewWpfPressCut10, 2026-11-20: one signed-in WPF fixture test whose rows each reach a distinct branch (reviewer's request)",
@@ -107087,7 +107087,8 @@
    "pair_reasons": {
     "19195": "Main, 2026-11-21: docs/tools/computer.md only; combined = #19195's macOS drag paragraph, wbc's BM_CLICK paragraph, then this entry's WPF press paragraph, no wording change",
     "19870": "Main, 2026-11-21: win32/ax.rs std and windows_sys UI import lists = union (cmp::Ordering, time::{Duration, Instant}; IsWindowEnabled + SPI_GETWHEELSCROLLCHARS/LINES, SystemParametersInfoW); docs AxUnconfirmed: in the recorded wbc x #19870 sentence, 'a WinForms check box' becomes 'a WinForms or WPF check box'"
-   }
+   },
+   "advanced": "2026-11-22T13:44:50Z"
   },
   {
    "id": "win-takeover-selection",
