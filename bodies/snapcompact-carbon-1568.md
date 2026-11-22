@@ -28,7 +28,7 @@ Each 1568 cell has 2 reps (316 answers), Carbon's 2048 cell 1 rep. An archive to
 
 At real size, one 1.37M-character history laid out by omp's own compaction: Carbon at 1568px with the 80-image budget of the stacked follow-up (72 frames, 6 regular + 66 dense) scored .929 against stock 2048px with 60 (56 frames) at .812, +.117 [+.045, +.195]; neither dropped history, and Devin accepted both (~6.2 MB). For Factory the evidence is an earlier synthetic copy task on Carbon: dense identifier lines copied exactly .367 → .825.
 
-**Cost:** uniform `8on22-bw` frames hold 1.7× more at 2048px, each still a flat ~1,090 tokens. In a synthetic compaction at a 300K trigger, Carbon at Devin's 60-frame budget kept 1.13M characters instead of 1.94M of 3.9M, and 1.14M of 1.54M it kept whole before. Hydrogen is still planned at omp's 5,024-token estimate here, not its price (Related: #20038), so it stops at 26 frames either way.
+**Cost:** uniform `8on22-bw` frames hold 1.7× more at 2048px, each still a flat ~1,090 tokens. In a synthetic compaction at a 300K trigger, Carbon at Devin's 60-frame budget kept 1.13M characters instead of 1.94M of 3.9M, and 1.14M of 1.54M it kept whole before. Neon and Hydrogen, both priced at 1,089 since #19883 and #20038, do the same.
 
 ## Testing
 

@@ -104662,7 +104662,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-carbon-1568",
    "host": "MacBook-Pro",
    "added": "2026-11-18T04:51:10Z",
-   "updated": "2026-11-22T10:52:48Z",
+   "updated": "2026-11-22T13:08:53Z",
    "note": "LaneSnapcompactStack, 2026-11-22: evidence refreshed from the finished study (levers/REPORT.md blocks 1-2): Carbon complete (2048 .892 -> 1568 .987, +.095 [+.051,+.142]; dense 1568 middle .959), Neon/Hydrogen dense middle .965/.883, real-size Carbon 1.37M history 1568+80 images .929 vs stock .812 (+.117). Body rewritten (material change: final-head review applies). CHANGELOG restated at the catalog layer per Brit's dc9a2443adf (frame size only, no read-back effect); head 795280e2b63 (CHANGELOG-only amend of 4de9bdeaaab, reviewed ready there). Large-request per-token cost left out pending the input-token check. Still needs #19880; not opened.",
    "kind": "fix"
   },
