@@ -22,6 +22,7 @@
 - On Windows, an abort or `timeout` now ends an in-process utility such as `cat` that is blocked reading an open, empty stdin pipe, instead of waiting until a writer closes it ([#19338](https://github.com/can1357/oh-my-pi/pull/19338) by [@jchanghong023](https://github.com/jchanghong023))
 - Fixed a standalone binary loading the native addon a previous build of the same version extracted, instead of its own, when both addons happened to be the same size: each build now extracts its addon to its own directory named by the addon's content hash ([#19346](https://github.com/can1357/oh-my-pi/pull/19346) by [@HeyItsGilbert](https://github.com/HeyItsGilbert))
 - Fixed Windows `computer` `press()` on a WPF button or check box behind other windows being refused: it now requests the control's default action without bringing the window forward; a check box changes state without running its `Click` handler ([#20179](https://github.com/can1357/oh-my-pi/pull/20179) by [@will-bogusz](https://github.com/will-bogusz))
+- Fixed Windows `setValue` to set a WPF slider to a number in its range (at most 15 significant digits) or a combo box/list to the exact name of an exposed item, then read it back. The app must already be in front; these writes are refused behind other windows ([#20178](https://github.com/can1357/oh-my-pi/pull/20178) by [@will-bogusz](https://github.com/will-bogusz))
 
 ## [19.1.0] - 2026-11-21
 
