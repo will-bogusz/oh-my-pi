@@ -119897,6 +119897,11 @@
     "sha": "766e314b82cdc40d46b769c2d274729d293cc84e",
     "at": "2026-11-22T15:47:38Z",
     "host": "goliath"
+   },
+   "macos": {
+    "sha": "6f5483f03324c88de7450aadcaa3c05e233e660b",
+    "at": "2026-11-22T16:13:17Z",
+    "host": "MacBook-Pro"
    }
   },
   "fa583934d514c0d9e36dac8db064a60e1470074d": {
