@@ -15,6 +15,8 @@ Behind another window, `setValue` on the fixture's WPF text box, three sliders a
 | combo box opened earlier | 0 → 5, 5, 5 / 5, 5, 5 | 0 → 5, 5, 5 / 5, 5, 5 |
 | combo box never opened | refused → refused | refused → refused |
 
+`main` refuses these too: WPF text boxes have no native `Edit` window for #19814's route, and containment's WPF refusal is unchanged.
+
 Reading order in `win32/ax.rs`: `Win32Ax::set_value`, `set_behind`, `legacy_dispatch`, `legacy_readback`; then `dispatch_fenced` in `desktop/mod.rs`.
 
 ## Why
@@ -33,13 +35,15 @@ Related: #19814.
 
 ## Testing
 
-`set_value_writes_a_wpf_slider_as_a_number_and_a_combo_box_as_its_item` (ignored; needs a signed-in desktop) now also writes behind another window: text, slider and an opened combo land; 2.75 on -2 to 8 is refused naming 2.7 and 2.8; a never-opened combo, password and read-only boxes, and all three controls behind the window's modal dialog (`InputFailed`) are refused and change nothing. It passes on Windows 10 and 11 and fails on both with the route turned off.
-
-Not tested (races the fixture has no seam for, and the poll has no clock seam): the read-back window's edges and a Chromium child attached during the provider reads.
+`set_value_writes_a_wpf_slider_as_a_number_and_a_combo_box_as_its_item` (ignored; needs a signed-in desktop) now also writes behind another window: text, slider and an opened combo land; 2.75 on -2 to 8 is refused naming 2.7 and 2.8; a never-opened combo, password and read-only boxes, and all three controls behind the window's modal dialog (`InputFailed`) are refused and change nothing. At `e02e94349fd` (before the rebase onto `main`) it passes on Windows 10 and 11 and fails on both with the route turned off.
 
 <details><summary>The runs behind the numbers</summary>
 
-Runs: the harness's WPF value fixture (FX-WPF-VALUES: a text box, the three sliders, a combo box whose list opened once at start, and one replaced by a never-opened combo before each run) behind another window, 5 runs per cell. Before = the `v19.0.1` release (natives sha256 `20098A21…`), after = the same release with this branch's natives, cross-built with cargo-xwin from this patch (sha256 `47206CDE…`). User keys lost and pointer moved: 0 in every typing cell. In one Windows 10 `v19.0.1` run (refused, as all were) another window took the foreground; none did in any run of this branch. Pure tests (slider admission and neighbours, native message fence, dispatch fence) pass on both.
+Runs: the harness's WPF value fixture (FX-WPF-VALUES: a text box, the three sliders, a combo box whose list opened once at start, and one replaced by a never-opened combo before each run) behind another window, 5 runs per cell. Before = the `v19.0.1` release (natives sha256 `20098A21…`), after = the same release with this branch's natives, cross-built with cargo-xwin from `e02e94349fd` (sha256 `47206CDE…`). User keys lost and pointer moved: 0 in every typing cell. In one Windows 10 `v19.0.1` run (refused, as all were) another window took the foreground; none did in any run of this branch. Pure tests (slider admission and neighbours, native message fence, dispatch fence) pass on both.
+
+In a tree merging this head with the other open natives PRs, the live test also passes on a GitHub-hosted windows-latest runner (Windows Server 2025 24H2, build 26100.33828, interactive session).
+
+`e02e94349fd` is this change before its rebase onto `main`, which changed none of its Rust lines. Not tested (races the fixture has no seam for, and the poll has no clock seam): the read-back window's edges and a Chromium child attached during the provider reads.
 
 </details>
 
@@ -61,7 +65,7 @@ LegacyIAccessible `SetValue(text)` on a WPF slider behind another window, then `
 The cover window was in the foreground before and after every trial.
 </details>
 
-`scripts/rust-check` on Windows (cargo-xwin) and Linux: clippy and rustfmt pass on this branch's lines at `e02e94349fd`.
+`scripts/rust-check` on Windows (cargo-xwin), Linux and macOS: clippy and rustfmt pass on this branch's lines at `5ccab6c3633`.
 
 ---
 
