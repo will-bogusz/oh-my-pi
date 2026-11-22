@@ -106077,6 +106077,21 @@
        "On Windows, a screenshot or zoom of a window drawn by Chromium (Chrome, Edge, Electron apps) that appeared fully covered around the read (other windows over all of it, or off every display) sets `covered: true` and adds a note to its status text, and that window's `ax()` ends with a `\u2026 covered:` line. `silent: true` leaves out the status text and its note, not the `covered` property. The mark comes from window geometry, not from the app: Chromium can stop drawing and updating its accessibility tree while it finds itself covered, and Windows then returns the last frame it drew, so either read may be stale, and repeating it while the window stays covered does not help. The note names the ways to a current view, least disruptive first: the browser tool when it is connected to that app, then `raise()` (which brings the window in front of the user's and takes their keyboard, and which Windows refuses while the user is using another window) and a read that checks for the expected state rather than trusting the first unmarked one, else telling the user what could not be confirmed. Nothing is refused; a window with any part showing, and other apps' windows, carry no mark."
       ]
      }
+    },
+    {
+     "at": "2026-11-22T13:17:11Z",
+     "reason": "Main, 2026-11-22: recorded wbc x #19849 form: #19849's tests-module WindowsAndMessaging import lines are folded into main's (wbc's) tests import list as a union",
+     "old": "0bc9f30381479658e12c0157fbd1a9b93017a907",
+     "new": "f6d3565f1894bf0036f1ee279d17fbef7abe23a7",
+     "dropped": {
+      "crates/natives/src/desktop/win32/window.rs": [
+       "\t\t\t\tGetAncestor, GetClassNameW, GetForegroundWindow, GetGUIThreadInfo,",
+       "\t\t\t\tWS_EX_LAYERED,",
+       "\t\t\tCreateWindowExW, DefWindowProcW, DestroyWindow, GWL_STYLE, HWND_TOPMOST, RegisterClassW,",
+       "\t\t\tSetLayeredWindowAttributes, SetWindowLongW, SetWindowPos, WNDCLASSW, WS_EX_TOOLWINDOW,",
+       "\t\t\tWS_EX_TRANSPARENT, WS_OVERLAPPEDWINDOW, WS_POPUP,"
+      ]
+     }
     }
    ]
   },
