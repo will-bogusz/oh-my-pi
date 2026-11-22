@@ -1,10 +1,10 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-22 17:01Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-22 17:19Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-22 17:01Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 1, conflict-held 17, stacked 16, held 12, parked 1, open PRs 21; merged 420, closed 45
+**Counts:** openable now 1, conflict-held 17, stacked 16, held 12, parked 1, open PRs 20; merged 421, closed 45
 
 ## Openable now (1)
 
@@ -78,11 +78,10 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-22
 |---|---|---|---|---|---|---|---|---|
 | [#16611](https://github.com/can1357/oh-my-pi/pull/16611) | read-audio-transcripts | feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio | catalog | P2 | 4d | Will, 2026-11-17: parked as draft, not maintained for now; revisit later | not checked or kept fresh | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-audio-transcripts) |
 
-## Open PRs (21)
+## Open PRs (20)
 
 | PR | id | title | area | rank | open | plan | branch |
 |---|---|---|---|---|---|---|---|
-| [#17756](https://github.com/can1357/oh-my-pi/pull/17756) | iphone-mirror-pointer | fix(natives): keep background iPhone Mirroring taps reaching the phone after a takeover tap | computer | P1 | 20d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-pointer) |
 | [#19513](https://github.com/can1357/oh-my-pi/pull/19513) | upload-stall-error-all-providers | fix(ai,agent): say how far a request body uploaded when any provider's connection drops | other | P1 | 5d | keep; tests-over: Main, 2026-11-17: each test pins a distinct user-visible behaviour: upload progress named for bodies of 1 MiB or more (mid-body, after body, below threshold, Anthropic fetch fallback), resend semantics per redirect status (only the five real redirect codes resend; 300 returned), credentials dropped cross-origin, and redirected on the response and its clones; plus remote compaction retrying the new error | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/upload-stall-error-all-providers) |
 | [#19542](https://github.com/can1357/oh-my-pi/pull/19542) | browser-wait-predicate | feat(browser): add waitForFunction to tabs and frames | browser | P2 | 5d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-wait-predicate) |
 | [#19633](https://github.com/can1357/oh-my-pi/pull/19633) | settle-reads | feat(browser): settle the preceding action before reads too | browser | P2 | 4d | keep; tests-over: Main, 2026-11-18: one test per settle branch: settled read, unanswered request bound, no preceding action, batched reads settle once, element id survives an action, click opening a confirm | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-settle-reads) |
