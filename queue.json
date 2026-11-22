@@ -119964,8 +119964,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-22T17:01:03.692979Z",
-  "host": "goliath",
+  "at": "2026-11-22T17:19:22.612755Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -119992,23 +119992,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-22T15:32:07Z"
-   },
-   {
-    "id": "iphone-mirror-pointer",
-    "label": "#17756",
-    "number": 17756,
-    "state": "open",
-    "area": "computer",
-    "priority": "P1",
-    "title": "fix(natives): keep background iPhone Mirroring taps reaching the phone after a takeover tap",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-02T03:27:31Z"
    },
    {
     "id": "macos-drag-confirm",
@@ -120371,14 +120354,12 @@
     "title": "fix(natives): scroll iPhone Mirroring the whole distance asked for in the background",
     "action": "wait",
     "reasons": [
-     "conflicts with #17756 in crates/natives/src/desktop/macos/input.rs"
+     "conflicts with main in crates/natives/src/desktop/macos/input.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#17756"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-10-30T21:35:55Z"
    },
@@ -121266,10 +121247,8 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "wait",
-    "reasons": [
-     "conflicts with main in (branch missing on the fork)"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
