@@ -119841,6 +119841,11 @@
     "sha": "cf79c7d51fe3ba24dce56a2537ae919383646853",
     "at": "2026-11-22T15:08:50Z",
     "host": "goliath"
+   },
+   "windows": {
+    "sha": "cf79c7d51fe3ba24dce56a2537ae919383646853",
+    "at": "2026-11-22T15:10:18Z",
+    "host": "goliath"
    }
   }
  },
