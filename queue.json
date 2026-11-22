@@ -104658,8 +104658,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-carbon-1568",
    "host": "MacBook-Pro",
    "added": "2026-11-18T04:51:10Z",
-   "updated": "2026-11-20T22:03:49Z",
-   "note": "LaneSnapcompactStack, 2026-11-20: extended to Gemini 4 Neon and Hydrogen on Devin (all effort uids) on the 158-question real-archive study (~/tmp/adhoc/2026-11-20-devin-gemini-snapcompact/levers/REPORT.md): exact .804->.968 Hydrogen, .902->.981 Neon, .891->.991 Carbon (partial, 1 rep). Factory stays Carbon-only. Rebased onto kdl b01e9c6d012 (#19880). Test fails with Neon or Hydrogen ids removed (Received: 2048); snapcompact 124, catalog 1,421. Body rewritten around the three-model table; cost from a synthetic compaction (Carbon 60 frames: 1.13M vs 1.94M chars kept). Review ReviewCarbonNeonHydrogen: needs-changes at ee09efde76a (body/comment wording), ready at 4de9bdeaaab. Opens after #19880 merges.",
+   "updated": "2026-11-22T10:52:48Z",
+   "note": "LaneSnapcompactStack, 2026-11-22: evidence refreshed from the finished study (levers/REPORT.md blocks 1-2): Carbon complete (2048 .892 -> 1568 .987, +.095 [+.051,+.142]; dense 1568 middle .959), Neon/Hydrogen dense middle .965/.883, real-size Carbon 1.37M history 1568+80 images .929 vs stock .812 (+.117). Body rewritten (material change: final-head review applies). CHANGELOG restated at the catalog layer per Brit's dc9a2443adf (frame size only, no read-back effect); head 795280e2b63 (CHANGELOG-only amend of 4de9bdeaaab, reviewed ready there). Large-request per-token cost left out pending the input-token check. Still needs #19880; not opened.",
    "kind": "fix"
   },
   {
