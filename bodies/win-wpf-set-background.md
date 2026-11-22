@@ -27,7 +27,7 @@ Decisions:
 - Only containment's refusal of a WPF window tries this route; anything that does not qualify keeps that refusal, and in front nothing changes.
 - Right before sending, the window must still have no Chromium/WebView2 child window and must not be disabled by a modal dialog (`InputFailed`). Password and read-only text boxes are refused unsent.
 - Before dispatch this route's only time bound is the call's deadline, via the dispatch fence, which now marks every Windows `setValue` send.
-- A background write counts only if a read sees it within 500 ms (or the call's remaining time). No read starts after that, but a read already in flight is not interrupted. Not seeing it is `AxUnconfirmed`; a failed read is `InputFailed`.
+- A background write counts only if a read sees it within 500 ms (or the call's remaining time). No read starts after that, but a read already in flight is not interrupted. Not seeing it is `AxUnconfirmed`. A read that fails after the write was sent is `AxUnconfirmed` on both routes, the rule #20178 set in front.
 
 Limits: behind other windows a slider takes only a number at a whole percent of its range (steps of 10 on 0 to 1000); another valid number is refused unsent, naming the nearest that are, if any. In front that restriction does not apply. A combo box selects only items it already exposes, so one never opened is refused.
 
@@ -41,9 +41,9 @@ Related: #19814.
 
 Runs: the harness's WPF value fixture (FX-WPF-VALUES: a text box, the three sliders, a combo box whose list opened once at start, and one replaced by a never-opened combo before each run) behind another window, 5 runs per cell. Before = the `v19.0.1` release (natives sha256 `20098A21…`), after = the same release with this branch's natives, cross-built with cargo-xwin from `e02e94349fd` (sha256 `47206CDE…`). User keys lost and pointer moved: 0 in every typing cell. In one Windows 10 `v19.0.1` run (refused, as all were) another window took the foreground; none did in any run of this branch. Pure tests (slider admission and neighbours, native message fence, dispatch fence) pass on both.
 
-In a tree merging this head with the other open natives PRs, the live test also passes on a GitHub-hosted windows-latest runner (Windows Server 2025 24H2, build 26100.33828, interactive session).
+In a tree merging this head with the other open natives PRs, the live test also passes on a GitHub-hosted windows-latest runner (Windows Server 2025 24H2, build 26100.33828, interactive session). After the read-back alignment it passes there again at `c9903d153b0` (this head's code, plus four duplicate test rows since dropped), with the desktop unit tests; `unreadable_readback_after_a_sent_write_is_unconfirmed` fails with the helper's code reverted to `InputFailed`. The four behind-route read sites reach that code only through the helper, which no test fault-injects.
 
-`e02e94349fd` is this change before its rebase onto `main`, which changed none of its Rust lines. Not tested (races the fixture has no seam for, and the poll has no clock seam): the read-back window's edges and a Chromium child attached during the provider reads.
+`e02e94349fd` is this change before its rebase onto `main` and before the behind route's unreadable read-backs became `AxUnconfirmed`. Not tested (races the fixture has no seam for, and the poll has no clock seam): the read-back window's edges and a Chromium child attached during the provider reads.
 
 </details>
 
@@ -65,7 +65,7 @@ LegacyIAccessible `SetValue(text)` on a WPF slider behind another window, then `
 The cover window was in the foreground before and after every trial.
 </details>
 
-`scripts/rust-check` on Windows (cargo-xwin), Linux and macOS: clippy and rustfmt pass on this branch's lines at `5ccab6c3633`.
+`scripts/rust-check` on Windows (cargo-xwin) and Linux: clippy and rustfmt pass on this branch's lines at `89e9e23c325`.
 
 ---
 
