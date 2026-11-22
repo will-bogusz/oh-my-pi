@@ -107697,7 +107697,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-22T10:23:37Z",
+  "checked": "2026-11-22T11:25:10Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -107759,7 +107759,8 @@
    20038,
    20093,
    20094,
-   20110
+   20110,
+   20163
   ],
   "post_merge": {
    "18632": {
@@ -119163,12 +119164,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-22T10:56:08.787611Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-22T11:25:11.009553Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 1,
+   "left": 7
   },
   "rows": [
    {
@@ -119466,6 +119467,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-21T19:47:59Z"
+   },
+   {
+    "id": "snapcompact-frame-geometry",
+    "label": "#20163",
+    "number": 20163,
+    "state": "open",
+    "area": "snapcompact",
+    "priority": "P1",
+    "title": "fix(snapcompact): state every grid an archive's frames use in its summary",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-22T10:58:32Z"
    },
    {
     "id": "x11-xtest-release",
@@ -120065,23 +120083,6 @@
     "created": "2026-11-18T04:50:59Z"
    },
    {
-    "id": "snapcompact-frame-geometry",
-    "label": "snapcompact-frame-geometry",
-    "number": null,
-    "state": "queued",
-    "area": "snapcompact",
-    "priority": "P2",
-    "title": "fix(snapcompact): state every grid an archive's frames use in its summary",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-22T10:55:43Z"
-   },
-   {
     "id": "snapcompact-shape-reader-identity",
     "label": "snapcompact-shape-reader-identity",
     "number": null,
@@ -120654,8 +120655,10 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with main in (branch missing on the fork)"
+    ],
     "note": "",
     "over": [],
     "paired": [],

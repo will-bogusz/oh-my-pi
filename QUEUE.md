@@ -3,17 +3,16 @@
 Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-22 11:25Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-22 10:56Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 2, conflict-held 16, stacked 19, held 13, parked 1, open PRs 30; merged 408, closed 44
+**Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-22 11:25Z on goliath; groups below are from it, states from the manifest)
+**Counts:** openable now 1, conflict-held 17, stacked 19, held 13, parked 1, open PRs 30; merged 408, closed 44
 
-## Openable now (2)
+## Openable now (1)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
-| stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 9d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 | factory-droid-1100-pin | feat(catalog): identify Factory Droid requests as droid 1.10.0 | factory-droid |  | 8d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-pin) |
 
-## Conflict-held (16)
+## Conflict-held (17)
 
 | id | title | area | priority | age | blocked by | branch |
 |---|---|---|---|---|---|---|
@@ -31,6 +30,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-22
 | win-minimised-windows | fix(natives,coding-agent): show a minimized Windows app's window from apps.open instead of launching it again | computer | P2 | 11d | [#20110](https://github.com/can1357/oh-my-pi/pull/20110), [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#20019](https://github.com/can1357/oh-my-pi/pull/20019), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-minimised-windows) |
 | macos-ax-cancel-before-send | fix(natives): send no macOS AX action once its run is cancelled | natives | P2 | 11d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-ax-cancel-before-send) |
 | win-ax-states | fix(natives): expose Windows control state and stale-reference matches | computer | P2 | 11d | [#20110](https://github.com/can1357/oh-my-pi/pull/20110), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-ax-states) |
+| stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 9d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 | macos-web-type-background | fix(natives): type into a background macOS web page field without a takeover | computer | P2 | 7d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19504](https://github.com/can1357/oh-my-pi/pull/19504), [#19702](https://github.com/can1357/oh-my-pi/pull/19702), [#19871](https://github.com/can1357/oh-my-pi/pull/19871), [#19531](https://github.com/can1357/oh-my-pi/pull/19531), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-web-type-background) |
 | deadline-ranking | feat(ai): rank an account priority by quota deadline | ai/auth | P2 | 4d | [#19623](https://github.com/can1357/oh-my-pi/pull/19623), [#19700](https://github.com/can1357/oh-my-pi/pull/19700), [#19701](https://github.com/can1357/oh-my-pi/pull/19701) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/deadline-ranking) |
 
@@ -114,5 +114,5 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-22
 | [#20038](https://github.com/can1357/oh-my-pi/pull/20038) | devin-gemini-image-price-rest | fix(catalog): budget Devin's other measured Gemini models at the 1,089 tokens it bills per image | catalog | P0 | 23h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-gemini-image-price-rest) |
 | [#20093](https://github.com/can1357/oh-my-pi/pull/20093) | cursor-long-context-output | fix(catalog): price Cursor's GPT-5.6 long-context output at 1.5x | catalog | P0 | 15h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/cursor-long-context-output) |
 | [#20094](https://github.com/can1357/oh-my-pi/pull/20094) | devin-fast-long-context | fix(catalog): price Devin's GPT-5.6 long-context tiers as published, Fast lanes included | catalog | P1 | 15h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-fast-long-context) |
-| [#20110](https://github.com/can1357/oh-my-pi/pull/20110) | linux-ax-value-selected | fix(natives): read Linux slider and scroll bar values and selected state | computer | P0 | 11h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/linux-ax-value-selected) |
-| [#20163](https://github.com/can1357/oh-my-pi/pull/20163) | snapcompact-frame-geometry | fix(snapcompact): state every grid an archive's frames use in its summary | snapcompact | P2 | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-frame-geometry) |
+| [#20110](https://github.com/can1357/oh-my-pi/pull/20110) | linux-ax-value-selected | fix(natives): read Linux slider and scroll bar values and selected state | computer | P0 | 12h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/linux-ax-value-selected) |
+| [#20163](https://github.com/can1357/oh-my-pi/pull/20163) | snapcompact-frame-geometry | fix(snapcompact): state every grid an archive's frames use in its summary | snapcompact | P1 | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-frame-geometry) |
