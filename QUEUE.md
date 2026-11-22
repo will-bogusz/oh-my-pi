@@ -4,7 +4,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-22
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-22 12:59Z on MacBook-Pro; groups below are from it, states from the manifest)
-**Counts:** openable now 2, conflict-held 19, stacked 16, held 13, parked 1, open PRs 19; merged 419, closed 44
+**Counts:** openable now 2, conflict-held 18, stacked 16, held 13, parked 1, open PRs 19; merged 419, closed 45
 
 ## Openable now (2)
 
@@ -13,7 +13,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-22
 | stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 9d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 | factory-droid-1100-pin | feat(catalog): identify Factory Droid requests as droid 1.10.0 | factory-droid |  | 8d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-pin) |
 
-## Conflict-held (19)
+## Conflict-held (18)
 
 | id | title | area | priority | age | blocked by | branch |
 |---|---|---|---|---|---|---|
@@ -34,7 +34,6 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-22
 | macos-web-type-background | fix(natives): type into a background macOS web page field without a takeover | computer | P2 | 7d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19531](https://github.com/can1357/oh-my-pi/pull/19531), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-web-type-background) |
 | deadline-ranking | feat(ai): rank an account priority by quota deadline | ai/auth | P2 | 4d | [#19623](https://github.com/can1357/oh-my-pi/pull/19623), [#19700](https://github.com/can1357/oh-my-pi/pull/19700), [#19701](https://github.com/can1357/oh-my-pi/pull/19701) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/deadline-ranking) |
 | win-popup-foreground | fix(natives): press items of the open WPF context menu of the window in front | computer |  | 2d | [#19870](https://github.com/can1357/oh-my-pi/pull/19870), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-popup-foreground) |
-| win-button-click-fence | fix(natives): mark dispatch before a fenced BM_CLICK | computer |  | 1d | [#19849](https://github.com/can1357/oh-my-pi/pull/19849) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-button-click-fence) |
 | win-wpf-press | fix(natives): press WPF controls behind other windows through their default action | computer |  | 1d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-wpf-press) |
 
 ## Stacked (16)
