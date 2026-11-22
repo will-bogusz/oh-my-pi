@@ -119500,7 +119500,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-22T12:59:07.766993Z",
+  "at": "2026-11-22T13:20:43.464773Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -119535,14 +119535,16 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): stop macOS background drags reporting moves that did not happen",
-    "action": "rebase",
+    "action": "requeue",
     "reasons": [
-     "conflicts with main in docs/tools/computer.md"
+     "conflicts with #17756 in crates/natives/src/desktop/macos/input.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#17756"
+    ],
     "needs": [],
     "created": "2026-11-13T20:28:59Z"
    },
@@ -119571,10 +119573,8 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): count every opaque window as a cover over a Chromium capture",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in crates/natives/src/desktop/win32/window.rs"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -119628,10 +119628,8 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): release X11 XTest keys and buttons a killed omp held",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in crates/natives/src/desktop/linux/x11/input.rs, crates/natives/src/desktop/linux/x11/mod.rs"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -119698,10 +119696,8 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "accepted pair with #20019: Main, 2026-11-20: win32/mod.rs tests-module import list only; combined = union of both WindowsAndMessaging imports",
     "over": [],
     "paired": [
@@ -119929,15 +119925,12 @@
     "title": "fix(computer): say window and element filters take text when given a RegExp",
     "action": "wait",
     "reasons": [
-     "conflicts with #19195 in packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [
-     "#19195"
-    ],
+    "blocked_by": [],
     "needs": [],
     "created": "2026-11-11T01:40:14Z"
    },
@@ -119951,20 +119944,16 @@
     "title": "fix(computer): wait for the app to finish reacting before the next read or input",
     "action": "wait",
     "reasons": [
-     "conflicts with #19195 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #20019 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #19531 in docs/computer-use.md",
-     "conflicts with #19870 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with main in crates/natives/src/desktop/macos/settle.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#19195",
      "#20019",
-     "#19531",
-     "#19870"
+     "#19531"
     ],
     "needs": [],
     "created": "2026-10-19T07:26:45Z"
@@ -120021,7 +120010,6 @@
     "reasons": [
      "held: Main, 2026-11-18: rework against #19195's new drag logic after it merges (not a mechanical restack; drag_control.rs moved)",
      "needs #19195 (open)",
-     "its need #19195 conflicts with main in docs/tools/computer.md",
      "conflicts with main in crates/natives/src/desktop/macos/ax/drag_control.rs, crates/natives/src/desktop/macos/input.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md"
     ],
     "note": "",
@@ -120043,7 +120031,6 @@
     "title": "fix(natives): type into a background macOS web page field without a takeover",
     "action": "wait",
     "reasons": [
-     "conflicts with #19195 in docs/computer-use.md",
      "conflicts with #19531 in docs/computer-use.md",
      "conflicts with main in crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/macos/input.rs, docs/computer-use.md"
     ],
@@ -120051,7 +120038,6 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#19195",
      "#19531"
     ],
     "needs": [],
@@ -120237,12 +120223,19 @@
     "title": "fix(natives): expose Windows control state and stale-reference matches",
     "action": "wait",
     "reasons": [
+     "conflicts with #19849 in docs/tools/computer.md",
+     "conflicts with #19531 in docs/tools/computer.md",
+     "conflicts with #19870 in docs/tools/computer.md",
      "conflicts with main in crates/natives/src/desktop/ax.rs, crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/mod.rs, crates/natives/src/desktop/win32/ax.rs, crates/natives/src/desktop/win32/ax_states.rs, crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/win32/mod.rs, docs/tools/computer.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#19849",
+     "#19531",
+     "#19870"
+    ],
     "needs": [],
     "created": "2026-11-11T10:16:04Z"
    },
@@ -120256,18 +120249,14 @@
     "title": "fix(natives,coding-agent): show a minimized Windows app's window from apps.open instead of launching it again",
     "action": "wait",
     "reasons": [
-     "conflicts with #19195 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #20019 in packages/coding-agent/src/prompts/tools/computer.md",
-     "conflicts with #19870 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with main in crates/natives/src/desktop/win32/capture.rs, crates/natives/src/desktop/win32/reopen.rs, crates/pi-natives/src/desktop/win32/mod.rs, packages/coding-agent/src/prompts/tools/computer.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#19195",
-     "#20019",
-     "#19870"
+     "#20019"
     ],
     "needs": [],
     "created": "2026-11-11T09:06:32Z"
@@ -120304,7 +120293,6 @@
     "action": "held",
     "reasons": [
      "held: Main, 2026-11-18: needs an independent review and a VM row before it can open; no work on it now",
-     "conflicts with #19195 in docs/computer-use.md",
      "conflicts with #19531 in docs/computer-use.md",
      "conflicts with main in crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/macos/input.rs, docs/computer-use.md"
     ],
@@ -120312,7 +120300,6 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#19195",
      "#19531"
     ],
     "needs": [],
@@ -120378,7 +120365,6 @@
     "action": "held",
     "reasons": [
      "held: Main, 2026-11-11: stays held until #18786 merges with the typed-message guide channel (design check replace); then one property on the computer prelude, drop the wrap variant, re-run its blind legs",
-     "conflicts with #19195 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19849 in docs/tools/computer.md",
      "conflicts with #20019 in docs/tools/computer.md",
      "conflicts with #19531 in docs/tools/computer.md",
@@ -120390,7 +120376,6 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#19195",
      "#19849",
      "#20019",
      "#19531",
@@ -120412,13 +120397,12 @@
     "reasons": [
      "held: Main for InputDiffFix, 2026-11-12: held; the fix round failed two Opus acceptance lines fixed beforehand (Finder steps 1.47x, Automator tokens 1.26x vs main); code branch stays local and unpushed; see note",
      "needs computer-ui-quiet (queued)",
-     "conflicts with #19195 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19849 in docs/tools/computer.md",
      "conflicts with #20019 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #19531 in docs/computer-use.md, docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md",
      "conflicts with #19620 in packages/coding-agent/src/session/session-maintenance.ts",
-     "conflicts with #19870 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with #19870 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "its need computer-ui-quiet conflicts with main in crates/natives/src/desktop/macos/settle.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/tools/computer.md, packages/agent/src/agent.ts, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -120426,7 +120410,6 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#19195",
      "#19849",
      "#20019",
      "#19531",
@@ -120450,12 +120433,11 @@
     "action": "wait",
     "reasons": [
      "needs computer-ui-quiet (queued)",
-     "conflicts with #19195 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19849 in docs/tools/computer.md",
      "conflicts with #20019 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md",
-     "conflicts with #19870 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with #19870 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "its need computer-ui-quiet conflicts with main in crates/natives/src/desktop/macos/settle.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/macos/ax/rich_text.rs, crates/natives/src/desktop/mod.rs, docs/tools/computer.md"
     ],
@@ -120463,7 +120445,6 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#19195",
      "#19849",
      "#20019",
      "#19531",
@@ -120511,7 +120492,6 @@
     "action": "held",
     "reasons": [
      "held: Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check | Main 2026-11-12: before it opens, the waiting-key-chord case with the cursor actually drawn (20 trials at a 20 s deadline; CursorDemo's cursor-on arm never drew one, and an early run on the combined tree returned 'Cancelled, input may be partial' 11/11, unexplained), on the polished branch will/desktop-cursor-polish.",
-     "conflicts with #19195 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts, packages/natives/native/index.d.ts",
      "conflicts with #19849 in docs/tools/computer.md",
      "conflicts with #20019 in docs/tools/computer.md",
      "conflicts with #19531 in docs/tools/computer.md",
@@ -120523,7 +120503,6 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#19195",
      "#19849",
      "#20019",
      "#19531",
@@ -120650,7 +120629,6 @@
     "action": "held",
     "reasons": [
      "held: Main, 2026-11-12: proposal; opens only after entry A merges and Will has seen the body",
-     "conflicts with #19195 in docs/tools/computer.md",
      "conflicts with #19849 in docs/tools/computer.md",
      "conflicts with #20019 in docs/tools/computer.md",
      "conflicts with #19531 in docs/tools/computer.md",
@@ -120662,7 +120640,6 @@
     "over": [],
     "paired": [],
     "blocked_by": [
-     "#19195",
      "#19849",
      "#20019",
      "#19531",
@@ -120765,27 +120742,6 @@
     "created": "2026-10-31T21:07:28Z"
    },
    {
-    "id": "win-button-click-fence",
-    "label": "win-button-click-fence",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": null,
-    "title": "fix(natives): mark dispatch before a fenced BM_CLICK",
-    "action": "wait",
-    "reasons": [
-     "conflicts with #19849 in crates/natives/src/desktop/win32/window.rs"
-    ],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [
-     "#19849"
-    ],
-    "needs": [],
-    "created": "2026-11-20T17:01:38Z"
-   },
-   {
     "id": "win-popup-foreground",
     "label": "win-popup-foreground",
     "number": null,
@@ -120795,8 +120751,9 @@
     "title": "fix(natives): press items of the open WPF context menu of the window in front",
     "action": "wait",
     "reasons": [
-     "conflicts with #19870 in crates/natives/src/desktop/win32/ax.rs",
-     "conflicts with main in crates/natives/src/desktop/win32/ax.rs"
+     "conflicts with #19531 in docs/tools/computer.md",
+     "conflicts with #19870 in crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md",
+     "conflicts with main in crates/natives/src/desktop/win32/ax.rs, crates/natives/src/desktop/win32/input.rs, crates/natives/src/desktop/win32/window.rs, docs/tools/computer.md"
     ],
     "note": "accepted pair with #19849: Main, 2026-11-20: win32/window.rs; combined = WindowsAndMessaging import-list union, and one #[cfg(test)] mod tests holding both sides' uses and items (both append a tests module); recheck at #19849's next head",
     "over": [],
@@ -120804,6 +120761,7 @@
      "#19849"
     ],
     "blocked_by": [
+     "#19531",
      "#19870"
     ],
     "needs": [],
@@ -120875,6 +120833,8 @@
     "action": "held",
     "reasons": [
      "held: Main, 2026-11-20: in its fix round (WinWpfRoutes5, review needs-changes at 86d258734d9); takes the recorded ax.rs form with win-wpf-scroll when it follows",
+     "conflicts with #19849 in docs/tools/computer.md",
+     "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with main in crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md"
     ],
     "note": "accepted pair with #19870: Main, 2026-11-20: win32/ax.rs: two appended blocks (methods then free items each) and uiautomation import unions; combined = both",
@@ -120882,7 +120842,10 @@
     "paired": [
      "#19870"
     ],
-    "blocked_by": [],
+    "blocked_by": [
+     "#19849",
+     "#19531"
+    ],
     "needs": [],
     "created": "2026-11-20T06:29:20Z"
    },
@@ -120896,6 +120859,8 @@
     "title": "fix(natives): press WPF controls behind other windows through their default action",
     "action": "wait",
     "reasons": [
+     "conflicts with #19849 in docs/tools/computer.md",
+     "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with main in docs/tools/computer.md"
     ],
     "note": "accepted pair with #19195: Main, 2026-11-21: docs/tools/computer.md only; combined = #19195's macOS drag paragraph, wbc's BM_CLICK paragraph, then this entry's WPF press paragraph, no wording change; accepted pair with #19870: Main, 2026-11-21: win32/ax.rs std and windows_sys UI import lists = union (cmp::Ordering, time::{Duration, Instant}; IsWindowEnabled + SPI_GETWHEELSCROLLCHARS/LINES, SystemParametersInfoW); docs AxUnconfirmed: in the recorded wbc x #19870 sentence, 'a WinForms check box' becomes 'a WinForms or WPF check box'; tests-over: ReviewWpfPressCut10, 2026-11-20: one signed-in WPF fixture test whose rows each reach a distinct branch (reviewer's request)",
@@ -120904,7 +120869,10 @@
      "#19195",
      "#19870"
     ],
-    "blocked_by": [],
+    "blocked_by": [
+     "#19849",
+     "#19531"
+    ],
     "needs": [],
     "created": "2026-11-20T19:14:08Z"
    },
@@ -120919,7 +120887,8 @@
     "action": "wait",
     "reasons": [
      "needs win-wpf-press (queued), win-uia-set-patterns (queued)",
-     "conflicts with #19195 in docs/tools/computer.md",
+     "conflicts with #19849 in docs/tools/computer.md",
+     "conflicts with #19531 in docs/tools/computer.md",
      "its need win-wpf-press conflicts with main in crates/natives/src/desktop/mod.rs, crates/natives/src/desktop/win32/ax.rs, crates/natives/src/desktop/win32/input.rs, crates/natives/src/desktop/win32/window.rs, docs/tools/computer.md",
      "its need win-uia-set-patterns conflicts with main in crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md"
     ],
@@ -120929,7 +120898,8 @@
      "#19870"
     ],
     "blocked_by": [
-     "#19195"
+     "#19849",
+     "#19531"
     ],
     "needs": [
      "win-wpf-press",
