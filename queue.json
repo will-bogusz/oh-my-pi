@@ -107655,7 +107655,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-21T23:42:11Z",
+  "checked": "2026-11-22T00:42:22Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -107742,24 +107742,6 @@
       "addressed_by": 18658
      }
     ]
-   },
-   "19590": {
-    "title": "fix(ai): warn when a broker refresh failure outlasts the access token",
-    "merge_commit": "35a313ec2bf11512eb4816d718fbd373689bc2ca",
-    "merged_at": "2026-11-20T00:19:38Z",
-    "findings": []
-   },
-   "19611": {
-    "title": "fix(coding-agent): keep the image omission note on evicted Responses computer results",
-    "merge_commit": "9c1d2879708db7357554ceb63de326e524a4c94b",
-    "merged_at": "2026-11-20T00:19:38Z",
-    "findings": []
-   },
-   "19748": {
-    "title": "fix(coding-agent): fire key events after a browser fill for pages that search on keyup",
-    "merge_commit": "b832944e598a22cbe022394a7e02b181f58f26c9",
-    "merged_at": "2026-11-20T00:19:37Z",
-    "findings": []
    },
    "19814": {
     "title": "fix(natives): write Windows edit values without activating their window",
@@ -119139,12 +119121,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-21T23:42:12.482945Z",
+  "at": "2026-11-22T00:42:22.933531Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 1,
-   "left": 7
+   "used": 0,
+   "left": 8
   },
   "rows": [
    {
