@@ -104522,7 +104522,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-shape-kdl",
    "host": "MacBook-Pro",
    "added": "2026-11-18T00:47:39Z",
-   "updated": "2026-11-22T13:05:06Z",
+   "updated": "2026-11-22T13:05:48Z",
    "note": "LaneSnapcompactStack, 2026-11-21: CONFLICTING after 19.1.0; advanced onto 3c65f4895fd (rules.json regenerated at each commit, CHANGELOG entries back under [Unreleased]), head dabcb7b440c, MERGEABLE. Main's batch also touched axes.ts and gemini/anthropic/gpt-oss.kdl (prompt perturbation, gemini-cli removal, Gemini 4 tool-result folding): textual only, rebase clean. Census rerun on new main: 7,755 built models 0 diffs, 0 with configured snapcompactShape. snapcompact 123, catalog 1,416, tui preview 3, typechecks clean; compaction suites fail only the 6 that fail on main (4 anthropic-native-compaction, 2 no-reduction). Pairs rebuilt: with #19620 and with devin-gemini-image-price-rest (#20038).",
    "kind": "proposal",
    "line_loss_overrides": [
@@ -104589,7 +104589,7 @@
      }
     }
    ],
-   "advanced": "2026-11-22T13:05:06Z",
+   "advanced": "2026-11-22T13:05:48Z",
    "built": [
     {
      "with": "#19620",
