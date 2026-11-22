@@ -119566,8 +119566,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-22T13:42:42.307639Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-22T13:58:24.214074Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -120793,8 +120793,10 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with main in (branch missing on the fork)"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -120908,11 +120910,7 @@
     "title": "fix(natives): set WPF sliders and combo boxes through RangeValue and SelectionItem",
     "action": "wait",
     "reasons": [
-     "conflicts with #19195 in crates/natives/src/desktop/macos/ax.rs, docs/tools/computer.md",
-     "conflicts with #19849 in docs/tools/computer.md",
-     "conflicts with #19531 in docs/tools/computer.md",
-     "conflicts with win-popup-foreground in crates/natives/src/desktop/win32/ax.rs",
-     "conflicts with main in crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md"
+     "conflicts with win-popup-foreground in crates/natives/src/desktop/win32/ax.rs"
     ],
     "note": "accepted pair with #19870: Main, 2026-11-20: win32/ax.rs: two appended blocks (methods then free items each) and uiautomation import unions; combined = both",
     "over": [],
@@ -120920,9 +120918,6 @@
      "#19870"
     ],
     "blocked_by": [
-     "#19195",
-     "#19849",
-     "#19531",
      "win-popup-foreground"
     ],
     "needs": [],
@@ -120938,10 +120933,7 @@
     "title": "fix(natives): press WPF controls behind other windows through their default action",
     "action": "wait",
     "reasons": [
-     "conflicts with #19849 in docs/tools/computer.md",
-     "conflicts with #19531 in docs/tools/computer.md",
-     "conflicts with win-popup-foreground in crates/natives/src/desktop/win32/ax.rs",
-     "conflicts with main in docs/tools/computer.md"
+     "conflicts with win-popup-foreground in crates/natives/src/desktop/win32/ax.rs"
     ],
     "note": "accepted pair with #19195: Main, 2026-11-21: docs/tools/computer.md only; combined = #19195's macOS drag paragraph, wbc's BM_CLICK paragraph, then this entry's WPF press paragraph, no wording change; accepted pair with #19870: Main, 2026-11-21: win32/ax.rs std and windows_sys UI import lists = union (cmp::Ordering, time::{Duration, Instant}; IsWindowEnabled + SPI_GETWHEELSCROLLCHARS/LINES, SystemParametersInfoW); docs AxUnconfirmed: in the recorded wbc x #19870 sentence, 'a WinForms check box' becomes 'a WinForms or WPF check box'; tests-over: ReviewWpfPressCut10, 2026-11-20: one signed-in WPF fixture test whose rows each reach a distinct branch (reviewer's request)",
     "over": [],
@@ -120950,8 +120942,6 @@
      "#19870"
     ],
     "blocked_by": [
-     "#19849",
-     "#19531",
      "win-popup-foreground"
     ],
     "needs": [],
@@ -120968,12 +120958,8 @@
     "action": "wait",
     "reasons": [
      "needs win-wpf-press (queued), win-uia-set-patterns (queued)",
-     "conflicts with #19195 in crates/natives/src/desktop/mod.rs, docs/tools/computer.md",
-     "conflicts with #19849 in docs/tools/computer.md",
-     "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with win-popup-foreground in crates/natives/src/desktop/win32/ax.rs",
-     "its need win-wpf-press conflicts with main in crates/natives/src/desktop/mod.rs, crates/natives/src/desktop/win32/ax.rs, crates/natives/src/desktop/win32/input.rs, crates/natives/src/desktop/win32/window.rs, docs/tools/computer.md",
-     "its need win-uia-set-patterns conflicts with main in crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md"
+     "its need win-uia-set-patterns conflicts with main in crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md"
     ],
     "note": "accepted pair with #19870: Main, 2026-11-21: win32/ax.rs std + windows_sys UI import unions (as D's form); D2's appended impl methods and #19870's scroll_at_point methods insert at one point: combined = both blocks (methods of each inside the impl, then free items of each), no shared item names; docs: D2's 'and setValue() calls' goes inside the recorded #19871 x #19870 dispatch line. Combined tree (sim main+wbc+#19871+D+uia+D2 x #19870, 6ae79fb584) passed Windows clippy/rustfmt on goliath. The docs AxUnconfirmed paragraph written by #19870, wbc, #19871 and D/D2 is read once as a whole by whoever merges last (Main's ruling).",
     "over": [],
@@ -120981,9 +120967,6 @@
      "#19870"
     ],
     "blocked_by": [
-     "#19195",
-     "#19849",
-     "#19531",
      "win-popup-foreground"
     ],
     "needs": [
