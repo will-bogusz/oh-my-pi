@@ -106275,6 +106275,22 @@
        "On Windows, a windowless control without a text value takes a number or an item instead, through UI Automation. Its hosting window must already own the foreground, regardless of toolkit (otherwise `BackgroundUnavailable`, with nothing sent); `setValue` does not automatically take over. A range control (a WPF slider) takes plain decimal text within its range, at most 15 significant digits, and must read back as that number. A selection container (a WPF combo box or list) takes the exact name of one of the items it currently exposes; virtualized offscreen rows are not searched. A combo box exposing no items yet is opened, the item selected and the list closed again, also when selection fails, while the window remains in front. If it loses the foreground, no further input is sent and `InputFailed` reports the partial result and list state. The selection is read back only after a full 150 ms post-close settling period; this bounded observation does not guarantee every deferred handler has finished. If the operation cannot cover that full period or waiting is interrupted, `AxUnconfirmed` reports that the item was selected but could not be confirmed. If the selection differs after settling, `AxFailed` names what it reads and warns against blindly retrying. Otherwise unavailable or differing read-back after a write throws `InputFailed`. A control offering none of Value, RangeValue and Selection reports `AxFailed`, naming them."
       ]
      }
+    },
+    {
+     "at": "2026-11-22T13:43:46Z",
+     "reason": "QueueFifty, 2026-11-22: rebase onto b505770284d: macos/ax.rs import list reflowed as the union with #20110's bounded_number (same names plus it); AxUnconfirmed paragraph rewritten onto main's wbc+#19871 text: '(macOS and Windows)', WinForms sentence gains ', and a combo selection may already have changed even when its post-close settling period could not finish', main's ending kept",
+     "old": "50086f38c575b11b602b6b77d8c3173c74b49f27",
+     "new": "1008420faa6fbcf183e5b97667d989d0732c6aab",
+     "dropped": {
+      "crates/natives/src/desktop/macos/ax.rs": [
+       "\t\t\tAxBounds, AxHandle, AxProps, AxReadAs, WalkBounds, confirm_read_as, decimal_value,",
+       "\t\t\tnormalize_role_macos, performable_names, plain_decimal, real_reached, require_read_as,",
+       "\t\t\ttext_readback, truncate_chars,"
+      ],
+      "docs/tools/computer.md": [
+       "`AxUnconfirmed` (macOS or Windows) means an AX action was requested but its outcome could not be confirmed. On Windows, a combo selection may already have changed even when its post-close settling period could not finish. On macOS, the app may not reply in time or messaging may fail, for example because the action opened a modal dialog, or the app may answer with an attribute error that does not apply to actions, as Preview does after following a PDF link and Finder after opening an item. Inspect fresh AX or a screenshot before repeating it; never retry blindly."
+      ]
+     }
     }
    ],
    "rebases_after": [
