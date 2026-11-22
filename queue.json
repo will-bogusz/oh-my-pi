@@ -108094,7 +108094,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-22T18:01:39Z",
+  "checked": "2026-11-22T19:02:21Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108103,15 +108103,7 @@
     "title": "feat(catalog): identify Factory Droid requests as droid 1.10.0"
    }
   },
-  "conflicts": {
-   "#19592": {
-    "since": "2026-11-22T12:57:50Z",
-    "title": "feat(ai,coding-agent): exchanged omp versions between auth-broker clients and the broker",
-    "files": [
-     "packages/ai/src/auth-broker/client.ts"
-    ]
-   }
-  },
+  "conflicts": {},
   "merged_through": "2026-11-22T17:14:06Z",
   "unreleased": {
    "19929": {
@@ -120031,7 +120023,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-22T18:01:39.756261Z",
+  "at": "2026-11-22T19:02:21.967227Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -120308,10 +120300,8 @@
     "area": "auth-broker",
     "priority": "P2",
     "title": "feat(ai,coding-agent): exchanged omp versions between auth-broker clients and the broker",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in packages/ai/src/auth-broker/client.ts"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
