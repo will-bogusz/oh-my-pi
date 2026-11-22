@@ -105681,6 +105681,17 @@
        "`AxUnconfirmed` means an accessibility action was requested but its outcome could not be confirmed. On macOS, the app may not have replied in time or messaging failed, for example because the action opened a modal dialog, or the app answered with an attribute error that does not apply to actions, as Preview does after following a PDF link and Finder after opening an item. On Windows, a WPF scroll may have been sent without its movement being confirmed, including when the container's view size changed. It may already have taken effect: observe the named app/window on macOS or the target window on Windows before repeating it."
       ]
      }
+    },
+    {
+     "at": "2026-11-22T13:14:26Z",
+     "reason": "Main, 2026-11-22: #19870's AxUnconfirmed docs line is merged into main's wbc/#19871 paragraph (approved combined text: WinForms check box + WPF scroll clauses, #19870's ending; main's dispatch line untouched)",
+     "old": "a195fe0e6f728b294a04a62891129af3d64bdb37",
+     "new": "42c28e0aaa9dd511f40291dbb093560467c02b1f",
+     "dropped": {
+      "docs/tools/computer.md": [
+       "`AxUnconfirmed` means an accessibility action was requested but its outcome could not be confirmed. On macOS, the app may not have replied in time or messaging failed, for example because the action opened a modal dialog, or the app answered with an attribute error that does not apply to actions, as Preview does after following a PDF link and Finder after opening an item. On Windows, a WPF scroll step was sent, but no element under the point showed it moving the requested way, or the operation's time ran out. It may already have taken effect: observe the named app/window on macOS or the target window on Windows before repeating it."
+      ]
+     }
     }
    ],
    "built": [
