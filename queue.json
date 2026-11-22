@@ -58969,8 +58969,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/iphone-mirror-scroll-distance",
    "host": "MacBook-Pro",
    "added": "2026-10-30T21:35:55Z",
-   "updated": "2026-11-17T02:30:33Z",
-   "note": "FalseSuccess2 2026-11-13: needs a redo on main's new_scroll_wheel_event2 call and on the direction fix (macos-scroll-direction, now on main 84f5adc as 7d8261c with no needs; it no longer carries this entry's report_scroll lines, and iPhone Mirroring's scroll sign flips through background_scroll there).",
+   "updated": "2026-11-22T13:17:59Z",
+   "note": "FalseSuccess2 2026-11-13: needs a redo on main's new_scroll_wheel_event2 call and on the direction fix (macos-scroll-direction, now on main 84f5adc as 7d8261c with no needs; it no longer carries this entry's report_scroll lines, and iPhone Mirroring's scroll sign flips through background_scroll there). | Main, 2026-11-22: leave queued; it restacks on #17756 (rebased 2026-11-22 onto b505770284d with the primer's KeyPurpose::Pointer commit), with which it conflicts in macos/input.rs.",
    "advanced": "2026-11-10T22:13:06Z"
   },
   {
