@@ -106324,6 +106324,27 @@
        "`AxUnconfirmed` (macOS or Windows) means an AX action was requested but its outcome could not be confirmed. On Windows, a combo selection may already have changed even when its post-close settling period could not finish. On macOS, the app may not reply in time or messaging may fail, for example because the action opened a modal dialog, or the app may answer with an attribute error that does not apply to actions, as Preview does after following a PDF link and Finder after opening an item. Inspect fresh AX or a screenshot before repeating it; never retry blindly."
       ]
      }
+    },
+    {
+     "at": "2026-11-22T16:14:00Z",
+     "reason": "QueueFifty, 2026-11-22: roboomp should-fix on #20178 (Main's go): readable slider/selection read-back mismatches move from InputFailed to AxFailed and unreadable read-backs after a sent write to AxUnconfirmed via helpers; the uia docs paragraph's read-back sentences are rewritten to match",
+     "old": "84d8a073211b48d7f61046b5e9506f8b18f78590",
+     "new": "4b781b170a8c485ff049121c7e7fd9af321ab611",
+     "dropped": {
+      "crates/natives/src/desktop/win32/ax.rs": [
+       "\t\t\t\t\"wrote {text}, but the control's value could not be read back ({error}); inspect it \\",
+       "\t\t\t\t before writing again\"",
+       "\t\t\tErr(DesktopError::input_failed(format!(",
+       "\t\t\t\t\"selected {text:?}, but the selection could not be read back ({error})\"",
+       "\t\t\t\t\t\"selected {text:?}, but CompareElements failed during read-back ({error})\"",
+       "\t\t\t\t\"after the list closed, the selection reads [{}] instead of {text:?}; inspect it \\",
+       "\t\t\t\t before writing again, do not retry blindly\",",
+       "\t\t\t\t\"selected {text:?}, but the selection now reads [{}]; the app may have changed it\","
+      ],
+      "docs/tools/computer.md": [
+       "On Windows, a windowless control without a text value takes a number or an item instead, through UI Automation. A range or selection control's hosting window must already own the foreground, regardless of toolkit (otherwise `BackgroundUnavailable`, with nothing sent); `setValue` does not automatically take over. A range control (a WPF slider) takes plain decimal text within its range, at most 15 significant digits, and must read back as that number. A selection container (a WPF combo box or list) takes the exact name of one of the items it currently exposes; virtualized offscreen rows are not searched. A multiple-selection list refuses before mutation if selecting would replace any other selected item; press the item or select via click instead. A combo box exposing no items yet is opened and the item selected; the call then attempts to close the list, even when selection fails, while the window remains in front. Failed cleanup reports whether the list remains open or its state is unknown. If it loses the foreground, no further input is sent and `InputFailed` reports the partial result and list state. After a successful selection and close, the selection is read back only after a full 150 ms post-close settling period; this bounded observation does not guarantee every deferred handler has finished. If the operation cannot cover that full period or waiting is interrupted, `AxUnconfirmed` reports that the item was selected but could not be confirmed. If the selection differs after settling, `AxFailed` names what it reads and warns against blindly retrying. Otherwise unavailable or differing read-back after a write throws `InputFailed`. A control offering none of Value, RangeValue and Selection reports `AxFailed`, naming them."
+      ]
+     }
     }
    ],
    "rebases_after": [
