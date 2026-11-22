@@ -106281,7 +106281,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-uia-set-patterns",
    "host": "MacBook-Pro",
    "added": "2026-11-20T06:29:20Z",
-   "updated": "2026-11-22T16:14:33Z",
+   "updated": "2026-11-22T16:14:52Z",
    "note": "",
    "advanced": "2026-11-22T16:14:06Z",
    "line_loss_overrides": [
@@ -106353,7 +106353,7 @@
     20177
    ],
    "pair_reasons": {
-    "19870": "Main, 2026-11-22: rechecked at #19870's head 42c28e0aaa9: win32/ax.rs = uiautomation patterns/types import unions + both appended blocks (methods of each inside the impl, then free items of each); docs AxUnconfirmed paragraph = #19870's approved text with uia's combo clause as the middle item ('a WinForms check box can process press() without changing its state, a combo selection may already have changed even when its post-close settling period could not finish, and a WPF scroll may report it ...')",
+    "19870": "Main, 2026-11-22: rechecked at #19870's head 42c28e0aaa9: win32/ax.rs = uiautomation patterns/types import unions + both appended blocks (methods of each inside the impl, then free items of each); docs AxUnconfirmed paragraph = #19870's approved text with uia's combo clause as the middle item ('a WinForms check box can process press() without changing its state, a combo selection may already have changed even when its post-close settling period could not finish, and a WPF scroll may report it ...') Rechecked 2026-11-22 at uia 4b781b170a8 (read-back fix): conflict hunks unchanged except uia's own appended-block content; form holds. Tree 9f869465ff (uia x #19870 by this form, free helpers after the impl): linux tests 373/0, linux+windows clippy pass, windows test build ok.",
     "19871": "Main, 2026-11-20: ax.rs import union; perform arms = #19871's (pattern fetch, dispatch mark, action); this entry's setValue routes stay outside the fence's stated scope until win-wpf-set-background extends it (unfenced setValue keeps main's generic Timeout: AxSetValue is not dispatch_fenced, so it never reaches abandoned_before_dispatch). docs/tools/computer.md AxUnconfirmed paragraph: form brought to Main at #19870's final head",
     "20177": "Main, 2026-11-22: win32/ax.rs set_value: popup's two-closure contained(element, lookup, send); combined = uia's Pattern arm as lookup (match value: Some(pattern) => Ok(pattern), None => get_pattern::<UIValuePattern>() mapped through pattern_error(\"Value\")) and send |pattern| pattern.set_value(text); uia's windowless set_value probe becomes a lookup-only contained call whose send closure sends nothing (no dispatch mark, setValue stays unmarked per uia x #19871); built in tree a50c4da6228 (main+popup+uia+D+D2+open natives PRs), Windows desktop unit tests + uia/D2 setValue live test pass on GitHub windows-latest"
    },
