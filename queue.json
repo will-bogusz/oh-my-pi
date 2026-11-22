@@ -107658,7 +107658,7 @@
    "branch": "will/snapcompact-frame-geometry",
    "title": "fix(snapcompact): state every grid an archive's frames use in its summary",
    "area": "snapcompact",
-   "priority": "P2",
+   "priority": "P1",
    "needs": [],
    "base": "8e7856eb40360719990116f439828702b92ef8a6",
    "body": "bodies/snapcompact-frame-geometry.md",
@@ -107668,7 +107668,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-frame-geometry",
    "host": "MacBook-Pro",
    "added": "2026-11-22T10:55:43Z",
-   "updated": "2026-11-22T11:02:36Z",
+   "updated": "2026-11-22T11:25:06Z",
    "note": "LaneSnapcompactStack, 2026-11-22: opened as #20163 (P2, kind fix). roboomp P1 with one should-fix (CHANGELOG narrated cause and old row counts): fixed in 870ed687913 (also rebased onto 8e7856eb40), thread replied. Codex could not review: usage limit reached on the repo (failed pass on 949c7dde609). Review ReviewFrameGeometry ready at 9769d7f56f5; later commits are CHANGELOG-only. Precheck NOTEs: test/source line ratio (each test reaches a distinct grid case) and a behaviour eval for the template change, not run.",
    "kind": "fix",
    "built": [
