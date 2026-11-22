@@ -119864,12 +119864,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-22T15:33:34.767911Z",
+  "at": "2026-11-22T15:38:34.712868Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 1,
-   "left": 7
+   "used": 3,
+   "left": 5
   },
   "rows": [
    {
@@ -119882,10 +119882,12 @@
     "title": "fix(natives): press items of the open WPF context menu of the window in front",
     "action": "keep",
     "reasons": [],
-    "note": "accepted pair with #19849: Main, 2026-11-22: rechecked at #19849's head f6d3565f189: win32/window.rs production WindowsAndMessaging list = popup's minus WS_EX_TOOLWINDOW and WS_EX_TRANSPARENT (unused once #19849 drops the cover check's tool-window test; popup keeps GW_OWNER, GetWindow, WS_EX_NOACTIVATE, WS_POPUP for is_menu_popup); tests-module list = union (+GWL_STYLE, WS_EX_TOOLWINDOW, WS_EX_TRANSPARENT, WS_POPUP from #19849, PostMessageW, WM_APP from popup), rustfmt reflow; both tests modules merge as one; tests-over: Main, 2026-11-22: one signed-in WPF fixture test whose cases each reach a distinct branch (pressed in front, owned dialog refused, lookup-switch refused, behind refused); no smaller fixture reaches the popup-owner rule",
+    "note": "accepted pair with #19849: Main, 2026-11-22: rechecked at #19849's head f6d3565f189: win32/window.rs production WindowsAndMessaging list = popup's minus WS_EX_TOOLWINDOW and WS_EX_TRANSPARENT (unused once #19849 drops the cover check's tool-window test; popup keeps GW_OWNER, GetWindow, WS_EX_NOACTIVATE, WS_POPUP for is_menu_popup); tests-module list = union (+GWL_STYLE, WS_EX_TOOLWINDOW, WS_EX_TRANSPARENT, WS_POPUP from #19849, PostMessageW, WM_APP from popup), rustfmt reflow; both tests modules merge as one; accepted pair with #20178: Main, 2026-11-22: win32/ax.rs set_value: popup's two-closure contained(element, lookup, send); combined = uia's Pattern arm as lookup (match value: Some(pattern) => Ok(pattern), None => get_pattern::<UIValuePattern>() mapped through pattern_error(\"Value\")) and send |pattern| pattern.set_value(text); uia's windowless set_value probe becomes a lookup-only contained call whose send closure sends nothing (no dispatch mark, setValue stays unmarked per uia x #19871); built in tree a50c4da6228 (main+popup+uia+D+D2+open natives PRs), Windows desktop unit tests + uia/D2 setValue live test pass on GitHub windows-latest; accepted pair with #20179: Main, 2026-11-22: win32/ax.rs: contained_root/contained_or take popup's lookup and send closures; D's refusal route keeps containment's first check (Ok -> lookup, recheck ensure_pattern_safe, send; Err(refusal) -> refused), and perform's LegacyPress fallback sits in the lookup, send = action.send() after popup's recheck and #19871's one dispatching() mark; a window switch during the lookup is refused with nothing sent rather than handed to the background route (one Limits line in D's body once popup is in); built in tree a50c4da6228, D's press live test passes on GitHub windows-latest; tests-over: Main, 2026-11-22: one signed-in WPF fixture test whose cases each reach a distinct branch (pressed in front, owned dialog refused, lookup-switch refused, behind refused); no smaller fixture reaches the popup-owner rule",
     "over": [],
     "paired": [
-     "#19849"
+     "#19849",
+     "#20178",
+     "#20179"
     ],
     "blocked_by": [],
     "needs": [],
@@ -119918,9 +119920,11 @@
     "title": "fix(natives): stop macOS background drags reporting moves that did not happen",
     "action": "keep",
     "reasons": [],
-    "note": "",
+    "note": "accepted pair with #20179: Main, 2026-11-21: docs/tools/computer.md only; combined = #19195's macOS drag paragraph, wbc's BM_CLICK paragraph, then this entry's WPF press paragraph, no wording change",
     "over": [],
-    "paired": [],
+    "paired": [
+     "#20179"
+    ],
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-13T20:28:59Z"
@@ -119981,23 +119985,25 @@
     "created": "2026-11-21T05:22:39Z"
    },
    {
-    "id": "snapcompact-frame-geometry",
-    "label": "#20163",
-    "number": 20163,
+    "id": "win-uia-set-patterns",
+    "label": "#20178",
+    "number": 20178,
     "state": "open",
-    "area": "snapcompact",
+    "area": "computer",
     "priority": "P1",
-    "title": "fix(snapcompact): state every grid an archive's frames use in its summary",
-    "action": "close",
-    "reasons": [
-     "its commits are already on main"
-    ],
-    "note": "",
+    "title": "fix(natives): set WPF sliders and combo boxes through RangeValue and SelectionItem",
+    "action": "keep",
+    "reasons": [],
+    "note": "accepted pair with #19870: Main, 2026-11-22: rechecked at #19870's head 42c28e0aaa9: win32/ax.rs = uiautomation patterns/types import unions + both appended blocks (methods of each inside the impl, then free items of each); docs AxUnconfirmed paragraph = #19870's approved text with uia's combo clause as the middle item ('a WinForms check box can process press() without changing its state, a combo selection may already have changed even when its post-close settling period could not finish, and a WPF scroll may report it ...'); accepted pair with #20177: Main, 2026-11-22: win32/ax.rs set_value: popup's two-closure contained(element, lookup, send); combined = uia's Pattern arm as lookup (match value: Some(pattern) => Ok(pattern), None => get_pattern::<UIValuePattern>() mapped through pattern_error(\"Value\")) and send |pattern| pattern.set_value(text); uia's windowless set_value probe becomes a lookup-only contained call whose send closure sends nothing (no dispatch mark, setValue stays unmarked per uia x #19871); built in tree a50c4da6228 (main+popup+uia+D+D2+open natives PRs), Windows desktop unit tests + uia/D2 setValue live test pass on GitHub windows-latest; accepted pair with #20179: Main, 2026-11-22: win32/ax.rs = both appended test blocks (D's WPF press fixture/test, then uia's slider/combo fixture/test; no shared item names); docs/tools/computer.md AxUnconfirmed paragraph = D's 'a WinForms or WPF check box' + uia's ', and a combo selection may already have changed even when its post-close settling period could not finish' clause; no production overlap. Form = D2's base merge 86aca62c83a, built in tree a50c4da6228 (Windows desktop unit tests + D press live + uia/D2 setValue live pass on GitHub windows-latest)",
     "over": [],
-    "paired": [],
+    "paired": [
+     "#19870",
+     "#20177",
+     "#20179"
+    ],
     "blocked_by": [],
     "needs": [],
-    "created": "2026-11-22T10:58:32Z"
+    "created": "2026-11-22T15:35:02Z"
    },
    {
     "id": "x11-xtest-release",
@@ -120077,10 +120083,12 @@
     "title": "fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing",
     "action": "keep",
     "reasons": [],
-    "note": "accepted pair with #20019: Main, 2026-11-20: win32/mod.rs tests-module import list only; combined = union of both WindowsAndMessaging imports",
+    "note": "accepted pair with #20178: Main, 2026-11-22: rechecked at #19870's head 42c28e0aaa9: win32/ax.rs = uiautomation patterns/types import unions + both appended blocks (methods of each inside the impl, then free items of each); docs AxUnconfirmed paragraph = #19870's approved text with uia's combo clause as the middle item ('a WinForms check box can process press() without changing its state, a combo selection may already have changed even when its post-close settling period could not finish, and a WPF scroll may report it ...'); accepted pair with #20019: Main, 2026-11-20: win32/mod.rs tests-module import list only; combined = union of both WindowsAndMessaging imports; accepted pair with #20179: Main, 2026-11-21: win32/ax.rs std and windows_sys UI import lists = union (cmp::Ordering, time::{Duration, Instant}; IsWindowEnabled + SPI_GETWHEELSCROLLCHARS/LINES, SystemParametersInfoW); docs AxUnconfirmed: in the recorded wbc x #19870 sentence, 'a WinForms check box' becomes 'a WinForms or WPF check box'",
     "over": [],
     "paired": [
-     "#20019"
+     "#20178",
+     "#20019",
+     "#20179"
     ],
     "blocked_by": [],
     "needs": [],
@@ -120230,6 +120238,28 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-18T18:40:21Z"
+   },
+   {
+    "id": "win-wpf-press",
+    "label": "#20179",
+    "number": 20179,
+    "state": "open",
+    "area": "computer",
+    "priority": null,
+    "title": "fix(natives): press WPF controls behind other windows through their default action",
+    "action": "keep",
+    "reasons": [],
+    "note": "accepted pair with #19195: Main, 2026-11-21: docs/tools/computer.md only; combined = #19195's macOS drag paragraph, wbc's BM_CLICK paragraph, then this entry's WPF press paragraph, no wording change; accepted pair with #19870: Main, 2026-11-21: win32/ax.rs std and windows_sys UI import lists = union (cmp::Ordering, time::{Duration, Instant}; IsWindowEnabled + SPI_GETWHEELSCROLLCHARS/LINES, SystemParametersInfoW); docs AxUnconfirmed: in the recorded wbc x #19870 sentence, 'a WinForms check box' becomes 'a WinForms or WPF check box'; accepted pair with #20177: Main, 2026-11-22: win32/ax.rs: contained_root/contained_or take popup's lookup and send closures; D's refusal route keeps containment's first check (Ok -> lookup, recheck ensure_pattern_safe, send; Err(refusal) -> refused), and perform's LegacyPress fallback sits in the lookup, send = action.send() after popup's recheck and #19871's one dispatching() mark; a window switch during the lookup is refused with nothing sent rather than handed to the background route (one Limits line in D's body once popup is in); built in tree a50c4da6228, D's press live test passes on GitHub windows-latest; accepted pair with #20178: Main, 2026-11-22: win32/ax.rs = both appended test blocks (D's WPF press fixture/test, then uia's slider/combo fixture/test; no shared item names); docs/tools/computer.md AxUnconfirmed paragraph = D's 'a WinForms or WPF check box' + uia's ', and a combo selection may already have changed even when its post-close settling period could not finish' clause; no production overlap. Form = D2's base merge 86aca62c83a, built in tree a50c4da6228 (Windows desktop unit tests + D press live + uia/D2 setValue live pass on GitHub windows-latest); tests-over: ReviewWpfPressCut10, 2026-11-20: one signed-in WPF fixture test whose rows each reach a distinct branch (reviewer's request)",
+    "over": [],
+    "paired": [
+     "#19195",
+     "#19870",
+     "#20177",
+     "#20178"
+    ],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-22T15:37:36Z"
    },
    {
     "id": "iphone-mirror-scroll-distance",
@@ -120611,8 +120641,10 @@
     "reasons": [
      "conflicts with #19195 in docs/tools/computer.md",
      "conflicts with #19849 in docs/tools/computer.md",
+     "conflicts with #20178 in docs/tools/computer.md",
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with #19870 in docs/tools/computer.md",
+     "conflicts with #20179 in docs/tools/computer.md",
      "conflicts with main in crates/natives/src/desktop/ax.rs, crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/mod.rs, crates/natives/src/desktop/win32/ax.rs, crates/natives/src/desktop/win32/ax_states.rs, crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/win32/mod.rs, docs/tools/computer.md"
     ],
     "note": "",
@@ -120621,8 +120653,10 @@
     "blocked_by": [
      "#19195",
      "#19849",
+     "#20178",
      "#19531",
-     "#19870"
+     "#19870",
+     "#20179"
     ],
     "needs": [],
     "created": "2026-11-11T10:16:04Z"
@@ -120760,9 +120794,11 @@
      "conflicts with #19195 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19849 in docs/tools/computer.md",
      "conflicts with #20019 in docs/tools/computer.md",
+     "conflicts with #20178 in docs/tools/computer.md",
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md",
      "conflicts with #19870 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with #20179 in docs/tools/computer.md",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/sdk-computer-prelude-toggle.test.ts, packages/coding-agent/test/tools/computer.test.ts, packages/coding-agent/test/tools/eval-description.test.ts"
     ],
     "note": "",
@@ -120772,9 +120808,11 @@
      "#19195",
      "#19849",
      "#20019",
+     "#20178",
      "#19531",
      "#19618",
-     "#19870"
+     "#19870",
+     "#20179"
     ],
     "needs": [],
     "created": "2026-11-10T19:53:35Z"
@@ -120794,10 +120832,12 @@
      "conflicts with #19195 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19849 in docs/tools/computer.md",
      "conflicts with #20019 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with #20178 in docs/tools/computer.md",
      "conflicts with #19531 in docs/computer-use.md, docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md",
      "conflicts with #19620 in packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with #19870 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with #20179 in docs/tools/computer.md",
      "its need computer-ui-quiet conflicts with main in crates/natives/src/desktop/macos/settle.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/tools/computer.md, packages/agent/src/agent.ts, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -120808,10 +120848,12 @@
      "#19195",
      "#19849",
      "#20019",
+     "#20178",
      "#19531",
      "#19618",
      "#19620",
-     "#19870"
+     "#19870",
+     "#20179"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -120832,9 +120874,11 @@
      "conflicts with #19195 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with #19849 in docs/tools/computer.md",
      "conflicts with #20019 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with #20178 in docs/tools/computer.md",
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md",
      "conflicts with #19870 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with #20179 in docs/tools/computer.md",
      "its need computer-ui-quiet conflicts with main in crates/natives/src/desktop/macos/settle.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/macos/ax/rich_text.rs, crates/natives/src/desktop/mod.rs, docs/tools/computer.md"
     ],
@@ -120845,9 +120889,11 @@
      "#19195",
      "#19849",
      "#20019",
+     "#20178",
      "#19531",
      "#19618",
-     "#19870"
+     "#19870",
+     "#20179"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -120893,9 +120939,11 @@
      "conflicts with #19195 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts, packages/natives/native/index.d.ts",
      "conflicts with #19849 in docs/tools/computer.md",
      "conflicts with #20019 in docs/tools/computer.md",
+     "conflicts with #20178 in docs/tools/computer.md",
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md, packages/natives/native/index.d.ts",
      "conflicts with #19870 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with #20179 in docs/tools/computer.md",
      "conflicts with main in crates/natives/src/desktop/backend.rs, crates/natives/src/desktop/cursor.rs, crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/macos/capture.rs, crates/natives/src/desktop/macos/cursor.rs, crates/natives/src/desktop/macos/cursor/helper.m, crates/natives/src/desktop/macos/mod.rs, crates/natives/src/desktop/mod.rs, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
@@ -120905,9 +120953,11 @@
      "#19195",
      "#19849",
      "#20019",
+     "#20178",
      "#19531",
      "#19618",
-     "#19870"
+     "#19870",
+     "#20179"
     ],
     "needs": [],
     "created": "2026-11-11T00:21:12Z"
@@ -121032,9 +121082,11 @@
      "conflicts with #19195 in docs/tools/computer.md",
      "conflicts with #19849 in docs/tools/computer.md",
      "conflicts with #20019 in docs/tools/computer.md",
+     "conflicts with #20178 in docs/tools/computer.md",
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md",
      "conflicts with #19870 in docs/tools/computer.md",
+     "conflicts with #20179 in docs/tools/computer.md",
      "conflicts with main in crates/natives/src/desktop/win32/edit.rs, crates/natives/src/desktop/win32/input.rs, crates/natives/src/desktop/win32/mod.rs"
     ],
     "note": "",
@@ -121044,9 +121096,11 @@
      "#19195",
      "#19849",
      "#20019",
+     "#20178",
      "#19531",
      "#19618",
-     "#19870"
+     "#19870",
+     "#20179"
     ],
     "needs": [],
     "created": "2026-11-12T04:40:13Z"
@@ -121199,51 +121253,6 @@
     "created": "2026-11-20T13:55:57Z"
    },
    {
-    "id": "win-uia-set-patterns",
-    "label": "win-uia-set-patterns",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": null,
-    "title": "fix(natives): set WPF sliders and combo boxes through RangeValue and SelectionItem",
-    "action": "open",
-    "reasons": [],
-    "note": "accepted pair with #19870: Main, 2026-11-22: rechecked at #19870's head 42c28e0aaa9: win32/ax.rs = uiautomation patterns/types import unions + both appended blocks (methods of each inside the impl, then free items of each); docs AxUnconfirmed paragraph = #19870's approved text with uia's combo clause as the middle item ('a WinForms check box can process press() without changing its state, a combo selection may already have changed even when its post-close settling period could not finish, and a WPF scroll may report it ...'); accepted pair with #20177: Main, 2026-11-22: win32/ax.rs set_value: popup's two-closure contained(element, lookup, send); combined = uia's Pattern arm as lookup (match value: Some(pattern) => Ok(pattern), None => get_pattern::<UIValuePattern>() mapped through pattern_error(\"Value\")) and send |pattern| pattern.set_value(text); uia's windowless set_value probe becomes a lookup-only contained call whose send closure sends nothing (no dispatch mark, setValue stays unmarked per uia x #19871); built in tree a50c4da6228 (main+popup+uia+D+D2+open natives PRs), Windows desktop unit tests + uia/D2 setValue live test pass on GitHub windows-latest",
-    "over": [],
-    "paired": [
-     "#19870",
-     "#20177"
-    ],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-20T06:29:20Z"
-   },
-   {
-    "id": "win-wpf-press",
-    "label": "win-wpf-press",
-    "number": null,
-    "state": "queued",
-    "area": "computer",
-    "priority": null,
-    "title": "fix(natives): press WPF controls behind other windows through their default action",
-    "action": "wait",
-    "reasons": [
-     "conflicts with win-uia-set-patterns in crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md"
-    ],
-    "note": "accepted pair with #19195: Main, 2026-11-21: docs/tools/computer.md only; combined = #19195's macOS drag paragraph, wbc's BM_CLICK paragraph, then this entry's WPF press paragraph, no wording change; accepted pair with #19870: Main, 2026-11-21: win32/ax.rs std and windows_sys UI import lists = union (cmp::Ordering, time::{Duration, Instant}; IsWindowEnabled + SPI_GETWHEELSCROLLCHARS/LINES, SystemParametersInfoW); docs AxUnconfirmed: in the recorded wbc x #19870 sentence, 'a WinForms check box' becomes 'a WinForms or WPF check box'; accepted pair with #20177: Main, 2026-11-22: win32/ax.rs: contained_root/contained_or take popup's lookup and send closures; D's refusal route keeps containment's first check (Ok -> lookup, recheck ensure_pattern_safe, send; Err(refusal) -> refused), and perform's LegacyPress fallback sits in the lookup, send = action.send() after popup's recheck and #19871's one dispatching() mark; a window switch during the lookup is refused with nothing sent rather than handed to the background route (one Limits line in D's body once popup is in); built in tree a50c4da6228, D's press live test passes on GitHub windows-latest; tests-over: ReviewWpfPressCut10, 2026-11-20: one signed-in WPF fixture test whose rows each reach a distinct branch (reviewer's request)",
-    "over": [],
-    "paired": [
-     "#19195",
-     "#19870",
-     "#20177"
-    ],
-    "blocked_by": [
-     "win-uia-set-patterns"
-    ],
-    "needs": [],
-    "created": "2026-11-20T19:14:08Z"
-   },
-   {
     "id": "win-wpf-set-background",
     "label": "win-wpf-set-background",
     "number": null,
@@ -121253,8 +121262,8 @@
     "title": "fix(natives): set WPF text boxes, sliders and combo boxes behind other windows",
     "action": "wait",
     "reasons": [
-     "needs win-wpf-press (queued), win-uia-set-patterns (queued)",
-     "its need win-uia-set-patterns conflicts with main in crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md"
+     "needs #20179 (open), #20178 (open)",
+     "its need #20178 conflicts with main in crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md"
     ],
     "note": "accepted pair with #19870: Main, 2026-11-21: win32/ax.rs std + windows_sys UI import unions (as D's form); D2's appended impl methods and #19870's scroll_at_point methods insert at one point: combined = both blocks (methods of each inside the impl, then free items of each), no shared item names; docs: D2's 'and setValue() calls' goes inside the recorded #19871 x #19870 dispatch line. Combined tree (sim main+wbc+#19871+D+uia+D2 x #19870, 6ae79fb584) passed Windows clippy/rustfmt on goliath. The docs AxUnconfirmed paragraph written by #19870, wbc, #19871 and D/D2 is read once as a whole by whoever merges last (Main's ruling).; accepted pair with #20177: Main, 2026-11-22: win32/ax.rs set_value: D2's Pattern arm send closure = { control::dispatching()?; pattern.set_value(text).map_err(ax_error) } (nothing between the mark and the live call, per popup x #19871); D2's contained_or(... set_behind ...) call is lookup-only (send closure sends nothing); same Limits line as D; built in tree a50c4da6228, uia/D2 setValue live test passes on GitHub windows-latest",
     "over": [],
