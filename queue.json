@@ -58980,7 +58980,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "bf9a9fbd40e96766d528a9f19a603e53e8c0b5a1",
+   "base": "da91f6af1d903a9d3fe9d21e01bc263c36a925d2",
    "body": "bodies/iphone-mirror-scroll-distance.md",
    "state": "queued",
    "pr": null,
@@ -58988,8 +58988,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/iphone-mirror-scroll-distance",
    "host": "MacBook-Pro",
    "added": "2026-10-30T21:35:55Z",
-   "updated": "2026-11-22T13:17:59Z",
-   "note": "FalseSuccess2 2026-11-13: needs a redo on main's new_scroll_wheel_event2 call and on the direction fix (macos-scroll-direction, now on main 84f5adc as 7d8261c with no needs; it no longer carries this entry's report_scroll lines, and iPhone Mirroring's scroll sign flips through background_scroll there). | Main, 2026-11-22: leave queued; it restacks on #17756 (rebased 2026-11-22 onto b505770284d with the primer's KeyPurpose::Pointer commit), with which it conflicts in macos/input.rs.",
+   "updated": "2026-11-22T17:32:25Z",
+   "note": "QueueFiftyOne, 2026-11-22: restacked onto main da91f6af1d9 (merged #17756) -> 94bcfeb8ae0 (fork; backups backup/iphone-mirror-scroll-distance-{842cab069c3,ce57c55f801}). One conflict, report_pointer's Scroll arm: combined = #17756's primed(..) wrapper around this entry's paced report_scroll call. CHANGELOG line moved under [Unreleased] Fixed (union merge had dragged released lines). rust-check macOS recorded (Rust diff 85d543bc1f), cargo test desktop 738/0. Phone measurements were taken 2026-10-30 on f32a0eda46d; not re-runnable (no device). Draft body v2 queuefiftyone/scroll-body-v2.md. Owed before open: linux rust-check, tests-over (118 vs 95), dup-scan, body-read review stamp. Awaiting Main: open vs hold.",
    "advanced": "2026-11-10T22:13:06Z"
   },
   {
