@@ -119532,7 +119532,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-22T13:30:12.920507Z",
+  "at": "2026-11-22T13:42:42.307639Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -120800,7 +120800,7 @@
     "title": "fix(natives): press items of the open WPF context menu of the window in front",
     "action": "open",
     "reasons": [],
-    "note": "accepted pair with #19849: Main, 2026-11-20: win32/window.rs; combined = WindowsAndMessaging import-list union, and one #[cfg(test)] mod tests holding both sides' uses and items (both append a tests module); recheck at #19849's next head",
+    "note": "accepted pair with #19849: Main, 2026-11-22: rechecked at #19849's head f6d3565f189: win32/window.rs production WindowsAndMessaging list = popup's minus WS_EX_TOOLWINDOW and WS_EX_TRANSPARENT (unused once #19849 drops the cover check's tool-window test; popup keeps GW_OWNER, GetWindow, WS_EX_NOACTIVATE, WS_POPUP for is_menu_popup); tests-module list = union (+GWL_STYLE, WS_EX_TOOLWINDOW, WS_EX_TRANSPARENT, WS_POPUP from #19849, PostMessageW, WM_APP from popup), rustfmt reflow; both tests modules merge as one",
     "over": [],
     "paired": [
      "#19849"
@@ -120872,9 +120872,8 @@
     "area": "computer",
     "priority": null,
     "title": "fix(natives): set WPF sliders and combo boxes through RangeValue and SelectionItem",
-    "action": "held",
+    "action": "wait",
     "reasons": [
-     "held: Main, 2026-11-20: in its fix round (WinWpfRoutes5, review needs-changes at 86d258734d9); takes the recorded ax.rs form with win-wpf-scroll when it follows",
      "conflicts with #19195 in crates/natives/src/desktop/macos/ax.rs, docs/tools/computer.md",
      "conflicts with #19849 in docs/tools/computer.md",
      "conflicts with #19531 in docs/tools/computer.md",
