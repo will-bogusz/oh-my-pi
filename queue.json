@@ -105553,7 +105553,7 @@
    "area": "computer",
    "priority": "P2",
    "needs": [],
-   "base": "c61a4881a55389ca576662d62dbee0399463a0c1",
+   "base": "b505770284deff6b2888a4eb26a7cc95497cc111",
    "body": "bodies/win-wpf-scroll.md",
    "state": "open",
    "pr": 19870,
@@ -105561,7 +105561,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-wpf-scroll",
    "host": "MacBook-Pro",
    "added": "2026-11-20T04:27:43Z",
-   "updated": "2026-11-21T09:22:02Z",
+   "updated": "2026-11-22T13:06:12Z",
    "note": "QueueFortyOne.ScrollDeltaReview must-fix (split COM init/activation cutoffs in scroll) declined by Main, 2026-11-20: main's shared automation() path, used unchanged; nit fold of control.rs time_left/reply_deadline skipped by Main (don't touch #19814's merged fn)\nMain, 2026-11-21: after a195fe0e6f7 (round-5 P1 fix, past budget) no further push on this PR for bot findings below P0.",
    "rebases_after": [
     19814
@@ -105569,7 +105569,7 @@
    "pair_reasons": {
     "19814": "Main, 2026-11-20: import-list union in win32/ax.rs; combined = both"
    },
-   "advanced": "2026-11-21T09:21:38Z",
+   "advanced": "2026-11-22T13:06:12Z",
    "line_loss_overrides": [
     {
      "at": "2026-11-20T13:09:34Z",
