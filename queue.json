@@ -106129,7 +106129,7 @@
    "branch": "will/win-popup-foreground",
    "title": "fix(natives): press items of the open WPF context menu of the window in front",
    "area": "computer",
-   "priority": null,
+   "priority": "P0",
    "needs": [
     "win-button-click"
    ],
@@ -106141,7 +106141,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-popup-foreground",
    "host": "MacBook-Pro",
    "added": "2026-11-20T04:47:55Z",
-   "updated": "2026-11-22T15:32:30Z",
+   "updated": "2026-11-22T15:40:04Z",
    "note": "",
    "rebases_after": [
     19814,
@@ -106271,7 +106271,7 @@
    "branch": "will/win-uia-set-patterns",
    "title": "fix(natives): set WPF sliders and combo boxes through RangeValue and SelectionItem",
    "area": "computer",
-   "priority": null,
+   "priority": "P1",
    "needs": [],
    "base": "b505770284deff6b2888a4eb26a7cc95497cc111",
    "body": "bodies/win-uia-set-patterns.md",
@@ -106281,7 +106281,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-uia-set-patterns",
    "host": "MacBook-Pro",
    "added": "2026-11-20T06:29:20Z",
-   "updated": "2026-11-22T15:35:25Z",
+   "updated": "2026-11-22T15:40:04Z",
    "note": "",
    "advanced": "2026-11-22T13:43:51Z",
    "line_loss_overrides": [
@@ -107172,7 +107172,7 @@
    "branch": "will/win-wpf-press",
    "title": "fix(natives): press WPF controls behind other windows through their default action",
    "area": "computer",
-   "priority": null,
+   "priority": "P1",
    "needs": [
     "win-button-click",
     "desktop-dispatch-fence"
@@ -107185,7 +107185,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-wpf-press",
    "host": "MacBook-Pro",
    "added": "2026-11-20T19:14:08Z",
-   "updated": "2026-11-22T15:38:00Z",
+   "updated": "2026-11-22T15:40:04Z",
    "note": "",
    "tests_over_override": {
     "reason": "ReviewWpfPressCut10, 2026-11-20: one signed-in WPF fixture test whose rows each reach a distinct branch (reviewer's request)",
@@ -108024,13 +108024,13 @@
    "needs": [],
    "base": "8e7856eb40360719990116f439828702b92ef8a6",
    "body": "bodies/snapcompact-frame-geometry.md",
-   "state": "open",
+   "state": "merged",
    "pr": 20163,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-frame-geometry",
    "host": "MacBook-Pro",
    "added": "2026-11-22T10:55:43Z",
-   "updated": "2026-11-22T11:25:06Z",
+   "updated": "2026-11-22T15:40:04Z",
    "note": "LaneSnapcompactStack, 2026-11-22: opened as #20163 (P2, kind fix). roboomp P1 with one should-fix (CHANGELOG narrated cause and old row counts): fixed in 870ed687913 (also rebased onto 8e7856eb40), thread replied. Codex could not review: usage limit reached on the repo (failed pass on 949c7dde609). Review ReviewFrameGeometry ready at 9769d7f56f5; later commits are CHANGELOG-only. Precheck NOTEs: test/source line ratio (each test reaches a distinct grid case) and a behaviour eval for the template change, not run.",
    "kind": "fix",
    "built": [
@@ -108055,7 +108055,8 @@
    ],
    "opened": "2026-11-22T10:58:33Z",
    "readied": "2026-11-22T10:58:56Z",
-   "advanced": "2026-11-22T11:02:02Z"
+   "advanced": "2026-11-22T11:02:02Z",
+   "merged_by": "pr"
   }
  ],
  "watch": {
