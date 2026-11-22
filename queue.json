@@ -107175,7 +107175,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-wpf-press",
    "host": "MacBook-Pro",
    "added": "2026-11-20T19:14:08Z",
-   "updated": "2026-11-22T13:44:50Z",
+   "updated": "2026-11-22T14:30:34Z",
    "note": "",
    "tests_over_override": {
     "reason": "ReviewWpfPressCut10, 2026-11-20: one signed-in WPF fixture test whose rows each reach a distinct branch (reviewer's request)",
@@ -107189,7 +107189,81 @@
     "19195": "Main, 2026-11-21: docs/tools/computer.md only; combined = #19195's macOS drag paragraph, wbc's BM_CLICK paragraph, then this entry's WPF press paragraph, no wording change",
     "19870": "Main, 2026-11-21: win32/ax.rs std and windows_sys UI import lists = union (cmp::Ordering, time::{Duration, Instant}; IsWindowEnabled + SPI_GETWHEELSCROLLCHARS/LINES, SystemParametersInfoW); docs AxUnconfirmed: in the recorded wbc x #19870 sentence, 'a WinForms check box' becomes 'a WinForms or WPF check box'"
    },
-   "advanced": "2026-11-22T13:44:50Z"
+   "advanced": "2026-11-22T13:44:50Z",
+   "built": [
+    {
+     "with": "#17756",
+     "code": "a13af40c8578b8d987803e5254ce0d1a463ceb7b",
+     "with_code": "caf77492960d89f000905a09a193378d7b37a2ac",
+     "tip": "b97153e94cfb6669e3866fbbfe88b3c795a8e856",
+     "with_tip": "5778203c49696eba5a1cb9cc5dc1c3332d6d7d02",
+     "at": "2026-11-22T14:30:30Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19195",
+     "code": "a13af40c8578b8d987803e5254ce0d1a463ceb7b",
+     "with_code": "3bec4d1dda3a7008f29c51bbe3a046dfc06f6e8d",
+     "tip": "b97153e94cfb6669e3866fbbfe88b3c795a8e856",
+     "with_tip": "2de4b9940c4d1c6a6c36939564c58fa1a74725c1",
+     "at": "2026-11-22T14:30:33Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#20019",
+     "code": "a13af40c8578b8d987803e5254ce0d1a463ceb7b",
+     "with_code": "4322b53dfbbce859704597aa21884902bfbb435e",
+     "tip": "b97153e94cfb6669e3866fbbfe88b3c795a8e856",
+     "with_tip": "02fcc0306fdf796c5cd668838c682691cf4721d6",
+     "at": "2026-11-22T14:30:33Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19531",
+     "code": "a13af40c8578b8d987803e5254ce0d1a463ceb7b",
+     "with_code": "7910a0183e5d556ebe8645f6b97a1f2997b44ede",
+     "tip": "b97153e94cfb6669e3866fbbfe88b3c795a8e856",
+     "with_tip": "67d636aa1e7f78c11e17562eecf26e6155576d95",
+     "at": "2026-11-22T14:30:33Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19615",
+     "code": "a13af40c8578b8d987803e5254ce0d1a463ceb7b",
+     "with_code": "0036bb43366a79d0cfba6ea0b6b3e12b5e29c41d",
+     "tip": "b97153e94cfb6669e3866fbbfe88b3c795a8e856",
+     "with_tip": "d03e71ae4f6b969202e53f47c2abb4cfca8e109f",
+     "at": "2026-11-22T14:30:33Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19618",
+     "code": "a13af40c8578b8d987803e5254ce0d1a463ceb7b",
+     "with_code": "3a959a39c3120742b133ff2ed29e7708078c2ad8",
+     "tip": "b97153e94cfb6669e3866fbbfe88b3c795a8e856",
+     "with_tip": "f287a716d3215166ff861c38a2caf113e4e05fd3",
+     "at": "2026-11-22T14:30:33Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19870",
+     "code": "a13af40c8578b8d987803e5254ce0d1a463ceb7b",
+     "with_code": "9ad747781670913bc63cfadeefaa82e3597c5d4b",
+     "tip": "b97153e94cfb6669e3866fbbfe88b3c795a8e856",
+     "with_tip": "42c28e0aaa9dd511f40291dbb093560467c02b1f",
+     "at": "2026-11-22T14:30:33Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19849",
+     "code": "a13af40c8578b8d987803e5254ce0d1a463ceb7b",
+     "with_code": "72a39e664dbafade7ff5398fd70ba0f0a5b47b85",
+     "tip": "b97153e94cfb6669e3866fbbfe88b3c795a8e856",
+     "with_tip": "f6d3565f1894bf0036f1ee279d17fbef7abe23a7",
+     "at": "2026-11-22T14:30:33Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "win-takeover-selection",
