@@ -107567,7 +107567,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-wpf-set-background",
    "host": "MacBook-Pro",
    "added": "2026-11-20T21:08:35Z",
-   "updated": "2026-11-22T16:15:04Z",
+   "updated": "2026-11-22T16:15:07Z",
    "note": "",
    "rebases_after": [
     19870,
@@ -107575,7 +107575,7 @@
    ],
    "pair_reasons": {
     "19870": "Main, 2026-11-21: win32/ax.rs std + windows_sys UI import unions (as D's form); D2's appended impl methods and #19870's scroll_at_point methods insert at one point: combined = both blocks (methods of each inside the impl, then free items of each), no shared item names; docs: D2's 'and setValue() calls' goes inside the recorded #19871 x #19870 dispatch line. Combined tree (sim main+wbc+#19871+D+uia+D2 x #19870, 6ae79fb584) passed Windows clippy/rustfmt on goliath. The docs AxUnconfirmed paragraph written by #19870, wbc, #19871 and D/D2 is read once as a whole by whoever merges last (Main's ruling). Rechecked 2026-11-22 at uia 4b781b170a8 (read-back fix): conflict hunks unchanged except uia's own appended-block content; form holds. D2 restacked to 0f9805df404 on base b55dc22512a (D cd555199939 x uia); D2 rust-check linux+windows recorded.",
-    "20177": "Main, 2026-11-22: win32/ax.rs set_value: D2's Pattern arm send closure = { control::dispatching()?; pattern.set_value(text).map_err(ax_error) } (nothing between the mark and the live call, per popup x #19871); D2's contained_or(... set_behind ...) call is lookup-only (send closure sends nothing); same Limits line as D; built in tree a50c4da6228, uia/D2 setValue live test passes on GitHub windows-latest"
+    "20177": "Main, 2026-11-22: win32/ax.rs set_value: D2's Pattern arm send closure = { control::dispatching()?; pattern.set_value(text).map_err(ax_error) } (nothing between the mark and the live call, per popup x #19871); D2's contained_or(... set_behind ...) call is lookup-only (send closure sends nothing); same Limits line as D; built in tree a50c4da6228, uia/D2 setValue live test passes on GitHub windows-latest Rechecked 2026-11-22 at uia 4b781b170a8 (read-back fix): conflict hunks unchanged except uia's own appended-block content; form holds. D2 restacked to 0f9805df404 on base b55dc22512a (D cd555199939 x uia); D2 rust-check linux+windows recorded."
    },
    "built": [
     {
