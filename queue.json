@@ -107538,7 +107538,7 @@
     "win-uia-set-patterns",
     "desktop-dispatch-fence"
    ],
-   "base": "86aca62c83a5a925a3f5e4c1a1b846db55ccc1a6",
+   "base": "d4433088feedb216617c3117400f8c8167f4c4f5",
    "body": "bodies/win-wpf-set-background.md",
    "state": "queued",
    "pr": null,
@@ -107546,7 +107546,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-wpf-set-background",
    "host": "MacBook-Pro",
    "added": "2026-11-20T21:08:35Z",
-   "updated": "2026-11-22T15:33:14Z",
+   "updated": "2026-11-22T15:46:07Z",
    "note": "",
    "rebases_after": [
     19870,
