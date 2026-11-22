@@ -107179,13 +107179,13 @@
    ],
    "base": "b505770284deff6b2888a4eb26a7cc95497cc111",
    "body": "bodies/win-wpf-press.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 20179,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-wpf-press",
    "host": "MacBook-Pro",
    "added": "2026-11-20T19:14:08Z",
-   "updated": "2026-11-22T15:36:49Z",
+   "updated": "2026-11-22T15:37:37Z",
    "note": "",
    "tests_over_override": {
     "reason": "ReviewWpfPressCut10, 2026-11-20: one signed-in WPF fixture test whose rows each reach a distinct branch (reviewer's request)",
@@ -107277,7 +107277,8 @@
      "at": "2026-11-22T14:30:33Z",
      "host": "MacBook-Pro"
     }
-   ]
+   ],
+   "opened": "2026-11-22T15:37:37Z"
   },
   {
    "id": "win-takeover-selection",
