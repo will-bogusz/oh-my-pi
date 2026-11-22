@@ -9,7 +9,7 @@ I raised the image count for Gemini models on Devin's own host from 60 to 80 per
 | 1.54M chars of history | all (48 frames) | 1.14M (60 frames) | 1.52M (80 frames) |
 | 3.98M chars of history | 1.94M (60 frames) | 1.13M (60 frames) | 1.52M (80 frames) |
 
-Neon (verified since #19883) gets the same numbers, and Hydrogen does once #20038 verifies its price; until then omp plans Hydrogen's frames at a 5,024-token estimate and it stops at 26 frames either way.
+Neon and Hydrogen get the same numbers: Devin's price for both is verified (#19883, #20038), so omp plans their frames at 1,089 tokens like Carbon's.
 
 It is one rule in `providers/devin.kdl`: `official-image-count-budget 80` for the `gemini` class. Claude on Devin keeps its 20, other Devin models 60, a configured custom base URL 40.
 

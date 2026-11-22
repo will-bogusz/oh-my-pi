@@ -107333,7 +107333,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-gemini-image-count-80",
    "host": "MacBook-Pro",
    "added": "2026-11-20T22:18:48Z",
-   "updated": "2026-11-22T10:52:51Z",
+   "updated": "2026-11-22T13:08:49Z",
    "note": "LaneSnapcompactStack, 2026-11-22: restacked on carbon-1568 795280e2b63, head 07ee4c50a32 (CHANGELOG restated at the catalog layer: official-image-count-budget 80, no frames effect). Body adds the study's reason (no ~18k page matched 1568 on Hydrogen, capacity/REPORT.md: capacity must come from page count) and the real-size Carbon pair (.929 at 1568/80 vs .812 stock, +.117 [+.045,+.195], no history dropped, ~6.2 MB accepted); Neon verified since #19883, Hydrogen waits on #20038; per-token cost of large requests left out pending a check. Material body change: final-head review applies. Earlier: review needs-changes at ba63e70e203 on the auth reroute, declined by design (Main 11-20, pre-existing pi-ai ordering gap, #16172). Opens after snapcompact-carbon-1568.",
    "kind": "fix"
   },
