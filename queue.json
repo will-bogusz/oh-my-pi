@@ -119831,7 +119831,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-22T14:29:10.061696Z",
+  "at": "2026-11-22T14:59:10.779760Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -121101,7 +121101,7 @@
     "title": "fix(natives): press items of the open WPF context menu of the window in front",
     "action": "open",
     "reasons": [],
-    "note": "accepted pair with #19849: Main, 2026-11-22: rechecked at #19849's head f6d3565f189: win32/window.rs production WindowsAndMessaging list = popup's minus WS_EX_TOOLWINDOW and WS_EX_TRANSPARENT (unused once #19849 drops the cover check's tool-window test; popup keeps GW_OWNER, GetWindow, WS_EX_NOACTIVATE, WS_POPUP for is_menu_popup); tests-module list = union (+GWL_STYLE, WS_EX_TOOLWINDOW, WS_EX_TRANSPARENT, WS_POPUP from #19849, PostMessageW, WM_APP from popup), rustfmt reflow; both tests modules merge as one",
+    "note": "accepted pair with #19849: Main, 2026-11-22: rechecked at #19849's head f6d3565f189: win32/window.rs production WindowsAndMessaging list = popup's minus WS_EX_TOOLWINDOW and WS_EX_TRANSPARENT (unused once #19849 drops the cover check's tool-window test; popup keeps GW_OWNER, GetWindow, WS_EX_NOACTIVATE, WS_POPUP for is_menu_popup); tests-module list = union (+GWL_STYLE, WS_EX_TOOLWINDOW, WS_EX_TRANSPARENT, WS_POPUP from #19849, PostMessageW, WM_APP from popup), rustfmt reflow; both tests modules merge as one; tests-over: Main, 2026-11-22: one signed-in WPF fixture test whose cases each reach a distinct branch (pressed in front, owned dialog refused, lookup-switch refused, behind refused); no smaller fixture reaches the popup-owner rule",
     "over": [],
     "paired": [
      "#19849"
