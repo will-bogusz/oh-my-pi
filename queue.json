@@ -107530,14 +107530,88 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-wpf-set-background",
    "host": "MacBook-Pro",
    "added": "2026-11-20T21:08:35Z",
-   "updated": "2026-11-22T13:46:56Z",
+   "updated": "2026-11-22T14:30:42Z",
    "note": "",
    "rebases_after": [
     19870
    ],
    "pair_reasons": {
     "19870": "Main, 2026-11-21: win32/ax.rs std + windows_sys UI import unions (as D's form); D2's appended impl methods and #19870's scroll_at_point methods insert at one point: combined = both blocks (methods of each inside the impl, then free items of each), no shared item names; docs: D2's 'and setValue() calls' goes inside the recorded #19871 x #19870 dispatch line. Combined tree (sim main+wbc+#19871+D+uia+D2 x #19870, 6ae79fb584) passed Windows clippy/rustfmt on goliath. The docs AxUnconfirmed paragraph written by #19870, wbc, #19871 and D/D2 is read once as a whole by whoever merges last (Main's ruling)."
-   }
+   },
+   "built": [
+    {
+     "with": "#17756",
+     "code": "59e1978410bc026eea416120c7336cc15f43257a",
+     "with_code": "caf77492960d89f000905a09a193378d7b37a2ac",
+     "tip": "5ccab6c3633259091d5fdff70c6d8d2a8abb6812",
+     "with_tip": "5778203c49696eba5a1cb9cc5dc1c3332d6d7d02",
+     "at": "2026-11-22T14:30:38Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19195",
+     "code": "59e1978410bc026eea416120c7336cc15f43257a",
+     "with_code": "3bec4d1dda3a7008f29c51bbe3a046dfc06f6e8d",
+     "tip": "5ccab6c3633259091d5fdff70c6d8d2a8abb6812",
+     "with_tip": "2de4b9940c4d1c6a6c36939564c58fa1a74725c1",
+     "at": "2026-11-22T14:30:42Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#20019",
+     "code": "59e1978410bc026eea416120c7336cc15f43257a",
+     "with_code": "4322b53dfbbce859704597aa21884902bfbb435e",
+     "tip": "5ccab6c3633259091d5fdff70c6d8d2a8abb6812",
+     "with_tip": "02fcc0306fdf796c5cd668838c682691cf4721d6",
+     "at": "2026-11-22T14:30:42Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19531",
+     "code": "59e1978410bc026eea416120c7336cc15f43257a",
+     "with_code": "7910a0183e5d556ebe8645f6b97a1f2997b44ede",
+     "tip": "5ccab6c3633259091d5fdff70c6d8d2a8abb6812",
+     "with_tip": "67d636aa1e7f78c11e17562eecf26e6155576d95",
+     "at": "2026-11-22T14:30:42Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19615",
+     "code": "59e1978410bc026eea416120c7336cc15f43257a",
+     "with_code": "0036bb43366a79d0cfba6ea0b6b3e12b5e29c41d",
+     "tip": "5ccab6c3633259091d5fdff70c6d8d2a8abb6812",
+     "with_tip": "d03e71ae4f6b969202e53f47c2abb4cfca8e109f",
+     "at": "2026-11-22T14:30:42Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19618",
+     "code": "59e1978410bc026eea416120c7336cc15f43257a",
+     "with_code": "3a959a39c3120742b133ff2ed29e7708078c2ad8",
+     "tip": "5ccab6c3633259091d5fdff70c6d8d2a8abb6812",
+     "with_tip": "f287a716d3215166ff861c38a2caf113e4e05fd3",
+     "at": "2026-11-22T14:30:42Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19870",
+     "code": "59e1978410bc026eea416120c7336cc15f43257a",
+     "with_code": "9ad747781670913bc63cfadeefaa82e3597c5d4b",
+     "tip": "5ccab6c3633259091d5fdff70c6d8d2a8abb6812",
+     "with_tip": "42c28e0aaa9dd511f40291dbb093560467c02b1f",
+     "at": "2026-11-22T14:30:42Z",
+     "host": "MacBook-Pro"
+    },
+    {
+     "with": "#19849",
+     "code": "59e1978410bc026eea416120c7336cc15f43257a",
+     "with_code": "72a39e664dbafade7ff5398fd70ba0f0a5b47b85",
+     "tip": "5ccab6c3633259091d5fdff70c6d8d2a8abb6812",
+     "with_tip": "f6d3565f1894bf0036f1ee279d17fbef7abe23a7",
+     "at": "2026-11-22T14:30:42Z",
+     "host": "MacBook-Pro"
+    }
+   ]
   },
   {
    "id": "devin-gemini-image-price-rest",
