@@ -106281,7 +106281,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-uia-set-patterns",
    "host": "MacBook-Pro",
    "added": "2026-11-20T06:29:20Z",
-   "updated": "2026-11-22T15:35:03Z",
+   "updated": "2026-11-22T15:35:25Z",
    "note": "",
    "advanced": "2026-11-22T13:43:51Z",
    "line_loss_overrides": [
@@ -106410,7 +106410,8 @@
      "host": "MacBook-Pro"
     }
    ],
-   "opened": "2026-11-22T15:35:03Z"
+   "opened": "2026-11-22T15:35:03Z",
+   "readied": "2026-11-22T15:35:25Z"
   },
   {
    "id": "win-takeover-intervene",
