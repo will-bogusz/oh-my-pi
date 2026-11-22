@@ -119140,8 +119140,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-22T10:23:38.543170Z",
-  "host": "goliath",
+  "at": "2026-11-22T10:56:08.787611Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -120042,6 +120042,23 @@
     "created": "2026-11-18T04:50:59Z"
    },
    {
+    "id": "snapcompact-frame-geometry",
+    "label": "snapcompact-frame-geometry",
+    "number": null,
+    "state": "queued",
+    "area": "snapcompact",
+    "priority": "P2",
+    "title": "fix(snapcompact): state every grid an archive's frames use in its summary",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-22T10:55:43Z"
+   },
+   {
     "id": "snapcompact-shape-reader-identity",
     "label": "snapcompact-shape-reader-identity",
     "number": null,
@@ -120614,10 +120631,8 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "wait",
-    "reasons": [
-     "conflicts with main in (branch missing on the fork)"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
