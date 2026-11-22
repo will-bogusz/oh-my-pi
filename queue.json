@@ -108060,14 +108060,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-22T14:29:09Z",
+  "checked": "2026-11-22T16:00:13Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "win-popup-foreground": {
-    "since": "2026-11-22T13:28:11Z",
-    "title": "fix(natives): press items of the open WPF context menu of the window in front"
-   },
    "factory-droid-1100-pin": {
     "since": "2026-11-17T00:39:57Z",
     "title": "feat(catalog): identify Factory Droid requests as droid 1.10.0"
@@ -108082,7 +108078,7 @@
     ]
    }
   },
-  "merged_through": "2026-11-22T12:54:56Z",
+  "merged_through": "2026-11-22T15:35:04Z",
   "unreleased": {
    "19929": {
     "title": "fix(ai): rank Devin logins by quota before their on-demand balance",
@@ -108158,6 +108154,11 @@
     "title": "fix(natives): give the macOS key window back after a takeover while another program types",
     "merge_commit": "f1cf93301bdd7d2f1a76e8533939c3bffdea7e10",
     "merged_at": "2026-11-22T12:54:56Z"
+   },
+   "20163": {
+    "title": "fix(snapcompact): state every grid an archive's frames use in its summary",
+    "merge_commit": "addef6c7872c7594676b2e4c0b2cf695a85d5bf6",
+    "merged_at": "2026-11-22T15:35:04Z"
    }
   },
   "ready": [
@@ -108179,7 +108180,9 @@
    19870,
    19880,
    20019,
-   20163
+   20177,
+   20178,
+   20179
   ],
   "post_merge": {
    "18632": {
@@ -108293,6 +108296,12 @@
     "title": "fix(natives): read Linux slider and scroll bar values and selected state",
     "merge_commit": "d37b9beeff2304f0b3dd304737a95adcf6878289",
     "merged_at": "2026-11-22T12:54:56Z",
+    "findings": []
+   },
+   "20163": {
+    "title": "fix(snapcompact): state every grid an archive's frames use in its summary",
+    "merge_commit": "addef6c7872c7594676b2e4c0b2cf695a85d5bf6",
+    "merged_at": "2026-11-22T15:35:04Z",
     "findings": []
    }
   },
@@ -110004,6 +110013,21 @@
     "kind": "openable",
     "id": "win-popup-foreground",
     "title": "fix(natives): press items of the open WPF context menu of the window in front"
+   },
+   {
+    "at": "2026-11-22T16:00:13Z",
+    "kind": "merged",
+    "number": 20163,
+    "title": "fix(snapcompact): state every grid an archive's frames use in its summary",
+    "merged_by": "H4vC",
+    "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-22T16:00:13Z",
+    "kind": "unopenable",
+    "id": "win-popup-foreground",
+    "title": "fix(natives): press items of the open WPF context menu of the window in front",
+    "why": "opened as #20177"
    }
   ]
  },
@@ -119884,8 +119908,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-22T15:38:34.712868Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-22T16:00:14.402648Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 3,
@@ -120024,6 +120048,28 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-22T15:35:02Z"
+   },
+   {
+    "id": "win-wpf-press",
+    "label": "#20179",
+    "number": 20179,
+    "state": "open",
+    "area": "computer",
+    "priority": "P1",
+    "title": "fix(natives): press WPF controls behind other windows through their default action",
+    "action": "keep",
+    "reasons": [],
+    "note": "accepted pair with #19195: Main, 2026-11-21: docs/tools/computer.md only; combined = #19195's macOS drag paragraph, wbc's BM_CLICK paragraph, then this entry's WPF press paragraph, no wording change; accepted pair with #19870: Main, 2026-11-21: win32/ax.rs std and windows_sys UI import lists = union (cmp::Ordering, time::{Duration, Instant}; IsWindowEnabled + SPI_GETWHEELSCROLLCHARS/LINES, SystemParametersInfoW); docs AxUnconfirmed: in the recorded wbc x #19870 sentence, 'a WinForms check box' becomes 'a WinForms or WPF check box'; accepted pair with #20177: Main, 2026-11-22: win32/ax.rs: contained_root/contained_or take popup's lookup and send closures; D's refusal route keeps containment's first check (Ok -> lookup, recheck ensure_pattern_safe, send; Err(refusal) -> refused), and perform's LegacyPress fallback sits in the lookup, send = action.send() after popup's recheck and #19871's one dispatching() mark; a window switch during the lookup is refused with nothing sent rather than handed to the background route (one Limits line in D's body once popup is in); built in tree a50c4da6228, D's press live test passes on GitHub windows-latest; accepted pair with #20178: Main, 2026-11-22: win32/ax.rs = both appended test blocks (D's WPF press fixture/test, then uia's slider/combo fixture/test; no shared item names); docs/tools/computer.md AxUnconfirmed paragraph = D's 'a WinForms or WPF check box' + uia's ', and a combo selection may already have changed even when its post-close settling period could not finish' clause; no production overlap. Form = D2's base merge 86aca62c83a, built in tree a50c4da6228 (Windows desktop unit tests + D press live + uia/D2 setValue live pass on GitHub windows-latest); tests-over: ReviewWpfPressCut10, 2026-11-20: one signed-in WPF fixture test whose rows each reach a distinct branch (reviewer's request)",
+    "over": [],
+    "paired": [
+     "#19195",
+     "#19870",
+     "#20177",
+     "#20178"
+    ],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-22T15:37:36Z"
    },
    {
     "id": "x11-xtest-release",
@@ -120258,28 +120304,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-18T18:40:21Z"
-   },
-   {
-    "id": "win-wpf-press",
-    "label": "#20179",
-    "number": 20179,
-    "state": "open",
-    "area": "computer",
-    "priority": null,
-    "title": "fix(natives): press WPF controls behind other windows through their default action",
-    "action": "keep",
-    "reasons": [],
-    "note": "accepted pair with #19195: Main, 2026-11-21: docs/tools/computer.md only; combined = #19195's macOS drag paragraph, wbc's BM_CLICK paragraph, then this entry's WPF press paragraph, no wording change; accepted pair with #19870: Main, 2026-11-21: win32/ax.rs std and windows_sys UI import lists = union (cmp::Ordering, time::{Duration, Instant}; IsWindowEnabled + SPI_GETWHEELSCROLLCHARS/LINES, SystemParametersInfoW); docs AxUnconfirmed: in the recorded wbc x #19870 sentence, 'a WinForms check box' becomes 'a WinForms or WPF check box'; accepted pair with #20177: Main, 2026-11-22: win32/ax.rs: contained_root/contained_or take popup's lookup and send closures; D's refusal route keeps containment's first check (Ok -> lookup, recheck ensure_pattern_safe, send; Err(refusal) -> refused), and perform's LegacyPress fallback sits in the lookup, send = action.send() after popup's recheck and #19871's one dispatching() mark; a window switch during the lookup is refused with nothing sent rather than handed to the background route (one Limits line in D's body once popup is in); built in tree a50c4da6228, D's press live test passes on GitHub windows-latest; accepted pair with #20178: Main, 2026-11-22: win32/ax.rs = both appended test blocks (D's WPF press fixture/test, then uia's slider/combo fixture/test; no shared item names); docs/tools/computer.md AxUnconfirmed paragraph = D's 'a WinForms or WPF check box' + uia's ', and a combo selection may already have changed even when its post-close settling period could not finish' clause; no production overlap. Form = D2's base merge 86aca62c83a, built in tree a50c4da6228 (Windows desktop unit tests + D press live + uia/D2 setValue live pass on GitHub windows-latest); tests-over: ReviewWpfPressCut10, 2026-11-20: one signed-in WPF fixture test whose rows each reach a distinct branch (reviewer's request)",
-    "over": [],
-    "paired": [
-     "#19195",
-     "#19870",
-     "#20177",
-     "#20178"
-    ],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-22T15:37:36Z"
    },
    {
     "id": "iphone-mirror-scroll-distance",
@@ -120662,9 +120686,9 @@
      "conflicts with #19195 in docs/tools/computer.md",
      "conflicts with #19849 in docs/tools/computer.md",
      "conflicts with #20178 in docs/tools/computer.md",
+     "conflicts with #20179 in docs/tools/computer.md",
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with #19870 in docs/tools/computer.md",
-     "conflicts with #20179 in docs/tools/computer.md",
      "conflicts with main in crates/natives/src/desktop/ax.rs, crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/mod.rs, crates/natives/src/desktop/win32/ax.rs, crates/natives/src/desktop/win32/ax_states.rs, crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/win32/mod.rs, docs/tools/computer.md"
     ],
     "note": "",
@@ -120674,9 +120698,9 @@
      "#19195",
      "#19849",
      "#20178",
+     "#20179",
      "#19531",
-     "#19870",
-     "#20179"
+     "#19870"
     ],
     "needs": [],
     "created": "2026-11-11T10:16:04Z"
@@ -120815,10 +120839,10 @@
      "conflicts with #19849 in docs/tools/computer.md",
      "conflicts with #20019 in docs/tools/computer.md",
      "conflicts with #20178 in docs/tools/computer.md",
+     "conflicts with #20179 in docs/tools/computer.md",
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md",
      "conflicts with #19870 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with #20179 in docs/tools/computer.md",
      "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/sdk-computer-prelude-toggle.test.ts, packages/coding-agent/test/tools/computer.test.ts, packages/coding-agent/test/tools/eval-description.test.ts"
     ],
     "note": "",
@@ -120829,10 +120853,10 @@
      "#19849",
      "#20019",
      "#20178",
+     "#20179",
      "#19531",
      "#19618",
-     "#19870",
-     "#20179"
+     "#19870"
     ],
     "needs": [],
     "created": "2026-11-10T19:53:35Z"
@@ -120853,11 +120877,11 @@
      "conflicts with #19849 in docs/tools/computer.md",
      "conflicts with #20019 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #20178 in docs/tools/computer.md",
+     "conflicts with #20179 in docs/tools/computer.md",
      "conflicts with #19531 in docs/computer-use.md, docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md",
      "conflicts with #19620 in packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with #19870 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with #20179 in docs/tools/computer.md",
      "its need computer-ui-quiet conflicts with main in crates/natives/src/desktop/macos/settle.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/tools/computer.md, packages/agent/src/agent.ts, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -120869,11 +120893,11 @@
      "#19849",
      "#20019",
      "#20178",
+     "#20179",
      "#19531",
      "#19618",
      "#19620",
-     "#19870",
-     "#20179"
+     "#19870"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -120895,10 +120919,10 @@
      "conflicts with #19849 in docs/tools/computer.md",
      "conflicts with #20019 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #20178 in docs/tools/computer.md",
+     "conflicts with #20179 in docs/tools/computer.md",
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md",
      "conflicts with #19870 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with #20179 in docs/tools/computer.md",
      "its need computer-ui-quiet conflicts with main in crates/natives/src/desktop/macos/settle.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/macos/ax/rich_text.rs, crates/natives/src/desktop/mod.rs, docs/tools/computer.md"
     ],
@@ -120910,10 +120934,10 @@
      "#19849",
      "#20019",
      "#20178",
+     "#20179",
      "#19531",
      "#19618",
-     "#19870",
-     "#20179"
+     "#19870"
     ],
     "needs": [
      "computer-ui-quiet"
@@ -120960,10 +120984,10 @@
      "conflicts with #19849 in docs/tools/computer.md",
      "conflicts with #20019 in docs/tools/computer.md",
      "conflicts with #20178 in docs/tools/computer.md",
+     "conflicts with #20179 in docs/tools/computer.md",
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md, packages/natives/native/index.d.ts",
      "conflicts with #19870 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with #20179 in docs/tools/computer.md",
      "conflicts with main in crates/natives/src/desktop/backend.rs, crates/natives/src/desktop/cursor.rs, crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/macos/capture.rs, crates/natives/src/desktop/macos/cursor.rs, crates/natives/src/desktop/macos/cursor/helper.m, crates/natives/src/desktop/macos/mod.rs, crates/natives/src/desktop/mod.rs, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
@@ -120974,10 +120998,10 @@
      "#19849",
      "#20019",
      "#20178",
+     "#20179",
      "#19531",
      "#19618",
-     "#19870",
-     "#20179"
+     "#19870"
     ],
     "needs": [],
     "created": "2026-11-11T00:21:12Z"
@@ -121103,10 +121127,10 @@
      "conflicts with #19849 in docs/tools/computer.md",
      "conflicts with #20019 in docs/tools/computer.md",
      "conflicts with #20178 in docs/tools/computer.md",
+     "conflicts with #20179 in docs/tools/computer.md",
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md",
      "conflicts with #19870 in docs/tools/computer.md",
-     "conflicts with #20179 in docs/tools/computer.md",
      "conflicts with main in crates/natives/src/desktop/win32/edit.rs, crates/natives/src/desktop/win32/input.rs, crates/natives/src/desktop/win32/mod.rs"
     ],
     "note": "",
@@ -121117,10 +121141,10 @@
      "#19849",
      "#20019",
      "#20178",
+     "#20179",
      "#19531",
      "#19618",
-     "#19870",
-     "#20179"
+     "#19870"
     ],
     "needs": [],
     "created": "2026-11-12T04:40:13Z"
@@ -121186,8 +121210,10 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with main in (branch missing on the fork)"
+    ],
     "note": "",
     "over": [],
     "paired": [],
