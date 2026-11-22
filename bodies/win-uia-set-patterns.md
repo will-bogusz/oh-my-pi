@@ -2,7 +2,7 @@
 
 I made `setValue` work on WPF sliders and combo boxes on Windows, where it failed with an error that reads like success: "UI Automation failed: The operation completed successfully".
 
-With the app in front, at this head, slider writes went from 0/40 to 40/40 and combo box writes from 0/40 to 38/40 on Windows 10 and 11; the other two are one test app crash and one unread state, both on Windows 11.
+With the app in front, at `6f545b59b90` (before the rebase onto `main`), slider writes went from 0/40 to 40/40 and combo box writes from 0/40 to 38/40 on Windows 10 and 11; the other two are one test app crash and one unread state, both on Windows 11.
 
 > **Windows context.** A WPF slider offers UI Automation's `RangeValue` pattern, and a combo box that is not editable offers `Selection`, with one `SelectionItem` per entry once its list has been opened; neither offers the `Value` pattern a text box does. Asked for a pattern an element lacks, UI Automation returns success with no interface, which the `windows` crate turns into an error carrying HRESULT 0, whose system text is "The operation completed successfully".
 
@@ -42,11 +42,13 @@ Decisions:
 
 <details><summary>What the live test covers</summary>
 
-A slider number and a 16-significant-digit refusal, a never-opened combo's item (opened, selected, closed), a miss on a never-opened combo and on a previously opened, now closed one, a combo whose `DropDownClosed` handler resets the selection and one whose handler commits it only on close, a multiple-selection list whose prior selection is kept, the window losing the foreground once the list is open, and refusals with nothing sent behind another window and for a covered windowless WinForms button.
+A slider number and a 16-significant-digit refusal, a never-opened combo's item (opened, selected, closed), a miss on a never-opened combo and on a previously opened, now closed one, a combo whose `DropDownClosed` handler resets the selection and one whose handler commits it only on close, a multiple-selection list whose prior selection is kept, the window losing the foreground once the list is open, and refusals with nothing sent behind another window and for a covered windowless WinForms button. The rebase onto `main` changed one import list (beside #20110's) and the `AxUnconfirmed` docs sentence, no logic.
+
+In a tree merging this head with the other open natives PRs, the test (with rows a follow-up adds for windows behind others) also passes on a GitHub-hosted windows-latest runner (Windows Server 2025 24H2, build 26100.33828, interactive session).
 
 </details>
 
-`scripts/rust-check` on Windows (cargo-xwin), Linux and macOS: clippy and rustfmt pass on this branch's lines at `6f545b59b90`. `bun check` was not run: the diff is Rust and docs only.
+`scripts/rust-check` on Windows (cargo-xwin), Linux and macOS: clippy and rustfmt pass on this branch's lines at `1008420faa6`. `bun check` was not run: the diff is Rust and docs only.
 
 ---
 
