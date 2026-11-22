@@ -121420,5 +121420,11 @@
     "wake": ""
    }
   ]
+ },
+ "opening": {
+  "id": "win-popup-foreground",
+  "token": "10fc47d35ae04afb9652bc85e0dc211f",
+  "host": "MacBook-Pro",
+  "at": "2026-11-22T15:29:45Z"
  }
 }
