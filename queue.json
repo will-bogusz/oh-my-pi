@@ -108083,14 +108083,10 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-22T17:31:29Z",
+  "checked": "2026-11-22T18:01:39Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
-   "iphone-mirror-scroll-distance": {
-    "since": "2026-11-22T17:31:29Z",
-    "title": "fix(natives): scroll iPhone Mirroring the whole distance asked for in the background"
-   },
    "factory-droid-1100-pin": {
     "since": "2026-11-17T00:39:57Z",
     "title": "feat(catalog): identify Factory Droid requests as droid 1.10.0"
@@ -110079,6 +110075,13 @@
     "kind": "openable",
     "id": "iphone-mirror-scroll-distance",
     "title": "fix(natives): scroll iPhone Mirroring the whole distance asked for in the background"
+   },
+   {
+    "at": "2026-11-22T18:01:39Z",
+    "kind": "unopenable",
+    "id": "iphone-mirror-scroll-distance",
+    "title": "fix(natives): scroll iPhone Mirroring the whole distance asked for in the background",
+    "why": "plan: held (held: needs one live iPhone Mirroring run on the restacked head (scroll both directions, distance vs the table; first scroll after a takeover activation); Main, 2026-11-22)"
    }
   ]
  },
@@ -120017,7 +120020,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-22T17:31:30.131259Z",
+  "at": "2026-11-22T18:01:39.756261Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -120405,8 +120408,10 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): scroll iPhone Mirroring the whole distance asked for in the background",
-    "action": "open",
-    "reasons": [],
+    "action": "held",
+    "reasons": [
+     "held: needs one live iPhone Mirroring run on the restacked head (scroll both directions, distance vs the table; first scroll after a takeover activation); Main, 2026-11-22"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -120491,7 +120496,6 @@
      "conflicts with #19195 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #20019 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #19531 in docs/computer-use.md",
-     "conflicts with iphone-mirror-scroll-distance in docs/computer-use.md",
      "conflicts with main in crates/natives/src/desktop/macos/settle.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
@@ -120500,8 +120504,7 @@
     "blocked_by": [
      "#19195",
      "#20019",
-     "#19531",
-     "iphone-mirror-scroll-distance"
+     "#19531"
     ],
     "needs": [],
     "created": "2026-10-19T07:26:45Z"
@@ -120581,7 +120584,6 @@
     "reasons": [
      "conflicts with #19195 in docs/computer-use.md",
      "conflicts with #19531 in docs/computer-use.md",
-     "conflicts with iphone-mirror-scroll-distance in docs/computer-use.md",
      "conflicts with main in crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/macos/input.rs, docs/computer-use.md"
     ],
     "note": "",
@@ -120589,8 +120591,7 @@
     "paired": [],
     "blocked_by": [
      "#19195",
-     "#19531",
-     "iphone-mirror-scroll-distance"
+     "#19531"
     ],
     "needs": [],
     "created": "2026-11-14T20:50:44Z"
@@ -120855,7 +120856,6 @@
      "held: Main, 2026-11-18: needs an independent review and a VM row before it can open; no work on it now",
      "conflicts with #19195 in docs/computer-use.md",
      "conflicts with #19531 in docs/computer-use.md",
-     "conflicts with iphone-mirror-scroll-distance in docs/computer-use.md",
      "conflicts with main in crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/macos/input.rs, docs/computer-use.md"
     ],
     "note": "",
@@ -120863,8 +120863,7 @@
     "paired": [],
     "blocked_by": [
      "#19195",
-     "#19531",
-     "iphone-mirror-scroll-distance"
+     "#19531"
     ],
     "needs": [],
     "created": "2026-11-18T18:02:46Z"
@@ -120976,7 +120975,6 @@
      "conflicts with #19618 in docs/tools/computer.md",
      "conflicts with #19620 in packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with #19870 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with iphone-mirror-scroll-distance in docs/computer-use.md",
      "its need computer-ui-quiet conflicts with main in crates/natives/src/desktop/macos/settle.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in docs/tools/computer.md, packages/agent/src/agent.ts, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
@@ -120992,8 +120990,7 @@
      "#19531",
      "#19618",
      "#19620",
-     "#19870",
-     "iphone-mirror-scroll-distance"
+     "#19870"
     ],
     "needs": [
      "computer-ui-quiet"
