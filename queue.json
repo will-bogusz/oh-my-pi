@@ -107660,7 +107660,7 @@
    "area": "snapcompact",
    "priority": "P2",
    "needs": [],
-   "base": "e1a9f4b41d24fe223bb71e864bef552f0fae6948",
+   "base": "8e7856eb40360719990116f439828702b92ef8a6",
    "body": "bodies/snapcompact-frame-geometry.md",
    "state": "open",
    "pr": 20163,
@@ -107668,7 +107668,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-frame-geometry",
    "host": "MacBook-Pro",
    "added": "2026-11-22T10:55:43Z",
-   "updated": "2026-11-22T10:58:56Z",
+   "updated": "2026-11-22T11:02:02Z",
    "note": "LaneSnapcompactStack, 2026-11-22: found by the Devin Gemini lever study (dense 1568 middle pages 196x98 described as 'up to 71 rows'). On main e1a9f4b41d2: 8on22-bw readers (1568 and 2048px) were told the edge grid's rows for dense middle pages; Claude's 1932px two widths were already right. Fix lists every rendered grid from the template. Tests fail on main (2048 both grids; dense-only 8x4 stated 8x2). Review ReviewFrameGeometry: needs-changes at 13b6d712ec7 (test distinctness, parser, body), ready at 9769d7f56f5. Touches snapcompact.ts/test/CHANGELOG like #19880 and #19620 but no shared hunks: 3-way merge clean, snapcompact 125 pass, reader 12/12, typechecks clean.",
    "kind": "fix",
    "built": [
@@ -107692,7 +107692,8 @@
     }
    ],
    "opened": "2026-11-22T10:58:33Z",
-   "readied": "2026-11-22T10:58:56Z"
+   "readied": "2026-11-22T10:58:56Z",
+   "advanced": "2026-11-22T11:02:02Z"
   }
  ],
  "watch": {
