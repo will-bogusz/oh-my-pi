@@ -11,6 +11,8 @@ Behind another window, `press()` on the fixture's WPF button and check box was c
 | button | 0 → 5, 5, 5 / 5, 4, 5 | 0 → 5, 5, 5 / 5, 5, 5 |
 | check box | 0 → 5, 5, 5 / 5, 5, 5 | 0 → 5, 5, 5 / 5, 5, 5 |
 
+`main` refuses these too: WPF controls have no native window for #19889's `BM_CLICK` route, and containment's WPF refusal is unchanged.
+
 Reading order in `win32/ax.rs`: `legacy_window`, `LegacyPress`, `Win32Ax::contained_or`, `Win32Ax::perform`.
 
 ## Why
@@ -28,17 +30,19 @@ Related: #16573 changes the same refusal for WinForms. Limits: `click()` on a WP
 
 ## Testing
 
-`press_acts_on_a_wpf_window_behind_another_and_leaves_it_there` (ignored; needs a signed-in desktop) opens a WPF window behind another window of the same app. A button and a check box act and the window stays behind; a list row and disabled controls send nothing; a check box that keeps its state is `AxUnconfirmed`; behind the window's modal dialog both send nothing (`InputFailed`). Run at `5bcfae24682` (this head plus a fixture read timeout), it passes on Windows 10 and 11 and fails on both with the route off (first button press) and with the modal check removed (dialog row).
-
-Not tested (races the fixture has no seam for): the read-back window's edges, a Chromium child attached during the provider reads, and the foreground changing during containment's one sample.
+`press_acts_on_a_wpf_window_behind_another_and_leaves_it_there` (ignored; needs a signed-in desktop) opens a WPF window behind another window of the same app. A button and a check box act and the window stays behind; a list row and disabled controls send nothing; a check box that keeps its state is `AxUnconfirmed`; behind the window's modal dialog both send nothing (`InputFailed`). Run at `5bcfae24682` (`73b8e40f8d2` plus a fixture read timeout), it passes on Windows 10 and 11 and fails on both with the route off (first button press) and with the modal check removed (dialog row).
 
 <details><summary>The runs behind the numbers</summary>
 
-Runs: the harness's WPF press fixture (FX-WPF) behind another window, 5 runs per cell. Before = the `v19.0.1` release (natives sha256 `20098A21…`), after = the same release with this branch's natives, cross-built with cargo-xwin at `2cb81daa27a`, whose production code is this head's (sha256 `F946EA81…`). The one run not counted (Windows 10, refuse-takeover, user typing) pressed the button, but Windows' Copilot window took the foreground during it. User keys lost and pointer moved: 0 in every typing cell.
+`73b8e40f8d2` is this change before its rebase onto `main`, which changed none of its Rust lines. Runs: the harness's WPF press fixture (FX-WPF) behind another window, 5 runs per cell. Before = the `v19.0.1` release (natives sha256 `20098A21…`), after = the same release with this branch's natives, cross-built with cargo-xwin at `2cb81daa27a`, whose production code is `73b8e40f8d2`'s (sha256 `F946EA81…`). The one run not counted (Windows 10, refuse-takeover, user typing) pressed the button, but Windows' Copilot window took the foreground during it. User keys lost and pointer moved: 0 in every typing cell.
+
+Not tested (races the fixture has no seam for): the read-back window's edges, a Chromium child attached during the provider reads, and the foreground changing during containment's one sample.
+
+In a tree merging this head with the other open natives PRs, the test also passes on a GitHub-hosted windows-latest runner (Windows Server 2025 24H2, build 26100.33828, interactive session).
 
 </details>
 
-`scripts/rust-check` on Windows (cargo-xwin) and Linux: clippy and rustfmt pass on this branch's lines at `73b8e40f8d2`.
+`scripts/rust-check` on Windows (cargo-xwin) and Linux: clippy and rustfmt pass on this branch's lines at `b97153e94cf`.
 
 ---
 
