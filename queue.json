@@ -108094,7 +108094,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-22T19:02:21Z",
+  "checked": "2026-11-22T20:04:01Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108342,24 +108342,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-15T19:39:43Z",
-    "kind": "conflict",
-    "label": "#18786",
-    "title": "feat(agent,coding-agent): send a short browser guide with the first browser call",
-    "files": [
-     "packages/coding-agent/src/prompts/tools/browser.md"
-    ]
-   },
-   {
-    "at": "2026-11-15T19:39:43Z",
-    "kind": "conflict",
-    "label": "#19045",
-    "title": "feat(browser): let observe() settle the effects of the preceding action",
-    "files": [
-     "packages/coding-agent/src/tools/browser/tab-worker.ts"
-    ]
-   },
    {
     "at": "2026-11-16T01:14:24Z",
     "kind": "conflict",
@@ -120023,7 +120005,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-22T19:02:21.967227Z",
+  "at": "2026-11-22T20:04:02.756115Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
