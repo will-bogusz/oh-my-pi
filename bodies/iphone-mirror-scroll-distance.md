@@ -19,7 +19,7 @@ Not changed: Screen Sharing and other windows, takeover scrolls, and the scroll'
 
 ## Testing
 
-- Live, iPhone 16 Pro (iOS 18.7) through iPhone Mirroring on macOS 26.1, a Safari page logging `scrollY` until 200 ms after its last scroll event, before #19165 flipped the sign: on `main`, `dy: -300` took the page 0 → 128 → 256 over two calls and `dy: +300` back to 129. With the change: `dy: -300` moved 300 down in 5 of 5 calls and `+300` 300 up in 2 of 2 (0.80-0.86 s per call); `dy: ∓2000` moved exactly 2,000 in 7 of 7 (1.86-1.92 s). Not re-run on the phone after the rebase; the unit test pins the negated deltas.
+- Live (2026-10-30, this change's first version), iPhone 16 Pro (iOS 18.7) through iPhone Mirroring on macOS 26.1, a Safari page logging `scrollY` until 200 ms after its last scroll event: on `main`, `dy: -300` took the page 0 → 128 → 256 over two calls and `dy: +300` back to 129. With the change: `dy: -300` moved 300 down in 5 of 5 calls and `+300` 300 up in 2 of 2 (0.80-0.86 s per call); `dy: ∓2000` moved exactly 2,000 in 7 of 7 (1.86-1.92 s). Not re-run since (no phone): #19165's later sign flip and #17756's primer are unit-tested only.
 - `report_scroll_aims_once_then_posts_the_requested_distance_in_paced_chunks` (negated deltas), `report_scroll_stops_mid_train_and_keeps_long_distances_in_small_steps` (a failed check after three wheels stops at three, a cancel between wheels stops, 6,000 px is 200 steps of 30, 6,001 px is 200 summing exactly with one of 31, a zero scroll aims nothing), all with injected waits. The `desktop::macos::{ax,input}` tests pass on macOS; `rust-check` on macOS and Linux.
 
 ---

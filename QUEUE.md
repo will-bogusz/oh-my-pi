@@ -4,13 +4,12 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-22
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-22 17:31Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 2, conflict-held 16, stacked 16, held 12, parked 1, open PRs 20; merged 421, closed 45
+**Counts:** openable now 1, conflict-held 16, stacked 16, held 13, parked 1, open PRs 20; merged 421, closed 45
 
-## Openable now (2)
+## Openable now (1)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
-| iphone-mirror-scroll-distance | fix(natives): scroll iPhone Mirroring the whole distance asked for in the background | computer | P1 | 22d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-scroll-distance) |
 | factory-droid-1100-pin | feat(catalog): identify Factory Droid requests as droid 1.10.0 | factory-droid |  | 8d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-pin) |
 
 ## Conflict-held (16)
@@ -55,13 +54,14 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-22
 | win-wpf-set-background | fix(natives): set WPF text boxes, sliders and combo boxes behind other windows | computer |  | 1d | win-wpf-press ([#20179](https://github.com/can1357/oh-my-pi/pull/20179)), win-uia-set-patterns ([#20178](https://github.com/can1357/oh-my-pi/pull/20178)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-wpf-set-background) |
 | devin-gemini-image-count-80 | fix(catalog): let Gemini on Devin's own host carry 80 images | catalog | P2 | 1d | snapcompact-carbon-1568 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-gemini-image-count-80) |
 
-## Held (12)
+## Held (13)
 
 | id | title | area | priority | age | hold | branch |
 |---|---|---|---|---|---|---|
 | devin-billed-cost | feat(ai,catalog,coding-agent): show what each Devin turn billed to quota and overage | catalog |  | 39d | Will, 2026-10-22: parked; reopens only when Will asks | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-billed-cost) |
 | fallback-revert-when-healthy | feat(coding-agent): add retry.fallbackRevertPolicy when-healthy to return from usage fallbacks | broker | P2 | 39d | Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/fallback-revert-when-healthy) |
 | computer-input-diff-report | feat(computer): report what input changed as a diff once the app goes quiet | computer | P2 | 39d | Main for InputDiffFix, 2026-11-12: held; the fix round failed two Opus acceptance lines fixed beforehand (Finder steps 1.47x, Automator tokens 1.26x vs main); code branch stays local and unpushed; see note | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-input-diff-report) |
+| iphone-mirror-scroll-distance | fix(natives): scroll iPhone Mirroring the whole distance asked for in the background | computer | P1 | 22d | needs one live iPhone Mirroring run on the restacked head (scroll both directions, distance vs the table; first scroll after a takeover activation); Main, 2026-11-22 | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-scroll-distance) |
 | computer-guide-first-use | feat(coding-agent): send the computer guide with the first computer call | computer | P2 | 11d | Main, 2026-11-11: stays held until #18786 merges with the typed-message guide channel (design check replace); then one property on the computer prelude, drop the wrap variant, re-run its blind legs | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-guide-first-use) |
 | browser-cursor | feat(browser): draw the acting agent's cursor in OMP-driven tabs | browser | P2 | 11d | Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-cursor) |
 | desktop-cursor | feat(coding-agent,natives): show each agent's cursor where its computer input lands on macOS | coding-agent | P2 | 11d | Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check \| Main 2026-11-12: before it opens, the waiting-key-chord case with the cursor actually drawn (20 trials at a 20 s deadline; CursorDemo's cursor-on arm never drew one, and an early run on the combined tree returned 'Cancelled, input may be partial' 11/11, unexplained), on the polished branch will/desktop-cursor-polish. | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/desktop-cursor) |
