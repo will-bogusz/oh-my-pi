@@ -106200,7 +106200,20 @@
      "host": "MacBook-Pro"
     }
    ],
-   "advanced": "2026-11-22T13:19:29Z"
+   "advanced": "2026-11-22T13:19:29Z",
+   "line_loss_overrides": [
+    {
+     "at": "2026-11-22T13:22:48Z",
+     "reason": "Main, 2026-11-21 recorded popup x #19871 form: the send closure becomes a block with one control::dispatching()? before action.send()",
+     "old": "3121d8ce90e3c5c264f9339c9a60ff2ec01b8637",
+     "new": "0eda9d8f030044683a4354b66e2614be70a18ea6",
+     "dropped": {
+      "crates/natives/src/desktop/win32/ax.rs": [
+       "\t\t\t|action| action.send().map_err(ax_error),"
+      ]
+     }
+    }
+   ]
   },
   {
    "id": "win-uia-set-patterns",
