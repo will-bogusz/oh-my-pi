@@ -21,7 +21,7 @@ No call failed: the element lacked `ValuePattern`, the only pattern `set_value` 
 
 Decisions:
 - These writes run only while the control's window owns the foreground, checked before each mutating pattern call of this route, since each call would bring the window forward. Behind other windows the call is refused with nothing sent (`BackgroundUnavailable`), including a WPF control in a WinForms `ElementHost` (see details). A control offering neither `RangeValue` nor `Selection` keeps `main`'s outcome.
-- A slider takes a plain decimal number in its range; a combo box or list selects the exposed item named exactly the text. Each is read back, and a different reading fails naming both. In a multiple-selection list, a write that would replace other selected items is refused with nothing changed (as `main` refused it); select the item with a press or click instead.
+- A slider takes a plain decimal number in its range; a combo box or list selects the exposed item named exactly the text. Each is read back: a different reading is `AxFailed`, an unreadable one after the write `AxUnconfirmed`. In a multiple-selection list, a write that would replace other selected items is refused with nothing changed (as `main` refused it); select the item with a press or click instead.
 - Win32 trackbars and combo boxes, which have their own windows, keep their routes.
 - `docs/tools/computer.md` states the accepted inputs, the in-front requirement and what `AxUnconfirmed` means here; the model prompt is left to one sampled change covering scroll, the dispatch fence and `setValue`.
 
@@ -48,11 +48,14 @@ In a tree merging this head with the other open natives PRs, the test (with rows
 
 </details>
 
-`scripts/rust-check` on Windows (cargo-xwin), Linux and macOS: clippy and rustfmt pass on this branch's lines at `1008420faa6`. `bun check` was not run: the diff is Rust and docs only.
+Three unit tests pin these codes; each fails with its code reverted to `InputFailed`. At `766e314b82c` (the head's code) the live test and the desktop unit tests pass on a GitHub-hosted windows-latest runner.
+
+`scripts/rust-check` on Windows (cargo-xwin), Linux and macOS: clippy and rustfmt pass on this branch's lines at `4b781b170a8`. `bun check` was not run: the diff is Rust and docs only.
 
 ---
 
 - [ ] `bun check` passes
 - [x] Tested locally
 - [x] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
+
 
