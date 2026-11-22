@@ -1,19 +1,20 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-22 15:28Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-22 15:29Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-22 14:59Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 2, conflict-held 19, stacked 16, held 12, parked 1, open PRs 19; merged 419, closed 45
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-22 15:29Z on MacBook-Pro; groups below are from it, states from the manifest)
+**Counts:** openable now 3, conflict-held 18, stacked 16, held 12, parked 1, open PRs 19; merged 419, closed 45
 
-## Openable now (2)
+## Openable now (3)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
+| stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 9d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 | factory-droid-1100-pin | feat(catalog): identify Factory Droid requests as droid 1.10.0 | factory-droid |  | 8d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-pin) |
 | win-popup-foreground | fix(natives): press items of the open WPF context menu of the window in front | computer |  | 2d | open; accepted pair with #19849: Main, 2026-11-22: rechecked at #19849's head f6d3565f189: win32/window.rs production WindowsAndMessaging list = popup's minus WS_EX_TOOLWINDOW and WS_EX_TRANSPARENT (unused once #19849 drops the cover check's tool-window test; popup keeps GW_OWNER, GetWindow, WS_EX_NOACTIVATE, WS_POPUP for is_menu_popup); tests-module list = union (+GWL_STYLE, WS_EX_TOOLWINDOW, WS_EX_TRANSPARENT, WS_POPUP from #19849, PostMessageW, WM_APP from popup), rustfmt reflow; both tests modules merge as one; tests-over: Main, 2026-11-22: one signed-in WPF fixture test whose cases each reach a distinct branch (pressed in front, owned dialog refused, lookup-switch refused, behind refused); no smaller fixture reaches the popup-owner rule | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-popup-foreground) |
 
-## Conflict-held (19)
+## Conflict-held (18)
 
 | id | title | area | priority | age | blocked by | branch |
 |---|---|---|---|---|---|---|
@@ -31,7 +32,6 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-22
 | win-minimised-windows | fix(natives,coding-agent): show a minimized Windows app's window from apps.open instead of launching it again | computer | P2 | 11d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#20019](https://github.com/can1357/oh-my-pi/pull/20019), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-minimised-windows) |
 | macos-ax-cancel-before-send | fix(natives): send no macOS AX action once its run is cancelled | natives | P2 | 11d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-ax-cancel-before-send) |
 | win-ax-states | fix(natives): expose Windows control state and stale-reference matches | computer | P2 | 11d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19849](https://github.com/can1357/oh-my-pi/pull/19849), [#19531](https://github.com/can1357/oh-my-pi/pull/19531), [#19870](https://github.com/can1357/oh-my-pi/pull/19870), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-ax-states) |
-| stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 9d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 | macos-web-type-background | fix(natives): type into a background macOS web page field without a takeover | computer | P2 | 7d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19531](https://github.com/can1357/oh-my-pi/pull/19531), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-web-type-background) |
 | deadline-ranking | feat(ai): rank an account priority by quota deadline | ai/auth | P2 | 4d | [#19623](https://github.com/can1357/oh-my-pi/pull/19623), [#19700](https://github.com/can1357/oh-my-pi/pull/19700), [#19701](https://github.com/can1357/oh-my-pi/pull/19701) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/deadline-ranking) |
 | win-uia-set-patterns | fix(natives): set WPF sliders and combo boxes through RangeValue and SelectionItem | computer |  | 2d | win-popup-foreground | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-uia-set-patterns) |
