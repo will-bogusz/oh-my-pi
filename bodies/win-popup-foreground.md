@@ -21,7 +21,7 @@ Reading order: `in_front` and `ensure_pattern_safe` in `win32/window.rs`, then `
 Decisions:
 - A target counts as in front when it holds the foreground, or when it has both `WS_POPUP` and `WS_EX_NOACTIVATE` and its direct owner holds the foreground. Ownership alone is not enough: a modeless dialog the window owns can activate itself, so it stays refused, as does the menu once another window is in front.
 - The check runs again after the pattern lookup, right before sending: the user can switch windows while the app answers the lookup.
-- Admitting any such popup, not only menus, is deliberate: a UI Automation probe without omp acted on a custom owned WPF `Popup` 40/40 on Windows 10 and 11 while a user typed into the owner, foreground, focus and keys untouched.
+- Admitting any such popup, not only menus, is deliberate (probe in details).
 
 Limits:
 - In refuse mode the right-click that opens a WPF menu is itself refused (WPF drops posted clicks), so this changes only the default mode.
@@ -29,7 +29,9 @@ Limits:
 
 ## Testing
 
-`an_item_of_the_open_context_menu_of_the_window_in_front_is_pressed` (ignored; needs a signed-in desktop) opens a real WPF context menu and drives `AxElementAt`, `AxQuery` and `AxPerform`. The item is pressed with its window in front, and no window of the app gains or loses activation. Refused with nothing run: a button in an owned popup that can activate itself (`WS_POPUP` without `WS_EX_NOACTIVATE`, asserted), the item when the app activates another window during the pattern lookup, and the item once another window is in front. It passed 3/3 on Windows 10 at `0520a6df498` (before this rebase) and on Windows 11 at `c270cca520f`. With the post-lookup check removed it fails at the lookup case; without the popup rule, at the first press. The rebase changed one line of this change: `perform`'s send closure now opens with #19871's dispatch mark.
+`an_item_of_the_open_context_menu_of_the_window_in_front_is_pressed` (ignored; needs a signed-in desktop) opens a real WPF context menu and drives `AxPerform` on its item. The item is pressed with its window in front, and no window of the app gains or loses activation. Refused with nothing run: a button in an owned popup that can activate itself (`WS_POPUP` without `WS_EX_NOACTIVATE`, asserted), the item when the app activates another window during the pattern lookup, and the item once another window is in front. With the post-lookup check removed it fails at the lookup case; without the popup rule, at the first press.
+
+At this head it passes 3/3 on a GitHub-hosted windows-latest runner (Windows Server 2025 24H2, build 26100.33828) and fails there with the post-lookup check removed. That Windows closes the menu when another window of the app activates, so there the last case expects the refusal for the menu's missing window. Earlier heads passed 3/3 on Windows 10 and 11.
 
 <details><summary>Builds and runs behind the numbers</summary>
 
@@ -37,12 +39,12 @@ Limits:
 - Head rows, Windows 10: v19.0.1 against an addon of `c577a9434b2` (the head's production code; the head adds only test-fixture changes), interleaved, 2 rounds of 5, 17:35-17:46Z; foreground taken 0/10 and user keys lost 0/10 on both sides. Unit test at the head `0520a6df498`: passed 3/3; with the post-lookup recheck removed it failed 3/3 at the lookup-switch press.
 - Windows 11 row and unit: v19.0.1 against an addon of `c270cca520f` (this change on `main` alone, same popup rule and recheck), interleaved, 2 rounds of 5 (09:11-09:19Z); unit passed (08:51Z), with the post-lookup recheck removed it failed at the lookup-switch press (08:52Z). Windows 11 runs between 07:39 and 08:12Z were discarded: another session's input ran on that guest.
 - Styles `0x96000000` / `0x08080088`: read with Win32 from the fixture's open menu during a v19.0.0 run.
-- Custom popup probe: `StaysOpen` WPF `Popup` (styles `0x96000000` / `0x08000088`) owned by the window in front, plain and with focusable content, `ValuePattern.SetValue` on its text box and `InvokePattern.Invoke` on its button, n=5 per popup, action and OS, 24 keys typed into the owner's box during each call, foreground polled every 2 ms.
-- GitHub-hosted windows-latest runner (Windows Server 2025 24H2, build 26100.33828, interactive session), this head merged with the open natives PRs, 2 runs: every case of the test passes but the last, where the item behind the other window is refused with `AxFailed` (its host window is no longer found) instead of `BackgroundUnavailable`. With the post-lookup check removed it fails at the lookup case there too. The dispatch-fence unit tests and the other desktop unit tests pass there.
+- Custom popup probe (no omp build loaded): `setValue` and `press` acted 40/40 on Windows 10 and 11 while a user typed into the owner, with the foreground, focus and all 960 typed keys untouched. `StaysOpen` WPF `Popup` (styles `0x96000000` / `0x08000088`) owned by the window in front, plain and with focusable content, `ValuePattern.SetValue` on its text box and `InvokePattern.Invoke` on its button, n=5 per popup, action and OS, 24 keys typed into the owner's box during each call, foreground polled every 2 ms.
+- This rebase onto `main` changed one line of the fix (`perform`'s send closure now opens with #19871's dispatch mark); the last test case gained the menu check above. On the runner the dispatch-fence unit tests and the other desktop unit tests pass too.
 
 </details>
 
-`scripts/rust-check` on Windows (cargo-xwin), Linux and macOS: pass, recorded for the head.
+`scripts/rust-check` on Windows (cargo-xwin) and Linux: pass, recorded at `cf79c7d51fe`.
 
 ---
 
