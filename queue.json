@@ -106248,7 +106248,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-uia-set-patterns",
    "host": "MacBook-Pro",
    "added": "2026-11-20T06:29:20Z",
-   "updated": "2026-11-22T13:43:51Z",
+   "updated": "2026-11-22T13:58:30Z",
    "note": "",
    "advanced": "2026-11-22T13:43:51Z",
    "line_loss_overrides": [
@@ -106298,7 +106298,7 @@
     19871
    ],
    "pair_reasons": {
-    "19870": "Main, 2026-11-20: win32/ax.rs: two appended blocks (methods then free items each) and uiautomation import unions; combined = both",
+    "19870": "Main, 2026-11-22: rechecked at #19870's head 42c28e0aaa9: win32/ax.rs = uiautomation patterns/types import unions + both appended blocks (methods of each inside the impl, then free items of each); docs AxUnconfirmed paragraph = #19870's approved text with uia's combo clause as the middle item ('a WinForms check box can process press() without changing its state, a combo selection may already have changed even when its post-close settling period could not finish, and a WPF scroll may report it ...')",
     "19871": "Main, 2026-11-20: ax.rs import union; perform arms = #19871's (pattern fetch, dispatch mark, action); this entry's setValue routes stay outside the fence's stated scope until win-wpf-set-background extends it (unfenced setValue keeps main's generic Timeout: AxSetValue is not dispatch_fenced, so it never reaches abandoned_before_dispatch). docs/tools/computer.md AxUnconfirmed paragraph: form brought to Main at #19870's final head"
    }
   },
