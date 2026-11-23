@@ -9013,10 +9013,10 @@ mod tests {
 	fn iphone_mirroring_taps_are_primed_once_after_a_takeover_activated_the_window() {
 		use crate::desktop::error::ErrorCode;
 		let event = PointerEvent::Click {
-			x: 0.0,
-			y: 0.0,
-			button: MouseButton::Left,
-			count: 1,
+			x:         0.0,
+			y:         0.0,
+			button:    MouseButton::Left,
+			count:     1,
 			modifiers: Modifiers::default(),
 		};
 		let (down, up) = (CGEventType::LeftMouseDown.0, CGEventType::LeftMouseUp.0);
