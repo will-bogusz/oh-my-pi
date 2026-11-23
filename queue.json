@@ -80988,7 +80988,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-xtest-release",
    "host": "MacBook-Pro",
    "added": "2026-11-11T02:31:05Z",
-   "updated": "2026-11-23T05:15:47Z",
+   "updated": "2026-11-23T05:19:27Z",
    "note": "",
    "rebases_after": [
     18222,
@@ -81083,7 +81083,7 @@
    ],
    "opened": "2026-11-17T06:33:00Z",
    "readied": "2026-11-17T06:33:25Z",
-   "advanced": "2026-11-23T05:15:47Z",
+   "advanced": "2026-11-23T05:19:27Z",
    "line_loss_overrides": [
     {
      "at": "2026-11-18T16:21:12Z",
