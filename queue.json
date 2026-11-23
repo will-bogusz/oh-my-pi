@@ -119987,8 +119987,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-23T04:16:03.429170Z",
-  "host": "goliath",
+  "at": "2026-11-23T05:05:03.900540Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -120024,8 +120024,10 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): stop macOS background drags reporting moves that did not happen",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in docs/computer-use.md"
+    ],
     "note": "accepted pair with #20179: Main, 2026-11-21: docs/tools/computer.md only; combined = #19195's macOS drag paragraph, wbc's BM_CLICK paragraph, then this entry's WPF press paragraph, no wording change",
     "over": [],
     "paired": [
@@ -120079,8 +120081,10 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): wait for the user to pause before a Windows takeover",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in docs/tools/computer.md"
+    ],
     "note": "accepted pair with #19870: Main, 2026-11-20: win32/mod.rs tests-module import list only; combined = union of both WindowsAndMessaging imports",
     "over": [],
     "paired": [
@@ -120141,8 +120145,10 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): release X11 XTest keys and buttons a killed omp held",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in docs/tools/computer.md"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -120526,7 +120532,8 @@
     "reasons": [
      "held: Main, 2026-11-18: rework against #19195's new drag logic after it merges (not a mechanical restack; drag_control.rs moved)",
      "needs #19195 (open)",
-     "conflicts with main in crates/natives/src/desktop/macos/ax/drag_control.rs, crates/natives/src/desktop/macos/input.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md"
+     "its need #19195 conflicts with main in docs/computer-use.md",
+     "conflicts with main in crates/natives/src/desktop/macos/ax/drag_control.rs, crates/natives/src/desktop/macos/input.rs, packages/coding-agent/src/prompts/tools/computer.md"
     ],
     "note": "",
     "over": [],
@@ -120901,7 +120908,7 @@
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md",
      "conflicts with #19870 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/sdk-computer-prelude-toggle.test.ts, packages/coding-agent/test/tools/computer.test.ts, packages/coding-agent/test/tools/eval-description.test.ts"
+     "conflicts with main in docs/tools/computer.md, packages/coding-agent/src/eval/preludes.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/sdk-computer-prelude-toggle.test.ts, packages/coding-agent/test/tools/computer.test.ts, packages/coding-agent/test/tools/eval-description.test.ts"
     ],
     "note": "",
     "over": [],
@@ -120941,7 +120948,7 @@
      "conflicts with #19620 in packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with #19870 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "its need computer-ui-quiet conflicts with main in crates/natives/src/desktop/macos/settle.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
-     "conflicts with main in docs/tools/computer.md, packages/agent/src/agent.ts, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/tools/computer.test.ts"
+     "conflicts with main in docs/tools/computer.md, packages/agent/src/agent.ts, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/prompts/system/computer-use.md, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
     "over": [],
@@ -121046,7 +121053,7 @@
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md, packages/natives/native/index.d.ts",
      "conflicts with #19870 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
-     "conflicts with main in crates/natives/src/desktop/backend.rs, crates/natives/src/desktop/cursor.rs, crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/macos/capture.rs, crates/natives/src/desktop/macos/cursor.rs, crates/natives/src/desktop/macos/cursor/helper.m, crates/natives/src/desktop/macos/mod.rs, crates/natives/src/desktop/mod.rs, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/test/tools/computer.test.ts"
+     "conflicts with main in crates/natives/src/desktop/backend.rs, crates/natives/src/desktop/cursor.rs, crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/macos/capture.rs, crates/natives/src/desktop/macos/cursor.rs, crates/natives/src/desktop/macos/cursor/helper.m, crates/natives/src/desktop/macos/mod.rs, crates/natives/src/desktop/mod.rs, docs/computer-use.md, docs/settings.md, docs/tools/computer.md, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
     "over": [],
@@ -121268,10 +121275,8 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "wait",
-    "reasons": [
-     "conflicts with main in (branch missing on the fork)"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -121314,7 +121319,8 @@
      "held: Main, 2026-11-21: waits on a restack lane onto cut C via win-takeover-settle: needs the \"person input since the takeover started\" veto in its caret loops and a restack on the new restore code (cut C removed activity::check). Spec: WinTakeoverCut PLAN.md (d) and \"What a/b need\"",
      "needs win-takeover-settle (queued)",
      "conflicts with #20019 in crates/natives/src/desktop/win32/input.rs, crates/natives/src/desktop/win32/mod.rs",
-     "conflicts with #19870 in crates/natives/src/desktop/win32/mod.rs"
+     "conflicts with #19870 in crates/natives/src/desktop/win32/mod.rs",
+     "its need win-takeover-settle conflicts with main in docs/tools/computer.md"
     ],
     "note": "",
     "over": [],
@@ -121342,6 +121348,7 @@
      "needs #20019 (open)",
      "conflicts with #20019 in crates/natives/src/desktop/win32/input.rs, crates/natives/src/desktop/win32/mod.rs, docs/tools/computer.md",
      "conflicts with #19870 in crates/natives/src/desktop/win32/mod.rs",
+     "its need #20019 conflicts with main in docs/tools/computer.md",
      "conflicts with main in crates/natives/src/desktop/win32/input.rs, crates/natives/src/desktop/win32/mod.rs"
     ],
     "note": "",
