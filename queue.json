@@ -108146,6 +108146,24 @@
    "readied": "2026-11-22T10:58:56Z",
    "advanced": "2026-11-22T11:02:02Z",
    "merged_by": "pr"
+  },
+  {
+   "id": "iphone-mirror-scroll-unprimed",
+   "branch": "will/iphone-mirror-scroll-unprimed",
+   "title": "fix(natives): restore iPhone Mirroring scrolling after takeover taps",
+   "area": "computer",
+   "priority": "P1",
+   "needs": [],
+   "base": "e4fe8782978e19c5de8b8830d050b95e63fc89ca",
+   "body": "bodies/iphone-mirror-scroll-unprimed.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/iphone-mirror-scroll-unprimed",
+   "host": "MacBook-Pro",
+   "added": "2026-11-23T22:14:52Z",
+   "updated": "2026-11-23T22:14:52Z",
+   "note": ""
   }
  ],
  "watch": {
