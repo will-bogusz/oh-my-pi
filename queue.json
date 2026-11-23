@@ -108149,7 +108149,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-23T21:06:50Z",
+  "checked": "2026-11-23T21:37:42Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108306,24 +108306,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-16T21:36:22Z",
-    "kind": "conflict",
-    "label": "#18353",
-    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
-    "files": [
-     "MODULE.bazel.lock"
-    ]
-   },
-   {
-    "at": "2026-11-16T21:36:22Z",
-    "kind": "conflict",
-    "label": "#18013",
-    "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "files": [
-     "MODULE.bazel.lock"
-    ]
-   },
    {
     "at": "2026-11-17T00:39:57Z",
     "kind": "merged",
