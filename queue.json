@@ -107219,7 +107219,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-wpf-press",
    "host": "MacBook-Pro",
    "added": "2026-11-20T19:14:08Z",
-   "updated": "2026-11-23T05:23:15Z",
+   "updated": "2026-11-23T05:34:16Z",
    "note": "",
    "tests_over_override": {
     "reason": "ReviewWpfPressCut10, 2026-11-20: one signed-in WPF fixture test whose rows each reach a distinct branch (reviewer's request)",
@@ -107237,7 +107237,7 @@
     "20177": "Main, 2026-11-22: win32/ax.rs: contained_root/contained_or take popup's lookup and send closures; D's refusal route keeps containment's first check (Ok -> lookup, recheck ensure_pattern_safe, send; Err(refusal) -> refused), and perform's LegacyPress fallback sits in the lookup, send = action.send() after popup's recheck and #19871's one dispatching() mark; a window switch during the lookup is refused with nothing sent rather than handed to the background route (one Limits line in D's body once popup is in); built in tree a50c4da6228, D's press live test passes on GitHub windows-latest",
     "20178": "Main, 2026-11-22: win32/ax.rs = both appended test blocks (D's WPF press fixture/test, then uia's slider/combo fixture/test; no shared item names); docs/tools/computer.md AxUnconfirmed paragraph = D's 'a WinForms or WPF check box' + uia's ', and a combo selection may already have changed even when its post-close settling period could not finish' clause; no production overlap. Form = D2's base merge 86aca62c83a, built in tree a50c4da6228 (Windows desktop unit tests + D press live + uia/D2 setValue live pass on GitHub windows-latest) Rechecked 2026-11-22 at uia 4b781b170a8 (read-back fix): conflict hunks unchanged except uia's own appended-block content; form holds."
    },
-   "advanced": "2026-11-23T05:23:15Z",
+   "advanced": "2026-11-23T05:34:16Z",
    "built": [
     {
      "with": "#17756",
