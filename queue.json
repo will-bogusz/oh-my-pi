@@ -106296,6 +106296,21 @@
        "\t\t\t|action| action.send().map_err(ax_error),"
       ]
      }
+    },
+    {
+     "at": "2026-11-23T11:12:48Z",
+     "reason": "Main, 2026-11-23: recorded #19849 pair form; window.rs import lists only (prod drops WS_EX_TOOLWINDOW/WS_EX_TRANSPARENT now unused after #19849, tests list = union, rustfmt reflow)",
+     "old": "3a621f3b6cd3600182ad67ddb3684b2983f6c239",
+     "new": "35763440fb8e3e78640936b8a21477bc79e90f90",
+     "dropped": {
+      "crates/natives/src/desktop/win32/window.rs": [
+       "\t\t\t\tWS_EX_NOACTIVATE, WS_EX_TOOLWINDOW, WS_EX_TRANSPARENT, WS_POPUP,",
+       "\t\t\t\tGWLP_WNDPROC, GetClassInfoW, GetParent, HWND_TOPMOST, PostMessageW, RegisterClassW,",
+       "\t\t\t\tSWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE, SWP_NOZORDER, SWP_SHOWWINDOW, SendMessageW,",
+       "\t\t\t\tWM_APP, WM_COMMAND, WM_LBUTTONDOWN, WM_LBUTTONUP, WNDCLASSW, WNDPROC, WS_CHILD,",
+       "\t\t\t\tWS_OVERLAPPED, WS_OVERLAPPEDWINDOW,"
+      ]
+     }
     }
    ],
    "tests_over_override": {
