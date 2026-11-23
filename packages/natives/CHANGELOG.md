@@ -4,6 +4,7 @@
 
 ### Fixed
 
+- Fixed v19.1.1 background scrolls on iPhone Mirroring moving nothing after a takeover tap.
 - Fixed Windows captures and accessibility trees of a fully covered Chromium or Electron window passing as current when the cover is a popup, tool or click-through window, under which a paused page can stay paused; they now report `covered` there too ([#19849](https://github.com/can1357/oh-my-pi/pull/19849) by [@will-bogusz](https://github.com/will-bogusz))
 ### Added
 

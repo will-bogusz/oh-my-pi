@@ -3566,9 +3566,9 @@ fn background_scroll(
 /// (iPhone Mirroring). A tap needs no activation, only a press that outlasts
 /// a report, addressed to the window. The device moves its own pointer only
 /// for a button event and scrolls whatever is under that pointer, so a scroll
-/// first aims it with a lone release, which taps nothing. A tap or scroll after
-/// a takeover pointer call activated the window is primed first ([`primed`]);
-/// other events take the ordinary route.
+/// first aims it with a lone release, which taps nothing. A tap after a
+/// takeover pointer call activated the window is primed first ([`primed`]);
+/// scrolls leave that primer pending for the next tap.
 /// Like every background pointer event, each pointer post first passes
 /// [`pointer_recheck`].
 fn report_pointer(
@@ -3610,14 +3610,14 @@ fn report_pointer(
 		|| prime_reports(source, pid, wid, window, entry_front, visit).inspect_err(|_| checks.set(0));
 	match event {
 		PointerEvent::Click { x, y, button: MouseButton::Left, count, .. } => {
-			primed(awaiting_primer, (pid, wid), before_post, prime, || {
+			primed(awaiting_primer, (pid, wid), &event, before_post, prime, || {
 				report_taps(count, before_post, |event_type, click_state| {
 					post(event_type, x, y, click_state)
 				})
 			})
 		},
 		PointerEvent::Scroll { x, y, dx, dy } => {
-			primed(awaiting_primer, (pid, wid), before_post, prime, || {
+			primed(awaiting_primer, (pid, wid), &event, before_post, prime, || {
 				report_scroll(
 					before_post,
 					|| post(CGEventType::LeftMouseUp, x, y, 1),
@@ -3647,14 +3647,19 @@ fn report_pointer(
 /// user stopped (`UserIntervened`) or cancelled keeps the mark and stops the
 /// call before any pointer event; a cancel noticed after a primer ran stops
 /// it with the mark already cleared.
+/// Scrolls bypass the primer and keep the mark: after a takeover, the primer
+/// stopped scrolls moving the phone, while unprimed scrolls moved it.
 fn primed<T>(
 	awaiting: &mut HashSet<(libc::pid_t, u32)>,
 	(pid, wid): (libc::pid_t, u32),
+	event: &PointerEvent,
 	before_post: impl Fn() -> CoreResult<()>,
 	prime: impl FnOnce() -> CoreResult<()>,
 	send: impl FnOnce() -> CoreResult<T>,
 ) -> CoreResult<T> {
-	if awaiting.contains(&(pid, wid)) {
+	if matches!(event, PointerEvent::Click { button: MouseButton::Left, .. })
+		&& awaiting.contains(&(pid, wid))
+	{
 		before_post()?;
 		if let Err(error) = prime()
 			&& matches!(error.code, ErrorCode::UserIntervened | ErrorCode::Cancelled)
@@ -9007,6 +9012,13 @@ mod tests {
 	#[test]
 	fn iphone_mirroring_taps_are_primed_once_after_a_takeover_activated_the_window() {
 		use crate::desktop::error::ErrorCode;
+		let event = PointerEvent::Click {
+			x: 0.0,
+			y: 0.0,
+			button: MouseButton::Left,
+			count: 1,
+			modifiers: Modifiers::default(),
+		};
 		let (down, up) = (CGEventType::LeftMouseDown.0, CGEventType::LeftMouseUp.0);
 		let log = std::cell::RefCell::new(Vec::new());
 		let check = || {
@@ -9027,11 +9039,26 @@ mod tests {
 		let unprimed = [("check", 0), ("post", down), ("post", up)];
 		// A takeover activated only window 43: a tap in 42 goes out unprimed.
 		let mut awaiting = HashSet::from([(7, 43)]);
-		primed(&mut awaiting, (7, 42), check, prime, tap).unwrap();
+		primed(&mut awaiting, (7, 42), &event, check, prime, tap).unwrap();
 		assert_eq!(log.take(), unprimed);
-		// Once one activated 42, only its next tap is primed.
+		// A scroll skips even the primer's check, sends once, returns its own
+		// error, and leaves the takeover mark for the following tap.
 		awaiting.insert((7, 42));
-		primed(&mut awaiting, (7, 42), check, prime, tap).unwrap();
+		let scroll = PointerEvent::Scroll { x: 0.0, y: 0.0, dx: 0.0, dy: 300.0 };
+		let sends = std::cell::Cell::new(0);
+		let failure = DesktopError::input_failed("scroll post failed");
+		let error = primed(&mut awaiting, (7, 42), &scroll, check, prime, || -> CoreResult<()> {
+			sends.set(sends.get() + 1);
+			Err(failure.clone())
+		})
+		.unwrap_err();
+		assert_eq!(sends.get(), 1);
+		assert!(log.take().is_empty());
+		assert_eq!(error.code, failure.code);
+		assert_eq!(error.message, failure.message);
+		assert!(awaiting.contains(&(7, 42)));
+		// Only the next tap is primed.
+		primed(&mut awaiting, (7, 42), &event, check, prime, tap).unwrap();
 		assert_eq!(log.take(), [
 			("check", 0),
 			("prime", 0),
@@ -9039,7 +9066,7 @@ mod tests {
 			("post", down),
 			("post", up),
 		]);
-		primed(&mut awaiting, (7, 42), check, prime, tap).unwrap();
+		primed(&mut awaiting, (7, 42), &event, check, prime, tap).unwrap();
 		assert_eq!(log.take(), unprimed);
 		assert_eq!(awaiting, HashSet::from([(7, 43)]));
 		// A primer the key route refuses, or one that fails otherwise, still
@@ -9051,20 +9078,20 @@ mod tests {
 		] {
 			awaiting.insert((7, 42));
 			let failing = || Err(failure.clone());
-			primed(&mut awaiting, (7, 42), check, failing, tap).unwrap();
+			primed(&mut awaiting, (7, 42), &event, check, failing, tap).unwrap();
 			assert_eq!(log.take(), [("check", 0), ("check", 0), ("post", down), ("post", up)]);
-			primed(&mut awaiting, (7, 42), check, prime, tap).unwrap();
+			primed(&mut awaiting, (7, 42), &event, check, prime, tap).unwrap();
 			assert_eq!(log.take(), unprimed);
 		}
 		// The user already has the target: nothing primes or posts.
 		awaiting.insert((7, 42));
 		let refused = || Err(DesktopError::user_intervened("the user has the target"));
-		let error = primed(&mut awaiting, (7, 42), refused, prime, no_tap).unwrap_err();
+		let error = primed(&mut awaiting, (7, 42), &event, refused, prime, no_tap).unwrap_err();
 		assert_eq!(error.code, ErrorCode::UserIntervened);
 		assert!(log.take().is_empty());
 		// A primer the user stopped keeps its code, sends no pointer input, and
 		// leaves the next call primed.
-		let error = primed(&mut awaiting, (7, 42), check, refused, no_tap).unwrap_err();
+		let error = primed(&mut awaiting, (7, 42), &event, check, refused, no_tap).unwrap_err();
 		assert_eq!(error.code, ErrorCode::UserIntervened);
 		assert!(awaiting.contains(&(7, 42)));
 		// A cancel while priming stops before any pointer event.
@@ -9074,6 +9101,7 @@ mod tests {
 			primed(
 				&mut awaiting,
 				(7, 42),
+				&event,
 				|| Ok(()),
 				|| {
 					cancellation.cancel();
