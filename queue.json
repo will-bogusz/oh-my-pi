@@ -80980,7 +80980,7 @@
    "area": "computer",
    "priority": "P2",
    "needs": [],
-   "base": "b505770284deff6b2888a4eb26a7cc95497cc111",
+   "base": "693b149c76bfbf9b330f3d34f603b543c47feb7c",
    "body": "bodies/x11-xtest-release.md",
    "state": "open",
    "pr": 19531,
@@ -80988,7 +80988,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/x11-xtest-release",
    "host": "MacBook-Pro",
    "added": "2026-11-11T02:31:05Z",
-   "updated": "2026-11-22T13:17:32Z",
+   "updated": "2026-11-23T05:15:47Z",
    "note": "",
    "rebases_after": [
     18222,
@@ -81083,7 +81083,7 @@
    ],
    "opened": "2026-11-17T06:33:00Z",
    "readied": "2026-11-17T06:33:25Z",
-   "advanced": "2026-11-22T13:17:32Z",
+   "advanced": "2026-11-23T05:15:47Z",
    "line_loss_overrides": [
     {
      "at": "2026-11-18T16:21:12Z",
