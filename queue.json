@@ -105734,6 +105734,20 @@
        "`AxUnconfirmed` means an accessibility action was requested but its outcome could not be confirmed. On macOS, the app may not have replied in time or messaging failed, for example because the action opened a modal dialog, or the app answered with an attribute error that does not apply to actions, as Preview does after following a PDF link and Finder after opening an item. On Windows, a WPF scroll step was sent, but no element under the point showed it moving the requested way, or the operation's time ran out. It may already have taken effect: observe the named app/window on macOS or the target window on Windows before repeating it."
       ]
      }
+    },
+    {
+     "at": "2026-11-23T05:38:05Z",
+     "reason": "Main, 2026-11-23: v19.1.1 renamed computer.backgroundFallback to computer.takeover; the docs line and the test's mode argument are rewritten to the new name, not dropped",
+     "old": "42c28e0aaa9dd511f40291dbb093560467c02b1f",
+     "new": "9ea44e466ee14d2f0bfb1d2d79ba40350742c168",
+     "dropped": {
+      "docs/tools/computer.md": [
+       "On Windows, WPF ignores posted wheel input. While a WPF window with no Chromium/WebView2 child window holds the foreground, `scroll` uses the UI Automation scroll containers under the point without moving the pointer, choosing each requested axis independently. Before each step it takes the container's item or element under the point; the step counts as moved once that element moves on screen the requested way, since rows added or removed and a resized view leave it in place. A step that leaves it in place throws `InputFailed`; a step with no such element under the point (its scroll bar or a column header, for example), or that moved it the other way, throws `AxUnconfirmed`. A child window under the point that is neither WPF nor the root (a hosted WinForms list, for example) keeps the posted wheel where its delivery checks allow it. Every other WPF scroll (behind other windows, no scroll container under the point, a Chromium/WebView2 child window, a WPF child window hosted in a non-WPF window, Windows wheel scrolling set to 0 lines or characters per notch on every requested axis) throws `BackgroundUnavailable` with nothing sent, as other WPF pointer input does, so `computer.backgroundFallback` decides; by default it reruns the scroll with a real wheel in takeover. Inspect the target window before retrying partial `InputFailed` or `AxUnconfirmed` errors; input may already have taken effect."
+      ],
+      "packages/coding-agent/test/tools/computer.test.ts": [
+       "\t\tconst result = await run(native, 'await (await desktop.window(\"42\")).scroll(1, 2, { dy: 3 })', \"takeover\");"
+      ]
+     }
     }
    ],
    "built": [
