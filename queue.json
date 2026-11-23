@@ -103862,7 +103862,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/wayland-still-capture",
    "host": "MacBook-Pro",
    "added": "2026-11-17T23:02:30Z",
-   "updated": "2026-11-23T05:25:16Z",
+   "updated": "2026-11-23T05:36:05Z",
    "note": "",
    "built": [
     {
@@ -103956,7 +103956,7 @@
      "host": "MacBook-Pro"
     }
    ],
-   "advanced": "2026-11-23T05:25:16Z",
+   "advanced": "2026-11-23T05:36:05Z",
    "opened": "2026-11-18T01:48:59Z",
    "readied": "2026-11-18T01:49:25Z",
    "line_loss_overrides": [
