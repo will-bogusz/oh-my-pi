@@ -105875,13 +105875,13 @@
    "needs": [],
    "base": "31ffee513f27a01bba7d4dfbe12bae239cdc646a",
    "body": "bodies/win-occluded-capture.md",
-   "state": "open",
+   "state": "merged",
    "pr": 19849,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-occluded-capture",
    "host": "MacBook-Pro",
    "added": "2026-11-20T04:27:57Z",
-   "updated": "2026-11-23T05:34:43Z",
+   "updated": "2026-11-23T11:01:07Z",
    "note": "",
    "rebases_after": [
     19519
@@ -106160,7 +106160,8 @@
       ]
      }
     }
-   ]
+   ],
+   "merged_by": "pr"
   },
   {
    "id": "win-popup-foreground",
