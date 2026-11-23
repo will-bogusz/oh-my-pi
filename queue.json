@@ -105848,7 +105848,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "b505770284deff6b2888a4eb26a7cc95497cc111",
+   "base": "31ffee513f27a01bba7d4dfbe12bae239cdc646a",
    "body": "bodies/win-occluded-capture.md",
    "state": "open",
    "pr": 19849,
@@ -105856,7 +105856,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-occluded-capture",
    "host": "MacBook-Pro",
    "added": "2026-11-20T04:27:57Z",
-   "updated": "2026-11-22T13:17:16Z",
+   "updated": "2026-11-23T05:23:28Z",
    "note": "",
    "rebases_after": [
     19519
@@ -105864,7 +105864,7 @@
    "pair_reasons": {
     "19519": "Main, 2026-11-20: adjacent test-only fields in the fake backend; combined = both"
    },
-   "advanced": "2026-11-22T13:17:16Z",
+   "advanced": "2026-11-23T05:23:28Z",
    "built": [
     {
      "with": "#19195",
