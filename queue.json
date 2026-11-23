@@ -108149,7 +108149,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-23T16:01:01Z",
+  "checked": "2026-11-23T17:02:09Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108306,12 +108306,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-16T17:01:47Z",
-    "kind": "openable",
-    "id": "dialog-closed-state",
-    "title": "fix(browser): forget a dialog the user or another client answered"
-   },
    {
     "at": "2026-11-16T18:02:50Z",
     "kind": "unopenable",
