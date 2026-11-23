@@ -108133,7 +108133,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-23T05:17:47Z",
+  "checked": "2026-11-23T05:48:35Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108142,29 +108142,7 @@
     "title": "feat(catalog): identify Factory Droid requests as droid 1.10.0"
    }
   },
-  "conflicts": {
-   "#19531": {
-    "since": "2026-11-23T05:17:47Z",
-    "title": "fix(natives): release X11 XTest keys and buttons a killed omp held",
-    "files": [
-     "docs/tools/computer.md"
-    ]
-   },
-   "#19195": {
-    "since": "2026-11-23T05:17:47Z",
-    "title": "fix(natives): stop macOS background drags reporting moves that did not happen",
-    "files": [
-     "docs/computer-use.md"
-    ]
-   },
-   "#20019": {
-    "since": "2026-11-23T05:17:47Z",
-    "title": "fix(natives): wait for the user to pause before a Windows takeover",
-    "files": [
-     "docs/tools/computer.md"
-    ]
-   }
-  },
+  "conflicts": {},
   "merged_through": "2026-11-22T17:14:06Z",
   "unreleased": {},
   "ready": [
@@ -108317,30 +108295,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-16T05:18:57Z",
-    "kind": "openable",
-    "id": "ax-number-setvalue",
-    "title": "fix(natives): set macOS sliders and other number controls from setValue"
-   },
-   {
-    "at": "2026-11-16T05:18:57Z",
-    "kind": "conflict",
-    "label": "#18353",
-    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
-    "files": [
-     "MODULE.bazel.lock"
-    ]
-   },
-   {
-    "at": "2026-11-16T05:18:57Z",
-    "kind": "conflict",
-    "label": "#18013",
-    "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "files": [
-     "MODULE.bazel.lock"
-    ]
-   },
    {
     "at": "2026-11-16T06:20:09Z",
     "kind": "unopenable",
@@ -119858,7 +119812,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-23T05:17:48.699028Z",
+  "at": "2026-11-23T05:48:36.217534Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -119895,10 +119849,8 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): stop macOS background drags reporting moves that did not happen",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in docs/computer-use.md"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "accepted pair with #20179: Main, 2026-11-21: docs/tools/computer.md only; combined = #19195's macOS drag paragraph, wbc's BM_CLICK paragraph, then this entry's WPF press paragraph, no wording change",
     "over": [],
     "paired": [
@@ -119952,10 +119904,8 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): wait for the user to pause before a Windows takeover",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in docs/tools/computer.md"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "accepted pair with #19870: Main, 2026-11-20: win32/mod.rs tests-module import list only; combined = union of both WindowsAndMessaging imports",
     "over": [],
     "paired": [
@@ -120016,10 +119966,8 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): release X11 XTest keys and buttons a killed omp held",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in docs/tools/computer.md"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -120403,13 +120351,15 @@
     "reasons": [
      "held: Main, 2026-11-18: rework against #19195's new drag logic after it merges (not a mechanical restack; drag_control.rs moved)",
      "needs #19195 (open)",
-     "its need #19195 conflicts with main in docs/computer-use.md",
-     "conflicts with main in crates/natives/src/desktop/macos/ax/drag_control.rs, crates/natives/src/desktop/macos/input.rs, packages/coding-agent/src/prompts/tools/computer.md"
+     "conflicts with #19531 in docs/computer-use.md",
+     "conflicts with main in crates/natives/src/desktop/macos/ax/drag_control.rs, crates/natives/src/desktop/macos/input.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md"
     ],
     "note": "",
     "over": [],
     "paired": [],
-    "blocked_by": [],
+    "blocked_by": [
+     "#19531"
+    ],
     "needs": [
      "macos-drag-confirm"
     ],
@@ -120621,9 +120571,11 @@
     "reasons": [
      "conflicts with #19195 in docs/tools/computer.md",
      "conflicts with #19849 in docs/tools/computer.md",
+     "conflicts with #20019 in docs/tools/computer.md",
      "conflicts with #20178 in docs/tools/computer.md",
      "conflicts with #20179 in docs/tools/computer.md",
      "conflicts with #19531 in docs/tools/computer.md",
+     "conflicts with #19618 in docs/tools/computer.md",
      "conflicts with #19870 in docs/tools/computer.md",
      "conflicts with main in crates/natives/src/desktop/ax.rs, crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/mod.rs, crates/natives/src/desktop/win32/ax.rs, crates/natives/src/desktop/win32/ax_states.rs, crates/pi-natives/src/desktop/linux/ax.rs, crates/pi-natives/src/desktop/win32/mod.rs, docs/tools/computer.md"
     ],
@@ -120633,9 +120585,11 @@
     "blocked_by": [
      "#19195",
      "#19849",
+     "#20019",
      "#20178",
      "#20179",
      "#19531",
+     "#19618",
      "#19870"
     ],
     "needs": [],
@@ -120916,12 +120870,12 @@
     "action": "held",
     "reasons": [
      "held: Main, 2026-11-12: opens after CursorDemo's VM re-check of the built branch and Will's multi-display check | Main 2026-11-12: before it opens, the waiting-key-chord case with the cursor actually drawn (20 trials at a 20 s deadline; CursorDemo's cursor-on arm never drew one, and an early run on the combined tree returned 'Cancelled, input may be partial' 11/11, unexplained), on the polished branch will/desktop-cursor-polish.",
-     "conflicts with #19195 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts, packages/natives/native/index.d.ts",
+     "conflicts with #19195 in docs/computer-use.md, docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts, packages/natives/native/index.d.ts",
      "conflicts with #19849 in docs/tools/computer.md",
      "conflicts with #20019 in docs/tools/computer.md",
      "conflicts with #20178 in docs/tools/computer.md",
      "conflicts with #20179 in docs/tools/computer.md",
-     "conflicts with #19531 in docs/tools/computer.md",
+     "conflicts with #19531 in docs/computer-use.md, docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md, packages/natives/native/index.d.ts",
      "conflicts with #19870 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "conflicts with main in crates/natives/src/desktop/backend.rs, crates/natives/src/desktop/cursor.rs, crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/macos/capture.rs, crates/natives/src/desktop/macos/cursor.rs, crates/natives/src/desktop/macos/cursor/helper.m, crates/natives/src/desktop/macos/mod.rs, crates/natives/src/desktop/mod.rs, docs/computer-use.md, docs/settings.md, docs/tools/computer.md, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/test/tools/computer.test.ts"
@@ -121219,16 +121173,27 @@
     "reasons": [
      "held: Main, 2026-11-21: waits on a restack lane onto cut C (f2d071a1915): needs new production code, since the cut removed what it used: it must carry the WM_NULL settle_activation fence and the interruptible bring_forward arrival loop itself, and a \"person input since the takeover started\" veto (on cut C alone only the polled last-input date, pointer moves veto too; activity::check() only with the listener + stop-on-press follow-up). Spec: WinTakeoverCut PLAN.md (d) and \"What a/b need\"",
      "needs #20019 (open)",
+     "conflicts with #19195 in docs/tools/computer.md",
+     "conflicts with #19849 in docs/tools/computer.md",
      "conflicts with #20019 in crates/natives/src/desktop/win32/input.rs, crates/natives/src/desktop/win32/mod.rs, docs/tools/computer.md",
-     "conflicts with #19870 in crates/natives/src/desktop/win32/mod.rs",
-     "its need #20019 conflicts with main in docs/tools/computer.md",
+     "conflicts with #20178 in docs/tools/computer.md",
+     "conflicts with #20179 in docs/tools/computer.md",
+     "conflicts with #19531 in docs/tools/computer.md",
+     "conflicts with #19618 in docs/tools/computer.md",
+     "conflicts with #19870 in crates/natives/src/desktop/win32/mod.rs, docs/tools/computer.md",
      "conflicts with main in crates/natives/src/desktop/win32/input.rs, crates/natives/src/desktop/win32/mod.rs"
     ],
     "note": "",
     "over": [],
     "paired": [],
     "blocked_by": [
+     "#19195",
+     "#19849",
      "#20019",
+     "#20178",
+     "#20179",
+     "#19531",
+     "#19618",
      "#19870"
     ],
     "needs": [
@@ -121247,6 +121212,7 @@
     "action": "wait",
     "reasons": [
      "needs #20179 (open), #20178 (open)",
+     "conflicts with #20179 in crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md",
      "its need #20178 conflicts with main in crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md"
     ],
     "note": "accepted pair with #19870: Main, 2026-11-21: win32/ax.rs std + windows_sys UI import unions (as D's form); D2's appended impl methods and #19870's scroll_at_point methods insert at one point: combined = both blocks (methods of each inside the impl, then free items of each), no shared item names; docs: D2's 'and setValue() calls' goes inside the recorded #19871 x #19870 dispatch line. Combined tree (sim main+wbc+#19871+D+uia+D2 x #19870, 6ae79fb584) passed Windows clippy/rustfmt on goliath. The docs AxUnconfirmed paragraph written by #19870, wbc, #19871 and D/D2 is read once as a whole by whoever merges last (Main's ruling). Rechecked 2026-11-22 at uia 4b781b170a8 (read-back fix): conflict hunks unchanged except uia's own appended-block content; form holds. D2 restacked to 0f9805df404 on base b55dc22512a (D cd555199939 x uia); D2 rust-check linux+windows recorded.; accepted pair with #20177: Main, 2026-11-22: win32/ax.rs set_value: D2's Pattern arm send closure = { control::dispatching()?; pattern.set_value(text).map_err(ax_error) } (nothing between the mark and the live call, per popup x #19871); D2's contained_or(... set_behind ...) call is lookup-only (send closure sends nothing); same Limits line as D; built in tree a50c4da6228, uia/D2 setValue live test passes on GitHub windows-latest Rechecked 2026-11-22 at uia 4b781b170a8 (read-back fix): conflict hunks unchanged except uia's own appended-block content; form holds. D2 restacked to 0f9805df404 on base b55dc22512a (D cd555199939 x uia); D2 rust-check linux+windows recorded.",
@@ -121255,7 +121221,9 @@
      "#19870",
      "#20177"
     ],
-    "blocked_by": [],
+    "blocked_by": [
+     "#20179"
+    ],
     "needs": [
      "win-wpf-press",
      "win-uia-set-patterns"
