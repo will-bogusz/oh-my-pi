@@ -75218,7 +75218,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-settle-reads",
    "host": "MacBook-Pro",
    "added": "2026-11-10T18:56:55Z",
-   "updated": "2026-11-23T05:23:34Z",
+   "updated": "2026-11-23T05:35:11Z",
    "note": "",
    "kind": "proposal",
    "built": [
@@ -75605,7 +75605,7 @@
      "host": "MacBook-Pro"
     }
    ],
-   "advanced": "2026-11-23T05:23:34Z",
+   "advanced": "2026-11-23T05:35:11Z",
    "line_loss_overrides": [
     {
      "at": "2026-11-17T23:37:48Z",
