@@ -108168,7 +108168,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-24T02:13:22Z",
+  "checked": "2026-11-24T02:44:25Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108325,113 +108325,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-17T02:43:20Z",
-    "kind": "merged",
-    "number": 18925,
-    "title": "feat(coding-agent): name the native windows a browser call raised on macOS",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-17T02:43:20Z",
-    "kind": "merged",
-    "number": 18789,
-    "title": "feat(coding-agent): keep subagents' browser tabs out of the user's Chrome and Tern pane unless asked",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-17T02:43:20Z",
-    "kind": "merged",
-    "number": 18786,
-    "title": "feat(agent,coding-agent): send a short browser guide with the first browser call",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-17T02:43:20Z",
-    "kind": "merged",
-    "number": 18624,
-    "title": "fix(ai): say whether an Anthropic request body finished uploading when its connection drops",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-17T02:43:20Z",
-    "kind": "merged",
-    "number": 18353,
-    "title": "fix(natives): load libpipewire at runtime so released addons capture on Wayland",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-17T02:43:20Z",
-    "kind": "merged",
-    "number": 18222,
-    "title": "feat(coding-agent): find nested menu commands in one read",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-17T02:43:20Z",
-    "kind": "merged",
-    "number": 18013,
-    "title": "feat(natives): type text the wayland layout lacks through libei text",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-17T02:43:20Z",
-    "kind": "merged",
-    "number": 16553,
-    "title": "fix(natives): place macOS clicks for the focus guard where WindowServer routed them",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-17T02:43:20Z",
-    "kind": "merged",
-    "number": 18125,
-    "title": "fix(ai,coding-agent): keep Anthropic web search queries intact, always search, and report refusals",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-17T02:43:20Z",
-    "kind": "merged",
-    "number": 17610,
-    "title": "fix(ai,coding-agent): carry other models' reasoning to Claude and retry its refusal without it",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-17T02:43:20Z",
-    "kind": "openable",
-    "id": "upload-stall-error-all-providers",
-    "title": "fix(ai,agent): say how far a request body uploaded when any provider's connection drops"
-   },
-   {
-    "at": "2026-11-17T02:43:20Z",
-    "kind": "unopenable",
-    "id": "macos-window-order",
-    "title": "fix(natives): put the user's key window back in front of a macOS target after background input and takeover",
-    "why": "plan: wait (conflicts with main in crates/pi-natives/src/desktop/macos/skylight.rs)"
-   },
-   {
-    "at": "2026-11-17T02:43:20Z",
-    "kind": "unopenable",
-    "id": "macos-handback-typed",
-    "title": "fix(natives): give the macOS key window back after a takeover while another program types",
-    "why": "opened as #19504"
-   },
-   {
-    "at": "2026-11-17T02:43:20Z",
-    "kind": "unopenable",
-    "id": "macos-move-receipt",
-    "title": "fix(coding-agent): say what a macOS background move did",
-    "why": "left the queue"
-   },
    {
     "at": "2026-11-17T03:15:55Z",
     "kind": "unopenable",
@@ -119582,7 +119475,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-24T01:43:02.500673Z",
+  "at": "2026-11-24T02:44:26.603440Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
