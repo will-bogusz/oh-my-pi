@@ -108168,7 +108168,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-24T14:59:45Z",
+  "checked": "2026-11-24T16:00:25Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108280,12 +108280,6 @@
     "title": "fix(natives): count every opaque window as a cover over a Chromium capture",
     "merge_commit": "0ad25b612c64d3df43925a488cf737f23151181c",
     "merged_at": "2026-11-23T10:56:19Z",
-    "findings": []
-   },
-   "20163": {
-    "title": "fix(snapcompact): state every grid an archive's frames use in its summary",
-    "merge_commit": "addef6c7872c7594676b2e4c0b2cf695a85d5bf6",
-    "merged_at": "2026-11-22T15:35:04Z",
     "findings": []
    }
   },
