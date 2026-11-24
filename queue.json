@@ -108168,7 +108168,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-24T11:56:10Z",
+  "checked": "2026-11-24T12:57:07Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108276,76 +108276,10 @@
      }
     ]
    },
-   "19504": {
-    "title": "fix(natives): give the macOS key window back after a takeover while another program types",
-    "merge_commit": "f1cf93301bdd7d2f1a76e8533939c3bffdea7e10",
-    "merged_at": "2026-11-22T12:54:56Z",
-    "findings": []
-   },
-   "19519": {
-    "title": "fix(natives): type characters outside the X11 keymap through temporary keycodes",
-    "merge_commit": "14dd6b6f715eb914bda8149286757205b817f2c7",
-    "merged_at": "2026-11-22T12:54:56Z",
-    "findings": []
-   },
-   "19616": {
-    "title": "fix(natives): wait for the Wayland screen-share picker until the call's deadline",
-    "merge_commit": "78e7b3adb1434cec8a255b65ba2f26d9dcb8c388",
-    "merged_at": "2026-11-22T12:54:56Z",
-    "findings": []
-   },
-   "19702": {
-    "title": "fix(natives): send macOS background keys to the key window without a press",
-    "merge_commit": "d0d52763cacc711d6e67a2f1f5b5eae0959a6396",
-    "merged_at": "2026-11-22T12:54:56Z",
-    "findings": []
-   },
    "19849": {
     "title": "fix(natives): count every opaque window as a cover over a Chromium capture",
     "merge_commit": "0ad25b612c64d3df43925a488cf737f23151181c",
     "merged_at": "2026-11-23T10:56:19Z",
-    "findings": []
-   },
-   "19871": {
-    "title": "fix(natives): report Windows UIA actions unconfirmed when their reply times out after dispatch",
-    "merge_commit": "e720b3568ac4b26da3821c41997883d9953281eb",
-    "merged_at": "2026-11-22T12:54:56Z",
-    "findings": []
-   },
-   "19878": {
-    "title": "fix(coding-agent,tui): refresh discovery from the model picker once the catalog is two hours old",
-    "merge_commit": "4221ebec8edfb1b803b055aaf9f9c8cdcd1530f5",
-    "merged_at": "2026-11-22T12:54:56Z",
-    "findings": []
-   },
-   "19889": {
-    "title": "fix(natives): click Windows buttons without activating their window",
-    "merge_commit": "22fdc80bc5fc60fc3b222f1212b1815124543110",
-    "merged_at": "2026-11-22T12:54:56Z",
-    "findings": []
-   },
-   "20038": {
-    "title": "fix(catalog): budget Devin's other measured Gemini models at the 1,089 tokens it bills per image",
-    "merge_commit": "029488d2d244af2ff8183b785593a262e74f9b63",
-    "merged_at": "2026-11-22T12:54:56Z",
-    "findings": []
-   },
-   "20093": {
-    "title": "fix(catalog): price Cursor's GPT-5.6 long-context output at 1.5x",
-    "merge_commit": "8cd282f9a39467d5b1e9a985e9b6944df19dab20",
-    "merged_at": "2026-11-22T12:54:56Z",
-    "findings": []
-   },
-   "20094": {
-    "title": "fix(catalog): price Devin's GPT-5.6 long-context tiers as published, Fast lanes included",
-    "merge_commit": "bd57da626b41e6a512ab7f868eb8658400ee66a2",
-    "merged_at": "2026-11-22T12:54:56Z",
-    "findings": []
-   },
-   "20110": {
-    "title": "fix(natives): read Linux slider and scroll bar values and selected state",
-    "merge_commit": "d37b9beeff2304f0b3dd304737a95adcf6878289",
-    "merged_at": "2026-11-22T12:54:56Z",
     "findings": []
    },
    "20163": {
