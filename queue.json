@@ -108168,7 +108168,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-24T02:44:25Z",
+  "checked": "2026-11-24T03:45:01Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108325,13 +108325,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-17T03:15:55Z",
-    "kind": "unopenable",
-    "id": "upload-stall-error-all-providers",
-    "title": "fix(ai,agent): say how far a request body uploaded when any provider's connection drops",
-    "why": "opened as #19513"
-   },
    {
     "at": "2026-11-17T05:15:42Z",
     "kind": "openable",
@@ -119475,7 +119468,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-24T02:44:26.603440Z",
+  "at": "2026-11-24T03:45:02.671535Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
