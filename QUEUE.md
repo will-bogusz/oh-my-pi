@@ -1,9 +1,9 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-24 07:20Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-24 08:22Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-24 07:20Z on goliath; groups below are from it, states from the manifest)
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-24 08:21Z on goliath; groups below are from it, states from the manifest)
 **Counts:** openable now 1, conflict-held 16, stacked 16, held 14, parked 1, open PRs 19; merged 422, closed 45
 
 ## Openable now (1)
@@ -18,7 +18,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-24
 |---|---|---|---|---|---|---|
 | r2/relay-own-only | fix(browser): attach only the relay tabs omp opened or borrowed | browser | P2 | 41d | [#19542](https://github.com/can1357/oh-my-pi/pull/19542), [#19633](https://github.com/can1357/oh-my-pi/pull/19633), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/r2/relay-own-only) |
 | factory-droid-web-search | feat(coding-agent): search the web through a Factory Droid login (web/factory) | web | P2 | 36d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-web-search) |
-| computer-ui-quiet | fix(computer): wait for the app to finish reacting before the next read or input | computer | P2 | 35d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#20019](https://github.com/can1357/oh-my-pi/pull/20019), [#19531](https://github.com/can1357/oh-my-pi/pull/19531), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-ui-quiet) |
+| computer-ui-quiet | fix(computer): wait for the app to finish reacting before the next read or input | computer | P2 | 36d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#20019](https://github.com/can1357/oh-my-pi/pull/20019), [#19531](https://github.com/can1357/oh-my-pi/pull/19531), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-ui-quiet) |
 | compaction-trigger | feat(coding-agent): record what triggered each compaction | other |  | 34d | [#19620](https://github.com/can1357/oh-my-pi/pull/19620), [#19623](https://github.com/can1357/oh-my-pi/pull/19623), [#19626](https://github.com/can1357/oh-my-pi/pull/19626), [#19701](https://github.com/can1357/oh-my-pi/pull/19701), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/compaction-trigger) |
 | text-reader-usage-shift | fix(coding-agent): price a text-only fallback's archive text, not the failed request's frames, in the fit check | coding-agent |  | 23d | [#19620](https://github.com/can1357/oh-my-pi/pull/19620), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/text-reader-usage-shift) |
 | token-count-policy | feat(catalog,coding-agent): token-count framing policy in KDL | catalog |  | 21d | [#19620](https://github.com/can1357/oh-my-pi/pull/19620), [#19880](https://github.com/can1357/oh-my-pi/pull/19880), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/token-count-policy) |
@@ -71,7 +71,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-24
 | win-takeover-settle | fix(natives): stop Windows takeovers of a busy app bringing it forward after the call failed | computer |  | 3d | Main, 2026-11-21: waits on a restack lane onto cut C (f2d071a1915): needs new production code, since the cut removed what it used: it must carry the WM_NULL settle_activation fence and the interruptible bring_forward arrival loop itself, and a "person input since the takeover started" veto (on cut C alone only the polled last-input date, pointer moves veto too; activity::check() only with the listener + stop-on-press follow-up). Spec: WinTakeoverCut PLAN.md (d) and "What a/b need" | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-takeover-settle) |
 | hyprland-window-list | fix(natives): list Hyprland window positions for native Wayland apps | computer |  | 3d | LinuxUpstream2, 2026-11-20: delta review ReviewHyprList (gpt-6.2-sol) on 50e036edcd6 needs-changes, 3 must-fixes in new code (positional j/clients rows accepted; Hyprland::detect connects at backend startup and caches a failed probe; accept-queue test hits the FD limit); parked for Main/Will | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/hyprland-window-list) |
 | win-takeover-selection | fix(natives): keep the user's caret through a Windows takeover's hand-back | computer |  | 3d | Main, 2026-11-21: waits on a restack lane onto cut C via win-takeover-settle: needs the "person input since the takeover started" veto in its caret loops and a restack on the new restore code (cut C removed activity::check). Spec: WinTakeoverCut PLAN.md (d) and "What a/b need" | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-takeover-selection) |
-| iphone-mirror-scroll-unprimed | fix(natives): restore iPhone Mirroring scrolling after takeover taps | computer | P1 | 9h | Main, 2026-11-23: live run owed | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-scroll-unprimed) |
+| iphone-mirror-scroll-unprimed | fix(natives): restore iPhone Mirroring scrolling after takeover taps | computer | P1 | 10h | Main, 2026-11-23: live run owed | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-scroll-unprimed) |
 
 ## Parked (1)
 
