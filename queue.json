@@ -108168,7 +108168,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-24T05:18:01Z",
+  "checked": "2026-11-24T06:19:13Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108178,11 +108178,42 @@
    }
   },
   "conflicts": {
+   "#19513": {
+    "since": "2026-11-24T06:19:13Z",
+    "title": "fix(ai,agent): say how far a request body uploaded when any provider's connection drops",
+    "files": [
+     "packages/ai/src/utils/transport-fetch.ts"
+    ]
+   },
+   "#19542": {
+    "since": "2026-11-24T06:19:13Z",
+    "title": "feat(browser): add waitForFunction to tabs and frames",
+    "files": [
+     "packages/coding-agent/src/tools/browser/aria/aria-snapshot.ts",
+     "packages/coding-agent/src/tools/browser/queries.ts"
+    ]
+   },
+   "#19626": {
+    "since": "2026-11-24T06:19:13Z",
+    "title": "feat(coding-agent): log every saved-reset spend attempt at info",
+    "files": [
+     "packages/coding-agent/src/cli/usage-cli.ts"
+    ]
+   },
    "#19623": {
     "since": "2026-11-23T11:25:37Z",
     "title": "feat(ai,coding-agent): record why a session's OAuth account switched",
     "files": [
-     "packages/coding-agent/src/modes/rpc/rpc-client.ts"
+     "packages/coding-agent/src/modes/controllers/event-controller.ts",
+     "packages/coding-agent/src/modes/rpc/rpc-client.ts",
+     "packages/coding-agent/src/session/reset-expiry.ts"
+    ]
+   },
+   "#19701": {
+    "since": "2026-11-24T06:19:13Z",
+    "title": "feat(ai,coding-agent): let an account policy decide its own saved-reset spending",
+    "files": [
+     "packages/coding-agent/src/cli/usage-cli.ts"
     ]
    }
   },
@@ -108325,19 +108356,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-17T06:15:33Z",
-    "kind": "openable",
-    "id": "macos-window-order",
-    "title": "fix(natives): put the user's key window back in front of a macOS target after background input and takeover"
-   },
-   {
-    "at": "2026-11-17T06:15:33Z",
-    "kind": "unopenable",
-    "id": "covered-fill",
-    "title": "fix(coding-agent): refuse browser keys aimed at a field a modal dialog covers",
-    "why": "opened as #19524"
-   },
    {
     "at": "2026-11-17T06:48:16Z",
     "kind": "unopenable",
@@ -109730,6 +109748,43 @@
     "title": "feat(ai,coding-agent): record why a session's OAuth account switched",
     "files": [
      "packages/coding-agent/src/modes/rpc/rpc-client.ts"
+    ]
+   },
+   {
+    "at": "2026-11-24T06:19:13Z",
+    "kind": "conflict",
+    "label": "#19513",
+    "title": "fix(ai,agent): say how far a request body uploaded when any provider's connection drops",
+    "files": [
+     "packages/ai/src/utils/transport-fetch.ts"
+    ]
+   },
+   {
+    "at": "2026-11-24T06:19:13Z",
+    "kind": "conflict",
+    "label": "#19542",
+    "title": "feat(browser): add waitForFunction to tabs and frames",
+    "files": [
+     "packages/coding-agent/src/tools/browser/aria/aria-snapshot.ts",
+     "packages/coding-agent/src/tools/browser/queries.ts"
+    ]
+   },
+   {
+    "at": "2026-11-24T06:19:13Z",
+    "kind": "conflict",
+    "label": "#19626",
+    "title": "feat(coding-agent): log every saved-reset spend attempt at info",
+    "files": [
+     "packages/coding-agent/src/cli/usage-cli.ts"
+    ]
+   },
+   {
+    "at": "2026-11-24T06:19:13Z",
+    "kind": "conflict",
+    "label": "#19701",
+    "title": "feat(ai,coding-agent): let an account policy decide its own saved-reset spending",
+    "files": [
+     "packages/coding-agent/src/cli/usage-cli.ts"
     ]
    }
   ]
@@ -119443,7 +119498,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-24T05:48:21.999698Z",
+  "at": "2026-11-24T06:19:14.085093Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -119498,8 +119553,10 @@
     "area": "other",
     "priority": "P1",
     "title": "fix(ai,agent): say how far a request body uploaded when any provider's connection drops",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in packages/ai/src/utils/transport-fetch.ts"
+    ],
     "note": "tests-over: Main, 2026-11-17: each test pins a distinct user-visible behaviour: upload progress named for bodies of 1 MiB or more (mid-body, after body, below threshold, Anthropic fetch fallback), resend semantics per redirect status (only the five real redirect codes resend; 300 returned), credentials dropped cross-origin, and redirected on the response and its clones; plus remote compaction retrying the new error",
     "over": [],
     "paired": [],
@@ -119683,8 +119740,10 @@
     "area": "browser",
     "priority": "P2",
     "title": "feat(browser): add waitForFunction to tabs and frames",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in packages/coding-agent/src/tools/browser/aria/aria-snapshot.ts, packages/coding-agent/src/tools/browser/queries.ts"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -119719,7 +119778,7 @@
     "title": "feat(ai,coding-agent): record why a session's OAuth account switched",
     "action": "rebase",
     "reasons": [
-     "conflicts with main in packages/coding-agent/src/modes/rpc/rpc-client.ts"
+     "conflicts with main in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/modes/rpc/rpc-client.ts, packages/coding-agent/src/session/reset-expiry.ts"
     ],
     "note": "",
     "over": [],
@@ -119736,8 +119795,10 @@
     "area": "coding-agent",
     "priority": "P2",
     "title": "feat(coding-agent): log every saved-reset spend attempt at info",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in packages/coding-agent/src/cli/usage-cli.ts"
+    ],
     "note": "accepted pair with #19701: Main, 2026-11-18: adjacent call-site edits in agent-session.ts #redeemConsentedResets and its three callers; #19626 adds a trigger argument, this adds a consent argument; the combined form passes both (provider, trigger, actions, coordinator, consent) and keeps this PR's per-action credentialResetModes",
     "over": [],
     "paired": [
@@ -119791,8 +119852,10 @@
     "area": "broker",
     "priority": "P2",
     "title": "feat(ai,coding-agent): let an account policy decide its own saved-reset spending",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in packages/coding-agent/src/cli/usage-cli.ts"
+    ],
     "note": "accepted pair with #19626: Main, 2026-11-18: adjacent call-site edits in agent-session.ts #redeemConsentedResets and its three callers; #19626 adds a trigger argument, this adds a consent argument; the combined form passes both (provider, trigger, actions, coordinator, consent) and keeps this PR's per-action credentialResetModes; accepted pair with #19700: Main, 2026-11-18: both add account-policy keys side by side in docs/auth-broker-gateway.md (table row), ai auth-broker/discover.ts (allowed keys) and cli/usage-cli.ts (diagnostics fields, base spread, policy-line prefix); the combined form keeps both: reservePctByLimit/scopedInsideReserve plus autoRedeem*, prefix with limit reserves then reclaim then auto-redeem",
     "over": [],
     "paired": [
@@ -119851,7 +119914,9 @@
     "title": "fix(browser): accept a RegExp in waitForText, as waitForUrl does",
     "action": "wait",
     "reasons": [
-     "needs #19542 (open)"
+     "needs #19542 (open)",
+     "its need #19542 conflicts with main in packages/coding-agent/src/tools/browser/aria/aria-snapshot.ts, packages/coding-agent/src/tools/browser/queries.ts",
+     "conflicts with main in packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
     ],
     "note": "",
     "over": [],
@@ -119872,7 +119937,8 @@
     "title": "fix(browser): let a scoped waitForText match only text the page renders",
     "action": "wait",
     "reasons": [
-     "needs browser-wait-text-regexp (queued)"
+     "needs browser-wait-text-regexp (queued)",
+     "its need browser-wait-text-regexp conflicts with main in packages/coding-agent/src/tools/browser/aria/aria-snapshot.ts, packages/coding-agent/src/tools/browser/queries.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
     ],
     "note": "",
     "over": [],
@@ -120087,7 +120153,7 @@
      "conflicts with #19542 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19633 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need r2/relay-popup-owned conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/extension/background.ts, packages/browser-relay/extension/chrome.d.ts, packages/browser-relay/extension/manifest.json, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/extension-assets/manifest.json.txt, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-daemon.test.ts",
-     "its need r2/page-waiting conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/dialogs.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
+     "its need r2/page-waiting conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/dialogs.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts"
     ],
     "note": "",
@@ -120610,7 +120676,7 @@
      "conflicts with #19542 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19633 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-daemon.test.ts",
-     "conflicts with main in packages/coding-agent/src/tools/browser/dialogs.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/interactions.ts"
+     "conflicts with main in packages/coding-agent/src/tools/browser/dialogs.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
     ],
     "note": "",
     "over": [],
@@ -120673,9 +120739,9 @@
      "conflicts with #19623 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #19626 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #19701 in packages/coding-agent/src/session/agent-session.ts",
-     "its need token-count-policy conflicts with main in packages/catalog/scripts/compat-compiler/compile-axes.ts, packages/catalog/src/compat/rules/README.md, packages/catalog/src/compat/rules/classes/anthropic.kdl, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/session/session-stats.ts, packages/coding-agent/test/context-fits-model.test.ts",
+     "its need token-count-policy conflicts with main in packages/catalog/scripts/compat-compiler/compile-axes.ts, packages/catalog/src/compat/rules/README.md, packages/catalog/src/compat/rules/classes/anthropic.kdl, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/session/session-stats.ts, packages/coding-agent/test/agent-session-stats.test.ts, packages/coding-agent/test/context-fits-model.test.ts",
      "its need wire-delta-count conflicts with main in packages/agent/src/agent.ts, packages/agent/src/tokenizer.ts, packages/agent/test/tokenizer.test.ts, packages/ai/src/providers/factory-droid.ts, packages/ai/src/providers/transform-messages.ts, packages/coding-agent/src/session/session-maintenance.ts",
-     "conflicts with main in packages/ai/src/providers/factory-droid/gemini.ts, packages/ai/src/providers/google-gemini-cli.ts, packages/ai/src/providers/openai-responses.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/context-view.ts, packages/coding-agent/test/modes/context-view.test.ts, packages/tui/src/status-line/context-usage.ts, packages/tui/test/context-usage.test.ts"
+     "conflicts with main in packages/ai/src/providers/factory-droid/gemini.ts, packages/ai/src/providers/google-gemini-cli.ts, packages/ai/src/providers/openai-responses.ts, packages/coding-agent/scripts/measure-prompt-tokens.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/context-usage.ts, packages/coding-agent/src/session/context-view.ts, packages/coding-agent/src/session/session-advisors.ts, packages/coding-agent/test/advisor-context-maintenance.test.ts, packages/coding-agent/test/modes/context-usage.test.ts, packages/coding-agent/test/modes/context-view.test.ts, packages/coding-agent/test/status-line-context-cache.test.ts, packages/tui/src/status-line/component.ts, packages/tui/test/context-usage.test.ts"
     ],
     "note": "",
     "over": [],
@@ -120742,7 +120808,7 @@
     "action": "wait",
     "reasons": [
      "conflicts with #19620 in packages/coding-agent/src/session/session-maintenance.ts",
-     "conflicts with main in packages/coding-agent/src/session/session-maintenance.ts"
+     "conflicts with main in packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/session/session-stats.ts"
     ],
     "note": "",
     "over": [],
@@ -120884,7 +120950,7 @@
      "conflicts with #19623 in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #19626 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #19701 in packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with main in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/tui/src/chat/compaction-summary-message.ts"
+     "conflicts with main in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-maintenance.ts, packages/tui/src/chat/compaction-summary-message.ts, packages/tui/test/compaction-divider.test.ts"
     ],
     "note": "",
     "over": [],
@@ -120909,7 +120975,7 @@
     "action": "held",
     "reasons": [
      "held: Will, 2026-10-22: parked; reopens only when Will asks",
-     "conflicts with main in docs/provider-quirks.md, packages/coding-agent/test/agent-session-stats.test.ts"
+     "conflicts with main in docs/provider-quirks.md, packages/coding-agent/src/modes/controllers/command-controller.ts, packages/coding-agent/test/agent-session-stats.test.ts"
     ],
     "note": "",
     "over": [],
@@ -120967,7 +121033,7 @@
     "action": "wait",
     "reasons": [
      "needs token-count-policy (queued)",
-     "its need token-count-policy conflicts with main in packages/catalog/scripts/compat-compiler/compile-axes.ts, packages/catalog/src/compat/rules/README.md, packages/catalog/src/compat/rules/classes/anthropic.kdl, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/session/session-stats.ts, packages/coding-agent/test/context-fits-model.test.ts",
+     "its need token-count-policy conflicts with main in packages/catalog/scripts/compat-compiler/compile-axes.ts, packages/catalog/src/compat/rules/README.md, packages/catalog/src/compat/rules/classes/anthropic.kdl, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/session/session-stats.ts, packages/coding-agent/test/agent-session-stats.test.ts, packages/coding-agent/test/context-fits-model.test.ts",
      "conflicts with main in crates/natives/data/LICENSE.gemma4, crates/natives/data/gemma4.bin.zst, crates/natives/fixtures/gemma4.json, crates/natives/src/utok/gemma.rs, crates/natives/src/utok/tests/gemma.rs, crates/natives/tools/gen-gemma-fixtures.py, crates/natives/tools/pack-gemma.ts, docs/models.md, packages/natives/THIRD-PARTY-NOTICES.txt"
     ],
     "note": "",
@@ -120991,7 +121057,7 @@
     "reasons": [
      "conflicts with #19620 in packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with #19880 in packages/catalog/src/compat/rules/README.md, packages/catalog/src/compat/rules/classes/anthropic.kdl, packages/catalog/src/compat/rules/classes/glm.kdl, packages/catalog/src/compat/rules/classes/kimi.kdl, packages/catalog/src/compat/rules/classes/openai.kdl",
-     "conflicts with main in packages/catalog/scripts/compat-compiler/compile-axes.ts, packages/catalog/src/compat/rules/README.md, packages/catalog/src/compat/rules/classes/anthropic.kdl, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/session/session-stats.ts, packages/coding-agent/test/context-fits-model.test.ts"
+     "conflicts with main in packages/catalog/scripts/compat-compiler/compile-axes.ts, packages/catalog/src/compat/rules/README.md, packages/catalog/src/compat/rules/classes/anthropic.kdl, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/session/session-stats.ts, packages/coding-agent/test/agent-session-stats.test.ts, packages/coding-agent/test/context-fits-model.test.ts"
     ],
     "note": "",
     "over": [],
