@@ -108168,7 +108168,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-24T17:01:26Z",
+  "checked": "2026-11-24T17:32:07Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108247,12 +108247,6 @@
    20179
   ],
   "post_merge": {
-   "17756": {
-    "title": "fix(natives): keep background iPhone Mirroring taps reaching the phone after a takeover tap",
-    "merge_commit": "da91f6af1d903a9d3fe9d21e01bc263c36a925d2",
-    "merged_at": "2026-11-22T17:14:06Z",
-    "findings": []
-   },
    "18632": {
     "title": "fix(coding-agent): resolve Chromium role selectors through Chrome's accessibility tree",
     "merge_commit": "0c740e39652b83516103538b63225385a945bf6c",
@@ -119405,7 +119399,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-24T16:31:03.216412Z",
+  "at": "2026-11-24T17:32:08.596541Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
