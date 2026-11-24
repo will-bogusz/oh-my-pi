@@ -108168,7 +108168,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-24T09:22:57Z",
+  "checked": "2026-11-24T09:54:01Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108356,13 +108356,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-17T09:48:12Z",
-    "kind": "unopenable",
-    "id": "browser-wait-predicate",
-    "title": "feat(browser): add waitForFunction to tabs and frames",
-    "why": "opened as #19542"
-   },
    {
     "at": "2026-11-17T18:02:51Z",
     "kind": "merged",
