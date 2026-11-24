@@ -108168,7 +108168,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-24T17:32:07Z",
+  "checked": "2026-11-24T18:33:02Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108278,46 +108278,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-17T18:02:51Z",
-    "kind": "merged",
-    "number": 19524,
-    "title": "fix(coding-agent): refuse browser keys aimed at a field a modal dialog covers",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-17T18:02:51Z",
-    "kind": "merged",
-    "number": 19521,
-    "title": "fix(natives): read each AT-SPI element in two concurrent rounds",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-17T18:02:51Z",
-    "kind": "merged",
-    "number": 19518,
-    "title": "feat(browser): accept explicit dropdown option selectors",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-17T18:02:51Z",
-    "kind": "merged",
-    "number": 19515,
-    "title": "fix(natives): count keys moved back to a macOS user's app as theirs",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-17T18:02:51Z",
-    "kind": "merged",
-    "number": 19509,
-    "title": "fix(coding-agent): say once that a macOS background move gives no hover",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
    {
     "at": "2026-11-18T18:13:33Z",
     "kind": "released",
@@ -119399,7 +119359,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-24T17:32:08.596541Z",
+  "at": "2026-11-24T18:33:03.447536Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
