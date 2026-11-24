@@ -108168,7 +108168,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-24T04:47:01Z",
+  "checked": "2026-11-24T05:18:01Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108325,31 +108325,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-17T05:15:42Z",
-    "kind": "openable",
-    "id": "covered-fill",
-    "title": "fix(coding-agent): refuse browser keys aimed at a field a modal dialog covers"
-   },
-   {
-    "at": "2026-11-17T05:15:42Z",
-    "kind": "openable",
-    "id": "x11-xtest-release",
-    "title": "fix(natives): release X11 XTest keys and buttons a killed omp held"
-   },
-   {
-    "at": "2026-11-17T05:15:42Z",
-    "kind": "openable",
-    "id": "browser-wait-predicate",
-    "title": "feat(browser): add waitForFunction to tabs and frames"
-   },
-   {
-    "at": "2026-11-17T05:15:42Z",
-    "kind": "unopenable",
-    "id": "macos-key-read-settled",
-    "title": "fix(natives): read a macOS popup after the option its typed letters choose",
-    "why": "opened as #19516"
-   },
    {
     "at": "2026-11-17T06:15:33Z",
     "kind": "openable",
