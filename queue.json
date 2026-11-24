@@ -119359,7 +119359,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-24T22:37:51.549570Z",
+  "at": "2026-11-24T23:08:39.327995Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -120895,7 +120895,7 @@
     "reasons": [
      "needs token-count-policy (queued)",
      "its need token-count-policy conflicts with main in packages/catalog/scripts/compat-compiler/compile-axes.ts, packages/catalog/src/compat/rules/README.md, packages/catalog/src/compat/rules/classes/anthropic.kdl, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/session/session-stats.ts, packages/coding-agent/test/agent-session-stats.test.ts, packages/coding-agent/test/context-fits-model.test.ts",
-     "conflicts with main in crates/natives/data/LICENSE.gemma4, crates/natives/data/gemma4.bin.zst, crates/natives/fixtures/gemma4.json, crates/natives/src/utok/gemma.rs, crates/natives/src/utok/tests/gemma.rs, crates/natives/tools/gen-gemma-fixtures.py, crates/natives/tools/pack-gemma.ts, docs/models.md, packages/natives/THIRD-PARTY-NOTICES.txt"
+     "conflicts with main in crates/natives/data/LICENSE.gemma4, crates/natives/data/gemma4.bin.zst, crates/natives/fixtures/gemma4.json, crates/natives/src/utok/gemma.rs, crates/natives/src/utok/mod.rs, crates/natives/src/utok/tests/gemma.rs, crates/natives/tools/gen-gemma-fixtures.py, crates/natives/tools/pack-gemma.ts, docs/models.md, packages/natives/THIRD-PARTY-NOTICES.txt"
     ],
     "note": "",
     "over": [],
