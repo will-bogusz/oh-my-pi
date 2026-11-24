@@ -108168,7 +108168,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-24T06:19:13Z",
+  "checked": "2026-11-24T06:49:46Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108356,13 +108356,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-17T06:48:16Z",
-    "kind": "unopenable",
-    "id": "x11-xtest-release",
-    "title": "fix(natives): release X11 XTest keys and buttons a killed omp held",
-    "why": "opened as #19531"
-   },
    {
     "at": "2026-11-17T07:16:01Z",
     "kind": "unopenable",
