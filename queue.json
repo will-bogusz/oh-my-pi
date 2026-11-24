@@ -119477,7 +119477,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-24T11:25:21.888320Z",
+  "at": "2026-11-24T12:26:51.740405Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -120598,7 +120598,7 @@
      "conflicts with #19626 in packages/coding-agent/src/session/agent-session.ts",
      "conflicts with #19700 in packages/ai/src/auth/health.ts",
      "conflicts with #19701 in docs/settings.md, packages/coding-agent/src/session/agent-session.ts",
-     "conflicts with main in docs/advisor-watchdog.md, docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-advisors.ts, packages/coding-agent/src/session/turn-recovery.ts, packages/coding-agent/test/agent-session-retry-fallback.test.ts"
+     "conflicts with main in docs/advisor-watchdog.md, docs/settings.md, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/session-advisors.ts, packages/coding-agent/src/session/turn-recovery.ts, packages/coding-agent/test/agent-session-retry-fallback.test.ts, packages/coding-agent/test/turn-recovery-replay-unsafe.test.ts"
     ],
     "note": "",
     "over": [],
