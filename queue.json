@@ -108168,7 +108168,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-24T00:41:02Z",
+  "checked": "2026-11-24T01:11:45Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108325,12 +108325,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-17T01:10:38Z",
-    "kind": "openable",
-    "id": "macos-window-order",
-    "title": "fix(natives): put the user's key window back in front of a macOS target after background input and takeover"
-   },
    {
     "at": "2026-11-17T02:43:20Z",
     "kind": "merged",
