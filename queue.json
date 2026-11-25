@@ -108328,7 +108328,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-25T16:26:12Z",
+  "checked": "2026-11-25T16:56:22Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108399,7 +108399,8 @@
    20177,
    20178,
    20179,
-   20516
+   20516,
+   20524
   ],
   "post_merge": {
    "18632": {
@@ -119594,12 +119595,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-25T16:45:05.768768Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-25T16:56:23.365989Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 2,
-   "left": 6
+   "used": 3,
+   "left": 5
   },
   "rows": [
    {
@@ -119621,6 +119622,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-22T15:32:07Z"
+   },
+   {
+    "id": "shell-windows-env-cwd-test",
+    "label": "#20516",
+    "number": 20516,
+    "state": "open",
+    "area": "shell",
+    "priority": "P0",
+    "title": "fix(shell): build the Windows env_cwd test with the errexit field",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-25T16:12:36Z"
    },
    {
     "id": "macos-drag-confirm",
@@ -119978,23 +119996,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-18T18:40:21Z"
-   },
-   {
-    "id": "shell-windows-env-cwd-test",
-    "label": "#20516",
-    "number": 20516,
-    "state": "open",
-    "area": "shell",
-    "priority": null,
-    "title": "fix(shell): build the Windows env_cwd test with the errexit field",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-25T16:12:36Z"
    },
    {
     "id": "iphone-mirror-scroll-distance",
@@ -120917,8 +120918,10 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with main in (branch missing on the fork)"
+    ],
     "note": "",
     "over": [],
     "paired": [],
