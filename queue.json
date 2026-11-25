@@ -108196,11 +108196,21 @@
    "host": "MacBook-Pro",
    "added": "2026-11-25T15:53:59Z",
    "updated": "2026-11-25T16:00:34Z",
-   "note": "",
+   "note": "2026-11-25T16:02:48Z: --allow-rust-check main's own Windows test build break E0063 env_cwd.rs:22 since cc3a18faa44; this entry is the repair; workspace xwin clippy 0 errors at 72f80e21f37 (windows)",
    "main_repair": {
     "reason": "`cargo xwin clippy --target x86_64-pc-windows-msvc -p omp-shell --all-targets` (and rust-check --windows at any base) fails with E0063 at crates/shell/src/shell/tests/env_cwd.rs:22 since cc3a18faa44",
     "at": "2026-11-25T15:54:13Z"
-   }
+   },
+   "rust_check_overrides": [
+    {
+     "at": "2026-11-25T16:02:48Z",
+     "reason": "main's own Windows test build break E0063 env_cwd.rs:22 since cc3a18faa44; this entry is the repair; workspace xwin clippy 0 errors at 72f80e21f37",
+     "diff": "abe7dbd9ebf64bb53020ea5fb03c7b43257be005",
+     "missing": [
+      "windows"
+     ]
+    }
+   ]
   }
  ],
  "watch": {
