@@ -96942,7 +96942,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/factory-droid-1100-pin",
    "host": "MacBook-Pro",
    "added": "2026-11-13T17:35:36Z",
-   "updated": "2026-11-20T21:22:14Z",
+   "updated": "2026-11-25T16:42:40Z",
    "note": "",
    "built": [
     {
@@ -96976,16 +96976,6 @@
      "tree": "4cc6b7d9db959f93f46c319bce3e4460daeb9fe6"
     },
     {
-     "with": "#19513",
-     "code": "2ce01c8d9d3dfcc120b3ef5dbca0d7384e45e2c5",
-     "with_code": "58756d46d0aaa29d1bfd113ddd35ea5f4d7583d5",
-     "tip": "3336d0c48fe7e24ff937dcba4743738472ed1c1f",
-     "with_tip": "35bb518dd5d5352d61c2003e99d5828c523a1bf0",
-     "at": "2026-11-18T01:58:07Z",
-     "host": "MacBook-Pro",
-     "tree": "4cc6b7d9db959f93f46c319bce3e4460daeb9fe6"
-    },
-    {
      "with": "#19598",
      "code": "2ce01c8d9d3dfcc120b3ef5dbca0d7384e45e2c5",
      "with_code": "b61d2ff2270a6b325577bf9ed16d043f0737b76c",
@@ -97012,16 +97002,6 @@
      "tip": "3336d0c48fe7e24ff937dcba4743738472ed1c1f",
      "with_tip": "af1d7bca36656ad5b1aa93c11e16829bce79901e",
      "at": "2026-11-18T01:58:07Z",
-     "host": "MacBook-Pro",
-     "tree": "4cc6b7d9db959f93f46c319bce3e4460daeb9fe6"
-    },
-    {
-     "with": "#19592",
-     "code": "2ce01c8d9d3dfcc120b3ef5dbca0d7384e45e2c5",
-     "with_code": "8392c922c234ea7d1826f17a99c3caf7c8ee65c7",
-     "tip": "3336d0c48fe7e24ff937dcba4743738472ed1c1f",
-     "with_tip": "43f7a2a1ca11375af52026dcdeed6f52108fe9b2",
-     "at": "2026-11-18T01:58:08Z",
      "host": "MacBook-Pro",
      "tree": "4cc6b7d9db959f93f46c319bce3e4460daeb9fe6"
     },
@@ -97066,16 +97046,6 @@
      "tree": "e9584438c41afaa009edd0c2345fb9ee779195da"
     },
     {
-     "with": "#19880",
-     "code": "2ce01c8d9d3dfcc120b3ef5dbca0d7384e45e2c5",
-     "with_code": "245964753c73e11932c639d96176f4391cf9bca2",
-     "tip": "3336d0c48fe7e24ff937dcba4743738472ed1c1f",
-     "with_tip": "b01e9c6d012ff37428dc28f259a4a0803bb7432b",
-     "at": "2026-11-20T21:07:00Z",
-     "host": "goliath",
-     "tree": "fbca06f7eb19be84bfeb7a548e24ae622b091a09"
-    },
-    {
      "with": "devin-org-identity",
      "code": "2ce01c8d9d3dfcc120b3ef5dbca0d7384e45e2c5",
      "with_code": "ec5555c44600697e422daa0a0c3ae035b5c477a4",
@@ -97104,6 +97074,46 @@
      "at": "2026-11-20T21:22:09Z",
      "host": "goliath",
      "tree": "b3231a59a3866da303d660121d5cea7149a26b61"
+    },
+    {
+     "with": "#19513",
+     "code": "2ce01c8d9d3dfcc120b3ef5dbca0d7384e45e2c5",
+     "with_code": "867b18a37c47733d6900464c3b1b4d7381168363",
+     "tip": "3336d0c48fe7e24ff937dcba4743738472ed1c1f",
+     "with_tip": "f0a91d4ab1fcc0fdea9d1c76fd878b75b0d555b5",
+     "at": "2026-11-25T16:42:40Z",
+     "host": "goliath",
+     "tree": "c038875bc9ca008ad4a0ad01cd0628b2d916a51a"
+    },
+    {
+     "with": "#19880",
+     "code": "2ce01c8d9d3dfcc120b3ef5dbca0d7384e45e2c5",
+     "with_code": "a29bd7c4e03e5ab1b12a4f731c6f12a573ada4c9",
+     "tip": "3336d0c48fe7e24ff937dcba4743738472ed1c1f",
+     "with_tip": "96595056de278ba979eacdf8cec72d9330b55e8a",
+     "at": "2026-11-25T16:42:40Z",
+     "host": "goliath",
+     "tree": "c038875bc9ca008ad4a0ad01cd0628b2d916a51a"
+    },
+    {
+     "with": "#19592",
+     "code": "2ce01c8d9d3dfcc120b3ef5dbca0d7384e45e2c5",
+     "with_code": "57e4ec3ca64d7595783af8f3e8b5adbf6014dcc0",
+     "tip": "3336d0c48fe7e24ff937dcba4743738472ed1c1f",
+     "with_tip": "9cd28583c0cf33507a02462d14c52f380ac88613",
+     "at": "2026-11-25T16:42:40Z",
+     "host": "goliath",
+     "tree": "c038875bc9ca008ad4a0ad01cd0628b2d916a51a"
+    },
+    {
+     "with": "devin-quota-exhausted-rotate",
+     "code": "2ce01c8d9d3dfcc120b3ef5dbca0d7384e45e2c5",
+     "with_code": "fd8ecc62ceae2a0564cefe3486c438cae37005bd",
+     "tip": "3336d0c48fe7e24ff937dcba4743738472ed1c1f",
+     "with_tip": "8aff205eb10fbdc8c960ffbb0f5ca9bb3aa2a280",
+     "at": "2026-11-25T16:42:40Z",
+     "host": "goliath",
+     "tree": "c038875bc9ca008ad4a0ad01cd0628b2d916a51a"
     }
    ]
   },
@@ -108229,8 +108239,90 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-quota-exhausted-rotate",
    "host": "MacBook-Pro",
    "added": "2026-11-25T16:33:34Z",
-   "updated": "2026-11-25T16:33:34Z",
-   "note": ""
+   "updated": "2026-11-25T16:42:40Z",
+   "note": "",
+   "built": [
+    {
+     "with": "#19195",
+     "code": "fd8ecc62ceae2a0564cefe3486c438cae37005bd",
+     "with_code": "24970d988fd314d6e304497b5bca174b2817444a",
+     "tip": "8aff205eb10fbdc8c960ffbb0f5ca9bb3aa2a280",
+     "with_tip": "e680905fdd2fd2cfbb369d679f428b321a0076e9",
+     "at": "2026-11-25T16:42:40Z",
+     "host": "goliath",
+     "tree": "c038875bc9ca008ad4a0ad01cd0628b2d916a51a"
+    },
+    {
+     "with": "#19513",
+     "code": "fd8ecc62ceae2a0564cefe3486c438cae37005bd",
+     "with_code": "867b18a37c47733d6900464c3b1b4d7381168363",
+     "tip": "8aff205eb10fbdc8c960ffbb0f5ca9bb3aa2a280",
+     "with_tip": "f0a91d4ab1fcc0fdea9d1c76fd878b75b0d555b5",
+     "at": "2026-11-25T16:42:40Z",
+     "host": "goliath",
+     "tree": "c038875bc9ca008ad4a0ad01cd0628b2d916a51a"
+    },
+    {
+     "with": "#20019",
+     "code": "fd8ecc62ceae2a0564cefe3486c438cae37005bd",
+     "with_code": "ccc48929281a61b3b36c9efc69f61bb00fcdbfdc",
+     "tip": "8aff205eb10fbdc8c960ffbb0f5ca9bb3aa2a280",
+     "with_tip": "d18f4e9af070d42c7d96c31fe5226b0afb7396e0",
+     "at": "2026-11-25T16:42:40Z",
+     "host": "goliath",
+     "tree": "c038875bc9ca008ad4a0ad01cd0628b2d916a51a"
+    },
+    {
+     "with": "#19870",
+     "code": "fd8ecc62ceae2a0564cefe3486c438cae37005bd",
+     "with_code": "a86411ed8655a1c9931a7ff71c5e5b78e8e032c6",
+     "tip": "8aff205eb10fbdc8c960ffbb0f5ca9bb3aa2a280",
+     "with_tip": "35e66deed071c573e04f5580df9017149c8cbb90",
+     "at": "2026-11-25T16:42:40Z",
+     "host": "goliath",
+     "tree": "c038875bc9ca008ad4a0ad01cd0628b2d916a51a"
+    },
+    {
+     "with": "#19542",
+     "code": "fd8ecc62ceae2a0564cefe3486c438cae37005bd",
+     "with_code": "df901e1a8b8dfff06c072bc3843b76a2fd07c613",
+     "tip": "8aff205eb10fbdc8c960ffbb0f5ca9bb3aa2a280",
+     "with_tip": "9faeb0cba2d420f7078ed9ea9b0cf8d0195dc26c",
+     "at": "2026-11-25T16:42:40Z",
+     "host": "goliath",
+     "tree": "c038875bc9ca008ad4a0ad01cd0628b2d916a51a"
+    },
+    {
+     "with": "#19592",
+     "code": "fd8ecc62ceae2a0564cefe3486c438cae37005bd",
+     "with_code": "57e4ec3ca64d7595783af8f3e8b5adbf6014dcc0",
+     "tip": "8aff205eb10fbdc8c960ffbb0f5ca9bb3aa2a280",
+     "with_tip": "9cd28583c0cf33507a02462d14c52f380ac88613",
+     "at": "2026-11-25T16:42:40Z",
+     "host": "goliath",
+     "tree": "c038875bc9ca008ad4a0ad01cd0628b2d916a51a"
+    },
+    {
+     "with": "#19633",
+     "code": "fd8ecc62ceae2a0564cefe3486c438cae37005bd",
+     "with_code": "36560a5f0f1bb92067fb1052c8131b57201112cf",
+     "tip": "8aff205eb10fbdc8c960ffbb0f5ca9bb3aa2a280",
+     "with_tip": "abeb58d29422bbe8f0be4393187924cac67e8058",
+     "at": "2026-11-25T16:42:40Z",
+     "host": "goliath",
+     "tree": "c038875bc9ca008ad4a0ad01cd0628b2d916a51a"
+    },
+    {
+     "with": "factory-droid-1100-pin",
+     "code": "fd8ecc62ceae2a0564cefe3486c438cae37005bd",
+     "with_code": "2ce01c8d9d3dfcc120b3ef5dbca0d7384e45e2c5",
+     "tip": "8aff205eb10fbdc8c960ffbb0f5ca9bb3aa2a280",
+     "with_tip": "3336d0c48fe7e24ff937dcba4743738472ed1c1f",
+     "at": "2026-11-25T16:42:40Z",
+     "host": "goliath",
+     "tree": "c038875bc9ca008ad4a0ad01cd0628b2d916a51a"
+    }
+   ]
   }
  ],
  "watch": {
