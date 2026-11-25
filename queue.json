@@ -62149,8 +62149,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/token-count-policy",
    "host": "MacBook-Pro",
    "added": "2026-11-03T01:24:37Z",
-   "updated": "2026-11-03T02:17:50Z",
-   "note": ""
+   "updated": "2026-11-25T05:38:41Z",
+   "note": "QF54, 2026-11-25, restack onto v19.2.0+ (b7fed994075/43215265750): new conflict packages/coding-agent/test/agent-session-stats.test.ts; imports '@oh-my-pi/pi-tui/status-line/context-usage', now packages/coding-agent/src/session/context-usage.ts."
   },
   {
    "id": "gemma-tokenizer",
