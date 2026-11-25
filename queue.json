@@ -73131,8 +73131,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/browser-wait-text-regexp",
    "host": "MacBook-Pro",
    "added": "2026-11-10T16:35:28Z",
-   "updated": "2026-11-18T21:32:30Z",
-   "note": ""
+   "updated": "2026-11-25T05:38:07Z",
+   "note": "QF54, 2026-11-25, restack onto v19.2.0+ (b7fed994075/43215265750): new conflicts aria-snapshot.ts, queries.ts, tern-tab.ts = the ToolError import line (77848964343 moved ToolError: '@oh-my-pi/pi-tui/tools/tool-errors' -> coding-agent src/tools/tool-errors.ts ('../tool-errors')); restack onto #19542's merge, whose combined form (main's path + our imports) carries it."
   },
   {
    "id": "browser-run-main-world",
