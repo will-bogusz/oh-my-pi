@@ -62169,8 +62169,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/gemma-tokenizer",
    "host": "MacBook-Pro",
    "added": "2026-11-03T01:29:02Z",
-   "updated": "2026-11-03T02:18:29Z",
-   "note": ""
+   "updated": "2026-11-25T05:38:45Z",
+   "note": "QF54, 2026-11-25, restack onto v19.2.0+ (b7fed994075/43215265750): new conflicts crates/natives/src/utok/mod.rs, packages/coding-agent/test/agent-session-stats.test.ts; imports '@oh-my-pi/pi-tui/status-line/context-usage', now packages/coding-agent/src/session/context-usage.ts."
   },
   {
    "id": "wire-delta-count",
