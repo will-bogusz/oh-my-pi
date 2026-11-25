@@ -108233,13 +108233,13 @@
    "needs": [],
    "base": "4a6030b062b6307fba90e3406f7822f13eaaded9",
    "body": "bodies/devin-quota-exhausted-rotate.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 20524,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-quota-exhausted-rotate",
    "host": "MacBook-Pro",
    "added": "2026-11-25T16:33:34Z",
-   "updated": "2026-11-25T16:42:40Z",
+   "updated": "2026-11-25T16:43:40Z",
    "note": "",
    "built": [
     {
@@ -108322,7 +108322,8 @@
      "host": "goliath",
      "tree": "c038875bc9ca008ad4a0ad01cd0628b2d916a51a"
     }
-   ]
+   ],
+   "opened": "2026-11-25T16:43:40Z"
   }
  ],
  "watch": {
