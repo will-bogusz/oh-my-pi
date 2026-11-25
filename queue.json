@@ -40943,8 +40943,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/compaction-trigger",
    "host": "MacBook-Pro",
    "added": "2026-10-20T23:41:41Z",
-   "updated": "2026-11-17T01:28:46Z",
-   "note": "stacked on #16587 head 98ef1f55dc (2026-10-22, its runIdleCompaction line resolved as inLogContext(...runIdleCompaction(thresholdTokens))). After #16587 merges, pr-queue advance compaction-trigger replays its own commits onto main.",
+   "updated": "2026-11-25T05:38:35Z",
+   "note": "stacked on #16587 head 98ef1f55dc (2026-10-22, its runIdleCompaction line resolved as inLogContext(...runIdleCompaction(thresholdTokens))). After #16587 merges, pr-queue advance compaction-trigger replays its own commits onto main.\nQF54, 2026-11-25, restack onto v19.2.0+ (b7fed994075/43215265750): new conflict packages/tui/test/compaction-divider.test.ts.",
    "built": [
     {
      "with": "#16231",
