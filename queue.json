@@ -108399,7 +108399,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-25T21:01:53Z",
+  "checked": "2026-11-25T21:32:35Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108520,118 +108520,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-18T21:17:56Z",
-    "kind": "released",
-    "number": 17897,
-    "title": "perf(natives): type on iPhone Mirroring twice as fast",
-    "tag": "v19.0.0"
-   },
-   {
-    "at": "2026-11-18T21:17:56Z",
-    "kind": "released",
-    "number": 19629,
-    "title": "fix(natives): refuse every Wayland input call at once when no input route exists",
-    "tag": "v19.0.0"
-   },
-   {
-    "at": "2026-11-18T21:17:56Z",
-    "kind": "released",
-    "number": 19619,
-    "title": "fix(catalog): carry Devin's measured image limits",
-    "tag": "v19.0.0"
-   },
-   {
-    "at": "2026-11-18T21:17:56Z",
-    "kind": "released",
-    "number": 19606,
-    "title": "fix(coding-agent): judge omp usage policy state by account-wide windows",
-    "tag": "v19.0.0"
-   },
-   {
-    "at": "2026-11-18T21:17:56Z",
-    "kind": "released",
-    "number": 19605,
-    "title": "fix(utils): apply OMP_LOG_LEVEL to the console transport",
-    "tag": "v19.0.0"
-   },
-   {
-    "at": "2026-11-18T21:17:56Z",
-    "kind": "released",
-    "number": 19602,
-    "title": "fix(ai): read auth-broker responses that carry fields a newer broker adds",
-    "tag": "v19.0.0"
-   },
-   {
-    "at": "2026-11-18T21:17:56Z",
-    "kind": "released",
-    "number": 19601,
-    "title": "fix(catalog): switch Devin's Gemini promo prices to list when each promo ends",
-    "tag": "v19.0.0"
-   },
-   {
-    "at": "2026-11-18T21:17:56Z",
-    "kind": "released",
-    "number": 19600,
-    "title": "fix(ai): heal Claude tier blocks a shared weekly wall caused from single-window usage reports",
-    "tag": "v19.0.0"
-   },
-   {
-    "at": "2026-11-18T21:17:56Z",
-    "kind": "released",
-    "number": 19599,
-    "title": "fix(coding-agent): let auth-broker serve save an in-flight refresh before exit",
-    "tag": "v19.0.0"
-   },
-   {
-    "at": "2026-11-18T21:17:56Z",
-    "kind": "released",
-    "number": 19598,
-    "title": "fix(ai): retry the initial auth-broker snapshot through a broker restart",
-    "tag": "v19.0.0"
-   },
-   {
-    "at": "2026-11-18T21:17:56Z",
-    "kind": "released",
-    "number": 19596,
-    "title": "fix(natives): capture the visible part of a Linux window partly off its monitor",
-    "tag": "v19.0.0"
-   },
-   {
-    "at": "2026-11-18T21:17:56Z",
-    "kind": "released",
-    "number": 19586,
-    "title": "docs(auth-gateway): describe reclaim moving warm pins back",
-    "tag": "v19.0.0"
-   },
-   {
-    "at": "2026-11-18T21:17:56Z",
-    "kind": "released",
-    "number": 19532,
-    "title": "fix(natives): put the user's key window back in front of a macOS target after background input and takeover",
-    "tag": "v19.0.0"
-   },
-   {
-    "at": "2026-11-18T21:17:56Z",
-    "kind": "released",
-    "number": 19516,
-    "title": "fix(natives): read a macOS popup after the option its typed letters choose",
-    "tag": "v19.0.0"
-   },
-   {
-    "at": "2026-11-18T21:17:56Z",
-    "kind": "released",
-    "number": 19696,
-    "title": "fix(coding-agent): regenerated the stale export viewer metadata",
-    "tag": "v19.0.0"
-   },
-   {
-    "at": "2026-11-18T21:17:56Z",
-    "kind": "released",
-    "number": 19699,
-    "title": "fix: restored main's lint and type-check job",
-    "tag": "v19.0.0"
-   },
    {
     "at": "2026-11-19T01:52:03Z",
     "kind": "openable",
