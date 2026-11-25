@@ -20,12 +20,14 @@ I made `scroll` on a WPF window stop reporting success for a wheel the window dr
 - Any other WPF scroll (behind, no container, a Chromium/WebView2 child, WPF in a non-WPF window, wheel set to 0 on every axis) is `BackgroundUnavailable` with nothing sent, so `computer.takeover` decides; a hosted non-WPF child keeps posting.
 - On this route, past the posted wheel's range (273 notches per axis): `InputFailed`; non-finite anywhere.
 
-Limits: if the first axis moved and the second finds no container under the point, the call is `AxUnconfirmed` with the first axis applied, and takeover does not rerun it. With no container, default mode's takeover wheel can be `ok` without a read-back. A scroll whose last step to an edge is under one pixel can report that the offset did not move although the view reached the edge. A window moved mid-step can confirm a step that scrolled nothing; a fixed control in the viewer reports `InputFailed`; a blocked provider can hold one call past the cutoff.
+Limits: if the first axis moved and the second finds no container under the point: `AxUnconfirmed`, first axis applied, no takeover rerun. With no container, default mode's takeover wheel can be `ok` without a read-back. A scroll whose last step to an edge is under one pixel can report that the offset did not move although the view reached the edge. A window moved mid-step can confirm a step that scrolled nothing; a fixed control in the viewer reports `InputFailed`; a blocked provider can hold one call past the cutoff.
 
 ## Testing
 
-`wpf_scrolls_go_through_ui_automation_in_front_and_report_what_moved` (ignored) drives each route on a live WPF list. `wpf_mixed_scroll_scrolls_the_list_the_horizontal_axis_brings_under_the_point` (ignored) puts two lists side by side in a horizontal viewer; the vertical step must scroll the list the horizontal step brought under the point.
+`wpf_scrolls_go_through_ui_automation_in_front_and_report_what_moved` (ignored) drives each route live. `wpf_mixed_scroll_scrolls_the_list_the_horizontal_axis_brings_under_the_point` (ignored) puts two lists side by side in a horizontal viewer; the vertical step must scroll the one the horizontal step brought under the point.
 
-Cells: v19.0.1 against an addon from `4dd113f40f8`, 2×5 per mode; in-front trials moved neither focus nor pointer. GitHub-hosted windows-latest runner, at `3fa23fb0d87` plus the two-list test and CI-only diagnostics (this head differs in test code only): desktop units pass (242); the two-list test 3/3; with the re-hit reverted it fails, the vertical step going to the first list and the horizontal assertion failing first (why that build skipped the horizontal axis is not established); the route test passes up to a page-swap step this head drops.
+Cells: v19.0.1 vs an addon from `4dd113f40f8`, 2×5 per mode; in-front trials moved neither focus nor pointer. GitHub-hosted windows-latest runner, at `3fa23fb0d87` plus the two-list test and CI-only diagnostics (this head differs in test code only): desktop units pass (242); the two-list test 3/3; with the re-hit reverted it fails, the vertical step going to the first list and the horizontal assertion failing first (why that build skipped the horizontal axis is not established); the route test passes up to a page-swap step this head drops.
 
-`scripts/rust-check`: Linux and macOS pass on this head's Rust lines; Windows `cargo xwin clippy -p omp-natives` adds no warning (the full check is blocked on `main`).
+Not covered live: a first axis that moves, then no container for the second.
+
+`scripts/rust-check` passes on Linux and macOS; Windows `cargo xwin clippy -p omp-natives` adds no warning (full check blocked on `main`).
