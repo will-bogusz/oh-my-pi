@@ -108298,13 +108298,13 @@
    "needs": [],
    "base": "4a6030b062b6307fba90e3406f7822f13eaaded9",
    "body": "bodies/devin-quota-exhausted-rotate.md",
-   "state": "open",
+   "state": "merged",
    "pr": 20524,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-quota-exhausted-rotate",
    "host": "MacBook-Pro",
    "added": "2026-11-25T16:33:34Z",
-   "updated": "2026-11-25T17:22:51Z",
+   "updated": "2026-11-25T20:31:00Z",
    "note": "",
    "built": [
     {
@@ -108393,7 +108393,8 @@
    "tests_over_override": {
     "reason": "DevinQuotaRotateLane, 2026-11-25: two outcomes, one test each: the session moves to the other login on the weekly refusal (needs its own offline AuthStorage with no usage provider, per roboomp and Codex), and a per-minute throttle worded alike stays out of rotation",
     "at": "2026-11-25T17:22:51Z"
-   }
+   },
+   "merged_by": "pr"
   }
  ],
  "watch": {
