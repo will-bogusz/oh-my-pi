@@ -108195,7 +108195,7 @@
    "branch": "will/shell-windows-env-cwd-test",
    "title": "fix(shell): build the Windows env_cwd test with the errexit field",
    "area": "shell",
-   "priority": null,
+   "priority": "P0",
    "needs": [],
    "base": "4a6030b062b6307fba90e3406f7822f13eaaded9",
    "body": "bodies/shell-windows-env-cwd-test.md",
@@ -108205,7 +108205,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/shell-windows-env-cwd-test",
    "host": "MacBook-Pro",
    "added": "2026-11-25T15:53:59Z",
-   "updated": "2026-11-25T16:12:37Z",
+   "updated": "2026-11-25T16:56:19Z",
    "note": "2026-11-25T16:02:48Z: --allow-rust-check main's own Windows test build break E0063 env_cwd.rs:22 since cc3a18faa44; this entry is the repair; workspace xwin clippy 0 errors at 72f80e21f37 (windows)",
    "main_repair": {
     "reason": "`cargo xwin clippy --target x86_64-pc-windows-msvc -p omp-shell --all-targets` (and rust-check --windows at any base) fails with E0063 at crates/shell/src/shell/tests/env_cwd.rs:22 since cc3a18faa44",
@@ -108229,7 +108229,7 @@
    "branch": "will/devin-quota-exhausted-rotate",
    "title": "fix(ai): rotate Devin logins whose weekly quota is spent",
    "area": "other",
-   "priority": null,
+   "priority": "P1",
    "needs": [],
    "base": "4a6030b062b6307fba90e3406f7822f13eaaded9",
    "body": "bodies/devin-quota-exhausted-rotate.md",
@@ -108239,7 +108239,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-quota-exhausted-rotate",
    "host": "MacBook-Pro",
    "added": "2026-11-25T16:33:34Z",
-   "updated": "2026-11-25T16:44:04Z",
+   "updated": "2026-11-25T16:56:19Z",
    "note": "",
    "built": [
     {
