@@ -108182,7 +108182,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-25T05:15:58Z",
+  "checked": "2026-11-25T05:46:20Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108192,21 +108192,6 @@
    }
   },
   "conflicts": {
-   "#19513": {
-    "since": "2026-11-24T06:19:13Z",
-    "title": "fix(ai,agent): say how far a request body uploaded when any provider's connection drops",
-    "files": [
-     "packages/ai/src/utils/transport-fetch.ts"
-    ]
-   },
-   "#19542": {
-    "since": "2026-11-24T06:19:13Z",
-    "title": "feat(browser): add waitForFunction to tabs and frames",
-    "files": [
-     "packages/coding-agent/src/tools/browser/aria/aria-snapshot.ts",
-     "packages/coding-agent/src/tools/browser/queries.ts"
-    ]
-   },
    "#19626": {
     "since": "2026-11-24T06:19:13Z",
     "title": "feat(coding-agent): log every saved-reset spend attempt at info",
@@ -119391,7 +119376,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-25T05:15:59.122180Z",
+  "at": "2026-11-25T05:46:21.274551Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -119446,10 +119431,8 @@
     "area": "other",
     "priority": "P1",
     "title": "fix(ai,agent): say how far a request body uploaded when any provider's connection drops",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in packages/ai/src/utils/transport-fetch.ts"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "tests-over: Main, 2026-11-17: each test pins a distinct user-visible behaviour: upload progress named for bodies of 1 MiB or more (mid-body, after body, below threshold, Anthropic fetch fallback), resend semantics per redirect status (only the five real redirect codes resend; 300 returned), credentials dropped cross-origin, and redirected on the response and its clones; plus remote compaction retrying the new error",
     "over": [],
     "paired": [],
@@ -119635,10 +119618,8 @@
     "area": "browser",
     "priority": "P2",
     "title": "feat(browser): add waitForFunction to tabs and frames",
-    "action": "rebase",
-    "reasons": [
-     "conflicts with main in packages/coding-agent/src/tools/browser/aria/aria-snapshot.ts, packages/coding-agent/src/tools/browser/queries.ts"
-    ],
+    "action": "keep",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
@@ -119810,7 +119791,6 @@
     "action": "wait",
     "reasons": [
      "needs #19542 (open)",
-     "its need #19542 conflicts with main in packages/coding-agent/src/tools/browser/aria/aria-snapshot.ts, packages/coding-agent/src/tools/browser/queries.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
     ],
     "note": "",
@@ -120569,7 +120549,7 @@
     "action": "wait",
     "reasons": [
      "needs r2/relay-own-only (queued)",
-     "conflicts with #19542 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
+     "conflicts with #19542 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts",
      "conflicts with #19633 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-daemon.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/dialogs.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
