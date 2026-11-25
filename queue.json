@@ -108189,13 +108189,13 @@
    "needs": [],
    "base": "4a6030b062b6307fba90e3406f7822f13eaaded9",
    "body": "bodies/shell-windows-env-cwd-test.md",
-   "state": "queued",
-   "pr": null,
+   "state": "open",
+   "pr": 20516,
    "closed_prs": [],
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/shell-windows-env-cwd-test",
    "host": "MacBook-Pro",
    "added": "2026-11-25T15:53:59Z",
-   "updated": "2026-11-25T16:00:34Z",
+   "updated": "2026-11-25T16:12:37Z",
    "note": "2026-11-25T16:02:48Z: --allow-rust-check main's own Windows test build break E0063 env_cwd.rs:22 since cc3a18faa44; this entry is the repair; workspace xwin clippy 0 errors at 72f80e21f37 (windows)",
    "main_repair": {
     "reason": "`cargo xwin clippy --target x86_64-pc-windows-msvc -p omp-shell --all-targets` (and rust-check --windows at any base) fails with E0063 at crates/shell/src/shell/tests/env_cwd.rs:22 since cc3a18faa44",
@@ -108210,7 +108210,9 @@
       "windows"
      ]
     }
-   ]
+   ],
+   "opened": "2026-11-25T16:12:37Z",
+   "owed_builds": []
   }
  ],
  "watch": {
