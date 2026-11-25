@@ -108239,7 +108239,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-quota-exhausted-rotate",
    "host": "MacBook-Pro",
    "added": "2026-11-25T16:33:34Z",
-   "updated": "2026-11-25T16:43:40Z",
+   "updated": "2026-11-25T16:44:04Z",
    "note": "",
    "built": [
     {
@@ -108323,7 +108323,8 @@
      "tree": "c038875bc9ca008ad4a0ad01cd0628b2d916a51a"
     }
    ],
-   "opened": "2026-11-25T16:43:40Z"
+   "opened": "2026-11-25T16:43:40Z",
+   "readied": "2026-11-25T16:44:04Z"
   }
  ],
  "watch": {
