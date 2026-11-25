@@ -108179,6 +108179,24 @@
    "updated": "2026-11-23T22:15:00Z",
    "note": "One reviewer pass: openai-codex/gpt-6.2-sol, no production-code findings; needs-changes on body only. Addressed every body finding: attribute live data to earlier paced experiment, distinguish action invocation from sent posts, narrow distance claim to unchanged wheel encoding, leave attribution unchecked. No new test needed for evidence-wording corrections; existing seam test already covers corrected routing claims. Built head has not run on a phone; RUN.md and paired addons prepared in MirrorScrollUnprime scratch. Distance branch merges cleanly; combined form keeps its paced train inside this scroll pass-through and leaves the tap primer pending.",
    "hold": "Main, 2026-11-23: live run owed"
+  },
+  {
+   "id": "shell-windows-env-cwd-test",
+   "branch": "will/shell-windows-env-cwd-test",
+   "title": "fix(shell): build the Windows env_cwd test with the errexit field",
+   "area": "shell",
+   "priority": null,
+   "needs": [],
+   "base": "4a6030b062b6307fba90e3406f7822f13eaaded9",
+   "body": "bodies/shell-windows-env-cwd-test.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/shell-windows-env-cwd-test",
+   "host": "MacBook-Pro",
+   "added": "2026-11-25T15:53:59Z",
+   "updated": "2026-11-25T15:53:59Z",
+   "note": ""
   }
  ],
  "watch": {
