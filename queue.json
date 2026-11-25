@@ -70793,7 +70793,7 @@
    "needs": [
     "#18624"
    ],
-   "base": "b28adb50cb89afaeaa06bfc39da8b94090f0e489",
+   "base": "bf6aa0bc80d163024139cfdf8a0ace42611dd6a8",
    "body": "bodies/upload-stall-error-all-providers.md",
    "state": "open",
    "pr": 19513,
@@ -70801,9 +70801,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/upload-stall-error-all-providers",
    "host": "MacBook-Pro",
    "added": "2026-11-09T18:20:14Z",
-   "updated": "2026-11-25T14:43:45Z",
+   "updated": "2026-11-25T15:01:16Z",
    "note": "",
-   "advanced": "2026-11-25T14:43:45Z",
+   "advanced": "2026-11-25T15:01:16Z",
    "line_loss_overrides": [
     {
      "at": "2026-11-17T02:53:49Z",
