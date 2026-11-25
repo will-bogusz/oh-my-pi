@@ -108182,7 +108182,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-25T09:50:47Z",
+  "checked": "2026-11-25T10:52:11Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108197,6 +108197,13 @@
     "title": "feat(coding-agent): log every saved-reset spend attempt at info",
     "files": [
      "packages/coding-agent/src/cli/usage-cli.ts"
+    ]
+   },
+   "#19700": {
+    "since": "2026-11-25T10:52:11Z",
+    "title": "feat(ai): reserve per usage limit in account policies",
+    "files": [
+     "packages/ai/src/auth/select.ts"
     ]
    },
    "#19623": {
@@ -109664,6 +109671,15 @@
     "number": 19849,
     "title": "fix(natives): count every opaque window as a cover over a Chromium capture",
     "tag": "v19.2.0"
+   },
+   {
+    "at": "2026-11-25T10:52:11Z",
+    "kind": "conflict",
+    "label": "#19700",
+    "title": "feat(ai): reserve per usage limit in account policies",
+    "files": [
+     "packages/ai/src/auth/select.ts"
+    ]
    }
   ]
  },
@@ -119376,7 +119392,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-25T09:50:48.176448Z",
+  "at": "2026-11-25T10:52:12.070760Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -119709,8 +119725,10 @@
     "area": "broker",
     "priority": "P2",
     "title": "feat(ai): reserve per usage limit in account policies",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in packages/ai/src/auth/select.ts"
+    ],
     "note": "accepted pair with #19701: Main, 2026-11-18: both add account-policy keys side by side in docs/auth-broker-gateway.md (table row), ai auth-broker/discover.ts (allowed keys) and cli/usage-cli.ts (diagnostics fields, base spread, policy-line prefix); the combined form keeps both: reservePctByLimit/scopedInsideReserve plus autoRedeem*, prefix with limit reserves then reclaim then auto-redeem",
     "over": [],
     "paired": [
@@ -120412,7 +120430,8 @@
     "reasons": [
      "conflicts with #19623 in packages/ai/src/auth/select.ts, packages/ai/test/auth-storage-account-reclaim.test.ts",
      "conflicts with #19700 in docs/auth-broker-gateway.md, packages/ai/src/auth-broker/discover.ts, packages/ai/src/auth/policy.ts, packages/ai/src/auth/select.ts",
-     "conflicts with #19701 in docs/auth-broker-gateway.md, packages/ai/src/auth-broker/discover.ts, packages/ai/src/auth/types.ts, packages/ai/test/auth-broker-config-discovery.test.ts"
+     "conflicts with #19701 in docs/auth-broker-gateway.md, packages/ai/src/auth-broker/discover.ts, packages/ai/src/auth/types.ts, packages/ai/test/auth-broker-config-discovery.test.ts",
+     "conflicts with main in packages/ai/src/auth/rank.ts, packages/ai/src/auth/select.ts"
     ],
     "note": "",
     "over": [],
