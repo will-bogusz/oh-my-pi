@@ -106327,7 +106327,7 @@
    "area": "computer",
    "priority": "P1",
    "needs": [],
-   "base": "31ffee513f27a01bba7d4dfbe12bae239cdc646a",
+   "base": "b7fed994075eca804ce38c8ecaec23bd569ef4f0",
    "body": "bodies/win-uia-set-patterns.md",
    "state": "open",
    "pr": 20178,
@@ -106335,9 +106335,9 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-uia-set-patterns",
    "host": "MacBook-Pro",
    "added": "2026-11-20T06:29:20Z",
-   "updated": "2026-11-23T05:33:48Z",
+   "updated": "2026-11-25T05:11:27Z",
    "note": "",
-   "advanced": "2026-11-23T05:33:48Z",
+   "advanced": "2026-11-25T05:11:27Z",
    "line_loss_overrides": [
     {
      "at": "2026-11-20T16:01:27Z",
