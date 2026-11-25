@@ -107649,8 +107649,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-wpf-set-background",
    "host": "MacBook-Pro",
    "added": "2026-11-20T21:08:35Z",
-   "updated": "2026-11-25T05:37:53Z",
-   "note": "QF54, 2026-11-25, restack onto v19.2.0+ (b7fed994075/43215265750): main added windows-sys feature Win32_System_ProcessStatus (Cargo.toml) and changed natives Cargo.toml beside D2's own Cargo edits; merges clean, but re-run rust-check linux/macOS/windows at the restack (rust diff id may move).",
+   "updated": "2026-11-25T14:42:01Z",
+   "note": "QF54, 2026-11-25, restack onto v19.2.0+ (b7fed994075/43215265750): main added windows-sys feature Win32_System_ProcessStatus (Cargo.toml) and changed natives Cargo.toml beside D2's own Cargo edits; merges clean, but re-run rust-check linux/macOS/windows at the restack (rust diff id may move).\nQF55, 2026-11-25, v19.2.1 (b28adb50cb8): 6e1f14c778a replaced set_edit's ES_NUMBER letter regex in win32/value_write.rs with an xutf general-category scan (same rule: BMP letters), a few lines below D2's own set_edit hunk; merges clean and D2's rust diff id is unchanged (c4e9109165a), so its records stand until the restack.",
    "rebases_after": [
     19870,
     20177
