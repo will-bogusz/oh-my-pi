@@ -108204,10 +108204,14 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-25T15:25:59Z",
+  "checked": "2026-11-25T15:56:02Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
+   "shell-windows-env-cwd-test": {
+    "since": "2026-11-25T15:56:02Z",
+    "title": "fix(shell): build the Windows env_cwd test with the errexit field"
+   },
    "factory-droid-1100-pin": {
     "since": "2026-11-17T00:39:57Z",
     "title": "feat(catalog): identify Factory Droid requests as droid 1.10.0"
@@ -109696,6 +109700,12 @@
     "files": [
      "packages/ai/src/auth/select.ts"
     ]
+   },
+   {
+    "at": "2026-11-25T15:56:02Z",
+    "kind": "openable",
+    "id": "shell-windows-env-cwd-test",
+    "title": "fix(shell): build the Windows env_cwd test with the errexit field"
    }
   ]
  },
@@ -119444,8 +119454,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-25T15:54:19.779341Z",
-  "host": "MacBook-Pro",
+  "at": "2026-11-25T15:56:03.823977Z",
+  "host": "goliath",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -120750,8 +120760,10 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "open",
-    "reasons": [],
+    "action": "wait",
+    "reasons": [
+     "conflicts with main in (branch missing on the fork)"
+    ],
     "note": "",
     "over": [],
     "paired": [],
