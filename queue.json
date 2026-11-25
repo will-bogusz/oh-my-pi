@@ -119466,12 +119466,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-25T15:56:03.823977Z",
-  "host": "goliath",
+  "at": "2026-11-25T16:14:06.178973Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
-   "used": 0,
-   "left": 8
+   "used": 1,
+   "left": 7
   },
   "rows": [
    {
@@ -119833,6 +119833,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-18T18:40:21Z"
+   },
+   {
+    "id": "shell-windows-env-cwd-test",
+    "label": "#20516",
+    "number": 20516,
+    "state": "open",
+    "area": "shell",
+    "priority": null,
+    "title": "fix(shell): build the Windows env_cwd test with the errexit field",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-25T16:12:36Z"
    },
    {
     "id": "iphone-mirror-scroll-distance",
@@ -120748,23 +120765,6 @@
     "created": "2026-11-20T18:38:26Z"
    },
    {
-    "id": "shell-windows-env-cwd-test",
-    "label": "shell-windows-env-cwd-test",
-    "number": null,
-    "state": "queued",
-    "area": "shell",
-    "priority": null,
-    "title": "fix(shell): build the Windows env_cwd test with the errexit field",
-    "action": "open",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-25T15:53:59Z"
-   },
-   {
     "id": "stats-live-appends",
     "label": "stats-live-appends",
     "number": null,
@@ -120772,10 +120772,8 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "wait",
-    "reasons": [
-     "conflicts with main in (branch missing on the fork)"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
