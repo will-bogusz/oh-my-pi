@@ -107649,8 +107649,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-wpf-set-background",
    "host": "MacBook-Pro",
    "added": "2026-11-20T21:08:35Z",
-   "updated": "2026-11-22T16:43:48Z",
-   "note": "",
+   "updated": "2026-11-25T05:37:53Z",
+   "note": "QF54, 2026-11-25, restack onto v19.2.0+ (b7fed994075/43215265750): main added windows-sys feature Win32_System_ProcessStatus (Cargo.toml) and changed natives Cargo.toml beside D2's own Cargo edits; merges clean, but re-run rust-check linux/macOS/windows at the restack (rust diff id may move).",
    "rebases_after": [
     19870,
     20177
