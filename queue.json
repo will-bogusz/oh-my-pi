@@ -108399,7 +108399,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-25T20:31:04Z",
+  "checked": "2026-11-25T21:01:53Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108448,12 +108448,17 @@
     ]
    }
   },
-  "merged_through": "2026-11-25T20:22:33Z",
+  "merged_through": "2026-11-25T20:42:45Z",
   "unreleased": {
    "20524": {
     "title": "fix(ai): rotate Devin logins whose weekly quota is spent",
     "merge_commit": "a28d947a7269231069205712935479b330025e6b",
     "merged_at": "2026-11-25T20:22:33Z"
+   },
+   "20516": {
+    "title": "fix(shell): build the Windows env_cwd test with the errexit field",
+    "merge_commit": "d3ded4246f642e5566c28abaf1c9793000c060dc",
+    "merged_at": "2026-11-25T20:42:45Z"
    }
   },
   "ready": [
@@ -108475,8 +108480,7 @@
    20019,
    20177,
    20178,
-   20179,
-   20516
+   20179
   ],
   "post_merge": {
    "18632": {
@@ -108501,6 +108505,12 @@
       "addressed_by": 18658
      }
     ]
+   },
+   "20516": {
+    "title": "fix(shell): build the Windows env_cwd test with the errexit field",
+    "merge_commit": "d3ded4246f642e5566c28abaf1c9793000c060dc",
+    "merged_at": "2026-11-25T20:42:45Z",
+    "findings": []
    },
    "20524": {
     "title": "fix(ai): rotate Devin logins whose weekly quota is spent",
@@ -109453,6 +109463,14 @@
     "title": "fix(ai): rotate Devin logins whose weekly quota is spent",
     "merged_by": "H4vC",
     "maintainer_commits": 1
+   },
+   {
+    "at": "2026-11-25T21:01:53Z",
+    "kind": "merged",
+    "number": 20516,
+    "title": "fix(shell): build the Windows env_cwd test with the errexit field",
+    "merged_by": "can1357",
+    "maintainer_commits": 0
    }
   ]
  },
@@ -119225,7 +119243,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-25T20:31:05.046668Z",
+  "at": "2026-11-25T21:01:54.539337Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -119252,23 +119270,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-22T15:32:07Z"
-   },
-   {
-    "id": "shell-windows-env-cwd-test",
-    "label": "#20516",
-    "number": 20516,
-    "state": "open",
-    "area": "shell",
-    "priority": "P0",
-    "title": "fix(shell): build the Windows env_cwd test with the errexit field",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-25T16:12:36Z"
    },
    {
     "id": "macos-drag-confirm",
