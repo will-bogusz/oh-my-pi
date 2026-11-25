@@ -104709,8 +104709,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/snapcompact-deepseek-text",
    "host": "MacBook-Pro",
    "added": "2026-11-18T04:50:59Z",
-   "updated": "2026-11-20T18:04:44Z",
-   "note": "LaneSnapcompactStack, 2026-11-20: rebased onto the restacked kdl (a0078fecb18) merged with #19620 205ab81cc2b (base 03ac8048980, a local merge; rebase on advance). Head e8e4da8d5e7 adds per-line sizing guards: the sizing test requires one render (planner), a render forced past its plan must be cut back by text keeping the planned frames (projection, per-frame price), and a dead-end rebuild test prices frames as text (4 vs 5). Each of the five sizing lines reverted alone fails a test; body's 54.8k / 64.5k (full sizing revert) rechecked. Reader 16, dead-end 13, compaction suites 445 pass + 2 main-failing; rule reverted -> text-archive test fails. Test-only change since the last review."
+   "updated": "2026-11-25T05:38:52Z",
+   "note": "LaneSnapcompactStack, 2026-11-20: rebased onto the restacked kdl (a0078fecb18) merged with #19620 205ab81cc2b (base 03ac8048980, a local merge; rebase on advance). Head e8e4da8d5e7 adds per-line sizing guards: the sizing test requires one render (planner), a render forced past its plan must be cut back by text keeping the planned frames (projection, per-frame price), and a dead-end rebuild test prices frames as text (4 vs 5). Each of the five sizing lines reverted alone fails a test; body's 54.8k / 64.5k (full sizing revert) rechecked. Reader 16, dead-end 13, compaction suites 445 pass + 2 main-failing; rule reverted -> text-archive test fails. Test-only change since the last review.\nQF54, 2026-11-25, restack onto v19.2.0+ (b7fed994075/43215265750): new conflict packages/coding-agent/src/session/session-maintenance.ts."
   },
   {
    "id": "snapcompact-carbon-1568",
