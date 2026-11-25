@@ -108213,6 +108213,24 @@
    ],
    "opened": "2026-11-25T16:12:37Z",
    "owed_builds": []
+  },
+  {
+   "id": "devin-quota-exhausted-rotate",
+   "branch": "will/devin-quota-exhausted-rotate",
+   "title": "fix(ai): rotate Devin logins whose weekly quota is spent",
+   "area": "other",
+   "priority": null,
+   "needs": [],
+   "base": "4a6030b062b6307fba90e3406f7822f13eaaded9",
+   "body": "bodies/devin-quota-exhausted-rotate.md",
+   "state": "queued",
+   "pr": null,
+   "closed_prs": [],
+   "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/devin-quota-exhausted-rotate",
+   "host": "MacBook-Pro",
+   "added": "2026-11-25T16:33:34Z",
+   "updated": "2026-11-25T16:33:34Z",
+   "note": ""
   }
  ],
  "watch": {
