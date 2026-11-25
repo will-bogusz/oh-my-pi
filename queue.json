@@ -70829,6 +70829,20 @@
        "\tObject.defineProperty(response, \"redirected\", { value: true });"
       ]
      }
+    },
+    {
+     "at": "2026-11-25T05:36:45Z",
+     "reason": "Main, 2026-11-25: v19.2.0 made coworkFetch lazy (77848964343); the cowork skip is now keyed on lazyCoworkFetch (approved combined form), and the test import line gains spyOn for the new skip test",
+     "old": "e4ac78b2b18595df147d6d5e3856f90070d775d0",
+     "new": "7f1b124963876883fc2af70b0235b12be4c640c0",
+     "dropped": {
+      "packages/ai/src/utils/transport-fetch.ts": [
+       "\t\tgiven || base === coworkFetch ? base : (input, init) => fetchWithUploadProgress(base, input, init);"
+      ],
+      "packages/ai/test/transport-fetch-upload-error.test.ts": [
+       "import { afterEach, describe, expect, it } from \"bun:test\";"
+      ]
+     }
     }
    ],
    "opened": "2026-11-17T02:58:48Z",
