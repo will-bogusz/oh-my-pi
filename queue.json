@@ -119375,8 +119375,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-25T04:45:47.587911Z",
-  "host": "goliath",
+  "at": "2026-11-25T05:07:26.759366Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 0,
@@ -119657,7 +119657,7 @@
     "title": "feat(ai,coding-agent): record why a session's OAuth account switched",
     "action": "rebase",
     "reasons": [
-     "conflicts with main in packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/modes/rpc/rpc-client.ts, packages/coding-agent/src/session/reset-expiry.ts"
+     "conflicts with main in packages/ai/src/auth/select.ts, packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/modes/rpc/rpc-client.ts, packages/coding-agent/src/session/reset-expiry.ts"
     ],
     "note": "",
     "over": [],
@@ -119978,7 +119978,7 @@
     "reasons": [
      "conflicts with #19542 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19633 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-daemon.test.ts"
+     "conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-daemon.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts"
     ],
     "note": "",
     "over": [],
@@ -120003,7 +120003,7 @@
      "needs r2/relay-own-only (queued)",
      "conflicts with #19542 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19633 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-daemon.test.ts",
+     "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-daemon.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "conflicts with main in packages/browser-relay/extension/background.ts, packages/browser-relay/extension/chrome.d.ts, packages/browser-relay/extension/manifest.json, packages/coding-agent/src/tools/browser/relay/extension-assets/manifest.json.txt, packages/coding-agent/src/tools/browser/relay/protocol.ts"
     ],
     "note": "",
@@ -120031,7 +120031,7 @@
      "needs r2/relay-popup-owned (queued), r2/page-waiting (queued)",
      "conflicts with #19542 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19633 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "its need r2/relay-popup-owned conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/extension/background.ts, packages/browser-relay/extension/chrome.d.ts, packages/browser-relay/extension/manifest.json, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/extension-assets/manifest.json.txt, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-daemon.test.ts",
+     "its need r2/relay-popup-owned conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/extension/background.ts, packages/browser-relay/extension/chrome.d.ts, packages/browser-relay/extension/manifest.json, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/extension-assets/manifest.json.txt, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-daemon.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "its need r2/page-waiting conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/dialogs.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts"
     ],
@@ -120555,7 +120555,7 @@
      "needs r2/relay-own-only (queued)",
      "conflicts with #19542 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "conflicts with #19633 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/tab-worker.ts",
-     "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-daemon.test.ts",
+     "its need r2/relay-own-only conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-daemon.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/dialogs.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
     ],
     "note": "",
@@ -120666,10 +120666,8 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "wait",
-    "reasons": [
-     "conflicts with main in (branch missing on the fork)"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],
