@@ -105638,7 +105638,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-wpf-scroll",
    "host": "MacBook-Pro",
    "added": "2026-11-20T04:27:43Z",
-   "updated": "2026-11-25T19:20:12Z",
+   "updated": "2026-11-25T19:20:18Z",
    "note": "QueueFortyOne.ScrollDeltaReview must-fix (split COM init/activation cutoffs in scroll) declined by Main, 2026-11-20: main's shared automation() path, used unchanged; nit fold of control.rs time_left/reply_deadline skipped by Main (don't touch #19814's merged fn)\nMain, 2026-11-21: after a195fe0e6f7 (round-5 P1 fix, past budget) no further push on this PR for bot findings below P0.",
    "rebases_after": [
     19814
@@ -105888,7 +105888,17 @@
     }
    ],
    "opened": "2026-11-20T16:06:35Z",
-   "readied": "2026-11-20T16:07:00Z"
+   "readied": "2026-11-20T16:07:00Z",
+   "design_checks": [
+    {
+     "pr": 19870,
+     "rounds": 6,
+     "at": "2026-11-25T19:20:17Z",
+     "verdict": "keep",
+     "note": "Main, 2026-11-25: design kept. UIA ScrollPattern with a child-under-point read-back is the only background route WPF honours (posted and sent wheel 0/30), and the alternative of no read-back returns the false ok this PR exists to remove. Seven finding rounds: three on the read-back's verdict rules (settled by measurement 11-20), two on test rows that shared a branch (table now one row per branch, listed in the commit), one zero-delta, one stale hit across axes (fixed, hosted Windows run 45679698424). The size (a route, a read-back and a live fixture in one PR) is the cost of each round; it was cut from 1,058 to ~500 added lines on 11-20 and nothing separable remains that ships alone. After this push: P0 only; read-back edges go to Limits (sub-pixel last step recorded).",
+     "ref": "/Users/viathebrink/tmp/oh-my-pi/queuefiftysix/fix19870/run-45679698424.log"
+    }
+   ]
   },
   {
    "id": "win-occluded-capture",
