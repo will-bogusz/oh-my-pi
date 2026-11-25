@@ -108397,7 +108397,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-25T18:59:01Z",
+  "checked": "2026-11-25T19:29:51Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108497,36 +108497,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-18T19:14:33Z",
-    "kind": "merged",
-    "number": 19696,
-    "title": "fix(coding-agent): regenerated the stale export viewer metadata",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-18T19:14:33Z",
-    "kind": "merged",
-    "number": 19699,
-    "title": "fix: restored main's lint and type-check job",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-18T19:14:33Z",
-    "kind": "unopenable",
-    "id": "loop-sampler-stop",
-    "title": "fix(tui): stopped the loop profiler when the last TUI watchdog stops",
-    "why": "opened as #19703"
-   },
-   {
-    "at": "2026-11-18T19:14:33Z",
-    "kind": "unopenable",
-    "id": "macos-keys-no-press",
-    "title": "fix(natives): send macOS background keys to the key window without a press",
-    "why": "opened as #19702"
-   },
    {
     "at": "2026-11-18T21:17:56Z",
     "kind": "released",

@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-25 19:21Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-25 19:30Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-25 18:59Z on goliath; groups below are from it, states from the manifest)
@@ -70,14 +70,14 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-25
 | macos-keys-read-cost | perf(natives): prove a macOS key window draws its own content without reading all its children | computer | P2 | 7d | Main, 2026-11-18: needs an independent review and a VM row before it can open; no work on it now | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-keys-read-cost) |
 | win-takeover-settle | fix(natives): stop Windows takeovers of a busy app bringing it forward after the call failed | computer |  | 5d | Main, 2026-11-21: waits on a restack lane onto cut C (f2d071a1915): needs new production code, since the cut removed what it used: it must carry the WM_NULL settle_activation fence and the interruptible bring_forward arrival loop itself, and a "person input since the takeover started" veto (on cut C alone only the polled last-input date, pointer moves veto too; activity::check() only with the listener + stop-on-press follow-up). Spec: WinTakeoverCut PLAN.md (d) and "What a/b need" | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-takeover-settle) |
 | hyprland-window-list | fix(natives): list Hyprland window positions for native Wayland apps | computer |  | 5d | LinuxUpstream2, 2026-11-20: delta review ReviewHyprList (gpt-6.2-sol) on 50e036edcd6 needs-changes, 3 must-fixes in new code (positional j/clients rows accepted; Hyprland::detect connects at backend startup and caches a failed probe; accept-queue test hits the FD limit); parked for Main/Will | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/hyprland-window-list) |
-| win-takeover-selection | fix(natives): keep the user's caret through a Windows takeover's hand-back | computer |  | 4d | Main, 2026-11-21: waits on a restack lane onto cut C via win-takeover-settle: needs the "person input since the takeover started" veto in its caret loops and a restack on the new restore code (cut C removed activity::check). Spec: WinTakeoverCut PLAN.md (d) and "What a/b need" | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-takeover-selection) |
+| win-takeover-selection | fix(natives): keep the user's caret through a Windows takeover's hand-back | computer |  | 5d | Main, 2026-11-21: waits on a restack lane onto cut C via win-takeover-settle: needs the "person input since the takeover started" veto in its caret loops and a restack on the new restore code (cut C removed activity::check). Spec: WinTakeoverCut PLAN.md (d) and "What a/b need" | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-takeover-selection) |
 | iphone-mirror-scroll-unprimed | fix(natives): restore iPhone Mirroring scrolling after takeover taps | computer | P1 | 1d | Main, 2026-11-23: live run owed | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/iphone-mirror-scroll-unprimed) |
 
 ## Parked (1)
 
 | PR | id | title | area | rank | parked | why | since | branch |
 |---|---|---|---|---|---|---|---|---|
-| [#16611](https://github.com/can1357/oh-my-pi/pull/16611) | read-audio-transcripts | feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio | catalog | P2 | 7d | Will, 2026-11-17: parked as draft, not maintained for now; revisit later | not checked or kept fresh | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-audio-transcripts) |
+| [#16611](https://github.com/can1357/oh-my-pi/pull/16611) | read-audio-transcripts | feat(coding-agent): transcribe audio files and video soundtracks in read with a model that hears audio | catalog | P2 | 8d | Will, 2026-11-17: parked as draft, not maintained for now; revisit later | not checked or kept fresh | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/read-audio-transcripts) |
 
 ## Open PRs (21)
 
