@@ -103234,8 +103234,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/deadline-ranking",
    "host": "MacBook-Pro",
    "added": "2026-11-17T21:17:58Z",
-   "updated": "2026-11-21T18:44:38Z",
-   "note": "Will, 2026-11-17: go-ahead to open",
+   "updated": "2026-11-25T14:41:56Z",
+   "note": "Will, 2026-11-17: go-ahead to open\nQF55, 2026-11-25, v19.2.1 (b28adb50cb8): new conflict with main in packages/ai/src/auth/rank.ts and select.ts (401b81cdc53 feat(auth): routed fast service tiers to credentials that offer them; c2dd6bcf779 cleared oauth refresh backoff after recovery): real restack, not CHANGELOG-only.",
    "kind": "proposal",
    "advanced": "2026-11-21T18:44:38Z"
   },
