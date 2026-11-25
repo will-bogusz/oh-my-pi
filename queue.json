@@ -108195,8 +108195,12 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/shell-windows-env-cwd-test",
    "host": "MacBook-Pro",
    "added": "2026-11-25T15:53:59Z",
-   "updated": "2026-11-25T15:53:59Z",
-   "note": ""
+   "updated": "2026-11-25T15:54:14Z",
+   "note": "",
+   "main_repair": {
+    "reason": "`cargo xwin clippy --target x86_64-pc-windows-msvc -p omp-shell --all-targets` (and rust-check --windows at any base) fails with E0063 at crates/shell/src/shell/tests/env_cwd.rs:22 since cc3a18faa44",
+    "at": "2026-11-25T15:54:13Z"
+   }
   }
  ],
  "watch": {
