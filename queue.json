@@ -105638,7 +105638,7 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/win-wpf-scroll",
    "host": "MacBook-Pro",
    "added": "2026-11-20T04:27:43Z",
-   "updated": "2026-11-25T19:20:51Z",
+   "updated": "2026-11-25T19:21:15Z",
    "note": "QueueFortyOne.ScrollDeltaReview must-fix (split COM init/activation cutoffs in scroll) declined by Main, 2026-11-20: main's shared automation() path, used unchanged; nit fold of control.rs time_left/reply_deadline skipped by Main (don't touch #19814's merged fn)\nMain, 2026-11-21: after a195fe0e6f7 (round-5 P1 fix, past budget) no further push on this PR for bot findings below P0.\n2026-11-25T19:20:28Z: --allow-rust-check windows: full rust-check cannot complete at main's base (crates/shell/src/shell/tests/env_cwd.rs:22 missing errexit, cc3a18faa44; fix is our open main-repair PR 20516); scoped cargo xwin clippy -p omp-natives --all-targets at d7749726b06 adds 0 warning locations vs 35e66deed07; hosted windows-latest run 45679698424 (3fa23fb0d87 + two-list test) units 242 pass, two-list test 3/3 (windows)\n2026-11-25T19:20:41Z: --allow-rust-check windows: full rust-check cannot complete at main's base (crates/shell/src/shell/tests/env_cwd.rs:22 missing errexit, cc3a18faa44; fix is our open main-repair PR 20516); scoped cargo xwin clippy -p omp-natives --all-targets at d7749726b06 adds 0 warning locations vs 35e66deed07; hosted windows-latest run 45679698424 (3fa23fb0d87 + two-list test) units 242 pass, two-list test 3/3 ()",
    "rebases_after": [
     19814

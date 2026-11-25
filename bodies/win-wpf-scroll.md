@@ -26,7 +26,7 @@ Limits: if the first axis moved and the second finds no container under the poin
 
 `wpf_scrolls_go_through_ui_automation_in_front_and_report_what_moved` (ignored) drives each route live. `wpf_mixed_scroll_scrolls_the_list_the_horizontal_axis_brings_under_the_point` (ignored) puts two lists side by side in a horizontal viewer; the vertical step must scroll the one the horizontal step brought under the point.
 
-Cells: v19.0.1 vs an addon from `4dd113f40f8`, 2×5 per mode; in-front trials moved neither focus nor pointer. GitHub-hosted windows-latest runner, at `3fa23fb0d87` plus the two-list test and CI-only diagnostics (this head differs in test code only): desktop units pass (242); the two-list test 3/3; with the re-hit reverted it fails, the vertical step going to the first list and the horizontal assertion failing first (why that build skipped the horizontal axis is not established); the route test passes up to a page-swap step this head drops.
+Cells: v19.0.1 vs an addon from `4dd113f40f8`, 2×5 per mode; in-front trials moved neither focus nor pointer. GitHub-hosted windows-latest runner, at `3fa23fb0d87` plus the two-list test and CI-only diagnostics (this head adds test changes and a rebase): desktop units pass (242); the two-list test 3/3; with the re-hit reverted it fails, the vertical step going to the first list and the horizontal assertion failing first (why that build skipped the horizontal axis is not established); the route test passes up to a page-swap step this head drops.
 
 Not covered live: a first axis that moves, then no container for the second.
 
