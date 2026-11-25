@@ -108168,7 +108168,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-25T02:43:02Z",
+  "checked": "2026-11-25T03:44:11Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108214,6 +108214,13 @@
     "title": "feat(ai,coding-agent): let an account policy decide its own saved-reset spending",
     "files": [
      "packages/coding-agent/src/cli/usage-cli.ts"
+    ]
+   },
+   "#19620": {
+    "since": "2026-11-25T03:44:11Z",
+    "title": "fix(snapcompact,coding-agent): re-render a snapcompact archive in the frame shape of the model reading it",
+    "files": [
+     "packages/coding-agent/src/session/session-maintenance.ts"
     ]
    }
   },
@@ -109646,6 +109653,15 @@
     "title": "feat(ai,coding-agent): let an account policy decide its own saved-reset spending",
     "files": [
      "packages/coding-agent/src/cli/usage-cli.ts"
+    ]
+   },
+   {
+    "at": "2026-11-25T03:44:11Z",
+    "kind": "conflict",
+    "label": "#19620",
+    "title": "fix(snapcompact,coding-agent): re-render a snapcompact archive in the frame shape of the model reading it",
+    "files": [
+     "packages/coding-agent/src/session/session-maintenance.ts"
     ]
    }
   ]
@@ -119359,7 +119375,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-25T03:13:29.260890Z",
+  "at": "2026-11-25T03:44:11.847142Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -119546,8 +119562,10 @@
     "area": "snapcompact",
     "priority": "P2",
     "title": "fix(snapcompact,coding-agent): re-render a snapcompact archive in the frame shape of the model reading it",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in packages/coding-agent/src/session/session-maintenance.ts"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -120085,7 +120103,8 @@
     "title": "fix(catalog,snapcompact,coding-agent): give DeepSeek V4.1 Flash its snapcompact archive as text",
     "action": "wait",
     "reasons": [
-     "needs #19880 (open), #19620 (open)"
+     "needs #19880 (open), #19620 (open)",
+     "its need #19620 conflicts with main in packages/coding-agent/src/session/session-maintenance.ts"
     ],
     "note": "",
     "over": [],
