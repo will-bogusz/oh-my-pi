@@ -119599,12 +119599,12 @@
   }
  },
  "plan": {
-  "at": "2026-11-25T16:56:23.365989Z",
+  "at": "2026-11-25T17:27:11.416425Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
-   "used": 3,
-   "left": 5
+   "used": 2,
+   "left": 6
   },
   "rows": [
    {
@@ -119752,7 +119752,7 @@
     "title": "fix(ai): rotate Devin logins whose weekly quota is spent",
     "action": "keep",
     "reasons": [],
-    "note": "",
+    "note": "tests-over: DevinQuotaRotateLane, 2026-11-25: two outcomes, one test each: the session moves to the other login on the weekly refusal (needs its own offline AuthStorage with no usage provider, per roboomp and Codex), and a per-minute throttle worded alike stays out of rotation",
     "over": [],
     "paired": [],
     "blocked_by": [],
