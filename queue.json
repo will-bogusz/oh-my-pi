@@ -596,8 +596,8 @@
    "worktree": "/Users/viathebrink/.omp/main-wt/oh-my-pi/fallback-revert-when-healthy",
    "host": "MacBook-Pro",
    "added": "2026-10-13T21:47:19Z",
-   "updated": "2026-11-17T20:47:53Z",
-   "note": "Will, 2026-11-17: overlaps schickling-assistant's #15536 (issue #17671); back that design before reopening ours",
+   "updated": "2026-11-25T05:38:31Z",
+   "note": "Will, 2026-11-17: overlaps schickling-assistant's #15536 (issue #17671); back that design before reopening ours\nQF54, 2026-11-25, restack onto v19.2.0+ (b7fed994075/43215265750): imports '@oh-my-pi/pi-tui/thinking', which no longer exists (77848964343): repoint at restack; check:ts fails otherwise.",
    "hold": "Will, 2026-11-02: account-broker cluster on hold for redesign (Codex flagged codex-auto-reset.ts over 9 rounds on #15128); do not open or advance"
   },
   {
