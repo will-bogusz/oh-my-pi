@@ -105783,6 +105783,45 @@
        "\t\tconst result = await run(native, 'await (await desktop.window(\"42\")).scroll(1, 2, { dy: 3 })', \"takeover\");"
       ]
      }
+    },
+    {
+     "at": "2026-11-25T19:20:45Z",
+     "reason": "Codex P1 4696894731 + P2 4696894745 round (Main, 2026-11-25): same-branch test rows dropped (one row per branch; list in commit 0783f0c9f5d), shared hit replaced by a per-axis re-hit, harness takes a script, docs line rewritten for the partial-axis AxUnconfirmed",
+     "old": "35e66deed071c573e04f5580df9017149c8cbb90",
+     "new": "8a44f7cda3c415f33c2ae7548c68ed401e0faeee",
+     "dropped": {
+      "crates/natives/src/desktop/mod.rs": [
+       "\t\tfor (dx, dy) in [(f64::INFINITY, 0.0), (0.0, f64::NEG_INFINITY), (0.0, f64::NAN)] {"
+      ],
+      "crates/natives/src/desktop/win32/ax.rs": [
+       "\t\t\tlet mut element = run.call(|| Ok::<_, DesktopError>(hit.clone()))?;",
+       "\t\t\t(&[None, Some(1)][..], Some(\"pattern\")),",
+       "\t\t\t(&[Some(0)][..], None),",
+       "\t\tfor (depth, expected) in [",
+       "\t\t\t(1, Some(0)),",
+       "\t\t\t(12, Some(11)),",
+       "\t\t\t(MAX_ANCESTORS, Some(MAX_ANCESTORS - 1)),",
+       "\t\t\t(MAX_ANCESTORS + 1, None),"
+      ],
+      "crates/natives/src/desktop/win32/input.rs": [
+       "\t\tfor (delta, expected) in [",
+       "\t\t\t(0.0, Some(0)),",
+       "\t\t\t(27_300.0, Some(32_760)),",
+       "\t\t\t(-27_300.0, Some(-32_760)),",
+       "\t\t\t(27_400.0, None),",
+       "\t\t\t(f64::MAX, None),"
+      ],
+      "crates/natives/src/desktop/win32/mod.rs": [
+       "\t\t\t\t.args([\"-NoProfile\", \"-Command\", WPF_LIST])",
+       "\t\tfor dy in [100.0, 27_400.0] {",
+       "\t\t\tlet error = scroll(x, y, (0.0, dy), None).unwrap_err();",
+       "\t\tfor point in [(x, y), (width * 0.85, y)] {",
+       "\t\t\tlet error = scroll(point.0, point.1, (0.0, 100.0), None).unwrap_err();"
+      ],
+      "docs/tools/computer.md": [
+       "On Windows, WPF ignores posted wheel input. While a WPF window with no Chromium/WebView2 child window holds the foreground, `scroll` uses the UI Automation scroll containers under the point without moving the pointer, choosing each requested axis independently. Before each step it takes the container's item or element under the point; the step counts as moved once that element moves on screen the requested way, since rows added or removed and a resized view leave it in place. A step that leaves it in place throws `InputFailed`; a step with no such element under the point (its scroll bar or a column header, for example), or that moved it the other way, throws `AxUnconfirmed`. A child window under the point that is neither WPF nor the root (a hosted WinForms list, for example) keeps the posted wheel where its delivery checks allow it. Every other WPF scroll (behind other windows, no scroll container under the point, a Chromium/WebView2 child window, a WPF child window hosted in a non-WPF window, Windows wheel scrolling set to 0 lines or characters per notch on every requested axis) throws `BackgroundUnavailable` with nothing sent, as other WPF pointer input does, so `computer.takeover` decides; by default (`fallback`) it reruns the scroll with a real wheel in takeover. Inspect the target window before retrying partial `InputFailed` or `AxUnconfirmed` errors; input may already have taken effect."
+      ]
+     }
     }
    ],
    "built": [
