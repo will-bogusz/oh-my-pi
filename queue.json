@@ -119488,8 +119488,8 @@
   }
  },
  "plan": {
-  "at": "2026-11-25T16:26:13.164180Z",
-  "host": "goliath",
+  "at": "2026-11-25T16:33:56.982508Z",
+  "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
    "used": 1,
@@ -120734,6 +120734,23 @@
     "created": "2026-11-12T04:40:13Z"
    },
    {
+    "id": "devin-quota-exhausted-rotate",
+    "label": "devin-quota-exhausted-rotate",
+    "number": null,
+    "state": "queued",
+    "area": "other",
+    "priority": null,
+    "title": "fix(ai): rotate Devin logins whose weekly quota is spent",
+    "action": "open",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-25T16:33:34Z"
+   },
+   {
     "id": "encoded-prefix-count",
     "label": "encoded-prefix-count",
     "number": null,
@@ -120794,10 +120811,8 @@
     "area": "other",
     "priority": null,
     "title": "fix(stats): show running sessions' new requests within a second on macOS",
-    "action": "wait",
-    "reasons": [
-     "conflicts with main in (branch missing on the fork)"
-    ],
+    "action": "open",
+    "reasons": [],
     "note": "",
     "over": [],
     "paired": [],

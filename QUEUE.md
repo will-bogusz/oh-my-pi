@@ -1,18 +1,20 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-25 16:33Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-25 16:34Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-25 16:26Z on goliath; groups below are from it, states from the manifest)
-**Counts:** openable now 1, conflict-held 16, stacked 16, held 14, parked 1, open PRs 20, queued since the last plan 1; merged 422, closed 45
+**Ready budget:** 1 of 8 ready events used in the hour before the last plan, 7 left (plan of 2026-11-25 16:33Z on MacBook-Pro; groups below are from it, states from the manifest)
+**Counts:** openable now 3, conflict-held 15, stacked 16, held 14, parked 1, open PRs 20; merged 422, closed 45
 
-## Openable now (1)
+## Openable now (3)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
+| stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 12d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 | factory-droid-1100-pin | feat(catalog): identify Factory Droid requests as droid 1.10.0 | factory-droid |  | 11d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-pin) |
+| devin-quota-exhausted-rotate | fix(ai): rotate Devin logins whose weekly quota is spent | other |  | 0h | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-quota-exhausted-rotate) |
 
-## Conflict-held (16)
+## Conflict-held (15)
 
 | id | title | area | priority | age | blocked by | branch |
 |---|---|---|---|---|---|---|
@@ -29,7 +31,6 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-25
 | win-minimised-windows | fix(natives,coding-agent): show a minimized Windows app's window from apps.open instead of launching it again | computer | P2 | 14d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#20019](https://github.com/can1357/oh-my-pi/pull/20019), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-minimised-windows) |
 | macos-ax-cancel-before-send | fix(natives): send no macOS AX action once its run is cancelled | natives | P2 | 14d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-ax-cancel-before-send) |
 | win-ax-states | fix(natives): expose Windows control state and stale-reference matches | computer | P2 | 14d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#20019](https://github.com/can1357/oh-my-pi/pull/20019), [#20178](https://github.com/can1357/oh-my-pi/pull/20178), [#20179](https://github.com/can1357/oh-my-pi/pull/20179), [#19531](https://github.com/can1357/oh-my-pi/pull/19531), [#19618](https://github.com/can1357/oh-my-pi/pull/19618), [#19870](https://github.com/can1357/oh-my-pi/pull/19870), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-ax-states) |
-| stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 12d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
 | macos-web-type-background | fix(natives): type into a background macOS web page field without a takeover | computer | P2 | 10d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#19531](https://github.com/can1357/oh-my-pi/pull/19531), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-web-type-background) |
 | deadline-ranking | feat(ai): rank an account priority by quota deadline | ai/auth | P2 | 7d | [#19623](https://github.com/can1357/oh-my-pi/pull/19623), [#19700](https://github.com/can1357/oh-my-pi/pull/19700), [#19701](https://github.com/can1357/oh-my-pi/pull/19701), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/deadline-ranking) |
 
@@ -103,9 +104,3 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-25
 | [#20019](https://github.com/can1357/oh-my-pi/pull/20019) | win-takeover-intervene | fix(natives): wait for the user to pause before a Windows takeover | computer | P1 | 4d | keep; accepted pair with #19870: Main, 2026-11-20: win32/mod.rs tests-module import list only; combined = union of both WindowsAndMessaging imports | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-takeover-intervene) |
 | [#20179](https://github.com/can1357/oh-my-pi/pull/20179) | win-wpf-press | fix(natives): press WPF controls behind other windows through their default action | computer | P1 | 3d | keep; accepted pair with #19195: Main, 2026-11-21: docs/tools/computer.md only; combined = #19195's macOS drag paragraph, wbc's BM_CLICK paragraph, then this entry's WPF press paragraph, no wording change; accepted pair with #19870: Main, 2026-11-21: win32/ax.rs std and windows_sys UI import lists = union (cmp::Ordering, time::{Duration, Instant}; IsWindowEnabled + SPI_GETWHEELSCROLLCHARS/LINES, SystemParametersInfoW); docs AxUnconfirmed: in the recorded wbc x #19870 sentence, 'a WinForms check box' becomes 'a WinForms or WPF check box'; accepted pair with #20177: Main, 2026-11-22: win32/ax.rs: contained_root/contained_or take popup's lookup and send closures; D's refusal route keeps containment's first check (Ok -> lookup, recheck ensure_pattern_safe, send; Err(refusal) -> refused), and perform's LegacyPress fallback sits in the lookup, send = action.send() after popup's recheck and #19871's one dispatching() mark; a window switch during the lookup is refused with nothing sent rather than handed to the background route (one Limits line in D's body once popup is in); built in tree a50c4da6228, D's press live test passes on GitHub windows-latest; accepted pair with #20178: Main, 2026-11-22: win32/ax.rs = both appended test blocks (D's WPF press fixture/test, then uia's slider/combo fixture/test; no shared item names); docs/tools/computer.md AxUnconfirmed paragraph = D's 'a WinForms or WPF check box' + uia's ', and a combo selection may already have changed even when its post-close settling period could not finish' clause; no production overlap. Form = D2's base merge 86aca62c83a, built in tree a50c4da6228 (Windows desktop unit tests + D press live + uia/D2 setValue live pass on GitHub windows-latest) Rechecked 2026-11-22 at uia 4b781b170a8 (read-back fix): conflict hunks unchanged except uia's own appended-block content; form holds.; tests-over: ReviewWpfPressCut10, 2026-11-20: one signed-in WPF fixture test whose rows each reach a distinct branch (reviewer's request) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-wpf-press) |
 | [#20516](https://github.com/can1357/oh-my-pi/pull/20516) | shell-windows-env-cwd-test | fix(shell): build the Windows env_cwd test with the errexit field | shell |  | 0h | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/shell-windows-env-cwd-test) |
-
-## Queued since the last plan (1)
-
-| id | title | area | priority | age | branch |
-|---|---|---|---|---|---|
-| devin-quota-exhausted-rotate | fix(ai): rotate Devin logins whose weekly quota is spent | other |  | 0h | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/devin-quota-exhausted-rotate) |
