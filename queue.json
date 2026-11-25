@@ -119582,7 +119582,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-25T16:44:14.962885Z",
+  "at": "2026-11-25T16:45:05.768768Z",
   "host": "MacBook-Pro",
   "budget": {
    "limit": 8,
@@ -119707,6 +119707,23 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-22T15:37:36Z"
+   },
+   {
+    "id": "devin-quota-exhausted-rotate",
+    "label": "#20524",
+    "number": 20524,
+    "state": "open",
+    "area": "other",
+    "priority": "P1",
+    "title": "fix(ai): rotate Devin logins whose weekly quota is spent",
+    "action": "keep",
+    "reasons": [],
+    "note": "",
+    "over": [],
+    "paired": [],
+    "blocked_by": [],
+    "needs": [],
+    "created": "2026-11-25T16:43:37Z"
    },
    {
     "id": "x11-xtest-release",
@@ -119966,23 +119983,6 @@
     "blocked_by": [],
     "needs": [],
     "created": "2026-11-25T16:12:36Z"
-   },
-   {
-    "id": "devin-quota-exhausted-rotate",
-    "label": "#20524",
-    "number": 20524,
-    "state": "open",
-    "area": "other",
-    "priority": null,
-    "title": "fix(ai): rotate Devin logins whose weekly quota is spent",
-    "action": "keep",
-    "reasons": [],
-    "note": "",
-    "over": [],
-    "paired": [],
-    "blocked_by": [],
-    "needs": [],
-    "created": "2026-11-25T16:43:37Z"
    },
    {
     "id": "iphone-mirror-scroll-distance",
