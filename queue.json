@@ -108399,7 +108399,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-26T22:02:12Z",
+  "checked": "2026-11-26T23:02:46Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108520,20 +108520,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-19T22:46:08Z",
-    "kind": "released",
-    "number": 19715,
-    "title": "test(natives): restore passing macOS native typing tests",
-    "tag": "v19.0.1"
-   },
-   {
-    "at": "2026-11-19T22:46:08Z",
-    "kind": "released",
-    "number": 19703,
-    "title": "fix(tui): stopped the loop profiler when the last TUI watchdog stops",
-    "tag": "v19.0.1"
-   },
    {
     "at": "2026-11-20T00:49:17Z",
     "kind": "merged",
