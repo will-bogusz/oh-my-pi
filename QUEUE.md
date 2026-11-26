@@ -1,6 +1,6 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-26 07:14Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-26 07:44Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
 **Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-26 07:13Z on goliath; groups below are from it, states from the manifest)
@@ -18,7 +18,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-26
 |---|---|---|---|---|---|---|
 | r2/relay-own-only | fix(browser): attach only the relay tabs omp opened or borrowed | browser | P2 | 43d | [#19542](https://github.com/can1357/oh-my-pi/pull/19542), [#19633](https://github.com/can1357/oh-my-pi/pull/19633), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/r2/relay-own-only) |
 | factory-droid-web-search | feat(coding-agent): search the web through a Factory Droid login (web/factory) | web | P2 | 38d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-web-search) |
-| computer-ui-quiet | fix(computer): wait for the app to finish reacting before the next read or input | computer | P2 | 37d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#20019](https://github.com/can1357/oh-my-pi/pull/20019), [#19531](https://github.com/can1357/oh-my-pi/pull/19531), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-ui-quiet) |
+| computer-ui-quiet | fix(computer): wait for the app to finish reacting before the next read or input | computer | P2 | 38d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#20019](https://github.com/can1357/oh-my-pi/pull/20019), [#19531](https://github.com/can1357/oh-my-pi/pull/19531), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-ui-quiet) |
 | compaction-trigger | feat(coding-agent): record what triggered each compaction | other |  | 36d | [#19620](https://github.com/can1357/oh-my-pi/pull/19620), [#19623](https://github.com/can1357/oh-my-pi/pull/19623), [#19626](https://github.com/can1357/oh-my-pi/pull/19626), [#19701](https://github.com/can1357/oh-my-pi/pull/19701), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/compaction-trigger) |
 | text-reader-usage-shift | fix(coding-agent): price a text-only fallback's archive text, not the failed request's frames, in the fit check | coding-agent |  | 25d | [#19620](https://github.com/can1357/oh-my-pi/pull/19620), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/text-reader-usage-shift) |
 | token-count-policy | feat(catalog,coding-agent): token-count framing policy in KDL | catalog |  | 23d | [#19620](https://github.com/can1357/oh-my-pi/pull/19620), [#19880](https://github.com/can1357/oh-my-pi/pull/19880), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/token-count-policy) |
