@@ -108399,7 +108399,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-26T01:37:19Z",
+  "checked": "2026-11-26T02:07:45Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108520,12 +108520,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-19T01:52:03Z",
-    "kind": "openable",
-    "id": "fill-key-events",
-    "title": "fix(coding-agent): fire key events after a browser fill for pages that search on keyup"
-   },
    {
     "at": "2026-11-19T04:24:26Z",
     "kind": "unopenable",
@@ -119131,7 +119125,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-26T01:06:50.135870Z",
+  "at": "2026-11-26T02:07:46.500143Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
