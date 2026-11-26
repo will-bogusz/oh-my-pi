@@ -108399,7 +108399,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-26T10:47:51Z",
+  "checked": "2026-11-26T11:49:51Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108520,12 +108520,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-19T11:33:48Z",
-    "kind": "openable",
-    "id": "win-edit-setvalue",
-    "title": "fix(natives): write Windows edit values without activating their window"
-   },
    {
     "at": "2026-11-19T16:40:00Z",
     "kind": "unopenable",
