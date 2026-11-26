@@ -108399,7 +108399,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-26T15:54:51Z",
+  "checked": "2026-11-26T16:56:42Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108520,13 +108520,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-19T16:40:00Z",
-    "kind": "unopenable",
-    "id": "win-edit-setvalue",
-    "title": "fix(natives): write Windows edit values without activating their window",
-    "why": "plan: held (held: Main, 2026-11-19: hold until WinMine3's interleaved stall check (v19.0.0 vs round-5 build, n=30/cell, wait-chain + minidump per stall) lands and Main gives the go)"
-   },
    {
     "at": "2026-11-19T18:43:05Z",
     "kind": "merged",
