@@ -108399,7 +108399,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-27T19:27:10Z",
+  "checked": "2026-11-27T19:57:54Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108560,13 +108560,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-20T19:39:33Z",
-    "kind": "unopenable",
-    "id": "hyprland-window-list",
-    "title": "fix(natives): read window positions and focus from Hyprland",
-    "why": "plan: wait (conflicts with #19871 in crates/natives/src/desktop/mod.rs)"
-   },
    {
     "at": "2026-11-20T20:10:43Z",
     "kind": "unopenable",
@@ -118946,7 +118939,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-27T18:56:56.208117Z",
+  "at": "2026-11-27T19:57:54.851756Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
