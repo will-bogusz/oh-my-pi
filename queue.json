@@ -108399,7 +108399,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-27T13:51:15Z",
+  "checked": "2026-11-27T14:21:25Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108530,19 +108530,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-20T14:03:27Z",
-    "kind": "openable",
-    "id": "win-takeover-intervene",
-    "title": "fix(natives): stop Windows takeovers when the user types or clicks"
-   },
-   {
-    "at": "2026-11-20T14:03:27Z",
-    "kind": "unopenable",
-    "id": "win-wpf-scroll",
-    "title": "fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing",
-    "why": "plan: wait (conflicts with win-takeover-intervene in crates/natives/src/desktop/win32/mod.rs)"
-   },
    {
     "at": "2026-11-20T14:33:32Z",
     "kind": "openable",
