@@ -108399,7 +108399,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-27T17:55:45Z",
+  "checked": "2026-11-27T18:25:55Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108532,25 +108532,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-20T18:07:37Z",
-    "kind": "openable",
-    "id": "devin-neon-image-price",
-    "title": "fix(catalog): budget Gemini 4 Neon's images on Devin at the 1,089 tokens it bills"
-   },
-   {
-    "at": "2026-11-20T18:07:37Z",
-    "kind": "openable",
-    "id": "win-button-click",
-    "title": "fix(natives): click Windows buttons without activating their window"
-   },
-   {
-    "at": "2026-11-20T18:07:37Z",
-    "kind": "unopenable",
-    "id": "picker-stale-discovery",
-    "title": "fix(coding-agent): refresh discovery from the model picker once the catalog is two hours old",
-    "why": "opened as #19878"
-   },
    {
     "at": "2026-11-20T18:38:19Z",
     "kind": "unopenable",
