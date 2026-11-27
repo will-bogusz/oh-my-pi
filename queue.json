@@ -108399,7 +108399,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-27T08:14:01Z",
+  "checked": "2026-11-27T08:44:55Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108527,19 +108527,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-20T08:27:52Z",
-    "kind": "openable",
-    "id": "win-popup-foreground",
-    "title": "fix(natives): press items of the open WPF context menu of the window in front"
-   },
-   {
-    "at": "2026-11-20T08:27:52Z",
-    "kind": "unopenable",
-    "id": "win-wpf-scroll",
-    "title": "fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing",
-    "why": "plan: wait (conflicts with win-popup-foreground in crates/natives/src/desktop/win32/ax.rs)"
-   },
    {
     "at": "2026-11-20T10:29:39Z",
     "kind": "openable",
