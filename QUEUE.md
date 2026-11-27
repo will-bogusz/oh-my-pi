@@ -1,16 +1,16 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-27 17:25Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-27 17:56Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-27 16:54Z on goliath; groups below are from it, states from the manifest)
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-27 17:55Z on goliath; groups below are from it, states from the manifest)
 **Counts:** openable now 1, conflict-held 16, stacked 16, held 14, parked 1, open PRs 19; merged 424, closed 45
 
 ## Openable now (1)
 
 | id | title | area | priority | age | plan | branch |
 |---|---|---|---|---|---|---|
-| factory-droid-1100-pin | feat(catalog): identify Factory Droid requests as droid 1.10.0 | factory-droid |  | 13d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-pin) |
+| factory-droid-1100-pin | feat(catalog): identify Factory Droid requests as droid 1.10.0 | factory-droid |  | 14d | open | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-pin) |
 
 ## Conflict-held (16)
 
@@ -47,7 +47,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-27
 | browser-wait-text-rendered | fix(browser): let a scoped waitForText match only text the page renders | browser | P2 | 17d | browser-wait-text-regexp | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-wait-text-rendered) |
 | act-look-prompt | docs(browser): teach acting and looking in one Eval cell without sleeps | browser | P2 | 16d | settle-reads ([#19633](https://github.com/can1357/oh-my-pi/pull/19633)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-act-look-prompt) |
 | observe-stable-ids | feat(browser): keep observe() ids stable across observations | browser | P2 | 16d | act-look-prompt | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-observe-stable-ids) |
-| factory-droid-1100-models | feat(catalog): add the Factory Droid models droid 1.10.0 serves | factory-droid |  | 13d | factory-droid-1100-pin | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-models) |
+| factory-droid-1100-models | feat(catalog): add the Factory Droid models droid 1.10.0 serves | factory-droid |  | 14d | factory-droid-1100-pin | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/factory-droid-1100-models) |
 | snapcompact-shape-reader-identity | fix(catalog): give snapcompact readers their lead model's frame shape | snapcompact | P2 | 9d | snapcompact-shape-kdl ([#19880](https://github.com/can1357/oh-my-pi/pull/19880)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-shape-reader-identity) |
 | snapcompact-deepseek-text | fix(catalog,snapcompact,coding-agent): give DeepSeek V4.1 Flash its snapcompact archive as text | snapcompact | P2 | 9d | snapcompact-shape-kdl ([#19880](https://github.com/can1357/oh-my-pi/pull/19880)), snapcompact-rerender-on-switch ([#19620](https://github.com/can1357/oh-my-pi/pull/19620)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-deepseek-text) |
 | snapcompact-carbon-1568 | fix(catalog): draw Gemini 4 Carbon, Neon and Hydrogen snapcompact frames at 1568px on Devin, and Carbon's on Factory Droid | snapcompact | P2 | 9d | snapcompact-shape-kdl ([#19880](https://github.com/can1357/oh-my-pi/pull/19880)) | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/snapcompact-carbon-1568) |

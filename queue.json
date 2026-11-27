@@ -108399,7 +108399,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-27T17:25:10Z",
+  "checked": "2026-11-27T17:55:45Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108447,7 +108447,9 @@
     "since": "2026-11-24T06:19:13Z",
     "title": "feat(ai,coding-agent): let an account policy decide its own saved-reset spending",
     "files": [
-     "packages/coding-agent/src/cli/usage-cli.ts"
+     "packages/coding-agent/src/cli/usage-cli.ts",
+     "packages/coding-agent/src/session/codex-auto-reset.ts",
+     "packages/coding-agent/src/session/reset-expiry.ts"
     ]
    },
    "#19620": {
@@ -108530,12 +108532,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-20T17:36:51Z",
-    "kind": "openable",
-    "id": "picker-stale-discovery",
-    "title": "fix(coding-agent): refresh discovery from the model picker once the catalog is two hours old"
-   },
    {
     "at": "2026-11-20T18:07:37Z",
     "kind": "openable",
@@ -118923,7 +118919,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-27T16:54:11.367908Z",
+  "at": "2026-11-27T17:55:45.775805Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -119281,7 +119277,7 @@
     "title": "feat(ai,coding-agent): let an account policy decide its own saved-reset spending",
     "action": "rebase",
     "reasons": [
-     "conflicts with main in packages/coding-agent/src/cli/usage-cli.ts"
+     "conflicts with main in packages/coding-agent/src/cli/usage-cli.ts, packages/coding-agent/src/session/codex-auto-reset.ts, packages/coding-agent/src/session/reset-expiry.ts"
     ],
     "note": "accepted pair with #19626: Main, 2026-11-18: adjacent call-site edits in agent-session.ts #redeemConsentedResets and its three callers; #19626 adds a trigger argument, this adds a consent argument; the combined form passes both (provider, trigger, actions, coordinator, consent) and keeps this PR's per-action credentialResetModes; accepted pair with #19700: Main, 2026-11-18: both add account-policy keys side by side in docs/auth-broker-gateway.md (table row), ai auth-broker/discover.ts (allowed keys) and cli/usage-cli.ts (diagnostics fields, base spread, policy-line prefix); the combined form keeps both: reservePctByLimit/scopedInsideReserve plus autoRedeem*, prefix with limit reserves then reclaim then auto-redeem",
     "over": [],
@@ -120404,7 +120400,7 @@
     "action": "held",
     "reasons": [
      "held: Will, 2026-10-22: parked; reopens only when Will asks",
-     "conflicts with main in docs/provider-quirks.md, packages/coding-agent/src/modes/controllers/command-controller.ts, packages/coding-agent/test/agent-session-stats.test.ts"
+     "conflicts with main in docs/provider-quirks.md, packages/coding-agent/src/modes/controllers/command-controller.ts, packages/coding-agent/src/modes/rpc/wire/state.ts, packages/coding-agent/test/agent-session-stats.test.ts"
     ],
     "note": "",
     "over": [],
@@ -120423,7 +120419,8 @@
     "title": "feat(catalog): add the Factory Droid models droid 1.10.0 serves",
     "action": "wait",
     "reasons": [
-     "needs factory-droid-1100-pin (queued)"
+     "needs factory-droid-1100-pin (queued)",
+     "conflicts with main in packages/catalog/src/compat/rules/providers/factory-droid.kdl, packages/catalog/src/compat/rules/runtime/behavior.kdl, packages/catalog/test/factory-droid-provider.test.ts"
     ],
     "note": "",
     "over": [],
