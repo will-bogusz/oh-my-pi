@@ -108399,7 +108399,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-27T19:57:54Z",
+  "checked": "2026-11-27T20:28:27Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108415,6 +108415,7 @@
     "files": [
      "packages/coding-agent/src/prompts/tools/browser.md",
      "packages/coding-agent/src/tools/browser/tab-call.ts",
+     "packages/coding-agent/test/tools/browser-tab-timeouts.test.ts",
      "packages/coding-agent/test/tools/browser-tern-tab.test.ts"
     ]
    },
@@ -108440,7 +108441,6 @@
      "packages/ai/src/auth/select.ts",
      "packages/coding-agent/src/modes/controllers/event-controller.ts",
      "packages/coding-agent/src/modes/rpc/rpc-client.ts",
-     "packages/coding-agent/src/session/credential-pin.ts",
      "packages/coding-agent/src/session/reset-expiry.ts"
     ]
    },
@@ -108450,7 +108450,6 @@
     "files": [
      "packages/ai/src/auth-broker/discover.ts",
      "packages/coding-agent/src/cli/usage-cli.ts",
-     "packages/coding-agent/src/session/agent-session.ts",
      "packages/coding-agent/src/session/codex-auto-reset.ts",
      "packages/coding-agent/src/session/reset-expiry.ts"
     ]
@@ -108551,22 +108550,9 @@
     "merge_commit": "d3ded4246f642e5566c28abaf1c9793000c060dc",
     "merged_at": "2026-11-25T20:42:45Z",
     "findings": []
-   },
-   "20524": {
-    "title": "fix(ai): rotate Devin logins whose weekly quota is spent",
-    "merge_commit": "a28d947a7269231069205712935479b330025e6b",
-    "merged_at": "2026-11-25T20:22:33Z",
-    "findings": []
    }
   },
   "events": [
-   {
-    "at": "2026-11-20T20:10:43Z",
-    "kind": "unopenable",
-    "id": "win-button-click",
-    "title": "fix(natives): click Windows buttons without activating their window",
-    "why": "opened as #19889"
-   },
    {
     "at": "2026-11-21T07:53:28Z",
     "kind": "released",
@@ -118939,7 +118925,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-27T19:57:54.851756Z",
+  "at": "2026-11-27T20:28:28.061333Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -119189,7 +119175,7 @@
     "title": "feat(browser): add waitForFunction to tabs and frames",
     "action": "rebase",
     "reasons": [
-     "conflicts with main in packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/tab-call.ts, packages/coding-agent/test/tools/browser-tern-tab.test.ts"
+     "conflicts with main in packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/tab-call.ts, packages/coding-agent/test/tools/browser-tab-timeouts.test.ts, packages/coding-agent/test/tools/browser-tern-tab.test.ts"
     ],
     "note": "",
     "over": [],
@@ -119225,7 +119211,7 @@
     "title": "feat(ai,coding-agent): record why a session's OAuth account switched",
     "action": "rebase",
     "reasons": [
-     "conflicts with main in packages/ai/src/auth/affinity.ts, packages/ai/src/auth/select.ts, packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/modes/rpc/rpc-client.ts, packages/coding-agent/src/session/credential-pin.ts, packages/coding-agent/src/session/reset-expiry.ts"
+     "conflicts with main in packages/ai/src/auth/affinity.ts, packages/ai/src/auth/select.ts, packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/modes/rpc/rpc-client.ts, packages/coding-agent/src/session/reset-expiry.ts"
     ],
     "note": "",
     "over": [],
@@ -119303,7 +119289,7 @@
     "title": "feat(ai,coding-agent): let an account policy decide its own saved-reset spending",
     "action": "rebase",
     "reasons": [
-     "conflicts with main in packages/ai/src/auth-broker/discover.ts, packages/coding-agent/src/cli/usage-cli.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/codex-auto-reset.ts, packages/coding-agent/src/session/reset-expiry.ts"
+     "conflicts with main in packages/ai/src/auth-broker/discover.ts, packages/coding-agent/src/cli/usage-cli.ts, packages/coding-agent/src/session/codex-auto-reset.ts, packages/coding-agent/src/session/reset-expiry.ts"
     ],
     "note": "accepted pair with #19626: Main, 2026-11-18: adjacent call-site edits in agent-session.ts #redeemConsentedResets and its three callers; #19626 adds a trigger argument, this adds a consent argument; the combined form passes both (provider, trigger, actions, coordinator, consent) and keeps this PR's per-action credentialResetModes; accepted pair with #19700: Main, 2026-11-18: both add account-policy keys side by side in docs/auth-broker-gateway.md (table row), ai auth-broker/discover.ts (allowed keys) and cli/usage-cli.ts (diagnostics fields, base spread, policy-line prefix); the combined form keeps both: reservePctByLimit/scopedInsideReserve plus autoRedeem*, prefix with limit reserves then reclaim then auto-redeem",
     "over": [],
@@ -119364,7 +119350,7 @@
     "action": "wait",
     "reasons": [
      "needs #19542 (open)",
-     "its need #19542 conflicts with main in packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/tab-call.ts, packages/coding-agent/test/tools/browser-tern-tab.test.ts",
+     "its need #19542 conflicts with main in packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/tab-call.ts, packages/coding-agent/test/tools/browser-tab-timeouts.test.ts, packages/coding-agent/test/tools/browser-tern-tab.test.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
     ],
     "note": "",
@@ -119387,7 +119373,7 @@
     "action": "wait",
     "reasons": [
      "needs browser-wait-text-regexp (queued)",
-     "its need browser-wait-text-regexp conflicts with main in packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/aria/aria-snapshot.ts, packages/coding-agent/src/tools/browser/queries.ts, packages/coding-agent/src/tools/browser/tab-call.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts, packages/coding-agent/test/tools/browser-tern-tab.test.ts"
+     "its need browser-wait-text-regexp conflicts with main in packages/coding-agent/src/prompts/tools/browser.md, packages/coding-agent/src/tools/browser/aria/aria-snapshot.ts, packages/coding-agent/src/tools/browser/queries.ts, packages/coding-agent/src/tools/browser/tab-call.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts, packages/coding-agent/test/tools/browser-tab-timeouts.test.ts, packages/coding-agent/test/tools/browser-tern-tab.test.ts"
     ],
     "note": "",
     "over": [],
@@ -119606,7 +119592,7 @@
      "conflicts with #19633 in docs/tools/browser.md, packages/coding-agent/src/tools/browser/tab-worker.ts",
      "its need r2/relay-popup-owned conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/browser-relay/extension/background.ts, packages/browser-relay/extension/chrome.d.ts, packages/browser-relay/extension/manifest.json, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/extension-assets/manifest.json.txt, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/relay/protocol.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-daemon.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
      "its need r2/page-waiting conflicts with main in docs/tools/browser.md, packages/browser-relay/README.md, packages/coding-agent/src/tools/browser/attach.ts, packages/coding-agent/src/tools/browser/dialogs.ts, packages/coding-agent/src/tools/browser/frames.ts, packages/coding-agent/src/tools/browser/interactions.ts, packages/coding-agent/src/tools/browser/relay/bridge.ts, packages/coding-agent/src/tools/browser/relay/extension-assets/background.js.txt, packages/coding-agent/src/tools/browser/relay/probe.ts, packages/coding-agent/src/tools/browser/tab-supervisor.ts, packages/coding-agent/src/tools/browser/tab-worker.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts, packages/coding-agent/test/tools/browser-attach.test.ts, packages/coding-agent/test/tools/browser-relay-bridge.test.ts, packages/coding-agent/test/tools/browser-relay-tab-isolation.test.ts",
-     "conflicts with main in packages/coding-agent/src/tools/browser.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts"
+     "conflicts with main in packages/coding-agent/src/tools/browser.ts, packages/coding-agent/src/tools/browser/console-capture.ts, packages/coding-agent/src/tools/browser/tab-protocol.ts"
     ],
     "note": "",
     "over": [],
