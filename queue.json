@@ -108399,7 +108399,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-27T04:08:19Z",
+  "checked": "2026-11-27T05:09:53Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108520,18 +108520,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-20T04:53:31Z",
-    "kind": "openable",
-    "id": "win-occluded-capture",
-    "title": "fix(natives,coding-agent): say when a Windows capture or tree of a covered Chromium window may be stale"
-   },
-   {
-    "at": "2026-11-20T04:53:31Z",
-    "kind": "openable",
-    "id": "win-wpf-scroll",
-    "title": "fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing"
-   },
    {
     "at": "2026-11-20T07:57:45Z",
     "kind": "unopenable",
