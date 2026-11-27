@@ -108399,7 +108399,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-27T07:13:10Z",
+  "checked": "2026-11-27T08:14:01Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108409,6 +108409,13 @@
    }
   },
   "conflicts": {
+   "#19542": {
+    "since": "2026-11-27T08:14:01Z",
+    "title": "feat(browser): add waitForFunction to tabs and frames",
+    "files": [
+     "packages/coding-agent/src/tools/browser/tab-call.ts"
+    ]
+   },
    "#19626": {
     "since": "2026-11-24T06:19:13Z",
     "title": "feat(coding-agent): log every saved-reset spend attempt at info",
@@ -108520,13 +108527,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-20T07:57:45Z",
-    "kind": "unopenable",
-    "id": "win-occluded-capture",
-    "title": "fix(natives,coding-agent): say when a Windows capture or tree of a covered Chromium window may be stale",
-    "why": "opened as #19849"
-   },
    {
     "at": "2026-11-20T08:27:52Z",
     "kind": "openable",
@@ -109267,6 +109267,15 @@
     "title": "fix(shell): build the Windows env_cwd test with the errexit field",
     "merged_by": "can1357",
     "maintainer_commits": 0
+   },
+   {
+    "at": "2026-11-27T08:14:01Z",
+    "kind": "conflict",
+    "label": "#19542",
+    "title": "feat(browser): add waitForFunction to tabs and frames",
+    "files": [
+     "packages/coding-agent/src/tools/browser/tab-call.ts"
+    ]
    }
   ]
  },
@@ -119039,7 +119048,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-27T07:43:47.284966Z",
+  "at": "2026-11-27T08:14:02.269517Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -119281,8 +119290,10 @@
     "area": "browser",
     "priority": "P2",
     "title": "feat(browser): add waitForFunction to tabs and frames",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in packages/coding-agent/src/tools/browser/tab-call.ts"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -119456,6 +119467,7 @@
     "action": "wait",
     "reasons": [
      "needs #19542 (open)",
+     "its need #19542 conflicts with main in packages/coding-agent/src/tools/browser/tab-call.ts",
      "conflicts with main in packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
     ],
     "note": "",
@@ -119478,7 +119490,7 @@
     "action": "wait",
     "reasons": [
      "needs browser-wait-text-regexp (queued)",
-     "its need browser-wait-text-regexp conflicts with main in packages/coding-agent/src/tools/browser/aria/aria-snapshot.ts, packages/coding-agent/src/tools/browser/queries.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
+     "its need browser-wait-text-regexp conflicts with main in packages/coding-agent/src/tools/browser/aria/aria-snapshot.ts, packages/coding-agent/src/tools/browser/queries.ts, packages/coding-agent/src/tools/browser/tab-call.ts, packages/coding-agent/src/tools/browser/tern/tern-tab.ts"
     ],
     "note": "",
     "over": [],

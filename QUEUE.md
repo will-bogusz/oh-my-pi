@@ -1,9 +1,9 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-27 07:44Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-27 08:14Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-27 07:43Z on goliath; groups below are from it, states from the manifest)
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-27 08:14Z on goliath; groups below are from it, states from the manifest)
 **Counts:** openable now 1, conflict-held 16, stacked 16, held 14, parked 1, open PRs 19; merged 424, closed 45
 
 ## Openable now (1)
@@ -84,7 +84,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-27
 | PR | id | title | area | rank | open | plan | branch |
 |---|---|---|---|---|---|---|---|
 | [#19513](https://github.com/can1357/oh-my-pi/pull/19513) | upload-stall-error-all-providers | fix(ai,agent): say how far a request body uploaded when any provider's connection drops | other | P1 | 10d | keep; tests-over: Main, 2026-11-17: each test pins a distinct user-visible behaviour: upload progress named for bodies of 1 MiB or more (mid-body, after body, below threshold, Anthropic fetch fallback), resend semantics per redirect status (only the five real redirect codes resend; 300 returned), credentials dropped cross-origin, and redirected on the response and its clones; plus remote compaction retrying the new error | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/upload-stall-error-all-providers) |
-| [#19542](https://github.com/can1357/oh-my-pi/pull/19542) | browser-wait-predicate | feat(browser): add waitForFunction to tabs and frames | browser | P2 | 9d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-wait-predicate) |
+| [#19542](https://github.com/can1357/oh-my-pi/pull/19542) | browser-wait-predicate | feat(browser): add waitForFunction to tabs and frames | browser | P2 | 9d | rebase | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-wait-predicate) |
 | [#19633](https://github.com/can1357/oh-my-pi/pull/19633) | settle-reads | feat(browser): settle the preceding action before reads too | browser | P2 | 9d | keep; tests-over: Main, 2026-11-18: one test per settle branch: settled read, unanswered request bound, no preceding action, batched reads settle once, element id survives an action, click opening a confirm | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-settle-reads) |
 | [#19531](https://github.com/can1357/oh-my-pi/pull/19531) | x11-xtest-release | fix(natives): release X11 XTest keys and buttons a killed omp held | computer | P2 | 10d | keep | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/x11-xtest-release) |
 | [#19195](https://github.com/can1357/oh-my-pi/pull/19195) | macos-drag-confirm | fix(natives): stop macOS background drags reporting moves that did not happen | computer | P1 | 13d | keep; accepted pair with #20179: Main, 2026-11-21: docs/tools/computer.md only; combined = #19195's macOS drag paragraph, wbc's BM_CLICK paragraph, then this entry's WPF press paragraph, no wording change | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-drag-confirm) |
