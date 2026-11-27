@@ -108399,7 +108399,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-27T16:54:10Z",
+  "checked": "2026-11-27T17:25:10Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108530,13 +108530,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-20T17:06:38Z",
-    "kind": "unopenable",
-    "id": "desktop-dispatch-fence",
-    "title": "fix(natives): report Windows UIA actions unconfirmed when their reply times out after dispatch",
-    "why": "opened as #19871"
-   },
    {
     "at": "2026-11-20T17:36:51Z",
     "kind": "openable",
