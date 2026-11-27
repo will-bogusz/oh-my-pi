@@ -108399,7 +108399,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-27T14:21:25Z",
+  "checked": "2026-11-27T14:51:53Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108530,19 +108530,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-20T14:33:32Z",
-    "kind": "openable",
-    "id": "win-wpf-scroll",
-    "title": "fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing"
-   },
-   {
-    "at": "2026-11-20T14:33:32Z",
-    "kind": "unopenable",
-    "id": "win-takeover-intervene",
-    "title": "fix(natives): stop Windows takeovers when the user types or clicks",
-    "why": "plan: held (held: Main, 2026-11-20: final-head review needs-changes at 6073806a3fc (fix round WinTakeover3); win-wpf-scroll opens first (ready first))"
-   },
    {
     "at": "2026-11-20T16:36:18Z",
     "kind": "openable",
@@ -118956,7 +118943,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-27T13:51:15.858354Z",
+  "at": "2026-11-27T14:51:54.464245Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
