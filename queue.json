@@ -108399,7 +108399,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-27T09:45:25Z",
+  "checked": "2026-11-27T10:46:40Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108527,12 +108527,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-20T10:29:39Z",
-    "kind": "openable",
-    "id": "win-wpf-scroll",
-    "title": "fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing"
-   },
    {
     "at": "2026-11-20T12:32:15Z",
     "kind": "merged",
