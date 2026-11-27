@@ -1,9 +1,9 @@
 # Our oh-my-pi PR queue
 
-Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-27 08:45Z. Read-only: change the queue through `pr-queue` alone.
+Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-27 09:15Z. Read-only: change the queue through `pr-queue` alone.
 
 **Opening:** not paused
-**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-27 08:14Z on goliath; groups below are from it, states from the manifest)
+**Ready budget:** 0 of 8 ready events used in the hour before the last plan, 8 left (plan of 2026-11-27 09:15Z on goliath; groups below are from it, states from the manifest)
 **Counts:** openable now 1, conflict-held 16, stacked 16, held 14, parked 1, open PRs 19; merged 424, closed 45
 
 ## Openable now (1)
@@ -26,7 +26,7 @@ Rendered by `pr-queue` from `queue.json` with every write; last write 2026-11-27
 | browser-action-outcome | feat(browser): print what each browser action did to the page | browser | P2 | 16d | [#19542](https://github.com/can1357/oh-my-pi/pull/19542), [#19633](https://github.com/can1357/oh-my-pi/pull/19633), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/browser-action-outcome) |
 | computer-filter-types | fix(computer): say window and element filters take text when given a RegExp | computer | P2 | 16d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/computer-filter-types) |
 | relay-print-preview-error | fix(coding-agent,browser-relay): fail a browser call a print preview holds in an attached browser within seconds | browser | P2 | 16d | [#19542](https://github.com/can1357/oh-my-pi/pull/19542), [#19633](https://github.com/can1357/oh-my-pi/pull/19633), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/relay-print-preview-error) |
-| win-minimised-windows | fix(natives,coding-agent): show a minimized Windows app's window from apps.open instead of launching it again | computer | P2 | 15d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#20019](https://github.com/can1357/oh-my-pi/pull/20019), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-minimised-windows) |
+| win-minimised-windows | fix(natives,coding-agent): show a minimized Windows app's window from apps.open instead of launching it again | computer | P2 | 16d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#20019](https://github.com/can1357/oh-my-pi/pull/20019), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-minimised-windows) |
 | macos-ax-cancel-before-send | fix(natives): send no macOS AX action once its run is cancelled | natives | P2 | 15d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/macos-ax-cancel-before-send) |
 | win-ax-states | fix(natives): expose Windows control state and stale-reference matches | computer | P2 | 15d | [#19195](https://github.com/can1357/oh-my-pi/pull/19195), [#20019](https://github.com/can1357/oh-my-pi/pull/20019), [#20178](https://github.com/can1357/oh-my-pi/pull/20178), [#20179](https://github.com/can1357/oh-my-pi/pull/20179), [#19531](https://github.com/can1357/oh-my-pi/pull/19531), [#19618](https://github.com/can1357/oh-my-pi/pull/19618), [#19870](https://github.com/can1357/oh-my-pi/pull/19870), main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/win-ax-states) |
 | stats-live-appends | fix(stats): show running sessions' new requests within a second on macOS | other |  | 14d | main | [compare](https://github.com/can1357/oh-my-pi/compare/main...will-bogusz:oh-my-pi:will/stats-live-appends) |
