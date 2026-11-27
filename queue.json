@@ -108399,7 +108399,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-27T12:18:56Z",
+  "checked": "2026-11-27T12:49:54Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108529,37 +108529,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-20T12:32:15Z",
-    "kind": "merged",
-    "number": 19814,
-    "title": "fix(natives): write Windows edit values without activating their window",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-20T12:32:15Z",
-    "kind": "unopenable",
-    "id": "win-popup-foreground",
-    "title": "fix(natives): press items of the open WPF context menu of the window in front",
-    "why": "plan: wait (conflicts with main in crates/natives/src/desktop/win32/ax.rs, crates/natives/src/desktop/win32/window.rs)"
-   },
-   {
-    "at": "2026-11-20T12:32:15Z",
-    "kind": "unopenable",
-    "id": "win-wpf-scroll",
-    "title": "fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing",
-    "why": "plan: wait (conflicts with main in crates/natives/src/desktop/control.rs, crates/natives/src/desktop/win32/ax.rs)"
-   },
-   {
-    "at": "2026-11-20T12:32:15Z",
-    "kind": "conflict",
-    "label": "#19519",
-    "title": "fix(natives): type characters outside the X11 keymap through temporary keycodes",
-    "files": [
-     "crates/natives/src/desktop/mod.rs"
-    ]
-   },
    {
     "at": "2026-11-20T13:02:30Z",
     "kind": "openable",
