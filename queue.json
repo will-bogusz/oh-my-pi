@@ -108399,7 +108399,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-27T20:59:02Z",
+  "checked": "2026-11-27T22:00:02Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -118919,7 +118919,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-27T21:29:28.750981Z",
+  "at": "2026-11-27T22:00:02.814629Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -119904,7 +119904,7 @@
      "conflicts with #19620 in packages/coding-agent/src/session/session-maintenance.ts",
      "conflicts with #19870 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "its need computer-ui-quiet conflicts with main in crates/natives/src/desktop/macos/settle.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
-     "conflicts with main in docs/tools/computer.md, packages/agent/src/agent.ts, packages/coding-agent/src/eval/executor-base.ts, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/prompts/system/computer-use.md, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/tools/computer.test.ts"
+     "conflicts with main in docs/tools/computer.md, packages/agent/src/agent.ts, packages/coding-agent/src/eval/executor-base.ts, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/prompts/system/computer-use.md, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/src/tools/index.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
     "over": [],
@@ -120338,7 +120338,7 @@
      "needs #20179 (open), #20178 (open)",
      "conflicts with #20179 in crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md",
      "its need #20178 conflicts with main in crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md",
-     "conflicts with main in Cargo.lock"
+     "conflicts with main in Cargo.lock, crates/natives/Cargo.toml"
     ],
     "note": "accepted pair with #19870: Main, 2026-11-21: win32/ax.rs std + windows_sys UI import unions (as D's form); D2's appended impl methods and #19870's scroll_at_point methods insert at one point: combined = both blocks (methods of each inside the impl, then free items of each), no shared item names; docs: D2's 'and setValue() calls' goes inside the recorded #19871 x #19870 dispatch line. Combined tree (sim main+wbc+#19871+D+uia+D2 x #19870, 6ae79fb584) passed Windows clippy/rustfmt on goliath. The docs AxUnconfirmed paragraph written by #19870, wbc, #19871 and D/D2 is read once as a whole by whoever merges last (Main's ruling). Rechecked 2026-11-22 at uia 4b781b170a8 (read-back fix): conflict hunks unchanged except uia's own appended-block content; form holds. D2 restacked to 0f9805df404 on base b55dc22512a (D cd555199939 x uia); D2 rust-check linux+windows recorded.; accepted pair with #20177: Main, 2026-11-22: win32/ax.rs set_value: D2's Pattern arm send closure = { control::dispatching()?; pattern.set_value(text).map_err(ax_error) } (nothing between the mark and the live call, per popup x #19871); D2's contained_or(... set_behind ...) call is lookup-only (send closure sends nothing); same Limits line as D; built in tree a50c4da6228, uia/D2 setValue live test passes on GitHub windows-latest Rechecked 2026-11-22 at uia 4b781b170a8 (read-back fix): conflict hunks unchanged except uia's own appended-block content; form holds. D2 restacked to 0f9805df404 on base b55dc22512a (D cd555199939 x uia); D2 rust-check linux+windows recorded.",
     "over": [],
