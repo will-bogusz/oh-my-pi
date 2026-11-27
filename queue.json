@@ -108399,7 +108399,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-27T18:25:55Z",
+  "checked": "2026-11-27T18:56:55Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108440,6 +108440,7 @@
      "packages/ai/src/auth/select.ts",
      "packages/coding-agent/src/modes/controllers/event-controller.ts",
      "packages/coding-agent/src/modes/rpc/rpc-client.ts",
+     "packages/coding-agent/src/session/credential-pin.ts",
      "packages/coding-agent/src/session/reset-expiry.ts"
     ]
    },
@@ -108447,7 +108448,9 @@
     "since": "2026-11-24T06:19:13Z",
     "title": "feat(ai,coding-agent): let an account policy decide its own saved-reset spending",
     "files": [
+     "packages/ai/src/auth-broker/discover.ts",
      "packages/coding-agent/src/cli/usage-cli.ts",
+     "packages/coding-agent/src/session/agent-session.ts",
      "packages/coding-agent/src/session/codex-auto-reset.ts",
      "packages/coding-agent/src/session/reset-expiry.ts"
     ]
@@ -108457,6 +108460,31 @@
     "title": "fix(snapcompact,coding-agent): re-render a snapcompact archive in the frame shape of the model reading it",
     "files": [
      "packages/coding-agent/src/session/session-maintenance.ts"
+    ]
+   },
+   "#19880": {
+    "since": "2026-11-27T18:56:55Z",
+    "title": "refactor(catalog,snapcompact): move snapcompact frame shapes into catalog rules",
+    "files": [
+     "docs/compaction.md",
+     "packages/catalog/src/compat/image-tokenization.ts",
+     "packages/snapcompact/README.md",
+     "packages/snapcompact/src/snapcompact.ts",
+     "packages/snapcompact/test/snapcompact.test.ts"
+    ]
+   },
+   "#19870": {
+    "since": "2026-11-27T18:56:55Z",
+    "title": "fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing",
+    "files": [
+     "crates/natives/src/desktop/win32/input.rs"
+    ]
+   },
+   "#20019": {
+    "since": "2026-11-27T18:56:55Z",
+    "title": "fix(natives): wait for the user to pause before a Windows takeover",
+    "files": [
+     "crates/natives/src/desktop/win32/input.rs"
     ]
    }
   },
@@ -108532,13 +108560,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-20T18:38:19Z",
-    "kind": "unopenable",
-    "id": "devin-neon-image-price",
-    "title": "fix(catalog): budget Gemini 4 Neon's images on Devin at the 1,089 tokens it bills",
-    "why": "opened as #19883"
-   },
    {
     "at": "2026-11-20T19:08:32Z",
     "kind": "openable",
@@ -109127,6 +109148,37 @@
     "title": "feat(browser): add waitForFunction to tabs and frames",
     "files": [
      "packages/coding-agent/src/tools/browser/tab-call.ts"
+    ]
+   },
+   {
+    "at": "2026-11-27T18:56:55Z",
+    "kind": "conflict",
+    "label": "#19880",
+    "title": "refactor(catalog,snapcompact): move snapcompact frame shapes into catalog rules",
+    "files": [
+     "docs/compaction.md",
+     "packages/catalog/src/compat/image-tokenization.ts",
+     "packages/snapcompact/README.md",
+     "packages/snapcompact/src/snapcompact.ts",
+     "packages/snapcompact/test/snapcompact.test.ts"
+    ]
+   },
+   {
+    "at": "2026-11-27T18:56:55Z",
+    "kind": "conflict",
+    "label": "#19870",
+    "title": "fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing",
+    "files": [
+     "crates/natives/src/desktop/win32/input.rs"
+    ]
+   },
+   {
+    "at": "2026-11-27T18:56:55Z",
+    "kind": "conflict",
+    "label": "#20019",
+    "title": "fix(natives): wait for the user to pause before a Windows takeover",
+    "files": [
+     "crates/natives/src/desktop/win32/input.rs"
     ]
    }
   ]
@@ -118900,7 +118952,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-27T17:55:45.775805Z",
+  "at": "2026-11-27T18:56:56.208117Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -118972,8 +119024,10 @@
     "area": "computer",
     "priority": "P1",
     "title": "fix(natives): wait for the user to pause before a Windows takeover",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in crates/natives/src/desktop/win32/input.rs"
+    ],
     "note": "accepted pair with #19870: Main, 2026-11-20: win32/mod.rs tests-module import list only; combined = union of both WindowsAndMessaging imports",
     "over": [],
     "paired": [
@@ -119104,8 +119158,10 @@
     "area": "computer",
     "priority": "P2",
     "title": "fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in crates/natives/src/desktop/win32/input.rs"
+    ],
     "note": "accepted pair with #20178: Main, 2026-11-22: rechecked at #19870's head 42c28e0aaa9: win32/ax.rs = uiautomation patterns/types import unions + both appended blocks (methods of each inside the impl, then free items of each); docs AxUnconfirmed paragraph = #19870's approved text with uia's combo clause as the middle item ('a WinForms check box can process press() without changing its state, a combo selection may already have changed even when its post-close settling period could not finish, and a WPF scroll may report it ...') Rechecked 2026-11-22 at uia 4b781b170a8 (read-back fix): conflict hunks unchanged except uia's own appended-block content; form holds. Tree 9f869465ff (uia x #19870 by this form, free helpers after the impl): linux tests 373/0, linux+windows clippy pass, windows test build ok.; accepted pair with #20019: Main, 2026-11-20: win32/mod.rs tests-module import list only; combined = union of both WindowsAndMessaging imports; accepted pair with #20179: Main, 2026-11-21: win32/ax.rs std and windows_sys UI import lists = union (cmp::Ordering, time::{Duration, Instant}; IsWindowEnabled + SPI_GETWHEELSCROLLCHARS/LINES, SystemParametersInfoW); docs AxUnconfirmed: in the recorded wbc x #19870 sentence, 'a WinForms check box' becomes 'a WinForms or WPF check box'",
     "over": [],
     "paired": [
@@ -119125,8 +119181,10 @@
     "area": "snapcompact",
     "priority": "P2",
     "title": "refactor(catalog,snapcompact): move snapcompact frame shapes into catalog rules",
-    "action": "keep",
-    "reasons": [],
+    "action": "rebase",
+    "reasons": [
+     "conflicts with main in docs/compaction.md, packages/catalog/src/compat/image-tokenization.ts, packages/snapcompact/README.md, packages/snapcompact/src/snapcompact.ts, packages/snapcompact/test/snapcompact.test.ts"
+    ],
     "note": "",
     "over": [],
     "paired": [],
@@ -119180,7 +119238,7 @@
     "title": "feat(ai,coding-agent): record why a session's OAuth account switched",
     "action": "rebase",
     "reasons": [
-     "conflicts with main in packages/ai/src/auth/affinity.ts, packages/ai/src/auth/select.ts, packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/modes/rpc/rpc-client.ts, packages/coding-agent/src/session/reset-expiry.ts"
+     "conflicts with main in packages/ai/src/auth/affinity.ts, packages/ai/src/auth/select.ts, packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/modes/rpc/rpc-client.ts, packages/coding-agent/src/session/credential-pin.ts, packages/coding-agent/src/session/reset-expiry.ts"
     ],
     "note": "",
     "over": [],
@@ -119258,7 +119316,7 @@
     "title": "feat(ai,coding-agent): let an account policy decide its own saved-reset spending",
     "action": "rebase",
     "reasons": [
-     "conflicts with main in packages/coding-agent/src/cli/usage-cli.ts, packages/coding-agent/src/session/codex-auto-reset.ts, packages/coding-agent/src/session/reset-expiry.ts"
+     "conflicts with main in packages/ai/src/auth-broker/discover.ts, packages/coding-agent/src/cli/usage-cli.ts, packages/coding-agent/src/session/agent-session.ts, packages/coding-agent/src/session/codex-auto-reset.ts, packages/coding-agent/src/session/reset-expiry.ts"
     ],
     "note": "accepted pair with #19626: Main, 2026-11-18: adjacent call-site edits in agent-session.ts #redeemConsentedResets and its three callers; #19626 adds a trigger argument, this adds a consent argument; the combined form passes both (provider, trigger, actions, coordinator, consent) and keeps this PR's per-action credentialResetModes; accepted pair with #19700: Main, 2026-11-18: both add account-policy keys side by side in docs/auth-broker-gateway.md (table row), ai auth-broker/discover.ts (allowed keys) and cli/usage-cli.ts (diagnostics fields, base spread, policy-line prefix); the combined form keeps both: reservePctByLimit/scopedInsideReserve plus autoRedeem*, prefix with limit reserves then reclaim then auto-redeem",
     "over": [],
@@ -119388,6 +119446,7 @@
      "conflicts with #19195 in docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with #20019 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #19531 in docs/computer-use.md",
+     "conflicts with #19870 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with main in crates/natives/src/desktop/macos/settle.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts"
     ],
     "note": "",
@@ -119396,7 +119455,8 @@
     "blocked_by": [
      "#19195",
      "#20019",
-     "#19531"
+     "#19531",
+     "#19870"
     ],
     "needs": [],
     "created": "2026-10-19T07:26:45Z"
@@ -119411,7 +119471,8 @@
     "title": "fix(catalog): let Gemini on Devin's own host carry 80 images",
     "action": "wait",
     "reasons": [
-     "needs snapcompact-carbon-1568 (queued)"
+     "needs snapcompact-carbon-1568 (queued)",
+     "its need snapcompact-carbon-1568 conflicts with main in docs/compaction.md, packages/catalog/src/compat/image-tokenization.ts, packages/snapcompact/README.md, packages/snapcompact/src/snapcompact.ts, packages/snapcompact/test/snapcompact.test.ts"
     ],
     "note": "",
     "over": [],
@@ -119607,7 +119668,8 @@
     "title": "fix(catalog): draw Gemini 4 Carbon, Neon and Hydrogen snapcompact frames at 1568px on Devin, and Carbon's on Factory Droid",
     "action": "wait",
     "reasons": [
-     "needs #19880 (open)"
+     "needs #19880 (open)",
+     "its need #19880 conflicts with main in docs/compaction.md, packages/catalog/src/compat/image-tokenization.ts, packages/snapcompact/README.md, packages/snapcompact/src/snapcompact.ts, packages/snapcompact/test/snapcompact.test.ts"
     ],
     "note": "",
     "over": [],
@@ -119629,6 +119691,7 @@
     "action": "wait",
     "reasons": [
      "needs #19880 (open), #19620 (open)",
+     "its need #19880 conflicts with main in docs/compaction.md, packages/catalog/src/compat/image-tokenization.ts, packages/snapcompact/README.md, packages/snapcompact/src/snapcompact.ts, packages/snapcompact/test/snapcompact.test.ts",
      "its need #19620 conflicts with main in packages/coding-agent/src/session/session-maintenance.ts"
     ],
     "note": "",
@@ -119651,7 +119714,8 @@
     "title": "fix(catalog): give snapcompact readers their lead model's frame shape",
     "action": "wait",
     "reasons": [
-     "needs #19880 (open)"
+     "needs #19880 (open)",
+     "its need #19880 conflicts with main in docs/compaction.md, packages/catalog/src/compat/image-tokenization.ts, packages/snapcompact/README.md, packages/snapcompact/src/snapcompact.ts, packages/snapcompact/test/snapcompact.test.ts"
     ],
     "note": "",
     "over": [],
@@ -119708,6 +119772,7 @@
     "reasons": [
      "conflicts with #19195 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with #20019 in packages/coding-agent/src/prompts/tools/computer.md",
+     "conflicts with #19870 in packages/coding-agent/src/prompts/tools/computer.md",
      "conflicts with main in crates/natives/src/desktop/win32/capture.rs, crates/natives/src/desktop/win32/reopen.rs, crates/pi-natives/src/desktop/win32/mod.rs, packages/coding-agent/src/prompts/tools/computer.md"
     ],
     "note": "",
@@ -119715,7 +119780,8 @@
     "paired": [],
     "blocked_by": [
      "#19195",
-     "#20019"
+     "#20019",
+     "#19870"
     ],
     "needs": [],
     "created": "2026-11-11T09:06:32Z"
@@ -119869,9 +119935,9 @@
      "conflicts with #19531 in docs/computer-use.md, docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md",
      "conflicts with #19620 in packages/coding-agent/src/session/session-maintenance.ts",
-     "conflicts with #19870 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with #19870 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "its need computer-ui-quiet conflicts with main in crates/natives/src/desktop/macos/settle.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
-     "conflicts with main in docs/tools/computer.md, packages/agent/src/agent.ts, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/prompts/system/computer-use.md, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/tools/computer.test.ts"
+     "conflicts with main in docs/tools/computer.md, packages/agent/src/agent.ts, packages/coding-agent/src/eval/executor-base.ts, packages/coding-agent/src/eval/js/context-manager.ts, packages/coding-agent/src/eval/js/tool-bridge.ts, packages/coding-agent/src/eval/py/tool-bridge.ts, packages/coding-agent/src/prompts/system/computer-use.md, packages/coding-agent/src/session/session-maintenance.ts, packages/coding-agent/src/tools/computer.ts, packages/coding-agent/src/tools/computer/protocol.ts, packages/coding-agent/src/tools/computer/supervisor.ts, packages/coding-agent/src/tools/eval.ts, packages/coding-agent/test/tools/computer.test.ts"
     ],
     "note": "",
     "over": [],
@@ -119908,7 +119974,7 @@
      "conflicts with #20179 in docs/tools/computer.md",
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md",
-     "conflicts with #19870 in docs/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
+     "conflicts with #19870 in docs/tools/computer.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/test/tools/computer.test.ts",
      "its need computer-ui-quiet conflicts with main in crates/natives/src/desktop/macos/settle.rs, docs/computer-use.md, packages/coding-agent/src/prompts/tools/computer.md, packages/coding-agent/src/tools/computer/worker.ts",
      "conflicts with main in crates/natives/src/desktop/macos/ax.rs, crates/natives/src/desktop/macos/ax/rich_text.rs, crates/natives/src/desktop/mod.rs, docs/tools/computer.md"
     ],
@@ -120239,7 +120305,7 @@
      "needs win-takeover-settle (queued)",
      "conflicts with #20019 in crates/natives/src/desktop/win32/input.rs, crates/natives/src/desktop/win32/mod.rs",
      "conflicts with #19870 in crates/natives/src/desktop/win32/mod.rs",
-     "its need win-takeover-settle conflicts with main in docs/tools/computer.md"
+     "its need win-takeover-settle conflicts with main in crates/natives/src/desktop/win32/input.rs, docs/tools/computer.md"
     ],
     "note": "",
     "over": [],
@@ -120272,7 +120338,8 @@
      "conflicts with #19531 in docs/tools/computer.md",
      "conflicts with #19618 in docs/tools/computer.md",
      "conflicts with #19870 in crates/natives/src/desktop/win32/mod.rs, docs/tools/computer.md",
-     "conflicts with main in crates/natives/src/desktop/win32/input.rs, crates/natives/src/desktop/win32/mod.rs"
+     "its need #20019 conflicts with main in crates/natives/src/desktop/win32/input.rs",
+     "conflicts with main in crates/natives/src/desktop/win32/mod.rs"
     ],
     "note": "",
     "over": [],
@@ -120303,7 +120370,8 @@
     "reasons": [
      "needs #20179 (open), #20178 (open)",
      "conflicts with #20179 in crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md",
-     "its need #20178 conflicts with main in crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md"
+     "its need #20178 conflicts with main in crates/natives/src/desktop/win32/ax.rs, docs/tools/computer.md",
+     "conflicts with main in Cargo.lock"
     ],
     "note": "accepted pair with #19870: Main, 2026-11-21: win32/ax.rs std + windows_sys UI import unions (as D's form); D2's appended impl methods and #19870's scroll_at_point methods insert at one point: combined = both blocks (methods of each inside the impl, then free items of each), no shared item names; docs: D2's 'and setValue() calls' goes inside the recorded #19871 x #19870 dispatch line. Combined tree (sim main+wbc+#19871+D+uia+D2 x #19870, 6ae79fb584) passed Windows clippy/rustfmt on goliath. The docs AxUnconfirmed paragraph written by #19870, wbc, #19871 and D/D2 is read once as a whole by whoever merges last (Main's ruling). Rechecked 2026-11-22 at uia 4b781b170a8 (read-back fix): conflict hunks unchanged except uia's own appended-block content; form holds. D2 restacked to 0f9805df404 on base b55dc22512a (D cd555199939 x uia); D2 rust-check linux+windows recorded.; accepted pair with #20177: Main, 2026-11-22: win32/ax.rs set_value: D2's Pattern arm send closure = { control::dispatching()?; pattern.set_value(text).map_err(ax_error) } (nothing between the mark and the live call, per popup x #19871); D2's contained_or(... set_behind ...) call is lookup-only (send closure sends nothing); same Limits line as D; built in tree a50c4da6228, uia/D2 setValue live test passes on GitHub windows-latest Rechecked 2026-11-22 at uia 4b781b170a8 (read-back fix): conflict hunks unchanged except uia's own appended-block content; form holds. D2 restacked to 0f9805df404 on base b55dc22512a (D cd555199939 x uia); D2 rust-check linux+windows recorded.",
     "over": [],
