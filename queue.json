@@ -108399,7 +108399,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-27T12:49:54Z",
+  "checked": "2026-11-27T13:20:55Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108529,18 +108529,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-20T13:02:30Z",
-    "kind": "openable",
-    "id": "win-button-click",
-    "title": "fix(natives): click Windows buttons without activating their window"
-   },
-   {
-    "at": "2026-11-20T13:02:30Z",
-    "kind": "openable",
-    "id": "win-uia-set-patterns",
-    "title": "fix(natives): set WPF sliders and combo boxes through RangeValue and SelectionItem"
-   },
    {
     "at": "2026-11-20T13:33:09Z",
     "kind": "openable",
@@ -119000,7 +118988,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-27T12:18:57.305732Z",
+  "at": "2026-11-27T13:20:56.249743Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
