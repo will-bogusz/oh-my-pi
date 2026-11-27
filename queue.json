@@ -108399,7 +108399,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-27T13:20:55Z",
+  "checked": "2026-11-27T13:51:15Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108436,6 +108436,7 @@
     "since": "2026-11-23T11:25:37Z",
     "title": "feat(ai,coding-agent): record why a session's OAuth account switched",
     "files": [
+     "packages/ai/src/auth/affinity.ts",
      "packages/ai/src/auth/select.ts",
      "packages/coding-agent/src/modes/controllers/event-controller.ts",
      "packages/coding-agent/src/modes/rpc/rpc-client.ts",
@@ -108529,26 +108530,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-20T13:33:09Z",
-    "kind": "openable",
-    "id": "win-wpf-scroll",
-    "title": "fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing"
-   },
-   {
-    "at": "2026-11-20T13:33:09Z",
-    "kind": "unopenable",
-    "id": "win-button-click",
-    "title": "fix(natives): click Windows buttons without activating their window",
-    "why": "plan: held (held: Main, 2026-11-20: in its fix round (WinButtonRound, review needs-changes at e06e31d6bf7); ready work opens in the order it becomes ready)"
-   },
-   {
-    "at": "2026-11-20T13:33:09Z",
-    "kind": "unopenable",
-    "id": "win-uia-set-patterns",
-    "title": "fix(natives): set WPF sliders and combo boxes through RangeValue and SelectionItem",
-    "why": "plan: held (held: Main, 2026-11-20: in its fix round (WinWpfRoutes5, review needs-changes at 86d258734d9); takes the recorded ax.rs form with win-wpf-scroll when it follows)"
-   },
    {
     "at": "2026-11-20T14:03:27Z",
     "kind": "openable",
@@ -118988,7 +118969,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-27T13:20:56.249743Z",
+  "at": "2026-11-27T13:51:15.858354Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
@@ -119268,7 +119249,7 @@
     "title": "feat(ai,coding-agent): record why a session's OAuth account switched",
     "action": "rebase",
     "reasons": [
-     "conflicts with main in packages/ai/src/auth/select.ts, packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/modes/rpc/rpc-client.ts, packages/coding-agent/src/session/reset-expiry.ts"
+     "conflicts with main in packages/ai/src/auth/affinity.ts, packages/ai/src/auth/select.ts, packages/coding-agent/src/modes/controllers/event-controller.ts, packages/coding-agent/src/modes/rpc/rpc-client.ts, packages/coding-agent/src/session/reset-expiry.ts"
     ],
     "note": "",
     "over": [],
