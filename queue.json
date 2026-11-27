@@ -108399,7 +108399,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-27T20:28:27Z",
+  "checked": "2026-11-27T20:59:02Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108544,12 +108544,6 @@
       "addressed_by": 18658
      }
     ]
-   },
-   "20516": {
-    "title": "fix(shell): build the Windows env_cwd test with the errexit field",
-    "merge_commit": "d3ded4246f642e5566c28abaf1c9793000c060dc",
-    "merged_at": "2026-11-25T20:42:45Z",
-    "findings": []
    }
   },
   "events": [
