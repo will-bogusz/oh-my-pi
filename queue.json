@@ -108399,7 +108399,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-27T15:52:54Z",
+  "checked": "2026-11-27T16:54:10Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108530,19 +108530,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-20T16:36:18Z",
-    "kind": "openable",
-    "id": "desktop-dispatch-fence",
-    "title": "fix(natives): report Windows UIA actions unconfirmed when their reply times out after dispatch"
-   },
-   {
-    "at": "2026-11-20T16:36:18Z",
-    "kind": "unopenable",
-    "id": "win-wpf-scroll",
-    "title": "fix(natives): scroll WPF windows through UI Automation and report a scroll that moved nothing",
-    "why": "opened as #19870"
-   },
    {
     "at": "2026-11-20T17:06:38Z",
     "kind": "unopenable",
@@ -118943,7 +118930,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-27T15:52:55.662889Z",
+  "at": "2026-11-27T16:54:11.367908Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
