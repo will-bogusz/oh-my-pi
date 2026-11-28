@@ -108399,7 +108399,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-28T11:15:10Z",
+  "checked": "2026-11-28T11:45:58Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108547,44 +108547,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-21T11:27:20Z",
-    "kind": "merged",
-    "number": 19929,
-    "title": "fix(ai): rank Devin logins by quota before their on-demand balance",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-21T11:27:20Z",
-    "kind": "merged",
-    "number": 19928,
-    "title": "fix(ai,catalog): store Devin login identity scoped by organization",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-21T11:27:20Z",
-    "kind": "merged",
-    "number": 19884,
-    "title": "fix(natives): list GTK message dialogs as windows on Wayland",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-21T11:27:20Z",
-    "kind": "merged",
-    "number": 19883,
-    "title": "fix(catalog): budget Gemini 4 Neon's images on Devin at the 1,089 tokens it bills",
-    "merged_by": "H4vC",
-    "maintainer_commits": 0
-   },
-   {
-    "at": "2026-11-21T11:27:20Z",
-    "kind": "openable",
-    "id": "devin-gemini-image-price-rest",
-    "title": "fix(catalog): budget Devin's other measured Gemini models at the 1,089 tokens it bills per image"
-   },
    {
     "at": "2026-11-21T11:57:49Z",
     "kind": "unopenable",
