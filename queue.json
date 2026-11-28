@@ -108399,7 +108399,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-28T07:11:55Z",
+  "checked": "2026-11-28T08:12:36Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108547,43 +108547,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-21T07:53:28Z",
-    "kind": "released",
-    "number": 19748,
-    "title": "fix(coding-agent): fire key events after a browser fill for pages that search on keyup",
-    "tag": "v19.1.0"
-   },
-   {
-    "at": "2026-11-21T07:53:28Z",
-    "kind": "released",
-    "number": 19611,
-    "title": "fix(coding-agent): keep the image omission note on evicted Responses computer results",
-    "tag": "v19.1.0"
-   },
-   {
-    "at": "2026-11-21T07:53:28Z",
-    "kind": "released",
-    "number": 19590,
-    "title": "fix(ai): warn when a broker refresh failure outlasts the access token",
-    "tag": "v19.1.0"
-   },
-   {
-    "at": "2026-11-21T07:53:28Z",
-    "kind": "released",
-    "number": 19814,
-    "title": "fix(natives): write Windows edit values without activating their window",
-    "tag": "v19.1.0"
-   },
-   {
-    "at": "2026-11-21T07:53:28Z",
-    "kind": "conflict",
-    "label": "#19623",
-    "title": "feat(ai,coding-agent): record why a session's OAuth account switched",
-    "files": [
-     "packages/coding-agent/src/modes/controllers/event-controller.ts"
-    ]
-   },
    {
     "at": "2026-11-21T11:27:20Z",
     "kind": "merged",
@@ -118919,7 +118882,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-28T07:11:56.273759Z",
+  "at": "2026-11-28T08:12:37.479170Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
