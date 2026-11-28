@@ -108399,7 +108399,7 @@
   }
  ],
  "watch": {
-  "checked": "2026-11-28T11:45:58Z",
+  "checked": "2026-11-28T12:16:57Z",
   "host": "goliath",
   "started": "2026-10-14T19:15:53Z",
   "openable": {
@@ -108547,13 +108547,6 @@
    }
   },
   "events": [
-   {
-    "at": "2026-11-21T11:57:49Z",
-    "kind": "unopenable",
-    "id": "devin-gemini-image-price-rest",
-    "title": "fix(catalog): budget Devin's other measured Gemini models at the 1,089 tokens it bills per image",
-    "why": "opened as #20038"
-   },
    {
     "at": "2026-11-21T19:37:01Z",
     "kind": "openable",
@@ -118844,7 +118837,7 @@
   }
  },
  "plan": {
-  "at": "2026-11-28T11:15:11.518243Z",
+  "at": "2026-11-28T12:16:58.647837Z",
   "host": "goliath",
   "budget": {
    "limit": 8,
